@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results ignored="0" total="17" passed="17" failed="0" skipped="0">
+  <reporter-output>
+  </reporter-output>
+  <suite started-at="2024-05-11T17:39:43 MSK" name="Surefire suite" finished-at="2024-05-11T17:39:43 MSK" duration-ms="153">
+    <groups>
+    </groups>
+    <test started-at="2024-05-11T17:39:43 MSK" name="Surefire test" finished-at="2024-05-11T17:39:43 MSK" duration-ms="153">
+      <class name="org.openapitools.codegen.meta.FeatureSetTest">
+        <test-method signature="flattOnUnspecified()[pri:0, instance:org.openapitools.codegen.meta.FeatureSetTest@40e10ff8]" started-at="2024-05-11T17:39:43 MSK" name="flattOnUnspecified" finished-at="2024-05-11T17:39:43 MSK" duration-ms="51" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- flattOnUnspecified -->
+        <test-method signature="flattenOnMultipleFeatures()[pri:0, instance:org.openapitools.codegen.meta.FeatureSetTest@40e10ff8]" started-at="2024-05-11T17:39:43 MSK" name="flattenOnMultipleFeatures" finished-at="2024-05-11T17:39:43 MSK" duration-ms="5" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- flattenOnMultipleFeatures -->
+        <test-method signature="flattenOnSingleFeatures()[pri:0, instance:org.openapitools.codegen.meta.FeatureSetTest@40e10ff8]" started-at="2024-05-11T17:39:43 MSK" name="flattenOnSingleFeatures" finished-at="2024-05-11T17:39:43 MSK" duration-ms="3" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- flattenOnSingleFeatures -->
+      </class> <!-- org.openapitools.codegen.meta.FeatureSetTest -->
+      <class name="org.openapitools.codegen.validation.ValidatedTest">
+        <test-method signature="isValidFalseForInvalidType()[pri:0, instance:org.openapitools.codegen.validation.ValidatedTest@26a4842b]" started-at="2024-05-11T17:39:43 MSK" name="isValidFalseForInvalidType" finished-at="2024-05-11T17:39:43 MSK" duration-ms="30" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- isValidFalseForInvalidType -->
+        <test-method signature="isValidTrueForValidType()[pri:0, instance:org.openapitools.codegen.validation.ValidatedTest@26a4842b]" started-at="2024-05-11T17:39:43 MSK" name="isValidTrueForValidType" finished-at="2024-05-11T17:39:43 MSK" duration-ms="0" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- isValidTrueForValidType -->
+      </class> <!-- org.openapitools.codegen.validation.ValidatedTest -->
+      <class name="org.openapitools.codegen.validation.ValidationRuleTest">
+        <test-method signature="createMethodUsingLambda()[pri:0, instance:org.openapitools.codegen.validation.ValidationRuleTest@557a1e2d]" started-at="2024-05-11T17:39:43 MSK" name="createMethodUsingLambda" finished-at="2024-05-11T17:39:43 MSK" duration-ms="29" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- createMethodUsingLambda -->
+        <test-method signature="createMethodUsingMethodReference()[pri:0, instance:org.openapitools.codegen.validation.ValidationRuleTest@557a1e2d]" started-at="2024-05-11T17:39:43 MSK" name="createMethodUsingMethodReference" finished-at="2024-05-11T17:39:43 MSK" duration-ms="7" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- createMethodUsingMethodReference -->
+      </class> <!-- org.openapitools.codegen.validation.ValidationRuleTest -->
+      <class name="org.openapitools.codegen.config.WorkflowSettingsTest">
+        <test-method signature="customGlobalPropertiesAreSet()[pri:0, instance:org.openapitools.codegen.config.WorkflowSettingsTest@29e6eb25]" started-at="2024-05-11T17:39:43 MSK" name="customGlobalPropertiesAreSet" finished-at="2024-05-11T17:39:43 MSK" duration-ms="30" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- customGlobalPropertiesAreSet -->
+        <test-method signature="customOutputDirIsSet()[pri:0, instance:org.openapitools.codegen.config.WorkflowSettingsTest@29e6eb25]" started-at="2024-05-11T17:39:43 MSK" name="customOutputDirIsSet" finished-at="2024-05-11T17:39:43 MSK" duration-ms="3" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- customOutputDirIsSet -->
+        <test-method signature="defaultValuesCanBeChangedBuilder()[pri:0, instance:org.openapitools.codegen.config.WorkflowSettingsTest@29e6eb25]" started-at="2024-05-11T17:39:43 MSK" name="defaultValuesCanBeChangedBuilder" finished-at="2024-05-11T17:39:43 MSK" duration-ms="2" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- defaultValuesCanBeChangedBuilder -->
+        <test-method signature="defaultValuesCanBeChangedClassConstructor()[pri:0, instance:org.openapitools.codegen.config.WorkflowSettingsTest@29e6eb25]" started-at="2024-05-11T17:39:43 MSK" name="defaultValuesCanBeChangedClassConstructor" finished-at="2024-05-11T17:39:43 MSK" duration-ms="1" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- defaultValuesCanBeChangedClassConstructor -->
+        <test-method signature="defaultValuesNotOverriddenByNulls()[pri:0, instance:org.openapitools.codegen.config.WorkflowSettingsTest@29e6eb25]" started-at="2024-05-11T17:39:43 MSK" name="defaultValuesNotOverriddenByNulls" finished-at="2024-05-11T17:39:43 MSK" duration-ms="1" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- defaultValuesNotOverriddenByNulls -->
+        <test-method signature="newBuilderFromCopyShouldMutateGlobalProperties()[pri:0, instance:org.openapitools.codegen.config.WorkflowSettingsTest@29e6eb25]" started-at="2024-05-11T17:39:43 MSK" name="newBuilderFromCopyShouldMutateGlobalProperties" finished-at="2024-05-11T17:39:43 MSK" duration-ms="1" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- newBuilderFromCopyShouldMutateGlobalProperties -->
+      </class> <!-- org.openapitools.codegen.config.WorkflowSettingsTest -->
+      <class name="org.openapitools.codegen.validation.GenericValidatorTest">
+        <test-method signature="testGenericValidatorErrorsAndWarnings()[pri:0, instance:org.openapitools.codegen.validation.GenericValidatorTest@7829b776]" started-at="2024-05-11T17:39:43 MSK" name="testGenericValidatorErrorsAndWarnings" finished-at="2024-05-11T17:39:43 MSK" duration-ms="36" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testGenericValidatorErrorsAndWarnings -->
+        <test-method signature="testGenericValidatorMultipleConditionsFail()[pri:0, instance:org.openapitools.codegen.validation.GenericValidatorTest@7829b776]" started-at="2024-05-11T17:39:43 MSK" name="testGenericValidatorMultipleConditionsFail" finished-at="2024-05-11T17:39:43 MSK" duration-ms="5" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testGenericValidatorMultipleConditionsFail -->
+        <test-method signature="testGenericValidatorSingleConditionFails()[pri:0, instance:org.openapitools.codegen.validation.GenericValidatorTest@7829b776]" started-at="2024-05-11T17:39:43 MSK" name="testGenericValidatorSingleConditionFails" finished-at="2024-05-11T17:39:43 MSK" duration-ms="0" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testGenericValidatorSingleConditionFails -->
+        <test-method signature="testGenericValidatorSuccesses()[pri:0, instance:org.openapitools.codegen.validation.GenericValidatorTest@7829b776]" started-at="2024-05-11T17:39:43 MSK" name="testGenericValidatorSuccesses" finished-at="2024-05-11T17:39:43 MSK" duration-ms="1" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testGenericValidatorSuccesses -->
+      </class> <!-- org.openapitools.codegen.validation.GenericValidatorTest -->
+    </test> <!-- Surefire test -->
+  </suite> <!-- Surefire suite -->
+</testng-results>

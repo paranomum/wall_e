@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TypeScriptJqueryClientCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">TypeScriptJqueryClientCodegen.java</span></div><h1>TypeScriptJqueryClientCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.parser.util.SchemaTypeUtil;
+import org.openapitools.codegen.CliOption;
+import org.openapitools.codegen.CodegenModel;
+import org.openapitools.codegen.SupportingFile;
+import org.openapitools.codegen.meta.features.DocumentationFeature;
+import org.openapitools.codegen.utils.ModelUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+
+public class TypeScriptJqueryClientCodegen extends AbstractTypeScriptClientCodegen {
+<span class="nc" id="L33">    private final Logger LOGGER = LoggerFactory.getLogger(TypeScriptJqueryClientCodegen.class);</span>
+
+    public static final String NPM_REPOSITORY = &quot;npmRepository&quot;;
+    public static final String JQUERY_ALREADY_IMPORTED = &quot;jqueryAlreadyImported&quot;;
+
+<span class="nc" id="L38">    protected String npmRepository = null;</span>
+
+    public TypeScriptJqueryClientCodegen() {
+<span class="nc" id="L41">        super();</span>
+
+<span class="nc" id="L43">        modifyFeatureSet(features -&gt; features.includeDocumentationFeatures(DocumentationFeature.Readme));</span>
+
+<span class="nc" id="L45">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.ts&quot;);</span>
+<span class="nc" id="L46">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.ts&quot;);</span>
+<span class="nc" id="L47">        typeMapping.put(&quot;Date&quot;, &quot;Date&quot;);</span>
+<span class="nc" id="L48">        apiPackage = &quot;api&quot;;</span>
+<span class="nc" id="L49">        modelPackage = &quot;model&quot;;</span>
+
+<span class="nc" id="L51">        outputFolder = &quot;generated-code/typescript-jquery&quot;;</span>
+<span class="nc" id="L52">        embeddedTemplateDir = templateDir = &quot;typescript-jquery&quot;;</span>
+
+<span class="nc" id="L54">        this.cliOptions.add(new CliOption(NPM_REPOSITORY, &quot;Use this property to set an url your private npmRepo in the package.json&quot;));</span>
+<span class="nc" id="L55">        this.cliOptions.add(new CliOption(JQUERY_ALREADY_IMPORTED,</span>
+                &quot;When using this in legacy app using mix of typescript and javascript, this will only declare jquery and not import it&quot;,
+<span class="nc" id="L57">                SchemaTypeUtil.BOOLEAN_TYPE).defaultValue(Boolean.FALSE.toString()));</span>
+<span class="nc" id="L58">    }</span>
+
+    @Override
+    public String getName() {
+<span class="nc" id="L62">        return &quot;typescript-jquery&quot;;</span>
+    }
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L67">        return &quot;Generates a TypeScript jquery client library.&quot;;</span>
+    }
+
+    public String getNpmRepository() {
+<span class="nc" id="L71">        return npmRepository;</span>
+    }
+
+    public void setNpmRepository(String npmRepository) {
+<span class="nc" id="L75">        this.npmRepository = npmRepository;</span>
+<span class="nc" id="L76">    }</span>
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L80">        super.processOpts();</span>
+
+<span class="nc" id="L82">        supportingFiles.add(new SupportingFile(&quot;git_push.sh.mustache&quot;, &quot;&quot;, &quot;git_push.sh&quot;));</span>
+<span class="nc" id="L83">        supportingFiles.add(new SupportingFile(&quot;models.mustache&quot;, modelPackage().replace('.', File.separatorChar), &quot;models.ts&quot;));</span>
+<span class="nc" id="L84">        supportingFiles.add(new SupportingFile(&quot;apis.mustache&quot;, apiPackage().replace('.', File.separatorChar), &quot;api.ts&quot;));</span>
+<span class="nc" id="L85">        supportingFiles.add(new SupportingFile(&quot;configuration.mustache&quot;, getIndexDirectory(), &quot;configuration.ts&quot;));</span>
+<span class="nc" id="L86">        supportingFiles.add(new SupportingFile(&quot;index.mustache&quot;, getIndexDirectory(), &quot;index.ts&quot;));</span>
+<span class="nc" id="L87">        supportingFiles.add(new SupportingFile(&quot;variables.mustache&quot;, getIndexDirectory(), &quot;variables.ts&quot;));</span>
+
+<span class="nc bnc" id="L89" title="All 2 branches missed.">        if (additionalProperties.containsKey(NPM_NAME)) {</span>
+<span class="nc" id="L90">            addNpmPackageGeneration();</span>
+        }
+<span class="nc" id="L92">    }</span>
+
+    @Override
+    public String getSchemaType(Schema p) {
+<span class="nc" id="L96">        String openAPIType = super.getSchemaType(p);</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        if (ModelUtils.isStringSchema(p)) {</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">            if (p.getEnum() != null) {</span>
+<span class="nc" id="L99">                return openAPIType;</span>
+            }
+        }
+<span class="nc bnc" id="L102" title="All 4 branches missed.">        if (isLanguagePrimitive(openAPIType) || isLanguageGenericType(openAPIType)) {</span>
+<span class="nc" id="L103">            return openAPIType;</span>
+        }
+<span class="nc" id="L105">        return addModelPrefix(openAPIType);</span>
+    }
+
+    @Override
+    public String getTypeDeclaration(String name) {
+<span class="nc" id="L110">        return addModelPrefix(name);</span>
+    }
+
+    @Override
+    protected void addAdditionPropertiesToCodeGenModel(CodegenModel codegenModel, Schema schema) {
+<span class="nc" id="L115">        codegenModel.additionalPropertiesType = getSchemaType(ModelUtils.getAdditionalProperties(schema));</span>
+<span class="nc" id="L116">        addImport(codegenModel, codegenModel.additionalPropertiesType);</span>
+<span class="nc" id="L117">    }</span>
+
+    private String addModelPrefix(String openAPIType) {
+<span class="nc" id="L120">        String type = null;</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">        if (typeMapping.containsKey(openAPIType)) {</span>
+<span class="nc" id="L122">            type = typeMapping.get(openAPIType);</span>
+        } else {
+<span class="nc" id="L124">            type = openAPIType;</span>
+        }
+
+<span class="nc bnc" id="L127" title="All 4 branches missed.">        if (!isLanguagePrimitive(type) &amp;&amp; !isLanguageGenericType(type)) {</span>
+<span class="nc" id="L128">            type = &quot;models.&quot; + openAPIType;</span>
+        }
+<span class="nc" id="L130">        return type;</span>
+    }
+
+    private boolean isLanguagePrimitive(String type) {
+<span class="nc" id="L134">        return languageSpecificPrimitives.contains(type);</span>
+    }
+
+    private boolean isLanguageGenericType(String type) {
+<span class="nc bnc" id="L138" title="All 2 branches missed.">        for (String genericType : languageGenericTypes) {</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">            if (type.startsWith(genericType + &quot;&lt;&quot;)) {</span>
+<span class="nc" id="L140">                return true;</span>
+            }
+<span class="nc" id="L142">        }</span>
+<span class="nc" id="L143">        return false;</span>
+    }
+
+    private String getPackageRootDirectory() {
+<span class="nc" id="L147">        String indexPackage = modelPackage.substring(0, Math.max(0, modelPackage.lastIndexOf('.')));</span>
+<span class="nc" id="L148">        return indexPackage.replace('.', File.separatorChar);</span>
+    }
+
+    private void addNpmPackageGeneration() {
+
+<span class="nc bnc" id="L153" title="All 2 branches missed.">        if (additionalProperties.containsKey(NPM_REPOSITORY)) {</span>
+<span class="nc" id="L154">            this.setNpmRepository(additionalProperties.get(NPM_REPOSITORY).toString());</span>
+        }
+
+        //Files for building our lib
+<span class="nc" id="L158">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, getPackageRootDirectory(), &quot;README.md&quot;));</span>
+<span class="nc" id="L159">        supportingFiles.add(new SupportingFile(&quot;package.mustache&quot;, getPackageRootDirectory(), &quot;package.json&quot;));</span>
+<span class="nc" id="L160">        supportingFiles.add(new SupportingFile(&quot;tsconfig.mustache&quot;, getPackageRootDirectory(), &quot;tsconfig.json&quot;));</span>
+<span class="nc" id="L161">    }</span>
+
+    private String getIndexDirectory() {
+<span class="nc" id="L164">        String indexPackage = modelPackage.substring(0, Math.max(0, modelPackage.lastIndexOf('.')));</span>
+<span class="nc" id="L165">        return indexPackage.replace('.', File.separatorChar);</span>
+    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,21 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+openapi-generator-online,org.openapitools.codegen.online.model,ResponseCode,0,26,0,0,0,11,0,6,0,6
+openapi-generator-online,org.openapitools.codegen.online.model,Generated,0,17,0,0,0,7,0,5,0,5
+openapi-generator-online,org.openapitools.codegen.online.model,GeneratorInput,12,19,0,0,6,7,3,6,3,6
+openapi-generator-online,org.openapitools.codegen.online.model,ApiResponse,58,0,6,0,26,0,13,0,8,0
+openapi-generator-online,org.openapitools.codegen.online.api,ApiUtil,25,0,0,0,7,0,2,0,2,0
+openapi-generator-online,org.openapitools.codegen.online.api,GenApi,0,35,0,0,0,7,0,7,0,7
+openapi-generator-online,org.openapitools.codegen.online.api,GenApiController,0,9,0,0,0,4,0,2,0,2
+openapi-generator-online,org.openapitools.codegen.online.api,GenApiDelegate,153,0,16,0,36,0,20,0,12,0
+openapi-generator-online,org.openapitools.codegen.online.api,ApiOriginFilter,25,0,0,0,9,0,4,0,4,0
+openapi-generator-online,org.openapitools.codegen.online,RFC3339DateFormat,18,15,0,0,4,5,2,2,2,2
+openapi-generator-online,org.openapitools.codegen.online,OpenAPI2SpringBoot.new WebMvcConfigurer() {...},0,25,0,0,0,3,0,2,0,2
+openapi-generator-online,org.openapitools.codegen.online,OpenAPI2SpringBoot.ExitException,5,0,0,0,2,0,2,0,2,0
+openapi-generator-online,org.openapitools.codegen.online,OpenAPI2SpringBoot,23,16,3,1,3,5,3,4,1,4
+openapi-generator-online,org.openapitools.codegen.online.configuration,OpenAPIDocumentationConfig,46,97,6,2,14,31,4,3,0,3
+openapi-generator-online,org.openapitools.codegen.online.configuration,ParameterAllowableValuesPlugin,0,91,0,11,0,21,0,10,0,4
+openapi-generator-online,org.openapitools.codegen.online.configuration,HomeController,2,3,0,0,1,1,1,1,1,1
+openapi-generator-online,org.openapitools.codegen.online.service,GenApiService,46,225,5,13,12,57,6,14,1,10
+openapi-generator-online,org.openapitools.codegen.online.service,ZipUtil,39,104,3,9,9,21,3,7,1,3
+openapi-generator-online,org.openapitools.codegen.online.service,Generator.Type,0,28,0,0,0,6,0,3,0,3
+openapi-generator-online,org.openapitools.codegen.online.service,Generator,140,230,13,15,30,56,12,9,1,6

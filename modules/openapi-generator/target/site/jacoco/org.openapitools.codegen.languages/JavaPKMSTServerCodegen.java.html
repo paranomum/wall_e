@@ -1,0 +1,650 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JavaPKMSTServerCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">JavaPKMSTServerCodegen.java</span></div><h1>JavaPKMSTServerCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.tags.Tag;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.meta.features.DocumentationFeature;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.utils.URLPathUtils;
+
+import java.io.File;
+import java.net.URL;
+import java.util.*;
+
+import static org.openapitools.codegen.utils.CamelizeOption.LOWERCASE_FIRST_LETTER;
+import static org.openapitools.codegen.utils.StringUtils.camelize;
+
+/**
+ * Created by prokarma on 04/09/17.
+ */
+public class JavaPKMSTServerCodegen extends AbstractJavaCodegen {
+
+    public static final String CONFIG_PACKAGE = &quot;configPackage&quot;;
+    public static final String BASE_PACKAGE = &quot;basePackage&quot;;
+    public static final String TITLE = &quot;title&quot;;
+    public static final String EUREKA_URI = &quot;eurekaUri&quot;;
+    public static final String ZIPKIN_URI = &quot;zipkinUri&quot;;
+    public static final String SPRINGADMIN_URI = &quot;springBootAdminUri&quot;;
+<span class="fc" id="L50">    protected String basePackage = &quot;com.prokarma.pkmst&quot;;</span>
+<span class="fc" id="L51">    protected String serviceName = &quot;Pkmst&quot;;</span>
+<span class="fc" id="L52">    protected String configPackage = &quot;com.prokarma.pkmst.config&quot;;</span>
+    protected String title;
+    protected String eurekaUri;
+    protected String zipkinUri;
+    protected String springBootAdminUri;
+
+    public JavaPKMSTServerCodegen() {
+<span class="fc" id="L59">        super();</span>
+
+<span class="fc" id="L61">        modifyFeatureSet(features -&gt; features.includeDocumentationFeatures(DocumentationFeature.Readme));</span>
+
+<span class="fc" id="L63">        groupId = &quot;com.prokarma&quot;;</span>
+<span class="fc" id="L64">        artifactId = &quot;pkmst-microservice&quot;;</span>
+<span class="fc" id="L65">        embeddedTemplateDir = templateDir = &quot;java-pkmst&quot;;</span>
+<span class="fc" id="L66">        apiPackage = &quot;com.prokarma.pkmst.controller&quot;;</span>
+<span class="fc" id="L67">        modelPackage = &quot;com.prokarma.pkmst.model&quot;;</span>
+<span class="fc" id="L68">        invokerPackage = &quot;com.prokarma.pkmst.controller&quot;;</span>
+
+        // clioOptions default redefinition need to be updated
+<span class="fc" id="L71">        updateOption(CodegenConstants.GROUP_ID, this.getGroupId());</span>
+<span class="fc" id="L72">        updateOption(CodegenConstants.INVOKER_PACKAGE, this.getInvokerPackage());</span>
+<span class="fc" id="L73">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
+<span class="fc" id="L74">        updateOption(CodegenConstants.API_PACKAGE, apiPackage);</span>
+<span class="fc" id="L75">        updateOption(CodegenConstants.MODEL_PACKAGE, modelPackage);</span>
+
+<span class="fc" id="L77">        additionalProperties.put(JACKSON, &quot;true&quot;);</span>
+
+<span class="fc" id="L79">        this.cliOptions.add(new CliOption(&quot;basePackage&quot;, &quot;base package for java source code&quot;));</span>
+<span class="fc" id="L80">        this.cliOptions.add(new CliOption(&quot;serviceName&quot;, &quot;Service Name&quot;));</span>
+<span class="fc" id="L81">        this.cliOptions.add(new CliOption(TITLE, &quot;server title name or client service name&quot;));</span>
+<span class="fc" id="L82">        this.cliOptions.add(new CliOption(&quot;eurekaUri&quot;, &quot;Eureka URI&quot;));</span>
+<span class="fc" id="L83">        this.cliOptions.add(new CliOption(&quot;zipkinUri&quot;, &quot;Zipkin URI&quot;));</span>
+<span class="fc" id="L84">        this.cliOptions.add(new CliOption(&quot;springBootAdminUri&quot;, &quot;Spring-Boot URI&quot;));</span>
+        // Middleware config
+<span class="fc" id="L86">        this.cliOptions.add(new CliOption(&quot;pkmstInterceptor&quot;, &quot;PKMST Interceptor&quot;));</span>
+
+<span class="fc" id="L88">        this.apiTestTemplateFiles.put(&quot;api_test.mustache&quot;, &quot;.java&quot;);</span>
+
+<span class="pc bpc" id="L90" title="1 of 2 branches missed.">        if (&quot;.md&quot;.equals(this.modelDocTemplateFiles.get(&quot;model_doc.mustache&quot;))) {</span>
+<span class="fc" id="L91">            this.modelDocTemplateFiles.remove(&quot;model_doc.mustache&quot;);</span>
+        }
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">        if (&quot;.md&quot;.equals(this.apiDocTemplateFiles.get(&quot;api_doc.mustache&quot;))) {</span>
+<span class="fc" id="L94">            this.apiDocTemplateFiles.remove(&quot;api_doc.mustache&quot;);</span>
+        }
+<span class="fc" id="L96">    }</span>
+
+    public CodegenType getTag() {
+<span class="fc" id="L99">        return CodegenType.SERVER;</span>
+    }
+
+    public String getName() {
+<span class="fc" id="L103">        return &quot;java-pkmst&quot;;</span>
+    }
+
+    public String getHelp() {
+<span class="nc" id="L107">        return &quot;Generates a PKMST SpringBoot Server application using the SpringFox integration.&quot;</span>
+                + &quot; Also enables EurekaServerClient / Zipkin / Spring-Boot admin&quot;;
+    }
+
+    public void processOpts() {
+<span class="nc" id="L112">        super.processOpts();</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">        if (this.additionalProperties.containsKey(&quot;basePackage&quot;)) {</span>
+<span class="nc" id="L114">            this.setBasePackage((String) this.additionalProperties.get(&quot;basePackage&quot;));</span>
+<span class="nc" id="L115">            this.setInvokerPackage(this.getBasePackage());</span>
+<span class="nc" id="L116">            this.apiPackage = this.getBasePackage() + &quot;.controller&quot;;</span>
+<span class="nc" id="L117">            this.modelPackage = this.getBasePackage() + &quot;.model&quot;;</span>
+<span class="nc" id="L118">            this.setConfigPackage(this.getBasePackage() + &quot;.config&quot;);</span>
+        } else {
+<span class="nc" id="L120">            this.additionalProperties.put(BASE_PACKAGE, basePackage);</span>
+<span class="nc" id="L121">            this.additionalProperties.put(CONFIG_PACKAGE, this.getConfigPackage());</span>
+<span class="nc" id="L122">            this.additionalProperties.put(CodegenConstants.API_PACKAGE, apiPackage);</span>
+<span class="nc" id="L123">            this.additionalProperties.put(CodegenConstants.MODEL_PACKAGE, modelPackage);</span>
+<span class="nc" id="L124">            this.additionalProperties.put(CodegenConstants.INVOKER_PACKAGE, invokerPackage);</span>
+        }
+<span class="nc bnc" id="L126" title="All 2 branches missed.">        if (this.additionalProperties.containsKey(&quot;groupId&quot;)) {</span>
+<span class="nc" id="L127">            this.setGroupId((String) this.additionalProperties.get(&quot;groupId&quot;));</span>
+        } else {
+            // not set, use to be passed to template
+<span class="nc" id="L130">            additionalProperties.put(CodegenConstants.GROUP_ID, groupId);</span>
+        }
+<span class="nc bnc" id="L132" title="All 2 branches missed.">        if (this.additionalProperties.containsKey(&quot;artifactId&quot;)) {</span>
+<span class="nc" id="L133">            this.setArtifactId((String) this.additionalProperties.get(&quot;artifactId&quot;));</span>
+        } else {
+            // not set, use to be passed to template
+<span class="nc" id="L136">            additionalProperties.put(CodegenConstants.ARTIFACT_ID, artifactId);</span>
+        }
+<span class="nc bnc" id="L138" title="All 2 branches missed.">        if (this.additionalProperties.containsKey(&quot;artifactVersion&quot;)) {</span>
+<span class="nc" id="L139">            this.setArtifactVersion((String) this.additionalProperties.get(&quot;artifactVersion&quot;));</span>
+        } else {
+            // not set, use to be passed to template
+<span class="nc" id="L142">            additionalProperties.put(CodegenConstants.ARTIFACT_VERSION, artifactVersion);</span>
+        }
+<span class="nc bnc" id="L144" title="All 2 branches missed.">        if (this.additionalProperties.containsKey(&quot;serviceName&quot;)) {</span>
+<span class="nc" id="L145">            this.setServiceName((String) this.additionalProperties.get(&quot;serviceName&quot;));</span>
+        } else {
+            // not set, use to be passed to template
+<span class="nc" id="L148">            additionalProperties.put(&quot;serviceName&quot;, serviceName);</span>
+        }
+
+<span class="nc bnc" id="L151" title="All 2 branches missed.">        if (this.additionalProperties.containsKey(CodegenConstants.SERIALIZE_BIG_DECIMAL_AS_STRING)) {</span>
+<span class="nc" id="L152">            this.setSerializeBigDecimalAsString(Boolean.parseBoolean(</span>
+<span class="nc" id="L153">                    this.additionalProperties.get(CodegenConstants.SERIALIZE_BIG_DECIMAL_AS_STRING).toString()));</span>
+        }
+<span class="nc bnc" id="L155" title="All 2 branches missed.">        if (this.additionalProperties.containsKey(CodegenConstants.SERIALIZABLE_MODEL)) {</span>
+<span class="nc" id="L156">            this.setSerializableModel(</span>
+<span class="nc" id="L157">                    Boolean.valueOf(this.additionalProperties.get(CodegenConstants.SERIALIZABLE_MODEL).toString()));</span>
+        }
+<span class="nc bnc" id="L159" title="All 2 branches missed.">        if (this.additionalProperties.containsKey(TITLE)) {</span>
+<span class="nc" id="L160">            this.setTitle((String) this.additionalProperties.get(TITLE));</span>
+        }
+<span class="nc" id="L162">        this.additionalProperties.put(CodegenConstants.SERIALIZABLE_MODEL, serializableModel);</span>
+
+<span class="nc bnc" id="L164" title="All 2 branches missed.">        if (this.additionalProperties.containsKey(EUREKA_URI)) {</span>
+<span class="nc" id="L165">            this.setEurekaUri((String) this.additionalProperties.get(EUREKA_URI));</span>
+        }
+<span class="nc bnc" id="L167" title="All 2 branches missed.">        if (this.additionalProperties.containsKey(ZIPKIN_URI)) {</span>
+<span class="nc" id="L168">            this.setZipkinUri((String) this.additionalProperties.get(ZIPKIN_URI));</span>
+        }
+<span class="nc bnc" id="L170" title="All 2 branches missed.">        if (this.additionalProperties.containsKey(SPRINGADMIN_URI)) {</span>
+<span class="nc" id="L171">            this.setSpringBootAdminUri((String) this.additionalProperties.get(SPRINGADMIN_URI));</span>
+        }
+<span class="nc" id="L173">        this.additionalProperties.put(&quot;java8&quot;, true);</span>
+
+<span class="nc bnc" id="L175" title="All 2 branches missed.">        if (this.additionalProperties.containsKey(WITH_XML)) {</span>
+<span class="nc" id="L176">            this.setWithXml(Boolean.parseBoolean(additionalProperties.get(WITH_XML).toString()));</span>
+        }
+<span class="nc" id="L178">        this.additionalProperties.put(WITH_XML, withXml);</span>
+
+<span class="nc" id="L180">        this.apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.java&quot;);</span>
+<span class="nc" id="L181">        this.apiTemplateFiles.put(&quot;apiController.mustache&quot;, &quot;Controller.java&quot;);</span>
+
+<span class="nc" id="L183">        this.modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.java&quot;);</span>
+
+<span class="nc" id="L185">        this.supportingFiles.add(new SupportingFile(&quot;SpringBootApplication.mustache&quot;,</span>
+<span class="nc" id="L186">                (this.getSourceFolder() + File.separator + this.getBasePackage()).replace(&quot;.&quot;, File.separator),</span>
+<span class="nc" id="L187">                this.getServiceName() + &quot;Application&quot; + &quot;.java&quot;));</span>
+
+<span class="nc" id="L189">        this.supportingFiles</span>
+<span class="nc" id="L190">                .add(new SupportingFile(&quot;config&quot; + File.separator + &quot;openapiDocumentationConfig.mustache&quot;,</span>
+<span class="nc" id="L191">                        (this.sourceFolder + File.separator + this.getConfigPackage()).replace(&quot;.&quot;,</span>
+                                java.io.File.separator) + File.separator + &quot;swagger&quot;,
+                        &quot;OpenAPIDocumentationConfig.java&quot;));
+
+<span class="nc" id="L195">        this.supportingFiles.add(new SupportingFile(&quot;config&quot; + File.separator + &quot;pkmstproperties.mustache&quot;,</span>
+<span class="nc" id="L196">                (this.sourceFolder + File.separator + this.getConfigPackage()).replace(&quot;.&quot;, java.io.File.separator)</span>
+                        + File.separator + &quot;swagger&quot;,
+                &quot;PkmstProperties.java&quot;));
+<span class="nc" id="L199">        this.supportingFiles.add(new SupportingFile(&quot;config&quot; + File.separator + &quot;appconfig.mustache&quot;,</span>
+<span class="nc" id="L200">                (this.sourceFolder + File.separator + this.getConfigPackage()).replace(&quot;.&quot;, java.io.File.separator)</span>
+                        + File.separator,
+                &quot;AppConfig.java&quot;));
+
+        // Security
+<span class="nc" id="L205">        this.supportingFiles</span>
+<span class="nc" id="L206">                .add(new SupportingFile(&quot;security&quot; + File.separator + &quot;authorizationServerConfiguration.mustache&quot;,</span>
+<span class="nc" id="L207">                        (this.sourceFolder + File.separator + this.basePackage).replace(&quot;.&quot;, File.separator)</span>
+                                + File.separator + &quot;security&quot;,
+                        &quot;AuthorizationServerConfiguration.java&quot;));
+<span class="nc" id="L210">        this.supportingFiles</span>
+<span class="nc" id="L211">                .add(new SupportingFile(&quot;security&quot; + File.separator + &quot;oAuth2SecurityConfiguration.mustache&quot;,</span>
+<span class="nc" id="L212">                        (this.sourceFolder + File.separator + this.basePackage).replace(&quot;.&quot;, File.separator)</span>
+                                + File.separator + &quot;security&quot;,
+                        &quot;OAuth2SecurityConfiguration.java&quot;));
+<span class="nc" id="L215">        this.supportingFiles</span>
+<span class="nc" id="L216">                .add(new SupportingFile(&quot;security&quot; + File.separator + &quot;resourceServerConfiguration.mustache&quot;,</span>
+<span class="nc" id="L217">                        (this.sourceFolder + File.separator + this.basePackage).replace(&quot;.&quot;, File.separator)</span>
+                                + File.separator + &quot;security&quot;,
+                        &quot;ResourceServerConfiguration.java&quot;));
+
+        // logging
+
+<span class="nc" id="L223">        this.supportingFiles.add(new SupportingFile(&quot;logging&quot; + File.separator + &quot;httpLoggingFilter.mustache&quot;,</span>
+<span class="nc" id="L224">                (this.sourceFolder + File.separator + this.basePackage).replace(&quot;.&quot;, File.separator) + File.separator</span>
+                        + &quot;logging&quot;,
+                &quot;HttpLoggingFilter.java&quot;));
+
+        // Resources
+<span class="nc" id="L229">        this.supportingFiles.add(new SupportingFile(&quot;resources&quot; + File.separator + &quot;application-local.mustache&quot;,</span>
+<span class="nc" id="L230">                (&quot;src.main.resources&quot;).replace(&quot;.&quot;, java.io.File.separator), &quot;application-local.yml&quot;));</span>
+<span class="nc" id="L231">        this.supportingFiles.add(new SupportingFile(&quot;resources&quot; + File.separator + &quot;application-dev.mustache&quot;,</span>
+<span class="nc" id="L232">                (&quot;src.main.resources&quot;).replace(&quot;.&quot;, java.io.File.separator), &quot;application-dev.yml&quot;));</span>
+<span class="nc" id="L233">        this.supportingFiles.add(new SupportingFile(&quot;resources&quot; + File.separator + &quot;application-dev-config.mustache&quot;,</span>
+<span class="nc" id="L234">                (&quot;src.main.resources&quot;).replace(&quot;.&quot;, java.io.File.separator), &quot;application-dev-config.yml&quot;));</span>
+<span class="nc" id="L235">        this.supportingFiles.add(new SupportingFile(&quot;resources&quot; + File.separator + &quot;bootstrap.mustache&quot;,</span>
+<span class="nc" id="L236">                (&quot;src.main.resources&quot;).replace(&quot;.&quot;, java.io.File.separator), &quot;bootstrap.yml&quot;));</span>
+
+        // POM
+<span class="nc" id="L239">        this.supportingFiles.add(new SupportingFile(&quot;pom.mustache&quot;, &quot;&quot;, &quot;pom.xml&quot;));</span>
+
+        // Readme
+<span class="nc" id="L242">        this.supportingFiles.add(new SupportingFile(&quot;readme.mustache&quot;, &quot;&quot;, &quot;Readme.md&quot;));</span>
+
+        // manifest
+
+<span class="nc" id="L246">        this.supportingFiles.add(new SupportingFile(&quot;manifest.mustache&quot;, &quot;&quot;, &quot;manifest.yml&quot;));</span>
+
+        // docker
+<span class="nc" id="L249">        this.supportingFiles.add(new SupportingFile(&quot;docker.mustache&quot;, &quot;&quot;, &quot;Dockerfile&quot;));</span>
+
+        // logstash
+
+<span class="nc" id="L253">        this.supportingFiles.add(new SupportingFile(&quot;logstash.mustache&quot;, &quot;&quot;, &quot;logstash.conf&quot;));</span>
+
+        // Cucumber
+<span class="nc" id="L256">        this.supportingFiles.add(new SupportingFile(&quot;cucumber&quot; + File.separator + &quot;executeReport.mustache&quot;,</span>
+<span class="nc" id="L257">                this.testFolder + File.separator + this.basePackage.replace(&quot;.&quot;, File.separator) + File.separator</span>
+                        + &quot;cucumber&quot; + File.separator + &quot;report&quot;,
+                &quot;ExecuteReport.java&quot;));
+
+<span class="nc" id="L261">        this.supportingFiles.add(new SupportingFile(</span>
+                &quot;cucumber&quot; + File.separator + &quot;cucumberTest.mustache&quot;, this.testFolder + File.separator
+<span class="nc" id="L263">                + this.basePackage.replace(&quot;.&quot;, File.separator) + File.separator + &quot;cucumber&quot;,</span>
+                serviceName + &quot;Test.java&quot;));
+
+<span class="nc" id="L266">        this.supportingFiles.add(new SupportingFile(</span>
+                &quot;cucumber&quot; + File.separator + &quot;cucumberSteps.mustache&quot;, this.testFolder + File.separator
+<span class="nc" id="L268">                + this.basePackage.replace(&quot;.&quot;, File.separator) + File.separator + &quot;cucumber&quot;,</span>
+                serviceName + &quot;Steps.java&quot;));
+
+<span class="nc" id="L271">        this.supportingFiles.add(new SupportingFile(</span>
+                &quot;cucumber&quot; + File.separator + &quot;package.mustache&quot;, this.testFolder + File.separator
+<span class="nc" id="L273">                + this.basePackage.replace(&quot;.&quot;, File.separator) + File.separator + &quot;cucumber&quot;,</span>
+                serviceName + &quot;package-info.java&quot;));
+
+        // test resources
+<span class="nc" id="L277">        this.supportingFiles.add(new SupportingFile(&quot;cucumber&quot; + File.separator + &quot;cucumber.mustache&quot;,</span>
+<span class="nc" id="L278">                ((&quot;src.test.resources&quot;) + File.separator + this.basePackage).replace(&quot;.&quot;, File.separator)</span>
+                        + File.separator + &quot;cucumber&quot;,
+                serviceName + &quot;.feature&quot;));
+
+<span class="nc" id="L282">        this.supportingFiles.add(new SupportingFile(&quot;testresources&quot; + File.separator + &quot;bootstrap.mustache&quot;,</span>
+<span class="nc" id="L283">                (&quot;src.test.resources&quot;).replace(&quot;.&quot;, java.io.File.separator), &quot;bootstrap.yml&quot;));</span>
+<span class="nc" id="L284">        this.supportingFiles.add(new SupportingFile(&quot;testresources&quot; + File.separator + &quot;application.mustache&quot;,</span>
+<span class="nc" id="L285">                (&quot;src.test.resources&quot;).replace(&quot;.&quot;, java.io.File.separator), &quot;application.properties&quot;));</span>
+<span class="nc" id="L286">        this.supportingFiles.add(new SupportingFile(&quot;testresources&quot; + File.separator + &quot;application-test.mustache&quot;,</span>
+<span class="nc" id="L287">                (&quot;src.test.resources&quot;).replace(&quot;.&quot;, java.io.File.separator), &quot;application-test.properties&quot;));</span>
+
+        // Gatling
+<span class="nc" id="L290">        this.supportingFiles.add(new SupportingFile(&quot;gatling&quot; + File.separator + &quot;gatling.mustache&quot;,</span>
+<span class="nc" id="L291">                (&quot;src.test.resources&quot;).replace(&quot;.&quot;, java.io.File.separator), &quot;gatling.conf&quot;));</span>
+
+<span class="nc" id="L293">        this.supportingFiles.add(new SupportingFile(&quot;gatling&quot; + File.separator + &quot;application.mustache&quot;,</span>
+<span class="nc" id="L294">                (&quot;src.test.resources&quot;).replace(&quot;.&quot;, java.io.File.separator), &quot;application.conf&quot;));</span>
+
+<span class="nc" id="L296">        this.supportingFiles.add(new SupportingFile(</span>
+                &quot;gatling&quot; + File.separator + &quot;testapi.mustache&quot;, (&quot;src&quot;) + File.separator + (&quot;test&quot;) + File.separator
+<span class="nc" id="L298">                + (&quot;scala&quot;) + File.separator + (&quot;scalaFiles&quot;).replace(&quot;.&quot;, java.io.File.separator),</span>
+                &quot;testapi.scala&quot;));
+
+        // adding class for integration test
+<span class="nc" id="L302">        this.supportingFiles.add(new SupportingFile(</span>
+                &quot;integration&quot; + File.separator + &quot;integrationtest.mustache&quot;, this.testFolder + File.separator
+<span class="nc" id="L304">                + this.basePackage.replace(&quot;.&quot;, File.separator) + File.separator + &quot;controller&quot;,</span>
+                serviceName + &quot;IT.java&quot;));
+<span class="nc" id="L306">    }</span>
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L310">        OperationMap operations = objs.getOperations();</span>
+<span class="nc bnc" id="L311" title="All 2 branches missed.">        if (operations != null) {</span>
+<span class="nc" id="L312">            List&lt;CodegenOperation&gt; ops = operations.getOperation();</span>
+<span class="nc bnc" id="L313" title="All 2 branches missed.">            for (final CodegenOperation operation : ops) {</span>
+<span class="nc" id="L314">                List&lt;CodegenResponse&gt; responses = operation.responses;</span>
+<span class="nc bnc" id="L315" title="All 2 branches missed.">                if (responses != null) {</span>
+<span class="nc bnc" id="L316" title="All 2 branches missed.">                    for (final CodegenResponse resp : responses) {</span>
+<span class="nc bnc" id="L317" title="All 2 branches missed.">                        if (&quot;0&quot;.equals(resp.code)) {</span>
+<span class="nc" id="L318">                            resp.code = &quot;200&quot;;</span>
+                        }
+<span class="nc" id="L320">                        doDataTypeAssignment(resp.dataType, new DataTypeAssigner() {</span>
+
+                            public void setReturnType(final String returnType) {
+<span class="nc" id="L323">                                resp.dataType = returnType;</span>
+<span class="nc" id="L324">                            }</span>
+
+                            public void setReturnContainer(final String returnContainer) {
+<span class="nc" id="L327">                                resp.containerType = returnContainer;</span>
+<span class="nc" id="L328">                            }</span>
+                        });
+<span class="nc" id="L330">                    }</span>
+                }
+
+<span class="nc" id="L333">                doDataTypeAssignment(operation.returnType, new DataTypeAssigner() {</span>
+
+                    public void setReturnType(final String returnType) {
+<span class="nc" id="L336">                        operation.returnType = returnType;</span>
+<span class="nc" id="L337">                    }</span>
+
+                    public void setReturnContainer(final String returnContainer) {
+<span class="nc" id="L340">                        operation.returnContainer = returnContainer;</span>
+<span class="nc" id="L341">                    }</span>
+                });
+
+<span class="nc" id="L344">                handleImplicitHeaders(operation);</span>
+<span class="nc" id="L345">            }</span>
+        }
+
+<span class="nc" id="L348">        return objs;</span>
+    }
+
+    /**
+     * @param returnType       The return type that needs to be converted
+     * @param dataTypeAssigner An object that will assign the data to the respective fields
+     *                         in the model.
+     */
+    private void doDataTypeAssignment(String returnType, DataTypeAssigner dataTypeAssigner) {
+<span class="nc" id="L357">        final String rt = returnType;</span>
+<span class="nc bnc" id="L358" title="All 2 branches missed.">        if (rt == null) {</span>
+<span class="nc" id="L359">            dataTypeAssigner.setReturnType(&quot;Void&quot;);</span>
+<span class="nc bnc" id="L360" title="All 2 branches missed.">        } else if (rt.startsWith(&quot;List&quot;)) {</span>
+<span class="nc" id="L361">            int end = rt.lastIndexOf(&quot;&gt;&quot;);</span>
+<span class="nc bnc" id="L362" title="All 2 branches missed.">            if (end &gt; 0) {</span>
+<span class="nc" id="L363">                dataTypeAssigner.setReturnType(rt.substring(&quot;List&lt;&quot;.length(), end).trim());</span>
+<span class="nc" id="L364">                dataTypeAssigner.setReturnContainer(&quot;List&quot;);</span>
+            }
+<span class="nc bnc" id="L366" title="All 2 branches missed.">        } else if (rt.startsWith(&quot;Map&quot;)) {</span>
+<span class="nc" id="L367">            int end = rt.lastIndexOf(&quot;&gt;&quot;);</span>
+<span class="nc bnc" id="L368" title="All 2 branches missed.">            if (end &gt; 0) {</span>
+<span class="nc" id="L369">                dataTypeAssigner.setReturnType(rt.substring(&quot;Map&lt;&quot;.length(), end).split(&quot;,&quot;)[1].trim());</span>
+<span class="nc" id="L370">                dataTypeAssigner.setReturnContainer(&quot;Map&quot;);</span>
+            }
+<span class="nc bnc" id="L372" title="All 2 branches missed.">        } else if (rt.startsWith(&quot;Set&quot;)) {</span>
+<span class="nc" id="L373">            int end = rt.lastIndexOf(&quot;&gt;&quot;);</span>
+<span class="nc bnc" id="L374" title="All 2 branches missed.">            if (end &gt; 0) {</span>
+<span class="nc" id="L375">                dataTypeAssigner.setReturnType(rt.substring(&quot;Set&lt;&quot;.length(), end).trim());</span>
+<span class="nc" id="L376">                dataTypeAssigner.setReturnContainer(&quot;Set&quot;);</span>
+            }
+        }
+<span class="nc" id="L379">    }</span>
+
+    @Override
+    public void postProcessModelProperty(CodegenModel model, CodegenProperty property) {
+<span class="nc" id="L383">        super.postProcessModelProperty(model, property);</span>
+
+<span class="nc bnc" id="L385" title="All 2 branches missed.">        if (&quot;null&quot;.equals(property.example)) {</span>
+<span class="nc" id="L386">            property.example = null;</span>
+        }
+
+        // Add imports for Jackson
+<span class="nc bnc" id="L390" title="All 2 branches missed.">        if (!Boolean.TRUE.equals(model.isEnum)) {</span>
+<span class="nc" id="L391">            model.imports.add(&quot;JsonProperty&quot;);</span>
+
+<span class="nc bnc" id="L393" title="All 2 branches missed.">            if (Boolean.TRUE.equals(model.hasEnums)) {</span>
+<span class="nc" id="L394">                model.imports.add(&quot;JsonValue&quot;);</span>
+            }
+        } else { // enum class
+            // Needed imports for Jackson's JsonCreator
+<span class="nc bnc" id="L398" title="All 2 branches missed.">            if (this.additionalProperties.containsKey(JACKSON)) {</span>
+<span class="nc" id="L399">                model.imports.add(&quot;JsonCreator&quot;);</span>
+            }
+        }
+
+<span class="nc" id="L403">    }</span>
+
+    @Override
+    public ModelsMap postProcessModelsEnum(ModelsMap objs) {
+<span class="nc" id="L407">        objs = super.postProcessModelsEnum(objs);</span>
+
+        // Add imports for Jackson
+<span class="nc" id="L410">        List&lt;Map&lt;String, String&gt;&gt; imports = objs.getImports();</span>
+<span class="nc bnc" id="L411" title="All 2 branches missed.">        for (ModelMap mo : objs.getModels()) {</span>
+<span class="nc" id="L412">            CodegenModel cm = mo.getModel();</span>
+            // for enum model
+<span class="nc bnc" id="L414" title="All 4 branches missed.">            if (Boolean.TRUE.equals(cm.isEnum) &amp;&amp; cm.allowableValues != null) {</span>
+<span class="nc" id="L415">                cm.imports.add(this.importMapping.get(&quot;JsonValue&quot;));</span>
+<span class="nc" id="L416">                Map&lt;String, String&gt; item = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L417">                item.put(&quot;import&quot;, this.importMapping.get(&quot;JsonValue&quot;));</span>
+<span class="nc" id="L418">                imports.add(item);</span>
+            }
+<span class="nc" id="L420">        }</span>
+
+<span class="nc" id="L422">        return objs;</span>
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    @Override
+    public void preprocessOpenAPI(OpenAPI openAPI) {
+<span class="nc" id="L428">        super.preprocessOpenAPI(openAPI);</span>
+<span class="nc bnc" id="L429" title="All 4 branches missed.">        if (openAPI == null || openAPI.getPaths() == null) {</span>
+<span class="nc" id="L430">            return;</span>
+        }
+<span class="nc bnc" id="L432" title="All 2 branches missed.">        if (openAPI.getTags() != null) {</span>
+<span class="nc" id="L433">            List&lt;ResourcePath&gt; resourcePaths = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L434" title="All 2 branches missed.">            for (Tag tag : openAPI.getTags()) {</span>
+<span class="nc" id="L435">                ResourcePath resourcePath = new ResourcePath();</span>
+<span class="nc" id="L436">                resourcePath.setPath(tag.getName());</span>
+<span class="nc" id="L437">                resourcePaths.add(resourcePath);</span>
+<span class="nc" id="L438">            }</span>
+<span class="nc" id="L439">            this.additionalProperties.put(&quot;resourcePaths&quot;, resourcePaths);</span>
+        }
+        // get vendor extensions
+
+<span class="nc" id="L443">        Map&lt;String, Object&gt; vendorExt = openAPI.getInfo().getExtensions();</span>
+<span class="nc bnc" id="L444" title="All 4 branches missed.">        if (vendorExt != null &amp;&amp; !vendorExt.toString().isEmpty()) {</span>
+<span class="nc bnc" id="L445" title="All 2 branches missed.">            if (vendorExt.containsKey(&quot;x-codegen&quot;)) {</span>
+
+<span class="nc" id="L447">                Map&lt;String, String&gt; uris = (Map&lt;String, String&gt;) vendorExt.get(&quot;x-codegen&quot;);</span>
+<span class="nc bnc" id="L448" title="All 2 branches missed.">                if (uris.containsKey(&quot;eurekaUri&quot;)) {</span>
+<span class="nc" id="L449">                    String eurekaUri = uris.get(&quot;eurekaUri&quot;);</span>
+<span class="nc" id="L450">                    additionalProperties.put(EUREKA_URI, eurekaUri);</span>
+                }
+<span class="nc bnc" id="L452" title="All 2 branches missed.">                if (uris.containsKey(&quot;zipkinUri&quot;)) {</span>
+<span class="nc" id="L453">                    String zipkinUri = uris.get(&quot;zipkinUri&quot;);</span>
+<span class="nc" id="L454">                    additionalProperties.put(ZIPKIN_URI, zipkinUri);</span>
+                }
+<span class="nc bnc" id="L456" title="All 2 branches missed.">                if (uris.containsKey(&quot;springBootAdminUri&quot;)) {</span>
+<span class="nc" id="L457">                    String springBootAdminUri = uris.get(&quot;springBootAdminUri&quot;);</span>
+<span class="nc" id="L458">                    additionalProperties.put(SPRINGADMIN_URI, springBootAdminUri);</span>
+                }
+<span class="nc bnc" id="L460" title="All 2 branches missed.">                if (uris.containsKey(&quot;pkmstInterceptor&quot;)) {</span>
+<span class="nc" id="L461">                    String pkmstInterceptor = uris.get(&quot;pkmstInterceptor&quot;);</span>
+<span class="nc" id="L462">                    additionalProperties.put(&quot;pkmstInterceptor&quot;, pkmstInterceptor);</span>
+                }
+            }
+        }
+
+        /* comment out below as it's already done in AbstractJavaCodegen
+        for (String pathname : openAPI.getPaths().keySet()) {
+            PathItem path = openAPI.getPaths().get(pathname);
+            if (path.readOperations() == null) {
+                continue;
+            }
+            for (Operation operation : path.readOperations()) {
+                boolean hasFormParameters = hasFormParameter(operation);
+
+                // only add content-Type if its no a GET-Method
+                if (path.getGet() != null || !operation.equals(path.getGet())) {
+                    String defaultContentType = hasFormParameters ? &quot;application/x-www-form-urlencoded&quot;
+                            : &quot;application/json&quot;;
+                    List&lt;String&gt; consumes = new ArrayList&lt;String&gt;(getConsumesInfo(operation));
+                    String contentType = consumes == null || consumes.isEmpty() ? defaultContentType : consumes.get(0);
+                    operation.addExtension(&quot;x-contentType&quot;, contentType);
+                }
+                String accepts = getAccept(operation);
+                operation.addExtension(&quot;x-accepts&quot;, accepts);
+            }
+        }*/
+
+        /* TODO the following logic shouldn't need any more
+        if (&quot;/&quot;.equals(openAPI.getBasePath())) {
+            openAPI.setBasePath(&quot;&quot;);
+        }
+        */
+
+<span class="nc bnc" id="L495" title="All 2 branches missed.">        if (!additionalProperties.containsKey(TITLE)) {</span>
+            // From the title, compute a reasonable name for the package and the
+            // API
+<span class="nc" id="L498">            String title = openAPI.getInfo().getTitle();</span>
+
+            // Drop any API suffix
+<span class="nc bnc" id="L501" title="All 2 branches missed.">            if (title != null) {</span>
+<span class="nc" id="L502">                title = title.trim().replace(&quot; &quot;, &quot;-&quot;);</span>
+<span class="nc bnc" id="L503" title="All 2 branches missed.">                if (title.toUpperCase(Locale.ROOT).endsWith(&quot;API&quot;)) {</span>
+<span class="nc" id="L504">                    title = title.substring(0, title.length() - 3);</span>
+                }
+
+<span class="nc" id="L507">                this.title = camelize(sanitizeName(title), LOWERCASE_FIRST_LETTER);</span>
+            }
+<span class="nc" id="L509">            additionalProperties.put(TITLE, this.title);</span>
+        }
+
+<span class="nc" id="L512">        URL url = URLPathUtils.getServerURL(openAPI, serverVariableOverrides());</span>
+<span class="nc" id="L513">        this.additionalProperties.put(&quot;serverPort&quot;, URLPathUtils.getPort(url, 8080));</span>
+
+<span class="nc bnc" id="L515" title="All 2 branches missed.">        if (openAPI.getPaths() != null) {</span>
+<span class="nc bnc" id="L516" title="All 2 branches missed.">            for (Map.Entry&lt;String, PathItem&gt; openAPIGetPathsEntry : openAPI.getPaths().entrySet()) {</span>
+<span class="nc" id="L517">                String pathname = openAPIGetPathsEntry.getKey();</span>
+<span class="nc" id="L518">                PathItem path = openAPIGetPathsEntry.getValue();</span>
+<span class="nc bnc" id="L519" title="All 2 branches missed.">                if (path.readOperations() != null) {</span>
+<span class="nc bnc" id="L520" title="All 2 branches missed.">                    for (Operation operation : path.readOperations()) {</span>
+<span class="nc bnc" id="L521" title="All 2 branches missed.">                        if (operation.getTags() != null) {</span>
+<span class="nc" id="L522">                            List&lt;Map&lt;String, String&gt;&gt; tags = new ArrayList&lt;Map&lt;String, String&gt;&gt;();</span>
+<span class="nc bnc" id="L523" title="All 2 branches missed.">                            for (String tag : operation.getTags()) {</span>
+<span class="nc" id="L524">                                Map&lt;String, String&gt; value = new HashMap&lt;String, String&gt;();</span>
+<span class="nc" id="L525">                                value.put(&quot;tag&quot;, tag);</span>
+<span class="nc" id="L526">                                tags.add(value);</span>
+<span class="nc" id="L527">                            }</span>
+<span class="nc bnc" id="L528" title="All 2 branches missed.">                            if (operation.getTags().size() &gt; 0) {</span>
+<span class="nc" id="L529">                                String tag = operation.getTags().get(0);</span>
+<span class="nc" id="L530">                                operation.setTags(Arrays.asList(tag));</span>
+                            }
+<span class="nc" id="L532">                            operation.addExtension(&quot;x-tags&quot;, tags);</span>
+                        }
+<span class="nc" id="L534">                    }</span>
+                }
+<span class="nc" id="L536">            }</span>
+        }
+<span class="nc" id="L538">    }</span>
+
+    @Override
+    public void addOperationToGroup(String tag, String resourcePath, Operation operation, CodegenOperation co,
+                                    Map&lt;String, List&lt;CodegenOperation&gt;&gt; operations) {
+<span class="nc" id="L543">        super.addOperationToGroup(tag, resourcePath, operation, co, operations);</span>
+<span class="nc bnc" id="L544" title="All 2 branches missed.">        co.subresourceOperation = !co.path.isEmpty();</span>
+<span class="nc" id="L545">    }</span>
+
+    @Override
+    public String toApiName(String name) {
+<span class="nc bnc" id="L549" title="All 2 branches missed.">        if (name.length() == 0) {</span>
+<span class="nc" id="L550">            return &quot;DefaultApi&quot;;</span>
+        }
+<span class="nc" id="L552">        name = sanitizeName(name);</span>
+<span class="nc" id="L553">        return camelize(name) + &quot;Api&quot;;</span>
+    }
+
+    @Override
+    public String apiFileFolder() {
+<span class="nc" id="L558">        return this.outputFolder + &quot;/&quot; + this.sourceFolder + &quot;/&quot; + apiPackage().replace(&quot;.&quot;, &quot;/&quot;);</span>
+    }
+
+    @Override
+    public String apiTestFileFolder() {
+<span class="nc" id="L563">        return this.outputFolder + &quot;/&quot; + this.testFolder + &quot;/&quot; + apiPackage().replace(&quot;.&quot;, &quot;/&quot;);</span>
+    }
+
+    @Override
+    public String modelFileFolder() {
+<span class="nc" id="L568">        return this.outputFolder + &quot;/&quot; + this.sourceFolder + &quot;/&quot; + modelPackage().replace(&quot;.&quot;, &quot;/&quot;);</span>
+    }
+
+    @Override
+    public String apiDocFileFolder() {
+<span class="nc" id="L573">        return (this.outputFolder + &quot;/&quot; + this.apiDocPath).replace(&quot;/&quot;, File.separator);</span>
+    }
+
+    @Override
+    public String modelDocFileFolder() {
+<span class="nc" id="L578">        return (this.outputFolder + &quot;/&quot; + this.modelDocPath).replace(&quot;/&quot;, File.separator);</span>
+    }
+
+    public void setEurekaUri(String eurekaUri) {
+<span class="nc" id="L582">        this.eurekaUri = eurekaUri;</span>
+<span class="nc" id="L583">    }</span>
+
+    public void setZipkinUri(String zipkinUri) {
+<span class="nc" id="L586">        this.zipkinUri = zipkinUri;</span>
+<span class="nc" id="L587">    }</span>
+
+    public void setSpringBootAdminUri(String springBootAdminUri) {
+<span class="nc" id="L590">        this.springBootAdminUri = springBootAdminUri;</span>
+<span class="nc" id="L591">    }</span>
+
+    public String getBasePackage() {
+<span class="nc" id="L594">        return basePackage;</span>
+    }
+
+    public void setBasePackage(String basePackage) {
+<span class="nc" id="L598">        this.basePackage = basePackage;</span>
+<span class="nc" id="L599">    }</span>
+
+    public String getServiceName() {
+<span class="nc" id="L602">        return serviceName;</span>
+    }
+
+    public void setServiceName(String serviceName) {
+<span class="nc" id="L606">        this.serviceName = serviceName;</span>
+<span class="nc" id="L607">    }</span>
+
+    public String getConfigPackage() {
+<span class="nc" id="L610">        return configPackage;</span>
+    }
+
+    public void setConfigPackage(String configPackage) {
+<span class="nc" id="L614">        this.configPackage = configPackage;</span>
+<span class="nc" id="L615">    }</span>
+
+    public String getTitle() {
+<span class="nc" id="L618">        return title;</span>
+    }
+
+    public void setTitle(String title) {
+<span class="nc" id="L622">        this.title = title;</span>
+<span class="nc" id="L623">    }</span>
+
+    private interface DataTypeAssigner {
+
+        void setReturnType(String returnType);
+
+        void setReturnContainer(String returnContainer);
+    }
+
+    private static class ResourcePath {
+
+        private String path;
+
+        public String getPath() {
+<span class="nc" id="L637">            return path;</span>
+        }
+
+        public void setPath(String path) {
+<span class="nc" id="L641">            this.path = path;</span>
+<span class="nc" id="L642">        }</span>
+
+        @Override
+        public String toString() {
+<span class="nc" id="L646">            return this.path;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

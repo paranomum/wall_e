@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ScalatraServerCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">ScalatraServerCodegen.java</span></div><h1>ScalatraServerCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.meta.features.*;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+
+import java.io.File;
+import java.util.*;
+
+public class ScalatraServerCodegen extends AbstractScalaCodegen implements CodegenConfig {
+
+<span class="nc" id="L31">    protected String groupId = &quot;org.openapitools&quot;;</span>
+<span class="nc" id="L32">    protected String artifactId = &quot;openapi-server&quot;;</span>
+<span class="nc" id="L33">    protected String artifactVersion = &quot;1.0.0&quot;;</span>
+
+    public ScalatraServerCodegen() {
+<span class="nc" id="L36">        super();</span>
+
+<span class="nc" id="L38">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L39">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="nc" id="L40">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON, WireFormatFeature.XML, WireFormatFeature.Custom))</span>
+<span class="nc" id="L41">                .securityFeatures(EnumSet.noneOf(SecurityFeature.class))</span>
+<span class="nc" id="L42">                .excludeGlobalFeatures(</span>
+                        GlobalFeature.XMLStructureDefinitions,
+                        GlobalFeature.Callbacks,
+                        GlobalFeature.LinkObjects,
+                        GlobalFeature.ParameterStyling
+                )
+<span class="nc" id="L48">                .excludeSchemaSupportFeatures(</span>
+                        SchemaSupportFeature.Polymorphism
+                )
+<span class="nc" id="L51">                .excludeParameterFeatures(</span>
+                        ParameterFeature.Cookie
+                )
+         );
+
+<span class="nc" id="L56">        outputFolder = &quot;generated-code/scalatra&quot;;</span>
+<span class="nc" id="L57">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.scala&quot;);</span>
+<span class="nc" id="L58">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.scala&quot;);</span>
+<span class="nc" id="L59">        embeddedTemplateDir = templateDir = &quot;scalatra&quot;;</span>
+<span class="nc" id="L60">        invokerPackage = &quot;org.openapitools&quot;;</span>
+<span class="nc" id="L61">        apiPackage = &quot;org.openapitools.server.api&quot;;</span>
+<span class="nc" id="L62">        modelPackage = &quot;org.openapitools.server.model&quot;;</span>
+
+<span class="nc" id="L64">        defaultIncludes = new HashSet&lt;&gt;(</span>
+<span class="nc" id="L65">                Arrays.asList(&quot;double&quot;,</span>
+                        &quot;Int&quot;,
+                        &quot;Long&quot;,
+                        &quot;Float&quot;,
+                        &quot;Double&quot;,
+                        &quot;char&quot;,
+                        &quot;float&quot;,
+                        &quot;String&quot;,
+                        &quot;boolean&quot;,
+                        &quot;Boolean&quot;,
+                        &quot;Double&quot;,
+                        &quot;Integer&quot;,
+                        &quot;Long&quot;,
+                        &quot;Float&quot;,
+                        &quot;Set&quot;,
+                        &quot;Map&quot;)
+        );
+
+<span class="nc" id="L83">        typeMapping = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L84">        typeMapping.put(&quot;array&quot;, &quot;List&quot;);</span>
+<span class="nc" id="L85">        typeMapping.put(&quot;set&quot;, &quot;Set&quot;);</span>
+<span class="nc" id="L86">        typeMapping.put(&quot;boolean&quot;, &quot;Boolean&quot;);</span>
+<span class="nc" id="L87">        typeMapping.put(&quot;string&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L88">        typeMapping.put(&quot;int&quot;, &quot;Int&quot;);</span>
+<span class="nc" id="L89">        typeMapping.put(&quot;integer&quot;, &quot;Int&quot;);</span>
+<span class="nc" id="L90">        typeMapping.put(&quot;long&quot;, &quot;Long&quot;);</span>
+<span class="nc" id="L91">        typeMapping.put(&quot;float&quot;, &quot;Float&quot;);</span>
+<span class="nc" id="L92">        typeMapping.put(&quot;byte&quot;, &quot;Byte&quot;);</span>
+<span class="nc" id="L93">        typeMapping.put(&quot;short&quot;, &quot;Short&quot;);</span>
+<span class="nc" id="L94">        typeMapping.put(&quot;char&quot;, &quot;Char&quot;);</span>
+<span class="nc" id="L95">        typeMapping.put(&quot;double&quot;, &quot;Double&quot;);</span>
+<span class="nc" id="L96">        typeMapping.put(&quot;object&quot;, &quot;Any&quot;);</span>
+<span class="nc" id="L97">        typeMapping.put(&quot;file&quot;, &quot;File&quot;);</span>
+<span class="nc" id="L98">        typeMapping.put(&quot;binary&quot;, &quot;File&quot;);</span>
+<span class="nc" id="L99">        typeMapping.put(&quot;number&quot;, &quot;Double&quot;);</span>
+<span class="nc" id="L100">        typeMapping.put(&quot;decimal&quot;, &quot;BigDecimal&quot;);</span>
+
+<span class="nc" id="L102">        importMapping = new HashMap&lt;String, String&gt;();</span>
+<span class="nc" id="L103">        importMapping.put(&quot;UUID&quot;, &quot;java.util.UUID&quot;);</span>
+<span class="nc" id="L104">        importMapping.put(&quot;URI&quot;, &quot;java.net.URI&quot;);</span>
+<span class="nc" id="L105">        importMapping.put(&quot;File&quot;, &quot;java.io.File&quot;);</span>
+<span class="nc" id="L106">        importMapping.put(&quot;Date&quot;, &quot;java.util.Date&quot;);</span>
+<span class="nc" id="L107">        importMapping.put(&quot;Timestamp&quot;, &quot;java.sql.Timestamp&quot;);</span>
+<span class="nc" id="L108">        importMapping.put(&quot;Map&quot;, &quot;java.util.Map&quot;);</span>
+<span class="nc" id="L109">        importMapping.put(&quot;HashMap&quot;, &quot;java.util.HashMap&quot;);</span>
+<span class="nc" id="L110">        importMapping.put(&quot;Array&quot;, &quot;java.util.List&quot;);</span>
+<span class="nc" id="L111">        importMapping.put(&quot;ArrayList&quot;, &quot;java.util.ArrayList&quot;);</span>
+<span class="nc" id="L112">        importMapping.put(&quot;DateTime&quot;, &quot;org.joda.time.DateTime&quot;);</span>
+<span class="nc" id="L113">        importMapping.put(&quot;LocalDateTime&quot;, &quot;org.joda.time.LocalDateTime&quot;);</span>
+<span class="nc" id="L114">        importMapping.put(&quot;LocalDate&quot;, &quot;org.joda.time.LocalDate&quot;);</span>
+<span class="nc" id="L115">        importMapping.put(&quot;LocalTime&quot;, &quot;org.joda.time.LocalTime&quot;);</span>
+<span class="nc" id="L116">        importMapping.put(&quot;ListBuffer&quot;, &quot;scala.collection.mutable.ListBuffer&quot;);</span>
+<span class="nc" id="L117">        importMapping.put(&quot;Set&quot;, &quot;scala.collection.immutable.Set&quot;);</span>
+<span class="nc" id="L118">        importMapping.put(&quot;ListSet&quot;, &quot;scala.collection.immutable.ListSet&quot;);</span>
+
+<span class="nc" id="L120">        instantiationTypes.put(&quot;array&quot;, &quot;List&quot;);</span>
+<span class="nc" id="L121">        instantiationTypes.put(&quot;map&quot;, &quot;HashMap&quot;);</span>
+<span class="nc" id="L122">        instantiationTypes.put(&quot;set&quot;, &quot;Set&quot;);</span>
+<span class="nc" id="L123">    }</span>
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L127">        super.processOpts();</span>
+        
+<span class="nc" id="L129">        String appPackage = invokerPackage + &quot;.app&quot;;</span>
+        
+<span class="nc" id="L131">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;));</span>
+<span class="nc" id="L132">        supportingFiles.add(new SupportingFile(&quot;build.mustache&quot;, &quot;&quot;, &quot;build.sbt&quot;));</span>
+<span class="nc" id="L133">        supportingFiles.add(new SupportingFile(&quot;web.xml&quot;, &quot;/src/main/webapp/WEB-INF&quot;, &quot;web.xml&quot;));</span>
+<span class="nc" id="L134">        supportingFiles.add(new SupportingFile(&quot;logback.xml&quot;, &quot;/src/main/resources&quot;, &quot;logback.xml&quot;));</span>
+<span class="nc" id="L135">        supportingFiles.add(new SupportingFile(&quot;gitignore.mustache&quot;, &quot;&quot;, &quot;.gitignore&quot;));</span>
+<span class="nc" id="L136">        supportingFiles.add(new SupportingFile(&quot;JettyMain.mustache&quot;, sourceFolderByPackage(invokerPackage), &quot;JettyMain.scala&quot;));</span>
+<span class="nc" id="L137">        supportingFiles.add(new SupportingFile(&quot;Bootstrap.mustache&quot;, sourceFolderByPackage(invokerPackage), &quot;ScalatraBootstrap.scala&quot;));</span>
+<span class="nc" id="L138">        supportingFiles.add(new SupportingFile(&quot;ServletApp.mustache&quot;, sourceFolderByPackage(appPackage), &quot;ServletApp.scala&quot;));</span>
+<span class="nc" id="L139">        supportingFiles.add(new SupportingFile(&quot;project/build.properties&quot;, &quot;project&quot;, &quot;build.properties&quot;));</span>
+<span class="nc" id="L140">        supportingFiles.add(new SupportingFile(&quot;project/plugins.sbt&quot;, &quot;project&quot;, &quot;plugins.sbt&quot;));</span>
+<span class="nc" id="L141">        supportingFiles.add(new SupportingFile(&quot;sbt&quot;, &quot;&quot;, &quot;sbt&quot;));</span>
+
+<span class="nc" id="L143">        additionalProperties.put(&quot;appName&quot;, appName);</span>
+<span class="nc" id="L144">        additionalProperties.put(&quot;appDescription&quot;, appDescription);</span>
+<span class="nc" id="L145">        additionalProperties.put(&quot;infoUrl&quot;, infoUrl);</span>
+<span class="nc" id="L146">        additionalProperties.put(&quot;infoEmail&quot;, infoEmail);</span>
+<span class="nc" id="L147">        additionalProperties.put(&quot;apiVersion&quot;, apiVersion) ;</span>
+<span class="nc" id="L148">        additionalProperties.put(&quot;licenseInfo&quot;, licenseInfo);</span>
+<span class="nc" id="L149">        additionalProperties.put(&quot;licenseUrl&quot;, licenseUrl);</span>
+<span class="nc" id="L150">        additionalProperties.put(CodegenConstants.INVOKER_PACKAGE, invokerPackage);</span>
+<span class="nc" id="L151">        additionalProperties.put(CodegenConstants.GROUP_ID, groupId);</span>
+<span class="nc" id="L152">        additionalProperties.put(CodegenConstants.ARTIFACT_ID, artifactId);</span>
+<span class="nc" id="L153">        additionalProperties.put(CodegenConstants.ARTIFACT_VERSION, artifactVersion);</span>
+<span class="nc" id="L154">    }</span>
+    
+    @Override
+    public CodegenType getTag() {
+<span class="nc" id="L158">        return CodegenType.SERVER;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L163">        return &quot;scalatra&quot;;</span>
+    }
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L168">        return &quot;Generates a Scala server application with Scalatra.&quot;;</span>
+    }
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L173">        OperationMap operations = objs.getOperations();</span>
+<span class="nc" id="L174">        List&lt;CodegenOperation&gt; operationList = operations.getOperation();</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">        for (CodegenOperation op : operationList) {</span>
+            // force http method to lower case
+<span class="nc" id="L177">            op.httpMethod = op.httpMethod.toLowerCase(Locale.ROOT);</span>
+
+<span class="nc" id="L179">            String[] items = op.path.split(&quot;/&quot;, -1);</span>
+<span class="nc" id="L180">            String scalaPath = &quot;&quot;;</span>
+<span class="nc" id="L181">            int pathParamIndex = 0;</span>
+
+<span class="nc bnc" id="L183" title="All 2 branches missed.">            for (int i = 0; i &lt; items.length; ++i) {</span>
+<span class="nc bnc" id="L184" title="All 2 branches missed.">                if (items[i].matches(&quot;^\\{(.*)\\}$&quot;)) { // wrap in {}</span>
+<span class="nc" id="L185">                    scalaPath = scalaPath + &quot;:&quot; + items[i].replace(&quot;{&quot;, &quot;&quot;).replace(&quot;}&quot;, &quot;&quot;);</span>
+<span class="nc" id="L186">                    pathParamIndex++;</span>
+                } else {
+<span class="nc" id="L188">                    scalaPath = scalaPath + items[i];</span>
+                }
+
+<span class="nc bnc" id="L191" title="All 2 branches missed.">                if (i != items.length - 1) {</span>
+<span class="nc" id="L192">                    scalaPath = scalaPath + &quot;/&quot;;</span>
+                }
+            }
+
+<span class="nc" id="L196">            op.vendorExtensions.put(&quot;x-scalatra-path&quot;, scalaPath);</span>
+<span class="nc" id="L197">        }</span>
+
+<span class="nc" id="L199">        return objs;</span>
+    }
+
+    private String sourceFolderByPackage(String packageName) {
+<span class="nc" id="L203">        return sourceFolder + File.separator + packageName.replace('.', File.separatorChar);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

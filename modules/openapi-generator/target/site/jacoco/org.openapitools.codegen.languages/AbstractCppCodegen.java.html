@@ -1,0 +1,466 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractCppCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">AbstractCppCodegen.java</span></div><h1>AbstractCppCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import com.google.common.collect.ImmutableMap;
+import com.samskivert.mustache.Mustache.Lambda;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.servers.Server;
+import io.swagger.v3.oas.models.servers.ServerVariables;
+import io.swagger.v3.oas.models.servers.ServerVariable;
+import org.openapitools.codegen.*;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.templating.mustache.IndentedLambda;
+import org.openapitools.codegen.utils.ModelUtils;
+import org.openapitools.codegen.utils.URLPathUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+abstract public class AbstractCppCodegen extends DefaultCodegen implements CodegenConfig {
+<span class="fc" id="L50">    private final Logger LOGGER = LoggerFactory.getLogger(AbstractCppCodegen.class);</span>
+
+    protected static final String RESERVED_WORD_PREFIX_OPTION = &quot;reservedWordPrefix&quot;;
+    protected static final String RESERVED_WORD_PREFIX_DESC = &quot;Prefix to prepend to reserved words in order to avoid conflicts&quot;;
+<span class="fc" id="L54">    protected String reservedWordPrefix = &quot;r_&quot;;</span>
+    protected static final String VARIABLE_NAME_FIRST_CHARACTER_UPPERCASE_OPTION = &quot;variableNameFirstCharacterUppercase&quot;;
+    protected static final String VARIABLE_NAME_FIRST_CHARACTER_UPPERCASE_DESC = &quot;Make first character of variable name uppercase (eg. value -&gt; Value)&quot;;
+<span class="fc" id="L57">    protected boolean variableNameFirstCharacterUppercase = true;</span>
+
+    public AbstractCppCodegen() {
+<span class="fc" id="L60">        super();</span>
+
+        /*
+         * Reserved words.  Override this with reserved words specific to your language
+         */
+<span class="fc" id="L65">        reservedWords = new HashSet&lt;&gt;(</span>
+<span class="fc" id="L66">                Arrays.asList(</span>
+                        &quot;alignas&quot;,
+                        &quot;alignof&quot;,
+                        &quot;and&quot;,
+                        &quot;and_eq&quot;,
+                        &quot;asm&quot;,
+                        &quot;auto&quot;,
+                        &quot;bitand&quot;,
+                        &quot;bitor&quot;,
+                        &quot;bool&quot;,
+                        &quot;break&quot;,
+                        &quot;case&quot;,
+                        &quot;catch&quot;,
+                        &quot;char&quot;,
+                        &quot;char16_t&quot;,
+                        &quot;char32_t&quot;,
+                        &quot;class&quot;,
+                        &quot;compl&quot;,
+                        &quot;concept&quot;,
+                        &quot;const&quot;,
+                        &quot;constexpr&quot;,
+                        &quot;const_cast&quot;,
+                        &quot;continue&quot;,
+                        &quot;decltype&quot;,
+                        &quot;default&quot;,
+                        &quot;delete&quot;,
+                        &quot;do&quot;,
+                        &quot;double&quot;,
+                        &quot;dynamic_cast&quot;,
+                        &quot;else&quot;,
+                        &quot;enum&quot;,
+                        &quot;explicit&quot;,
+                        &quot;export&quot;,
+                        &quot;extern&quot;,
+                        &quot;false&quot;,
+                        &quot;float&quot;,
+                        &quot;for&quot;,
+                        &quot;friend&quot;,
+                        &quot;goto&quot;,
+                        &quot;if&quot;,
+                        &quot;inline&quot;,
+                        &quot;int&quot;,
+                        &quot;linux&quot;,
+                        &quot;long&quot;,
+                        &quot;mutable&quot;,
+                        &quot;namespace&quot;,
+                        &quot;new&quot;,
+                        &quot;noexcept&quot;,
+                        &quot;not&quot;,
+                        &quot;not_eq&quot;,
+                        &quot;NULL&quot;,
+                        &quot;nullptr&quot;,
+                        &quot;operator&quot;,
+                        &quot;or&quot;,
+                        &quot;or_eq&quot;,
+                        &quot;private&quot;,
+                        &quot;protected&quot;,
+                        &quot;public&quot;,
+                        &quot;register&quot;,
+                        &quot;reinterpret_cast&quot;,
+                        &quot;requires&quot;,
+                        &quot;return&quot;,
+                        &quot;short&quot;,
+                        &quot;signed&quot;,
+                        &quot;sizeof&quot;,
+                        &quot;static&quot;,
+                        &quot;static_assert&quot;,
+                        &quot;static_cast&quot;,
+                        &quot;struct&quot;,
+                        &quot;switch&quot;,
+                        &quot;template&quot;,
+                        &quot;this&quot;,
+                        &quot;thread_local&quot;,
+                        &quot;throw&quot;,
+                        &quot;true&quot;,
+                        &quot;try&quot;,
+                        &quot;typedef&quot;,
+                        &quot;typeid&quot;,
+                        &quot;typename&quot;,
+                        &quot;union&quot;,
+                        &quot;unsigned&quot;,
+                        &quot;using&quot;,
+                        &quot;virtual&quot;,
+                        &quot;void&quot;,
+                        &quot;volatile&quot;,
+                        &quot;wchar_t&quot;,
+                        &quot;while&quot;,
+                        &quot;xor&quot;,
+                        &quot;xor_eq&quot;)
+        );
+
+<span class="fc" id="L157">        addOption(RESERVED_WORD_PREFIX_OPTION,</span>
+                RESERVED_WORD_PREFIX_DESC,
+                this.reservedWordPrefix);
+<span class="fc" id="L160">        addOption(VARIABLE_NAME_FIRST_CHARACTER_UPPERCASE_OPTION,</span>
+                VARIABLE_NAME_FIRST_CHARACTER_UPPERCASE_DESC,
+<span class="fc" id="L162">                Boolean.toString(this.variableNameFirstCharacterUppercase));</span>
+<span class="fc" id="L163">    }</span>
+
+    @Override
+    @SuppressWarnings(&quot;static-method&quot;)
+    public String sanitizeName(String name) {
+<span class="nc" id="L168">        String sanitizedName = super.sanitizeName(name);</span>
+<span class="nc" id="L169">        sanitizedName = sanitizedName.replaceAll(&quot;-&quot;, &quot;&quot;);</span>
+<span class="nc" id="L170">        return sanitizedName;</span>
+    }
+
+    @Override
+    public String escapeQuotationMark(String input) {
+        // remove &quot; to avoid code injection
+<span class="nc" id="L176">        return input.replace(&quot;\&quot;&quot;, &quot;&quot;);</span>
+    }
+
+    @Override
+    public String escapeUnsafeCharacters(String input) {
+<span class="nc" id="L181">        return input.replace(&quot;*/&quot;, &quot;*_/&quot;).replace(&quot;/*&quot;, &quot;/_*&quot;);</span>
+    }
+
+    @Override
+    public String toApiName(String type) {
+<span class="nc" id="L186">        return sanitizeName(modelNamePrefix + super.toApiName(type));</span>
+    }
+
+    @Override
+    public String toModelName(String name) {
+        // obtain the name from modelNameMapping directly if provided
+<span class="nc bnc" id="L192" title="All 2 branches missed.">        if (modelNameMapping.containsKey(name)) {</span>
+<span class="nc" id="L193">            return modelNameMapping.get(name);</span>
+        }
+
+<span class="nc bnc" id="L196" title="All 2 branches missed.">        if (name == null) {</span>
+<span class="nc" id="L197">            LOGGER.warn(&quot;Model name can't be null. Default to 'UnknownModel'.&quot;);</span>
+<span class="nc" id="L198">            name = &quot;UnknownModel&quot;;</span>
+        }
+
+<span class="nc bnc" id="L201" title="All 4 branches missed.">        if (typeMapping.keySet().contains(name) || typeMapping.values().contains(name)</span>
+<span class="nc bnc" id="L202" title="All 4 branches missed.">                || importMapping.values().contains(name) || defaultIncludes.contains(name)</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">                || languageSpecificPrimitives.contains(name)) {</span>
+<span class="nc" id="L204">            return name;</span>
+        } else {
+<span class="nc" id="L206">            String sanitizedName = sanitizeName(modelNamePrefix + Character.toUpperCase(name.charAt(0)) + name.substring(1));</span>
+<span class="nc" id="L207">            sanitizedName = sanitizedName.replaceFirst(&quot;^([^_a-zA-Z])&quot;, reservedWordPrefix + &quot;$1&quot;);</span>
+<span class="nc" id="L208">            return sanitizedName;</span>
+        }
+    }
+
+    @Override
+    public String toEnumValue(String value, String datatype) {
+<span class="nc" id="L214">        return escapeText(value);</span>
+    }
+
+    @Override
+    public String toVarName(String name) {
+        // obtain the name from nameMapping directly if provided
+<span class="nc bnc" id="L220" title="All 2 branches missed.">        if (nameMapping.containsKey(name)) {</span>
+<span class="nc" id="L221">            return nameMapping.get(name);</span>
+        }
+
+<span class="nc bnc" id="L224" title="All 4 branches missed.">        if (typeMapping.keySet().contains(name) || typeMapping.values().contains(name)</span>
+<span class="nc bnc" id="L225" title="All 4 branches missed.">                || importMapping.values().contains(name) || defaultIncludes.contains(name)</span>
+<span class="nc bnc" id="L226" title="All 2 branches missed.">                || languageSpecificPrimitives.contains(name)) {</span>
+<span class="nc" id="L227">            return sanitizeName(name);</span>
+        }
+
+<span class="nc bnc" id="L230" title="All 4 branches missed.">        if (isReservedWord(name) || name.matches(&quot;^\\d.*&quot;)) {</span>
+<span class="nc" id="L231">            return escapeReservedWord(name);</span>
+        }
+
+<span class="nc bnc" id="L234" title="All 4 branches missed.">        if (variableNameFirstCharacterUppercase &amp;&amp; name.length() &gt; 1) {</span>
+<span class="nc" id="L235">            return sanitizeName(Character.toUpperCase(name.charAt(0)) + name.substring(1));</span>
+        }
+
+<span class="nc" id="L238">        return sanitizeName(name);</span>
+    }
+
+    /**
+     * Escapes a reserved word as defined in the `reservedWords` array. Handle
+     * escaping those terms here. This logic is only called if a variable
+     * matches the reserved words
+     *
+     * @return the escaped term
+     */
+    @Override
+    public String escapeReservedWord(String name) {
+<span class="nc bnc" id="L250" title="All 2 branches missed.">        if (this.reservedWordsMappings().containsKey(name)) {</span>
+<span class="nc" id="L251">            return this.reservedWordsMappings().get(name);</span>
+        }
+<span class="nc" id="L253">        return sanitizeName(reservedWordPrefix + name);</span>
+    }
+
+    @Override
+    public String toOperationId(String operationId) {
+<span class="nc bnc" id="L258" title="All 2 branches missed.">        if (isReservedWord(operationId)) {</span>
+<span class="nc" id="L259">            LOGGER.warn(&quot;{} (reserved word) cannot be used as method name. Renamed to {}&quot;, operationId, escapeReservedWord(operationId));</span>
+<span class="nc" id="L260">            return escapeReservedWord(operationId);</span>
+        }
+<span class="nc" id="L262">        return sanitizeName(super.toOperationId(operationId));</span>
+    }
+
+    @Override
+    public String toParamName(String name) {
+        // obtain the name from parameterNameMapping directly if provided
+<span class="nc bnc" id="L268" title="All 2 branches missed.">        if (parameterNameMapping.containsKey(name)) {</span>
+<span class="nc" id="L269">            return parameterNameMapping.get(name);</span>
+        }
+
+<span class="nc bnc" id="L272" title="All 4 branches missed.">        if (isReservedWord(name) || name.matches(&quot;^\\d.*&quot;)) {</span>
+<span class="nc" id="L273">            return escapeReservedWord(name);</span>
+        }
+
+<span class="nc" id="L276">        return sanitizeName(super.toParamName(name));</span>
+    }
+
+    @SuppressWarnings(&quot;rawtypes&quot;)
+    @Override
+    public CodegenProperty fromProperty(String name, Schema p, boolean required) {
+<span class="nc" id="L282">        CodegenProperty property = super.fromProperty(name, p, required);</span>
+<span class="nc" id="L283">        String nameInCamelCase = property.nameInPascalCase;</span>
+<span class="nc bnc" id="L284" title="All 2 branches missed.">        if (nameInCamelCase.length() &gt; 1) {</span>
+<span class="nc" id="L285">            nameInCamelCase = sanitizeName(Character.toLowerCase(nameInCamelCase.charAt(0)) + nameInCamelCase.substring(1));</span>
+        } else {
+<span class="nc" id="L287">            nameInCamelCase = sanitizeName(nameInCamelCase);</span>
+        }
+<span class="nc bnc" id="L289" title="All 4 branches missed.">        if (isReservedWord(nameInCamelCase) || nameInCamelCase.matches(&quot;^\\d.*&quot;)) {</span>
+<span class="nc" id="L290">            nameInCamelCase = escapeReservedWord(nameInCamelCase);</span>
+        }
+<span class="nc" id="L292">        property.nameInCamelCase = nameInCamelCase;</span>
+<span class="nc" id="L293">        return property;</span>
+    }
+
+    /**
+     * Output the Getter name for boolean property, e.g. isActive
+     *
+     * @param name the name of the property
+     * @return getter name based on naming convention
+     */
+    @Override
+    public String toBooleanGetter(String name) {
+<span class="nc" id="L304">        return &quot;is&quot; + getterAndSetterCapitalize(name);</span>
+    }
+
+    @Override
+    public String getTypeDeclaration(String str) {
+<span class="nc" id="L309">        return &quot;std::shared_ptr&lt;&quot; + toModelName(str) + &quot;&gt;&quot;;</span>
+    }
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L314">        super.processOpts();</span>
+
+<span class="nc bnc" id="L316" title="All 2 branches missed.">        if (StringUtils.isEmpty(System.getenv(&quot;CPP_POST_PROCESS_FILE&quot;))) {</span>
+<span class="nc" id="L317">            LOGGER.info(&quot;Environment variable CPP_POST_PROCESS_FILE not defined so the C++ code may not be properly formatted. To define it, try 'export CPP_POST_PROCESS_FILE=\&quot;/usr/local/bin/clang-format -i\&quot;' (Linux/Mac)&quot;);</span>
+<span class="nc" id="L318">            LOGGER.info(&quot;NOTE: To enable file post-processing, 'enablePostProcessFile' must be set to `true` (--enable-post-process-file for CLI).&quot;);</span>
+        }
+
+<span class="nc bnc" id="L321" title="All 2 branches missed.">        if (additionalProperties.containsKey(RESERVED_WORD_PREFIX_OPTION)) {</span>
+<span class="nc" id="L322">            reservedWordPrefix = (String) additionalProperties.get(RESERVED_WORD_PREFIX_OPTION);</span>
+        }
+
+<span class="nc" id="L325">        additionalProperties.put(RESERVED_WORD_PREFIX_OPTION, reservedWordPrefix);</span>
+
+<span class="nc bnc" id="L327" title="All 2 branches missed.">        if (additionalProperties.containsKey(VARIABLE_NAME_FIRST_CHARACTER_UPPERCASE_OPTION))</span>
+<span class="nc" id="L328">            variableNameFirstCharacterUppercase =</span>
+<span class="nc" id="L329">                    convertPropertyToBooleanAndWriteBack(VARIABLE_NAME_FIRST_CHARACTER_UPPERCASE_OPTION);</span>
+<span class="nc" id="L330">        additionalProperties.put(VARIABLE_NAME_FIRST_CHARACTER_UPPERCASE_OPTION, variableNameFirstCharacterUppercase);</span>
+<span class="nc" id="L331">    }</span>
+
+    @Override
+    protected ImmutableMap.Builder&lt;String, Lambda&gt; addMustacheLambdas() {
+<span class="fc" id="L335">        return super.addMustacheLambdas()</span>
+<span class="fc" id="L336">                .put(&quot;multiline_comment_4&quot;, new IndentedLambda(4, &quot; &quot;, &quot;///&quot;, false, false));</span>
+    }
+
+    @Override
+    public void postProcessFile(File file, String fileType) {
+<span class="nc bnc" id="L341" title="All 2 branches missed.">        if (file == null) {</span>
+<span class="nc" id="L342">            return;</span>
+        }
+<span class="nc" id="L344">        String cppPostProcessFile = System.getenv(&quot;CPP_POST_PROCESS_FILE&quot;);</span>
+<span class="nc bnc" id="L345" title="All 2 branches missed.">        if (StringUtils.isEmpty(cppPostProcessFile)) {</span>
+<span class="nc" id="L346">            return; // skip if CPP_POST_PROCESS_FILE env variable is not defined</span>
+        }
+        // only process files with cpp extension
+<span class="nc bnc" id="L349" title="All 4 branches missed.">        if (&quot;cpp&quot;.equals(FilenameUtils.getExtension(file.toString())) || &quot;h&quot;.equals(FilenameUtils.getExtension(file.toString()))) {</span>
+<span class="nc" id="L350">            String command = cppPostProcessFile + &quot; &quot; + file;</span>
+            try {
+<span class="nc" id="L352">                Process p = Runtime.getRuntime().exec(command);</span>
+<span class="nc" id="L353">                p.waitFor();</span>
+<span class="nc" id="L354">                int exitValue = p.exitValue();</span>
+<span class="nc bnc" id="L355" title="All 2 branches missed.">                if (exitValue != 0) {</span>
+<span class="nc" id="L356">                    LOGGER.error(&quot;Error running the command ({}). Exit value: {}&quot;, command, exitValue);</span>
+                } else {
+<span class="nc" id="L358">                    LOGGER.info(&quot;Successfully executed: {}&quot;, command);</span>
+                }
+<span class="nc" id="L360">            } catch (InterruptedException | IOException e) {</span>
+<span class="nc" id="L361">                LOGGER.error(&quot;Error running the command ({}). Exception: {}&quot;, command, e.getMessage());</span>
+                // Restore interrupted state
+<span class="nc" id="L363">                Thread.currentThread().interrupt();</span>
+<span class="nc" id="L364">            }</span>
+        }
+<span class="nc" id="L366">    }</span>
+
+    @Override
+    public void preprocessOpenAPI(OpenAPI openAPI) {
+<span class="nc" id="L370">        List&lt;Server&gt; serverList = openAPI.getServers();</span>
+<span class="nc" id="L371">        List&lt;CodegenServer&gt; CodegenServerList = new ArrayList&lt;CodegenServer&gt;();</span>
+<span class="nc" id="L372">        URL url = URLPathUtils.getServerURL(openAPI, serverVariableOverrides());</span>
+<span class="nc" id="L373">        String port = URLPathUtils.getPort(url, &quot;&quot;);</span>
+<span class="nc" id="L374">        String host = url.getHost();</span>
+<span class="nc" id="L375">        String scheme = url.getProtocol();</span>
+
+<span class="nc bnc" id="L377" title="All 2 branches missed.">        if (!port.isEmpty()) {</span>
+<span class="nc" id="L378">            this.additionalProperties.put(&quot;serverPort&quot;, port);</span>
+        }
+<span class="nc bnc" id="L380" title="All 2 branches missed.">        if (!host.isEmpty()) {</span>
+<span class="nc" id="L381">            this.additionalProperties.put(&quot;serverHost&quot;, host);</span>
+        }
+<span class="nc bnc" id="L383" title="All 2 branches missed.">        if (!scheme.isEmpty()) {</span>
+<span class="nc" id="L384">            this.additionalProperties.put(&quot;scheme&quot;, scheme);</span>
+        }
+<span class="nc bnc" id="L386" title="All 2 branches missed.">        if (!serverList.isEmpty()) {</span>
+<span class="nc bnc" id="L387" title="All 2 branches missed.">            for (Server server : serverList) {</span>
+<span class="nc" id="L388">                CodegenServer s = new CodegenServer();</span>
+<span class="nc" id="L389">                s.description = server.getDescription();</span>
+<span class="nc" id="L390">                s.url = server.getUrl();</span>
+<span class="nc" id="L391">                s.variables = new ArrayList&lt;CodegenServerVariable&gt;();</span>
+<span class="nc" id="L392">                ServerVariables serverVars = server.getVariables();</span>
+<span class="nc bnc" id="L393" title="All 2 branches missed.">                if (serverVars != null) {</span>
+<span class="nc" id="L394">                    serverVars.forEach((key, value) -&gt; {</span>
+<span class="nc" id="L395">                        CodegenServerVariable codegenServerVar = new CodegenServerVariable();</span>
+<span class="nc" id="L396">                        ServerVariable ServerVar = value;</span>
+<span class="nc" id="L397">                        codegenServerVar.name = key;</span>
+<span class="nc" id="L398">                        codegenServerVar.description = ServerVar.getDescription();</span>
+<span class="nc" id="L399">                        codegenServerVar.defaultValue = ServerVar.getDefault();</span>
+<span class="nc" id="L400">                        codegenServerVar.enumValues = ServerVar.getEnum();</span>
+<span class="nc" id="L401">                        s.variables.add(codegenServerVar);</span>
+<span class="nc" id="L402">                    });</span>
+                }
+<span class="nc" id="L404">                CodegenServerList.add(s);</span>
+<span class="nc" id="L405">            }</span>
+<span class="nc" id="L406">            this.vendorExtensions.put(&quot;x-cpp-global-server-list&quot;, CodegenServerList);</span>
+        }
+<span class="nc" id="L408">    }</span>
+
+    @Override
+    public ModelsMap postProcessModels(ModelsMap objs) {
+<span class="nc bnc" id="L412" title="All 2 branches missed.">        for (ModelMap mo : objs.getModels()) {</span>
+<span class="nc" id="L413">            CodegenModel cm = mo.getModel();</span>
+            // cannot handle inheritance from maps and arrays in C++
+<span class="nc bnc" id="L415" title="All 6 branches missed.">            if ((cm.isArray || cm.isMap) &amp;&amp; (cm.parentModel == null)) {</span>
+<span class="nc" id="L416">                cm.parent = null;</span>
+            }
+<span class="nc" id="L418">        }</span>
+<span class="nc" id="L419">        return postProcessModelsEnum(objs);</span>
+    }
+
+    @Override
+    public Map&lt;String, ModelsMap&gt; postProcessAllModels(Map&lt;String, ModelsMap&gt; objs) {
+<span class="nc" id="L424">        Map&lt;String, ModelsMap&gt; models = super.postProcessAllModels(objs);</span>
+<span class="nc bnc" id="L425" title="All 2 branches missed.">        for (final String key : models.keySet()) {</span>
+<span class="nc" id="L426">            CodegenModel mo = ModelUtils.getModelByName(key, models);</span>
+<span class="nc" id="L427">            addForwardDeclarations(mo, models);</span>
+<span class="nc" id="L428">        }</span>
+<span class="nc" id="L429">        return models;</span>
+    }
+
+    private void addForwardDeclarations(CodegenModel parentModel, Map&lt;String, ModelsMap&gt; objs) {
+<span class="nc" id="L433">        List&lt;String&gt; forwardDeclarations = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L434" title="All 2 branches missed.">        if (!parentModel.hasVars) {</span>
+<span class="nc" id="L435">            return;</span>
+        }
+<span class="nc bnc" id="L437" title="All 2 branches missed.">        for (CodegenProperty property : parentModel.vars) {</span>
+<span class="nc bnc" id="L438" title="All 6 branches missed.">            if (!((property.isContainer &amp;&amp; property.mostInnerItems.isModel) || (property.isModel))) {</span>
+<span class="nc" id="L439">                continue;</span>
+            }
+<span class="nc bnc" id="L441" title="All 2 branches missed.">            String childPropertyType = property.isContainer ? property.mostInnerItems.baseType : property.baseType;</span>
+<span class="nc bnc" id="L442" title="All 2 branches missed.">            for (final String key : objs.keySet()) {</span>
+<span class="nc" id="L443">                CodegenModel childModel = ModelUtils.getModelByName(key, objs);</span>
+<span class="nc bnc" id="L444" title="All 6 branches missed.">                if (!childPropertyType.equals(childModel.classname) || childPropertyType.equals(parentModel.classname) || !childModel.hasVars) {</span>
+<span class="nc" id="L445">                    continue;</span>
+                }
+
+<span class="nc" id="L448">                String forwardDecl = &quot;class &quot; + childPropertyType + &quot;;&quot;;</span>
+<span class="nc bnc" id="L449" title="All 2 branches missed.">                if (!forwardDeclarations.contains(forwardDecl)) {</span>
+<span class="nc" id="L450">                    forwardDeclarations.add(forwardDecl);</span>
+                }
+<span class="nc" id="L452">            }</span>
+<span class="nc" id="L453">        }</span>
+<span class="nc bnc" id="L454" title="All 2 branches missed.">        if (!forwardDeclarations.isEmpty()) {</span>
+<span class="nc" id="L455">            parentModel.vendorExtensions.put(&quot;x-has-forward-declarations&quot;, true);</span>
+<span class="nc" id="L456">            parentModel.vendorExtensions.put(&quot;x-forward-declarations&quot;, forwardDeclarations);</span>
+        }
+<span class="nc" id="L458">        return;</span>
+    }
+
+    @Override
+    public GeneratorLanguage generatorLanguage() {
+<span class="nc" id="L463">        return GeneratorLanguage.C_PLUS_PLUS;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

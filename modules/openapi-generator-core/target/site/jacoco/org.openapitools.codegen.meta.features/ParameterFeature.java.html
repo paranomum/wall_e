@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ParameterFeature.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator-core</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.meta.features</a> &gt; <span class="el_source">ParameterFeature.java</span></div><h1>ParameterFeature.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2019 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.meta.features;
+
+import org.openapitools.codegen.meta.features.annotations.OAS2;
+import org.openapitools.codegen.meta.features.annotations.OAS3;
+
+/**
+ * Defines parameters supported by endpoints in the generated code.
+ */
+<span class="fc" id="L25">public enum ParameterFeature {</span>
+    /**
+     * Supports path parameters.
+     */
+<span class="fc" id="L29">    @OAS2 @OAS3</span>
+    Path,
+
+    /**
+     * Supports query parameters.
+     */
+<span class="fc" id="L35">    @OAS2 @OAS3</span>
+    Query,
+
+    /**
+     * Supports header parameters.
+     */
+<span class="fc" id="L41">    @OAS2 @OAS3</span>
+    Header,
+
+    /**
+     * Supports body parameters.
+     *
+     * &lt;p&gt;
+     *     OAS 3.x specification supports this structurally rather than as an &quot;in&quot; parameter.
+     * &lt;/p&gt;
+     */
+<span class="fc" id="L51">    @OAS2</span>
+    Body,
+
+    /**
+     * Supports form encoded parameters.
+     *
+     * OAS 3.x specification supports this structurally via content types rather than as an &quot;in&quot; parameter.
+     */
+<span class="fc" id="L59">    @OAS2</span>
+    FormUnencoded,
+
+    /**
+     * Supports multipart parameters.
+     *
+     * &lt;p&gt;OAS 3.x specification supports this structurally via content types rather than as an &quot;in&quot; parameter.&lt;/p&gt;
+     */
+<span class="fc" id="L67">    @OAS2</span>
+    FormMultipart,
+
+    /**
+     * Supports Cookie parameters.
+     *
+     * &lt;p&gt;Not defined in OAS 2.0 and no tooling extensions currently supported for OAS 2.0 support.&lt;/p&gt;
+     */
+<span class="fc" id="L75">    @OAS3</span>
+    Cookie
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

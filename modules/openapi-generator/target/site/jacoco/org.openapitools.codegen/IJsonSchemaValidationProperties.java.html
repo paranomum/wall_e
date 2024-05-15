@@ -1,0 +1,433 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IJsonSchemaValidationProperties.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen</a> &gt; <span class="el_source">IJsonSchemaValidationProperties.java</span></div><h1>IJsonSchemaValidationProperties.java</h1><pre class="source lang-java linenums">package org.openapitools.codegen;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Stream;
+
+import org.openapitools.codegen.meta.FeatureSet;
+import org.openapitools.codegen.meta.features.SchemaSupportFeature;
+import org.openapitools.codegen.utils.ModelUtils;
+
+import io.swagger.v3.oas.models.media.Schema;
+
+public interface IJsonSchemaValidationProperties {
+    CodegenProperty getContains();
+
+    void setContains(CodegenProperty contains);
+
+    LinkedHashMap&lt;String, List&lt;String&gt;&gt; getDependentRequired();
+
+    void setDependentRequired(LinkedHashMap&lt;String, List&lt;String&gt;&gt; dependentRequired);
+
+    String getPattern();
+
+    void setPattern(String pattern);
+
+    String getMaximum();
+
+    void setMaximum(String maximum);
+
+    String getMinimum();
+
+    void setMinimum(String minimum);
+
+    boolean getExclusiveMaximum();
+
+    void setExclusiveMaximum(boolean exclusiveMaximum);
+
+    boolean getExclusiveMinimum();
+
+    void setExclusiveMinimum(boolean exclusiveMinimum);
+
+    Integer getMinLength();
+
+    void setMinLength(Integer minLength);
+
+    Integer getMaxLength();
+
+    void setMaxLength(Integer maxLength);
+
+    Integer getMinItems();
+
+    void setMinItems(Integer minItems);
+
+    Integer getMaxItems();
+
+    void setMaxItems(Integer maxItems);
+
+    // TODO update this value to Boolean in 7.0.0
+    boolean getUniqueItems();
+
+    // TODO update this value to Boolean in 7.0.0
+    void setUniqueItems(boolean uniqueItems);
+
+    // TODO remove in 7.0.0
+    Boolean getUniqueItemsBoolean();
+
+    // TODO remove in 7.0.0
+    void setUniqueItemsBoolean(Boolean uniqueItems);
+
+    Integer getMinProperties();
+
+    void setMinProperties(Integer minProperties);
+
+    Integer getMaxProperties();
+
+    void setMaxProperties(Integer maxProperties);
+
+    Number getMultipleOf();
+
+    void setMultipleOf(Number multipleOf);
+
+    CodegenProperty getItems();
+
+    void setItems(CodegenProperty items);
+
+    boolean getIsModel();
+
+    void setIsModel(boolean isModel);
+
+    boolean getIsDate();
+
+    void setIsDate(boolean isDate);
+
+    boolean getIsDateTime();
+
+    void setIsDateTime(boolean isDateTime);
+
+    // true when the schema type is object
+    boolean getIsMap();
+
+    void setIsMap(boolean isMap);
+
+    boolean getIsArray();
+
+    void setIsArray(boolean isShort);
+
+    boolean getIsShort();
+
+    void setIsShort(boolean isShort);
+
+    boolean getIsBoolean();
+
+    void setIsBoolean(boolean isBoolean);
+
+    boolean getIsUnboundedInteger();
+
+    void setIsUnboundedInteger(boolean isUnboundedInteger);
+
+    boolean getIsPrimitiveType();
+
+    void setIsPrimitiveType(boolean isPrimitiveType);
+
+    CodegenProperty getAdditionalProperties();
+
+    void setAdditionalProperties(CodegenProperty additionalProperties);
+
+    List&lt;CodegenProperty&gt; getVars();
+
+    void setVars(List&lt;CodegenProperty&gt; vars);
+
+    List&lt;CodegenProperty&gt; getRequiredVars();
+
+    void setRequiredVars(List&lt;CodegenProperty&gt; requiredVars);
+
+    Map&lt;String, CodegenProperty&gt; getRequiredVarsMap();
+
+    // goes from required propertyName to its CodegenProperty
+    // Use Cases:
+    // 1. required property is defined in properties, value is that CodegenProperty
+    // 2. required property is not defined in properties, and additionalProperties is true or unset value is CodegenProperty made from empty schema
+    // 3. required property is not defined in properties, and additionalProperties is schema, value is CodegenProperty made from schema
+    // 4. required property is not defined in properties, and additionalProperties is false, value is null
+    void setRequiredVarsMap(Map&lt;String, CodegenProperty&gt; requiredVarsMap);
+
+
+    boolean getIsNull();
+
+    void setIsNull(boolean isNull);
+
+    boolean getIsVoid();
+
+    void setIsVoid(boolean isVoid);
+
+    boolean getHasValidation();
+
+    void setHasValidation(boolean hasValidation);
+
+    boolean getAdditionalPropertiesIsAnyType();
+
+    void setAdditionalPropertiesIsAnyType(boolean additionalPropertiesIsAnyType);
+
+    boolean getHasVars();
+
+    void setHasVars(boolean hasVars);
+
+    boolean getHasRequired();
+
+    void setHasRequired(boolean hasRequired);
+
+    // discriminators are only supported in request bodies and response payloads per OpenApi
+    boolean getHasDiscriminatorWithNonEmptyMapping();
+
+    // discriminators are only supported in request bodies and response payloads per OpenApi
+    void setHasDiscriminatorWithNonEmptyMapping(boolean hasDiscriminatorWithNonEmptyMapping);
+
+    boolean getIsString();
+
+    void setIsString(boolean isNumber);
+
+    boolean getIsNumber();
+
+    void setIsNumber(boolean isNumber);
+
+    boolean getIsAnyType();
+
+    void setIsAnyType(boolean isAnyType);
+
+    boolean getIsFreeFormObject();
+
+    void setIsFreeFormObject(boolean isFreeFormObject);
+
+    String getRef();
+
+    void setRef(String ref);
+
+    CodegenComposedSchemas getComposedSchemas();
+
+    void setComposedSchemas(CodegenComposedSchemas composedSchemas);
+
+    boolean getHasMultipleTypes();
+
+    void setHasMultipleTypes(boolean hasMultipleTypes);
+
+    // for when the schema is just the boolean true in a spec
+    boolean getIsBooleanSchemaTrue();
+
+    void setIsBooleanSchemaTrue(boolean isBooleanSchemaTrue);
+
+    // for when the schema is just the boolean false in a spec
+    boolean getIsBooleanSchemaFalse();
+
+    void setIsBooleanSchemaFalse(boolean isBooleanSchemaFalse);
+
+    boolean getSchemaIsFromAdditionalProperties();
+
+    void setSchemaIsFromAdditionalProperties(boolean schemaIsFromAdditionalProperties);
+
+    void setFormat(String format);
+
+    String getFormat();
+
+    void setDataType(String dataType);
+
+    String getDataType();
+
+    void setIsFloat(boolean isFloat);
+
+    boolean getIsFloat();
+
+    void setIsDouble(boolean isDouble);
+
+    boolean getIsDouble();
+
+    void setIsInteger(boolean isDouble);
+
+    boolean getIsInteger();
+
+    void setIsLong(boolean isLong);
+
+    boolean getIsLong();
+
+    void setIsBinary(boolean isBinary);
+
+    boolean getIsBinary();
+
+    void setIsByteArray(boolean isByteArray);
+
+    boolean getIsByteArray();
+
+    void setIsDecimal(boolean isDecimal);
+
+    boolean getIsDecimal();
+
+    void setIsUuid(boolean isUuid);
+
+    boolean getIsUuid();
+
+    void setIsEnum(boolean isEnum);
+
+    boolean getIsEnum();
+
+    /**
+     * Syncs all the schema's type properties into the IJsonSchemaValidationProperties instance
+     * for now this only supports types without format information
+     * TODO: in the future move the format handling in here too
+     *
+     * @param p the schema which contains the type info
+     */
+    default void setTypeProperties(Schema p) {
+<span class="fc bfc" id="L275" title="All 2 branches covered.">        if (ModelUtils.isModelWithPropertiesOnly(p)) {</span>
+<span class="fc" id="L276">            setIsModel(true);</span>
+<span class="fc bfc" id="L277" title="All 2 branches covered.">        } else if (ModelUtils.isArraySchema(p)) {</span>
+<span class="fc" id="L278">            setIsArray(true);</span>
+<span class="pc bpc" id="L279" title="3 of 4 branches missed.">        } else if (ModelUtils.isFileSchema(p) &amp;&amp; !ModelUtils.isStringSchema(p)) {</span>
+            // swagger v2 only, type file
+            ;
+<span class="fc bfc" id="L282" title="All 2 branches covered.">        } else if (ModelUtils.isStringSchema(p)) {</span>
+<span class="fc" id="L283">            setIsString(true);</span>
+<span class="pc bpc" id="L284" title="1 of 2 branches missed.">            if (ModelUtils.isByteArraySchema(p)) {</span>
+                ;
+<span class="pc bpc" id="L286" title="1 of 2 branches missed.">            } else if (ModelUtils.isBinarySchema(p)) {</span>
+                // openapi v3 way of representing binary + file data
+                // for backward compatibility with 2.x file type
+<span class="nc" id="L289">                setIsString(false);</span>
+<span class="pc bpc" id="L290" title="1 of 2 branches missed.">            } else if (ModelUtils.isUUIDSchema(p)) {</span>
+                // keep isString to true to make it backward compatible
+                ;
+<span class="pc bpc" id="L293" title="1 of 2 branches missed.">            } else if (ModelUtils.isURISchema(p)) {</span>
+                ;
+<span class="fc bfc" id="L295" title="All 2 branches covered.">            } else if (ModelUtils.isEmailSchema(p)) {</span>
+                ;
+<span class="pc bpc" id="L297" title="1 of 2 branches missed.">            } else if (ModelUtils.isPasswordSchema(p)) {</span>
+                ;
+<span class="fc bfc" id="L299" title="All 2 branches covered.">            } else if (ModelUtils.isDateSchema(p)) {</span>
+                ;
+<span class="pc bpc" id="L301" title="1 of 2 branches missed.">            } else if (ModelUtils.isDateTimeSchema(p)) {</span>
+                ;
+<span class="pc bpc" id="L303" title="1 of 2 branches missed.">            } else if (ModelUtils.isDecimalSchema(p)) { // type: string, format: number</span>
+                ;
+            }
+<span class="pc bpc" id="L306" title="1 of 2 branches missed.">        } else if (ModelUtils.isNumberSchema(p)) {</span>
+<span class="nc bnc" id="L307" title="All 2 branches missed.">            if (ModelUtils.isFloatSchema(p)) { // float</span>
+                ;
+<span class="nc bnc" id="L309" title="All 2 branches missed.">            } else if (ModelUtils.isDoubleSchema(p)) { // double</span>
+                ;
+            } else { // type is number and without format
+<span class="nc" id="L312">                setIsNumber(true);</span>
+            }
+<span class="fc bfc" id="L314" title="All 2 branches covered.">        } else if (ModelUtils.isIntegerSchema(p)) { // integer type</span>
+<span class="fc bfc" id="L315" title="All 2 branches covered.">            if (ModelUtils.isLongSchema(p)) { // int64/long format</span>
+                ;
+<span class="pc bpc" id="L317" title="1 of 2 branches missed.">            } else if (ModelUtils.isShortSchema(p)) { // int32/short format</span>
+                ;
+            } else { // unbounded integer
+<span class="fc" id="L320">                setIsUnboundedInteger(true);</span>
+            }
+<span class="fc bfc" id="L322" title="All 2 branches covered.">        } else if (ModelUtils.isBooleanSchema(p)) { // boolean type</span>
+<span class="fc" id="L323">            setIsBoolean(true);</span>
+<span class="pc bpc" id="L324" title="1 of 2 branches missed.">        } else if (ModelUtils.isNullType(p)) {</span>
+<span class="nc" id="L325">            setIsNull(true);</span>
+<span class="pc bpc" id="L326" title="1 of 2 branches missed.">        } else if (ModelUtils.isAnyType(p)) {</span>
+<span class="nc" id="L327">            setIsAnyType(true);</span>
+<span class="pc bpc" id="L328" title="1 of 2 branches missed.">        } else if (ModelUtils.isFreeFormObject(p)) {</span>
+<span class="nc" id="L329">            setIsFreeFormObject(true);</span>
+            // TODO: remove below later after updating generators to properly use isFreeFormObject
+<span class="nc" id="L331">            setIsMap(true);</span>
+<span class="pc bpc" id="L332" title="1 of 2 branches missed.">        } else if (ModelUtils.isMapSchema(p)) {</span>
+<span class="nc" id="L333">            setIsMap(true);</span>
+<span class="pc bpc" id="L334" title="1 of 2 branches missed.">        } else if (ModelUtils.isTypeObjectSchema(p)) {</span>
+<span class="nc" id="L335">            setIsMap(true);</span>
+        }
+<span class="fc" id="L337">    }</span>
+
+    /**
+     * @return basic type - no generics supported.
+     */
+    default String getBaseType() {
+<span class="nc" id="L343">        return null;</span>
+    }
+
+    /**
+     * @return complex type that can contain type parameters - like {@code List&lt;Items&gt;} for Java
+     */
+    default String getComplexType() {
+<span class="nc" id="L350">        return getBaseType();</span>
+    }
+
+    /**
+     * Recursively collect all necessary imports to include so that the type may be resolved.
+     *
+     * @param importContainerType whether or not to include the container types in the returned imports.
+     * @param importBaseType      whether or not to include the base types in the returned imports.
+     * @param featureSet          the generator feature set, used to determine if composed schemas should be added
+     * @return all of the imports
+     */
+    default Set&lt;String&gt; getImports(boolean importContainerType, boolean importBaseType, FeatureSet featureSet) {
+<span class="fc" id="L362">        Set&lt;String&gt; imports = new HashSet&lt;&gt;();</span>
+<span class="pc bpc" id="L363" title="1 of 2 branches missed.">        if (this.getComposedSchemas() != null) {</span>
+<span class="nc" id="L364">            CodegenComposedSchemas composed = this.getComposedSchemas();</span>
+<span class="nc" id="L365">            List&lt;CodegenProperty&gt; allOfs = Collections.emptyList();</span>
+<span class="nc" id="L366">            List&lt;CodegenProperty&gt; oneOfs = Collections.emptyList();</span>
+<span class="nc" id="L367">            List&lt;CodegenProperty&gt; anyOfs = Collections.emptyList();</span>
+<span class="nc" id="L368">            List&lt;CodegenProperty&gt; nots = Collections.emptyList();</span>
+<span class="nc bnc" id="L369" title="All 4 branches missed.">            if (composed.getAllOf() != null &amp;&amp; featureSet.getSchemaSupportFeatures().contains(SchemaSupportFeature.allOf)) {</span>
+<span class="nc" id="L370">                allOfs = composed.getAllOf();</span>
+            }
+<span class="nc bnc" id="L372" title="All 4 branches missed.">            if (composed.getOneOf() != null &amp;&amp; featureSet.getSchemaSupportFeatures().contains(SchemaSupportFeature.oneOf)) {</span>
+<span class="nc" id="L373">                oneOfs = composed.getOneOf();</span>
+            }
+<span class="nc bnc" id="L375" title="All 4 branches missed.">            if (composed.getAnyOf() != null &amp;&amp; featureSet.getSchemaSupportFeatures().contains(SchemaSupportFeature.anyOf)) {</span>
+<span class="nc" id="L376">                anyOfs = composed.getAnyOf();</span>
+            }
+<span class="nc bnc" id="L378" title="All 4 branches missed.">            if (composed.getNot() != null &amp;&amp; featureSet.getSchemaSupportFeatures().contains(SchemaSupportFeature.not)) {</span>
+<span class="nc" id="L379">                nots = Arrays.asList(composed.getNot());</span>
+            }
+<span class="nc" id="L381">            Stream&lt;CodegenProperty&gt; innerTypes = Stream.of(</span>
+<span class="nc" id="L382">                            allOfs.stream(), anyOfs.stream(), oneOfs.stream(), nots.stream())</span>
+<span class="nc" id="L383">                    .flatMap(i -&gt; i);</span>
+<span class="nc" id="L384">            innerTypes.flatMap(cp -&gt; cp.getImports(importContainerType, importBaseType, featureSet).stream()).forEach(s -&gt; imports.add(s));</span>
+        }
+        // items can exist for AnyType and type array
+<span class="pc bpc" id="L387" title="1 of 4 branches missed.">        if (this.getItems() != null &amp;&amp; this.getIsArray()) {</span>
+<span class="fc" id="L388">            imports.addAll(this.getItems().getImports(importContainerType, importBaseType, featureSet));</span>
+        }
+        // additionalProperties can exist for AnyType and type object
+<span class="pc bpc" id="L391" title="1 of 2 branches missed.">        if (this.getAdditionalProperties() != null) {</span>
+<span class="nc" id="L392">            imports.addAll(this.getAdditionalProperties().getImports(importContainerType, importBaseType, featureSet));</span>
+        }
+        // vars can exist for AnyType and type object
+<span class="pc bpc" id="L395" title="2 of 4 branches missed.">        if (this.getVars() != null &amp;&amp; !this.getVars().isEmpty()) {</span>
+<span class="nc" id="L396">            this.getVars().stream().flatMap(v -&gt; v.getImports(importContainerType, importBaseType, featureSet).stream()).forEach(s -&gt; imports.add(s));</span>
+        }
+<span class="pc bpc" id="L398" title="1 of 4 branches missed.">        if (this.getIsArray() || this.getIsMap()) {</span>
+<span class="pc bpc" id="L399" title="1 of 2 branches missed.">            if (importContainerType) {</span>
+                /*
+                use-case for this complexType block:
+                DefaultCodegenTest.objectQueryParamIdentifyAsObject
+                DefaultCodegenTest.mapParamImportInnerObject
+                */
+<span class="fc" id="L405">                String complexType = this.getComplexType();</span>
+<span class="pc bpc" id="L406" title="1 of 2 branches missed.">                if (complexType != null) {</span>
+<span class="fc" id="L407">                    imports.add(complexType);</span>
+                }
+                /*
+                use-case:
+                Adding List/Map etc, Java uses this
+                 */
+<span class="fc" id="L413">                String baseType = this.getBaseType();</span>
+<span class="pc bpc" id="L414" title="2 of 4 branches missed.">                if (importBaseType &amp;&amp; baseType != null) {</span>
+<span class="fc" id="L415">                    imports.add(baseType);</span>
+                }
+<span class="fc" id="L417">            }</span>
+        } else {
+            // referenced or inline schemas
+<span class="fc" id="L420">            String complexType = this.getComplexType();</span>
+<span class="pc bpc" id="L421" title="1 of 2 branches missed.">            if (complexType != null) {</span>
+<span class="fc" id="L422">                imports.add(complexType);</span>
+            }
+<span class="fc" id="L424">            String baseType = this.getBaseType();</span>
+<span class="pc bpc" id="L425" title="2 of 4 branches missed.">            if (importBaseType &amp;&amp; baseType != null) {</span>
+<span class="fc" id="L426">                imports.add(baseType);</span>
+            }
+<span class="fc" id="L428">            return imports;</span>
+        }
+<span class="fc" id="L430">        return imports;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

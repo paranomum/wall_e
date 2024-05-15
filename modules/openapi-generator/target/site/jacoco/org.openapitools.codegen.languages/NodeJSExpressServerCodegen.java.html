@@ -1,0 +1,461 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NodeJSExpressServerCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">NodeJSExpressServerCodegen.java</span></div><h1>NodeJSExpressServerCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.PathItem.HttpMethod;
+import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.info.Info;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.meta.GeneratorMetadata;
+import org.openapitools.codegen.meta.Stability;
+import org.openapitools.codegen.meta.features.*;
+import org.openapitools.codegen.model.ApiInfoMap;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.utils.URLPathUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.*;
+import java.util.Map.Entry;
+
+import static org.openapitools.codegen.utils.StringUtils.camelize;
+
+public class NodeJSExpressServerCodegen extends DefaultCodegen implements CodegenConfig {
+
+<span class="nc" id="L52">    private final Logger LOGGER = LoggerFactory.getLogger(NodeJSExpressServerCodegen.class);</span>
+    public static final String EXPORTED_NAME = &quot;exportedName&quot;;
+    public static final String SERVER_HOST = &quot;serverHost&quot;;
+    public static final String SERVER_PORT = &quot;serverPort&quot;;
+
+<span class="nc" id="L57">    protected String apiVersion = &quot;1.0.0&quot;;</span>
+<span class="nc" id="L58">    protected String defaultServerPort = &quot;8080&quot;;</span>
+<span class="nc" id="L59">    protected String implFolder = &quot;services&quot;;</span>
+<span class="nc" id="L60">    protected String projectName = &quot;openapi-server&quot;;</span>
+    protected String exportedName;
+
+    public NodeJSExpressServerCodegen() {
+<span class="nc" id="L64">        super();</span>
+
+<span class="nc" id="L66">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L67">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="nc" id="L68">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON))</span>
+<span class="nc" id="L69">                .securityFeatures(EnumSet.of(</span>
+                        SecurityFeature.OAuth2_Implicit
+                ))
+<span class="nc" id="L72">                .excludeGlobalFeatures(</span>
+                        GlobalFeature.XMLStructureDefinitions,
+                        GlobalFeature.Callbacks,
+                        GlobalFeature.LinkObjects,
+                        GlobalFeature.ParameterStyling
+                )
+<span class="nc" id="L78">                .excludeSchemaSupportFeatures(</span>
+                        SchemaSupportFeature.Polymorphism
+                )
+<span class="nc" id="L81">                .includeParameterFeatures(</span>
+                        ParameterFeature.Cookie
+                )
+        );
+
+<span class="nc" id="L86">        generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
+<span class="nc" id="L87">                .stability(Stability.BETA)</span>
+<span class="nc" id="L88">                .build();</span>
+
+<span class="nc" id="L90">        outputFolder = &quot;generated-code/nodejs-express-server&quot;;</span>
+<span class="nc" id="L91">        embeddedTemplateDir = templateDir = &quot;nodejs-express-server&quot;;</span>
+
+<span class="nc" id="L93">        setReservedWordsLowerCase(</span>
+<span class="nc" id="L94">                Arrays.asList(</span>
+                        &quot;break&quot;, &quot;case&quot;, &quot;class&quot;, &quot;catch&quot;, &quot;const&quot;, &quot;continue&quot;, &quot;debugger&quot;,
+                        &quot;default&quot;, &quot;delete&quot;, &quot;do&quot;, &quot;else&quot;, &quot;export&quot;, &quot;extends&quot;, &quot;finally&quot;,
+                        &quot;for&quot;, &quot;function&quot;, &quot;if&quot;, &quot;import&quot;, &quot;in&quot;, &quot;instanceof&quot;, &quot;let&quot;, &quot;new&quot;,
+                        &quot;return&quot;, &quot;super&quot;, &quot;switch&quot;, &quot;this&quot;, &quot;throw&quot;, &quot;try&quot;, &quot;typeof&quot;, &quot;var&quot;,
+                        &quot;void&quot;, &quot;while&quot;, &quot;with&quot;, &quot;yield&quot;)
+        );
+
+<span class="nc" id="L102">        additionalProperties.put(&quot;apiVersion&quot;, apiVersion);</span>
+<span class="nc" id="L103">        additionalProperties.put(&quot;implFolder&quot;, implFolder);</span>
+
+        // no model file
+<span class="nc" id="L106">        modelTemplateFiles.clear();</span>
+
+<span class="nc" id="L108">        apiTemplateFiles.put(&quot;controller.mustache&quot;, &quot;.js&quot;);</span>
+<span class="nc" id="L109">        apiTemplateFiles.put(&quot;service.mustache&quot;, &quot;.js&quot;);</span>
+
+<span class="nc" id="L111">        supportingFiles.add(new SupportingFile(&quot;openapi.mustache&quot;, &quot;api&quot;, &quot;openapi.yaml&quot;));</span>
+<span class="nc" id="L112">        supportingFiles.add(new SupportingFile(&quot;config.mustache&quot;, &quot;&quot;, &quot;config.js&quot;));</span>
+<span class="nc" id="L113">        supportingFiles.add(new SupportingFile(&quot;expressServer.mustache&quot;, &quot;&quot;, &quot;expressServer.js&quot;));</span>
+<span class="nc" id="L114">        supportingFiles.add(new SupportingFile(&quot;index.mustache&quot;, &quot;&quot;, &quot;index.js&quot;));</span>
+<span class="nc" id="L115">        supportingFiles.add(new SupportingFile(&quot;logger.mustache&quot;, &quot;&quot;, &quot;logger.js&quot;));</span>
+<span class="nc" id="L116">        supportingFiles.add(new SupportingFile(&quot;eslintrc.mustache&quot;, &quot;&quot;, &quot;.eslintrc.json&quot;));</span>
+
+        // utils folder
+<span class="nc" id="L119">        supportingFiles.add(new SupportingFile(&quot;utils&quot; + File.separator + &quot;openapiRouter.mustache&quot;, &quot;utils&quot;, &quot;openapiRouter.js&quot;));</span>
+
+        // controllers folder
+<span class="nc" id="L122">        supportingFiles.add(new SupportingFile(&quot;controllers&quot; + File.separator + &quot;index.mustache&quot;, &quot;controllers&quot;, &quot;index.js&quot;));</span>
+<span class="nc" id="L123">        supportingFiles.add(new SupportingFile(&quot;controllers&quot; + File.separator + &quot;Controller.mustache&quot;, &quot;controllers&quot;, &quot;Controller.js&quot;));</span>
+        // service folder
+<span class="nc" id="L125">        supportingFiles.add(new SupportingFile(&quot;services&quot; + File.separator + &quot;index.mustache&quot;, &quot;services&quot;, &quot;index.js&quot;));</span>
+<span class="nc" id="L126">        supportingFiles.add(new SupportingFile(&quot;services&quot; + File.separator + &quot;Service.mustache&quot;, &quot;services&quot;, &quot;Service.js&quot;));</span>
+
+        // do not overwrite if the file is already present
+<span class="nc" id="L129">        supportingFiles.add(new SupportingFile(&quot;package.mustache&quot;, &quot;&quot;, &quot;package.json&quot;)</span>
+<span class="nc" id="L130">                .doNotOverwrite());</span>
+<span class="nc" id="L131">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;)</span>
+<span class="nc" id="L132">                .doNotOverwrite());</span>
+
+<span class="nc" id="L134">        cliOptions.add(new CliOption(SERVER_PORT,</span>
+                &quot;TCP port to listen on.&quot;));
+<span class="nc" id="L136">    }</span>
+
+    @Override
+    public String apiPackage() {
+<span class="nc" id="L140">        return &quot;controllers&quot;;</span>
+    }
+
+    /**
+     * Configures the type of generator.
+     *
+     * @return the CodegenType for this generator
+     * @see org.openapitools.codegen.CodegenType
+     */
+    @Override
+    public CodegenType getTag() {
+<span class="nc" id="L151">        return CodegenType.SERVER;</span>
+    }
+
+    /**
+     * Configures a friendly name for the generator.  This will be used by the generator
+     * to select the library with the -g flag.
+     *
+     * @return the friendly name for the generator
+     */
+    @Override
+    public String getName() {
+<span class="nc" id="L162">        return &quot;nodejs-express-server&quot;;</span>
+    }
+
+    /**
+     * Returns human-friendly help for the generator.  Provide the consumer with help
+     * tips, parameters here
+     *
+     * @return A string value for the help message
+     */
+    @Override
+    public String getHelp() {
+<span class="nc" id="L173">        return &quot;Generates a NodeJS Express server (alpha). IMPORTANT: this generator may subject to breaking changes without further notice).&quot;;</span>
+    }
+
+    @Override
+    public String toApiName(String name) {
+<span class="nc bnc" id="L178" title="All 2 branches missed.">        if (name.length() == 0) {</span>
+<span class="nc" id="L179">            return &quot;Default&quot;;</span>
+        }
+<span class="nc" id="L181">        return camelize(name);</span>
+    }
+
+    @Override
+    public String toApiFilename(String name) {
+<span class="nc" id="L186">        return toApiName(name) + &quot;Controller&quot;;</span>
+    }
+
+    @Override
+    public String apiFilename(String templateName, String tag) {
+<span class="nc" id="L191">        String result = super.apiFilename(templateName, tag);</span>
+
+<span class="nc bnc" id="L193" title="All 2 branches missed.">        if (templateName.equals(&quot;service.mustache&quot;)) {</span>
+<span class="nc" id="L194">            String stringToMatch = File.separator + &quot;controllers&quot; + File.separator;</span>
+<span class="nc" id="L195">            String replacement = File.separator + implFolder + File.separator;</span>
+<span class="nc" id="L196">            result = result.replace(stringToMatch, replacement);</span>
+
+<span class="nc" id="L198">            stringToMatch = &quot;Controller.js&quot;;</span>
+<span class="nc" id="L199">            replacement = &quot;Service.js&quot;;</span>
+<span class="nc" id="L200">            result = result.replace(stringToMatch, replacement);</span>
+        }
+<span class="nc" id="L202">        return result;</span>
+    }
+
+/*
+    @Override
+    protected String implFileFolder(String output) {
+        return outputFolder + File.separator + output + File.separator + apiPackage().replace('.', File.separatorChar);
+    }
+*/
+
+    /**
+     * Escapes a reserved word as defined in the `reservedWords` array. Handle escaping
+     * those terms here.  This logic is only called if a variable matches the reserved words
+     *
+     * @return the escaped term
+     */
+    @Override
+    public String escapeReservedWord(String name) {
+<span class="nc bnc" id="L220" title="All 2 branches missed.">        if (this.reservedWordsMappings().containsKey(name)) {</span>
+<span class="nc" id="L221">            return this.reservedWordsMappings().get(name);</span>
+        }
+<span class="nc" id="L223">        return &quot;_&quot; + name;</span>
+    }
+
+    /**
+     * Location to write api files.  You can use the apiPackage() as defined when the class is
+     * instantiated
+     */
+    @Override
+    public String apiFileFolder() {
+<span class="nc" id="L232">        return outputFolder + File.separator + apiPackage().replace('.', File.separatorChar);</span>
+    }
+
+    public String getExportedName() {
+<span class="nc" id="L236">        return exportedName;</span>
+    }
+
+    public void setExportedName(String name) {
+<span class="nc" id="L240">        exportedName = name;</span>
+<span class="nc" id="L241">    }</span>
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L245">        OperationMap objectMap = objs.getOperations();</span>
+<span class="nc" id="L246">        List&lt;CodegenOperation&gt; operations = objectMap.getOperation();</span>
+<span class="nc bnc" id="L247" title="All 2 branches missed.">        for (CodegenOperation operation : operations) {</span>
+<span class="nc" id="L248">            operation.httpMethod = operation.httpMethod.toLowerCase(Locale.ROOT);</span>
+
+<span class="nc" id="L250">            List&lt;CodegenParameter&gt; params = operation.allParams;</span>
+<span class="nc bnc" id="L251" title="All 4 branches missed.">            if (params != null &amp;&amp; params.size() == 0) {</span>
+<span class="nc" id="L252">                operation.allParams = null;</span>
+            }
+<span class="nc" id="L254">            List&lt;CodegenResponse&gt; responses = operation.responses;</span>
+<span class="nc bnc" id="L255" title="All 2 branches missed.">            if (responses != null) {</span>
+<span class="nc bnc" id="L256" title="All 2 branches missed.">                for (CodegenResponse resp : responses) {</span>
+<span class="nc bnc" id="L257" title="All 2 branches missed.">                    if (&quot;0&quot;.equals(resp.code)) {</span>
+<span class="nc" id="L258">                        resp.code = &quot;default&quot;;</span>
+                    }
+<span class="nc" id="L260">                }</span>
+            }
+<span class="nc bnc" id="L262" title="All 4 branches missed.">            if (operation.examples != null &amp;&amp; !operation.examples.isEmpty()) {</span>
+                // Leave application/json* items only
+<span class="nc bnc" id="L264" title="All 2 branches missed.">                for (Iterator&lt;Map&lt;String, String&gt;&gt; it = operation.examples.iterator(); it.hasNext(); ) {</span>
+<span class="nc" id="L265">                    final Map&lt;String, String&gt; example = it.next();</span>
+<span class="nc" id="L266">                    final String contentType = example.get(&quot;contentType&quot;);</span>
+<span class="nc bnc" id="L267" title="All 4 branches missed.">                    if (contentType == null || !contentType.startsWith(&quot;application/json&quot;)) {</span>
+<span class="nc" id="L268">                        it.remove();</span>
+                    }
+<span class="nc" id="L270">                }</span>
+            }
+<span class="nc" id="L272">        }</span>
+<span class="nc" id="L273">        return objs;</span>
+    }
+
+    private static List&lt;OperationMap&gt; getOperations(Map&lt;String, Object&gt; objs) {
+<span class="nc" id="L277">        List&lt;OperationMap&gt; result = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L278">        ApiInfoMap apiInfo = (ApiInfoMap) objs.get(&quot;apiInfo&quot;);</span>
+<span class="nc bnc" id="L279" title="All 2 branches missed.">        for (OperationsMap api : apiInfo.getApis()) {</span>
+<span class="nc" id="L280">            result.add(api.getOperations());</span>
+<span class="nc" id="L281">        }</span>
+<span class="nc" id="L282">        return result;</span>
+    }
+
+    private static List&lt;Map&lt;String, Object&gt;&gt; sortOperationsByPath(List&lt;CodegenOperation&gt; ops) {
+<span class="nc" id="L286">        Multimap&lt;String, CodegenOperation&gt; opsByPath = ArrayListMultimap.create();</span>
+
+<span class="nc bnc" id="L288" title="All 2 branches missed.">        for (CodegenOperation op : ops) {</span>
+<span class="nc" id="L289">            opsByPath.put(op.path, op);</span>
+<span class="nc" id="L290">        }</span>
+
+<span class="nc" id="L292">        List&lt;Map&lt;String, Object&gt;&gt; opsByPathList = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L293" title="All 2 branches missed.">        for (Entry&lt;String, Collection&lt;CodegenOperation&gt;&gt; entry : opsByPath.asMap().entrySet()) {</span>
+<span class="nc" id="L294">            Map&lt;String, Object&gt; opsByPathEntry = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L295">            opsByPathList.add(opsByPathEntry);</span>
+<span class="nc" id="L296">            opsByPathEntry.put(&quot;path&quot;, entry.getKey());</span>
+<span class="nc" id="L297">            opsByPathEntry.put(&quot;operation&quot;, entry.getValue());</span>
+<span class="nc" id="L298">            List&lt;CodegenOperation&gt; operationsForThisPath = Lists.newArrayList(entry.getValue());</span>
+<span class="nc" id="L299">        }</span>
+
+<span class="nc" id="L301">        return opsByPathList;</span>
+    }
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L306">        super.processOpts();</span>
+
+<span class="nc bnc" id="L308" title="All 2 branches missed.">        if (StringUtils.isEmpty(System.getenv(&quot;JS_POST_PROCESS_FILE&quot;))) {</span>
+<span class="nc" id="L309">            LOGGER.info(&quot;Environment variable JS_POST_PROCESS_FILE not defined so the JS code may not be properly formatted. To define it, try 'export JS_POST_PROCESS_FILE=\&quot;/usr/local/bin/js-beautify -r -f\&quot;' (Linux/Mac)&quot;);</span>
+<span class="nc" id="L310">            LOGGER.info(&quot;NOTE: To enable file post-processing, 'enablePostProcessFile' must be set to `true` (--enable-post-process-file for CLI).&quot;);</span>
+        }
+
+<span class="nc bnc" id="L313" title="All 2 branches missed.">        if (additionalProperties.containsKey(EXPORTED_NAME)) {</span>
+<span class="nc" id="L314">            setExportedName((String) additionalProperties.get(EXPORTED_NAME));</span>
+        }
+
+        /*
+         * Supporting Files.  You can write single files for the generator with the
+         * entire object tree available.  If the input file has a suffix of `.mustache
+         * it will be processed by the template engine.  Otherwise, it will be copied
+         */
+        // supportingFiles.add(new SupportingFile(&quot;controller.mustache&quot;,
+        //   &quot;controllers&quot;,
+        //   &quot;controller.js&quot;)
+        // );
+<span class="nc" id="L326">    }</span>
+
+    @Override
+    public void preprocessOpenAPI(OpenAPI openAPI) {
+<span class="nc" id="L330">        URL url = URLPathUtils.getServerURL(openAPI, serverVariableOverrides());</span>
+<span class="nc" id="L331">        String host = URLPathUtils.getProtocolAndHost(url);</span>
+<span class="nc" id="L332">        String port = URLPathUtils.getPort(url, defaultServerPort);</span>
+<span class="nc" id="L333">        String basePath = url.getPath();</span>
+
+<span class="nc bnc" id="L335" title="All 2 branches missed.">        if (additionalProperties.containsKey(SERVER_HOST)) {</span>
+<span class="nc" id="L336">            host = additionalProperties.get(SERVER_HOST).toString();</span>
+        }
+<span class="nc" id="L338">        this.additionalProperties.put(SERVER_HOST, host);</span>
+
+<span class="nc bnc" id="L340" title="All 2 branches missed.">        if (additionalProperties.containsKey(SERVER_PORT)) {</span>
+<span class="nc" id="L341">            port = additionalProperties.get(SERVER_PORT).toString();</span>
+        }
+<span class="nc" id="L343">        this.additionalProperties.put(SERVER_PORT, port);</span>
+
+<span class="nc bnc" id="L345" title="All 2 branches missed.">        if (openAPI.getInfo() != null) {</span>
+<span class="nc" id="L346">            Info info = openAPI.getInfo();</span>
+<span class="nc bnc" id="L347" title="All 2 branches missed.">            if (info.getTitle() != null) {</span>
+                // when info.title is defined, use it for projectName
+                // used in package.json
+<span class="nc" id="L350">                projectName = info.getTitle()</span>
+<span class="nc" id="L351">                        .replaceAll(&quot;[^a-zA-Z0-9]&quot;, &quot;-&quot;)</span>
+<span class="nc" id="L352">                        .replaceAll(&quot;^[-]*&quot;, &quot;&quot;)</span>
+<span class="nc" id="L353">                        .replaceAll(&quot;[-]*$&quot;, &quot;&quot;)</span>
+<span class="nc" id="L354">                        .replaceAll(&quot;[-]{2,}&quot;, &quot;-&quot;)</span>
+<span class="nc" id="L355">                        .toLowerCase(Locale.ROOT);</span>
+<span class="nc" id="L356">                this.additionalProperties.put(&quot;projectName&quot;, projectName);</span>
+            }
+        }
+
+        // need vendor extensions
+<span class="nc" id="L361">        Paths paths = openAPI.getPaths();</span>
+<span class="nc bnc" id="L362" title="All 2 branches missed.">        if (paths != null) {</span>
+<span class="nc bnc" id="L363" title="All 2 branches missed.">            for (Map.Entry&lt;String, PathItem&gt; pathsEntry : paths.entrySet()) {</span>
+<span class="nc" id="L364">                String pathname = pathsEntry.getKey();</span>
+<span class="nc" id="L365">                PathItem path = pathsEntry.getValue();</span>
+<span class="nc" id="L366">                Map&lt;HttpMethod, Operation&gt; operationMap = path.readOperationsMap();</span>
+<span class="nc bnc" id="L367" title="All 2 branches missed.">                if (operationMap != null) {</span>
+<span class="nc bnc" id="L368" title="All 2 branches missed.">                    for (Map.Entry&lt;HttpMethod, Operation&gt; operationMapEntry : operationMap.entrySet()) {</span>
+<span class="nc" id="L369">                        HttpMethod method = operationMapEntry.getKey();</span>
+<span class="nc" id="L370">                        Operation operation = operationMapEntry.getValue();</span>
+<span class="nc" id="L371">                        String tag = &quot;default&quot;;</span>
+<span class="nc bnc" id="L372" title="All 4 branches missed.">                        if (operation.getTags() != null &amp;&amp; operation.getTags().size() &gt; 0) {</span>
+<span class="nc" id="L373">                            tag = toApiName(operation.getTags().get(0));</span>
+                        }
+<span class="nc bnc" id="L375" title="All 2 branches missed.">                        if (operation.getOperationId() == null) {</span>
+<span class="nc" id="L376">                            operation.setOperationId(getOrGenerateOperationId(operation, pathname, method.toString()));</span>
+                        }
+                        // add x-openapi-router-controller
+//                        if (operation.getExtensions() == null ||
+//                                operation.getExtensions().get(&quot;x-openapi-router-controller&quot;) == null) {
+//                            operation.addExtension(&quot;x-openapi-router-controller&quot;, sanitizeTag(tag) + &quot;Controller&quot;);
+//                        }
+//                        // add x-openapi-router-service
+//                        if (operation.getExtensions() == null ||
+//                                operation.getExtensions().get(&quot;x-openapi-router-service&quot;) == null) {
+//                            operation.addExtension(&quot;x-openapi-router-service&quot;, sanitizeTag(tag) + &quot;Service&quot;);
+//                        }
+<span class="nc bnc" id="L388" title="All 2 branches missed.">                        if (operation.getExtensions() == null ||</span>
+<span class="nc bnc" id="L389" title="All 2 branches missed.">                                operation.getExtensions().get(&quot;x-eov-operation-handler&quot;) == null) {</span>
+<span class="nc" id="L390">                            operation.addExtension(&quot;x-eov-operation-handler&quot;, &quot;controllers/&quot; + sanitizeTag(tag) + &quot;Controller&quot;);</span>
+                        }
+<span class="nc" id="L392">                    }</span>
+                }
+<span class="nc" id="L394">            }</span>
+        }
+
+<span class="nc" id="L397">    }</span>
+
+    @Override
+    public Map&lt;String, Object&gt; postProcessSupportingFileData(Map&lt;String, Object&gt; objs) {
+<span class="nc" id="L401">        generateYAMLSpecFile(objs);</span>
+
+<span class="nc bnc" id="L403" title="All 2 branches missed.">        for (OperationMap operations : getOperations(objs)) {</span>
+<span class="nc" id="L404">            List&lt;CodegenOperation&gt; ops = operations.getOperation();</span>
+
+<span class="nc" id="L406">            List&lt;Map&lt;String, Object&gt;&gt; opsByPathList = sortOperationsByPath(ops);</span>
+<span class="nc" id="L407">            operations.put(&quot;operationsByPath&quot;, opsByPathList);</span>
+<span class="nc" id="L408">        }</span>
+<span class="nc" id="L409">        return super.postProcessSupportingFileData(objs);</span>
+    }
+
+    @Override
+    public String removeNonNameElementToCamelCase(String name) {
+<span class="nc" id="L414">        return removeNonNameElementToCamelCase(name, &quot;[-:;#]&quot;);</span>
+    }
+
+    @Override
+    public String escapeUnsafeCharacters(String input) {
+<span class="nc" id="L419">        return input.replace(&quot;*/&quot;, &quot;*_/&quot;).replace(&quot;/*&quot;, &quot;/_*&quot;);</span>
+    }
+
+    @Override
+    public String escapeQuotationMark(String input) {
+        // remove &quot; to avoid code injection
+<span class="nc" id="L425">        return input.replace(&quot;\&quot;&quot;, &quot;&quot;);</span>
+    }
+
+    @Override
+    public void postProcessFile(File file, String fileType) {
+<span class="nc bnc" id="L430" title="All 2 branches missed.">        if (file == null) {</span>
+<span class="nc" id="L431">            return;</span>
+        }
+
+<span class="nc" id="L434">        String jsPostProcessFile = System.getenv(&quot;JS_POST_PROCESS_FILE&quot;);</span>
+<span class="nc bnc" id="L435" title="All 2 branches missed.">        if (StringUtils.isEmpty(jsPostProcessFile)) {</span>
+<span class="nc" id="L436">            return; // skip if JS_POST_PROCESS_FILE env variable is not defined</span>
+        }
+
+        // only process files with js extension
+<span class="nc bnc" id="L440" title="All 2 branches missed.">        if (&quot;js&quot;.equals(FilenameUtils.getExtension(file.toString()))) {</span>
+<span class="nc" id="L441">            String command = jsPostProcessFile + &quot; &quot; + file;</span>
+            try {
+<span class="nc" id="L443">                Process p = Runtime.getRuntime().exec(command);</span>
+<span class="nc" id="L444">                p.waitFor();</span>
+<span class="nc" id="L445">                int exitValue = p.exitValue();</span>
+<span class="nc bnc" id="L446" title="All 2 branches missed.">                if (exitValue != 0) {</span>
+<span class="nc" id="L447">                    LOGGER.error(&quot;Error running the command ({}). Exit code: {}&quot;, command, exitValue);</span>
+                }
+<span class="nc" id="L449">                LOGGER.info(&quot;Successfully executed: {}&quot;, command);</span>
+<span class="nc" id="L450">            } catch (InterruptedException | IOException e) {</span>
+<span class="nc" id="L451">                LOGGER.error(&quot;Error running the command ({}). Exception: {}&quot;, command, e.getMessage());</span>
+                // Restore interrupted state
+<span class="nc" id="L453">                Thread.currentThread().interrupt();</span>
+<span class="nc" id="L454">            }</span>
+        }
+<span class="nc" id="L456">    }</span>
+
+    @Override
+<span class="nc" id="L459">    public GeneratorLanguage generatorLanguage() { return GeneratorLanguage.JAVASCRIPT; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ListGenerators.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (executable)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.cmd</a> &gt; <span class="el_source">ListGenerators.java</span></div><h1>ListGenerators.java</h1><pre class="source lang-java linenums">package org.openapitools.codegen.cmd;
+
+import com.google.common.base.Objects;
+
+import io.airlift.airline.Command;
+import io.airlift.airline.Option;
+
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.CodegenConfig;
+import org.openapitools.codegen.CodegenConfigLoader;
+import org.openapitools.codegen.CodegenType;
+import org.openapitools.codegen.meta.GeneratorMetadata;
+import org.openapitools.codegen.meta.Stability;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+// NOTE: List can later have subcommands such as list languages, list types, list frameworks, etc.
+@SuppressWarnings({&quot;java:S106&quot;})
+@Command(name = &quot;list&quot;, description = &quot;Lists the available generators&quot;)
+<span class="nc" id="L21">public class ListGenerators extends OpenApiGeneratorCommand {</span>
+
+<span class="nc" id="L23">    @Option(name = {&quot;-s&quot;, &quot;--short&quot; }, description = &quot;shortened output (suitable for scripting)&quot;)</span>
+<span class="nc" id="L24">    private Boolean shortened = false;</span>
+
+<span class="nc" id="L26">    @Option(name = {&quot;-d&quot;, &quot;--docsite&quot; }, description = &quot;format for docusaurus site output&quot;, hidden = true)</span>
+<span class="nc" id="L27">    private Boolean docusaurus = false;</span>
+
+<span class="nc" id="L29">    @Option(name = {&quot;--github-nested-index&quot; }, description = &quot;format for github index at docs/generators/README.md&quot;, hidden = true)</span>
+<span class="nc" id="L30">    private Boolean  githubNestedIndex = false;</span>
+
+<span class="nc" id="L32">    @Option(name = {&quot;-i&quot;, &quot;--include&quot; },</span>
+            description = &quot;comma-separated list of stability indexes to include (value: all,beta,stable,experimental,deprecated). Excludes deprecated by default.&quot;,
+            allowedValues = { &quot;all&quot;, &quot;beta&quot;, &quot;stable&quot;, &quot;experimental&quot;, &quot;deprecated&quot; })
+    private String include = &quot;stable,beta,experimental&quot;;
+
+    @Override
+    public void execute() {
+<span class="nc" id="L39">        List&lt;CodegenConfig&gt; generators = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L40">        List&lt;Stability&gt; stabilities = Arrays.asList(Stability.values());</span>
+
+<span class="nc bnc" id="L42" title="All 2 branches missed.">        if (!StringUtils.isEmpty(include)) {</span>
+<span class="nc" id="L43">            List&lt;String&gt; includes = Arrays.asList(include.split(&quot;,&quot;));</span>
+<span class="nc bnc" id="L44" title="All 4 branches missed.">            if (includes.size() != 0 &amp;&amp; !includes.contains(&quot;all&quot;)) {</span>
+<span class="nc" id="L45">                stabilities = includes.stream()</span>
+<span class="nc" id="L46">                        .map(Stability::forDescription)</span>
+<span class="nc" id="L47">                        .collect(Collectors.toList());</span>
+            }
+        }
+
+<span class="nc bnc" id="L51" title="All 2 branches missed.">        for (CodegenConfig codegenConfig : CodegenConfigLoader.getAll()) {</span>
+<span class="nc" id="L52">            GeneratorMetadata meta = codegenConfig.getGeneratorMetadata();</span>
+<span class="nc bnc" id="L53" title="All 4 branches missed.">            if (meta != null &amp;&amp; stabilities.contains(meta.getStability())) {</span>
+<span class="nc" id="L54">                generators.add(codegenConfig);</span>
+            }
+<span class="nc" id="L56">        }</span>
+
+<span class="nc" id="L58">        StringBuilder sb = new StringBuilder();</span>
+
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        if (shortened) {</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">            for (int i = 0; i &lt; generators.size(); i++) {</span>
+<span class="nc" id="L62">                CodegenConfig generator = generators.get(i);</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">                if (i != 0) {</span>
+<span class="nc" id="L64">                    sb.append(&quot;,&quot;);</span>
+                }
+<span class="nc" id="L66">                sb.append(generator.getName());</span>
+            }
+        } else {
+<span class="nc" id="L69">            CodegenType[] types = CodegenType.values();</span>
+
+<span class="nc" id="L71">            sb.append(&quot;The following generators are available:&quot;);</span>
+
+<span class="nc" id="L73">            sb.append(System.lineSeparator());</span>
+<span class="nc" id="L74">            sb.append(System.lineSeparator());</span>
+
+<span class="nc bnc" id="L76" title="All 2 branches missed.">            for (CodegenType type : types) {</span>
+<span class="nc" id="L77">                appendForType(sb, type, type.name(), generators);</span>
+            }
+<span class="nc" id="L79">            appendForType(sb, null, &quot;UNSPECIFIED&quot;, generators);</span>
+        }
+
+<span class="nc" id="L82">        System.out.printf(Locale.ROOT, &quot;%s%n&quot;, sb.toString());</span>
+<span class="nc" id="L83">    }</span>
+
+    private void appendForType(StringBuilder sb, CodegenType type, String typeName, List&lt;CodegenConfig&gt; generators) {
+<span class="nc" id="L86">        List&lt;CodegenConfig&gt; list = generators.stream()</span>
+<span class="nc" id="L87">                .filter(g -&gt; Objects.equal(type, g.getTag()))</span>
+<span class="nc" id="L88">                .sorted(Comparator.comparing(CodegenConfig::getName))</span>
+<span class="nc" id="L89">                .collect(Collectors.toList());</span>
+
+<span class="nc bnc" id="L91" title="All 2 branches missed.">        if(!list.isEmpty()) {</span>
+<span class="nc bnc" id="L92" title="All 4 branches missed.">            if (docusaurus || githubNestedIndex) {</span>
+<span class="nc" id="L93">                sb.append(&quot;## &quot;).append(typeName).append(&quot; generators&quot;);</span>
+            } else {
+<span class="nc" id="L95">                sb.append(typeName).append(&quot; generators:&quot;);</span>
+            }
+<span class="nc" id="L97">            sb.append(System.lineSeparator());</span>
+
+<span class="nc" id="L99">            list.forEach(generator -&gt; {</span>
+<span class="nc" id="L100">                GeneratorMetadata meta = generator.getGeneratorMetadata();</span>
+<span class="nc bnc" id="L101" title="All 4 branches missed.">                if (docusaurus || githubNestedIndex) {</span>
+<span class="nc" id="L102">                    sb.append(&quot;* &quot;);</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">                    String idPrefix = docusaurus ? &quot;generators/&quot; : &quot;&quot;;</span>
+<span class="nc" id="L104">                    String id = idPrefix + generator.getName() + &quot;.md&quot;;</span>
+<span class="nc" id="L105">                    sb.append(&quot;[&quot;).append(generator.getName());</span>
+
+<span class="nc bnc" id="L107" title="All 6 branches missed.">                    if (meta != null &amp;&amp; meta.getStability() != null &amp;&amp; meta.getStability() != Stability.STABLE) {</span>
+<span class="nc" id="L108">                        sb.append(&quot; (&quot;).append(meta.getStability().value()).append(&quot;)&quot;);</span>
+                    }
+
+<span class="nc" id="L111">                    sb.append(&quot;](&quot;).append(id).append(&quot;)&quot;);</span>
+
+                    // trailing space is important for markdown list formatting
+<span class="nc" id="L114">                    sb.append(&quot;  &quot;);</span>
+<span class="nc" id="L115">                } else {</span>
+<span class="nc" id="L116">                    sb.append(&quot;    - &quot;);</span>
+<span class="nc" id="L117">                    sb.append(generator.getName());</span>
+
+<span class="nc bnc" id="L119" title="All 6 branches missed.">                    if (meta != null &amp;&amp; meta.getStability() != null &amp;&amp; meta.getStability() != Stability.STABLE) {</span>
+<span class="nc" id="L120">                        sb.append(&quot; (&quot;).append(meta.getStability().value()).append(&quot;)&quot;);</span>
+                    }
+                }
+<span class="nc" id="L123">                sb.append(System.lineSeparator());</span>
+<span class="nc" id="L124">            });</span>
+
+<span class="nc" id="L126">            sb.append(System.lineSeparator());</span>
+<span class="nc" id="L127">            sb.append(System.lineSeparator());</span>
+        }
+<span class="nc" id="L129">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DryRunStatus.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen</a> &gt; <span class="el_source">DryRunStatus.java</span></div><h1>DryRunStatus.java</h1><pre class="source lang-java linenums">package org.openapitools.codegen;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Locale;
+
+/**
+ * Holds details about a file's write status for display via the --dry-run option of CLI
+ */
+class DryRunStatus {
+    private Path path;
+    private State state;
+    private String reason;
+
+    /**
+     * Constructs a new instance of {@link DryRunStatus} for a given path and status of {@link State#Write}
+     *
+     * @param path The target path where the file would write
+     */
+    public DryRunStatus(Path path) {
+<span class="nc" id="L21">        this(path, State.Write);</span>
+<span class="nc" id="L22">    }</span>
+
+    /**
+     * Constructs a new instance of {@link DryRunStatus} for a path and a target state
+     *
+     * @param path  The target path where the file would write
+     * @param state The evaluated state as determined by the generation workflow
+     */
+<span class="nc" id="L30">    public DryRunStatus(Path path, State state) {</span>
+<span class="nc" id="L31">        this.path = path;</span>
+<span class="nc" id="L32">        setState(state);</span>
+<span class="nc" id="L33">    }</span>
+
+    /**
+     * Constructs a new instance of {@link DryRunStatus} for a path, target state, and presenting a specific reason for that state
+     *
+     * @param path   The target path where the file would write
+     * @param state  The evaluated state as determined by the generation workflow
+     * @param reason A reason for the state, beyond any generic reason
+     */
+<span class="nc" id="L42">    public DryRunStatus(Path path, State state, String reason) {</span>
+<span class="nc" id="L43">        this.path = path;</span>
+<span class="nc" id="L44">        this.state = state;</span>
+<span class="nc" id="L45">        this.reason = reason;</span>
+<span class="nc" id="L46">    }</span>
+
+    /**
+     * Append a user display text to the {@link Appendable} instance
+     *
+     * @param appendable An object implementing {@link Appendable} (such as {@link StringBuilder}
+     * @throws IOException via contract of {@link Path#toAbsolutePath()}
+     */
+    public void appendTo(Appendable appendable) throws IOException {
+<span class="nc" id="L55">        appendable.append(String.format(Locale.ROOT, &quot;%s %s&quot;, this.state.getShortDisplay(), this.path.toAbsolutePath()));</span>
+<span class="nc" id="L56">    }</span>
+
+    /**
+     * Gets the target path of the file write operation
+     *
+     * @return a {@link Path} instance
+     */
+    public Path getPath() {
+<span class="nc" id="L64">        return path;</span>
+    }
+
+    /**
+     * Gets the reason for the file's {@link State}
+     *
+     * @return A human-readable string which explains why this file's dry-run resulted in the defined {@link State}
+     */
+    public String getReason() {
+<span class="nc" id="L73">        return reason;</span>
+    }
+
+    /**
+     * Gets the {@link State} as determined by the generator's workflow
+     *
+     * @return A {@link State} enum detailing the expected operation of the generator's workflow
+     */
+    public State getState() {
+<span class="nc" id="L82">        return state;</span>
+    }
+
+    /**
+     * Sets the {@link State} as determined by the generator's workflow.
+     * &lt;p&gt;
+     * This method will provide a default reason. To explicitly provide a reason for the {@link State}, use {@link DryRunStatus#DryRunStatus(Path, State, String)}
+     *
+     * @param state A {@link State} enum detailing the expected operation of the generator's workflow
+     */
+    public void setState(State state) {
+<span class="nc bnc" id="L93" title="All 2 branches missed.">        if (state != this.state) {</span>
+<span class="nc bnc" id="L94" title="All 6 branches missed.">            switch (state) {</span>
+                case Write:
+<span class="nc" id="L96">                    this.reason = &quot;File will be written.&quot;;</span>
+<span class="nc" id="L97">                    break;</span>
+                case WriteIfNewer:
+<span class="nc" id="L99">                    this.reason = &quot;File will be written only if it is new or if contents differ from an existing file.&quot;;</span>
+<span class="nc" id="L100">                    break;</span>
+                case Ignored:
+<span class="nc" id="L102">                    this.reason = &quot;Ignored via rules defined in codegen ignore file.&quot;;</span>
+<span class="nc" id="L103">                    break;</span>
+                case SkippedOverwrite:
+<span class="nc" id="L105">                    this.reason = &quot;File is configured not to overwrite an existing file of the same name.&quot;;</span>
+<span class="nc" id="L106">                    break;</span>
+                case Error:
+<span class="nc" id="L108">                    this.reason = &quot;File error: template does not exist, or file is not accessible.&quot;;</span>
+                    break;
+            }
+        }
+
+<span class="nc" id="L113">        this.state = state;</span>
+<span class="nc" id="L114">    }</span>
+
+    /**
+     * Represents the possible states of a file write operation as determined by the Generator
+     */
+<span class="nc" id="L119">    enum State {</span>
+<span class="nc" id="L120">        Write(&quot;w&quot;, &quot;Write&quot;),</span>
+<span class="nc" id="L121">        WriteIfNewer(&quot;n&quot;, &quot;Write if New/Updated&quot;),</span>
+<span class="nc" id="L122">        Ignored(&quot;i&quot;, &quot;Ignored&quot;),</span>
+<span class="nc" id="L123">        SkippedOverwrite(&quot;s&quot;, &quot;Skipped Overwrite&quot;),</span>
+<span class="nc" id="L124">        Skipped(&quot;k&quot;, &quot;Skipped by user option(s)&quot;),</span>
+<span class="nc" id="L125">        Error(&quot;e&quot;, &quot;Error evaluating file write state&quot;);</span>
+
+        private final String shortDisplay;
+        private final String description;
+
+        /**
+         * Constructs a new {@link State} with required short value and human-readable description
+         *
+         * @param shortDisplay The short value used for display
+         * @param description  A description of the state which is more human-readable than the enum's name
+         */
+<span class="nc" id="L136">        State(String shortDisplay, String description) {</span>
+
+<span class="nc" id="L138">            this.shortDisplay = shortDisplay;</span>
+<span class="nc" id="L139">            this.description = description;</span>
+<span class="nc" id="L140">        }</span>
+
+        /**
+         * Gets a description of the state which is more human-readable than the enum's name
+         *
+         * @return A human-readable description
+         */
+        public String getDescription() {
+<span class="nc" id="L148">            return description;</span>
+        }
+
+        /**
+         * Gets the short value used for display
+         *
+         * @return A character representing this state
+         */
+        public String getShortDisplay() {
+<span class="nc" id="L157">            return shortDisplay;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

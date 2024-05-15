@@ -1,0 +1,2213 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractPythonCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">AbstractPythonCodegen.java</span></div><h1>AbstractPythonCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import static org.openapitools.codegen.utils.StringUtils.camelize;
+import static org.openapitools.codegen.utils.StringUtils.escape;
+import static org.openapitools.codegen.utils.StringUtils.underscore;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
+
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.CodegenConfig;
+import org.openapitools.codegen.CodegenConstants;
+import org.openapitools.codegen.CodegenDiscriminator;
+import org.openapitools.codegen.CodegenMediaType;
+import org.openapitools.codegen.CodegenModel;
+import org.openapitools.codegen.CodegenOperation;
+import org.openapitools.codegen.CodegenParameter;
+import org.openapitools.codegen.CodegenProperty;
+import org.openapitools.codegen.DefaultCodegen;
+import org.openapitools.codegen.GeneratorLanguage;
+import org.openapitools.codegen.IJsonSchemaValidationProperties;
+import org.openapitools.codegen.meta.features.SecurityFeature;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.utils.ModelUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.github.curiousoddman.rgxgen.RgxGen;
+
+import io.swagger.v3.oas.models.examples.Example;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.Parameter;
+
+
+
+
+
+public abstract class AbstractPythonCodegen extends DefaultCodegen implements CodegenConfig {
+<span class="nc" id="L78">    private final Logger LOGGER = LoggerFactory.getLogger(AbstractPythonCodegen.class);</span>
+
+    public static final String MAP_NUMBER_TO = &quot;mapNumberTo&quot;;
+
+<span class="nc" id="L82">    protected String packageName = &quot;openapi_client&quot;;</span>
+<span class="nc" id="L83">    protected String packageVersion = &quot;1.0.0&quot;;</span>
+    protected String projectName; // for setup.py, e.g. petstore-api
+<span class="nc" id="L85">    protected boolean hasModelsToImport = Boolean.FALSE;</span>
+<span class="nc" id="L86">    protected String mapNumberTo = &quot;Union[StrictFloat, StrictInt]&quot;;</span>
+    protected Map&lt;Character, String&gt; regexModifiers;
+
+<span class="nc" id="L89">    private Map&lt;String, String&gt; schemaKeyToModelNameCache = new HashMap&lt;&gt;();</span>
+    // map of set (model imports)
+<span class="nc" id="L91">    private HashMap&lt;String, HashSet&lt;String&gt;&gt; circularImports = new HashMap&lt;&gt;();</span>
+    // map of codegen models
+<span class="nc" id="L93">    private HashMap&lt;String, CodegenModel&gt; codegenModelMap = new HashMap&lt;&gt;();</span>
+
+    public AbstractPythonCodegen() {
+<span class="nc" id="L96">        super();</span>
+
+<span class="nc" id="L98">        modifyFeatureSet(features -&gt; features.securityFeatures(EnumSet.of(</span>
+                SecurityFeature.BasicAuth,
+                SecurityFeature.BearerToken,
+                SecurityFeature.ApiKey,
+                SecurityFeature.OAuth2_Implicit
+        )));
+
+        // from https://docs.python.org/3/reference/lexical_analysis.html#keywords
+<span class="nc" id="L106">        setReservedWordsLowerCase(</span>
+<span class="nc" id="L107">                Arrays.asList(</span>
+                        // pydantic
+                        &quot;field&quot;,
+                        // local variable name used in API methods (endpoints)
+                        &quot;all_params&quot;, &quot;resource_path&quot;, &quot;path_params&quot;, &quot;query_params&quot;,
+                        &quot;header_params&quot;, &quot;form_params&quot;, &quot;local_var_files&quot;, &quot;body_params&quot;, &quot;auth_settings&quot;,
+                        // @property
+                        &quot;property&quot;,
+                        // typing keywords
+                        &quot;schema&quot;, &quot;base64&quot;, &quot;json&quot;,
+                        &quot;date&quot;, &quot;float&quot;,
+                        // python reserved words
+                        &quot;and&quot;, &quot;del&quot;, &quot;from&quot;, &quot;not&quot;, &quot;while&quot;, &quot;as&quot;, &quot;elif&quot;, &quot;global&quot;, &quot;or&quot;, &quot;with&quot;,
+                        &quot;assert&quot;, &quot;else&quot;, &quot;if&quot;, &quot;pass&quot;, &quot;yield&quot;, &quot;break&quot;, &quot;except&quot;, &quot;import&quot;,
+                        &quot;print&quot;, &quot;class&quot;, &quot;exec&quot;, &quot;in&quot;, &quot;raise&quot;, &quot;continue&quot;, &quot;finally&quot;, &quot;is&quot;,
+                        &quot;return&quot;, &quot;def&quot;, &quot;for&quot;, &quot;lambda&quot;, &quot;try&quot;, &quot;self&quot;, &quot;nonlocal&quot;, &quot;None&quot;, &quot;True&quot;,
+                        &quot;False&quot;, &quot;async&quot;, &quot;await&quot;));
+
+<span class="nc" id="L125">        languageSpecificPrimitives.clear();</span>
+<span class="nc" id="L126">        languageSpecificPrimitives.add(&quot;int&quot;);</span>
+<span class="nc" id="L127">        languageSpecificPrimitives.add(&quot;float&quot;);</span>
+<span class="nc" id="L128">        languageSpecificPrimitives.add(&quot;list&quot;);</span>
+<span class="nc" id="L129">        languageSpecificPrimitives.add(&quot;dict&quot;);</span>
+<span class="nc" id="L130">        languageSpecificPrimitives.add(&quot;List&quot;);</span>
+<span class="nc" id="L131">        languageSpecificPrimitives.add(&quot;Dict&quot;);</span>
+<span class="nc" id="L132">        languageSpecificPrimitives.add(&quot;bool&quot;);</span>
+<span class="nc" id="L133">        languageSpecificPrimitives.add(&quot;str&quot;);</span>
+<span class="nc" id="L134">        languageSpecificPrimitives.add(&quot;datetime&quot;);</span>
+<span class="nc" id="L135">        languageSpecificPrimitives.add(&quot;date&quot;);</span>
+<span class="nc" id="L136">        languageSpecificPrimitives.add(&quot;object&quot;);</span>
+        // TODO file and binary is mapped as `file`
+<span class="nc" id="L138">        languageSpecificPrimitives.add(&quot;file&quot;);</span>
+<span class="nc" id="L139">        languageSpecificPrimitives.add(&quot;bytes&quot;);</span>
+
+<span class="nc" id="L141">        typeMapping.clear();</span>
+<span class="nc" id="L142">        typeMapping.put(&quot;integer&quot;, &quot;int&quot;);</span>
+<span class="nc" id="L143">        typeMapping.put(&quot;float&quot;, &quot;float&quot;);</span>
+<span class="nc" id="L144">        typeMapping.put(&quot;number&quot;, &quot;float&quot;);</span>
+<span class="nc" id="L145">        typeMapping.put(&quot;long&quot;, &quot;int&quot;);</span>
+<span class="nc" id="L146">        typeMapping.put(&quot;double&quot;, &quot;float&quot;);</span>
+<span class="nc" id="L147">        typeMapping.put(&quot;array&quot;, &quot;list&quot;);</span>
+<span class="nc" id="L148">        typeMapping.put(&quot;set&quot;, &quot;list&quot;);</span>
+<span class="nc" id="L149">        typeMapping.put(&quot;map&quot;, &quot;dict&quot;);</span>
+<span class="nc" id="L150">        typeMapping.put(&quot;boolean&quot;, &quot;bool&quot;);</span>
+<span class="nc" id="L151">        typeMapping.put(&quot;string&quot;, &quot;str&quot;);</span>
+<span class="nc" id="L152">        typeMapping.put(&quot;date&quot;, &quot;date&quot;);</span>
+<span class="nc" id="L153">        typeMapping.put(&quot;DateTime&quot;, &quot;datetime&quot;);</span>
+<span class="nc" id="L154">        typeMapping.put(&quot;object&quot;, &quot;object&quot;);</span>
+<span class="nc" id="L155">        typeMapping.put(&quot;AnyType&quot;, &quot;object&quot;);</span>
+<span class="nc" id="L156">        typeMapping.put(&quot;file&quot;, &quot;file&quot;);</span>
+        // TODO binary should be mapped to byte array
+        // mapped to String as a workaround
+<span class="nc" id="L159">        typeMapping.put(&quot;binary&quot;, &quot;str&quot;);</span>
+<span class="nc" id="L160">        typeMapping.put(&quot;ByteArray&quot;, &quot;str&quot;);</span>
+        // map uuid to string for the time being
+<span class="nc" id="L162">        typeMapping.put(&quot;UUID&quot;, &quot;str&quot;);</span>
+<span class="nc" id="L163">        typeMapping.put(&quot;URI&quot;, &quot;str&quot;);</span>
+<span class="nc" id="L164">        typeMapping.put(&quot;null&quot;, &quot;none_type&quot;);</span>
+
+<span class="nc" id="L166">        regexModifiers = new HashMap&lt;Character, String&gt;();</span>
+<span class="nc" id="L167">        regexModifiers.put('i', &quot;IGNORECASE&quot;);</span>
+<span class="nc" id="L168">        regexModifiers.put('l', &quot;LOCALE&quot;);</span>
+<span class="nc" id="L169">        regexModifiers.put('m', &quot;MULTILINE&quot;);</span>
+<span class="nc" id="L170">        regexModifiers.put('s', &quot;DOTALL&quot;);</span>
+<span class="nc" id="L171">        regexModifiers.put('u', &quot;UNICODE&quot;);</span>
+<span class="nc" id="L172">        regexModifiers.put('x', &quot;VERBOSE&quot;);</span>
+<span class="nc" id="L173">    }</span>
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L177">        super.processOpts();</span>
+
+<span class="nc bnc" id="L179" title="All 2 branches missed.">        if (StringUtils.isEmpty(System.getenv(&quot;PYTHON_POST_PROCESS_FILE&quot;))) {</span>
+<span class="nc" id="L180">            LOGGER.info(&quot;Environment variable PYTHON_POST_PROCESS_FILE not defined so the Python code may not be properly formatted. To define it, try 'export PYTHON_POST_PROCESS_FILE=\&quot;/usr/local/bin/yapf -i\&quot;' (Linux/Mac)&quot;);</span>
+<span class="nc" id="L181">            LOGGER.info(&quot;NOTE: To enable file post-processing, 'enablePostProcessFile' must be set to `true` (--enable-post-process-file for CLI).&quot;);</span>
+        }
+<span class="nc" id="L183">    }</span>
+
+    @Override
+    public String escapeReservedWord(String name) {
+<span class="nc bnc" id="L187" title="All 2 branches missed.">        if (this.reservedWordsMappings().containsKey(name)) {</span>
+<span class="nc" id="L188">            return this.reservedWordsMappings().get(name);</span>
+        }
+<span class="nc" id="L190">        return &quot;_&quot; + name;</span>
+    }
+
+
+    /**
+     * Return the default value of the property
+     *
+     * @param p OpenAPI property object
+     * @return string presentation of the default value of the property
+     */
+    @Override
+    public String toDefaultValue(Schema p) {
+<span class="nc bnc" id="L202" title="All 2 branches missed.">        if (ModelUtils.isBooleanSchema(p)) {</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">            if (p.getDefault() != null) {</span>
+<span class="nc bnc" id="L204" title="All 2 branches missed.">                if (!Boolean.valueOf(p.getDefault().toString()))</span>
+<span class="nc" id="L205">                    return &quot;False&quot;;</span>
+                else
+<span class="nc" id="L207">                    return &quot;True&quot;;</span>
+            }
+<span class="nc bnc" id="L209" title="All 2 branches missed.">        } else if (ModelUtils.isDateSchema(p)) {</span>
+            // TODO
+<span class="nc bnc" id="L211" title="All 2 branches missed.">        } else if (ModelUtils.isDateTimeSchema(p)) {</span>
+            // TODO
+<span class="nc bnc" id="L213" title="All 2 branches missed.">        } else if (ModelUtils.isNumberSchema(p)) {</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">            if (p.getDefault() != null) {</span>
+<span class="nc" id="L215">                return p.getDefault().toString();</span>
+            }
+<span class="nc bnc" id="L217" title="All 2 branches missed.">        } else if (ModelUtils.isIntegerSchema(p)) {</span>
+<span class="nc bnc" id="L218" title="All 2 branches missed.">            if (p.getDefault() != null) {</span>
+<span class="nc" id="L219">                return p.getDefault().toString();</span>
+            }
+<span class="nc bnc" id="L221" title="All 2 branches missed.">        } else if (ModelUtils.isStringSchema(p)) {</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">            if (p.getDefault() != null) {</span>
+<span class="nc" id="L223">                String defaultValue = String.valueOf(p.getDefault());</span>
+<span class="nc bnc" id="L224" title="All 2 branches missed.">                if (defaultValue != null) {</span>
+<span class="nc" id="L225">                    defaultValue = defaultValue.replace(&quot;\\&quot;, &quot;\\\\&quot;)</span>
+<span class="nc" id="L226">                            .replace(&quot;'&quot;, &quot;\'&quot;);</span>
+<span class="nc bnc" id="L227" title="All 2 branches missed.">                    if (Pattern.compile(&quot;\r\n|\r|\n&quot;).matcher(defaultValue).find()) {</span>
+<span class="nc" id="L228">                        return &quot;'''&quot; + defaultValue + &quot;'''&quot;;</span>
+                    } else {
+<span class="nc" id="L230">                        return &quot;'&quot; + defaultValue + &quot;'&quot;;</span>
+                    }
+                }
+<span class="nc" id="L233">            }</span>
+<span class="nc bnc" id="L234" title="All 2 branches missed.">        } else if (ModelUtils.isArraySchema(p)) {</span>
+<span class="nc bnc" id="L235" title="All 2 branches missed.">            if (p.getDefault() != null) {</span>
+<span class="nc" id="L236">                return p.getDefault().toString();</span>
+            } else {
+<span class="nc" id="L238">                return null;</span>
+            }
+        }
+
+<span class="nc" id="L242">        return null;</span>
+    }
+
+
+    @Override
+    public String toVarName(String name) {
+        // obtain the name from nameMapping directly if provided
+<span class="nc bnc" id="L249" title="All 2 branches missed.">        if (nameMapping.containsKey(name)) {</span>
+<span class="nc" id="L250">            return nameMapping.get(name);</span>
+        }
+
+        // sanitize name
+<span class="nc" id="L254">        name = sanitizeName(name); // FIXME: a parameter should not be assigned. Also declare the methods parameters as 'final'.</span>
+
+        // remove dollar sign
+<span class="nc" id="L257">        name = name.replace(&quot;$&quot;, &quot;&quot;);</span>
+
+        // if it's all upper case, convert to lower case
+<span class="nc bnc" id="L260" title="All 2 branches missed.">        if (name.matches(&quot;^[A-Z_]*$&quot;)) {</span>
+<span class="nc" id="L261">            name = name.toLowerCase(Locale.ROOT);</span>
+        }
+
+        // underscore the variable name
+        // petId =&gt; pet_id
+<span class="nc" id="L266">        name = underscore(name);</span>
+
+        // remove leading underscore
+<span class="nc" id="L269">        name = name.replaceAll(&quot;^_*&quot;, &quot;&quot;);</span>
+
+        // for reserved word or word starting with number, append _
+<span class="nc bnc" id="L272" title="All 4 branches missed.">        if (isReservedWord(name) || name.matches(&quot;^\\d.*&quot;)) {</span>
+<span class="nc" id="L273">            name = escapeReservedWord(name);</span>
+        }
+
+<span class="nc" id="L276">        return name;</span>
+    }
+
+    @Override
+    public String toRegularExpression(String pattern) {
+<span class="nc" id="L281">        return addRegularExpressionDelimiter(pattern);</span>
+    }
+
+    @Override
+    public String toParamName(String name) {
+        // obtain the name from parameterNameMapping directly if provided
+<span class="nc bnc" id="L287" title="All 2 branches missed.">        if (parameterNameMapping.containsKey(name)) {</span>
+<span class="nc" id="L288">            return parameterNameMapping.get(name);</span>
+        }
+
+        // to avoid conflicts with 'callback' parameter for async call
+<span class="nc bnc" id="L292" title="All 2 branches missed.">        if (&quot;callback&quot;.equals(name)) {</span>
+<span class="nc" id="L293">            return &quot;param_callback&quot;;</span>
+        }
+
+        // should be the same as variable name
+<span class="nc" id="L297">        return toVarName(name);</span>
+    }
+
+    @Override
+    public String toOperationId(String operationId) {
+        // throw exception if method name is empty (should not occur as an auto-generated method name will be used)
+<span class="nc bnc" id="L303" title="All 2 branches missed.">        if (StringUtils.isEmpty(operationId)) {</span>
+<span class="nc" id="L304">            throw new RuntimeException(&quot;Empty method name (operationId) not allowed&quot;);</span>
+        }
+
+        // method name cannot use reserved keyword, e.g. return
+<span class="nc bnc" id="L308" title="All 2 branches missed.">        if (isReservedWord(operationId)) {</span>
+<span class="nc" id="L309">            LOGGER.warn(&quot;{} (reserved word) cannot be used as method name. Renamed to {}&quot;, operationId, underscore(sanitizeName(&quot;call_&quot; + operationId)));</span>
+<span class="nc" id="L310">            operationId = &quot;call_&quot; + operationId;</span>
+        }
+
+        // operationId starts with a number
+<span class="nc bnc" id="L314" title="All 2 branches missed.">        if (operationId.matches(&quot;^\\d.*&quot;)) {</span>
+<span class="nc" id="L315">            LOGGER.warn(&quot;{} (starting with a number) cannot be used as method name. Renamed to {}&quot;, operationId, underscore(sanitizeName(&quot;call_&quot; + operationId)));</span>
+<span class="nc" id="L316">            operationId = &quot;call_&quot; + operationId;</span>
+        }
+
+<span class="nc" id="L319">        return underscore(sanitizeName(operationId));</span>
+    }
+
+    @Override
+    public String escapeQuotationMark(String input) {
+        // remove ' to avoid code injection
+<span class="nc" id="L325">        return input.replace(&quot;'&quot;, &quot;&quot;);</span>
+    }
+
+    @Override
+    public String escapeUnsafeCharacters(String input) {
+        // remove multiline comment
+<span class="nc" id="L331">        return input.replace(&quot;'''&quot;, &quot;'_'_'&quot;);</span>
+    }
+
+    @Override
+    public void postProcessFile(File file, String fileType) {
+<span class="nc bnc" id="L336" title="All 2 branches missed.">        if (file == null) {</span>
+<span class="nc" id="L337">            return;</span>
+        }
+<span class="nc" id="L339">        String pythonPostProcessFile = System.getenv(&quot;PYTHON_POST_PROCESS_FILE&quot;);</span>
+<span class="nc bnc" id="L340" title="All 2 branches missed.">        if (StringUtils.isEmpty(pythonPostProcessFile)) {</span>
+<span class="nc" id="L341">            return; // skip if PYTHON_POST_PROCESS_FILE env variable is not defined</span>
+        }
+
+        // only process files with py extension
+<span class="nc bnc" id="L345" title="All 2 branches missed.">        if (&quot;py&quot;.equals(FilenameUtils.getExtension(file.toString()))) {</span>
+<span class="nc" id="L346">            String command = pythonPostProcessFile + &quot; &quot; + file;</span>
+            try {
+<span class="nc" id="L348">                Process p = Runtime.getRuntime().exec(command);</span>
+<span class="nc" id="L349">                int exitValue = p.waitFor();</span>
+<span class="nc bnc" id="L350" title="All 2 branches missed.">                if (exitValue != 0) {</span>
+<span class="nc" id="L351">                    LOGGER.error(&quot;Error running the command ({}). Exit value: {}&quot;, command, exitValue);</span>
+                } else {
+<span class="nc" id="L353">                    LOGGER.info(&quot;Successfully executed: {}&quot;, command);</span>
+                }
+<span class="nc" id="L355">            } catch (InterruptedException | IOException e) {</span>
+<span class="nc" id="L356">                LOGGER.error(&quot;Error running the command ({}). Exception: {}&quot;, command, e.getMessage());</span>
+                // Restore interrupted state
+<span class="nc" id="L358">                Thread.currentThread().interrupt();</span>
+<span class="nc" id="L359">            }</span>
+        }
+<span class="nc" id="L361">    }</span>
+
+    @Override
+    public String toExampleValue(Schema schema) {
+<span class="nc" id="L365">        return toExampleValueRecursive(schema, new ArrayList&lt;&gt;(), 5);</span>
+    }
+
+    private String toExampleValueRecursive(Schema schema, List&lt;Schema&gt; includedSchemas, int indentation) {
+<span class="nc bnc" id="L369" title="All 2 branches missed.">        boolean cycleFound = includedSchemas.stream().filter(s -&gt; schema.equals(s)).count() &gt; 1;</span>
+<span class="nc bnc" id="L370" title="All 2 branches missed.">        if (cycleFound) {</span>
+<span class="nc" id="L371">            return &quot;&quot;;</span>
+        }
+<span class="nc" id="L373">        String indentationString = &quot;&quot;;</span>
+<span class="nc bnc" id="L374" title="All 2 branches missed.">        for (int i = 0; i &lt; indentation; i++) indentationString += &quot;    &quot;;</span>
+<span class="nc" id="L375">        String example = null;</span>
+<span class="nc bnc" id="L376" title="All 2 branches missed.">        if (schema.getExample() != null) {</span>
+<span class="nc" id="L377">            example = schema.getExample().toString();</span>
+        }
+
+<span class="nc bnc" id="L380" title="All 4 branches missed.">        if (ModelUtils.isNullType(schema) &amp;&amp; null != example) {</span>
+            // The 'null' type is allowed in OAS 3.1 and above. It is not supported by OAS 3.0.x,
+            // though this tooling supports it.
+<span class="nc" id="L383">            return &quot;None&quot;;</span>
+        }
+        // correct &quot;true&quot;s into &quot;True&quot;s, since super.toExampleValue uses &quot;toString()&quot; on Java booleans
+<span class="nc bnc" id="L386" title="All 4 branches missed.">        if (ModelUtils.isBooleanSchema(schema) &amp;&amp; null != example) {</span>
+<span class="nc bnc" id="L387" title="All 2 branches missed.">            if (&quot;false&quot;.equalsIgnoreCase(example)) example = &quot;False&quot;;</span>
+<span class="nc" id="L388">            else example = &quot;True&quot;;</span>
+        }
+
+        // correct &quot;&amp;#39;&quot;s into &quot;'&quot;s after toString()
+<span class="nc bnc" id="L392" title="All 8 branches missed.">        if (ModelUtils.isStringSchema(schema) &amp;&amp; schema.getDefault() != null &amp;&amp; !ModelUtils.isDateSchema(schema) &amp;&amp; !ModelUtils.isDateTimeSchema(schema)) {</span>
+<span class="nc" id="L393">            example = String.valueOf(schema.getDefault());</span>
+        }
+
+<span class="nc bnc" id="L396" title="All 4 branches missed.">        if (StringUtils.isNotBlank(example) &amp;&amp; !&quot;null&quot;.equals(example)) {</span>
+<span class="nc bnc" id="L397" title="All 2 branches missed.">            if (ModelUtils.isStringSchema(schema)) {</span>
+<span class="nc" id="L398">                example = &quot;'&quot; + example + &quot;'&quot;;</span>
+            }
+<span class="nc" id="L400">            return example;</span>
+        }
+
+<span class="nc bnc" id="L403" title="All 4 branches missed.">        if (schema.getEnum() != null &amp;&amp; !schema.getEnum().isEmpty()) {</span>
+            // Enum case:
+<span class="nc" id="L405">            example = schema.getEnum().get(0).toString();</span>
+<span class="nc bnc" id="L406" title="All 2 branches missed.">            if (ModelUtils.isStringSchema(schema)) {</span>
+<span class="nc" id="L407">                example = &quot;'&quot; + escapeText(example) + &quot;'&quot;;</span>
+            }
+<span class="nc bnc" id="L409" title="All 2 branches missed.">            if (null == example)</span>
+<span class="nc" id="L410">                LOGGER.warn(&quot;Empty enum. Cannot built an example!&quot;);</span>
+
+<span class="nc" id="L412">            return example;</span>
+<span class="nc bnc" id="L413" title="All 2 branches missed.">        } else if (null != schema.get$ref()) {</span>
+            // $ref case:
+<span class="nc" id="L415">            Map&lt;String, Schema&gt; allDefinitions = ModelUtils.getSchemas(this.openAPI);</span>
+<span class="nc" id="L416">            String ref = ModelUtils.getSimpleRef(schema.get$ref());</span>
+<span class="nc bnc" id="L417" title="All 2 branches missed.">            if (allDefinitions != null) {</span>
+<span class="nc" id="L418">                Schema refSchema = allDefinitions.get(ref);</span>
+<span class="nc bnc" id="L419" title="All 2 branches missed.">                if (null == refSchema) {</span>
+<span class="nc" id="L420">                    return &quot;None&quot;;</span>
+                } else {
+<span class="nc" id="L422">                    String refTitle = refSchema.getTitle();</span>
+<span class="nc bnc" id="L423" title="All 4 branches missed.">                    if (StringUtils.isBlank(refTitle) || &quot;null&quot;.equals(refTitle)) {</span>
+<span class="nc" id="L424">                        refSchema.setTitle(ref);</span>
+                    }
+<span class="nc bnc" id="L426" title="All 4 branches missed.">                    if (StringUtils.isNotBlank(schema.getTitle()) &amp;&amp; !&quot;null&quot;.equals(schema.getTitle())) {</span>
+<span class="nc" id="L427">                        includedSchemas.add(schema);</span>
+                    }
+<span class="nc" id="L429">                    return toExampleValueRecursive(refSchema, includedSchemas, indentation);</span>
+                }
+            } else {
+<span class="nc" id="L432">                LOGGER.warn(&quot;allDefinitions not defined in toExampleValue!\n&quot;);</span>
+            }
+        }
+<span class="nc bnc" id="L435" title="All 2 branches missed.">        if (ModelUtils.isDateSchema(schema)) {</span>
+<span class="nc" id="L436">            example = &quot;datetime.datetime.strptime('1975-12-30', '%Y-%m-%d').date()&quot;;</span>
+<span class="nc" id="L437">            return example;</span>
+<span class="nc bnc" id="L438" title="All 2 branches missed.">        } else if (ModelUtils.isDateTimeSchema(schema)) {</span>
+<span class="nc" id="L439">            example = &quot;datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f')&quot;;</span>
+<span class="nc" id="L440">            return example;</span>
+<span class="nc bnc" id="L441" title="All 2 branches missed.">        } else if (ModelUtils.isBinarySchema(schema)) {</span>
+<span class="nc" id="L442">            example = &quot;bytes(b'blah')&quot;;</span>
+<span class="nc" id="L443">            return example;</span>
+<span class="nc bnc" id="L444" title="All 2 branches missed.">        } else if (ModelUtils.isByteArraySchema(schema)) {</span>
+<span class="nc" id="L445">            example = &quot;YQ==&quot;;</span>
+<span class="nc bnc" id="L446" title="All 2 branches missed.">        } else if (ModelUtils.isStringSchema(schema)) {</span>
+            // a BigDecimal:
+<span class="nc bnc" id="L448" title="All 2 branches missed.">            if (&quot;Number&quot;.equalsIgnoreCase(schema.getFormat())) {</span>
+<span class="nc" id="L449">                return &quot;1&quot;;</span>
+            }
+<span class="nc bnc" id="L451" title="All 2 branches missed.">            if (StringUtils.isNotBlank(schema.getPattern())) {</span>
+<span class="nc" id="L452">                String pattern = schema.getPattern();</span>
+<span class="nc" id="L453">                RgxGen rgxGen = new RgxGen(patternCorrection(pattern));</span>
+                // this seed makes it so if we have [a-z] we pick a
+<span class="nc" id="L455">                Random random = new Random(18);</span>
+<span class="nc" id="L456">                String sample = rgxGen.generate(random);</span>
+                // omit leading / and trailing /, omit trailing /i
+<span class="nc" id="L458">                Pattern valueExtractor = Pattern.compile(&quot;^/\\^?(.+?)\\$?/.?$&quot;);</span>
+<span class="nc" id="L459">                Matcher m = valueExtractor.matcher(sample);</span>
+<span class="nc bnc" id="L460" title="All 2 branches missed.">                if (m.find()) {</span>
+<span class="nc" id="L461">                    example = m.group(m.groupCount());</span>
+                } else {
+<span class="nc" id="L463">                    example = sample;</span>
+                }
+            }
+<span class="nc bnc" id="L466" title="All 2 branches missed.">            if (example == null) {</span>
+<span class="nc" id="L467">                example = &quot;&quot;;</span>
+            }
+<span class="nc" id="L469">            int len = 0;</span>
+<span class="nc bnc" id="L470" title="All 2 branches missed.">            if (null != schema.getMinLength()) {</span>
+<span class="nc" id="L471">                len = schema.getMinLength().intValue();</span>
+<span class="nc bnc" id="L472" title="All 2 branches missed.">                if (len &lt; 1) {</span>
+<span class="nc" id="L473">                    example = &quot;&quot;;</span>
+                } else {
+<span class="nc bnc" id="L475" title="All 2 branches missed.">                    for (int i = 0; i &lt; len; i++) example += i;</span>
+                }
+            }
+<span class="nc bnc" id="L478" title="All 2 branches missed.">        } else if (ModelUtils.isIntegerSchema(schema)) {</span>
+<span class="nc bnc" id="L479" title="All 2 branches missed.">            if (schema.getMinimum() != null)</span>
+<span class="nc" id="L480">                example = schema.getMinimum().toString();</span>
+            else
+<span class="nc" id="L482">                example = &quot;56&quot;;</span>
+<span class="nc bnc" id="L483" title="All 2 branches missed.">        } else if (ModelUtils.isNumberSchema(schema)) {</span>
+<span class="nc bnc" id="L484" title="All 2 branches missed.">            if (schema.getMinimum() != null)</span>
+<span class="nc" id="L485">                example = schema.getMinimum().toString();</span>
+            else
+<span class="nc" id="L487">                example = &quot;1.337&quot;;</span>
+<span class="nc bnc" id="L488" title="All 2 branches missed.">        } else if (ModelUtils.isBooleanSchema(schema)) {</span>
+<span class="nc" id="L489">            example = &quot;True&quot;;</span>
+<span class="nc bnc" id="L490" title="All 2 branches missed.">        } else if (ModelUtils.isArraySchema(schema)) {</span>
+<span class="nc bnc" id="L491" title="All 4 branches missed.">            if (StringUtils.isNotBlank(schema.getTitle()) &amp;&amp; !&quot;null&quot;.equals(schema.getTitle())) {</span>
+<span class="nc" id="L492">                includedSchemas.add(schema);</span>
+            }
+<span class="nc" id="L494">            example = &quot;[\n&quot; + indentationString + toExampleValueRecursive(ModelUtils.getSchemaItems(schema), includedSchemas, indentation + 1) + &quot;\n&quot; + indentationString + &quot;]&quot;;</span>
+<span class="nc bnc" id="L495" title="All 2 branches missed.">        } else if (ModelUtils.isMapSchema(schema)) {</span>
+<span class="nc bnc" id="L496" title="All 4 branches missed.">            if (StringUtils.isNotBlank(schema.getTitle()) &amp;&amp; !&quot;null&quot;.equals(schema.getTitle())) {</span>
+<span class="nc" id="L497">                includedSchemas.add(schema);</span>
+            }
+<span class="nc" id="L499">            Object additionalObject = schema.getAdditionalProperties();</span>
+<span class="nc bnc" id="L500" title="All 2 branches missed.">            if (additionalObject instanceof Schema) {</span>
+<span class="nc" id="L501">                Schema additional = (Schema) additionalObject;</span>
+<span class="nc" id="L502">                String theKey = &quot;'key'&quot;;</span>
+<span class="nc bnc" id="L503" title="All 4 branches missed.">                if (additional.getEnum() != null &amp;&amp; !additional.getEnum().isEmpty()) {</span>
+<span class="nc" id="L504">                    theKey = additional.getEnum().get(0).toString();</span>
+<span class="nc bnc" id="L505" title="All 2 branches missed.">                    if (ModelUtils.isStringSchema(additional)) {</span>
+<span class="nc" id="L506">                        theKey = &quot;'&quot; + escapeText(theKey) + &quot;'&quot;;</span>
+                    }
+                }
+<span class="nc" id="L509">                example = &quot;{\n&quot; + indentationString + theKey + &quot; : &quot; + toExampleValueRecursive(additional, includedSchemas, indentation + 1) + &quot;\n&quot; + indentationString + &quot;}&quot;;</span>
+<span class="nc" id="L510">            } else {</span>
+<span class="nc" id="L511">                example = &quot;{ }&quot;;</span>
+            }
+<span class="nc bnc" id="L513" title="All 2 branches missed.">        } else if (ModelUtils.isObjectSchema(schema)) {</span>
+<span class="nc bnc" id="L514" title="All 2 branches missed.">            if (StringUtils.isBlank(schema.getTitle())) {</span>
+<span class="nc" id="L515">                example = &quot;None&quot;;</span>
+<span class="nc" id="L516">                return example;</span>
+            }
+
+            // I remove any property that is a discriminator, since it is not well supported by the python generator
+<span class="nc" id="L520">            String toExclude = null;</span>
+<span class="nc bnc" id="L521" title="All 2 branches missed.">            if (schema.getDiscriminator() != null) {</span>
+<span class="nc" id="L522">                toExclude = schema.getDiscriminator().getPropertyName();</span>
+            }
+
+<span class="nc" id="L525">            example = packageName + &quot;.models.&quot; + underscore(schema.getTitle()) + &quot;.&quot; + schema.getTitle() + &quot;(&quot;;</span>
+
+            // if required only:
+            // List&lt;String&gt; reqs = schema.getRequired();
+
+            // if required and optionals
+<span class="nc" id="L531">            List&lt;String&gt; reqs = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L532" title="All 4 branches missed.">            if (schema.getProperties() != null &amp;&amp; !schema.getProperties().isEmpty()) {</span>
+<span class="nc bnc" id="L533" title="All 2 branches missed.">                for (Object toAdd : schema.getProperties().keySet()) {</span>
+<span class="nc" id="L534">                    reqs.add((String) toAdd);</span>
+<span class="nc" id="L535">                }</span>
+
+<span class="nc" id="L537">                Map&lt;String, Schema&gt; properties = schema.getProperties();</span>
+<span class="nc" id="L538">                Set&lt;String&gt; propkeys = null;</span>
+<span class="nc bnc" id="L539" title="All 2 branches missed.">                if (properties != null) propkeys = properties.keySet();</span>
+<span class="nc bnc" id="L540" title="All 4 branches missed.">                if (toExclude != null &amp;&amp; reqs.contains(toExclude)) {</span>
+<span class="nc" id="L541">                    reqs.remove(toExclude);</span>
+                }
+<span class="nc bnc" id="L543" title="All 2 branches missed.">                for (String toRemove : includedSchemas.stream().map(Schema::getTitle).collect(Collectors.toList())) {</span>
+<span class="nc bnc" id="L544" title="All 2 branches missed.">                    if (reqs.contains(toRemove)) {</span>
+<span class="nc" id="L545">                        reqs.remove(toRemove);</span>
+                    }
+<span class="nc" id="L547">                }</span>
+<span class="nc bnc" id="L548" title="All 4 branches missed.">                if (StringUtils.isNotBlank(schema.getTitle()) &amp;&amp; !&quot;null&quot;.equals(schema.getTitle())) {</span>
+<span class="nc" id="L549">                    includedSchemas.add(schema);</span>
+                }
+<span class="nc bnc" id="L551" title="All 4 branches missed.">                if (null != schema.getRequired()) for (Object toAdd : schema.getRequired()) {</span>
+<span class="nc" id="L552">                    reqs.add((String) toAdd);</span>
+<span class="nc" id="L553">                }</span>
+<span class="nc bnc" id="L554" title="All 4 branches missed.">                if (null != propkeys) for (String propname : propkeys) {</span>
+<span class="nc" id="L555">                    Schema schema2 = properties.get(propname);</span>
+<span class="nc bnc" id="L556" title="All 2 branches missed.">                    if (reqs.contains(propname)) {</span>
+<span class="nc" id="L557">                        String refTitle = schema2.getTitle();</span>
+<span class="nc bnc" id="L558" title="All 4 branches missed.">                        if (StringUtils.isBlank(refTitle) || &quot;null&quot;.equals(refTitle)) {</span>
+<span class="nc" id="L559">                            schema2.setTitle(propname);</span>
+                        }
+<span class="nc" id="L561">                        example += &quot;\n&quot; + indentationString + underscore(propname) + &quot; = &quot; +</span>
+<span class="nc" id="L562">                                toExampleValueRecursive(schema2, includedSchemas, indentation + 1) + &quot;, &quot;;</span>
+                    }
+<span class="nc" id="L564">                }</span>
+            }
+<span class="nc" id="L566">            example += &quot;)&quot;;</span>
+<span class="nc" id="L567">        } else {</span>
+<span class="nc" id="L568">            LOGGER.debug(&quot;Type {} not handled properly in toExampleValue&quot;, schema.getType());</span>
+        }
+
+<span class="nc bnc" id="L571" title="All 2 branches missed.">        if (ModelUtils.isStringSchema(schema)) {</span>
+<span class="nc" id="L572">            example = &quot;'&quot; + escapeText(example) + &quot;'&quot;;</span>
+        }
+
+<span class="nc" id="L575">        return example;</span>
+    }
+
+    @Override
+    public void setParameterExampleValue(CodegenParameter p) {
+        String example;
+
+<span class="nc bnc" id="L582" title="All 2 branches missed.">        if (p.defaultValue == null) {</span>
+<span class="nc" id="L583">            example = p.example;</span>
+        } else {
+<span class="nc" id="L585">            p.example = p.defaultValue;</span>
+<span class="nc" id="L586">            return;</span>
+        }
+
+<span class="nc" id="L589">        String type = p.baseType;</span>
+<span class="nc bnc" id="L590" title="All 2 branches missed.">        if (type == null) {</span>
+<span class="nc" id="L591">            type = p.dataType;</span>
+        }
+
+<span class="nc bnc" id="L594" title="All 4 branches missed.">        if (&quot;String&quot;.equalsIgnoreCase(type) || &quot;str&quot;.equalsIgnoreCase(type)) {</span>
+<span class="nc bnc" id="L595" title="All 2 branches missed.">            if (example == null) {</span>
+<span class="nc" id="L596">                example = p.paramName + &quot;_example&quot;;</span>
+            }
+<span class="nc" id="L598">            example = &quot;'&quot; + escapeText(example) + &quot;'&quot;;</span>
+<span class="nc bnc" id="L599" title="All 4 branches missed.">        } else if (&quot;Integer&quot;.equals(type) || &quot;int&quot;.equals(type)) {</span>
+<span class="nc bnc" id="L600" title="All 2 branches missed.">            if (example == null) {</span>
+<span class="nc" id="L601">                example = &quot;56&quot;;</span>
+            }
+<span class="nc bnc" id="L603" title="All 4 branches missed.">        } else if (&quot;Float&quot;.equalsIgnoreCase(type) || &quot;Double&quot;.equalsIgnoreCase(type)) {</span>
+<span class="nc bnc" id="L604" title="All 2 branches missed.">            if (example == null) {</span>
+<span class="nc" id="L605">                example = &quot;3.4&quot;;</span>
+            }
+<span class="nc bnc" id="L607" title="All 4 branches missed.">        } else if (&quot;BOOLEAN&quot;.equalsIgnoreCase(type) || &quot;bool&quot;.equalsIgnoreCase(type)) {</span>
+<span class="nc bnc" id="L608" title="All 2 branches missed.">            if (example == null) {</span>
+<span class="nc" id="L609">                example = &quot;True&quot;;</span>
+            }
+<span class="nc bnc" id="L611" title="All 2 branches missed.">        } else if (&quot;file&quot;.equalsIgnoreCase(type)) {</span>
+<span class="nc bnc" id="L612" title="All 2 branches missed.">            if (example == null) {</span>
+<span class="nc" id="L613">                example = &quot;/path/to/file&quot;;</span>
+            }
+<span class="nc" id="L615">            example = &quot;'&quot; + escapeText(example) + &quot;'&quot;;</span>
+<span class="nc bnc" id="L616" title="All 2 branches missed.">        } else if (&quot;Date&quot;.equalsIgnoreCase(type)) {</span>
+<span class="nc bnc" id="L617" title="All 2 branches missed.">            if (example == null) {</span>
+<span class="nc" id="L618">                example = &quot;2013-10-20&quot;;</span>
+            }
+<span class="nc" id="L620">            example = &quot;'&quot; + escapeText(example) + &quot;'&quot;;</span>
+<span class="nc bnc" id="L621" title="All 2 branches missed.">        } else if (&quot;DateTime&quot;.equalsIgnoreCase(type)) {</span>
+<span class="nc bnc" id="L622" title="All 2 branches missed.">            if (example == null) {</span>
+<span class="nc" id="L623">                example = &quot;2013-10-20T19:20:30+01:00&quot;;</span>
+            }
+<span class="nc" id="L625">            example = &quot;'&quot; + escapeText(example) + &quot;'&quot;;</span>
+<span class="nc bnc" id="L626" title="All 2 branches missed.">        } else if (!languageSpecificPrimitives.contains(type)) {</span>
+            // type is a model class, e.g. User
+<span class="nc" id="L628">            example = this.packageName + &quot;.&quot; + type + &quot;()&quot;;</span>
+        } else {
+<span class="nc" id="L630">            LOGGER.debug(&quot;Type {} not handled properly in setParameterExampleValue&quot;, type);</span>
+        }
+
+<span class="nc bnc" id="L633" title="All 2 branches missed.">        if (example == null) {</span>
+<span class="nc" id="L634">            example = &quot;None&quot;;</span>
+<span class="nc bnc" id="L635" title="All 2 branches missed.">        } else if (Boolean.TRUE.equals(p.isArray)) {</span>
+<span class="nc" id="L636">            example = &quot;[&quot; + example + &quot;]&quot;;</span>
+<span class="nc bnc" id="L637" title="All 2 branches missed.">        } else if (Boolean.TRUE.equals(p.isMap)) {</span>
+<span class="nc" id="L638">            example = &quot;{'key': &quot; + example + &quot;}&quot;;</span>
+        }
+
+<span class="nc" id="L641">        p.example = example;</span>
+<span class="nc" id="L642">    }</span>
+
+    @Override
+    public void setParameterExampleValue(CodegenParameter codegenParameter, Parameter parameter) {
+<span class="nc" id="L646">        Schema schema = parameter.getSchema();</span>
+
+<span class="nc bnc" id="L648" title="All 2 branches missed.">        if (parameter.getExample() != null) {</span>
+<span class="nc" id="L649">            codegenParameter.example = parameter.getExample().toString();</span>
+<span class="nc bnc" id="L650" title="All 4 branches missed.">        } else if (parameter.getExamples() != null &amp;&amp; !parameter.getExamples().isEmpty()) {</span>
+<span class="nc" id="L651">            Example example = parameter.getExamples().values().iterator().next();</span>
+<span class="nc bnc" id="L652" title="All 2 branches missed.">            if (example.getValue() != null) {</span>
+<span class="nc" id="L653">                codegenParameter.example = example.getValue().toString();</span>
+            }
+<span class="nc bnc" id="L655" title="All 4 branches missed.">        } else if (schema != null &amp;&amp; schema.getExample() != null) {</span>
+<span class="nc" id="L656">            codegenParameter.example = schema.getExample().toString();</span>
+        }
+
+<span class="nc" id="L659">        setParameterExampleValue(codegenParameter);</span>
+<span class="nc" id="L660">    }</span>
+
+    @Override
+    public String sanitizeTag(String tag) {
+<span class="nc" id="L664">        return sanitizeName(tag);</span>
+    }
+
+    public String patternCorrection(String pattern) {
+        // Java does not recognize starting and ending forward slashes and mode modifiers
+        // It considers them as characters with no special meaning and tries to find them in the match string
+<span class="nc bnc" id="L670" title="All 6 branches missed.">        boolean checkEnding = pattern.endsWith(&quot;/i&quot;) || pattern.endsWith(&quot;/g&quot;) || pattern.endsWith(&quot;/m&quot;);</span>
+<span class="nc bnc" id="L671" title="All 2 branches missed.">        if (checkEnding) pattern = pattern.substring(0, pattern.length() - 2);</span>
+<span class="nc bnc" id="L672" title="All 2 branches missed.">        if (pattern.endsWith(&quot;/&quot;)) pattern = pattern.substring(0, pattern.length() - 1);</span>
+<span class="nc bnc" id="L673" title="All 2 branches missed.">        if (pattern.startsWith(&quot;/&quot;)) pattern = pattern.substring(1);</span>
+<span class="nc" id="L674">        return pattern;</span>
+    }
+
+    public void setPackageName(String packageName) {
+<span class="nc" id="L678">        this.packageName = packageName;</span>
+<span class="nc" id="L679">        additionalProperties.put(CodegenConstants.PACKAGE_NAME, this.packageName);</span>
+<span class="nc" id="L680">    }</span>
+
+    public void setProjectName(String projectName) {
+<span class="nc" id="L683">        this.projectName = projectName;</span>
+<span class="nc" id="L684">    }</span>
+
+    public void setPackageVersion(String packageVersion) {
+<span class="nc" id="L687">        this.packageVersion = packageVersion;</span>
+<span class="nc" id="L688">    }</span>
+
+    @Override
+    public String getTypeDeclaration(Schema p) {
+<span class="nc" id="L692">        p = ModelUtils.unaliasSchema(openAPI, p);</span>
+
+<span class="nc bnc" id="L694" title="All 2 branches missed.">        if (ModelUtils.isArraySchema(p)) {</span>
+<span class="nc" id="L695">            Schema inner = ModelUtils.getSchemaItems(p);</span>
+<span class="nc" id="L696">            return getSchemaType(p) + &quot;[&quot; + getCollectionItemTypeDeclaration(inner) + &quot;]&quot;;</span>
+<span class="nc bnc" id="L697" title="All 2 branches missed.">        } else if (ModelUtils.isMapSchema(p)) {</span>
+<span class="nc" id="L698">            Schema inner = ModelUtils.getAdditionalProperties(p);</span>
+<span class="nc" id="L699">            return getSchemaType(p) + &quot;[str, &quot; + getCollectionItemTypeDeclaration(inner) + &quot;]&quot;;</span>
+        }
+
+<span class="nc" id="L702">        String openAPIType = getSchemaType(p);</span>
+<span class="nc bnc" id="L703" title="All 2 branches missed.">        if (typeMapping.containsKey(openAPIType)) {</span>
+<span class="nc" id="L704">            return typeMapping.get(openAPIType);</span>
+        }
+
+<span class="nc bnc" id="L707" title="All 2 branches missed.">        if (languageSpecificPrimitives.contains(openAPIType)) {</span>
+<span class="nc" id="L708">            return openAPIType;</span>
+        }
+
+<span class="nc" id="L711">        return toModelName(openAPIType);</span>
+    }
+
+    private String getCollectionItemTypeDeclaration(Schema inner) {
+<span class="nc" id="L715">        String innerDeclaration = getTypeDeclaration(inner);</span>
+<span class="nc bnc" id="L716" title="All 2 branches missed.">        if (Boolean.TRUE.equals(inner.getNullable())) {</span>
+<span class="nc" id="L717">            innerDeclaration = &quot;Optional[&quot; + innerDeclaration + &quot;]&quot;;</span>
+        }
+<span class="nc" id="L719">        return innerDeclaration;</span>
+    }
+
+    @Override
+    public String getSchemaType(Schema p) {
+<span class="nc" id="L724">        String openAPIType = super.getSchemaType(p);</span>
+        String type;
+
+<span class="nc bnc" id="L727" title="All 2 branches missed.">        if (openAPIType == null) {</span>
+<span class="nc" id="L728">            LOGGER.error(&quot;OpenAPI Type for {} is null. Default to UNKNOWN_OPENAPI_TYPE instead.&quot;, p.getName());</span>
+<span class="nc" id="L729">            openAPIType = &quot;UNKNOWN_OPENAPI_TYPE&quot;;</span>
+        }
+
+<span class="nc bnc" id="L732" title="All 2 branches missed.">        if (typeMapping.containsKey(openAPIType)) {</span>
+<span class="nc" id="L733">            type = typeMapping.get(openAPIType);</span>
+<span class="nc bnc" id="L734" title="All 2 branches missed.">            if (type != null) {</span>
+<span class="nc" id="L735">                return type;</span>
+            }
+        } else {
+<span class="nc" id="L738">            type = openAPIType;</span>
+        }
+
+<span class="nc" id="L741">        return toModelName(type);</span>
+    }
+
+    @Override
+    public String toModelName(String name) {
+        // obtain the name from modelNameMapping directly if provided
+<span class="nc bnc" id="L747" title="All 2 branches missed.">        if (modelNameMapping.containsKey(name)) {</span>
+<span class="nc" id="L748">            return modelNameMapping.get(name);</span>
+        }
+
+        // check if schema-mapping has a different model for this class, so we can use it
+        // instead of the auto-generated one.
+<span class="nc bnc" id="L753" title="All 2 branches missed.">        if (schemaMapping.containsKey(name)) {</span>
+<span class="nc" id="L754">            return schemaMapping.get(name);</span>
+        }
+
+        // memoization
+<span class="nc" id="L758">        String origName = name;</span>
+<span class="nc bnc" id="L759" title="All 2 branches missed.">        if (schemaKeyToModelNameCache.containsKey(origName)) {</span>
+<span class="nc" id="L760">            return schemaKeyToModelNameCache.get(origName);</span>
+        }
+
+<span class="nc" id="L763">        String sanitizedName = sanitizeName(name); // FIXME: a parameter should not be assigned. Also declare the methods parameters as 'final'.</span>
+        // remove dollar sign
+<span class="nc" id="L765">        sanitizedName = sanitizedName.replace(&quot;$&quot;, &quot;&quot;);</span>
+        // remove whitespace
+<span class="nc" id="L767">        sanitizedName = sanitizedName.replaceAll(&quot;\\s+&quot;, &quot;&quot;);</span>
+
+<span class="nc" id="L769">        String nameWithPrefixSuffix = sanitizedName;</span>
+<span class="nc bnc" id="L770" title="All 2 branches missed.">        if (!StringUtils.isEmpty(modelNamePrefix)) {</span>
+            // add '_' so that model name can be camelized correctly
+<span class="nc" id="L772">            nameWithPrefixSuffix = modelNamePrefix + &quot;_&quot; + nameWithPrefixSuffix;</span>
+        }
+
+<span class="nc bnc" id="L775" title="All 2 branches missed.">        if (!StringUtils.isEmpty(modelNameSuffix)) {</span>
+            // add '_' so that model name can be camelized correctly
+<span class="nc" id="L777">            nameWithPrefixSuffix = nameWithPrefixSuffix + &quot;_&quot; + modelNameSuffix;</span>
+        }
+
+        // camelize the model name
+        // phone_number =&gt; PhoneNumber
+<span class="nc" id="L782">        String camelizedName = camelize(nameWithPrefixSuffix);</span>
+
+        // model name cannot use reserved keyword, e.g. return
+<span class="nc bnc" id="L785" title="All 2 branches missed.">        if (isReservedWord(camelizedName)) {</span>
+<span class="nc" id="L786">            String modelName = &quot;Model&quot; + camelizedName; // e.g. return =&gt; ModelReturn (after camelize)</span>
+<span class="nc" id="L787">            LOGGER.warn(&quot;{} (reserved word) cannot be used as model name. Renamed to {}&quot;, camelizedName, modelName);</span>
+<span class="nc" id="L788">            schemaKeyToModelNameCache.put(origName, modelName);</span>
+<span class="nc" id="L789">            return modelName;</span>
+        }
+
+        // model name starts with number
+<span class="nc bnc" id="L793" title="All 2 branches missed.">        if (camelizedName.matches(&quot;^\\d.*&quot;)) {</span>
+<span class="nc" id="L794">            String modelName = &quot;Model&quot; + camelizedName; // e.g. return =&gt; ModelReturn (after camelize)</span>
+<span class="nc" id="L795">            LOGGER.warn(&quot;{} (model name starts with number) cannot be used as model name. Renamed to {}&quot;, camelizedName, modelName);</span>
+<span class="nc" id="L796">            schemaKeyToModelNameCache.put(origName, modelName);</span>
+<span class="nc" id="L797">            return modelName;</span>
+        }
+
+<span class="nc" id="L800">        schemaKeyToModelNameCache.put(origName, camelizedName);</span>
+<span class="nc" id="L801">        return camelizedName;</span>
+    }
+
+    @Override
+    public String toModelFilename(String name) {
+        // underscore the model file name
+        // PhoneNumber =&gt; phone_number
+<span class="nc" id="L808">        return underscore(dropDots(toModelName(name)));</span>
+    }
+
+    @Override
+    public String toModelTestFilename(String name) {
+<span class="nc" id="L813">        return &quot;test_&quot; + toModelFilename(name);</span>
+    }
+
+    @Override
+    public String toApiFilename(String name) {
+        // e.g. PhoneNumberApi.py =&gt; phone_number_api.py
+<span class="nc" id="L819">        return underscore(toApiName(name));</span>
+    }
+
+    @Override
+    public String toApiTestFilename(String name) {
+<span class="nc" id="L824">        return &quot;test_&quot; + toApiFilename(name);</span>
+    }
+
+    @Override
+    public String toApiName(String name) {
+<span class="nc" id="L829">        return super.toApiName(name);</span>
+    }
+
+    @Override
+    public String toApiVarName(String name) {
+<span class="nc" id="L834">        return underscore(toApiName(name));</span>
+    }
+
+    protected static String dropDots(String str) {
+<span class="nc" id="L838">        return str.replaceAll(&quot;\\.&quot;, &quot;_&quot;);</span>
+    }
+
+    @Override
+    public GeneratorLanguage generatorLanguage() {
+<span class="nc" id="L843">        return GeneratorLanguage.PYTHON;</span>
+    }
+
+    @Override
+    public Map&lt;String, ModelsMap&gt; postProcessAllModels(Map&lt;String, ModelsMap&gt; objs) {
+<span class="nc" id="L848">        final Map&lt;String, ModelsMap&gt; processed = super.postProcessAllModels(objs);</span>
+
+<span class="nc bnc" id="L850" title="All 2 branches missed.">        for (Map.Entry&lt;String, ModelsMap&gt; entry : objs.entrySet()) {</span>
+            // create hash map of codegen model
+<span class="nc" id="L852">            CodegenModel cm = ModelUtils.getModelByName(entry.getKey(), objs);</span>
+<span class="nc" id="L853">            codegenModelMap.put(cm.classname, ModelUtils.getModelByName(entry.getKey(), objs));</span>
+<span class="nc" id="L854">        }</span>
+
+        // create circular import
+<span class="nc bnc" id="L857" title="All 2 branches missed.">        for (String m : codegenModelMap.keySet()) {</span>
+<span class="nc" id="L858">            createImportMapOfSet(m, codegenModelMap);</span>
+<span class="nc" id="L859">        }</span>
+
+<span class="nc bnc" id="L861" title="All 2 branches missed.">        for (Map.Entry&lt;String, ModelsMap&gt; entry : processed.entrySet()) {</span>
+<span class="nc" id="L862">            entry.setValue(postProcessModelsMap(entry.getValue()));</span>
+<span class="nc" id="L863">        }</span>
+
+<span class="nc" id="L865">        return processed;</span>
+    }
+
+    private ModelsMap postProcessModelsMap(ModelsMap objs) {
+        // process enum in models
+<span class="nc" id="L870">        objs = postProcessModelsEnum(objs);</span>
+
+        // TODO: migrate almost (all?) everything to the `PythonImports` class.
+<span class="nc" id="L873">        TreeSet&lt;String&gt; modelImports = new TreeSet&lt;&gt;();</span>
+<span class="nc" id="L874">        TreeSet&lt;String&gt; postponedModelImports = new TreeSet&lt;&gt;();</span>
+
+<span class="nc bnc" id="L876" title="All 2 branches missed.">        for (ModelMap m : objs.getModels()) {</span>
+<span class="nc" id="L877">            TreeSet&lt;String&gt; exampleImports = new TreeSet&lt;&gt;();</span>
+<span class="nc" id="L878">            TreeSet&lt;String&gt; postponedExampleImports = new TreeSet&lt;&gt;();</span>
+<span class="nc" id="L879">            List&lt;String&gt; readOnlyFields = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L880">            hasModelsToImport = false;</span>
+<span class="nc" id="L881">            int property_count = 1;</span>
+
+<span class="nc" id="L883">            PythonImports moduleImports = new PythonImports();</span>
+<span class="nc" id="L884">            CodegenModel model = m.getModel();</span>
+
+<span class="nc" id="L886">            PydanticType pydantic = new PydanticType(</span>
+                modelImports,
+                exampleImports,
+                postponedModelImports,
+                postponedExampleImports,
+                moduleImports,
+                model.classname
+            );
+
+            // handle null type in oneOf
+<span class="nc bnc" id="L896" title="All 4 branches missed.">            if (model.getComposedSchemas() != null &amp;&amp; model.getComposedSchemas().getOneOf() != null</span>
+<span class="nc bnc" id="L897" title="All 2 branches missed.">                    &amp;&amp; !model.getComposedSchemas().getOneOf().isEmpty()) {</span>
+<span class="nc" id="L898">                int index = 0;</span>
+<span class="nc" id="L899">                List&lt;CodegenProperty&gt; oneOfs = model.getComposedSchemas().getOneOf();</span>
+<span class="nc bnc" id="L900" title="All 2 branches missed.">                for (CodegenProperty oneOf : oneOfs) {</span>
+<span class="nc bnc" id="L901" title="All 2 branches missed.">                    if (&quot;none_type&quot;.equals(oneOf.dataType)) {</span>
+<span class="nc" id="L902">                        oneOfs.remove(index);</span>
+<span class="nc" id="L903">                        break; // return earlier assuming there's only 1 null type defined</span>
+                    }
+<span class="nc" id="L905">                    index++;</span>
+<span class="nc" id="L906">                }</span>
+            }
+
+<span class="nc" id="L909">            List&lt;CodegenProperty&gt; codegenProperties = null;</span>
+<span class="nc bnc" id="L910" title="All 2 branches missed.">            if (!model.oneOf.isEmpty()) { // oneOfValidationError</span>
+<span class="nc" id="L911">                codegenProperties = model.getComposedSchemas().getOneOf();</span>
+<span class="nc" id="L912">                moduleImports.add(&quot;typing&quot;, &quot;Any&quot;);</span>
+<span class="nc" id="L913">                moduleImports.add(&quot;typing&quot;, &quot;List&quot;);</span>
+<span class="nc" id="L914">                moduleImports.add(&quot;pydantic&quot;, &quot;Field&quot;);</span>
+<span class="nc" id="L915">                moduleImports.add(&quot;pydantic&quot;, &quot;StrictStr&quot;);</span>
+<span class="nc" id="L916">                moduleImports.add(&quot;pydantic&quot;, &quot;ValidationError&quot;);</span>
+<span class="nc" id="L917">                moduleImports.add(&quot;pydantic&quot;, &quot;field_validator&quot;);</span>
+<span class="nc bnc" id="L918" title="All 2 branches missed.">            } else if (!model.anyOf.isEmpty()) { // anyOF</span>
+<span class="nc" id="L919">                codegenProperties = model.getComposedSchemas().getAnyOf();</span>
+<span class="nc" id="L920">                moduleImports.add(&quot;pydantic&quot;, &quot;Field&quot;);</span>
+<span class="nc" id="L921">                moduleImports.add(&quot;pydantic&quot;, &quot;StrictStr&quot;);</span>
+<span class="nc" id="L922">                moduleImports.add(&quot;pydantic&quot;, &quot;ValidationError&quot;);</span>
+<span class="nc" id="L923">                moduleImports.add(&quot;pydantic&quot;, &quot;field_validator&quot;);</span>
+            } else { // typical model
+<span class="nc" id="L925">                codegenProperties = model.vars;</span>
+
+                // if super class
+<span class="nc bnc" id="L928" title="All 4 branches missed.">                if (model.getDiscriminator() != null &amp;&amp; model.getDiscriminator().getMappedModels() != null) {</span>
+<span class="nc" id="L929">                    moduleImports.add(&quot;typing&quot;, &quot;Union&quot;);</span>
+<span class="nc" id="L930">                    moduleImports.add(&quot;importlib&quot;, &quot;import_module&quot;);</span>
+                }
+            }
+
+<span class="nc bnc" id="L934" title="All 2 branches missed.">            if (!model.allOf.isEmpty()) { // allOf</span>
+<span class="nc bnc" id="L935" title="All 2 branches missed.">                for (CodegenProperty cp : model.allVars) {</span>
+<span class="nc bnc" id="L936" title="All 4 branches missed.">                    if (!cp.isPrimitiveType || cp.isModel) {</span>
+<span class="nc bnc" id="L937" title="All 4 branches missed.">                        if (cp.isArray || cp.isMap){ // if array or map</span>
+<span class="nc" id="L938">                            modelImports.add(cp.items.dataType);</span>
+                        }else{ // if model
+<span class="nc" id="L940">                            modelImports.add(cp.getDataType());</span>
+                        }
+                    }
+<span class="nc" id="L943">                }</span>
+            }
+
+            // if model_generic.mustache is used
+<span class="nc bnc" id="L947" title="All 6 branches missed.">            if (model.oneOf.isEmpty() &amp;&amp; model.anyOf.isEmpty() &amp;&amp; !model.isEnum) {</span>
+<span class="nc" id="L948">                moduleImports.add(&quot;typing&quot;, &quot;ClassVar&quot;);</span>
+<span class="nc" id="L949">                moduleImports.add(&quot;typing&quot;, &quot;Dict&quot;);</span>
+<span class="nc" id="L950">                moduleImports.add(&quot;typing&quot;, &quot;Any&quot;);</span>
+<span class="nc bnc" id="L951" title="All 4 branches missed.">                if(this.disallowAdditionalPropertiesIfNotPresent || model.isAdditionalPropertiesTrue) {</span>
+<span class="nc" id="L952">                    moduleImports.add(&quot;typing&quot;, &quot;List&quot;);</span>
+                }
+            }
+
+            // if pydantic model
+<span class="nc bnc" id="L957" title="All 2 branches missed.">            if (!model.isEnum) {</span>
+<span class="nc" id="L958">                moduleImports.add(&quot;pydantic&quot;, &quot;ConfigDict&quot;);</span>
+            }
+
+            //loop through properties/schemas to set up typing, pydantic
+<span class="nc bnc" id="L962" title="All 2 branches missed.">            for (CodegenProperty cp : codegenProperties) {</span>
+                // is readOnly?
+<span class="nc bnc" id="L964" title="All 2 branches missed.">                if (cp.isReadOnly) {</span>
+<span class="nc" id="L965">                    readOnlyFields.add(cp.name);</span>
+                }
+
+<span class="nc" id="L968">                String typing = pydantic.generatePythonType(cp);</span>
+<span class="nc" id="L969">                cp.vendorExtensions.put(&quot;x-py-typing&quot;, typing);</span>
+
+                // setup x-py-name for each oneOf/anyOf schema
+<span class="nc bnc" id="L972" title="All 2 branches missed.">                if (!model.oneOf.isEmpty()) { // oneOf</span>
+<span class="nc" id="L973">                    cp.vendorExtensions.put(&quot;x-py-name&quot;, String.format(Locale.ROOT, &quot;oneof_schema_%d_validator&quot;, property_count++));</span>
+<span class="nc bnc" id="L974" title="All 2 branches missed.">                } else if (!model.anyOf.isEmpty()) { // anyOf</span>
+<span class="nc" id="L975">                    cp.vendorExtensions.put(&quot;x-py-name&quot;, String.format(Locale.ROOT, &quot;anyof_schema_%d_validator&quot;, property_count++));</span>
+                }
+<span class="nc" id="L977">            }</span>
+
+            // add parent model to import
+<span class="nc bnc" id="L980" title="All 2 branches missed.">            if (!StringUtils.isEmpty(model.parent)) {</span>
+<span class="nc" id="L981">                modelImports.add(model.parent);</span>
+<span class="nc bnc" id="L982" title="All 2 branches missed.">            } else if (!model.isEnum) {</span>
+<span class="nc" id="L983">                moduleImports.add(&quot;pydantic&quot;, &quot;BaseModel&quot;);</span>
+            }
+
+            // set enum type in extensions and update `name` in enumVars
+<span class="nc bnc" id="L987" title="All 2 branches missed.">            if (model.isEnum) {</span>
+<span class="nc bnc" id="L988" title="All 2 branches missed.">                for (Map&lt;String, Object&gt; enumVars : (List&lt;Map&lt;String, Object&gt;&gt;) model.getAllowableValues().get(&quot;enumVars&quot;)) {</span>
+<span class="nc bnc" id="L989" title="All 2 branches missed.">                    if ((Boolean) enumVars.get(&quot;isString&quot;)) {</span>
+<span class="nc" id="L990">                        model.vendorExtensions.putIfAbsent(&quot;x-py-enum-type&quot;, &quot;str&quot;);</span>
+                        // update `name`, e.g.
+<span class="nc" id="L992">                        enumVars.put(&quot;name&quot;, toEnumVariableName((String) enumVars.get(&quot;value&quot;), &quot;str&quot;));</span>
+                    } else {
+<span class="nc" id="L994">                        model.vendorExtensions.putIfAbsent(&quot;x-py-enum-type&quot;, &quot;int&quot;);</span>
+<span class="nc" id="L995">                        enumVars.put(&quot;name&quot;, toEnumVariableName((String) enumVars.get(&quot;value&quot;), &quot;int&quot;));</span>
+                    }
+<span class="nc" id="L997">                }</span>
+            }
+
+            // set the extensions if the key is absent
+<span class="nc" id="L1001">            model.getVendorExtensions().putIfAbsent(&quot;x-py-readonly&quot;, readOnlyFields);</span>
+
+            // remove the items of postponedModelImports in modelImports to avoid circular imports error
+<span class="nc bnc" id="L1004" title="All 4 branches missed.">            if (!modelImports.isEmpty() &amp;&amp; !postponedModelImports.isEmpty()){</span>
+<span class="nc" id="L1005">                modelImports.removeAll(postponedModelImports);</span>
+            }
+
+            // import models one by one
+<span class="nc bnc" id="L1009" title="All 2 branches missed.">            if (!modelImports.isEmpty()) {</span>
+<span class="nc" id="L1010">                Set&lt;String&gt; modelsToImport = new TreeSet&lt;&gt;();</span>
+<span class="nc bnc" id="L1011" title="All 2 branches missed.">                for (String modelImport : modelImports) {</span>
+<span class="nc bnc" id="L1012" title="All 2 branches missed.">                    if (modelImport.equals(model.classname)) {</span>
+                        // skip self import
+<span class="nc" id="L1014">                        continue;</span>
+                    }
+<span class="nc" id="L1016">                    modelsToImport.add(&quot;from &quot; + packageName + &quot;.models.&quot; + underscore(modelImport) + &quot; import &quot; + modelImport);</span>
+<span class="nc" id="L1017">                }</span>
+
+<span class="nc bnc" id="L1019" title="All 2 branches missed.">                if (!modelsToImport.isEmpty()) {</span>
+<span class="nc" id="L1020">                    model.getVendorExtensions().putIfAbsent(&quot;x-py-model-imports&quot;, modelsToImport);</span>
+                }
+            }
+
+<span class="nc bnc" id="L1024" title="All 2 branches missed.">            if (!moduleImports.isEmpty()) {</span>
+<span class="nc" id="L1025">                model.getVendorExtensions().putIfAbsent(&quot;x-py-other-imports&quot;, moduleImports.exports());</span>
+            }
+
+
+<span class="nc bnc" id="L1029" title="All 2 branches missed.">            if (!postponedModelImports.isEmpty()) {</span>
+<span class="nc" id="L1030">                Set&lt;String&gt; modelsToImport = new TreeSet&lt;&gt;();</span>
+<span class="nc bnc" id="L1031" title="All 2 branches missed.">                for (String modelImport : postponedModelImports) {</span>
+<span class="nc bnc" id="L1032" title="All 2 branches missed.">                    if (modelImport.equals(model.classname)) {</span>
+                        // skip self import
+<span class="nc" id="L1034">                        continue;</span>
+                    }
+<span class="nc" id="L1036">                    modelsToImport.add(&quot;from &quot; + packageName + &quot;.models.&quot; + underscore(modelImport) + &quot; import &quot; + modelImport);</span>
+<span class="nc" id="L1037">                }</span>
+
+<span class="nc" id="L1039">                model.getVendorExtensions().putIfAbsent(&quot;x-py-postponed-model-imports&quot;, modelsToImport);</span>
+            }
+<span class="nc" id="L1041">        }</span>
+
+<span class="nc" id="L1043">        return objs;</span>
+    }
+
+
+    /*
+     * Gets the pydantic type given a Codegen Property
+     *
+     * @param cp codegen property
+     * @param modelImports model imports
+     * @param exampleImports example imports
+     * @param postponedModelImports postponed model imports
+     * @param postponedExampleImports postponed example imports
+     * @param classname class name
+     * @return pydantic type
+     *
+     */
+    private PythonType getPydanticType(CodegenProperty cp,
+                                   Set&lt;String&gt; modelImports,
+                                   Set&lt;String&gt; exampleImports,
+                                   Set&lt;String&gt; postponedModelImports,
+                                   Set&lt;String&gt; postponedExampleImports,
+                                   PythonImports moduleImports,
+                                   String classname) {
+<span class="nc" id="L1066">        PydanticType pt = new PydanticType(</span>
+            modelImports,
+            exampleImports,
+            postponedModelImports,
+            postponedExampleImports,
+            moduleImports,
+            classname
+        );
+
+<span class="nc" id="L1075">        return pt.getType(cp);</span>
+    }
+
+    public void setMapNumberTo(String mapNumberTo) {
+<span class="nc bnc" id="L1079" title="All 2 branches missed.">        if (&quot;Union[StrictFloat, StrictInt]&quot;.equals(mapNumberTo)</span>
+<span class="nc bnc" id="L1080" title="All 2 branches missed.">                || &quot;StrictFloat&quot;.equals(mapNumberTo)</span>
+<span class="nc bnc" id="L1081" title="All 2 branches missed.">                || &quot;float&quot;.equals(mapNumberTo)) {</span>
+<span class="nc" id="L1082">            this.mapNumberTo = mapNumberTo;</span>
+        } else {
+<span class="nc" id="L1084">            throw new IllegalArgumentException(&quot;mapNumberTo value must be Union[StrictFloat, StrictInt], StrictFloat or float&quot;);</span>
+        }
+<span class="nc" id="L1086">    }</span>
+
+    public String toEnumVariableName(String name, String datatype) {
+<span class="nc bnc" id="L1089" title="All 2 branches missed.">        if (&quot;int&quot;.equals(datatype)) {</span>
+<span class="nc" id="L1090">            return &quot;NUMBER_&quot; + name.replace(&quot;-&quot;, &quot;MINUS_&quot;);</span>
+        }
+
+        // remove quote e.g. 'abc' =&gt; abc
+<span class="nc" id="L1094">        name = name.substring(1, name.length() - 1);</span>
+
+<span class="nc bnc" id="L1096" title="All 2 branches missed.">        if (name.length() == 0) {</span>
+<span class="nc" id="L1097">            return &quot;EMPTY&quot;;</span>
+        }
+
+<span class="nc bnc" id="L1100" title="All 2 branches missed.">        if (&quot; &quot;.equals(name)) {</span>
+<span class="nc" id="L1101">            return &quot;SPACE&quot;;</span>
+        }
+
+<span class="nc bnc" id="L1104" title="All 2 branches missed.">        if (&quot;_&quot;.equals(name)) {</span>
+<span class="nc" id="L1105">            return &quot;UNDERSCORE&quot;;</span>
+        }
+
+<span class="nc bnc" id="L1108" title="All 2 branches missed.">        if (reservedWords.contains(name)) {</span>
+<span class="nc" id="L1109">            name = name.toUpperCase(Locale.ROOT);</span>
+<span class="nc bnc" id="L1110" title="All 2 branches missed.">        } else if (((CharSequence) name).chars().anyMatch(character -&gt; specialCharReplacements.keySet().contains(String.valueOf((char) character)))) {</span>
+<span class="nc" id="L1111">            name = underscore(escape(name, specialCharReplacements, Collections.singletonList(&quot;_&quot;), &quot;_&quot;)).toUpperCase(Locale.ROOT);</span>
+        } else {
+<span class="nc" id="L1113">            name = name.toUpperCase(Locale.ROOT);</span>
+        }
+
+<span class="nc" id="L1116">        name = name.replace(&quot; &quot;, &quot;_&quot;);</span>
+<span class="nc" id="L1117">        name = name.replaceFirst(&quot;^_&quot;, &quot;&quot;);</span>
+<span class="nc" id="L1118">        name = name.replaceFirst(&quot;_$&quot;, &quot;&quot;);</span>
+
+<span class="nc bnc" id="L1120" title="All 2 branches missed.">        if (name.matches(&quot;\\d.*&quot;)) {</span>
+<span class="nc" id="L1121">            name = &quot;ENUM_&quot; + name.toUpperCase(Locale.ROOT);</span>
+        }
+
+<span class="nc" id="L1124">        return name;</span>
+    }
+
+    /**
+     * Update circularImports with the model name (key) and its imports gathered recursively
+     *
+     * @param modelName       model name
+     * @param codegenModelMap a map of CodegenModel
+     */
+    void createImportMapOfSet(String modelName, Map&lt;String, CodegenModel&gt; codegenModelMap) {
+<span class="nc" id="L1134">        HashSet&lt;String&gt; imports = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L1135">        circularImports.put(modelName, imports);</span>
+
+<span class="nc" id="L1137">        CodegenModel cm = codegenModelMap.get(modelName);</span>
+
+<span class="nc bnc" id="L1139" title="All 2 branches missed.">        if (cm == null) {</span>
+<span class="nc" id="L1140">            LOGGER.warn(&quot;Failed to lookup model in createImportMapOfSet: &quot; + modelName);</span>
+<span class="nc" id="L1141">            return;</span>
+        }
+
+<span class="nc" id="L1144">        List&lt;CodegenProperty&gt; codegenProperties = null;</span>
+<span class="nc bnc" id="L1145" title="All 4 branches missed.">        if (cm.oneOf != null &amp;&amp; !cm.oneOf.isEmpty()) { // oneOf</span>
+<span class="nc" id="L1146">            codegenProperties = cm.getComposedSchemas().getOneOf();</span>
+<span class="nc bnc" id="L1147" title="All 4 branches missed.">        } else if (cm.anyOf != null &amp;&amp; !cm.anyOf.isEmpty()) { // anyOF</span>
+<span class="nc" id="L1148">            codegenProperties = cm.getComposedSchemas().getAnyOf();</span>
+        } else { // typical model
+<span class="nc" id="L1150">            codegenProperties = cm.vars;</span>
+        }
+
+<span class="nc bnc" id="L1153" title="All 2 branches missed.">        for (CodegenProperty cp : codegenProperties) {</span>
+<span class="nc" id="L1154">            String modelNameFromDataType = getModelNameFromDataType(cp);</span>
+<span class="nc bnc" id="L1155" title="All 2 branches missed.">            if (modelNameFromDataType != null) { // model</span>
+<span class="nc" id="L1156">                imports.add(modelNameFromDataType); // update import</span>
+                // go through properties or sub-schemas of the model recursively to identify more (model) import if any
+<span class="nc" id="L1158">                updateImportsFromCodegenModel(modelNameFromDataType, codegenModelMap.get(modelNameFromDataType), imports);</span>
+            }
+<span class="nc" id="L1160">        }</span>
+<span class="nc" id="L1161">    }</span>
+
+    /**
+     * Returns the model name (if any) from data type of codegen property.
+     * Returns null if it's not a model.
+     *
+     * @param cp Codegen property
+     * @return model name
+     */
+    private String getModelNameFromDataType(CodegenProperty cp) {
+<span class="nc bnc" id="L1171" title="All 2 branches missed.">        if (cp.isArray) {</span>
+<span class="nc" id="L1172">            return getModelNameFromDataType(cp.items);</span>
+<span class="nc bnc" id="L1173" title="All 2 branches missed.">        } else if (cp.isMap) {</span>
+<span class="nc" id="L1174">            return getModelNameFromDataType(cp.items);</span>
+<span class="nc bnc" id="L1175" title="All 4 branches missed.">        } else if (!cp.isPrimitiveType || cp.isModel) {</span>
+<span class="nc" id="L1176">            return cp.getDataType();</span>
+        } else {
+<span class="nc" id="L1178">            return null;</span>
+        }
+    }
+
+    /**
+     * Update set of imports from codegen model recursivly
+     *
+     * @param modelName model name
+     * @param cm        codegen model
+     * @param imports   set of imports
+     */
+    public void updateImportsFromCodegenModel(String modelName, CodegenModel cm, Set&lt;String&gt; imports) {
+<span class="nc bnc" id="L1190" title="All 2 branches missed.">        if (cm == null) {</span>
+<span class="nc" id="L1191">            LOGGER.warn(&quot;Failed to lookup model in createImportMapOfSet &quot; + modelName);</span>
+<span class="nc" id="L1192">            return;</span>
+        }
+
+<span class="nc" id="L1195">        List&lt;CodegenProperty&gt; codegenProperties = null;</span>
+<span class="nc bnc" id="L1196" title="All 4 branches missed.">        if (cm.oneOf != null &amp;&amp; !cm.oneOf.isEmpty()) { // oneOfValidationError</span>
+<span class="nc" id="L1197">            codegenProperties = cm.getComposedSchemas().getOneOf();</span>
+<span class="nc bnc" id="L1198" title="All 4 branches missed.">        } else if (cm.anyOf != null &amp;&amp; !cm.anyOf.isEmpty()) { // anyOF</span>
+<span class="nc" id="L1199">            codegenProperties = cm.getComposedSchemas().getAnyOf();</span>
+        } else { // typical model
+<span class="nc" id="L1201">            codegenProperties = cm.vars;</span>
+        }
+
+<span class="nc bnc" id="L1204" title="All 2 branches missed.">        for (CodegenProperty cp : codegenProperties) {</span>
+<span class="nc" id="L1205">            String modelNameFromDataType = getModelNameFromDataType(cp);</span>
+<span class="nc bnc" id="L1206" title="All 2 branches missed.">            if (modelNameFromDataType != null) { // model</span>
+<span class="nc bnc" id="L1207" title="All 2 branches missed.">                if (modelName.equals(modelNameFromDataType)) { // self referencing</span>
+<span class="nc" id="L1208">                    continue;</span>
+<span class="nc bnc" id="L1209" title="All 2 branches missed.">                } else if (imports.contains(modelNameFromDataType)) { // circular import</span>
+<span class="nc" id="L1210">                    continue;</span>
+                } else {
+<span class="nc" id="L1212">                    imports.add(modelNameFromDataType); // update import</span>
+                    // go through properties of the model recursively to identify more (model) import if any
+<span class="nc" id="L1214">                    updateImportsFromCodegenModel(modelNameFromDataType, codegenModelMap.get(modelNameFromDataType), imports);</span>
+                }
+            }
+<span class="nc" id="L1217">        }</span>
+<span class="nc" id="L1218">    }</span>
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L1222">        hasModelsToImport = false;</span>
+
+<span class="nc" id="L1224">        TreeSet&lt;String&gt; modelImports = new TreeSet&lt;&gt;();</span>
+<span class="nc" id="L1225">        TreeSet&lt;String&gt; postponedModelImports = new TreeSet&lt;&gt;();</span>
+<span class="nc" id="L1226">        PythonImports moduleImports = new PythonImports();</span>
+
+<span class="nc" id="L1228">        OperationMap objectMap = objs.getOperations();</span>
+<span class="nc" id="L1229">        List&lt;CodegenOperation&gt; operations = objectMap.getOperation();</span>
+
+<span class="nc bnc" id="L1231" title="All 2 branches missed.">        for (CodegenOperation operation : operations) {</span>
+<span class="nc" id="L1232">            TreeSet&lt;String&gt; exampleImports = new TreeSet&lt;&gt;(); // import for each operation to be show in sample code</span>
+<span class="nc" id="L1233">            TreeSet&lt;String&gt; postponedExampleImports = new TreeSet&lt;&gt;(); // import for each operation to be show in sample code</span>
+<span class="nc" id="L1234">            List&lt;CodegenParameter&gt; params = operation.allParams;</span>
+
+<span class="nc bnc" id="L1236" title="All 2 branches missed.">            for (CodegenParameter cp : params) {</span>
+<span class="nc" id="L1237">                PydanticType pydantic = new PydanticType(</span>
+                    modelImports,
+                    exampleImports,
+                    postponedModelImports,
+                    postponedExampleImports,
+                    moduleImports,
+                    null
+                );
+<span class="nc" id="L1245">                String typing = pydantic.generatePythonType(cp);</span>
+<span class="nc" id="L1246">                cp.vendorExtensions.put(&quot;x-py-typing&quot;, typing);</span>
+<span class="nc" id="L1247">            }</span>
+
+            // update typing import for operation return type
+<span class="nc bnc" id="L1250" title="All 2 branches missed.">            if (!StringUtils.isEmpty(operation.returnType)) {</span>
+                // Not interested in the result, only in the update of the imports
+<span class="nc" id="L1252">                getPydanticType(</span>
+                    operation.returnProperty,
+                    modelImports,
+                    exampleImports,
+                    postponedModelImports,
+                    postponedExampleImports,
+                    moduleImports,
+                    null
+                );
+            }
+
+            // add import for code samples
+            // import models one by one
+<span class="nc bnc" id="L1265" title="All 2 branches missed.">            if (!exampleImports.isEmpty()) {</span>
+<span class="nc" id="L1266">                List&lt;String&gt; imports = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L1267" title="All 2 branches missed.">                for (String exampleImport : exampleImports) {</span>
+<span class="nc" id="L1268">                    imports.add(&quot;from &quot; + packageName + &quot;.models.&quot; + underscore(exampleImport) + &quot; import &quot; + exampleImport);</span>
+<span class="nc" id="L1269">                }</span>
+<span class="nc" id="L1270">                operation.vendorExtensions.put(&quot;x-py-example-import&quot;, imports);</span>
+            }
+
+<span class="nc bnc" id="L1273" title="All 2 branches missed.">            if (!postponedExampleImports.isEmpty()) {</span>
+<span class="nc" id="L1274">                List&lt;String&gt; imports = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L1275" title="All 2 branches missed.">                for (String exampleImport : postponedExampleImports) {</span>
+<span class="nc" id="L1276">                    imports.add(&quot;from &quot; + packageName + &quot;.models.&quot; + underscore(exampleImport) + &quot; import &quot;</span>
+                            + exampleImport);
+<span class="nc" id="L1278">                }</span>
+<span class="nc" id="L1279">                operation.vendorExtensions.put(&quot;x-py-example-import&quot;, imports);</span>
+            }
+
+            // Remove constant params from allParams list and add to constantParams
+<span class="nc" id="L1283">            handleConstantParams(operation);</span>
+<span class="nc" id="L1284">        }</span>
+
+<span class="nc" id="L1286">        List&lt;Map&lt;String, String&gt;&gt; newImports = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L1288" title="All 2 branches missed.">        for (String importLine : moduleImports.exports()) {</span>
+<span class="nc" id="L1289">            Map&lt;String, String&gt; item = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L1290">            item.put(&quot;import&quot;, importLine);</span>
+<span class="nc" id="L1291">            newImports.add(item);</span>
+<span class="nc" id="L1292">        }</span>
+
+        // import models one by one
+<span class="nc bnc" id="L1295" title="All 2 branches missed.">        if (!modelImports.isEmpty()) {</span>
+<span class="nc bnc" id="L1296" title="All 2 branches missed.">            for (String modelImport : modelImports) {</span>
+<span class="nc" id="L1297">                Map&lt;String, String&gt; item = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L1298">                item.put(&quot;import&quot;, &quot;from &quot; + packageName + &quot;.models.&quot; + underscore(modelImport) + &quot; import &quot; + modelImport);</span>
+<span class="nc" id="L1299">                newImports.add(item);</span>
+<span class="nc" id="L1300">            }</span>
+        }
+
+<span class="nc bnc" id="L1303" title="All 2 branches missed.">        if (!postponedModelImports.isEmpty()) {</span>
+<span class="nc bnc" id="L1304" title="All 2 branches missed.">            for (String modelImport : postponedModelImports) {</span>
+<span class="nc" id="L1305">                Map&lt;String, String&gt; item = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L1306">                item.put(&quot;import&quot;, &quot;from &quot; + packageName + &quot;.models.&quot; + underscore(modelImport) + &quot; import &quot; + modelImport);</span>
+<span class="nc" id="L1307">                newImports.add(item);</span>
+<span class="nc" id="L1308">            }</span>
+        }
+
+        // reset imports with newImports
+<span class="nc" id="L1312">        objs.setImports(newImports);</span>
+<span class="nc" id="L1313">        return objs;</span>
+    }
+
+
+    @Override
+    public void postProcessParameter(CodegenParameter parameter) {
+<span class="nc" id="L1319">        postProcessPattern(parameter.pattern, parameter.vendorExtensions);</span>
+<span class="nc" id="L1320">    }</span>
+
+    @Override
+    public void postProcessModelProperty(CodegenModel model, CodegenProperty property) {
+<span class="nc" id="L1324">        postProcessPattern(property.pattern, property.vendorExtensions);</span>
+<span class="nc" id="L1325">    }</span>
+
+    /*
+     * The OpenAPI pattern spec follows the Perl convention and style of modifiers. Python
+     * does not support this in as natural a way so it needs to convert it. See
+     * https://docs.python.org/2/howto/regex.html#compilation-flags for details.
+     *
+     * @param pattern (the String pattern to convert from python to Perl convention)
+     * @param vendorExtensions (list of custom x-* properties for extra functionality-see https://swagger.io/docs/specification/openapi-extensions/)
+     * @return void
+     * @throws IllegalArgumentException if pattern does not follow the Perl /pattern/modifiers convention
+     *
+     * Includes fix for issue #6675
+     */
+    public void postProcessPattern(String pattern, Map&lt;String, Object&gt; vendorExtensions) {
+<span class="nc bnc" id="L1340" title="All 2 branches missed.">        if (pattern != null) {</span>
+<span class="nc" id="L1341">            int i = pattern.lastIndexOf('/');</span>
+
+            // TOOD update the check below follow python convention
+            //Must follow Perl /pattern/modifiers convention
+<span class="nc bnc" id="L1345" title="All 4 branches missed.">            if (pattern.charAt(0) != '/' || i &lt; 2) {</span>
+<span class="nc" id="L1346">                throw new IllegalArgumentException(&quot;Pattern must follow the Perl &quot;</span>
+                        + &quot;/pattern/modifiers convention. &quot; + pattern + &quot; is not valid.&quot;);
+            }
+
+<span class="nc" id="L1350">            String regex = pattern.substring(1, i).replace(&quot;'&quot;, &quot;\\'&quot;);</span>
+<span class="nc" id="L1351">            List&lt;String&gt; modifiers = new ArrayList&lt;String&gt;();</span>
+
+<span class="nc bnc" id="L1353" title="All 2 branches missed.">            for (char c : pattern.substring(i).toCharArray()) {</span>
+<span class="nc bnc" id="L1354" title="All 2 branches missed.">                if (regexModifiers.containsKey(c)) {</span>
+<span class="nc" id="L1355">                    String modifier = regexModifiers.get(c);</span>
+<span class="nc" id="L1356">                    modifiers.add(modifier);</span>
+                }
+            }
+
+<span class="nc" id="L1360">            vendorExtensions.put(&quot;x-regex&quot;, regex.replace(&quot;\&quot;&quot;, &quot;\\\&quot;&quot;));</span>
+<span class="nc" id="L1361">            vendorExtensions.put(&quot;x-pattern&quot;, pattern.replace(&quot;\&quot;&quot;, &quot;\\\&quot;&quot;));</span>
+<span class="nc" id="L1362">            vendorExtensions.put(&quot;x-modifiers&quot;, modifiers);</span>
+        }
+<span class="nc" id="L1364">    }</span>
+
+    @Override
+    public String addRegularExpressionDelimiter(String pattern) {
+<span class="nc bnc" id="L1368" title="All 2 branches missed.">        if (StringUtils.isEmpty(pattern)) {</span>
+<span class="nc" id="L1369">            return pattern;</span>
+        }
+
+<span class="nc bnc" id="L1372" title="All 2 branches missed.">        if (!pattern.matches(&quot;^/.*&quot;)) {</span>
+            // Perform a negative lookbehind on each `/` to ensure that it is escaped.
+<span class="nc" id="L1374">            return &quot;/&quot; + pattern.replaceAll(&quot;(?&lt;!\\\\)\\/&quot;, &quot;\\\\/&quot;) + &quot;/&quot;;</span>
+        }
+
+<span class="nc" id="L1377">        return pattern;</span>
+    }
+
+    @Override
+    public ModelsMap postProcessModels(ModelsMap objs) {
+        // process enum in models
+<span class="nc" id="L1383">        return postProcessModelsEnum(objs);</span>
+    }
+
+    @Override
+    public String toEnumVarName(String name, String datatype) {
+<span class="nc bnc" id="L1388" title="All 4 branches missed.">        if (&quot;int&quot;.equals(datatype) || &quot;float&quot;.equals(datatype)) {</span>
+<span class="nc" id="L1389">            return name;</span>
+        } else {
+<span class="nc" id="L1391">            return &quot;\'&quot; + name + &quot;\'&quot;;</span>
+        }
+    }
+
+    @Override
+    public String toEnumValue(String value, String datatype) {
+<span class="nc bnc" id="L1397" title="All 4 branches missed.">        if (&quot;int&quot;.equals(datatype) || &quot;float&quot;.equals(datatype)) {</span>
+<span class="nc" id="L1398">            return value;</span>
+        } else {
+<span class="nc" id="L1400">            return &quot;\'&quot; + escapeText(value) + &quot;\'&quot;;</span>
+        }
+    }
+
+    @Override
+    public String toEnumDefaultValue(String value, String datatype) {
+<span class="nc" id="L1406">        return value;</span>
+    }
+
+    /**
+     * checks if the data should be classified as &quot;string&quot; in enum
+     * e.g. double in C# needs to be double-quoted (e.g. &quot;2.8&quot;) by treating it as a string
+     * In the future, we may rename this function to &quot;isEnumString&quot;
+     *
+     * @param dataType data type
+     * @return true if it's a enum string
+     */
+    @Override
+    public boolean isDataTypeString(String dataType) {
+<span class="nc" id="L1419">        return &quot;str&quot;.equals(dataType);</span>
+    }
+
+    /* The definition for a Python type.
+     *
+     * This encapsulate all the type definition: the actual type, and potentially:
+     *
+     * * its type parameters if the actual type is a generic type
+     * * the additional constraints on the type
+     * * the additional annotations to give extra information about the type (description, alias, etc.)
+     * * a default value for the variable associated with the type
+     */
+    class PythonType {
+        private String type;
+        private List&lt;PythonType&gt; typeParams;
+        private Map&lt;String, Object&gt; annotations;
+        private Map&lt;String, Object&gt; constraints;
+
+        private String defaultValue;
+
+        public PythonType() {
+<span class="nc" id="L1440">            this(null);</span>
+<span class="nc" id="L1441">        }</span>
+
+<span class="nc" id="L1443">        public PythonType(String type) {</span>
+<span class="nc" id="L1444">            this.setType(type);</span>
+<span class="nc" id="L1445">            this.defaultValue = null;</span>
+<span class="nc" id="L1446">            this.typeParams = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L1447">            this.annotations = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L1448">            this.constraints = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L1449">        }</span>
+
+        public PythonType setType(String type) {
+<span class="nc" id="L1452">            this.type = type;</span>
+<span class="nc" id="L1453">            return this;</span>
+        }
+
+        public PythonType setDefaultValue(boolean value) {
+<span class="nc bnc" id="L1457" title="All 2 branches missed.">            if (value) {</span>
+<span class="nc" id="L1458">                defaultValue = &quot;True&quot;;</span>
+            } else {
+<span class="nc" id="L1460">                defaultValue = &quot;False&quot;;</span>
+            }
+<span class="nc" id="L1462">            return this;</span>
+        }
+
+        public PythonType setDefaultValue(Object value) {
+<span class="nc" id="L1466">            defaultValue = value.toString();</span>
+<span class="nc" id="L1467">            return this;</span>
+        }
+
+        public PythonType constrain(String name, String value) {
+<span class="nc" id="L1471">            return constrain(name, value, true);</span>
+        }
+
+        public PythonType constrain(String name, String value, boolean quote) {
+<span class="nc bnc" id="L1475" title="All 2 branches missed.">            if (quote) {</span>
+                // TODO:jon proper quoting
+<span class="nc" id="L1477">                value = &quot;\&quot;&quot; + value + &quot;\&quot;&quot;;</span>
+            }
+<span class="nc" id="L1479">            constraints.put(name, value);</span>
+<span class="nc" id="L1480">            return this;</span>
+        }
+
+        public PythonType constrain(String name, boolean value) {
+<span class="nc bnc" id="L1484" title="All 2 branches missed.">            if (value) {</span>
+<span class="nc" id="L1485">                constraints.put(name, &quot;True&quot;);</span>
+            } else {
+<span class="nc" id="L1487">                constraints.put(name, &quot;False&quot;);</span>
+            }
+<span class="nc" id="L1489">            return this;</span>
+        }
+
+        public PythonType constrain(String name, Object value) {
+<span class="nc" id="L1493">            constraints.put(name, value);</span>
+<span class="nc" id="L1494">            return this;</span>
+        }
+
+        /* Annotate a field with extra information.
+         *
+         * Annotation are made to add extra information about a field.
+         *
+         * If the information you need to add is a type constraint (to make the
+         * type more specific), use `constrain` instead.
+         */
+        public PythonType annotate(String name, String value) {
+<span class="nc" id="L1505">            return annotate(name, value, true);</span>
+        }
+
+        public PythonType annotate(String name, String value, boolean quote) {
+<span class="nc bnc" id="L1509" title="All 2 branches missed.">            if (quote) {</span>
+                // TODO:jon proper quoting
+<span class="nc" id="L1511">                value = &quot;\&quot;&quot; + value + &quot;\&quot;&quot;;</span>
+            }
+<span class="nc" id="L1513">            annotations.put(name, value);</span>
+<span class="nc" id="L1514">            return this;</span>
+        }
+
+        public PythonType annotate(String name, boolean value) {
+<span class="nc bnc" id="L1518" title="All 2 branches missed.">            if (value) {</span>
+<span class="nc" id="L1519">                annotations.put(name, &quot;True&quot;);</span>
+            } else {
+<span class="nc" id="L1521">                annotations.put(name, &quot;False&quot;);</span>
+            }
+<span class="nc" id="L1523">            return this;</span>
+        }
+
+        public PythonType annotate(String name, Object value) {
+<span class="nc" id="L1527">            annotations.put(name, value);</span>
+<span class="nc" id="L1528">            return this;</span>
+        }
+
+        /* A &quot;type param&quot; is the parameter to a generic type (the `str` in `list[str]`).
+         *
+         * A Python type can have multiple type parameters: it assumes the
+         * Python type on which the type parameter is added to is a generic
+         * type.
+         *
+         * Type parameters can be as simple or as complex as needed. They are just
+         * another list of `PythonType`.
+         */
+        public PythonType addTypeParam(PythonType typeParam) {
+<span class="nc" id="L1541">            this.typeParams.add(typeParam);</span>
+<span class="nc" id="L1542">            return this;</span>
+        }
+
+        /* The left-hand side of:
+         *
+         *      my_field: TypeConstraint = TypeAnnotations
+         *
+         *  A &quot;type constraint&quot; is a Python / Pydantic type, potentially
+         *  annotated with extra constraints, such as &quot;less than&quot;, &quot;maximum
+         *  number of items&quot;, etc.
+         *
+         *  The Python / Pydantic type can be as expressive as needed:
+         *
+         *  - it could simply be `str`
+         *  - or something more complex like `Optional[List[Dict[str, List[int]]]]`.
+         *
+         *  Note that the default value (if available) and/or the metadata about
+         *  the field / variable being defined are *not* part of the
+         *  constraints but part of the &quot;type value&quot;.
+         */
+        public String asTypeConstraint(PythonImports imports) {
+<span class="nc" id="L1563">            return asTypeConstraint(imports, false);</span>
+        }
+
+        /* Generate the Python type, constraints + annotations
+         *
+         * This should be mostly used to build the type definition for a
+         * function/method parameter, such as :
+         *
+         *      def f(my_param: TypeConstrainWithAnnotations):
+         *          ...
+         *
+         *  Note that the default value is not managed here, but directly in
+         *  the Mustache template.
+         */
+        public String asTypeConstraintWithAnnotations(PythonImports imports) {
+<span class="nc" id="L1578">            return asTypeConstraint(imports, true);</span>
+        }
+
+        private String asTypeConstraint(PythonImports imports, boolean withAnnotations) {
+<span class="nc" id="L1582">            String typeParam = &quot;&quot;;</span>
+<span class="nc bnc" id="L1583" title="All 2 branches missed.">            if (this.typeParams.size() &gt; 0) {</span>
+<span class="nc" id="L1584">                List&lt;String&gt; types = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L1585" title="All 2 branches missed.">                for (PythonType t : this.typeParams) {</span>
+<span class="nc" id="L1586">                    types.add(t.asTypeConstraint(imports));</span>
+<span class="nc" id="L1587">                }</span>
+<span class="nc" id="L1588">                typeParam = &quot;[&quot; + StringUtils.join(types, &quot;, &quot;) + &quot;]&quot;;</span>
+            }
+
+<span class="nc" id="L1591">            String currentType = this.type + typeParam;</span>
+
+
+            // Build the parameters for the `Field`, possibly associated with
+            // the type definition.
+            // There can be no constraints nor annotations, in which case we
+            // simply won't build a Field object.
+<span class="nc" id="L1598">            List&lt;String&gt; fieldParams = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L1599" title="All 2 branches missed.">            for (Map.Entry&lt;String, Object&gt; entry: this.constraints.entrySet()) {</span>
+<span class="nc" id="L1600">                String ans = entry.getKey() + &quot;=&quot;;</span>
+<span class="nc" id="L1601">                ans += entry.getValue().toString();</span>
+<span class="nc" id="L1602">                fieldParams.add(ans);</span>
+<span class="nc" id="L1603">            }</span>
+
+<span class="nc bnc" id="L1605" title="All 2 branches missed.">            if (withAnnotations) {</span>
+<span class="nc bnc" id="L1606" title="All 2 branches missed.">                for (Map.Entry&lt;String, Object&gt; entry: this.annotations.entrySet()) {</span>
+<span class="nc" id="L1607">                    String ans = entry.getKey() + &quot;=&quot;;</span>
+<span class="nc" id="L1608">                    ans += entry.getValue().toString();</span>
+<span class="nc" id="L1609">                    fieldParams.add(ans);</span>
+<span class="nc" id="L1610">                }</span>
+            }
+
+<span class="nc bnc" id="L1613" title="All 2 branches missed.">            if (fieldParams.size() &gt; 0) {</span>
+<span class="nc" id="L1614">                imports.add(&quot;pydantic&quot;, &quot;Field&quot;);</span>
+<span class="nc" id="L1615">                imports.add(&quot;typing_extensions&quot;, &quot;Annotated&quot;);</span>
+<span class="nc" id="L1616">                currentType = &quot;Annotated[&quot; + currentType + &quot;, Field(&quot; + StringUtils.join(fieldParams, &quot;, &quot;) + &quot;)]&quot;;</span>
+            }
+
+<span class="nc" id="L1619">            return currentType;</span>
+        }
+
+        /* The right-hand side of:
+         *
+         *      my_field: TypeConstraint = TypeValue
+         *
+         *  A &quot;type value&quot; is either:
+         *
+         *  * The default value of a field, if no other information is available
+         *  * A Pydantic `Field`, containing potentially the default value,
+         *    plus all the extra metadata that defines what a field is (description, alias, etc.).
+         *
+         *  Constraints on the type are *not* part of the &quot;type value&quot;, but are part of the &quot;type constraints&quot;.
+         */
+        @Nullable
+        public String asTypeValue(PythonImports imports) {
+<span class="nc" id="L1636">            String defaultValue = this.defaultValue;</span>
+
+<span class="nc bnc" id="L1638" title="All 2 branches missed.">            if (this.annotations.size() &gt; 0) {</span>
+<span class="nc" id="L1639">                String typeValue = &quot;&quot;;</span>
+
+<span class="nc" id="L1641">                List&lt;String&gt; ants = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L1643" title="All 2 branches missed.">                if (defaultValue != null) {</span>
+                    // Keep the default value first, if possible.
+<span class="nc" id="L1645">                    ants.add(&quot;default=&quot; + defaultValue);</span>
+                }
+
+<span class="nc bnc" id="L1648" title="All 2 branches missed.">                for (Map.Entry&lt;String, Object&gt; entry: this.annotations.entrySet()) {</span>
+<span class="nc" id="L1649">                    String ans = entry.getKey() + &quot;=&quot;;</span>
+<span class="nc" id="L1650">                    ans += entry.getValue().toString();</span>
+<span class="nc" id="L1651">                    ants.add(ans);</span>
+<span class="nc" id="L1652">                }</span>
+
+<span class="nc" id="L1654">                imports.add(&quot;pydantic&quot;, &quot;Field&quot;);</span>
+<span class="nc" id="L1655">                typeValue = &quot;Field(&quot; + StringUtils.join(ants, &quot;, &quot;) + &quot;)&quot;;</span>
+<span class="nc" id="L1656">                return typeValue;</span>
+            }
+
+<span class="nc" id="L1659">            return defaultValue;</span>
+        }
+    }
+
+    /* Track the list of resources to imports from where.
+     *
+     * PythonImports are tracked as a set of modules to import from, and actual
+     * resources (classes, functions, etc.) to import.
+     *
+     * The same resource can be safely &quot;imported&quot; many times from the same
+     * module; during the rendering of the actual Python imports, duplicated
+     * entries will be automatically removed.
+     *
+     * */
+    class PythonImports {
+        private Map&lt;String, Set&lt;String&gt;&gt; imports;
+
+<span class="nc" id="L1676">        public PythonImports() {</span>
+<span class="nc" id="L1677">            imports = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L1678">        }</span>
+
+        /* Add a new import:
+         *
+         *      from $from import $what
+         *
+         */
+        private void add(String from, String what) {
+            // Fetch the set of all the objects already imported from `from` (if any).
+<span class="nc" id="L1687">            Set&lt;String&gt; allImportsFrom = imports.get(from);</span>
+<span class="nc bnc" id="L1688" title="All 2 branches missed.">            if (allImportsFrom == null) {</span>
+<span class="nc" id="L1689">                allImportsFrom = new TreeSet&lt;&gt;();</span>
+            }
+            // Just one more thing to import from `from`.
+<span class="nc" id="L1692">            allImportsFrom.add(what);</span>
+<span class="nc" id="L1693">            imports.put(from, allImportsFrom);</span>
+<span class="nc" id="L1694">        }</span>
+
+        /* Export a list of import statements as:
+         *
+         *      from $from import $what
+         *
+         */
+        public Set&lt;String&gt; exports() {
+<span class="nc" id="L1702">            Set&lt;String&gt; results = new TreeSet&lt;&gt;();</span>
+
+<span class="nc bnc" id="L1704" title="All 2 branches missed.">            for (Map.Entry&lt;String, Set&lt;String&gt;&gt; entry : imports.entrySet()) {</span>
+<span class="nc" id="L1705">                String importLine = String.format(</span>
+                    Locale.ROOT, &quot;from %s import %s&quot;,
+<span class="nc" id="L1707">                    entry.getKey(), StringUtils.join(entry.getValue(), &quot;, &quot;));</span>
+<span class="nc" id="L1708">                results.add(importLine);</span>
+<span class="nc" id="L1709">            }</span>
+
+<span class="nc" id="L1711">            return results;</span>
+        }
+
+        public boolean isEmpty() {
+<span class="nc" id="L1715">            return imports.isEmpty();</span>
+        }
+    }
+
+    class PydanticType {
+        private Set&lt;String&gt; modelImports;
+        private Set&lt;String&gt; exampleImports;
+        private Set&lt;String&gt; postponedModelImports;
+        private Set&lt;String&gt; postponedExampleImports;
+        private PythonImports moduleImports;
+        private String classname;
+
+        public PydanticType(
+            Set&lt;String&gt; modelImports,
+            Set&lt;String&gt; exampleImports,
+            Set&lt;String&gt; postponedModelImports,
+            Set&lt;String&gt; postponedExampleImports,
+            PythonImports moduleImports,
+            String classname
+<span class="nc" id="L1734">        ) {</span>
+<span class="nc" id="L1735">            this.modelImports = modelImports;</span>
+<span class="nc" id="L1736">            this.exampleImports = exampleImports;</span>
+<span class="nc" id="L1737">            this.postponedModelImports = postponedModelImports;</span>
+<span class="nc" id="L1738">            this.postponedExampleImports = postponedExampleImports;</span>
+<span class="nc" id="L1739">            this.moduleImports = moduleImports;</span>
+<span class="nc" id="L1740">            this.classname = classname;</span>
+<span class="nc" id="L1741">        }</span>
+
+        private PythonType arrayType(IJsonSchemaValidationProperties cp) {
+<span class="nc" id="L1744">            PythonType pt = new PythonType();</span>
+<span class="nc bnc" id="L1745" title="All 2 branches missed.">            if (cp.getMaxItems() != null) {</span>
+<span class="nc" id="L1746">                pt.constrain(&quot;max_length&quot;, cp.getMaxItems());</span>
+            }
+<span class="nc bnc" id="L1748" title="All 2 branches missed.">            if (cp.getMinItems()!= null) {</span>
+<span class="nc" id="L1749">                pt.constrain(&quot;min_length&quot;, cp.getMinItems());</span>
+            }
+<span class="nc bnc" id="L1751" title="All 2 branches missed.">            if (cp.getUniqueItems()) {</span>
+                // A unique &quot;array&quot; is a set
+                // TODO: pydantic v2: Pydantic suggest to convert this to a set, but this has some implications:
+                // https://github.com/pydantic/pydantic-core/issues/296
+                // Also, having a set instead of list creates complications:
+                // random JSON serialization order, unable to easily serialize
+                // to JSON, etc.
+                //pt.setType(&quot;Set&quot;);
+                //moduleImports.add(&quot;typing&quot;, &quot;Set&quot;);
+<span class="nc" id="L1760">                pt.setType(&quot;List&quot;);</span>
+<span class="nc" id="L1761">                moduleImports.add(&quot;typing&quot;, &quot;List&quot;);</span>
+            } else {
+<span class="nc" id="L1763">                pt.setType(&quot;List&quot;);</span>
+<span class="nc" id="L1764">                moduleImports.add(&quot;typing&quot;, &quot;List&quot;);</span>
+            }
+<span class="nc" id="L1766">            pt.addTypeParam(collectionItemType(cp.getItems()));</span>
+<span class="nc" id="L1767">            return pt;</span>
+        }
+
+        private PythonType collectionItemType(CodegenProperty itemCp) {
+<span class="nc" id="L1771">            PythonType itemPt = getType(itemCp);</span>
+<span class="nc bnc" id="L1772" title="All 6 branches missed.">            if (itemCp != null &amp;&amp; !itemPt.type.equals(&quot;Any&quot;) &amp;&amp; itemCp.isNullable) {</span>
+<span class="nc" id="L1773">                moduleImports.add(&quot;typing&quot;, &quot;Optional&quot;);</span>
+<span class="nc" id="L1774">                PythonType opt = new PythonType(&quot;Optional&quot;);</span>
+<span class="nc" id="L1775">                opt.addTypeParam(itemPt);</span>
+<span class="nc" id="L1776">                itemPt = opt;</span>
+            }
+<span class="nc" id="L1778">            return itemPt;</span>
+        }
+
+        private PythonType stringType(IJsonSchemaValidationProperties cp) {
+
+<span class="nc bnc" id="L1783" title="All 2 branches missed.">            if (cp.getHasValidation()) {</span>
+<span class="nc" id="L1784">                PythonType pt = new PythonType(&quot;str&quot;);</span>
+
+                // e.g. constr(regex=r'/[a-z]/i', strict=True)
+<span class="nc" id="L1787">                pt.constrain(&quot;strict&quot;, true);</span>
+<span class="nc bnc" id="L1788" title="All 2 branches missed.">                if (cp.getMaxLength() != null) {</span>
+<span class="nc" id="L1789">                    pt.constrain(&quot;max_length&quot;, cp.getMaxLength());</span>
+                }
+<span class="nc bnc" id="L1791" title="All 2 branches missed.">                if (cp.getMinLength() != null) {</span>
+<span class="nc" id="L1792">                    pt.constrain(&quot;min_length&quot;, cp.getMinLength());</span>
+                }
+
+<span class="nc bnc" id="L1795" title="All 2 branches missed.">                if (cp.getPattern() != null) {</span>
+<span class="nc" id="L1796">                    moduleImports.add(&quot;pydantic&quot;, &quot;field_validator&quot;);</span>
+                    // use validator instead as regex doesn't support flags, e.g. IGNORECASE
+                    //fieldCustomization.add(Locale.ROOT, String.format(Locale.ROOT, &quot;regex=r'%s'&quot;, cp.getPattern()));
+                }
+<span class="nc" id="L1800">                return pt;</span>
+            } else {
+<span class="nc bnc" id="L1802" title="All 2 branches missed.">                if (&quot;password&quot;.equals(cp.getFormat())) { // TDOO avoid using format, use `is` boolean flag instead</span>
+<span class="nc" id="L1803">                    moduleImports.add(&quot;pydantic&quot;, &quot;SecretStr&quot;);</span>
+<span class="nc" id="L1804">                    return new PythonType(&quot;SecretStr&quot;);</span>
+                } else {
+<span class="nc" id="L1806">                    moduleImports.add(&quot;pydantic&quot;, &quot;StrictStr&quot;);</span>
+<span class="nc" id="L1807">                    return new PythonType(&quot;StrictStr&quot;);</span>
+                }
+            }
+        }
+
+        private PythonType mapType(IJsonSchemaValidationProperties cp) {
+<span class="nc" id="L1813">            moduleImports.add(&quot;typing&quot;, &quot;Dict&quot;);</span>
+<span class="nc" id="L1814">            PythonType pt = new PythonType(&quot;Dict&quot;);</span>
+<span class="nc" id="L1815">            pt.addTypeParam(new PythonType(&quot;str&quot;));</span>
+<span class="nc" id="L1816">            pt.addTypeParam(collectionItemType(cp.getItems()));</span>
+<span class="nc" id="L1817">            return pt;</span>
+        }
+
+        private PythonType numberType(IJsonSchemaValidationProperties cp) {
+<span class="nc bnc" id="L1821" title="All 2 branches missed.">            if (cp.getHasValidation()) {</span>
+<span class="nc" id="L1822">                PythonType floatt = new PythonType(&quot;float&quot;);</span>
+<span class="nc" id="L1823">                PythonType intt = new PythonType(&quot;int&quot;);</span>
+
+                // e.g. confloat(ge=10, le=100, strict=True)
+<span class="nc bnc" id="L1826" title="All 2 branches missed.">                if (cp.getMaximum() != null) {</span>
+<span class="nc bnc" id="L1827" title="All 2 branches missed.">                    if (cp.getExclusiveMaximum()) {</span>
+<span class="nc" id="L1828">                        floatt.constrain(&quot;lt&quot;, cp.getMaximum(), false);</span>
+<span class="nc" id="L1829">                        intt.constrain(&quot;lt&quot;, (int) Math.ceil(Double.valueOf(cp.getMaximum()))); // e.g. &lt; 7.59 =&gt; &lt; 8</span>
+                    } else {
+<span class="nc" id="L1831">                        floatt.constrain(&quot;le&quot;, cp.getMaximum(), false);</span>
+<span class="nc" id="L1832">                        intt.constrain(&quot;le&quot;, (int) Math.floor(Double.valueOf(cp.getMaximum()))); // e.g. &lt;= 7.59 =&gt; &lt;= 7</span>
+                    }
+                }
+<span class="nc bnc" id="L1835" title="All 2 branches missed.">                if (cp.getMinimum() != null) {</span>
+<span class="nc bnc" id="L1836" title="All 2 branches missed.">                    if (cp.getExclusiveMinimum()) {</span>
+<span class="nc" id="L1837">                        floatt.constrain(&quot;gt&quot;, cp.getMinimum(), false);</span>
+<span class="nc" id="L1838">                        intt.constrain(&quot;gt&quot;, (int) Math.floor(Double.valueOf(cp.getMinimum()))); // e.g. &gt; 7.59 =&gt; &gt; 7</span>
+                    } else {
+<span class="nc" id="L1840">                        floatt.constrain(&quot;ge&quot;, cp.getMinimum(), false);</span>
+<span class="nc" id="L1841">                        intt.constrain(&quot;ge&quot;, (int) Math.ceil(Double.valueOf(cp.getMinimum()))); // e.g. &gt;= 7.59 =&gt; &gt;= 8</span>
+                    }
+                }
+<span class="nc bnc" id="L1844" title="All 2 branches missed.">                if (cp.getMultipleOf() != null) {</span>
+<span class="nc" id="L1845">                    floatt.constrain(&quot;multiple_of&quot;, cp.getMultipleOf());</span>
+                }
+
+<span class="nc bnc" id="L1848" title="All 2 branches missed.">                if (&quot;Union[StrictFloat, StrictInt]&quot;.equals(mapNumberTo)) {</span>
+<span class="nc" id="L1849">                    floatt.constrain(&quot;strict&quot;, true);</span>
+<span class="nc" id="L1850">                    intt.constrain(&quot;strict&quot;, true);</span>
+
+<span class="nc" id="L1852">                    moduleImports.add(&quot;typing&quot;, &quot;Union&quot;);</span>
+<span class="nc" id="L1853">                    PythonType pt = new PythonType(&quot;Union&quot;);</span>
+<span class="nc" id="L1854">                    pt.addTypeParam(floatt);</span>
+<span class="nc" id="L1855">                    pt.addTypeParam(intt);</span>
+<span class="nc" id="L1856">                    return pt;</span>
+<span class="nc bnc" id="L1857" title="All 2 branches missed.">                } else if (&quot;StrictFloat&quot;.equals(mapNumberTo)) {</span>
+<span class="nc" id="L1858">                    floatt.constrain(&quot;strict&quot;, true);</span>
+<span class="nc" id="L1859">                    return floatt;</span>
+                } else { // float
+<span class="nc" id="L1861">                    return floatt;</span>
+                }
+            } else {
+<span class="nc bnc" id="L1864" title="All 2 branches missed.">                if (&quot;Union[StrictFloat, StrictInt]&quot;.equals(mapNumberTo)) {</span>
+<span class="nc" id="L1865">                    moduleImports.add(&quot;typing&quot;, &quot;Union&quot;);</span>
+<span class="nc" id="L1866">                    moduleImports.add(&quot;pydantic&quot;, &quot;StrictFloat&quot;);</span>
+<span class="nc" id="L1867">                    moduleImports.add(&quot;pydantic&quot;, &quot;StrictInt&quot;);</span>
+<span class="nc" id="L1868">                    PythonType pt = new PythonType(&quot;Union&quot;);</span>
+<span class="nc" id="L1869">                    pt.addTypeParam(new PythonType(&quot;StrictFloat&quot;));</span>
+<span class="nc" id="L1870">                    pt.addTypeParam(new PythonType(&quot;StrictInt&quot;));</span>
+<span class="nc" id="L1871">                    return pt;</span>
+<span class="nc bnc" id="L1872" title="All 2 branches missed.">                } else if (&quot;StrictFloat&quot;.equals(mapNumberTo)) {</span>
+<span class="nc" id="L1873">                    moduleImports.add(&quot;pydantic&quot;, &quot;StrictFloat&quot;);</span>
+<span class="nc" id="L1874">                    return new PythonType(&quot;StrictFloat&quot;);</span>
+                } else {
+<span class="nc" id="L1876">                    return new PythonType(&quot;float&quot;);</span>
+                }
+            }
+        }
+
+        private PythonType intType(IJsonSchemaValidationProperties cp) {
+<span class="nc bnc" id="L1882" title="All 2 branches missed.">            if (cp.getHasValidation()) {</span>
+<span class="nc" id="L1883">                PythonType pt = new PythonType(&quot;int&quot;);</span>
+                // e.g. conint(ge=10, le=100, strict=True)
+<span class="nc" id="L1885">                pt.constrain(&quot;strict&quot;, true);</span>
+<span class="nc bnc" id="L1886" title="All 2 branches missed.">                if (cp.getMaximum() != null) {</span>
+<span class="nc bnc" id="L1887" title="All 2 branches missed.">                    if (cp.getExclusiveMaximum()) {</span>
+<span class="nc" id="L1888">                        pt.constrain(&quot;lt&quot;, cp.getMaximum(), false);</span>
+                    } else {
+<span class="nc" id="L1890">                        pt.constrain(&quot;le&quot;, cp.getMaximum(), false);</span>
+                    }
+                }
+<span class="nc bnc" id="L1893" title="All 2 branches missed.">                if (cp.getMinimum() != null) {</span>
+<span class="nc bnc" id="L1894" title="All 2 branches missed.">                    if (cp.getExclusiveMinimum()) {</span>
+<span class="nc" id="L1895">                        pt.constrain(&quot;gt&quot;, cp.getMinimum(), false);</span>
+                    } else {
+<span class="nc" id="L1897">                        pt.constrain(&quot;ge&quot;, cp.getMinimum(), false);</span>
+                    }
+                }
+<span class="nc bnc" id="L1900" title="All 2 branches missed.">                if (cp.getMultipleOf() != null) {</span>
+<span class="nc" id="L1901">                    pt.constrain(&quot;multiple_of&quot;, cp.getMultipleOf());</span>
+                }
+<span class="nc" id="L1903">                return pt;</span>
+            } else {
+<span class="nc" id="L1905">                moduleImports.add(&quot;pydantic&quot;, &quot;StrictInt&quot;);</span>
+<span class="nc" id="L1906">                return new PythonType(&quot;StrictInt&quot;);</span>
+            }
+        }
+
+        private PythonType binaryType(IJsonSchemaValidationProperties cp) {
+<span class="nc bnc" id="L1911" title="All 2 branches missed.">            if (cp.getHasValidation()) {</span>
+<span class="nc" id="L1912">                PythonType bytest = new PythonType(&quot;bytes&quot;);</span>
+<span class="nc" id="L1913">                PythonType strt = new PythonType(&quot;str&quot;);</span>
+
+                // e.g. conbytes(min_length=2, max_length=10)
+<span class="nc" id="L1916">                bytest.constrain(&quot;strict&quot;, true);</span>
+<span class="nc" id="L1917">                strt.constrain(&quot;strict&quot;, true);</span>
+<span class="nc bnc" id="L1918" title="All 2 branches missed.">                if (cp.getMaxLength() != null) {</span>
+<span class="nc" id="L1919">                    bytest.constrain(&quot;max_length&quot;, cp.getMaxLength());</span>
+<span class="nc" id="L1920">                    strt.constrain(&quot;max_length&quot;, cp.getMaxLength());</span>
+                }
+<span class="nc bnc" id="L1922" title="All 2 branches missed.">                if (cp.getMinLength() != null) {</span>
+<span class="nc" id="L1923">                    bytest.constrain(&quot;min_length&quot;, cp.getMinLength());</span>
+<span class="nc" id="L1924">                    strt.constrain(&quot;min_length&quot;, cp.getMinLength());</span>
+                }
+<span class="nc bnc" id="L1926" title="All 2 branches missed.">                if (cp.getPattern() != null) {</span>
+<span class="nc" id="L1927">                    moduleImports.add(&quot;pydantic&quot;, &quot;field_validator&quot;);</span>
+                    // use validator instead as regex doesn't support flags, e.g. IGNORECASE
+                    //fieldCustomization.add(Locale.ROOT, String.format(Locale.ROOT, &quot;regex=r'%s'&quot;, cp.getPattern()));
+                }
+
+<span class="nc" id="L1932">                moduleImports.add(&quot;typing&quot;, &quot;Union&quot;);</span>
+<span class="nc" id="L1933">                PythonType pt = new PythonType(&quot;Union&quot;);</span>
+<span class="nc" id="L1934">                pt.addTypeParam(bytest);</span>
+<span class="nc" id="L1935">                pt.addTypeParam(strt);</span>
+<span class="nc" id="L1936">                return pt;</span>
+            } else {
+                // same as above which has validation
+<span class="nc" id="L1939">                moduleImports.add(&quot;pydantic&quot;, &quot;StrictBytes&quot;);</span>
+<span class="nc" id="L1940">                moduleImports.add(&quot;pydantic&quot;, &quot;StrictStr&quot;);</span>
+<span class="nc" id="L1941">                moduleImports.add(&quot;typing&quot;, &quot;Union&quot;);</span>
+
+<span class="nc" id="L1943">                PythonType pt = new PythonType(&quot;Union&quot;);</span>
+<span class="nc" id="L1944">                pt.addTypeParam(new PythonType(&quot;StrictBytes&quot;));</span>
+<span class="nc" id="L1945">                pt.addTypeParam(new PythonType(&quot;StrictStr&quot;));</span>
+<span class="nc" id="L1946">                return pt;</span>
+            }
+        }
+
+        private PythonType boolType(IJsonSchemaValidationProperties cp) {
+<span class="nc" id="L1951">            moduleImports.add(&quot;pydantic&quot;, &quot;StrictBool&quot;);</span>
+<span class="nc" id="L1952">            return new PythonType(&quot;StrictBool&quot;);</span>
+        }
+
+        private PythonType decimalType(IJsonSchemaValidationProperties cp) {
+<span class="nc" id="L1956">            PythonType pt = new PythonType(&quot;Decimal&quot;);</span>
+<span class="nc" id="L1957">            moduleImports.add(&quot;decimal&quot;, &quot;Decimal&quot;);</span>
+
+<span class="nc bnc" id="L1959" title="All 2 branches missed.">            if (cp.getHasValidation()) {</span>
+                // e.g. condecimal(ge=10, le=100, strict=True)
+<span class="nc" id="L1961">                pt.constrain(&quot;strict&quot;, true);</span>
+<span class="nc bnc" id="L1962" title="All 2 branches missed.">                if (cp.getMaximum() != null) {</span>
+<span class="nc bnc" id="L1963" title="All 2 branches missed.">                    if (cp.getExclusiveMaximum()) {</span>
+<span class="nc" id="L1964">                        pt.constrain(&quot;gt&quot;, cp.getMaximum(), false);</span>
+                    } else {
+<span class="nc" id="L1966">                        pt.constrain(&quot;ge&quot;, cp.getMaximum(), false);</span>
+                    }
+                }
+<span class="nc bnc" id="L1969" title="All 2 branches missed.">                if (cp.getMinimum() != null) {</span>
+<span class="nc bnc" id="L1970" title="All 2 branches missed.">                    if (cp.getExclusiveMinimum()) {</span>
+<span class="nc" id="L1971">                        pt.constrain(&quot;lt&quot;, cp.getMinimum(), false);</span>
+                    } else {
+<span class="nc" id="L1973">                        pt.constrain(&quot;le&quot;, cp.getMinimum(), false);</span>
+                    }
+                }
+<span class="nc bnc" id="L1976" title="All 2 branches missed.">                if (cp.getMultipleOf() != null) {</span>
+<span class="nc" id="L1977">                    pt.constrain(&quot;multiple_of&quot;, cp.getMultipleOf());</span>
+                }
+            }
+
+<span class="nc" id="L1981">            return pt;</span>
+        }
+
+        private PythonType anyType(IJsonSchemaValidationProperties cp) {
+<span class="nc" id="L1985">            moduleImports.add(&quot;typing&quot;, &quot;Any&quot;);</span>
+<span class="nc" id="L1986">            return new PythonType(&quot;Any&quot;);</span>
+        }
+
+        private PythonType dateType(IJsonSchemaValidationProperties cp) {
+<span class="nc bnc" id="L1990" title="All 2 branches missed.">            if (cp.getIsDate()) {</span>
+<span class="nc" id="L1991">                moduleImports.add(&quot;datetime&quot;, &quot;date&quot;);</span>
+            }
+<span class="nc bnc" id="L1993" title="All 2 branches missed.">            if (cp.getIsDateTime()) {</span>
+<span class="nc" id="L1994">                moduleImports.add(&quot;datetime&quot;, &quot;datetime&quot;);</span>
+            }
+
+<span class="nc" id="L1997">            return new PythonType(cp.getDataType());</span>
+        }
+
+        private PythonType uuidType(IJsonSchemaValidationProperties cp) {
+<span class="nc" id="L2001">            return new PythonType(cp.getDataType());</span>
+        }
+
+        private PythonType modelType(IJsonSchemaValidationProperties cp) {
+            // add model prefix
+<span class="nc" id="L2006">            hasModelsToImport = true;</span>
+<span class="nc" id="L2007">            modelImports.add(cp.getDataType());</span>
+<span class="nc" id="L2008">            exampleImports.add(cp.getDataType());</span>
+<span class="nc" id="L2009">            return new PythonType(cp.getDataType());</span>
+        }
+
+        private PythonType fromCommon(IJsonSchemaValidationProperties cp) {
+<span class="nc bnc" id="L2013" title="All 2 branches missed.">            if (cp == null) {</span>
+                // if codegen property (e.g. map/dict of undefined type) is null, default to string
+<span class="nc" id="L2015">                LOGGER.warn(&quot;Codegen property is null (e.g. map/dict of undefined type). Default to typing.Any.&quot;);</span>
+<span class="nc" id="L2016">                moduleImports.add(&quot;typing&quot;, &quot;Any&quot;);</span>
+<span class="nc" id="L2017">                return new PythonType(&quot;Any&quot;);</span>
+            }
+
+<span class="nc bnc" id="L2020" title="All 2 branches missed.">            if (cp.getIsEnum()) {</span>
+<span class="nc" id="L2021">                moduleImports.add(&quot;pydantic&quot;, &quot;field_validator&quot;);</span>
+            }
+
+<span class="nc bnc" id="L2024" title="All 2 branches missed.">            if (cp.getIsArray()) {</span>
+<span class="nc" id="L2025">                return arrayType(cp);</span>
+<span class="nc bnc" id="L2026" title="All 4 branches missed.">            } else if (cp.getIsMap() || cp.getIsFreeFormObject()) {</span>
+<span class="nc" id="L2027">                return mapType(cp);</span>
+<span class="nc bnc" id="L2028" title="All 2 branches missed.">            } else if (cp.getIsString()) {</span>
+<span class="nc" id="L2029">                return stringType(cp);</span>
+<span class="nc bnc" id="L2030" title="All 6 branches missed.">            } else if (cp.getIsNumber() || cp.getIsFloat() || cp.getIsDouble()) {</span>
+<span class="nc" id="L2031">                return numberType(cp);</span>
+<span class="nc bnc" id="L2032" title="All 8 branches missed.">            } else if (cp.getIsInteger() || cp.getIsLong() || cp.getIsShort() || cp.getIsUnboundedInteger()) {</span>
+<span class="nc" id="L2033">                return intType(cp);</span>
+<span class="nc bnc" id="L2034" title="All 4 branches missed.">            } else if (cp.getIsBinary() || cp.getIsByteArray()) {</span>
+<span class="nc" id="L2035">                return binaryType(cp);</span>
+<span class="nc bnc" id="L2036" title="All 2 branches missed.">            } else if (cp.getIsBoolean()) {</span>
+<span class="nc" id="L2037">                return boolType(cp);</span>
+<span class="nc bnc" id="L2038" title="All 2 branches missed.">            } else if (cp.getIsDecimal()) {</span>
+<span class="nc" id="L2039">                return decimalType(cp);</span>
+<span class="nc bnc" id="L2040" title="All 2 branches missed.">            } else if (cp.getIsAnyType()) {</span>
+<span class="nc" id="L2041">                return anyType(cp);</span>
+<span class="nc bnc" id="L2042" title="All 4 branches missed.">            } else if (cp.getIsDate() || cp.getIsDateTime()) {</span>
+<span class="nc" id="L2043">                return dateType(cp);</span>
+<span class="nc bnc" id="L2044" title="All 2 branches missed.">            } else if (cp.getIsUuid()) {</span>
+<span class="nc" id="L2045">                return uuidType(cp);</span>
+            }
+
+<span class="nc" id="L2048">            return null;</span>
+        }
+
+        public String generatePythonType(CodegenProperty cp) {
+<span class="nc" id="L2052">            PythonType pt = this.getType(cp);</span>
+<span class="nc" id="L2053">            return this.finalizeType(cp, pt);</span>
+        }
+
+        private PythonType getType(CodegenProperty cp) {
+<span class="nc" id="L2057">            PythonType result = fromCommon(cp);</span>
+
+            /* comment out the following since Literal requires python 3.8
+               also need to put cp.isEnum check after isArray, isMap check
+            if (cp.isEnum) {
+                // use Literal for inline enum
+                moduleImports.add(&quot;typing&quot;, &quot;Literal&quot;);
+                List&lt;String&gt; values = new ArrayList&lt;&gt;();
+                List&lt;Map&lt;String, Object&gt;&gt; enumVars = (List&lt;Map&lt;String, Object&gt;&gt;) cp.allowableValues.get(&quot;enumVars&quot;);
+                if (enumVars != null) {
+                    for (Map&lt;String, Object&gt; enumVar : enumVars) {
+                        values.add((String) enumVar.get(&quot;value&quot;));
+                    }
+                }
+                return String.format(Locale.ROOT, &quot;%sEnum&quot;, cp.nameInPascalCase);
+            } else*/
+
+<span class="nc bnc" id="L2074" title="All 2 branches missed.">            if (result == null) {</span>
+                // TODO: Cleanup
+<span class="nc bnc" id="L2076" title="All 4 branches missed.">                if (!cp.isPrimitiveType || cp.isModel) { // model</span>
+                    // skip import if it's a circular reference
+<span class="nc bnc" id="L2078" title="All 2 branches missed.">                    if (classname == null) {</span>
+                        // for parameter model, import directly
+<span class="nc" id="L2080">                        hasModelsToImport = true;</span>
+<span class="nc" id="L2081">                        modelImports.add(cp.getDataType());</span>
+<span class="nc" id="L2082">                        exampleImports.add(cp.getDataType());</span>
+                    } else {
+<span class="nc bnc" id="L2084" title="All 2 branches missed.">                        if (circularImports.containsKey(cp.getDataType())) {</span>
+<span class="nc bnc" id="L2085" title="All 2 branches missed.">                            if (circularImports.get(cp.getDataType()).contains(classname)) {</span>
+<span class="nc" id="L2086">                                hasModelsToImport = true;</span>
+<span class="nc" id="L2087">                                postponedModelImports.add(cp.getDataType());</span>
+<span class="nc" id="L2088">                                postponedExampleImports.add(cp.getDataType());</span>
+                                // cp.getDataType() import map of set contains this model (classname), don't import
+<span class="nc" id="L2090">                                LOGGER.debug(&quot;Skipped importing {} in {} due to circular import.&quot;, cp.getDataType(), classname);</span>
+                            } else {
+                                // not circular import, so ok to import it
+<span class="nc" id="L2093">                                hasModelsToImport = true;</span>
+<span class="nc" id="L2094">                                modelImports.add(cp.getDataType());</span>
+<span class="nc" id="L2095">                                exampleImports.add(cp.getDataType());</span>
+                            }
+                        } else {
+<span class="nc" id="L2098">                            LOGGER.error(&quot;Failed to look up {} from the imports (map of set) of models.&quot;, cp.getDataType());</span>
+                        }
+                    }
+<span class="nc" id="L2101">                    result = new PythonType(cp.getDataType());</span>
+                } else {
+<span class="nc" id="L2103">                    throw new RuntimeException(&quot;Error! Codegen Property not yet supported in getPydanticType: &quot; + cp);</span>
+                }
+            }
+
+<span class="nc" id="L2107">            return result;</span>
+        }
+
+        private String finalizeType(CodegenProperty cp, PythonType pt) {
+<span class="nc bnc" id="L2111" title="All 4 branches missed.">            if (!cp.required || cp.isNullable) {</span>
+<span class="nc" id="L2112">                moduleImports.add(&quot;typing&quot;, &quot;Optional&quot;);</span>
+<span class="nc" id="L2113">                PythonType opt = new PythonType(&quot;Optional&quot;);</span>
+<span class="nc" id="L2114">                opt.addTypeParam(pt);</span>
+<span class="nc" id="L2115">                pt = opt;</span>
+            }
+
+<span class="nc bnc" id="L2118" title="All 2 branches missed.">            if (!StringUtils.isEmpty(cp.description)) { // has description</span>
+<span class="nc" id="L2119">                pt.annotate(&quot;description&quot;, cp.description);</span>
+            }
+
+            // field
+<span class="nc bnc" id="L2123" title="All 4 branches missed.">            if (cp.baseName != null &amp;&amp; !cp.baseName.equals(cp.name)) { // base name not the same as name</span>
+<span class="nc" id="L2124">                pt.annotate(&quot;alias&quot;, cp.baseName);</span>
+            }
+
+            /* TODO review as example may break the build
+            if (!StringUtils.isEmpty(cp.getExample())) { // has example
+                fields.add(String.format(Locale.ROOT, &quot;example=%s&quot;, cp.getExample()));
+            }*/
+
+            //String defaultValue = null;
+<span class="nc bnc" id="L2133" title="All 2 branches missed.">            if (!cp.required) { //optional</span>
+<span class="nc bnc" id="L2134" title="All 2 branches missed.">                if (cp.defaultValue == null) {</span>
+<span class="nc" id="L2135">                    pt.setDefaultValue(&quot;None&quot;);</span>
+                } else {
+<span class="nc bnc" id="L2137" title="All 4 branches missed.">                    if (cp.isArray || cp.isMap) {</span>
+                        // TODO handle default value for array/map
+<span class="nc" id="L2139">                        pt.setDefaultValue(&quot;None&quot;);</span>
+                    } else {
+                        //defaultValue = ;
+<span class="nc" id="L2142">                        pt.setDefaultValue(cp.defaultValue);</span>
+                    }
+                }
+            }
+
+<span class="nc" id="L2147">            String typeConstraint = pt.asTypeConstraint(moduleImports);</span>
+<span class="nc" id="L2148">            String typeValue = pt.asTypeValue(moduleImports);</span>
+
+<span class="nc bnc" id="L2150" title="All 2 branches missed.">            if (typeValue == null) {</span>
+<span class="nc" id="L2151">                return typeConstraint;</span>
+            } else {
+<span class="nc" id="L2153">                return typeConstraint + &quot; = &quot; + typeValue;</span>
+            }
+        }
+
+        public String generatePythonType(CodegenParameter cp) {
+<span class="nc" id="L2158">            PythonType pt = this.getType(cp);</span>
+<span class="nc" id="L2159">            return this.finalizeType(cp, pt);</span>
+        }
+
+        private PythonType getType(CodegenParameter cp) {
+            // TODO: cleanup
+<span class="nc" id="L2164">            PythonType result = fromCommon(cp);</span>
+
+<span class="nc bnc" id="L2166" title="All 2 branches missed.">            if (result == null) {</span>
+<span class="nc bnc" id="L2167" title="All 2 branches missed.">                if (!cp.isPrimitiveType) {</span>
+                    // add model prefix
+<span class="nc" id="L2169">                     hasModelsToImport = true;</span>
+<span class="nc" id="L2170">                     modelImports.add(cp.getDataType());</span>
+<span class="nc" id="L2171">                     exampleImports.add(cp.getDataType());</span>
+<span class="nc" id="L2172">                     result = new PythonType(cp.getDataType());</span>
+<span class="nc bnc" id="L2173" title="All 2 branches missed.">                } else if (cp.getContent() != null) {</span>
+<span class="nc" id="L2174">                    LinkedHashMap&lt;String, CodegenMediaType&gt; contents = cp.getContent();</span>
+<span class="nc bnc" id="L2175" title="All 2 branches missed.">                    for (String key : contents.keySet()) {</span>
+<span class="nc" id="L2176">                        CodegenMediaType cmt = contents.get(key);</span>
+                        // TODO process the first one only at the moment
+<span class="nc bnc" id="L2178" title="All 2 branches missed.">                        if (cmt != null)</span>
+                            // TODO: don't loop back to the deprecated getPydanticType method
+<span class="nc" id="L2180">                            return getPydanticType(cmt.getSchema(), modelImports, exampleImports, postponedModelImports, postponedExampleImports, moduleImports, classname);</span>
+<span class="nc" id="L2181">                    }</span>
+<span class="nc" id="L2182">                    throw new RuntimeException(&quot;Error! Failed to process getPydanticType when getting the content: &quot; + cp);</span>
+                } else {
+<span class="nc" id="L2184">                    throw new RuntimeException(&quot;Error! Codegen Parameter not yet supported in getPydanticType: &quot; + cp);</span>
+                }
+            }
+
+<span class="nc" id="L2188">            return result;</span>
+        }
+
+        private String finalizeType(CodegenParameter cp, PythonType pt) {
+<span class="nc bnc" id="L2192" title="All 4 branches missed.">            if (!cp.required || cp.isNullable) {</span>
+<span class="nc" id="L2193">                moduleImports.add(&quot;typing&quot;, &quot;Optional&quot;);</span>
+<span class="nc" id="L2194">                PythonType opt = new PythonType(&quot;Optional&quot;);</span>
+<span class="nc" id="L2195">                opt.addTypeParam(pt);</span>
+<span class="nc" id="L2196">                pt = opt;</span>
+            }
+
+<span class="nc bnc" id="L2199" title="All 2 branches missed.">            if (!StringUtils.isEmpty(cp.description)) { // has description</span>
+<span class="nc" id="L2200">                pt.annotate(&quot;description&quot;, cp.description);</span>
+            }
+
+            /* TODO support example
+            if (!StringUtils.isEmpty(cp.getExample())) { // has example
+                fields.add(String.format(Locale.ROOT, &quot;example=%s&quot;, cp.getExample()));
+            }*/
+
+            //return pt.asTypeConstraint(moduleImports);
+<span class="nc" id="L2209">            return pt.asTypeConstraintWithAnnotations(moduleImports);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

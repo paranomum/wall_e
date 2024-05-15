@@ -1,0 +1,1365 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JavaClientCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">JavaClientCodegen.java</span></div><h1>JavaClientCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.media.Schema;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.languages.features.BeanValidationFeatures;
+import org.openapitools.codegen.languages.features.GzipFeatures;
+import org.openapitools.codegen.languages.features.PerformBeanValidationFeatures;
+import org.openapitools.codegen.meta.features.DocumentationFeature;
+import org.openapitools.codegen.meta.features.GlobalFeature;
+import org.openapitools.codegen.meta.features.SecurityFeature;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.templating.mustache.CaseFormatLambda;
+import org.openapitools.codegen.utils.ProcessUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static com.google.common.base.CaseFormat.LOWER_CAMEL;
+import static com.google.common.base.CaseFormat.UPPER_UNDERSCORE;
+import static java.util.Collections.sort;
+import static org.openapitools.codegen.utils.CamelizeOption.LOWERCASE_FIRST_LETTER;
+import static org.openapitools.codegen.utils.StringUtils.camelize;
+
+public class JavaClientCodegen extends AbstractJavaCodegen
+        implements BeanValidationFeatures, PerformBeanValidationFeatures, GzipFeatures {
+
+    static final String MEDIA_TYPE = &quot;mediaType&quot;;
+
+<span class="fc" id="L56">    private final Logger LOGGER = LoggerFactory.getLogger(JavaClientCodegen.class);</span>
+
+    public static final String USE_RX_JAVA2 = &quot;useRxJava2&quot;;
+    public static final String USE_RX_JAVA3 = &quot;useRxJava3&quot;;
+    public static final String DO_NOT_USE_RX = &quot;doNotUseRx&quot;;
+    public static final String USE_PLAY_WS = &quot;usePlayWS&quot;;
+    public static final String ASYNC_NATIVE = &quot;asyncNative&quot;;
+    public static final String CONFIG_KEY = &quot;configKey&quot;;
+    public static final String CONFIG_KEY_FROM_CLASS_NAME = &quot;configKeyFromClassName&quot;;
+    public static final String PARCELABLE_MODEL = &quot;parcelableModel&quot;;
+    public static final String USE_RUNTIME_EXCEPTION = &quot;useRuntimeException&quot;;
+    public static final String USE_REFLECTION_EQUALS_HASHCODE = &quot;useReflectionEqualsHashCode&quot;;
+    public static final String CASE_INSENSITIVE_RESPONSE_HEADERS = &quot;caseInsensitiveResponseHeaders&quot;;
+    public static final String MICROPROFILE_FRAMEWORK = &quot;microprofileFramework&quot;;
+    public static final String MICROPROFILE_MUTINY = &quot;microprofileMutiny&quot;;
+    public static final String USE_ABSTRACTION_FOR_FILES = &quot;useAbstractionForFiles&quot;;
+    public static final String DYNAMIC_OPERATIONS = &quot;dynamicOperations&quot;;
+    public static final String SUPPORT_STREAMING = &quot;supportStreaming&quot;;
+    public static final String SUPPORT_URL_QUERY = &quot;supportUrlQuery&quot;;
+    public static final String GRADLE_PROPERTIES = &quot;gradleProperties&quot;;
+    public static final String ERROR_OBJECT_TYPE = &quot;errorObjectType&quot;;
+
+    public static final String FEIGN = &quot;feign&quot;;
+    public static final String GOOGLE_API_CLIENT = &quot;google-api-client&quot;;
+    public static final String JERSEY2 = &quot;jersey2&quot;;
+    public static final String JERSEY3 = &quot;jersey3&quot;;
+    public static final String NATIVE = &quot;native&quot;;
+    public static final String OKHTTP_GSON = &quot;okhttp-gson&quot;;
+    public static final String RESTEASY = &quot;resteasy&quot;;
+    public static final String RESTTEMPLATE = &quot;resttemplate&quot;;
+    public static final String WEBCLIENT = &quot;webclient&quot;;
+    public static final String RESTCLIENT = &quot;restclient&quot;;
+    public static final String REST_ASSURED = &quot;rest-assured&quot;;
+    public static final String RETROFIT_2 = &quot;retrofit2&quot;;
+    public static final String VERTX = &quot;vertx&quot;;
+    public static final String MICROPROFILE = &quot;microprofile&quot;;
+    public static final String APACHE = &quot;apache-httpclient&quot;;
+    public static final String MICROPROFILE_REST_CLIENT_VERSION = &quot;microprofileRestClientVersion&quot;;
+    public static final String MICROPROFILE_REST_CLIENT_DEFAULT_VERSION = &quot;2.0&quot;;
+    public static final String MICROPROFILE_REST_CLIENT_DEFAULT_ROOT_PACKAGE = &quot;javax&quot;;
+    public static final String MICROPROFILE_DEFAULT = &quot;default&quot;;
+    public static final String MICROPROFILE_KUMULUZEE = &quot;kumuluzee&quot;;
+    public static final String WEBCLIENT_BLOCKING_OPERATIONS = &quot;webclientBlockingOperations&quot;;
+    public static final String USE_ENUM_CASE_INSENSITIVE = &quot;useEnumCaseInsensitive&quot;;
+
+    public static final String SERIALIZATION_LIBRARY_GSON = &quot;gson&quot;;
+    public static final String SERIALIZATION_LIBRARY_JACKSON = &quot;jackson&quot;;
+    public static final String SERIALIZATION_LIBRARY_JSONB = &quot;jsonb&quot;;
+
+    public static final String GENERATE_CLIENT_AS_BEAN = &quot;generateClientAsBean&quot;;
+
+<span class="fc" id="L107">    protected String gradleWrapperPackage = &quot;gradle.wrapper&quot;;</span>
+<span class="fc" id="L108">    protected boolean useRxJava = false;</span>
+<span class="fc" id="L109">    protected boolean useRxJava2 = false;</span>
+<span class="fc" id="L110">    protected boolean useRxJava3 = false;</span>
+    // backwards compatibility for openapi configs that specify neither rx1 nor rx2
+    // (mustache does not allow for boolean operators so we need this extra field)
+<span class="fc" id="L113">    protected boolean doNotUseRx = true;</span>
+<span class="fc" id="L114">    protected boolean usePlayWS = false;</span>
+<span class="fc" id="L115">    protected String microprofileFramework = MICROPROFILE_DEFAULT;</span>
+<span class="fc" id="L116">    protected boolean microprofileMutiny = false;</span>
+<span class="fc" id="L117">    protected String configKey = null;</span>
+<span class="fc" id="L118">    protected boolean configKeyFromClassName = false;</span>
+
+<span class="fc" id="L120">    protected boolean asyncNative = false;</span>
+<span class="fc" id="L121">    protected boolean parcelableModel = false;</span>
+<span class="fc" id="L122">    protected boolean useBeanValidation = false;</span>
+<span class="fc" id="L123">    protected boolean performBeanValidation = false;</span>
+<span class="fc" id="L124">    protected boolean useGzipFeature = false;</span>
+<span class="fc" id="L125">    protected boolean useRuntimeException = false;</span>
+<span class="fc" id="L126">    protected boolean useReflectionEqualsHashCode = false;</span>
+<span class="fc" id="L127">    protected boolean caseInsensitiveResponseHeaders = false;</span>
+<span class="fc" id="L128">    protected boolean useAbstractionForFiles = false;</span>
+<span class="fc" id="L129">    protected boolean dynamicOperations = false;</span>
+<span class="fc" id="L130">    protected boolean supportStreaming = false;</span>
+<span class="fc" id="L131">    protected boolean withAWSV4Signature = false;</span>
+    protected String gradleProperties;
+    protected String errorObjectType;
+    protected String authFolder;
+<span class="fc" id="L135">    protected String serializationLibrary = null;</span>
+<span class="fc" id="L136">    protected boolean useOneOfDiscriminatorLookup = false; // use oneOf discriminator's mapping for model lookup</span>
+    protected String rootJavaEEPackage;
+<span class="fc" id="L138">    protected Map&lt;String, MpRestClientVersion&gt; mpRestClientVersions = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L139">    protected boolean useSingleRequestParameter = false;</span>
+<span class="fc" id="L140">    protected boolean webclientBlockingOperations = false;</span>
+<span class="fc" id="L141">    protected boolean generateClientAsBean = false;</span>
+<span class="fc" id="L142">    protected boolean useEnumCaseInsensitive = false;</span>
+
+<span class="fc" id="L144">    protected int maxAttemptsForRetry = 1;</span>
+<span class="fc" id="L145">    protected long waitTimeMillis = 10l;</span>
+
+    private static class MpRestClientVersion {
+        public final String rootPackage;
+        public final String pomTemplate;
+
+<span class="fc" id="L151">        public MpRestClientVersion(String rootPackage, String pomTemplate) {</span>
+<span class="fc" id="L152">            this.rootPackage = rootPackage;</span>
+<span class="fc" id="L153">            this.pomTemplate = pomTemplate;</span>
+<span class="fc" id="L154">        }</span>
+    }
+
+    @Override
+    public DocumentationProvider defaultDocumentationProvider() {
+<span class="fc" id="L159">        return DocumentationProvider.SOURCE;</span>
+    }
+
+    @Override
+    public List&lt;DocumentationProvider&gt; supportedDocumentationProvider() {
+<span class="fc" id="L164">        List&lt;DocumentationProvider&gt; documentationProviders = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L165">        documentationProviders.add(DocumentationProvider.NONE);</span>
+<span class="fc" id="L166">        documentationProviders.add(DocumentationProvider.SOURCE);</span>
+<span class="fc" id="L167">        return documentationProviders;</span>
+    }
+
+    @Override
+    public List&lt;AnnotationLibrary&gt; supportedAnnotationLibraries() {
+<span class="fc" id="L172">        List&lt;AnnotationLibrary&gt; annotationLibraries = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L173">        annotationLibraries.add(AnnotationLibrary.NONE);</span>
+<span class="fc" id="L174">        annotationLibraries.add(AnnotationLibrary.SWAGGER1);</span>
+<span class="fc" id="L175">        annotationLibraries.add(AnnotationLibrary.SWAGGER2);</span>
+<span class="fc" id="L176">        return annotationLibraries;</span>
+    }
+
+    public JavaClientCodegen() {
+<span class="fc" id="L180">        super();</span>
+
+        // TODO: Move GlobalFeature.ParameterizedServer to library: jersey after moving featureSet to generatorMetadata
+<span class="fc" id="L183">        modifyFeatureSet(features -&gt; features</span>
+<span class="fc" id="L184">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="fc" id="L185">                .includeGlobalFeatures(GlobalFeature.ParameterizedServer)</span>
+<span class="fc" id="L186">                .includeSecurityFeatures(SecurityFeature.OAuth2_AuthorizationCode,</span>
+                        SecurityFeature.OAuth2_ClientCredentials,
+                        SecurityFeature.OAuth2_Password,
+                        SecurityFeature.SignatureAuth,//jersey only
+                        SecurityFeature.AWSV4Signature)//okhttp-gson only
+        );
+
+<span class="fc" id="L193">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;java&quot;;</span>
+<span class="fc" id="L194">        embeddedTemplateDir = templateDir = &quot;Java&quot;;</span>
+<span class="fc" id="L195">        invokerPackage = &quot;org.openapitools.client&quot;;</span>
+<span class="fc" id="L196">        artifactId = &quot;openapi-java-client&quot;;</span>
+<span class="fc" id="L197">        apiPackage = &quot;org.openapitools.client.api&quot;;</span>
+<span class="fc" id="L198">        modelPackage = &quot;org.openapitools.client.model&quot;;</span>
+<span class="fc" id="L199">        rootJavaEEPackage = MICROPROFILE_REST_CLIENT_DEFAULT_ROOT_PACKAGE;</span>
+
+        // cliOptions default redefinition need to be updated
+<span class="fc" id="L202">        updateOption(CodegenConstants.INVOKER_PACKAGE, this.getInvokerPackage());</span>
+<span class="fc" id="L203">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
+<span class="fc" id="L204">        updateOption(CodegenConstants.API_PACKAGE, apiPackage);</span>
+<span class="fc" id="L205">        updateOption(CodegenConstants.MODEL_PACKAGE, modelPackage);</span>
+
+<span class="fc" id="L207">        modelTestTemplateFiles.put(&quot;model_test.mustache&quot;, &quot;.java&quot;);</span>
+
+<span class="fc" id="L209">        cliOptions.add(CliOption.newBoolean(USE_RX_JAVA2, &quot;Whether to use the RxJava2 adapter with the retrofit2 library. IMPORTANT: This option has been deprecated.&quot;));</span>
+<span class="fc" id="L210">        cliOptions.add(CliOption.newBoolean(USE_RX_JAVA3, &quot;Whether to use the RxJava3 adapter with the retrofit2 library. IMPORTANT: This option has been deprecated.&quot;));</span>
+<span class="fc" id="L211">        cliOptions.add(CliOption.newBoolean(PARCELABLE_MODEL, &quot;Whether to generate models for Android that implement Parcelable with the okhttp-gson library.&quot;));</span>
+<span class="fc" id="L212">        cliOptions.add(CliOption.newBoolean(USE_PLAY_WS, &quot;Use Play! Async HTTP client (Play WS API)&quot;));</span>
+<span class="fc" id="L213">        cliOptions.add(CliOption.newBoolean(USE_BEANVALIDATION, &quot;Use BeanValidation API annotations&quot;));</span>
+<span class="fc" id="L214">        cliOptions.add(CliOption.newBoolean(PERFORM_BEANVALIDATION, &quot;Perform BeanValidation&quot;));</span>
+<span class="fc" id="L215">        cliOptions.add(CliOption.newBoolean(USE_GZIP_FEATURE, &quot;Send gzip-encoded requests&quot;));</span>
+<span class="fc" id="L216">        cliOptions.add(CliOption.newBoolean(USE_RUNTIME_EXCEPTION, &quot;Use RuntimeException instead of Exception. Only jersey2, jersey3, okhttp-gson, vertx, microprofile support this option.&quot;));</span>
+<span class="fc" id="L217">        cliOptions.add(CliOption.newBoolean(ASYNC_NATIVE, &quot;If true, async handlers will be used, instead of the sync version&quot;));</span>
+<span class="fc" id="L218">        cliOptions.add(CliOption.newBoolean(USE_REFLECTION_EQUALS_HASHCODE, &quot;Use org.apache.commons.lang3.builder for equals and hashCode in the models. WARNING: This will fail under a security manager, unless the appropriate permissions are set up correctly and also there's potential performance impact.&quot;));</span>
+<span class="fc" id="L219">        cliOptions.add(CliOption.newBoolean(CASE_INSENSITIVE_RESPONSE_HEADERS, &quot;Make API response's headers case-insensitive. Available on &quot; + OKHTTP_GSON + &quot;, &quot; + JERSEY2 + &quot; libraries&quot;));</span>
+<span class="fc" id="L220">        cliOptions.add(CliOption.newString(MICROPROFILE_FRAMEWORK, &quot;Framework for microprofile. Possible values \&quot;kumuluzee\&quot;&quot;));</span>
+<span class="fc" id="L221">        cliOptions.add(CliOption.newString(MICROPROFILE_MUTINY, &quot;Whether to use async types for microprofile (currently only Smallrye Mutiny is supported).&quot;));</span>
+<span class="fc" id="L222">        cliOptions.add(CliOption.newBoolean(USE_ABSTRACTION_FOR_FILES, &quot;Use alternative types instead of java.io.File to allow passing bytes without a file on disk. Available on resttemplate, webclient, restclient, libraries&quot;));</span>
+<span class="fc" id="L223">        cliOptions.add(CliOption.newBoolean(DYNAMIC_OPERATIONS, &quot;Generate operations dynamically at runtime from an OAS&quot;, this.dynamicOperations));</span>
+<span class="fc" id="L224">        cliOptions.add(CliOption.newBoolean(SUPPORT_STREAMING, &quot;Support streaming endpoint (beta)&quot;, this.supportStreaming));</span>
+<span class="fc" id="L225">        cliOptions.add(CliOption.newBoolean(CodegenConstants.WITH_AWSV4_SIGNATURE_COMMENT, CodegenConstants.WITH_AWSV4_SIGNATURE_COMMENT_DESC + &quot; (only available for okhttp-gson library)&quot;, this.withAWSV4Signature));</span>
+<span class="fc" id="L226">        cliOptions.add(CliOption.newString(GRADLE_PROPERTIES, &quot;Append additional Gradle properties to the gradle.properties file&quot;));</span>
+<span class="fc" id="L227">        cliOptions.add(CliOption.newString(ERROR_OBJECT_TYPE, &quot;Error Object type. (This option is for okhttp-gson only)&quot;));</span>
+<span class="fc" id="L228">        cliOptions.add(CliOption.newString(CONFIG_KEY, &quot;Config key in @RegisterRestClient. Default to none. Only `microprofile` supports this option.&quot;));</span>
+<span class="fc" id="L229">        cliOptions.add(CliOption.newString(CONFIG_KEY_FROM_CLASS_NAME, &quot;If true, set tag as key in @RegisterRestClient. Default to false. Only `microprofile` supports this option.&quot;));</span>
+<span class="fc" id="L230">        cliOptions.add(CliOption.newBoolean(CodegenConstants.USE_ONEOF_DISCRIMINATOR_LOOKUP, CodegenConstants.USE_ONEOF_DISCRIMINATOR_LOOKUP_DESC + &quot; Only jersey2, jersey3, native, okhttp-gson support this option.&quot;));</span>
+<span class="fc" id="L231">        cliOptions.add(CliOption.newString(MICROPROFILE_REST_CLIENT_VERSION, &quot;Version of MicroProfile Rest Client API.&quot;));</span>
+<span class="fc" id="L232">        cliOptions.add(CliOption.newBoolean(CodegenConstants.USE_SINGLE_REQUEST_PARAMETER, &quot;Setting this property to true will generate functions with a single argument containing all API endpoint parameters instead of one argument per parameter. ONLY jersey2, jersey3, okhttp-gson, microprofile support this option.&quot;));</span>
+<span class="fc" id="L233">        cliOptions.add(CliOption.newBoolean(WEBCLIENT_BLOCKING_OPERATIONS, &quot;Making all WebClient operations blocking(sync). Note that if on operation 'x-webclient-blocking: false' then such operation won't be sync&quot;, this.webclientBlockingOperations));</span>
+<span class="fc" id="L234">        cliOptions.add(CliOption.newBoolean(GENERATE_CLIENT_AS_BEAN, &quot;For resttemplate, configure whether to create `ApiClient.java` and Apis clients as bean (with `@Component` annotation).&quot;, this.generateClientAsBean));</span>
+<span class="fc" id="L235">        cliOptions.add(CliOption.newBoolean(SUPPORT_URL_QUERY, &quot;Generate toUrlQueryString in POJO (default to true). Available on `native`, `apache-httpclient` libraries.&quot;));</span>
+<span class="fc" id="L236">        cliOptions.add(CliOption.newBoolean(USE_ENUM_CASE_INSENSITIVE, &quot;Use `equalsIgnoreCase` when String for enum comparison&quot;, useEnumCaseInsensitive));</span>
+
+<span class="fc" id="L238">        supportedLibraries.put(JERSEY2, &quot;HTTP client: Jersey client 2.25.1. JSON processing: Jackson 2.9.x&quot;);</span>
+<span class="fc" id="L239">        supportedLibraries.put(JERSEY3, &quot;HTTP client: Jersey client 3.x. JSON processing: Jackson 2.x&quot;);</span>
+<span class="fc" id="L240">        supportedLibraries.put(FEIGN, &quot;HTTP client: OpenFeign 10.x. JSON processing: Jackson 2.9.x. or Gson 2.x&quot;);</span>
+<span class="fc" id="L241">        supportedLibraries.put(OKHTTP_GSON, &quot;[DEFAULT] HTTP client: OkHttp 3.x. JSON processing: Gson 2.8.x. Enable Parcelable models on Android using '-DparcelableModel=true'. Enable gzip request encoding using '-DuseGzipFeature=true'.&quot;);</span>
+<span class="fc" id="L242">        supportedLibraries.put(RETROFIT_2, &quot;HTTP client: OkHttp 3.x. JSON processing: Gson 2.x (Retrofit 2.3.0). Enable the RxJava adapter using '-DuseRxJava[2/3]=true'. (RxJava 1.x or 2.x or 3.x)&quot;);</span>
+<span class="fc" id="L243">        supportedLibraries.put(RESTTEMPLATE, &quot;HTTP client: Spring RestTemplate 4.x. JSON processing: Jackson 2.9.x&quot;);</span>
+<span class="fc" id="L244">        supportedLibraries.put(WEBCLIENT, &quot;HTTP client: Spring WebClient 5.x. JSON processing: Jackson 2.9.x&quot;);</span>
+<span class="fc" id="L245">        supportedLibraries.put(RESTCLIENT, &quot;HTTP client: Spring RestClient 6.1. JSON processing: Jackson 2.9.x&quot;);</span>
+<span class="fc" id="L246">        supportedLibraries.put(RESTEASY, &quot;HTTP client: Resteasy client 3.x. JSON processing: Jackson 2.9.x&quot;);</span>
+<span class="fc" id="L247">        supportedLibraries.put(VERTX, &quot;HTTP client: VertX client 3.x. JSON processing: Jackson 2.9.x&quot;);</span>
+<span class="fc" id="L248">        supportedLibraries.put(GOOGLE_API_CLIENT, &quot;HTTP client: Google API client 1.x. JSON processing: Jackson 2.9.x&quot;);</span>
+<span class="fc" id="L249">        supportedLibraries.put(REST_ASSURED, &quot;HTTP client: rest-assured : 4.x. JSON processing: Gson 2.x or Jackson 2.10.x. Only for Java 8&quot;);</span>
+<span class="fc" id="L250">        supportedLibraries.put(NATIVE, &quot;HTTP client: Java native HttpClient. JSON processing: Jackson 2.9.x. Only for Java11+&quot;);</span>
+<span class="fc" id="L251">        supportedLibraries.put(MICROPROFILE, &quot;HTTP client: Microprofile client 1.x. JSON processing: JSON-B or Jackson 2.9.x&quot;);</span>
+<span class="fc" id="L252">        supportedLibraries.put(APACHE, &quot;HTTP client: Apache httpclient 5.x&quot;);</span>
+
+<span class="fc" id="L254">        CliOption libraryOption = new CliOption(CodegenConstants.LIBRARY, &quot;library template (sub-template) to use&quot;);</span>
+<span class="fc" id="L255">        libraryOption.setEnum(supportedLibraries);</span>
+        // set okhttp-gson as the default
+<span class="fc" id="L257">        libraryOption.setDefault(OKHTTP_GSON);</span>
+<span class="fc" id="L258">        cliOptions.add(libraryOption);</span>
+<span class="fc" id="L259">        setLibrary(OKHTTP_GSON);</span>
+
+<span class="fc" id="L261">        CliOption serializationLibrary = new CliOption(CodegenConstants.SERIALIZATION_LIBRARY, &quot;Serialization library, default depends on value of the option library&quot;);</span>
+<span class="fc" id="L262">        Map&lt;String, String&gt; serializationOptions = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L263">        serializationOptions.put(SERIALIZATION_LIBRARY_GSON, &quot;Use Gson as serialization library&quot;);</span>
+<span class="fc" id="L264">        serializationOptions.put(SERIALIZATION_LIBRARY_JACKSON, &quot;Use Jackson as serialization library&quot;);</span>
+<span class="fc" id="L265">        serializationOptions.put(SERIALIZATION_LIBRARY_JSONB, &quot;Use JSON-B as serialization library&quot;);</span>
+<span class="fc" id="L266">        serializationLibrary.setEnum(serializationOptions);</span>
+<span class="fc" id="L267">        cliOptions.add(serializationLibrary);</span>
+
+        // Ensure the OAS 3.x discriminator mappings include any descendent schemas that allOf
+        // inherit from self, any oneOf schemas, any anyOf schemas, any x-discriminator-values,
+        // and the discriminator mapping schemas in the OAS document.
+<span class="fc" id="L272">        this.setLegacyDiscriminatorBehavior(false);</span>
+
+<span class="fc" id="L274">        initMpRestClientVersionToRootPackage();</span>
+<span class="fc" id="L275">    }</span>
+
+    private void initMpRestClientVersionToRootPackage() {
+<span class="fc" id="L278">        mpRestClientVersions.put(&quot;1.4.1&quot;, new MpRestClientVersion(&quot;javax&quot;, &quot;pom.mustache&quot;));</span>
+<span class="fc" id="L279">        mpRestClientVersions.put(&quot;2.0&quot;, new MpRestClientVersion(&quot;javax&quot;, &quot;pom.mustache&quot;));</span>
+<span class="fc" id="L280">        mpRestClientVersions.put(&quot;3.0&quot;, new MpRestClientVersion(&quot;jakarta&quot;, &quot;pom_3.0.mustache&quot;));</span>
+<span class="fc" id="L281">    }</span>
+
+    @Override
+    public CodegenType getTag() {
+<span class="fc" id="L285">        return CodegenType.CLIENT;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="fc" id="L290">        return &quot;java&quot;;</span>
+    }
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L295">        return &quot;Generates a Java client library (HTTP lib: Jersey (1.x, 2.x), Retrofit (2.x), OpenFeign (10.x) and more.&quot;;</span>
+    }
+
+    @Override
+    public void addOperationToGroup(String tag, String resourcePath, Operation operation, CodegenOperation co, Map&lt;String, List&lt;CodegenOperation&gt;&gt; operations) {
+<span class="nc" id="L300">        super.addOperationToGroup(tag, resourcePath, operation, co, operations);</span>
+<span class="nc bnc" id="L301" title="All 2 branches missed.">        if (MICROPROFILE.equals(getLibrary())) {</span>
+<span class="nc bnc" id="L302" title="All 2 branches missed.">            co.subresourceOperation = !co.path.isEmpty();</span>
+        }
+<span class="nc" id="L304">    }</span>
+
+    @Override
+    public void processOpts() {
+<span class="nc bnc" id="L308" title="All 6 branches missed.">        if (WEBCLIENT.equals(getLibrary()) || NATIVE.equals(getLibrary()) || RESTCLIENT.equals(getLibrary())) {</span>
+<span class="nc" id="L309">            dateLibrary = &quot;java8&quot;;</span>
+<span class="nc bnc" id="L310" title="All 2 branches missed.">        } else if (MICROPROFILE.equals(getLibrary())) {</span>
+<span class="nc" id="L311">            dateLibrary = &quot;legacy&quot;;</span>
+        }
+<span class="nc" id="L313">        super.processOpts();</span>
+
+<span class="nc bnc" id="L315" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.USE_ONEOF_DISCRIMINATOR_LOOKUP)) {</span>
+<span class="nc" id="L316">            setUseOneOfDiscriminatorLookup(convertPropertyToBooleanAndWriteBack(CodegenConstants.USE_ONEOF_DISCRIMINATOR_LOOKUP));</span>
+        } else {
+<span class="nc" id="L318">            additionalProperties.put(CodegenConstants.USE_ONEOF_DISCRIMINATOR_LOOKUP, useOneOfDiscriminatorLookup);</span>
+        }
+
+        // RxJava
+<span class="nc bnc" id="L322" title="All 4 branches missed.">        if (additionalProperties.containsKey(USE_RX_JAVA2) &amp;&amp; additionalProperties.containsKey(USE_RX_JAVA3)) {</span>
+<span class="nc" id="L323">            LOGGER.warn(&quot;You specified all RxJava versions 2 and 3 but they are mutually exclusive. Defaulting to v3.&quot;);</span>
+<span class="nc" id="L324">            this.setUseRxJava3(Boolean.parseBoolean(additionalProperties.get(USE_RX_JAVA3).toString()));</span>
+        } else {
+<span class="nc bnc" id="L326" title="All 4 branches missed.">            if (additionalProperties.containsKey(USE_RX_JAVA2) &amp;&amp; additionalProperties.containsKey(USE_RX_JAVA3)) {</span>
+<span class="nc" id="L327">                LOGGER.warn(&quot;You specified both RxJava versions 2 and 3 but they are mutually exclusive. Defaulting to v3.&quot;);</span>
+<span class="nc" id="L328">                this.setUseRxJava3(Boolean.parseBoolean(additionalProperties.get(USE_RX_JAVA3).toString()));</span>
+            } else {
+<span class="nc bnc" id="L330" title="All 2 branches missed.">                if (additionalProperties.containsKey(USE_RX_JAVA2)) {</span>
+<span class="nc" id="L331">                    this.setUseRxJava2(Boolean.parseBoolean(additionalProperties.get(USE_RX_JAVA2).toString()));</span>
+                }
+<span class="nc bnc" id="L333" title="All 2 branches missed.">                if (additionalProperties.containsKey(USE_RX_JAVA3)) {</span>
+<span class="nc" id="L334">                    this.setUseRxJava3(Boolean.parseBoolean(additionalProperties.get(USE_RX_JAVA3).toString()));</span>
+                }
+            }
+        }
+
+<span class="nc bnc" id="L339" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.USE_SINGLE_REQUEST_PARAMETER)) {</span>
+<span class="nc" id="L340">            this.setUseSingleRequestParameter(convertPropertyToBoolean(CodegenConstants.USE_SINGLE_REQUEST_PARAMETER));</span>
+        }
+<span class="nc" id="L342">        writePropertyBack(CodegenConstants.USE_SINGLE_REQUEST_PARAMETER, getUseSingleRequestParameter());</span>
+
+<span class="nc bnc" id="L344" title="All 6 branches missed.">        if (!useRxJava &amp;&amp; !useRxJava2 &amp;&amp; !useRxJava3) {</span>
+<span class="nc" id="L345">            additionalProperties.put(DO_NOT_USE_RX, true);</span>
+        }
+
+        // Java Play
+<span class="nc bnc" id="L349" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_PLAY_WS)) {</span>
+<span class="nc" id="L350">            this.setUsePlayWS(Boolean.parseBoolean(additionalProperties.get(USE_PLAY_WS).toString()));</span>
+        }
+<span class="nc" id="L352">        additionalProperties.put(USE_PLAY_WS, usePlayWS);</span>
+
+        // Microprofile framework
+<span class="nc bnc" id="L355" title="All 2 branches missed.">        if (additionalProperties.containsKey(MICROPROFILE_FRAMEWORK)) {</span>
+<span class="nc bnc" id="L356" title="All 2 branches missed.">            if (!MICROPROFILE_KUMULUZEE.equals(microprofileFramework)) {</span>
+<span class="nc" id="L357">                throw new RuntimeException(&quot;Invalid microprofileFramework '&quot; + microprofileFramework + &quot;'. Must be 'kumuluzee' or none.&quot;);</span>
+            }
+<span class="nc" id="L359">            this.setMicroprofileFramework(additionalProperties.get(MICROPROFILE_FRAMEWORK).toString());</span>
+        }
+<span class="nc" id="L361">        additionalProperties.put(MICROPROFILE_FRAMEWORK, microprofileFramework);</span>
+
+<span class="nc bnc" id="L363" title="All 2 branches missed.">        if (additionalProperties.containsKey(MICROPROFILE_MUTINY)) {</span>
+<span class="nc" id="L364">            this.setMicroprofileMutiny(convertPropertyToBooleanAndWriteBack(MICROPROFILE_MUTINY));</span>
+        }
+
+<span class="nc bnc" id="L367" title="All 2 branches missed.">        if (!additionalProperties.containsKey(MICROPROFILE_REST_CLIENT_VERSION)) {</span>
+<span class="nc" id="L368">            additionalProperties.put(MICROPROFILE_REST_CLIENT_VERSION, MICROPROFILE_REST_CLIENT_DEFAULT_VERSION);</span>
+        } else {
+<span class="nc" id="L370">            String mpRestClientVersion = (String) additionalProperties.get(MICROPROFILE_REST_CLIENT_VERSION);</span>
+<span class="nc bnc" id="L371" title="All 2 branches missed.">            if (!mpRestClientVersions.containsKey(mpRestClientVersion)) {</span>
+<span class="nc" id="L372">                throw new IllegalArgumentException(</span>
+<span class="nc" id="L373">                        String.format(Locale.ROOT,</span>
+                                &quot;Version %s of MicroProfile Rest Client is not supported or incorrect. Supported versions are %s&quot;,
+                                mpRestClientVersion,
+<span class="nc" id="L376">                                String.join(&quot;, &quot;, mpRestClientVersions.keySet())</span>
+                        )
+                );
+            }
+        }
+<span class="nc bnc" id="L381" title="All 2 branches missed.">        if (!additionalProperties.containsKey(&quot;rootJavaEEPackage&quot;)) {</span>
+<span class="nc" id="L382">            String mpRestClientVersion = (String) additionalProperties.get(MICROPROFILE_REST_CLIENT_VERSION);</span>
+<span class="nc bnc" id="L383" title="All 2 branches missed.">            if (mpRestClientVersions.containsKey(mpRestClientVersion)) {</span>
+<span class="nc" id="L384">                rootJavaEEPackage = mpRestClientVersions.get(mpRestClientVersion).rootPackage;</span>
+            }
+<span class="nc" id="L386">            additionalProperties.put(&quot;rootJavaEEPackage&quot;, rootJavaEEPackage);</span>
+        }
+
+<span class="nc bnc" id="L389" title="All 2 branches missed.">        if (additionalProperties.containsKey(CONFIG_KEY)) {</span>
+<span class="nc" id="L390">            this.setConfigKey(additionalProperties.get(CONFIG_KEY).toString());</span>
+<span class="nc bnc" id="L391" title="All 2 branches missed.">        } else if (additionalProperties.containsKey(CONFIG_KEY_FROM_CLASS_NAME)) {</span>
+<span class="nc" id="L392">            this.setConfigKeyFromClassName(Boolean.parseBoolean(additionalProperties.get(CONFIG_KEY_FROM_CLASS_NAME).toString()));</span>
+        }
+
+<span class="nc bnc" id="L395" title="All 2 branches missed.">        if (additionalProperties.containsKey(ASYNC_NATIVE)) {</span>
+<span class="nc" id="L396">            this.setAsyncNative(convertPropertyToBooleanAndWriteBack(ASYNC_NATIVE));</span>
+        }
+
+<span class="nc bnc" id="L399" title="All 2 branches missed.">        if (additionalProperties.containsKey(PARCELABLE_MODEL)) {</span>
+<span class="nc" id="L400">            this.setParcelableModel(Boolean.parseBoolean(additionalProperties.get(PARCELABLE_MODEL).toString()));</span>
+        }
+        // put the boolean value back to PARCELABLE_MODEL in additionalProperties
+<span class="nc" id="L403">        additionalProperties.put(PARCELABLE_MODEL, parcelableModel);</span>
+
+<span class="nc bnc" id="L405" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_BEANVALIDATION)) {</span>
+<span class="nc" id="L406">            this.setUseBeanValidation(convertPropertyToBooleanAndWriteBack(USE_BEANVALIDATION));</span>
+        }
+
+<span class="nc bnc" id="L409" title="All 2 branches missed.">        if (additionalProperties.containsKey(PERFORM_BEANVALIDATION)) {</span>
+<span class="nc" id="L410">            this.setPerformBeanValidation(convertPropertyToBooleanAndWriteBack(PERFORM_BEANVALIDATION));</span>
+        }
+
+<span class="nc bnc" id="L413" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_GZIP_FEATURE)) {</span>
+<span class="nc" id="L414">            this.setUseGzipFeature(convertPropertyToBooleanAndWriteBack(USE_GZIP_FEATURE));</span>
+        }
+
+<span class="nc bnc" id="L417" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_RUNTIME_EXCEPTION)) {</span>
+<span class="nc" id="L418">            this.setUseRuntimeException(convertPropertyToBooleanAndWriteBack(USE_RUNTIME_EXCEPTION));</span>
+        }
+
+<span class="nc bnc" id="L421" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_REFLECTION_EQUALS_HASHCODE)) {</span>
+<span class="nc" id="L422">            this.setUseReflectionEqualsHashCode(convertPropertyToBooleanAndWriteBack(USE_REFLECTION_EQUALS_HASHCODE));</span>
+        }
+
+<span class="nc bnc" id="L425" title="All 2 branches missed.">        if (additionalProperties.containsKey(CASE_INSENSITIVE_RESPONSE_HEADERS)) {</span>
+<span class="nc" id="L426">            this.setUseReflectionEqualsHashCode(convertPropertyToBooleanAndWriteBack(CASE_INSENSITIVE_RESPONSE_HEADERS));</span>
+        }
+
+<span class="nc bnc" id="L429" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_ABSTRACTION_FOR_FILES)) {</span>
+<span class="nc" id="L430">            this.setUseAbstractionForFiles(convertPropertyToBooleanAndWriteBack(USE_ABSTRACTION_FOR_FILES));</span>
+        }
+
+<span class="nc bnc" id="L433" title="All 2 branches missed.">        if (additionalProperties.containsKey(DYNAMIC_OPERATIONS)) {</span>
+<span class="nc" id="L434">            this.setDynamicOperations(Boolean.parseBoolean(additionalProperties.get(DYNAMIC_OPERATIONS).toString()));</span>
+        }
+<span class="nc" id="L436">        additionalProperties.put(DYNAMIC_OPERATIONS, dynamicOperations);</span>
+
+<span class="nc bnc" id="L438" title="All 2 branches missed.">        if (additionalProperties.containsKey(SUPPORT_STREAMING)) {</span>
+<span class="nc" id="L439">            this.setSupportStreaming(Boolean.parseBoolean(additionalProperties.get(SUPPORT_STREAMING).toString()));</span>
+        }
+<span class="nc" id="L441">        additionalProperties.put(SUPPORT_STREAMING, supportStreaming);</span>
+
+<span class="nc bnc" id="L443" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.WITH_AWSV4_SIGNATURE_COMMENT)) {</span>
+<span class="nc" id="L444">            this.setWithAWSV4Signature(Boolean.parseBoolean(additionalProperties.get(CodegenConstants.WITH_AWSV4_SIGNATURE_COMMENT).toString()));</span>
+        }
+<span class="nc" id="L446">        additionalProperties.put(CodegenConstants.WITH_AWSV4_SIGNATURE_COMMENT, withAWSV4Signature);</span>
+
+<span class="nc bnc" id="L448" title="All 2 branches missed.">        if (additionalProperties.containsKey(GRADLE_PROPERTIES)) {</span>
+<span class="nc" id="L449">            this.setGradleProperties(additionalProperties.get(GRADLE_PROPERTIES).toString());</span>
+        }
+<span class="nc" id="L451">        additionalProperties.put(GRADLE_PROPERTIES, gradleProperties);</span>
+
+<span class="nc bnc" id="L453" title="All 2 branches missed.">        if (additionalProperties.containsKey(ERROR_OBJECT_TYPE)) {</span>
+<span class="nc" id="L454">            this.setErrorObjectType(additionalProperties.get(ERROR_OBJECT_TYPE).toString());</span>
+        }
+<span class="nc" id="L456">        additionalProperties.put(ERROR_OBJECT_TYPE, errorObjectType);</span>
+<span class="nc bnc" id="L457" title="All 2 branches missed.">        if (additionalProperties.containsKey(WEBCLIENT_BLOCKING_OPERATIONS)) {</span>
+<span class="nc" id="L458">            this.webclientBlockingOperations = Boolean.parseBoolean(additionalProperties.get(WEBCLIENT_BLOCKING_OPERATIONS).toString());</span>
+        }
+
+        // add URL query deepObject support to native, apache-httpclient by default
+<span class="nc bnc" id="L462" title="All 2 branches missed.">        if (!additionalProperties.containsKey(SUPPORT_URL_QUERY)) {</span>
+<span class="nc bnc" id="L463" title="All 4 branches missed.">            if (isLibrary(NATIVE) || isLibrary(APACHE)) {</span>
+                // default to true for native and apache-httpclient
+<span class="nc" id="L465">                additionalProperties.put(SUPPORT_URL_QUERY, true);</span>
+            }
+        } else {
+<span class="nc" id="L468">            additionalProperties.put(SUPPORT_URL_QUERY, Boolean.parseBoolean(additionalProperties.get(SUPPORT_URL_QUERY).toString()));</span>
+        }
+
+<span class="nc bnc" id="L471" title="All 2 branches missed.">        if (additionalProperties.containsKey(GENERATE_CLIENT_AS_BEAN)) {</span>
+<span class="nc" id="L472">            this.setGenerateClientAsBean(convertPropertyToBooleanAndWriteBack(GENERATE_CLIENT_AS_BEAN));</span>
+        }
+
+<span class="nc bnc" id="L475" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_ENUM_CASE_INSENSITIVE)) {</span>
+<span class="nc" id="L476">            this.setUseEnumCaseInsensitive(Boolean.parseBoolean(additionalProperties.get(USE_ENUM_CASE_INSENSITIVE).toString()));</span>
+        }
+
+<span class="nc bnc" id="L479" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.MAX_ATTEMPTS_FOR_RETRY)) {</span>
+<span class="nc" id="L480">            this.setMaxAttemptsForRetry(Integer.parseInt(additionalProperties.get(CodegenConstants.MAX_ATTEMPTS_FOR_RETRY).toString()));</span>
+        } else {
+<span class="nc" id="L482">            additionalProperties.put(CodegenConstants.MAX_ATTEMPTS_FOR_RETRY, maxAttemptsForRetry);</span>
+        }
+
+<span class="nc bnc" id="L485" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.WAIT_TIME_OF_THREAD)) {</span>
+<span class="nc" id="L486">            this.setWaitTimeMillis(Long.parseLong((additionalProperties.get(CodegenConstants.WAIT_TIME_OF_THREAD).toString())));</span>
+        } else {
+<span class="nc" id="L488">            additionalProperties.put(CodegenConstants.WAIT_TIME_OF_THREAD, waitTimeMillis);</span>
+        }
+<span class="nc" id="L490">        writePropertyBack(USE_ENUM_CASE_INSENSITIVE, useEnumCaseInsensitive);</span>
+
+<span class="nc" id="L492">        final String invokerFolder = (sourceFolder + '/' + invokerPackage).replace(&quot;.&quot;, &quot;/&quot;);</span>
+<span class="nc" id="L493">        final String apiFolder = (sourceFolder + '/' + apiPackage).replace(&quot;.&quot;, &quot;/&quot;);</span>
+<span class="nc" id="L494">        final String modelsFolder = (sourceFolder + File.separator + modelPackage().replace('.', File.separatorChar)).replace('/', File.separatorChar);</span>
+<span class="nc" id="L495">        authFolder = (sourceFolder + '/' + invokerPackage + &quot;.auth&quot;).replace(&quot;.&quot;, &quot;/&quot;);</span>
+
+        //Common files
+<span class="nc" id="L498">        supportingFiles.add(new SupportingFile(&quot;pom.mustache&quot;, &quot;&quot;, &quot;pom.xml&quot;).doNotOverwrite());</span>
+<span class="nc" id="L499">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;).doNotOverwrite());</span>
+<span class="nc" id="L500">        supportingFiles.add(new SupportingFile(&quot;build.gradle.mustache&quot;, &quot;&quot;, &quot;build.gradle&quot;).doNotOverwrite());</span>
+<span class="nc" id="L501">        supportingFiles.add(new SupportingFile(&quot;build.sbt.mustache&quot;, &quot;&quot;, &quot;build.sbt&quot;).doNotOverwrite());</span>
+<span class="nc" id="L502">        supportingFiles.add(new SupportingFile(&quot;settings.gradle.mustache&quot;, &quot;&quot;, &quot;settings.gradle&quot;).doNotOverwrite());</span>
+<span class="nc" id="L503">        supportingFiles.add(new SupportingFile(&quot;gradle.properties.mustache&quot;, &quot;&quot;, &quot;gradle.properties&quot;).doNotOverwrite());</span>
+<span class="nc" id="L504">        supportingFiles.add(new SupportingFile(&quot;manifest.mustache&quot;, projectFolder, &quot;AndroidManifest.xml&quot;).doNotOverwrite());</span>
+<span class="nc" id="L505">        supportingFiles.add(new SupportingFile(&quot;travis.mustache&quot;, &quot;&quot;, &quot;.travis.yml&quot;));</span>
+<span class="nc" id="L506">        supportingFiles.add(new SupportingFile(&quot;ApiClient.mustache&quot;, invokerFolder, &quot;ApiClient.java&quot;));</span>
+<span class="nc" id="L507">        supportingFiles.add(new SupportingFile(&quot;ServerConfiguration.mustache&quot;, invokerFolder, &quot;ServerConfiguration.java&quot;));</span>
+<span class="nc" id="L508">        supportingFiles.add(new SupportingFile(&quot;ServerVariable.mustache&quot;, invokerFolder, &quot;ServerVariable.java&quot;));</span>
+<span class="nc" id="L509">        supportingFiles.add(new SupportingFile(&quot;maven.yml.mustache&quot;, &quot;.github/workflows&quot;, &quot;maven.yml&quot;));</span>
+<span class="nc bnc" id="L510" title="All 2 branches missed.">        if (dynamicOperations) {</span>
+<span class="nc" id="L511">            supportingFiles.add(new SupportingFile(&quot;openapi.mustache&quot;, projectFolder + &quot;/resources/openapi&quot;, &quot;openapi.yaml&quot;));</span>
+<span class="nc" id="L512">            supportingFiles.add(new SupportingFile(&quot;apiOperation.mustache&quot;, invokerFolder, &quot;ApiOperation.java&quot;));</span>
+        } else {
+<span class="nc" id="L514">            supportingFiles.add(new SupportingFile(&quot;openapi.mustache&quot;, &quot;api&quot;, &quot;openapi.yaml&quot;));</span>
+        }
+
+        // helper for client library that allow to parse/format java.time.OffsetDateTime or org.threeten.bp.OffsetDateTime
+<span class="nc bnc" id="L518" title="All 20 branches missed.">        if (additionalProperties.containsKey(&quot;jsr310&quot;) &amp;&amp; (isLibrary(WEBCLIENT) || isLibrary(VERTX) || isLibrary(RESTTEMPLATE) || isLibrary(RESTEASY) || isLibrary(MICROPROFILE) || isLibrary(JERSEY2) || isLibrary(JERSEY3) || isLibrary(APACHE) || isLibrary(RESTCLIENT))) {</span>
+<span class="nc" id="L519">            supportingFiles.add(new SupportingFile(&quot;JavaTimeFormatter.mustache&quot;, invokerFolder, &quot;JavaTimeFormatter.java&quot;));</span>
+        }
+
+<span class="nc bnc" id="L522" title="All 8 branches missed.">        if (!(RESTTEMPLATE.equals(getLibrary()) || isLibrary(REST_ASSURED) || isLibrary(NATIVE) || isLibrary(MICROPROFILE))) {</span>
+<span class="nc" id="L523">            supportingFiles.add(new SupportingFile(&quot;StringUtil.mustache&quot;, invokerFolder, &quot;StringUtil.java&quot;));</span>
+        }
+
+        // google-api-client doesn't use the OpenAPI auth, because it uses Google Credential directly (HttpRequestInitializer)
+<span class="nc bnc" id="L527" title="All 8 branches missed.">        if (!(isLibrary(GOOGLE_API_CLIENT) || isLibrary(REST_ASSURED) || isLibrary(NATIVE) || isLibrary(MICROPROFILE))) {</span>
+<span class="nc" id="L528">            supportingFiles.add(new SupportingFile(&quot;auth/HttpBasicAuth.mustache&quot;, authFolder, &quot;HttpBasicAuth.java&quot;));</span>
+<span class="nc" id="L529">            supportingFiles.add(new SupportingFile(&quot;auth/HttpBearerAuth.mustache&quot;, authFolder, &quot;HttpBearerAuth.java&quot;));</span>
+<span class="nc" id="L530">            supportingFiles.add(new SupportingFile(&quot;auth/ApiKeyAuth.mustache&quot;, authFolder, &quot;ApiKeyAuth.java&quot;));</span>
+<span class="nc bnc" id="L531" title="All 4 branches missed.">            if (OKHTTP_GSON.equals(getLibrary()) &amp;&amp; withAWSV4Signature) {</span>
+<span class="nc" id="L532">                supportingFiles.add(new SupportingFile(&quot;auth/AWS4Auth.mustache&quot;, authFolder, &quot;AWS4Auth.java&quot;));</span>
+            }
+        }
+
+<span class="nc" id="L536">        supportingFiles.add(new SupportingFile(&quot;gradlew.mustache&quot;, &quot;&quot;, &quot;gradlew&quot;));</span>
+<span class="nc" id="L537">        supportingFiles.add(new SupportingFile(&quot;gradlew.bat.mustache&quot;, &quot;&quot;, &quot;gradlew.bat&quot;));</span>
+<span class="nc" id="L538">        supportingFiles.add(new SupportingFile(&quot;gradle-wrapper.properties.mustache&quot;,</span>
+<span class="nc" id="L539">                gradleWrapperPackage.replace(&quot;.&quot;, File.separator), &quot;gradle-wrapper.properties&quot;));</span>
+<span class="nc" id="L540">        supportingFiles.add(new SupportingFile(&quot;gradle-wrapper.jar&quot;,</span>
+<span class="nc" id="L541">                gradleWrapperPackage.replace(&quot;.&quot;, File.separator), &quot;gradle-wrapper.jar&quot;));</span>
+<span class="nc" id="L542">        supportingFiles.add(new SupportingFile(&quot;git_push.sh.mustache&quot;, &quot;&quot;, &quot;git_push.sh&quot;));</span>
+<span class="nc" id="L543">        supportingFiles.add(new SupportingFile(&quot;gitignore.mustache&quot;, &quot;&quot;, &quot;.gitignore&quot;));</span>
+
+<span class="nc bnc" id="L545" title="All 2 branches missed.">        if (performBeanValidation) {</span>
+<span class="nc" id="L546">            supportingFiles.add(new SupportingFile(&quot;BeanValidationException.mustache&quot;, invokerFolder,</span>
+                    &quot;BeanValidationException.java&quot;));
+        }
+
+<span class="nc bnc" id="L550" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.SERIALIZATION_LIBRARY)) {</span>
+<span class="nc" id="L551">            setSerializationLibrary(additionalProperties.get(CodegenConstants.SERIALIZATION_LIBRARY).toString());</span>
+        }
+
+        //TODO: add auto-generated doc to feign
+<span class="nc bnc" id="L555" title="All 2 branches missed.">        if (FEIGN.equals(getLibrary())) {</span>
+<span class="nc" id="L556">            modelDocTemplateFiles.remove(&quot;model_doc.mustache&quot;);</span>
+<span class="nc" id="L557">            apiDocTemplateFiles.remove(&quot;api_doc.mustache&quot;);</span>
+            //Templates to decode response headers
+<span class="nc" id="L559">            supportingFiles.add(new SupportingFile(&quot;model/ApiResponse.mustache&quot;, modelsFolder, &quot;ApiResponse.java&quot;));</span>
+
+            // TODO remove &quot;file&quot; from reserved word list as feign client doesn't support using `baseName`
+            // as the parameter name yet
+<span class="nc" id="L563">            reservedWords.remove(&quot;file&quot;);</span>
+        }
+
+<span class="nc bnc" id="L566" title="All 16 branches missed.">        if (!(FEIGN.equals(getLibrary()) || RESTTEMPLATE.equals(getLibrary()) || RETROFIT_2.equals(getLibrary()) || GOOGLE_API_CLIENT.equals(getLibrary()) || REST_ASSURED.equals(getLibrary()) || WEBCLIENT.equals(getLibrary()) || MICROPROFILE.equals(getLibrary()) || RESTCLIENT.equals(getLibrary()))) {</span>
+<span class="nc" id="L567">            supportingFiles.add(new SupportingFile(&quot;apiException.mustache&quot;, invokerFolder, &quot;ApiException.java&quot;));</span>
+<span class="nc" id="L568">            supportingFiles.add(new SupportingFile(&quot;Configuration.mustache&quot;, invokerFolder, &quot;Configuration.java&quot;));</span>
+<span class="nc" id="L569">            supportingFiles.add(new SupportingFile(&quot;Pair.mustache&quot;, invokerFolder, &quot;Pair.java&quot;));</span>
+        }
+
+<span class="nc bnc" id="L572" title="All 14 branches missed.">        if (!(FEIGN.equals(getLibrary()) || RESTTEMPLATE.equals(getLibrary()) || RETROFIT_2.equals(getLibrary()) || GOOGLE_API_CLIENT.equals(getLibrary()) || REST_ASSURED.equals(getLibrary()) || NATIVE.equals(getLibrary()) || MICROPROFILE.equals(getLibrary()))) {</span>
+<span class="nc" id="L573">            supportingFiles.add(new SupportingFile(&quot;auth/Authentication.mustache&quot;, authFolder, &quot;Authentication.java&quot;));</span>
+        }
+
+<span class="nc bnc" id="L576" title="All 4 branches missed.">        if (APACHE.equals(getLibrary()) || RESTTEMPLATE.equals(getLibrary())) {</span>
+<span class="nc" id="L577">            supportingFiles.add(new SupportingFile(&quot;BaseApi.mustache&quot;, invokerFolder, &quot;BaseApi.java&quot;));</span>
+        }
+
+<span class="nc bnc" id="L580" title="All 2 branches missed.">        if (FEIGN.equals(getLibrary())) {</span>
+<span class="nc bnc" id="L581" title="All 2 branches missed.">            if (getSerializationLibrary() == null) {</span>
+<span class="nc" id="L582">                LOGGER.info(&quot;No serializationLibrary configured, using '{}' as fallback&quot;, SERIALIZATION_LIBRARY_JACKSON);</span>
+<span class="nc" id="L583">                setSerializationLibrary(SERIALIZATION_LIBRARY_JACKSON);</span>
+            }
+<span class="nc bnc" id="L585" title="All 2 branches missed.">            if (SERIALIZATION_LIBRARY_JACKSON.equals(getSerializationLibrary())) {</span>
+<span class="nc" id="L586">                supportingFiles.add(new SupportingFile(&quot;ApiResponseDecoder.mustache&quot;, invokerFolder, &quot;ApiResponseDecoder.java&quot;));</span>
+<span class="nc" id="L587">                supportingFiles.add(new SupportingFile(&quot;ParamExpander.mustache&quot;, invokerFolder, &quot;ParamExpander.java&quot;));</span>
+            }
+<span class="nc" id="L589">            supportingFiles.add(new SupportingFile(&quot;EncodingUtils.mustache&quot;, invokerFolder, &quot;EncodingUtils.java&quot;));</span>
+<span class="nc bnc" id="L590" title="All 4 branches missed.">        } else if (OKHTTP_GSON.equals(getLibrary()) || StringUtils.isEmpty(getLibrary())) {</span>
+            // the &quot;okhttp-gson&quot; library template requires &quot;ApiCallback.mustache&quot; for async call
+<span class="nc" id="L592">            supportingFiles.add(new SupportingFile(&quot;ApiCallback.mustache&quot;, invokerFolder, &quot;ApiCallback.java&quot;));</span>
+<span class="nc" id="L593">            supportingFiles.add(new SupportingFile(&quot;ApiResponse.mustache&quot;, invokerFolder, &quot;ApiResponse.java&quot;));</span>
+<span class="nc" id="L594">            supportingFiles.add(new SupportingFile(&quot;JSON.mustache&quot;, invokerFolder, &quot;JSON.java&quot;));</span>
+<span class="nc" id="L595">            supportingFiles.add(new SupportingFile(&quot;ProgressRequestBody.mustache&quot;, invokerFolder, &quot;ProgressRequestBody.java&quot;));</span>
+<span class="nc" id="L596">            supportingFiles.add(new SupportingFile(&quot;ProgressResponseBody.mustache&quot;, invokerFolder, &quot;ProgressResponseBody.java&quot;));</span>
+<span class="nc" id="L597">            supportingFiles.add(new SupportingFile(&quot;GzipRequestInterceptor.mustache&quot;, invokerFolder, &quot;GzipRequestInterceptor.java&quot;));</span>
+<span class="nc bnc" id="L598" title="All 2 branches missed.">            if (OKHTTP_GSON.equals(getLibrary())) {</span>
+<span class="nc" id="L599">                supportingFiles.add(new SupportingFile(&quot;AbstractOpenApiSchema.mustache&quot;, modelsFolder, &quot;AbstractOpenApiSchema.java&quot;));</span>
+            }
+
+            // NOTE: below moved to postProcessOperationsWithModels
+            //supportingFiles.add(new SupportingFile(&quot;auth/OAuthOkHttpClient.mustache&quot;, authFolder, &quot;OAuthOkHttpClient.java&quot;));
+            //supportingFiles.add(new SupportingFile(&quot;auth/RetryingOAuth.mustache&quot;, authFolder, &quot;RetryingOAuth.java&quot;));
+<span class="nc" id="L605">            forceSerializationLibrary(SERIALIZATION_LIBRARY_GSON);</span>
+
+            // Composed schemas can have the 'additionalProperties' keyword, as specified in JSON schema.
+            // In principle, this should be enabled by default for all code generators. However due to limitations
+            // in other code generators, support needs to be enabled on a case-by-case basis.
+            // The flag below should be set for all Java libraries, but the templates need to be ported
+            // one by one for each library.
+<span class="nc" id="L612">            supportsAdditionalPropertiesWithComposedSchema = true;</span>
+
+<span class="nc bnc" id="L614" title="All 2 branches missed.">        } else if (RETROFIT_2.equals(getLibrary())) {</span>
+<span class="nc" id="L615">            supportingFiles.add(new SupportingFile(&quot;auth/OAuthOkHttpClient.mustache&quot;, authFolder, &quot;OAuthOkHttpClient.java&quot;));</span>
+<span class="nc" id="L616">            supportingFiles.add(new SupportingFile(&quot;CollectionFormats.mustache&quot;, invokerFolder, &quot;CollectionFormats.java&quot;));</span>
+<span class="nc bnc" id="L617" title="All 2 branches missed.">            if (SERIALIZATION_LIBRARY_JACKSON.equals(getSerializationLibrary())) {</span>
+<span class="nc" id="L618">                supportingFiles.add(new SupportingFile(&quot;JSON_jackson.mustache&quot;, invokerFolder, &quot;JSON.java&quot;));</span>
+<span class="nc bnc" id="L619" title="All 2 branches missed.">            } else if (!usePlayWS) {</span>
+<span class="nc" id="L620">                supportingFiles.add(new SupportingFile(&quot;JSON.mustache&quot;, invokerFolder, &quot;JSON.java&quot;));</span>
+            }
+<span class="nc bnc" id="L622" title="All 2 branches missed.">        } else if (JERSEY2.equals(getLibrary())) {</span>
+<span class="nc" id="L623">            additionalProperties.put(&quot;jersey2&quot;, true);</span>
+<span class="nc" id="L624">            supportingFiles.add(new SupportingFile(&quot;JSON.mustache&quot;, invokerFolder, &quot;JSON.java&quot;));</span>
+<span class="nc" id="L625">            supportingFiles.add(new SupportingFile(&quot;ApiResponse.mustache&quot;, invokerFolder, &quot;ApiResponse.java&quot;));</span>
+<span class="nc bnc" id="L626" title="All 2 branches missed.">            if (ProcessUtils.hasHttpSignatureMethods(openAPI)) {</span>
+<span class="nc" id="L627">                supportingFiles.add(new SupportingFile(&quot;auth/HttpSignatureAuth.mustache&quot;, authFolder, &quot;HttpSignatureAuth.java&quot;));</span>
+            }
+<span class="nc" id="L629">            supportingFiles.add(new SupportingFile(&quot;AbstractOpenApiSchema.mustache&quot;, modelsFolder, &quot;AbstractOpenApiSchema.java&quot;));</span>
+<span class="nc" id="L630">            forceSerializationLibrary(SERIALIZATION_LIBRARY_JACKSON);</span>
+
+            // Composed schemas can have the 'additionalProperties' keyword, as specified in JSON schema.
+            // In principle, this should be enabled by default for all code generators. However due to limitations
+            // in other code generators, support needs to be enabled on a case-by-case basis.
+            // The flag below should be set for all Java libraries, but the templates need to be ported
+            // one by one for each library.
+<span class="nc" id="L637">            supportsAdditionalPropertiesWithComposedSchema = true;</span>
+
+<span class="nc bnc" id="L639" title="All 2 branches missed.">        } else if (JERSEY3.equals(getLibrary())) {</span>
+<span class="nc" id="L640">            additionalProperties.put(&quot;jersey3&quot;, true);</span>
+<span class="nc" id="L641">            supportingFiles.add(new SupportingFile(&quot;JSON.mustache&quot;, invokerFolder, &quot;JSON.java&quot;));</span>
+<span class="nc" id="L642">            supportingFiles.add(new SupportingFile(&quot;ApiResponse.mustache&quot;, invokerFolder, &quot;ApiResponse.java&quot;));</span>
+<span class="nc bnc" id="L643" title="All 2 branches missed.">            if (ProcessUtils.hasHttpSignatureMethods(openAPI)) {</span>
+<span class="nc" id="L644">                supportingFiles.add(new SupportingFile(&quot;auth/HttpSignatureAuth.mustache&quot;, authFolder, &quot;HttpSignatureAuth.java&quot;));</span>
+            }
+<span class="nc" id="L646">            supportingFiles.add(new SupportingFile(&quot;AbstractOpenApiSchema.mustache&quot;, modelsFolder, &quot;AbstractOpenApiSchema.java&quot;));</span>
+<span class="nc" id="L647">            forceSerializationLibrary(SERIALIZATION_LIBRARY_JACKSON);</span>
+
+            // Composed schemas can have the 'additionalProperties' keyword, as specified in JSON schema.
+            // In principle, this should be enabled by default for all code generators. However due to limitations
+            // in other code generators, support needs to be enabled on a case-by-case basis.
+            // The flag below should be set for all Java libraries, but the templates need to be ported
+            // one by one for each library.
+<span class="nc" id="L654">            supportsAdditionalPropertiesWithComposedSchema = true;</span>
+<span class="nc" id="L655">            applyJakartaPackage();</span>
+<span class="nc bnc" id="L656" title="All 2 branches missed.">        } else if (NATIVE.equals(getLibrary())) {</span>
+<span class="nc" id="L657">            supportingFiles.add(new SupportingFile(&quot;ApiResponse.mustache&quot;, invokerFolder, &quot;ApiResponse.java&quot;));</span>
+<span class="nc" id="L658">            supportingFiles.add(new SupportingFile(&quot;JSON.mustache&quot;, invokerFolder, &quot;JSON.java&quot;));</span>
+<span class="nc" id="L659">            supportingFiles.add(new SupportingFile(&quot;AbstractOpenApiSchema.mustache&quot;, modelsFolder, &quot;AbstractOpenApiSchema.java&quot;));</span>
+<span class="nc" id="L660">            forceSerializationLibrary(SERIALIZATION_LIBRARY_JACKSON);</span>
+<span class="nc bnc" id="L661" title="All 2 branches missed.">        } else if (RESTEASY.equals(getLibrary())) {</span>
+<span class="nc" id="L662">            supportingFiles.add(new SupportingFile(&quot;JSON.mustache&quot;, invokerFolder, &quot;JSON.java&quot;));</span>
+<span class="nc" id="L663">            forceSerializationLibrary(SERIALIZATION_LIBRARY_JACKSON);</span>
+<span class="nc bnc" id="L664" title="All 2 branches missed.">        } else if (RESTTEMPLATE.equals(getLibrary())) {</span>
+<span class="nc" id="L665">            forceSerializationLibrary(SERIALIZATION_LIBRARY_JACKSON);</span>
+<span class="nc" id="L666">            supportingFiles.add(new SupportingFile(&quot;auth/Authentication.mustache&quot;, authFolder, &quot;Authentication.java&quot;));</span>
+<span class="nc bnc" id="L667" title="All 2 branches missed.">        } else if (WEBCLIENT.equals(getLibrary())) {</span>
+<span class="nc" id="L668">            forceSerializationLibrary(SERIALIZATION_LIBRARY_JACKSON);</span>
+<span class="nc bnc" id="L669" title="All 2 branches missed.">        } else if (RESTCLIENT.equals(getLibrary())) {</span>
+<span class="nc" id="L670">            forceSerializationLibrary(SERIALIZATION_LIBRARY_JACKSON);</span>
+<span class="nc" id="L671">            applyJakartaPackage();</span>
+<span class="nc bnc" id="L672" title="All 2 branches missed.">        } else if (VERTX.equals(getLibrary())) {</span>
+<span class="nc" id="L673">            typeMapping.put(&quot;file&quot;, &quot;AsyncFile&quot;);</span>
+<span class="nc" id="L674">            importMapping.put(&quot;AsyncFile&quot;, &quot;io.vertx.core.file.AsyncFile&quot;);</span>
+<span class="nc" id="L675">            forceSerializationLibrary(SERIALIZATION_LIBRARY_JACKSON);</span>
+<span class="nc" id="L676">            apiTemplateFiles.put(&quot;apiImpl.mustache&quot;, &quot;Impl.java&quot;);</span>
+<span class="nc" id="L677">            apiTemplateFiles.put(&quot;rxApiImpl.mustache&quot;, &quot;.java&quot;);</span>
+<span class="nc" id="L678">            supportingFiles.remove(new SupportingFile(&quot;manifest.mustache&quot;, projectFolder, &quot;AndroidManifest.xml&quot;));</span>
+<span class="nc bnc" id="L679" title="All 2 branches missed.">        } else if (GOOGLE_API_CLIENT.equals(getLibrary())) {</span>
+<span class="nc" id="L680">            forceSerializationLibrary(SERIALIZATION_LIBRARY_JACKSON);</span>
+
+<span class="nc bnc" id="L682" title="All 2 branches missed.">        } else if (REST_ASSURED.equals(getLibrary())) {</span>
+<span class="nc bnc" id="L683" title="All 2 branches missed.">            if (getSerializationLibrary() == null) {</span>
+<span class="nc" id="L684">                LOGGER.info(&quot;No serializationLibrary configured, using '{}' as fallback&quot;, SERIALIZATION_LIBRARY_GSON);</span>
+<span class="nc" id="L685">                setSerializationLibrary(SERIALIZATION_LIBRARY_GSON);</span>
+            }
+<span class="nc bnc" id="L687" title="All 2 branches missed.">            if (SERIALIZATION_LIBRARY_JACKSON.equals(getSerializationLibrary())) {</span>
+<span class="nc" id="L688">                supportingFiles.add(new SupportingFile(&quot;JacksonObjectMapper.mustache&quot;, invokerFolder, &quot;JacksonObjectMapper.java&quot;));</span>
+<span class="nc bnc" id="L689" title="All 2 branches missed.">            } else if (SERIALIZATION_LIBRARY_GSON.equals(getSerializationLibrary())) {</span>
+<span class="nc" id="L690">                supportingFiles.add(new SupportingFile(&quot;JSON.mustache&quot;, invokerFolder, &quot;JSON.java&quot;));</span>
+<span class="nc" id="L691">                supportingFiles.add(new SupportingFile(&quot;GsonObjectMapper.mustache&quot;, invokerFolder, &quot;GsonObjectMapper.java&quot;));</span>
+            }
+<span class="nc" id="L693">            supportingFiles.add(new SupportingFile(&quot;Oper.mustache&quot;, apiFolder, &quot;Oper.java&quot;));</span>
+<span class="nc" id="L694">            additionalProperties.put(&quot;convert&quot;, new CaseFormatLambda(LOWER_CAMEL, UPPER_UNDERSCORE));</span>
+<span class="nc" id="L695">            apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.java&quot;);</span>
+<span class="nc" id="L696">            supportingFiles.add(new SupportingFile(&quot;ResponseSpecBuilders.mustache&quot;, invokerFolder, &quot;ResponseSpecBuilders.java&quot;));</span>
+<span class="nc bnc" id="L697" title="All 2 branches missed.">        } else if (MICROPROFILE.equals(getLibrary())) {</span>
+<span class="nc" id="L698">            supportingFiles.clear(); // Don't need extra files provided by Java Codegen</span>
+<span class="nc" id="L699">            String apiExceptionFolder = (sourceFolder + File.separator + apiPackage().replace('.', File.separatorChar)).replace('/', File.separatorChar);</span>
+<span class="nc" id="L700">            String mpRestClientVersion = (String) additionalProperties.get(MICROPROFILE_REST_CLIENT_VERSION);</span>
+<span class="nc" id="L701">            String pomTemplate = mpRestClientVersions.get(mpRestClientVersion).pomTemplate;</span>
+<span class="nc" id="L702">            supportingFiles.add(new SupportingFile(pomTemplate, &quot;&quot;, &quot;pom.xml&quot;));</span>
+<span class="nc" id="L703">            supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;));</span>
+<span class="nc" id="L704">            supportingFiles.add(new SupportingFile(&quot;api_exception.mustache&quot;, apiExceptionFolder, &quot;ApiException.java&quot;));</span>
+<span class="nc" id="L705">            supportingFiles.add(new SupportingFile(&quot;api_exception_mapper.mustache&quot;, apiExceptionFolder, &quot;ApiExceptionMapper.java&quot;));</span>
+<span class="nc bnc" id="L706" title="All 2 branches missed.">            if (getSerializationLibrary() == null) {</span>
+<span class="nc" id="L707">                LOGGER.info(&quot;No serializationLibrary configured, using '{}' as fallback&quot;, SERIALIZATION_LIBRARY_JSONB);</span>
+<span class="nc" id="L708">                setSerializationLibrary(SERIALIZATION_LIBRARY_JSONB);</span>
+<span class="nc bnc" id="L709" title="All 2 branches missed.">            } else if (getSerializationLibrary().equals(SERIALIZATION_LIBRARY_GSON)) {</span>
+<span class="nc" id="L710">                forceSerializationLibrary(SERIALIZATION_LIBRARY_JSONB);</span>
+            }
+
+<span class="nc bnc" id="L713" title="All 2 branches missed.">            if (microprofileFramework.equals(MICROPROFILE_KUMULUZEE)) {</span>
+<span class="nc" id="L714">                supportingFiles.add(new SupportingFile(&quot;kumuluzee.pom.mustache&quot;, &quot;&quot;, &quot;pom.xml&quot;));</span>
+<span class="nc" id="L715">                supportingFiles.add(new SupportingFile(&quot;kumuluzee.config.yaml.mustache&quot;, &quot;src/main/resources&quot;, &quot;config.yaml&quot;));</span>
+<span class="nc" id="L716">                supportingFiles.add(new SupportingFile(&quot;kumuluzee.beans.xml.mustache&quot;, &quot;src/main/resources/META-INF&quot;, &quot;beans.xml&quot;));</span>
+            }
+
+<span class="nc bnc" id="L719" title="All 2 branches missed.">            if (&quot;3.0&quot;.equals(mpRestClientVersion)) {</span>
+<span class="nc" id="L720">                additionalProperties.put(&quot;microprofile3&quot;, true);</span>
+            }
+<span class="nc bnc" id="L722" title="All 2 branches missed.">        } else if (APACHE.equals(getLibrary())) {</span>
+<span class="nc" id="L723">            forceSerializationLibrary(SERIALIZATION_LIBRARY_JACKSON);</span>
+        } else {
+<span class="nc" id="L725">            LOGGER.error(&quot;Unknown library option (-l/--library): {}&quot;, getLibrary());</span>
+        }
+
+<span class="nc bnc" id="L728" title="All 2 branches missed.">        if (usePlayWS) {</span>
+            // remove unsupported auth
+<span class="nc" id="L730">            Iterator&lt;SupportingFile&gt; iter = supportingFiles.iterator();</span>
+<span class="nc bnc" id="L731" title="All 2 branches missed.">            while (iter.hasNext()) {</span>
+<span class="nc" id="L732">                SupportingFile sf = iter.next();</span>
+<span class="nc bnc" id="L733" title="All 2 branches missed.">                if (sf.getTemplateFile().startsWith(&quot;auth/&quot;)) {</span>
+<span class="nc" id="L734">                    iter.remove();</span>
+                }
+<span class="nc" id="L736">            }</span>
+
+<span class="nc" id="L738">            apiTemplateFiles.remove(&quot;api.mustache&quot;);</span>
+<span class="nc" id="L739">            apiTemplateFiles.put(&quot;play26/api.mustache&quot;, &quot;.java&quot;);</span>
+
+<span class="nc" id="L741">            supportingFiles.add(new SupportingFile(&quot;play26/ApiClient.mustache&quot;, invokerFolder, &quot;ApiClient.java&quot;));</span>
+<span class="nc" id="L742">            supportingFiles.add(new SupportingFile(&quot;play26/Play26CallFactory.mustache&quot;, invokerFolder, &quot;Play26CallFactory.java&quot;));</span>
+<span class="nc" id="L743">            supportingFiles.add(new SupportingFile(&quot;play26/Play26CallAdapterFactory.mustache&quot;, invokerFolder,</span>
+                    &quot;Play26CallAdapterFactory.java&quot;));
+
+<span class="nc" id="L746">            supportingFiles.add(new SupportingFile(&quot;play-common/auth/ApiKeyAuth.mustache&quot;, authFolder, &quot;ApiKeyAuth.java&quot;));</span>
+<span class="nc" id="L747">            supportingFiles.add(new SupportingFile(&quot;auth/Authentication.mustache&quot;, authFolder, &quot;Authentication.java&quot;));</span>
+<span class="nc" id="L748">            supportingFiles.add(new SupportingFile(&quot;Pair.mustache&quot;, invokerFolder, &quot;Pair.java&quot;));</span>
+
+<span class="nc" id="L750">            forceSerializationLibrary(SERIALIZATION_LIBRARY_JACKSON);</span>
+        }
+
+<span class="nc bnc" id="L753" title="All 2 branches missed.">        if (getSerializationLibrary() == null) {</span>
+<span class="nc" id="L754">            LOGGER.info(&quot;No serializationLibrary configured, using '{}' as fallback&quot;, SERIALIZATION_LIBRARY_GSON);</span>
+<span class="nc" id="L755">            setSerializationLibrary(SERIALIZATION_LIBRARY_GSON);</span>
+        }
+<span class="nc bnc" id="L757" title="All 4 branches missed.">        switch (getSerializationLibrary()) {</span>
+            case SERIALIZATION_LIBRARY_JACKSON:
+<span class="nc" id="L759">                additionalProperties.put(SERIALIZATION_LIBRARY_JACKSON, &quot;true&quot;);</span>
+<span class="nc" id="L760">                additionalProperties.remove(SERIALIZATION_LIBRARY_GSON);</span>
+<span class="nc" id="L761">                additionalProperties.remove(SERIALIZATION_LIBRARY_JSONB);</span>
+<span class="nc" id="L762">                supportingFiles.add(new SupportingFile(&quot;RFC3339DateFormat.mustache&quot;, invokerFolder, &quot;RFC3339DateFormat.java&quot;));</span>
+<span class="nc" id="L763">                break;</span>
+            case SERIALIZATION_LIBRARY_GSON:
+<span class="nc" id="L765">                additionalProperties.put(SERIALIZATION_LIBRARY_GSON, &quot;true&quot;);</span>
+<span class="nc" id="L766">                additionalProperties.remove(SERIALIZATION_LIBRARY_JACKSON);</span>
+<span class="nc" id="L767">                additionalProperties.remove(SERIALIZATION_LIBRARY_JSONB);</span>
+<span class="nc" id="L768">                break;</span>
+            case SERIALIZATION_LIBRARY_JSONB:
+<span class="nc" id="L770">                additionalProperties.put(SERIALIZATION_LIBRARY_JSONB, &quot;true&quot;);</span>
+<span class="nc" id="L771">                additionalProperties.remove(SERIALIZATION_LIBRARY_JACKSON);</span>
+<span class="nc" id="L772">                additionalProperties.remove(SERIALIZATION_LIBRARY_GSON);</span>
+<span class="nc" id="L773">                break;</span>
+            default:
+<span class="nc" id="L775">                additionalProperties.remove(SERIALIZATION_LIBRARY_JACKSON);</span>
+<span class="nc" id="L776">                additionalProperties.remove(SERIALIZATION_LIBRARY_GSON);</span>
+<span class="nc" id="L777">                additionalProperties.remove(SERIALIZATION_LIBRARY_JSONB);</span>
+                break;
+        }
+
+        // authentication related files
+        // has OAuth defined
+<span class="nc bnc" id="L783" title="All 2 branches missed.">        if (ProcessUtils.hasOAuthMethods(openAPI)) {</span>
+            // for okhttp-gson (default), check to see if OAuth is defined and included OAuth-related files accordingly
+<span class="nc bnc" id="L785" title="All 4 branches missed.">            if ((OKHTTP_GSON.equals(getLibrary()) || StringUtils.isEmpty(getLibrary()))) {</span>
+<span class="nc" id="L786">                supportingFiles.add(new SupportingFile(&quot;auth/OAuthOkHttpClient.mustache&quot;, authFolder, &quot;OAuthOkHttpClient.java&quot;));</span>
+<span class="nc" id="L787">                supportingFiles.add(new SupportingFile(&quot;auth/RetryingOAuth.mustache&quot;, authFolder, &quot;RetryingOAuth.java&quot;));</span>
+            }
+
+            // google-api-client doesn't use the OpenAPI auth, because it uses Google Credential directly (HttpRequestInitializer)
+<span class="nc bnc" id="L791" title="All 6 branches missed.">            if (!(GOOGLE_API_CLIENT.equals(getLibrary()) || REST_ASSURED.equals(getLibrary()) || usePlayWS</span>
+<span class="nc bnc" id="L792" title="All 4 branches missed.">                    || NATIVE.equals(getLibrary()) || MICROPROFILE.equals(getLibrary()))) {</span>
+<span class="nc" id="L793">                supportingFiles.add(new SupportingFile(&quot;auth/OAuth.mustache&quot;, authFolder, &quot;OAuth.java&quot;));</span>
+<span class="nc" id="L794">                supportingFiles.add(new SupportingFile(&quot;auth/OAuthFlow.mustache&quot;, authFolder, &quot;OAuthFlow.java&quot;));</span>
+            }
+
+            // Add OauthPasswordGrant.java and OauthClientCredentialsGrant.java for feign library
+<span class="nc bnc" id="L798" title="All 2 branches missed.">            if (FEIGN.equals(getLibrary())) {</span>
+<span class="nc" id="L799">                supportingFiles.add(new SupportingFile(&quot;auth/DefaultApi20Impl.mustache&quot;, authFolder, &quot;DefaultApi20Impl.java&quot;));</span>
+<span class="nc" id="L800">                supportingFiles.add(new SupportingFile(&quot;auth/OauthPasswordGrant.mustache&quot;, authFolder, &quot;OauthPasswordGrant.java&quot;));</span>
+<span class="nc" id="L801">                supportingFiles.add(new SupportingFile(&quot;auth/OauthClientCredentialsGrant.mustache&quot;, authFolder, &quot;OauthClientCredentialsGrant.java&quot;));</span>
+<span class="nc" id="L802">                supportingFiles.add(new SupportingFile(&quot;auth/ApiErrorDecoder.mustache&quot;, authFolder, &quot;ApiErrorDecoder.java&quot;));</span>
+            }
+        }
+<span class="nc" id="L805">    }</span>
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L809">        super.postProcessOperationsWithModels(objs, allModels);</span>
+
+<span class="nc bnc" id="L811" title="All 8 branches missed.">        if (useSingleRequestParameter &amp;&amp; (JERSEY2.equals(getLibrary()) || JERSEY3.equals(getLibrary()) || OKHTTP_GSON.equals(getLibrary()))) {</span>
+            // loop through operations to set x-group-parameters extension to true if useSingleRequestParameter option is enabled
+<span class="nc" id="L813">            OperationMap operations = objs.getOperations();</span>
+<span class="nc bnc" id="L814" title="All 2 branches missed.">            if (operations != null) {</span>
+<span class="nc" id="L815">                List&lt;CodegenOperation&gt; ops = operations.getOperation();</span>
+<span class="nc bnc" id="L816" title="All 2 branches missed.">                for (CodegenOperation operation : ops) {</span>
+<span class="nc bnc" id="L817" title="All 2 branches missed.">                    if (!operation.vendorExtensions.containsKey(&quot;x-group-parameters&quot;)) {</span>
+<span class="nc" id="L818">                        operation.vendorExtensions.put(&quot;x-group-parameters&quot;, true);</span>
+                    }
+<span class="nc" id="L820">                }</span>
+            }
+        }
+
+<span class="nc bnc" id="L824" title="All 2 branches missed.">        if (RETROFIT_2.equals(getLibrary())) {</span>
+<span class="nc" id="L825">            OperationMap operations = objs.getOperations();</span>
+<span class="nc bnc" id="L826" title="All 2 branches missed.">            if (operations != null) {</span>
+<span class="nc" id="L827">                List&lt;CodegenOperation&gt; ops = operations.getOperation();</span>
+<span class="nc bnc" id="L828" title="All 2 branches missed.">                for (CodegenOperation operation : ops) {</span>
+<span class="nc bnc" id="L829" title="All 2 branches missed.">                    if (operation.hasConsumes == Boolean.TRUE) {</span>
+<span class="nc bnc" id="L830" title="All 2 branches missed.">                        if (isMultipartType(operation.consumes)) {</span>
+<span class="nc" id="L831">                            operation.isMultipart = Boolean.TRUE;</span>
+                        } else {
+<span class="nc" id="L833">                            operation.prioritizedContentTypes = prioritizeContentTypes(operation.consumes);</span>
+                        }
+                    }
+
+<span class="nc bnc" id="L837" title="All 4 branches missed.">                    if (StringUtils.isNotEmpty(operation.path) &amp;&amp; operation.path.startsWith(&quot;/&quot;)) {</span>
+<span class="nc" id="L838">                        operation.path = operation.path.substring(1);</span>
+                    }
+
+                    // sorting operation parameters to make sure path params are parsed before query params
+<span class="nc bnc" id="L842" title="All 2 branches missed.">                    if (operation.allParams != null) {</span>
+<span class="nc" id="L843">                        sort(operation.allParams, new Comparator&lt;CodegenParameter&gt;() {</span>
+                            @Override
+                            public int compare(CodegenParameter one, CodegenParameter another) {
+<span class="nc bnc" id="L846" title="All 4 branches missed.">                                if (one.isPathParam &amp;&amp; another.isQueryParam) {</span>
+<span class="nc" id="L847">                                    return -1;</span>
+                                }
+<span class="nc bnc" id="L849" title="All 4 branches missed.">                                if (one.isQueryParam &amp;&amp; another.isPathParam) {</span>
+<span class="nc" id="L850">                                    return 1;</span>
+                                }
+<span class="nc" id="L852">                                return 0;</span>
+                            }
+                        });
+                    }
+<span class="nc" id="L856">                }</span>
+            }
+        }
+
+        // camelize path variables for Feign client
+<span class="nc bnc" id="L861" title="All 2 branches missed.">        if (FEIGN.equals(getLibrary())) {</span>
+<span class="nc" id="L862">            OperationMap operations = objs.getOperations();</span>
+<span class="nc" id="L863">            List&lt;CodegenOperation&gt; operationList = operations.getOperation();</span>
+<span class="nc" id="L864">            Pattern methodPattern = Pattern.compile(&quot;^(.*):([^:]*)$&quot;);</span>
+<span class="nc bnc" id="L865" title="All 2 branches missed.">            for (CodegenOperation op : operationList) {</span>
+<span class="nc" id="L866">                String path = op.path;</span>
+<span class="nc" id="L867">                String method = &quot;&quot;;</span>
+
+                // if a custom method is found at the end of the path, cut it off for later
+<span class="nc" id="L870">                Matcher m = methodPattern.matcher(path);</span>
+<span class="nc bnc" id="L871" title="All 2 branches missed.">                if (m.find()) {</span>
+<span class="nc" id="L872">                    path = m.group(1);</span>
+<span class="nc" id="L873">                    method = m.group(2);</span>
+                }
+
+<span class="nc" id="L876">                String[] items = path.split(&quot;/&quot;, -1);</span>
+
+<span class="nc bnc" id="L878" title="All 2 branches missed.">                for (int i = 0; i &lt; items.length; ++i) {</span>
+<span class="nc bnc" id="L879" title="All 2 branches missed.">                    if (items[i].matches(&quot;^\\{(.*)\\}$&quot;)) { // wrap in {}</span>
+                        // camelize path variable
+<span class="nc" id="L881">                        items[i] = &quot;{&quot; + camelize(items[i].substring(1, items[i].length() - 1), LOWERCASE_FIRST_LETTER) + &quot;}&quot;;</span>
+                    }
+                }
+<span class="nc" id="L884">                op.path = StringUtils.join(items, &quot;/&quot;);</span>
+                // Replace the custom method on the path if one was found earlier
+<span class="nc bnc" id="L886" title="All 2 branches missed.">                if (!method.isEmpty()) {</span>
+<span class="nc" id="L887">                    op.path += &quot;:&quot; + method;</span>
+                }
+<span class="nc" id="L889">            }</span>
+        }
+
+<span class="nc bnc" id="L892" title="All 4 branches missed.">        if (NATIVE.equals(getLibrary()) || APACHE.equals(getLibrary())) {</span>
+<span class="nc" id="L893">            OperationMap operations = objs.getOperations();</span>
+<span class="nc" id="L894">            List&lt;CodegenOperation&gt; operationList = operations.getOperation();</span>
+<span class="nc" id="L895">            Pattern methodPattern = Pattern.compile(&quot;^(.*):([^:]*)$&quot;);</span>
+<span class="nc bnc" id="L896" title="All 2 branches missed.">            for (CodegenOperation op : operationList) {</span>
+                // add extension to indicate content type is `text/plain` and the response type is `String`
+<span class="nc bnc" id="L898" title="All 2 branches missed.">                if (op.produces != null) {</span>
+<span class="nc bnc" id="L899" title="All 2 branches missed.">                    for (Map&lt;String, String&gt; produce : op.produces) {</span>
+<span class="nc bnc" id="L900" title="All 2 branches missed.">                        if (&quot;text/plain&quot;.equalsIgnoreCase(produce.get(&quot;mediaType&quot;).split(&quot;;&quot;)[0].trim())</span>
+<span class="nc bnc" id="L901" title="All 2 branches missed.">                                &amp;&amp; &quot;String&quot;.equals(op.returnType)) {</span>
+<span class="nc" id="L902">                            op.vendorExtensions.put(&quot;x-java-text-plain-string&quot;, true);</span>
+<span class="nc" id="L903">                            continue;</span>
+                        }
+<span class="nc" id="L905">                    }</span>
+                }
+<span class="nc" id="L907">            }</span>
+        }
+
+<span class="nc bnc" id="L910" title="All 2 branches missed.">        if (MICROPROFILE.equals(getLibrary())) {</span>
+<span class="nc" id="L911">            objs = AbstractJavaJAXRSServerCodegen.jaxrsPostProcessOperations(objs);</span>
+<span class="nc bnc" id="L912" title="All 2 branches missed.">            if (configKeyFromClassName) {</span>
+<span class="nc" id="L913">                Map&lt;String, Object&gt; operations = (Map&lt;String, Object&gt;) objs.get(&quot;operations&quot;);</span>
+<span class="nc" id="L914">                String configKeyFromClassName = operations.get(&quot;classname&quot;)</span>
+<span class="nc" id="L915">                        .toString()</span>
+<span class="nc" id="L916">                        .replaceFirst(&quot;Api&quot;, &quot;&quot;)</span>
+<span class="nc" id="L917">                        .toLowerCase(Locale.ROOT).concat(&quot;-api&quot;);</span>
+<span class="nc" id="L918">                operations.put(&quot;configKey&quot;, configKeyFromClassName);</span>
+            }
+        }
+
+<span class="nc bnc" id="L922" title="All 2 branches missed.">        if (WEBCLIENT.equals(getLibrary())) {</span>
+<span class="nc" id="L923">            OperationMap operations = objs.getOperations();</span>
+<span class="nc bnc" id="L924" title="All 2 branches missed.">            if (operations != null) {</span>
+<span class="nc" id="L925">                List&lt;CodegenOperation&gt; ops = operations.getOperation();</span>
+<span class="nc bnc" id="L926" title="All 2 branches missed.">                for (CodegenOperation operation : ops) {</span>
+<span class="nc bnc" id="L927" title="All 4 branches missed.">                    if (!operation.vendorExtensions.containsKey(VendorExtension.X_WEBCLIENT_BLOCKING.getName()) &amp;&amp; webclientBlockingOperations) {</span>
+<span class="nc" id="L928">                        operation.vendorExtensions.put(VendorExtension.X_WEBCLIENT_BLOCKING.getName(), true);</span>
+                    }
+
+<span class="nc bnc" id="L931" title="All 4 branches missed.">                    if (operation.isArray &amp;&amp; !&quot;string&quot;.equalsIgnoreCase(operation.returnBaseType)) {</span>
+<span class="nc" id="L932">                        operation.vendorExtensions.put(VendorExtension.X_WEBCLIENT_RETURN_EXCEPT_LIST_OF_STRING.getName(), true);</span>
+                    }
+<span class="nc" id="L934">                }</span>
+            }
+        }
+
+<span class="nc" id="L938">        return objs;</span>
+    }
+
+    @Override
+    public String apiFilename(String templateName, String tag) {
+<span class="nc bnc" id="L943" title="All 2 branches missed.">        if (VERTX.equals(getLibrary())) {</span>
+<span class="nc" id="L944">            String suffix = apiTemplateFiles().get(templateName);</span>
+<span class="nc" id="L945">            String subFolder = &quot;&quot;;</span>
+<span class="nc bnc" id="L946" title="All 2 branches missed.">            if (templateName.startsWith(&quot;rx&quot;)) {</span>
+<span class="nc" id="L947">                subFolder = &quot;/rxjava&quot;;</span>
+            }
+<span class="nc" id="L949">            return apiFileFolder() + subFolder + '/' + toApiFilename(tag) + suffix;</span>
+        } else {
+<span class="nc" id="L951">            return super.apiFilename(templateName, tag);</span>
+        }
+    }
+
+    /**
+     * Prioritizes consumes mime-type list by moving json-vendor and json mime-types up front, but
+     * otherwise preserves original consumes definition order.
+     * [application/vnd...+json,... application/json, ..as is..]
+     *
+     * @param consumes consumes mime-type list
+     * @return
+     */
+    static List&lt;Map&lt;String, String&gt;&gt; prioritizeContentTypes(List&lt;Map&lt;String, String&gt;&gt; consumes) {
+<span class="nc bnc" id="L964" title="All 2 branches missed.">        if (consumes.size() &lt;= 1)</span>
+<span class="nc" id="L965">            return consumes;</span>
+
+<span class="nc" id="L967">        List&lt;Map&lt;String, String&gt;&gt; prioritizedContentTypes = new ArrayList&lt;&gt;(consumes.size());</span>
+
+<span class="nc" id="L969">        List&lt;Map&lt;String, String&gt;&gt; jsonVendorMimeTypes = new ArrayList&lt;&gt;(consumes.size());</span>
+<span class="nc" id="L970">        List&lt;Map&lt;String, String&gt;&gt; jsonMimeTypes = new ArrayList&lt;&gt;(consumes.size());</span>
+
+<span class="nc bnc" id="L972" title="All 2 branches missed.">        for (Map&lt;String, String&gt; consume : consumes) {</span>
+<span class="nc bnc" id="L973" title="All 2 branches missed.">            if (isJsonVendorMimeType(consume.get(MEDIA_TYPE))) {</span>
+<span class="nc" id="L974">                jsonVendorMimeTypes.add(consume);</span>
+<span class="nc bnc" id="L975" title="All 2 branches missed.">            } else if (isJsonMimeType(consume.get(MEDIA_TYPE))) {</span>
+<span class="nc" id="L976">                jsonMimeTypes.add(consume);</span>
+            } else
+<span class="nc" id="L978">                prioritizedContentTypes.add(consume);</span>
+<span class="nc" id="L979">        }</span>
+
+<span class="nc" id="L981">        prioritizedContentTypes.addAll(0, jsonMimeTypes);</span>
+<span class="nc" id="L982">        prioritizedContentTypes.addAll(0, jsonVendorMimeTypes);</span>
+<span class="nc" id="L983">        return prioritizedContentTypes;</span>
+    }
+
+    private static boolean isMultipartType(List&lt;Map&lt;String, String&gt;&gt; consumes) {
+<span class="nc" id="L987">        Map&lt;String, String&gt; firstType = consumes.get(0);</span>
+<span class="nc bnc" id="L988" title="All 2 branches missed.">        if (firstType != null) {</span>
+<span class="nc bnc" id="L989" title="All 2 branches missed.">            if (&quot;multipart/form-data&quot;.equals(firstType.get(MEDIA_TYPE))) {</span>
+<span class="nc" id="L990">                return true;</span>
+            }
+        }
+<span class="nc" id="L993">        return false;</span>
+    }
+
+    @Override
+    public void postProcessModelProperty(CodegenModel model, CodegenProperty property) {
+<span class="nc" id="L998">        super.postProcessModelProperty(model, property);</span>
+<span class="nc bnc" id="L999" title="All 2 branches missed.">        if (!BooleanUtils.toBoolean(model.isEnum)) {</span>
+            //final String lib = getLibrary();
+            //Needed imports for Jackson based libraries
+<span class="nc bnc" id="L1002" title="All 2 branches missed.">            if (additionalProperties.containsKey(SERIALIZATION_LIBRARY_JACKSON)) {</span>
+<span class="nc" id="L1003">                model.imports.add(&quot;JsonProperty&quot;);</span>
+<span class="nc" id="L1004">                model.imports.add(&quot;JsonValue&quot;);</span>
+<span class="nc" id="L1005">                model.imports.add(&quot;JsonInclude&quot;);</span>
+<span class="nc" id="L1006">                model.imports.add(&quot;JsonTypeName&quot;);</span>
+            }
+<span class="nc bnc" id="L1008" title="All 2 branches missed.">            if (additionalProperties.containsKey(SERIALIZATION_LIBRARY_GSON)) {</span>
+<span class="nc" id="L1009">                model.imports.add(&quot;SerializedName&quot;);</span>
+<span class="nc" id="L1010">                model.imports.add(&quot;TypeAdapter&quot;);</span>
+<span class="nc" id="L1011">                model.imports.add(&quot;JsonAdapter&quot;);</span>
+<span class="nc" id="L1012">                model.imports.add(&quot;JsonReader&quot;);</span>
+<span class="nc" id="L1013">                model.imports.add(&quot;JsonWriter&quot;);</span>
+<span class="nc" id="L1014">                model.imports.add(&quot;IOException&quot;);</span>
+            }
+        } else { // enum class
+            //Needed imports for Jackson's JsonCreator
+<span class="nc bnc" id="L1018" title="All 2 branches missed.">            if (additionalProperties.containsKey(SERIALIZATION_LIBRARY_JACKSON)) {</span>
+<span class="nc" id="L1019">                model.imports.add(&quot;JsonValue&quot;);</span>
+<span class="nc" id="L1020">                model.imports.add(&quot;JsonCreator&quot;);</span>
+            }
+        }
+<span class="nc bnc" id="L1023" title="All 2 branches missed.">        if (MICROPROFILE.equals(getLibrary())) {</span>
+<span class="nc" id="L1024">            model.imports.remove(&quot;ApiModelProperty&quot;);</span>
+<span class="nc" id="L1025">            model.imports.remove(&quot;ApiModel&quot;);</span>
+<span class="nc" id="L1026">            model.imports.remove(&quot;JsonSerialize&quot;);</span>
+<span class="nc" id="L1027">            model.imports.remove(&quot;ToStringSerializer&quot;);</span>
+        }
+
+<span class="nc bnc" id="L1030" title="All 2 branches missed.">        if (!BooleanUtils.toBoolean(model.isEnum)) {</span>
+            // needed by all pojos, but not enums
+<span class="nc bnc" id="L1032" title="All 2 branches missed.">            if (AnnotationLibrary.SWAGGER2.equals(getAnnotationLibrary())) {</span>
+<span class="nc" id="L1033">                model.imports.add(&quot;Schema&quot;);</span>
+            }
+        }
+
+<span class="nc bnc" id="L1037" title="All 4 branches missed.">        if (&quot;set&quot;.equals(property.containerType) &amp;&amp; !JACKSON.equals(serializationLibrary)) {</span>
+            // clean-up
+<span class="nc" id="L1039">            model.imports.remove(&quot;JsonDeserialize&quot;);</span>
+<span class="nc" id="L1040">            property.vendorExtensions.remove(&quot;x-setter-extra-annotation&quot;);</span>
+        }
+<span class="nc" id="L1042">    }</span>
+
+    @Override
+    public CodegenModel fromModel(String name, Schema model) {
+<span class="nc" id="L1046">        CodegenModel codegenModel = super.fromModel(name, model);</span>
+<span class="nc bnc" id="L1047" title="All 2 branches missed.">        if (MICROPROFILE.equals(getLibrary())) {</span>
+<span class="nc bnc" id="L1048" title="All 2 branches missed.">            if (codegenModel.imports.contains(&quot;ApiModel&quot;)) {</span>
+                // Remove io.swagger.annotations.ApiModel import
+<span class="nc" id="L1050">                codegenModel.imports.remove(&quot;ApiModel&quot;);</span>
+            }
+        }
+
+        // TODO: inverse logic. Do not add the imports unconditionally in the first place.
+<span class="nc bnc" id="L1055" title="All 2 branches missed.">        if (!AnnotationLibrary.SWAGGER1.equals(getAnnotationLibrary())) {</span>
+            // Remove io.swagger.annotations.* imports
+<span class="nc" id="L1057">            codegenModel.imports.remove(&quot;ApiModel&quot;);</span>
+<span class="nc" id="L1058">            codegenModel.imports.remove(&quot;ApiModelProperty&quot;);</span>
+        }
+
+<span class="nc bnc" id="L1061" title="All 2 branches missed.">        if (codegenModel.description != null) {</span>
+<span class="nc bnc" id="L1062" title="All 2 branches missed.">            if (AnnotationLibrary.SWAGGER2.equals(getAnnotationLibrary())) {</span>
+<span class="nc" id="L1063">                codegenModel.imports.add(&quot;Schema&quot;);</span>
+            }
+        }
+
+<span class="nc" id="L1067">        return codegenModel;</span>
+    }
+
+    @Override
+    public ModelsMap postProcessModelsEnum(ModelsMap objs) {
+<span class="nc" id="L1072">        objs = super.postProcessModelsEnum(objs);</span>
+        //Needed import for Gson based libraries
+<span class="nc bnc" id="L1074" title="All 2 branches missed.">        if (additionalProperties.containsKey(SERIALIZATION_LIBRARY_GSON)) {</span>
+<span class="nc" id="L1075">            List&lt;Map&lt;String, String&gt;&gt; imports = objs.getImports();</span>
+<span class="nc bnc" id="L1076" title="All 2 branches missed.">            for (ModelMap mo : objs.getModels()) {</span>
+<span class="nc" id="L1077">                CodegenModel cm = mo.getModel();</span>
+                // for enum model
+<span class="nc bnc" id="L1079" title="All 4 branches missed.">                if (Boolean.TRUE.equals(cm.isEnum) &amp;&amp; cm.allowableValues != null) {</span>
+<span class="nc" id="L1080">                    cm.imports.add(importMapping.get(&quot;SerializedName&quot;));</span>
+<span class="nc" id="L1081">                    Map&lt;String, String&gt; item = new HashMap&lt;String, String&gt;();</span>
+<span class="nc" id="L1082">                    item.put(&quot;import&quot;, importMapping.get(&quot;SerializedName&quot;));</span>
+<span class="nc" id="L1083">                    imports.add(item);</span>
+                }
+<span class="nc" id="L1085">            }</span>
+        }
+<span class="nc" id="L1087">        return objs;</span>
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    @Override
+    public ModelsMap postProcessModels(ModelsMap objs) {
+<span class="nc" id="L1093">        objs = super.postProcessModels(objs);</span>
+<span class="nc" id="L1094">        List&lt;ModelMap&gt; models = objs.getModels();</span>
+
+<span class="nc bnc" id="L1096" title="All 2 branches missed.">        if (additionalProperties.containsKey(SERIALIZATION_LIBRARY_JACKSON)) {</span>
+<span class="nc" id="L1097">            List&lt;Map&lt;String, String&gt;&gt; imports = objs.getImports();</span>
+<span class="nc bnc" id="L1098" title="All 2 branches missed.">            for (ModelMap mo : models) {</span>
+<span class="nc" id="L1099">                CodegenModel cm = mo.getModel();</span>
+<span class="nc" id="L1100">                boolean addNullableImports = false;</span>
+
+<span class="nc bnc" id="L1102" title="All 2 branches missed.">                for (CodegenProperty var : cm.vars) {</span>
+<span class="nc" id="L1103">                    addNullableImports = isAddNullableImports(cm, addNullableImports, var);</span>
+<span class="nc bnc" id="L1104" title="All 2 branches missed.">                    if (Boolean.TRUE.equals(var.getVendorExtensions().get(&quot;x-enum-as-string&quot;))) {</span>
+                        // treat enum string as just string
+<span class="nc" id="L1106">                        var.datatypeWithEnum = var.dataType;</span>
+
+<span class="nc bnc" id="L1108" title="All 2 branches missed.">                        if (StringUtils.isNotEmpty(var.defaultValue)) { // has default value</span>
+<span class="nc" id="L1109">                            String defaultValue = var.defaultValue.substring(var.defaultValue.lastIndexOf('.') + 1);</span>
+<span class="nc bnc" id="L1110" title="All 2 branches missed.">                            for (Map&lt;String, Object&gt; enumVars : (List&lt;Map&lt;String, Object&gt;&gt;) var.getAllowableValues().get(&quot;enumVars&quot;)) {</span>
+<span class="nc bnc" id="L1111" title="All 2 branches missed.">                                if (defaultValue.equals(enumVars.get(&quot;name&quot;))) {</span>
+                                    // update default to use the string directly instead of enum string
+<span class="nc" id="L1113">                                    var.defaultValue = (String) enumVars.get(&quot;value&quot;);</span>
+                                }
+<span class="nc" id="L1115">                            }</span>
+                        }
+
+                        // add import for Set, HashSet
+<span class="nc" id="L1119">                        cm.imports.add(&quot;Set&quot;);</span>
+<span class="nc" id="L1120">                        Map&lt;String, String&gt; importsSet = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L1121">                        importsSet.put(&quot;import&quot;, &quot;java.util.Set&quot;);</span>
+<span class="nc" id="L1122">                        imports.add(importsSet);</span>
+<span class="nc" id="L1123">                        Map&lt;String, String&gt; importsHashSet = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L1124">                        importsHashSet.put(&quot;import&quot;, &quot;java.util.HashSet&quot;);</span>
+<span class="nc" id="L1125">                        imports.add(importsHashSet);</span>
+                    }
+
+<span class="nc" id="L1128">                }</span>
+
+<span class="nc bnc" id="L1130" title="All 2 branches missed.">                if (addNullableImports) {</span>
+<span class="nc" id="L1131">                    Map&lt;String, String&gt; imports2Classnames = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L1132">                    imports2Classnames.put(&quot;JsonNullable&quot;, &quot;org.openapitools.jackson.nullable.JsonNullable&quot;);</span>
+<span class="nc" id="L1133">                    imports2Classnames.put(&quot;NoSuchElementException&quot;, &quot;java.util.NoSuchElementException&quot;);</span>
+<span class="nc" id="L1134">                    imports2Classnames.put(&quot;JsonIgnore&quot;, &quot;com.fasterxml.jackson.annotation.JsonIgnore&quot;);</span>
+<span class="nc" id="L1135">                    addImports(imports, cm, imports2Classnames);</span>
+                }
+<span class="nc" id="L1137">            }</span>
+        }
+
+        // add implements for serializable/parcelable to all models
+<span class="nc bnc" id="L1141" title="All 2 branches missed.">        for (ModelMap mo : models) {</span>
+<span class="nc" id="L1142">            CodegenModel cm = mo.getModel();</span>
+
+<span class="nc" id="L1144">            cm.getVendorExtensions().putIfAbsent(&quot;x-implements&quot;, new ArrayList&lt;String&gt;());</span>
+<span class="nc bnc" id="L1145" title="All 8 branches missed.">            if (JERSEY2.equals(getLibrary()) || JERSEY3.equals(getLibrary()) || NATIVE.equals(getLibrary()) || OKHTTP_GSON.equals(getLibrary())) {</span>
+<span class="nc bnc" id="L1146" title="All 6 branches missed.">                if (cm.oneOf != null &amp;&amp; !cm.oneOf.isEmpty() &amp;&amp; cm.oneOf.contains(&quot;ModelNull&quot;)) {</span>
+                    // if oneOf contains &quot;null&quot; type
+<span class="nc" id="L1148">                    cm.isNullable = true;</span>
+<span class="nc" id="L1149">                    cm.oneOf.remove(&quot;ModelNull&quot;);</span>
+                }
+
+<span class="nc bnc" id="L1152" title="All 6 branches missed.">                if (cm.anyOf != null &amp;&amp; !cm.anyOf.isEmpty() &amp;&amp; cm.anyOf.contains(&quot;ModelNull&quot;)) {</span>
+                    // if anyOf contains &quot;null&quot; type
+<span class="nc" id="L1154">                    cm.isNullable = true;</span>
+<span class="nc" id="L1155">                    cm.anyOf.remove(&quot;ModelNull&quot;);</span>
+                }
+            }
+<span class="nc bnc" id="L1158" title="All 2 branches missed.">            if (this.parcelableModel) {</span>
+<span class="nc" id="L1159">                ((ArrayList&lt;String&gt;) cm.getVendorExtensions().get(&quot;x-implements&quot;)).add(&quot;Parcelable&quot;);</span>
+            }
+<span class="nc" id="L1161">        }</span>
+
+<span class="nc" id="L1163">        return objs;</span>
+    }
+
+    @Override
+    protected boolean isConstructorWithAllArgsAllowed(CodegenModel codegenModel) {
+        // implementation detail: allVars is not reliable if openapiNormalizer.REFACTOR_ALLOF_WITH_PROPERTIES_ONLY is disabled
+<span class="nc bnc" id="L1169" title="All 2 branches missed.">        if (codegenModel.readOnlyVars.size() != codegenModel.vars.size() + codegenModel.parentVars.size()) {</span>
+<span class="nc" id="L1170">            return super.isConstructorWithAllArgsAllowed(codegenModel);</span>
+        }
+<span class="nc" id="L1172">        return false;</span>
+    }
+
+    public void setUseOneOfDiscriminatorLookup(boolean useOneOfDiscriminatorLookup) {
+<span class="nc" id="L1176">        this.useOneOfDiscriminatorLookup = useOneOfDiscriminatorLookup;</span>
+<span class="nc" id="L1177">    }</span>
+
+    public boolean getUseOneOfDiscriminatorLookup() {
+<span class="nc" id="L1180">        return this.useOneOfDiscriminatorLookup;</span>
+    }
+
+    private boolean getUseSingleRequestParameter() {
+<span class="nc" id="L1184">        return useSingleRequestParameter;</span>
+    }
+
+    private void setUseSingleRequestParameter(boolean useSingleRequestParameter) {
+<span class="nc" id="L1188">        this.useSingleRequestParameter = useSingleRequestParameter;</span>
+<span class="nc" id="L1189">    }</span>
+
+    public void setUseRxJava(boolean useRxJava) {
+<span class="nc" id="L1192">        this.useRxJava = useRxJava;</span>
+<span class="nc" id="L1193">        doNotUseRx = false;</span>
+<span class="nc" id="L1194">    }</span>
+
+    public void setUseRxJava2(boolean useRxJava2) {
+<span class="nc" id="L1197">        this.useRxJava2 = useRxJava2;</span>
+<span class="nc" id="L1198">        doNotUseRx = false;</span>
+<span class="nc" id="L1199">    }</span>
+
+    public void setUseRxJava3(boolean useRxJava3) {
+<span class="nc" id="L1202">        this.useRxJava3 = useRxJava3;</span>
+<span class="nc" id="L1203">        doNotUseRx = false;</span>
+<span class="nc" id="L1204">    }</span>
+
+    public void setDoNotUseRx(boolean doNotUseRx) {
+<span class="nc" id="L1207">        this.doNotUseRx = doNotUseRx;</span>
+<span class="nc" id="L1208">    }</span>
+
+    public void setUsePlayWS(boolean usePlayWS) {
+<span class="nc" id="L1211">        this.usePlayWS = usePlayWS;</span>
+<span class="nc" id="L1212">    }</span>
+
+    public void setAsyncNative(boolean asyncNative) {
+<span class="nc" id="L1215">        this.asyncNative = asyncNative;</span>
+<span class="nc" id="L1216">    }</span>
+
+    public void setMicroprofileFramework(String microprofileFramework) {
+<span class="nc" id="L1219">        this.microprofileFramework = microprofileFramework;</span>
+<span class="nc" id="L1220">    }</span>
+
+    public void setMicroprofileMutiny(boolean microprofileMutiny) {
+<span class="nc" id="L1223">        this.microprofileMutiny = microprofileMutiny;</span>
+<span class="nc" id="L1224">    }</span>
+
+    public void setConfigKey(String configKey) {
+<span class="nc" id="L1227">        this.configKey = configKey;</span>
+<span class="nc" id="L1228">    }</span>
+
+    public void setParcelableModel(boolean parcelableModel) {
+<span class="nc" id="L1231">        this.parcelableModel = parcelableModel;</span>
+<span class="nc" id="L1232">    }</span>
+
+    public void setUseBeanValidation(boolean useBeanValidation) {
+<span class="nc" id="L1235">        this.useBeanValidation = useBeanValidation;</span>
+<span class="nc" id="L1236">    }</span>
+
+    public void setPerformBeanValidation(boolean performBeanValidation) {
+<span class="nc" id="L1239">        this.performBeanValidation = performBeanValidation;</span>
+<span class="nc" id="L1240">    }</span>
+
+    public void setUseGzipFeature(boolean useGzipFeature) {
+<span class="nc" id="L1243">        this.useGzipFeature = useGzipFeature;</span>
+<span class="nc" id="L1244">    }</span>
+
+    public void setUseRuntimeException(boolean useRuntimeException) {
+<span class="nc" id="L1247">        this.useRuntimeException = useRuntimeException;</span>
+<span class="nc" id="L1248">    }</span>
+
+    public void setUseReflectionEqualsHashCode(boolean useReflectionEqualsHashCode) {
+<span class="nc" id="L1251">        this.useReflectionEqualsHashCode = useReflectionEqualsHashCode;</span>
+<span class="nc" id="L1252">    }</span>
+
+    public void setCaseInsensitiveResponseHeaders(final Boolean caseInsensitiveResponseHeaders) {
+<span class="nc" id="L1255">        this.caseInsensitiveResponseHeaders = caseInsensitiveResponseHeaders;</span>
+<span class="nc" id="L1256">    }</span>
+
+    public void setUseAbstractionForFiles(boolean useAbstractionForFiles) {
+<span class="nc" id="L1259">        this.useAbstractionForFiles = useAbstractionForFiles;</span>
+<span class="nc" id="L1260">    }</span>
+
+    public void setDynamicOperations(final boolean dynamicOperations) {
+<span class="nc" id="L1263">        this.dynamicOperations = dynamicOperations;</span>
+<span class="nc" id="L1264">    }</span>
+
+    public void setSupportStreaming(final boolean supportStreaming) {
+<span class="nc" id="L1267">        this.supportStreaming = supportStreaming;</span>
+<span class="nc" id="L1268">    }</span>
+
+    public void setWithAWSV4Signature(boolean withAWSV4Signature) {
+<span class="nc" id="L1271">        this.withAWSV4Signature = withAWSV4Signature;</span>
+<span class="nc" id="L1272">    }</span>
+
+    public void setGradleProperties(final String gradleProperties) {
+<span class="nc" id="L1275">        this.gradleProperties = gradleProperties;</span>
+<span class="nc" id="L1276">    }</span>
+
+    public void setErrorObjectType(final String errorObjectType) {
+<span class="nc" id="L1279">        this.errorObjectType = errorObjectType;</span>
+<span class="nc" id="L1280">    }</span>
+
+    public void setGenerateClientAsBean(boolean generateClientAsBean) {
+<span class="nc" id="L1283">        this.generateClientAsBean = generateClientAsBean;</span>
+<span class="nc" id="L1284">    }</span>
+
+    public void setUseEnumCaseInsensitive(boolean useEnumCaseInsensitive) {
+<span class="nc" id="L1287">        this.useEnumCaseInsensitive = useEnumCaseInsensitive;</span>
+<span class="nc" id="L1288">    }</span>
+
+    public void setMaxAttemptsForRetry(int maxAttemptsForRetry) {
+<span class="nc" id="L1291">        this.maxAttemptsForRetry = maxAttemptsForRetry;</span>
+<span class="nc" id="L1292">    }</span>
+
+    public void setWaitTimeMillis(long waitTimeMillis) {
+<span class="nc" id="L1295">        this.waitTimeMillis = waitTimeMillis;</span>
+<span class="nc" id="L1296">    }</span>
+
+    /**
+     * Serialization library.
+     *
+     * @return 'gson' or 'jackson'
+     */
+    public String getSerializationLibrary() {
+<span class="nc" id="L1304">        return serializationLibrary;</span>
+    }
+
+    public void setSerializationLibrary(String serializationLibrary) {
+<span class="nc bnc" id="L1308" title="All 2 branches missed.">        if (SERIALIZATION_LIBRARY_JACKSON.equalsIgnoreCase(serializationLibrary)) {</span>
+<span class="nc" id="L1309">            this.serializationLibrary = SERIALIZATION_LIBRARY_JACKSON;</span>
+<span class="nc bnc" id="L1310" title="All 2 branches missed.">        } else if (SERIALIZATION_LIBRARY_GSON.equalsIgnoreCase(serializationLibrary)) {</span>
+<span class="nc" id="L1311">            this.serializationLibrary = SERIALIZATION_LIBRARY_GSON;</span>
+<span class="nc bnc" id="L1312" title="All 2 branches missed.">        } else if (SERIALIZATION_LIBRARY_JSONB.equalsIgnoreCase(serializationLibrary)) {</span>
+<span class="nc" id="L1313">            this.serializationLibrary = SERIALIZATION_LIBRARY_JSONB;</span>
+        } else {
+<span class="nc" id="L1315">            throw new IllegalArgumentException(&quot;Unexpected serializationLibrary value: &quot; + serializationLibrary);</span>
+        }
+<span class="nc" id="L1317">    }</span>
+
+    public void forceSerializationLibrary(String serializationLibrary) {
+<span class="nc bnc" id="L1320" title="All 4 branches missed.">        if ((this.serializationLibrary != null) &amp;&amp; !this.serializationLibrary.equalsIgnoreCase(serializationLibrary)) {</span>
+<span class="nc" id="L1321">            LOGGER.warn(</span>
+                    &quot;The configured serializationLibrary '{}', is not supported by the library: '{}', switching back to: {}&quot;,
+<span class="nc" id="L1323">                    this.serializationLibrary, getLibrary(), serializationLibrary);</span>
+        }
+<span class="nc" id="L1325">        setSerializationLibrary(serializationLibrary);</span>
+<span class="nc" id="L1326">    }</span>
+
+    @Override
+    public Map&lt;String, Object&gt; postProcessSupportingFileData(Map&lt;String, Object&gt; objs) {
+<span class="nc" id="L1330">        generateYAMLSpecFile(objs);</span>
+<span class="nc" id="L1331">        return super.postProcessSupportingFileData(objs);</span>
+    }
+
+    private void setConfigKeyFromClassName(boolean configKeyFromClassName) {
+<span class="nc" id="L1335">        this.configKeyFromClassName = configKeyFromClassName;</span>
+<span class="nc" id="L1336">    }</span>
+
+    @Override
+    public String toApiVarName(String name) {
+<span class="nc" id="L1340">        String apiVarName = super.toApiVarName(name);</span>
+<span class="nc bnc" id="L1341" title="All 2 branches missed.">        if (reservedWords.contains(apiVarName)) {</span>
+<span class="nc" id="L1342">            apiVarName = escapeReservedWord(apiVarName);</span>
+        }
+<span class="nc" id="L1344">        return apiVarName;</span>
+    }
+
+    @Override
+    public void addImportsToOneOfInterface(List&lt;Map&lt;String, String&gt;&gt; imports) {
+<span class="nc bnc" id="L1349" title="All 2 branches missed.">        for (String i : Arrays.asList(&quot;JsonSubTypes&quot;, &quot;JsonTypeInfo&quot;, &quot;JsonIgnoreProperties&quot;)) {</span>
+<span class="nc" id="L1350">            Map&lt;String, String&gt; oneImport = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L1351">            oneImport.put(&quot;import&quot;, importMapping.get(i));</span>
+<span class="nc bnc" id="L1352" title="All 2 branches missed.">            if (!imports.contains(oneImport)) {</span>
+<span class="nc" id="L1353">                imports.add(oneImport);</span>
+            }
+<span class="nc" id="L1355">        }</span>
+<span class="nc" id="L1356">    }</span>
+
+    @Override
+    public List&lt;VendorExtension&gt; getSupportedVendorExtensions() {
+<span class="nc" id="L1360">        List&lt;VendorExtension&gt; extensions = super.getSupportedVendorExtensions();</span>
+<span class="nc" id="L1361">        extensions.add(VendorExtension.X_WEBCLIENT_BLOCKING);</span>
+<span class="nc" id="L1362">        return extensions;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

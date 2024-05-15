@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ValidationRule.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator-core</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.validation</a> &gt; <span class="el_source">ValidationRule.java</span></div><h1>ValidationRule.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2019 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.validation;
+
+import java.util.function.Function;
+
+/**
+ * Defines a rule to be evaluated against some target object.
+ */
+@SuppressWarnings(&quot;WeakerAccess&quot;)
+public class ValidationRule {
+    private Severity severity;
+    private String description;
+    private String failureMessage;
+    private Function&lt;Object, Result&gt; test;
+
+    /**
+     * Constructs a new instance of {@link ValidationRule}
+     *
+     * @param severity The declared severity if this validation rule fails.
+     * @param description A description to help differentiate this rule from others (not intended to be user-facing).
+     * @param failureMessage The message to be displayed in the event of a test failure (intended to be user-facing).
+     * @param test The test condition to be applied as a part of this rule, when this function returns &lt;code&gt;true&lt;/code&gt;,
+     *             the evaluated instance will be considered &quot;valid&quot; according to this rule.
+     */
+<span class="fc" id="L40">    ValidationRule(Severity severity, String description, String failureMessage, Function&lt;Object, Result&gt; test) {</span>
+<span class="fc" id="L41">        this.severity = severity;</span>
+<span class="fc" id="L42">        this.description = description;</span>
+<span class="fc" id="L43">        this.failureMessage = failureMessage;</span>
+<span class="fc" id="L44">        this.test = test;</span>
+<span class="fc" id="L45">    }</span>
+
+    /**
+     * Gets the message to be displayed in the event of a test failure (intended to be user-facing).
+     *
+     * @return A string message
+     */
+    public String getFailureMessage() {
+<span class="fc" id="L53">        return failureMessage;</span>
+    }
+
+    /**
+     * Evaluate an instance of an object against this rule.
+     *
+     * @param input The instance to be evaluated.
+     *
+     * @return &lt;code&gt;true&lt;/code&gt; if the object state is valid according to this rule, otherwise &lt;code&gt;false&lt;/code&gt;.
+     */
+    public Result evaluate(Object input) {
+<span class="fc" id="L64">        return test.apply(input);</span>
+    }
+
+    /**
+     * Get the level of severity which this rule considers a failure in evaluation. For example, if this is {@link Severity#WARNING} and
+     * a call to {@link ValidationRule#evaluate(Object)} returns &lt;code&gt;false&lt;/code&gt;, a user should not expect an error to be thrown under
+     * normal operation.
+     *
+     * @return An enum defining how severe a failure to evaluate this rule should be considered by the caller.
+     */
+    public Severity getSeverity() {
+<span class="fc" id="L75">        return severity;</span>
+    }
+
+    /**
+     * Gets a description to help differentiate this rule from others (not intended to be user-facing).
+     *
+     * @return A string description.
+     */
+    public String getDescription() {
+<span class="nc" id="L84">        return description;</span>
+    }
+
+    /**
+     * Constructs an empty rule (useful for testing).
+     *
+     * @return An &quot;empty&quot; rule.
+     */
+    static ValidationRule empty() {
+<span class="pc" id="L93">        return new ValidationRule(Severity.ERROR, &quot;empty&quot;, &quot;failure message&quot;, (i) -&gt; Fail.empty() );</span>
+    }
+
+    /**
+     * Create an instance of a {@link ValidationRule}
+     *
+     * @param severity The declared severity if this validation rule fails.
+     * @param description A description to help differentiate this rule from others (not intended to be user-facing).
+     * @param failureMessage The message to be displayed in the event of a test failure (intended to be user-facing).
+     * @param fn The test condition to be applied as a part of this rule, when this function returns &lt;code&gt;true&lt;/code&gt;,
+     *             the evaluated instance will be considered &quot;valid&quot; according to this rule.
+     * @param &lt;T&gt; The type of the object being evaluated.
+     *
+     * @return A new instance of a {@link ValidationRule}
+     */
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public static &lt;T&gt; ValidationRule create(Severity severity, String description, String failureMessage, Function&lt;T, Result&gt; fn) {
+<span class="nc" id="L110">        return new ValidationRule(severity, description, failureMessage, (Function&lt;Object, Result&gt;) fn);</span>
+    }
+
+    /**
+     * Create an instance of a {@link ValidationRule} which should result in an error should the evaluate of this rule fail.
+     *
+     * @param failureMessage The message to be displayed in the event of a test failure (intended to be user-facing).
+     * @param fn The test condition to be applied as a part of this rule, when this function returns &lt;code&gt;true&lt;/code&gt;,
+     *             the evaluated instance will be considered &quot;valid&quot; according to this rule.
+     * @param &lt;T&gt; The type of the object being evaluated.
+     *
+     * @return A new instance of a {@link ValidationRule}
+     */
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public static &lt;T&gt; ValidationRule error(String failureMessage, Function&lt;T, Result&gt; fn) {
+<span class="fc" id="L125">        return new ValidationRule(Severity.ERROR, null, failureMessage, (Function&lt;Object, Result&gt;) fn);</span>
+    }
+
+    /**
+     * Create an instance of a {@link ValidationRule} which should result in a warning should the evaluate of this rule fail.
+     *
+     * @param description A description to help differentiate this rule from others (not intended to be user-facing).
+     * @param failureMessage The message to be displayed in the event of a test failure (intended to be user-facing).
+     * @param fn The test condition to be applied as a part of this rule, when this function returns &lt;code&gt;true&lt;/code&gt;,
+     *             the evaluated instance will be considered &quot;valid&quot; according to this rule.
+     * @param &lt;T&gt; The type of the object being evaluated.
+     *
+     * @return A new instance of a {@link ValidationRule}
+     */
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public static &lt;T&gt; ValidationRule warn(String description, String failureMessage, Function&lt;T, Result&gt; fn) {
+<span class="fc" id="L141">        return new ValidationRule(Severity.WARNING, description, failureMessage, (Function&lt;Object, Result&gt;) fn);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L146">        return &quot;ValidationRule{&quot; +</span>
+                &quot;severity=&quot; + severity +
+                &quot;, description='&quot; + description + '\'' +
+                &quot;, failureMessage='&quot; + failureMessage + '\'' +
+                '}';
+    }
+
+<span class="fc" id="L153">    public static abstract class Result {</span>
+<span class="fc" id="L154">        protected String details = null;</span>
+<span class="fc" id="L155">        protected Throwable throwable = null;</span>
+
+        public String getDetails() {
+<span class="fc" id="L158">            return details;</span>
+        }
+
+        public void setDetails(String details) {
+<span class="nc bnc" id="L162" title="All 2 branches missed.">            assert this.details == null;</span>
+<span class="nc" id="L163">            this.details = details;</span>
+<span class="nc" id="L164">        }</span>
+
+        public abstract boolean passed();
+<span class="nc bnc" id="L167" title="All 2 branches missed.">        public final boolean failed() { return !passed(); }</span>
+
+        public Throwable getThrowable() {
+<span class="nc" id="L170">            return throwable;</span>
+        }
+
+<span class="nc bnc" id="L173" title="All 2 branches missed.">        public boolean thrown() { return this.throwable == null; }</span>
+    }
+
+    public static final class Pass extends Result {
+<span class="fc" id="L177">        public static Result empty() { return new Pass(); }</span>
+
+        public Pass() {
+<span class="fc" id="L180">            super();</span>
+<span class="fc" id="L181">        }</span>
+
+        public Pass(String details) {
+<span class="nc" id="L184">            this();</span>
+<span class="nc" id="L185">            this.details = details;</span>
+<span class="nc" id="L186">        }</span>
+
+        @Override
+        public boolean passed() {
+<span class="fc" id="L190">            return true;</span>
+        }
+    }
+
+    public static final class Fail extends Result {
+<span class="fc" id="L195">        public static Result empty() { return new Fail(); }</span>
+
+        public Fail() {
+<span class="fc" id="L198">            super();</span>
+<span class="fc" id="L199">        }</span>
+
+        public Fail(String details) {
+<span class="nc" id="L202">            this();</span>
+<span class="nc" id="L203">            this.details = details;</span>
+<span class="nc" id="L204">        }</span>
+
+        public Fail(String details, Throwable throwable) {
+<span class="nc" id="L207">            this();</span>
+<span class="nc" id="L208">            this.throwable = throwable;</span>
+<span class="nc" id="L209">            this.details = details;</span>
+<span class="nc" id="L210">        }</span>
+
+        @Override
+        public boolean passed() {
+<span class="fc" id="L214">            return false;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

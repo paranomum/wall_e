@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ApexClientCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">ApexClientCodegen.java</span></div><h1>ApexClientCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Schema;
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.CliOption;
+import org.openapitools.codegen.CodegenProperty;
+import org.openapitools.codegen.GeneratorLanguage;
+import org.openapitools.codegen.SupportingFile;
+import org.openapitools.codegen.utils.ModelUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Locale;
+
+import static org.openapitools.codegen.utils.StringUtils.camelize;
+
+public class ApexClientCodegen extends AbstractApexCodegen {
+
+    private static final String CLASS_PREFIX = &quot;classPrefix&quot;;
+    private static final String API_VERSION = &quot;apiVersion&quot;;
+    private static final String BUILD_METHOD = &quot;buildMethod&quot;;
+    private static final String NAMED_CREDENTIAL = &quot;namedCredential&quot;;
+<span class="fc" id="L46">    private final Logger LOGGER = LoggerFactory.getLogger(ApexClientCodegen.class);</span>
+<span class="fc" id="L47">    private String classPrefix = &quot;OAS&quot;;</span>
+<span class="fc" id="L48">    private String apiVersion = &quot;42.0&quot;;</span>
+<span class="fc" id="L49">    private String buildMethod = &quot;sfdx&quot;;</span>
+    private String namedCredential;
+<span class="fc" id="L51">    private String srcPath = &quot;force-app/main/default/&quot;;</span>
+<span class="fc" id="L52">    private String sfdxConfigPath = &quot;config/&quot;;</span>
+<span class="fc" id="L53">    private HashMap&lt;String, Object&gt; primitiveDefaults = new HashMap&lt;&gt;();</span>
+
+    public ApexClientCodegen() {
+<span class="fc" id="L56">        super();</span>
+
+<span class="fc" id="L58">        importMapping.clear();</span>
+
+<span class="fc" id="L60">        embeddedTemplateDir = templateDir = &quot;apex&quot;;</span>
+<span class="fc" id="L61">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;apex&quot;;</span>
+<span class="fc" id="L62">        modelPackage = apiPackage = srcPath + &quot;classes&quot;;</span>
+<span class="fc" id="L63">        testPackage = &quot;force-app.main.default.classes&quot;;</span>
+<span class="fc" id="L64">        modelNamePrefix = classPrefix;</span>
+
+<span class="fc" id="L66">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.cls&quot;);</span>
+<span class="fc" id="L67">        apiTemplateFiles.put(&quot;cls-meta.mustache&quot;, &quot;.cls-meta.xml&quot;);</span>
+<span class="fc" id="L68">        apiTestTemplateFiles.put(&quot;api_test.mustache&quot;, &quot;.cls&quot;);</span>
+<span class="fc" id="L69">        apiTestTemplateFiles.put(&quot;cls-meta.mustache&quot;, &quot;.cls-meta.xml&quot;);</span>
+<span class="fc" id="L70">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.cls&quot;);</span>
+<span class="fc" id="L71">        modelTemplateFiles.put(&quot;cls-meta.mustache&quot;, &quot;.cls-meta.xml&quot;);</span>
+<span class="fc" id="L72">        modelTestTemplateFiles.put(&quot;model_test.mustache&quot;, &quot;.cls&quot;);</span>
+<span class="fc" id="L73">        modelTestTemplateFiles.put(&quot;cls-meta.mustache&quot;, &quot;.cls-meta.xml&quot;);</span>
+
+<span class="fc" id="L75">        cliOptions.add(CliOption.newString(CLASS_PREFIX, &quot;Prefix for generated classes. Set this to avoid overwriting existing classes in your org.&quot;));</span>
+<span class="fc" id="L76">        cliOptions.add(CliOption.newString(API_VERSION, &quot;The Metadata API version number to use for components in this package.&quot;));</span>
+<span class="fc" id="L77">        cliOptions.add(CliOption.newString(BUILD_METHOD, &quot;The build method for this package.&quot;));</span>
+<span class="fc" id="L78">        cliOptions.add(CliOption.newString(NAMED_CREDENTIAL, &quot;The named credential name for the HTTP callouts&quot;));</span>
+
+<span class="fc" id="L80">        supportingFiles.add(new SupportingFile(&quot;OAS.cls&quot;, srcPath + &quot;classes&quot;, &quot;OAS.cls&quot;));</span>
+<span class="fc" id="L81">        supportingFiles.add(new SupportingFile(&quot;cls-meta.mustache&quot;, srcPath + &quot;classes&quot;, &quot;OAS.cls-meta.xml&quot;));</span>
+<span class="fc" id="L82">        supportingFiles.add(new SupportingFile(&quot;OASTest.cls&quot;, srcPath + &quot;classes&quot;, &quot;OASTest.cls&quot;));</span>
+<span class="fc" id="L83">        supportingFiles.add(new SupportingFile(&quot;cls-meta.mustache&quot;, srcPath + &quot;classes&quot;, &quot;OASTest.cls-meta.xml&quot;));</span>
+<span class="fc" id="L84">        supportingFiles.add(new SupportingFile(&quot;OASResponseMock.cls&quot;, srcPath + &quot;classes&quot;, &quot;OASResponseMock.cls&quot;));</span>
+<span class="fc" id="L85">        supportingFiles.add(new SupportingFile(&quot;cls-meta.mustache&quot;, srcPath + &quot;classes&quot;, &quot;OASResponseMock.cls-meta.xml&quot;));</span>
+
+<span class="fc" id="L87">        typeMapping.put(&quot;BigDecimal&quot;, &quot;Double&quot;);</span>
+<span class="fc" id="L88">        typeMapping.put(&quot;binary&quot;, &quot;String&quot;);</span>
+<span class="fc" id="L89">        typeMapping.put(&quot;ByteArray&quot;, &quot;Blob&quot;);</span>
+<span class="fc" id="L90">        typeMapping.put(&quot;date&quot;, &quot;Date&quot;);</span>
+<span class="fc" id="L91">        typeMapping.put(&quot;DateTime&quot;, &quot;Datetime&quot;);</span>
+<span class="fc" id="L92">        typeMapping.put(&quot;file&quot;, &quot;Blob&quot;);</span>
+<span class="fc" id="L93">        typeMapping.put(&quot;float&quot;, &quot;Double&quot;);</span>
+<span class="fc" id="L94">        typeMapping.put(&quot;number&quot;, &quot;Double&quot;);</span>
+<span class="fc" id="L95">        typeMapping.put(&quot;short&quot;, &quot;Integer&quot;);</span>
+<span class="fc" id="L96">        typeMapping.put(&quot;UUID&quot;, &quot;String&quot;);</span>
+<span class="fc" id="L97">        typeMapping.put(&quot;URI&quot;, &quot;String&quot;);</span>
+
+        // https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_reserved_words.htm
+<span class="fc" id="L100">        setReservedWordsLowerCase(</span>
+<span class="fc" id="L101">                Arrays.asList(&quot;abstract&quot;, &quot;activate&quot;, &quot;and&quot;, &quot;any&quot;, &quot;array&quot;, &quot;as&quot;, &quot;asc&quot;, &quot;autonomous&quot;,</span>
+                        &quot;begin&quot;, &quot;bigdecimal&quot;, &quot;blob&quot;, &quot;boolean&quot;, &quot;break&quot;, &quot;bulk&quot;, &quot;by&quot;, &quot;byte&quot;, &quot;case&quot;, &quot;cast&quot;,
+                        &quot;catch&quot;, &quot;char&quot;, &quot;class&quot;, &quot;collect&quot;, &quot;commit&quot;, &quot;const&quot;, &quot;continue&quot;,
+                        &quot;currency&quot;, &quot;date&quot;, &quot;datetime&quot;, &quot;decimal&quot;, &quot;default&quot;, &quot;delete&quot;, &quot;desc&quot;, &quot;do&quot;, &quot;double&quot;, &quot;else&quot;,
+                        &quot;end&quot;, &quot;enum&quot;, &quot;exception&quot;, &quot;exit&quot;, &quot;export&quot;, &quot;extends&quot;, &quot;false&quot;, &quot;final&quot;,
+                        &quot;finally&quot;, &quot;float&quot;, &quot;for&quot;, &quot;from&quot;, &quot;global&quot;, &quot;goto&quot;, &quot;group&quot;, &quot;having&quot;,
+                        &quot;hint&quot;, &quot;if&quot;, &quot;implements&quot;, &quot;import&quot;, &quot;in&quot;, &quot;inner&quot;, &quot;insert&quot;, &quot;instanceof&quot;, &quot;int&quot;, &quot;integer&quot;,
+                        &quot;interface&quot;, &quot;into&quot;, &quot;join&quot;, &quot;like&quot;, &quot;limit&quot;, &quot;list&quot;, &quot;long&quot;, &quot;loop&quot;, &quot;map&quot;, &quot;merge&quot;, &quot;new&quot;,
+                        &quot;not&quot;, &quot;null&quot;, &quot;nulls&quot;, &quot;number&quot;, &quot;object&quot;, &quot;of&quot;, &quot;on&quot;, &quot;or&quot;, &quot;outer&quot;, &quot;override&quot;, &quot;package&quot;, &quot;parallel&quot;,
+                        &quot;pragma&quot;, &quot;private&quot;, &quot;protected&quot;, &quot;public&quot;, &quot;retrieve&quot;, &quot;return&quot;,
+                        &quot;rollback&quot;, &quot;select&quot;, &quot;set&quot;, &quot;short&quot;, &quot;sObject&quot;, &quot;sort&quot;, &quot;static&quot;, &quot;string&quot;,
+                        &quot;super&quot;, &quot;switch&quot;, &quot;synchronized&quot;, &quot;system&quot;, &quot;testmethod&quot;, &quot;then&quot;, &quot;this&quot;,
+                        &quot;throw&quot;, &quot;time&quot;, &quot;transaction&quot;, &quot;trigger&quot;, &quot;true&quot;, &quot;try&quot;, &quot;undelete&quot;, &quot;update&quot;, &quot;upsert&quot;, &quot;using&quot;,
+                        &quot;virtual&quot;, &quot;void&quot;, &quot;webservice&quot;, &quot;when&quot;, &quot;where&quot;, &quot;while&quot;
+                ));
+
+<span class="fc" id="L117">        languageSpecificPrimitives = new HashSet&lt;&gt;(</span>
+<span class="fc" id="L118">                Arrays.asList(&quot;Blob&quot;, &quot;Boolean&quot;, &quot;Date&quot;, &quot;Datetime&quot;, &quot;Decimal&quot;, &quot;Double&quot;, &quot;ID&quot;,</span>
+                        &quot;Integer&quot;, &quot;Long&quot;, &quot;Object&quot;, &quot;String&quot;, &quot;Time&quot;
+                ));
+
+<span class="fc" id="L122">        primitiveDefaults.put(&quot;Boolean&quot;, true);</span>
+<span class="fc" id="L123">        primitiveDefaults.put(&quot;Decimal&quot;, 1);</span>
+<span class="fc" id="L124">        primitiveDefaults.put(&quot;Double&quot;, 1);</span>
+<span class="fc" id="L125">        primitiveDefaults.put(&quot;Integer&quot;, 1);</span>
+<span class="fc" id="L126">        primitiveDefaults.put(&quot;Long&quot;, 1);</span>
+<span class="fc" id="L127">        primitiveDefaults.put(&quot;String&quot;, &quot;&quot;);</span>
+
+<span class="fc" id="L129">        instantiationTypes.put(&quot;array&quot;, &quot;List&quot;);</span>
+<span class="fc" id="L130">        instantiationTypes.put(&quot;map&quot;, &quot;Map&quot;);</span>
+
+<span class="fc" id="L132">    }</span>
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L136">        super.processOpts();</span>
+
+<span class="nc bnc" id="L138" title="All 2 branches missed.">        if (additionalProperties.containsKey(CLASS_PREFIX)) {</span>
+<span class="nc" id="L139">            setClassPrefix((String) additionalProperties.get(CLASS_PREFIX));</span>
+        }
+<span class="nc" id="L141">        additionalProperties.put(CLASS_PREFIX, classPrefix);</span>
+
+<span class="nc bnc" id="L143" title="All 2 branches missed.">        if (additionalProperties.containsKey(API_VERSION)) {</span>
+<span class="nc" id="L144">            setApiVersion(toApiVersion((String) additionalProperties.get(API_VERSION)));</span>
+        }
+<span class="nc" id="L146">        additionalProperties.put(API_VERSION, apiVersion);</span>
+
+<span class="nc bnc" id="L148" title="All 2 branches missed.">        if (additionalProperties.containsKey(BUILD_METHOD)) {</span>
+<span class="nc" id="L149">            setBuildMethod((String) additionalProperties.get(BUILD_METHOD));</span>
+        }
+<span class="nc" id="L151">        additionalProperties.put(BUILD_METHOD, buildMethod);</span>
+
+<span class="nc bnc" id="L153" title="All 2 branches missed.">        if (additionalProperties.containsKey(NAMED_CREDENTIAL)) {</span>
+<span class="nc" id="L154">            setNamedCredential((String) additionalProperties.get(NAMED_CREDENTIAL));</span>
+        }
+<span class="nc" id="L156">        additionalProperties.put(NAMED_CREDENTIAL, namedCredential);</span>
+
+<span class="nc" id="L158">        postProcessOpts();</span>
+<span class="nc" id="L159">    }</span>
+
+    @Override
+    public void preprocessOpenAPI(OpenAPI openAPI) {
+<span class="nc" id="L163">        String calloutLabel = openAPI.getInfo().getTitle();</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">        if (StringUtils.isNotBlank(namedCredential)) {</span>
+<span class="nc" id="L165">            calloutLabel = namedCredential;</span>
+        }
+<span class="nc" id="L167">        additionalProperties.put(&quot;calloutLabel&quot;, calloutLabel);</span>
+<span class="nc" id="L168">        String sanitized = sanitizeName(calloutLabel);</span>
+<span class="nc" id="L169">        additionalProperties.put(&quot;calloutName&quot;, sanitized);</span>
+<span class="nc" id="L170">        supportingFiles.add(new SupportingFile(&quot;namedCredential.mustache&quot;, srcPath + &quot;/namedCredentials&quot;,</span>
+                sanitized + &quot;.namedCredential-meta.xml&quot;
+        ));
+
+<span class="nc bnc" id="L174" title="All 2 branches missed.">        if (additionalProperties.get(BUILD_METHOD).equals(&quot;sfdx&quot;)) {</span>
+<span class="nc" id="L175">            generateSfdxSupportingFiles();</span>
+<span class="nc bnc" id="L176" title="All 2 branches missed.">        } else if (additionalProperties.get(BUILD_METHOD).equals(&quot;ant&quot;)) {</span>
+<span class="nc" id="L177">            generateAntSupportingFiles();</span>
+        }
+<span class="nc" id="L179">    }</span>
+
+    @Override
+    public String escapeQuotationMark(String input) {
+<span class="nc" id="L183">        return input.replace(&quot;'&quot;, &quot;\\'&quot;);</span>
+    }
+
+    @Override
+    public String escapeUnsafeCharacters(String input) {
+<span class="nc" id="L188">        return input.replace(&quot;*/&quot;, &quot;*_/&quot;).replace(&quot;/*&quot;, &quot;/_*&quot;);</span>
+    }
+
+    @Override
+    public String escapeText(String input) {
+<span class="nc bnc" id="L193" title="All 2 branches missed.">        if (input == null) {</span>
+<span class="nc" id="L194">            return input;</span>
+        }
+
+<span class="nc" id="L197">        return input.replace(&quot;'&quot;, &quot;\\'&quot;).replace(&quot;\n&quot;, &quot;\\n&quot;).replace(&quot;\r&quot;, &quot;\\r&quot;).replace(&quot;*/&quot;, &quot;*_/&quot;).replace(&quot;/*&quot;, &quot;/_*&quot;);</span>
+    }
+
+    @Override
+    public String toApiName(String name) {
+<span class="nc" id="L202">        return camelize(classPrefix + super.toApiName(name));</span>
+    }
+
+    @Override
+    public String escapeReservedWord(String name) {
+        // Identifiers must start with a letter
+<span class="nc" id="L208">        return &quot;r&quot; + super.escapeReservedWord(name);</span>
+    }
+
+    @Override
+    public String toModelName(String name) {
+<span class="nc" id="L213">        String modelName = super.toModelName(name);</span>
+
+        // Max length is 40; save the last 4 for &quot;Test&quot;
+<span class="nc bnc" id="L216" title="All 2 branches missed.">        if (modelName.length() &gt; 36) {</span>
+<span class="nc" id="L217">            modelName = modelName.substring(0, 36);</span>
+        }
+<span class="nc" id="L219">        return modelName;</span>
+    }
+
+    @Override
+    public String toDefaultValue(Schema p) {
+<span class="nc" id="L224">        String out = null;</span>
+<span class="nc bnc" id="L225" title="All 2 branches missed.">        if (ModelUtils.isArraySchema(p)) {</span>
+<span class="nc" id="L226">            Schema inner = ModelUtils.getSchemaItems(p);</span>
+<span class="nc" id="L227">            out = String.format(</span>
+                    Locale.ROOT,
+                    &quot;new List&lt;%s&gt;()&quot;,
+<span class="nc bnc" id="L230" title="All 2 branches missed.">                    inner == null ? &quot;Object&quot; : getTypeDeclaration(inner)</span>
+            );
+<span class="nc bnc" id="L232" title="All 2 branches missed.">        } else if (ModelUtils.isBooleanSchema(p)) {</span>
+            // true =&gt; &quot;true&quot;, false =&gt; &quot;false&quot;, null =&gt; &quot;null&quot;
+<span class="nc" id="L234">            out = String.valueOf(p.getDefault());</span>
+<span class="nc bnc" id="L235" title="All 2 branches missed.">        } else if (ModelUtils.isLongSchema(p)) {</span>
+<span class="nc bnc" id="L236" title="All 2 branches missed.">            if (p.getDefault() != null) {</span>
+<span class="nc" id="L237">                Long def = Long.parseLong(String.valueOf(p.getDefault()));</span>
+<span class="nc bnc" id="L238" title="All 2 branches missed.">                out = def == null ? out : def + &quot;L&quot;;</span>
+<span class="nc" id="L239">            }</span>
+<span class="nc bnc" id="L240" title="All 2 branches missed.">        } else if (ModelUtils.isMapSchema(p)) {</span>
+<span class="nc" id="L241">            Schema inner = ModelUtils.getAdditionalProperties(p);</span>
+<span class="nc bnc" id="L242" title="All 2 branches missed.">            String s = inner == null ? &quot;Object&quot; : getTypeDeclaration(inner);</span>
+<span class="nc" id="L243">            out = String.format(Locale.ROOT, &quot;new Map&lt;String, %s&gt;()&quot;, s);</span>
+<span class="nc bnc" id="L244" title="All 2 branches missed.">        } else if (ModelUtils.isStringSchema(p)) {</span>
+<span class="nc bnc" id="L245" title="All 2 branches missed.">            if (p.getDefault() != null) {</span>
+<span class="nc" id="L246">                String def = p.getDefault().toString();</span>
+<span class="nc bnc" id="L247" title="All 2 branches missed.">                if (def != null) {</span>
+<span class="nc bnc" id="L248" title="All 2 branches missed.">                    out = p.getEnum() == null ? String.format(Locale.ROOT, &quot;'%s'&quot;, escapeText(def)) : def;</span>
+                }
+<span class="nc" id="L250">            }</span>
+        } else {
+<span class="nc" id="L252">            out = super.toDefaultValue(p);</span>
+        }
+
+        // we'll skip over null defaults in the model template to avoid redundant initialization
+<span class="nc bnc" id="L256" title="All 2 branches missed.">        return &quot;null&quot;.equals(out) ? null : out;</span>
+    }
+
+    public void setBuildMethod(String buildMethod) {
+<span class="nc bnc" id="L260" title="All 2 branches missed.">        if (buildMethod.equals(&quot;ant&quot;)) {</span>
+<span class="nc" id="L261">            this.srcPath = &quot;deploy/&quot;;</span>
+        }
+<span class="nc" id="L263">        this.buildMethod = buildMethod;</span>
+<span class="nc" id="L264">    }</span>
+
+    public void setNamedCredential(String namedCredential) {
+<span class="nc" id="L267">        this.namedCredential = namedCredential;</span>
+<span class="nc" id="L268">    }</span>
+
+    public void setClassPrefix(String classPrefix) {
+        // the best thing we can do without namespacing in Apex
+<span class="nc" id="L272">        modelNamePrefix = classPrefix;</span>
+<span class="nc" id="L273">        this.classPrefix = classPrefix;</span>
+<span class="nc" id="L274">    }</span>
+
+    public void setApiVersion(String apiVersion) {
+<span class="nc" id="L277">        this.apiVersion = apiVersion;</span>
+<span class="nc" id="L278">    }</span>
+
+    private String toApiVersion(String apiVersion) {
+<span class="nc bnc" id="L281" title="All 2 branches missed.">        if (apiVersion.matches(&quot;^\\d{2}(\\.0)?$&quot;)) {</span>
+<span class="nc" id="L282">            return apiVersion.substring(0, 2) + &quot;.0&quot;;</span>
+        } else {
+<span class="nc" id="L284">            LOGGER.warn(String.format(Locale.ROOT, &quot;specified API version is invalid: %s - defaulting to %s&quot;, apiVersion, this.apiVersion));</span>
+<span class="nc" id="L285">            return this.apiVersion;</span>
+        }
+    }
+
+    private void postProcessOpts() {
+<span class="nc" id="L290">        supportingFiles.add(</span>
+                new SupportingFile(&quot;client.mustache&quot;, srcPath + &quot;classes&quot;, classPrefix + &quot;Client.cls&quot;));
+<span class="nc" id="L292">        supportingFiles.add(new SupportingFile(&quot;cls-meta.mustache&quot;, srcPath + &quot;classes&quot;,</span>
+                classPrefix + &quot;Client.cls-meta.xml&quot;
+        ));
+<span class="nc" id="L295">    }</span>
+
+    @Override
+    public void updateCodegenPropertyEnum(CodegenProperty var) {
+<span class="nc" id="L299">        super.updateCodegenPropertyEnum(var);</span>
+<span class="nc bnc" id="L300" title="All 4 branches missed.">        if (var.isEnum &amp;&amp; var.example != null) {</span>
+<span class="nc" id="L301">            String example = var.example.replace(&quot;'&quot;, &quot;&quot;);</span>
+<span class="nc" id="L302">            example = toEnumVarName(example, var.dataType);</span>
+<span class="nc" id="L303">            var.example = toEnumDefaultValue(example, var.datatypeWithEnum);</span>
+        }
+<span class="nc" id="L305">    }</span>
+
+    private void generateAntSupportingFiles() {
+
+<span class="nc" id="L309">        supportingFiles.add(new SupportingFile(&quot;package.mustache&quot;, &quot;deploy&quot;, &quot;package.xml&quot;));</span>
+<span class="nc" id="L310">        supportingFiles.add(new SupportingFile(&quot;package.mustache&quot;, &quot;undeploy&quot;, &quot;destructiveChanges.xml&quot;));</span>
+<span class="nc" id="L311">        supportingFiles.add(new SupportingFile(&quot;build.mustache&quot;, &quot;build.xml&quot;));</span>
+<span class="nc" id="L312">        supportingFiles.add(new SupportingFile(&quot;build.properties&quot;, &quot;build.properties&quot;));</span>
+<span class="nc" id="L313">        supportingFiles.add(new SupportingFile(&quot;remove.package.mustache&quot;, &quot;undeploy&quot;, &quot;package.xml&quot;));</span>
+<span class="nc" id="L314">        supportingFiles.add(new SupportingFile(&quot;git_push.sh.mustache&quot;, &quot;&quot;, &quot;git_push.sh&quot;));</span>
+<span class="nc" id="L315">        supportingFiles.add(new SupportingFile(&quot;gitignore.mustache&quot;, &quot;&quot;, &quot;.gitignore&quot;));</span>
+
+<span class="nc" id="L317">        supportingFiles.add(new SupportingFile(&quot;README_ant.mustache&quot;, &quot;README.md&quot;)</span>
+<span class="nc" id="L318">                .doNotOverwrite());</span>
+
+<span class="nc" id="L320">    }</span>
+
+    private void generateSfdxSupportingFiles() {
+
+<span class="nc" id="L324">        supportingFiles.add(new SupportingFile(&quot;sfdx-project-scratch-def.json&quot;, sfdxConfigPath, &quot;project-scratch-def.json&quot;));</span>
+<span class="nc" id="L325">        supportingFiles.add(new SupportingFile(&quot;sfdx-project.json.mustache&quot;, &quot;sfdx-project.json&quot;));</span>
+
+<span class="nc" id="L327">        supportingFiles.add(new SupportingFile(&quot;README_sfdx.mustache&quot;, &quot;README.md&quot;)</span>
+<span class="nc" id="L328">                .doNotOverwrite());</span>
+
+<span class="nc" id="L330">    }</span>
+
+    @Override
+    public GeneratorLanguage generatorLanguage() {
+<span class="nc" id="L334">        return GeneratorLanguage.APEX;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

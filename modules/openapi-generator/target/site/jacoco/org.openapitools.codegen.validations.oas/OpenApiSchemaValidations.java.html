@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OpenApiSchemaValidations.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.validations.oas</a> &gt; <span class="el_source">OpenApiSchemaValidations.java</span></div><h1>OpenApiSchemaValidations.java</h1><pre class="source lang-java linenums">package org.openapitools.codegen.validations.oas;
+
+import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.Schema;
+
+import org.openapitools.codegen.utils.ModelUtils;
+import org.openapitools.codegen.utils.SemVer;
+import org.openapitools.codegen.validation.GenericValidator;
+import org.openapitools.codegen.validation.ValidationRule;
+
+import java.util.ArrayList;
+import java.util.Locale;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Arrays;
+
+/**
+ * A standalone instance for evaluating rules and recommendations related to OAS {@link Schema}
+ */
+class OpenApiSchemaValidations extends GenericValidator&lt;SchemaWrapper&gt; {
+    OpenApiSchemaValidations(RuleConfiguration ruleConfiguration) {
+<span class="nc" id="L22">        super(new ArrayList&lt;&gt;());</span>
+<span class="nc bnc" id="L23" title="All 2 branches missed.">        if (ruleConfiguration.isEnableRecommendations()) {</span>
+<span class="nc bnc" id="L24" title="All 2 branches missed.">            if (ruleConfiguration.isEnableOneOfWithPropertiesRecommendation()) {</span>
+<span class="nc" id="L25">                rules.add(ValidationRule.warn(</span>
+                        &quot;Schema defines properties alongside oneOf.&quot;,
+                        &quot;Schemas defining properties and oneOf are not clearly defined in the OpenAPI Specification. While our tooling supports this, it may cause issues with other tools.&quot;,
+                        OpenApiSchemaValidations::checkOneOfWithProperties
+                ));
+            }
+<span class="nc bnc" id="L31" title="All 2 branches missed.">            if (ruleConfiguration.isEnableSchemaTypeRecommendation()) {</span>
+<span class="nc" id="L32">                rules.add(ValidationRule.warn(</span>
+                        &quot;Schema uses the 'null' type but OAS document is version 3.0.&quot;,
+                        &quot;The 'null' type is not supported in OpenAPI 3.0.x. It is supported in OpenAPI 3.1 and above. While our tooling supports this, it may cause issues with other tools.&quot;,
+                        OpenApiSchemaValidations::checkNullType
+                ));
+            }
+<span class="nc bnc" id="L38" title="All 2 branches missed.">            if (ruleConfiguration.isEnableNullableAttributeRecommendation()) {</span>
+<span class="nc" id="L39">                rules.add(ValidationRule.warn(</span>
+                        &quot;Schema uses the 'nullable' attribute.&quot;,
+                        &quot;The 'nullable' attribute is deprecated in OpenAPI 3.1, and may no longer be supported in future releases. Consider migrating to the 'null' type.&quot;,
+                        OpenApiSchemaValidations::checkNullableAttribute
+                ));
+            }
+<span class="nc bnc" id="L45" title="All 2 branches missed.">            if (ruleConfiguration.isEnableInvalidTypeRecommendation()) {</span>
+<span class="nc" id="L46">                rules.add(ValidationRule.warn(</span>
+                        &quot;Schema uses an invalid value for the 'type' attribute.&quot;,
+                        &quot;The 'type' attribute must be one of 'null', 'boolean', 'object', 'array', 'number', 'string', or 'integer'.&quot;,
+                        OpenApiSchemaValidations::checkInvalidType
+                ));
+            }
+        }
+<span class="nc" id="L53">    }</span>
+
+    /**
+     * JSON Schema defines oneOf as a validation property which can be applied to any schema.
+     * &lt;p&gt;
+     * OpenAPI Specification is a variant of JSON Schema for which oneOf is defined as:
+     * &quot;Inline or referenced schema MUST be of a Schema Object and not a standard JSON Schema.&quot;
+     * &lt;p&gt;
+     * Where the only examples of oneOf in OpenAPI Specification are used to define either/or type structures rather than validations.
+     * Because of this ambiguity in the spec about what is non-standard about oneOf support, we'll warn as a recommendation that
+     * properties on the schema defining oneOf relationships may not be intentional in the OpenAPI Specification.
+     *
+     * @param schemaWrapper An input schema, regardless of the type of schema
+     * @return {@link ValidationRule.Pass} if the check succeeds, otherwise {@link ValidationRule.Fail}
+     */
+    private static ValidationRule.Result checkOneOfWithProperties(SchemaWrapper schemaWrapper) {
+<span class="nc" id="L69">        Schema schema = schemaWrapper.getSchema();</span>
+<span class="nc" id="L70">        ValidationRule.Result result = ValidationRule.Pass.empty();</span>
+
+<span class="nc bnc" id="L72" title="All 2 branches missed.">        if (ModelUtils.isComposedSchema(schema)) {</span>
+            // check for loosely defined oneOf extension requirements.
+            // This is a recommendation because the 3.0.x spec is not clear enough on usage of oneOf.
+            // see https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.9.2.1.3 and the OAS section on 'Composition and Inheritance'.
+<span class="nc bnc" id="L76" title="All 4 branches missed.">            if (schema.getOneOf() != null &amp;&amp; schema.getOneOf().size() &gt; 0) {</span>
+<span class="nc bnc" id="L77" title="All 6 branches missed.">                if (schema.getProperties() != null &amp;&amp; schema.getProperties().size() &gt;= 1 &amp;&amp; schema.getProperties().get(&quot;discriminator&quot;) == null) {</span>
+                    // not necessarily &quot;invalid&quot; here, but we trigger the recommendation which requires the method to return false.
+<span class="nc" id="L79">                    result = ValidationRule.Fail.empty();</span>
+                }
+            }
+        }
+<span class="nc" id="L83">        return result;</span>
+    }
+
+    /**
+     * JSON Schema specifies type: 'null'.
+     * &lt;p&gt;
+     * 'null' type is supported in OpenAPI Specification 3.1 and above. It is not supported in OpenAPI 3.0.x.
+     * Note: the validator invokes checkNullType() for every top-level schema in the OAS document. The method
+     * is not called for nested schemas that are defined inline.
+     *
+     * @param schemaWrapper An input schema, regardless of the type of schema.
+     * @return {@link ValidationRule.Pass} if the check succeeds, otherwise {@link ValidationRule.Fail}
+     */
+    private static ValidationRule.Result checkNullType(SchemaWrapper schemaWrapper) {
+<span class="nc" id="L97">        Schema schema = schemaWrapper.getSchema();</span>
+<span class="nc" id="L98">        ValidationRule.Result result = ValidationRule.Pass.empty();</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">        if (schemaWrapper.getOpenAPI() != null) {</span>
+<span class="nc" id="L100">            SemVer version = new SemVer(schemaWrapper.getOpenAPI().getOpenapi());</span>
+<span class="nc bnc" id="L101" title="All 4 branches missed.">            if (version.atLeast(&quot;3.0&quot;) &amp;&amp; version.compareTo(new SemVer(&quot;3.1&quot;)) &lt; 0) {</span>
+                // OAS spec is 3.0.x
+<span class="nc bnc" id="L103" title="All 2 branches missed.">                if (ModelUtils.isNullType(schema)) {</span>
+<span class="nc" id="L104">                    result = new ValidationRule.Fail();</span>
+<span class="nc" id="L105">                    String name = schema.getName();</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">                    if (name == null) {</span>
+<span class="nc" id="L107">                        name = schema.getTitle();</span>
+                    }
+<span class="nc" id="L109">                    result.setDetails(String.format(Locale.ROOT,</span>
+                        &quot;Schema '%s' uses a 'null' type, which is specified in OAS 3.1 and above, but OAS document is version %s&quot;,
+<span class="nc" id="L111">                        name, schemaWrapper.getOpenAPI().getOpenapi()));</span>
+<span class="nc" id="L112">                    return result;</span>
+                }
+            }
+        }
+<span class="nc" id="L116">        return result;</span>
+    }
+
+    /**
+     * JSON Schema uses the 'nullable' attribute.
+     * &lt;p&gt;
+     * The 'nullable' attribute is supported in OpenAPI Specification 3.0.x, but it is deprecated in OpenAPI 3.1 and above.
+     *
+     * @param schema An input schema, regardless of the type of schema
+     * @return {@link ValidationRule.Pass} if the check succeeds, otherwise {@link ValidationRule.Fail}
+     */
+    private static ValidationRule.Result checkNullableAttribute(SchemaWrapper schemaWrapper) {
+<span class="nc" id="L128">        Schema schema = schemaWrapper.getSchema();</span>
+<span class="nc" id="L129">        ValidationRule.Result result = ValidationRule.Pass.empty();</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">        if (schemaWrapper.getOpenAPI() != null) {</span>
+<span class="nc" id="L131">            SemVer version = new SemVer(schemaWrapper.getOpenAPI().getOpenapi());</span>
+<span class="nc bnc" id="L132" title="All 2 branches missed.">            if (version.atLeast(&quot;3.1&quot;)) {</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">                if (ModelUtils.isNullable(schema)) {</span>
+<span class="nc" id="L134">                    result = new ValidationRule.Fail();</span>
+<span class="nc" id="L135">                    String name = schema.getName();</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">                    if (name == null) {</span>
+<span class="nc" id="L137">                        name = schema.getTitle();</span>
+                    }
+<span class="nc" id="L139">                    result.setDetails(String.format(Locale.ROOT,</span>
+                        &quot;OAS document is version '%s'. Schema '%s' uses 'nullable' attribute, which has been deprecated in OAS 3.1.&quot;,
+<span class="nc" id="L141">                        schemaWrapper.getOpenAPI().getOpenapi(), name));</span>
+<span class="nc" id="L142">                    return result;</span>
+                }
+            }
+        }
+<span class="nc" id="L146">        return result;</span>
+    }
+
+    // The set of valid OAS values for the 'type' attribute.
+<span class="nc" id="L150">    private static Set&lt;String&gt; validTypes = new HashSet&lt;String&gt;(</span>
+<span class="nc" id="L151">        Arrays.asList(&quot;null&quot;, &quot;boolean&quot;, &quot;object&quot;, &quot;array&quot;, &quot;number&quot;, &quot;string&quot;, &quot;integer&quot;));</span>
+
+    /**
+     * Validate the OAS document uses supported values for the 'type' attribute.
+     * &lt;p&gt;
+     * The type must be one of the following values: null, boolean, object, array, number, string, integer.
+     *
+     * @param schema An input schema, regardless of the type of schema
+     * @return {@link ValidationRule.Pass} if the check succeeds, otherwise {@link ValidationRule.Fail}
+     */
+    private static ValidationRule.Result checkInvalidType(SchemaWrapper schemaWrapper) {
+<span class="nc" id="L162">        Schema schema = schemaWrapper.getSchema();</span>
+<span class="nc" id="L163">        ValidationRule.Result result = ValidationRule.Pass.empty();</span>
+<span class="nc bnc" id="L164" title="All 4 branches missed.">        if (schema.getType() != null &amp;&amp; !validTypes.contains(schema.getType())) {</span>
+<span class="nc" id="L165">            result = new ValidationRule.Fail();</span>
+<span class="nc" id="L166">            String name = schema.getName();</span>
+<span class="nc bnc" id="L167" title="All 2 branches missed.">            if (name == null) {</span>
+<span class="nc" id="L168">                name = schema.getTitle();</span>
+            }
+<span class="nc" id="L170">            result.setDetails(String.format(Locale.ROOT,</span>
+                &quot;Schema '%s' uses the '%s' type, which is not a valid type.&quot;,
+<span class="nc" id="L172">                name, schema.getType()));</span>
+<span class="nc" id="L173">            return result;</span>
+        }
+<span class="nc" id="L175">        return result;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

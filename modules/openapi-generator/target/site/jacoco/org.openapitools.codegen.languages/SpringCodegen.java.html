@@ -1,0 +1,1392 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SpringCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">SpringCodegen.java</span></div><h1>SpringCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.openapitools.codegen.utils.CamelizeOption.LOWERCASE_FIRST_LETTER;
+import static org.openapitools.codegen.utils.StringUtils.camelize;
+
+import com.samskivert.mustache.Mustache;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.servers.Server;
+import io.swagger.v3.oas.models.tags.Tag;
+import java.io.File;
+import java.net.URL;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.openapitools.codegen.CliOption;
+import org.openapitools.codegen.CodegenConstants;
+import org.openapitools.codegen.CodegenModel;
+import org.openapitools.codegen.CodegenOperation;
+import org.openapitools.codegen.CodegenParameter;
+import org.openapitools.codegen.CodegenProperty;
+import org.openapitools.codegen.CodegenResponse;
+import org.openapitools.codegen.CodegenSecurity;
+import org.openapitools.codegen.CodegenType;
+import org.openapitools.codegen.SupportingFile;
+import org.openapitools.codegen.VendorExtension;
+import org.openapitools.codegen.languages.features.BeanValidationFeatures;
+import org.openapitools.codegen.languages.features.DocumentationProviderFeatures;
+import org.openapitools.codegen.languages.features.OptionalFeatures;
+import org.openapitools.codegen.languages.features.PerformBeanValidationFeatures;
+import org.openapitools.codegen.languages.features.SwaggerUIFeatures;
+import org.openapitools.codegen.meta.features.DocumentationFeature;
+import org.openapitools.codegen.meta.features.GlobalFeature;
+import org.openapitools.codegen.meta.features.ParameterFeature;
+import org.openapitools.codegen.meta.features.SchemaSupportFeature;
+import org.openapitools.codegen.meta.features.SecurityFeature;
+import org.openapitools.codegen.meta.features.WireFormatFeature;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.templating.mustache.SplitStringLambda;
+import org.openapitools.codegen.templating.mustache.SpringHttpStatusLambda;
+import org.openapitools.codegen.templating.mustache.TrimWhitespaceLambda;
+import org.openapitools.codegen.utils.ProcessUtils;
+import org.openapitools.codegen.utils.URLPathUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class SpringCodegen extends AbstractJavaCodegen
+        implements BeanValidationFeatures, PerformBeanValidationFeatures, OptionalFeatures, SwaggerUIFeatures {
+<span class="fc" id="L78">    private final Logger LOGGER = LoggerFactory.getLogger(SpringCodegen.class);</span>
+    public static final String TITLE = &quot;title&quot;;
+    public static final String SERVER_PORT = &quot;serverPort&quot;;
+    public static final String CONFIG_PACKAGE = &quot;configPackage&quot;;
+    public static final String BASE_PACKAGE = &quot;basePackage&quot;;
+    public static final String INTERFACE_ONLY = &quot;interfaceOnly&quot;;
+    public static final String USE_FEIGN_CLIENT_URL = &quot;useFeignClientUrl&quot;;
+    public static final String USE_FEIGN_CLIENT = &quot;useFeignClient&quot;;
+    public static final String DELEGATE_PATTERN = &quot;delegatePattern&quot;;
+    public static final String SINGLE_CONTENT_TYPES = &quot;singleContentTypes&quot;;
+    public static final String VIRTUAL_SERVICE = &quot;virtualService&quot;;
+    public static final String SKIP_DEFAULT_INTERFACE = &quot;skipDefaultInterface&quot;;
+    public static final String GENERATE_CONSTRUCTOR_WITH_REQUIRED_ARGS = &quot;generatedConstructorWithRequiredArgs&quot;;
+
+    public static final String RESOURCE_FOLDER = &quot;resourceFolder&quot;;
+    public static final String RESOURCE_FOLDER_DESC = &quot;resource folder for generated resources&quot;;
+
+    public static final String ASYNC = &quot;async&quot;;
+    public static final String REACTIVE = &quot;reactive&quot;;
+    public static final String SSE = &quot;serverSentEvents&quot;;
+    public static final String RESPONSE_WRAPPER = &quot;responseWrapper&quot;;
+    public static final String USE_TAGS = &quot;useTags&quot;;
+    public static final String SPRING_BOOT = &quot;spring-boot&quot;;
+    public static final String SPRING_CLOUD_LIBRARY = &quot;spring-cloud&quot;;
+    public static final String SPRING_HTTP_INTERFACE = &quot;spring-http-interface&quot;;
+    public static final String API_FIRST = &quot;apiFirst&quot;;
+    public static final String SPRING_CONTROLLER = &quot;useSpringController&quot;;
+    public static final String HATEOAS = &quot;hateoas&quot;;
+    public static final String RETURN_SUCCESS_CODE = &quot;returnSuccessCode&quot;;
+    public static final String UNHANDLED_EXCEPTION_HANDLING = &quot;unhandledException&quot;;
+    public static final String USE_RESPONSE_ENTITY = &quot;useResponseEntity&quot;;
+    public static final String USE_ENUM_CASE_INSENSITIVE = &quot;useEnumCaseInsensitive&quot;;
+    public static final String USE_SPRING_BOOT3 = &quot;useSpringBoot3&quot;;
+    public static final String REQUEST_MAPPING_OPTION = &quot;requestMappingMode&quot;;
+    public static final String USE_REQUEST_MAPPING_ON_CONTROLLER = &quot;useRequestMappingOnController&quot;;
+    public static final String USE_REQUEST_MAPPING_ON_INTERFACE = &quot;useRequestMappingOnInterface&quot;;
+
+<span class="fc" id="L115">    public enum RequestMappingMode {</span>
+<span class="fc" id="L116">        api_interface(&quot;Generate the @RequestMapping annotation on the generated Api Interface.&quot;),</span>
+<span class="fc" id="L117">        controller(&quot;Generate the @RequestMapping annotation on the generated Api Controller Implementation.&quot;),</span>
+<span class="fc" id="L118">        none(&quot;Do not add a class level @RequestMapping annotation.&quot;);</span>
+
+        public String getDescription() {
+<span class="fc" id="L121">            return description;</span>
+        }
+
+        private String description;
+
+<span class="fc" id="L126">        RequestMappingMode(String description) {</span>
+<span class="fc" id="L127">            this.description = description;</span>
+<span class="fc" id="L128">        }</span>
+    }
+
+    public static final String OPEN_BRACE = &quot;{&quot;;
+    public static final String CLOSE_BRACE = &quot;}&quot;;
+
+<span class="fc" id="L134">    protected String title = &quot;OpenAPI Spring&quot;;</span>
+<span class="fc" id="L135">    protected String configPackage = &quot;org.openapitools.configuration&quot;;</span>
+<span class="fc" id="L136">    protected String basePackage = &quot;org.openapitools&quot;;</span>
+<span class="fc" id="L137">    protected String resourceFolder = projectFolder + &quot;/resources&quot;;</span>
+
+<span class="fc" id="L139">    protected boolean interfaceOnly = false;</span>
+<span class="fc" id="L140">    protected boolean useFeignClientUrl = true;</span>
+<span class="fc" id="L141">    protected boolean delegatePattern = false;</span>
+<span class="fc" id="L142">    protected boolean delegateMethod = false;</span>
+<span class="fc" id="L143">    protected boolean singleContentTypes = false;</span>
+<span class="fc" id="L144">    protected boolean async = false;</span>
+<span class="fc" id="L145">    protected boolean reactive = false;</span>
+<span class="fc" id="L146">    protected boolean sse = false;</span>
+<span class="fc" id="L147">    protected String responseWrapper = &quot;&quot;;</span>
+<span class="fc" id="L148">    protected boolean skipDefaultInterface = false;</span>
+<span class="fc" id="L149">    protected boolean useTags = false;</span>
+<span class="fc" id="L150">    protected boolean useBeanValidation = true;</span>
+<span class="fc" id="L151">    protected boolean performBeanValidation = false;</span>
+<span class="fc" id="L152">    protected boolean apiFirst = false;</span>
+<span class="fc" id="L153">    protected boolean useOptional = false;</span>
+<span class="fc" id="L154">    protected boolean virtualService = false;</span>
+<span class="fc" id="L155">    protected boolean hateoas = false;</span>
+<span class="fc" id="L156">    protected boolean returnSuccessCode = false;</span>
+<span class="fc" id="L157">    protected boolean unhandledException = false;</span>
+<span class="fc" id="L158">    protected boolean useSpringController = false;</span>
+<span class="fc" id="L159">    protected boolean useSwaggerUI = true;</span>
+<span class="fc" id="L160">    protected boolean useResponseEntity = true;</span>
+<span class="fc" id="L161">    protected boolean useEnumCaseInsensitive = false;</span>
+<span class="fc" id="L162">    protected boolean useSpringBoot3 = false;</span>
+<span class="fc" id="L163">    protected boolean generatedConstructorWithRequiredArgs = true;</span>
+<span class="fc" id="L164">    protected RequestMappingMode requestMappingMode = RequestMappingMode.controller;</span>
+
+    public SpringCodegen() {
+<span class="fc" id="L167">        super();</span>
+
+<span class="fc" id="L169">        modifyFeatureSet(features -&gt; features.includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="fc" id="L170">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON, WireFormatFeature.XML, WireFormatFeature.Custom))</span>
+<span class="fc" id="L171">                .securityFeatures(EnumSet.of(SecurityFeature.OAuth2_Implicit, SecurityFeature.OAuth2_AuthorizationCode,</span>
+                        SecurityFeature.OAuth2_ClientCredentials, SecurityFeature.OAuth2_Password,
+                        SecurityFeature.ApiKey, SecurityFeature.BasicAuth))
+<span class="fc" id="L174">                .excludeGlobalFeatures(GlobalFeature.Callbacks, GlobalFeature.LinkObjects,</span>
+                        GlobalFeature.ParameterStyling)
+<span class="fc" id="L176">                .includeGlobalFeatures(GlobalFeature.XMLStructureDefinitions)</span>
+<span class="fc" id="L177">                .includeSchemaSupportFeatures(SchemaSupportFeature.Polymorphism)</span>
+<span class="fc" id="L178">                .excludeParameterFeatures(ParameterFeature.Cookie));</span>
+
+<span class="fc" id="L180">        outputFolder = &quot;generated-code/javaSpring&quot;;</span>
+<span class="fc" id="L181">        embeddedTemplateDir = templateDir = &quot;JavaSpring&quot;;</span>
+<span class="fc" id="L182">        apiPackage = &quot;org.openapitools.api&quot;;</span>
+<span class="fc" id="L183">        modelPackage = &quot;org.openapitools.model&quot;;</span>
+<span class="fc" id="L184">        invokerPackage = &quot;org.openapitools.api&quot;;</span>
+<span class="fc" id="L185">        artifactId = &quot;openapi-spring&quot;;</span>
+
+        // clioOptions default redefinition need to be updated
+<span class="fc" id="L188">        updateOption(CodegenConstants.INVOKER_PACKAGE, this.getInvokerPackage());</span>
+<span class="fc" id="L189">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
+<span class="fc" id="L190">        updateOption(CodegenConstants.API_PACKAGE, apiPackage);</span>
+<span class="fc" id="L191">        updateOption(CodegenConstants.MODEL_PACKAGE, modelPackage);</span>
+
+<span class="fc" id="L193">        apiTestTemplateFiles.clear(); // TODO: add test template</span>
+
+        // spring uses the jackson lib
+<span class="fc" id="L196">        additionalProperties.put(JACKSON, &quot;true&quot;);</span>
+<span class="fc" id="L197">        additionalProperties.put(&quot;openbrace&quot;, OPEN_BRACE);</span>
+<span class="fc" id="L198">        additionalProperties.put(&quot;closebrace&quot;, CLOSE_BRACE);</span>
+
+<span class="fc" id="L200">        cliOptions.add(new CliOption(TITLE, &quot;server title name or client service name&quot;).defaultValue(title));</span>
+<span class="fc" id="L201">        cliOptions.add(new CliOption(CONFIG_PACKAGE, &quot;configuration package for generated code&quot;)</span>
+<span class="fc" id="L202">                .defaultValue(this.getConfigPackage()));</span>
+<span class="fc" id="L203">        cliOptions.add(new CliOption(BASE_PACKAGE, &quot;base package (invokerPackage) for generated code&quot;)</span>
+<span class="fc" id="L204">                .defaultValue(this.getBasePackage()));</span>
+<span class="fc" id="L205">        cliOptions.add(CliOption.newBoolean(INTERFACE_ONLY,</span>
+                &quot;Whether to generate only API interface stubs without the server files.&quot;, interfaceOnly));
+<span class="fc" id="L207">        cliOptions.add(CliOption.newBoolean(USE_FEIGN_CLIENT_URL,</span>
+                &quot;Whether to generate Feign client with url parameter.&quot;, useFeignClientUrl));
+<span class="fc" id="L209">        cliOptions.add(CliOption.newBoolean(DELEGATE_PATTERN,</span>
+                &quot;Whether to generate the server files using the delegate pattern&quot;, delegatePattern));
+<span class="fc" id="L211">        cliOptions.add(CliOption.newBoolean(SINGLE_CONTENT_TYPES,</span>
+                &quot;Whether to select only one produces/consumes content-type by operation.&quot;, singleContentTypes));
+<span class="fc" id="L213">        cliOptions.add(CliOption.newBoolean(SKIP_DEFAULT_INTERFACE,</span>
+                &quot;Whether to skip generation of default implementations for java8 interfaces&quot;, skipDefaultInterface));
+<span class="fc" id="L215">        cliOptions.add(CliOption.newBoolean(ASYNC, &quot;use async Callable controllers&quot;, async));</span>
+<span class="fc" id="L216">        cliOptions.add(CliOption.newBoolean(REACTIVE, &quot;wrap responses in Mono/Flux Reactor types (spring-boot only)&quot;,</span>
+                reactive));
+<span class="fc" id="L218">        cliOptions.add(new CliOption(RESPONSE_WRAPPER,</span>
+                &quot;wrap the responses in given type (Future, Callable, CompletableFuture,ListenableFuture, DeferredResult, RxObservable, RxSingle or fully qualified type)&quot;));
+<span class="fc" id="L220">        cliOptions.add(CliOption.newBoolean(VIRTUAL_SERVICE,</span>
+                &quot;Generates the virtual service. For more details refer - https://github.com/virtualansoftware/virtualan/wiki&quot;));
+<span class="fc" id="L222">        cliOptions.add(</span>
+<span class="fc" id="L223">                CliOption.newBoolean(USE_TAGS, &quot;use tags for creating interface and controller classnames&quot;, useTags));</span>
+<span class="fc" id="L224">        cliOptions</span>
+<span class="fc" id="L225">                .add(CliOption.newBoolean(USE_BEANVALIDATION, &quot;Use BeanValidation API annotations&quot;, useBeanValidation));</span>
+<span class="fc" id="L226">        cliOptions.add(CliOption.newBoolean(PERFORM_BEANVALIDATION,</span>
+                &quot;Use Bean Validation Impl. to perform BeanValidation&quot;, performBeanValidation));
+<span class="fc" id="L228">        cliOptions.add(CliOption.newBoolean(API_FIRST,</span>
+                &quot;Generate the API from the OAI spec at server compile time (API first approach)&quot;, apiFirst));
+<span class="fc" id="L230">        cliOptions</span>
+<span class="fc" id="L231">                .add(CliOption.newBoolean(USE_OPTIONAL, &quot;Use Optional container for optional parameters&quot;, useOptional));</span>
+<span class="fc" id="L232">        cliOptions.add(</span>
+<span class="fc" id="L233">                CliOption.newBoolean(HATEOAS, &quot;Use Spring HATEOAS library to allow adding HATEOAS links&quot;, hateoas));</span>
+<span class="fc" id="L234">        cliOptions</span>
+<span class="fc" id="L235">                .add(CliOption.newBoolean(RETURN_SUCCESS_CODE, &quot;Generated server returns 2xx code&quot;, returnSuccessCode));</span>
+<span class="fc" id="L236">        cliOptions.add(CliOption.newBoolean(SPRING_CONTROLLER, &quot;Annotate the generated API as a Spring Controller&quot;, useSpringController));</span>
+
+<span class="fc" id="L238">        CliOption requestMappingOpt = new CliOption(REQUEST_MAPPING_OPTION,</span>
+            &quot;Where to generate the class level @RequestMapping annotation.&quot;)
+<span class="fc" id="L240">            .defaultValue(requestMappingMode.name());</span>
+<span class="fc bfc" id="L241" title="All 2 branches covered.">        for (RequestMappingMode mode: RequestMappingMode.values()) {</span>
+<span class="fc" id="L242">            requestMappingOpt.addEnum(mode.name(), mode.getDescription());</span>
+        }
+<span class="fc" id="L244">        cliOptions.add(requestMappingOpt);</span>
+
+<span class="fc" id="L246">        cliOptions.add(CliOption.newBoolean(UNHANDLED_EXCEPTION_HANDLING,</span>
+                &quot;Declare operation methods to throw a generic exception and allow unhandled exceptions (useful for Spring `@ControllerAdvice` directives).&quot;,
+                unhandledException));
+<span class="fc" id="L249">        cliOptions.add(CliOption.newBoolean(USE_SWAGGER_UI,</span>
+            &quot;Open the OpenApi specification in swagger-ui. Will also import and configure needed dependencies&quot;,
+            useSwaggerUI));
+<span class="fc" id="L252">        cliOptions.add(CliOption.newBoolean(USE_RESPONSE_ENTITY,</span>
+                &quot;Use the `ResponseEntity` type to wrap return values of generated API methods. &quot;
+                    + &quot;If disabled, method are annotated using a `@ResponseStatus` annotation, which has the status of the first response declared in the Api definition&quot;,
+                useResponseEntity));
+<span class="fc" id="L256">        cliOptions.add(CliOption.newBoolean(USE_ENUM_CASE_INSENSITIVE,</span>
+                &quot;Use `equalsIgnoreCase` when String for enum comparison&quot;,
+                useEnumCaseInsensitive));
+<span class="fc" id="L259">        cliOptions.add(CliOption.newBoolean(USE_SPRING_BOOT3,</span>
+            &quot;Generate code and provide dependencies for use with Spring Boot 3.x. (Use jakarta instead of javax in imports). Enabling this option will also enable `useJakartaEe`.&quot;,
+            useSpringBoot3));
+<span class="fc" id="L262">        cliOptions.add(CliOption.newBoolean(GENERATE_CONSTRUCTOR_WITH_REQUIRED_ARGS,</span>
+            &quot;Whether to generate constructors with required args for models&quot;,
+            generatedConstructorWithRequiredArgs));
+<span class="fc" id="L265">        cliOptions.add(new CliOption(RESOURCE_FOLDER, RESOURCE_FOLDER_DESC).defaultValue(this.getResourceFolder()));</span>
+
+<span class="fc" id="L267">        supportedLibraries.put(SPRING_BOOT, &quot;Spring-boot Server application.&quot;);</span>
+<span class="fc" id="L268">        supportedLibraries.put(SPRING_CLOUD_LIBRARY,</span>
+            &quot;Spring-Cloud-Feign client with Spring-Boot auto-configured settings.&quot;);
+<span class="fc" id="L270">        supportedLibraries.put(SPRING_HTTP_INTERFACE, &quot;Spring 6 HTTP interfaces (testing)&quot;);</span>
+<span class="fc" id="L271">        setLibrary(SPRING_BOOT);</span>
+<span class="fc" id="L272">        final CliOption library = new CliOption(CodegenConstants.LIBRARY, CodegenConstants.LIBRARY_DESC)</span>
+<span class="fc" id="L273">                .defaultValue(SPRING_BOOT);</span>
+<span class="fc" id="L274">        library.setEnum(supportedLibraries);</span>
+<span class="fc" id="L275">        cliOptions.add(library);</span>
+
+<span class="fc" id="L277">    }</span>
+
+    @Override
+    public CodegenType getTag() {
+<span class="nc" id="L281">        return CodegenType.SERVER;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L286">        return &quot;spring&quot;;</span>
+    }
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L291">        return &quot;Generates a Java SpringBoot Server application using the SpringDoc integration.&quot;;</span>
+    }
+
+    @Override
+    public DocumentationProvider defaultDocumentationProvider() {
+<span class="pc bpc" id="L296" title="1 of 2 branches missed.">        return isLibrary(SPRING_HTTP_INTERFACE) ? null : DocumentationProvider.SPRINGDOC;</span>
+    }
+
+    public List&lt;DocumentationProvider&gt; supportedDocumentationProvider() {
+<span class="fc" id="L300">        List&lt;DocumentationProvider&gt; supportedProviders = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L301">        supportedProviders.add(DocumentationProvider.NONE);</span>
+<span class="fc" id="L302">        supportedProviders.add(DocumentationProvider.SOURCE);</span>
+<span class="fc" id="L303">        supportedProviders.add(DocumentationProvider.SPRINGFOX);</span>
+<span class="fc" id="L304">        supportedProviders.add(DocumentationProvider.SPRINGDOC);</span>
+<span class="fc" id="L305">        return supportedProviders;</span>
+    }
+
+    @Override
+    public List&lt;AnnotationLibrary&gt; supportedAnnotationLibraries() {
+<span class="fc" id="L310">        List&lt;AnnotationLibrary&gt; supportedLibraries = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L311">        supportedLibraries.add(AnnotationLibrary.NONE);</span>
+<span class="fc" id="L312">        supportedLibraries.add(AnnotationLibrary.SWAGGER1);</span>
+<span class="fc" id="L313">        supportedLibraries.add(AnnotationLibrary.SWAGGER2);</span>
+<span class="fc" id="L314">        return supportedLibraries;</span>
+    }
+
+    /**
+     * Whether the selected {@link DocumentationProviderFeatures.DocumentationProvider} requires us to bootstrap and
+     * configure swagger-ui by ourselves. Springdoc, for example ships its own swagger-ui integration.
+     *
+     * @return true if the selected DocumentationProvider requires us to bootstrap swagger-ui.
+     */
+    private boolean selectedDocumentationProviderRequiresSwaggerUiBootstrap() {
+<span class="nc bnc" id="L324" title="All 4 branches missed.">        return getDocumentationProvider().equals(DocumentationProvider.SPRINGFOX) || getDocumentationProvider().equals(DocumentationProvider.SOURCE);</span>
+    }
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L329">        final List&lt;Pair&lt;String, String&gt;&gt; configOptions = additionalProperties.entrySet().stream()</span>
+<span class="nc bnc" id="L330" title="All 2 branches missed.">                .filter(e -&gt; !Arrays.asList(API_FIRST, &quot;hideGenerationTimestamp&quot;).contains(e.getKey()))</span>
+<span class="nc" id="L331">                .filter(e -&gt; cliOptions.stream().map(CliOption::getOpt).anyMatch(opt -&gt; opt.equals(e.getKey())))</span>
+<span class="nc" id="L332">                .map(e -&gt; Pair.of(e.getKey(), e.getValue().toString())).collect(Collectors.toList());</span>
+<span class="nc" id="L333">        additionalProperties.put(&quot;configOptions&quot;, configOptions);</span>
+
+        // TODO remove &quot;file&quot; from reserved word list as feign client doesn't support using `baseName`
+        // as the parameter name yet
+<span class="nc" id="L337">        reservedWords.remove(&quot;file&quot;);</span>
+
+        // Process java8 option before common java ones to change the default
+        // dateLibrary to java8.
+<span class="nc" id="L341">        LOGGER.info(&quot;----------------------------------&quot;);</span>
+<span class="nc bnc" id="L342" title="All 2 branches missed.">        if (!additionalProperties.containsKey(DATE_LIBRARY)) {</span>
+<span class="nc" id="L343">            setDateLibrary(&quot;java8&quot;);</span>
+        }
+
+<span class="nc bnc" id="L346" title="All 2 branches missed.">        if (!additionalProperties.containsKey(BASE_PACKAGE)</span>
+<span class="nc bnc" id="L347" title="All 2 branches missed.">                &amp;&amp; additionalProperties.containsKey(CodegenConstants.INVOKER_PACKAGE)) {</span>
+            // set invokerPackage as basePackage:
+<span class="nc" id="L349">            this.setBasePackage((String) additionalProperties.get(CodegenConstants.INVOKER_PACKAGE));</span>
+<span class="nc" id="L350">            additionalProperties.put(BASE_PACKAGE, basePackage);</span>
+<span class="nc" id="L351">            LOGGER.info(&quot;Set base package to invoker package ({})&quot;, basePackage);</span>
+        }
+
+<span class="nc bnc" id="L354" title="All 2 branches missed.">        if (additionalProperties.containsKey(REQUEST_MAPPING_OPTION)) {</span>
+<span class="nc" id="L355">            RequestMappingMode optValue = RequestMappingMode.valueOf(</span>
+<span class="nc" id="L356">                String.valueOf(additionalProperties.get(REQUEST_MAPPING_OPTION)));</span>
+<span class="nc" id="L357">            setRequestMappingMode(optValue);</span>
+<span class="nc" id="L358">            additionalProperties.remove(REQUEST_MAPPING_OPTION);</span>
+        }
+
+<span class="nc" id="L361">        useOneOfInterfaces = true;</span>
+<span class="nc" id="L362">        legacyDiscriminatorBehavior = false;</span>
+
+        // Please refrain from updating values of Config Options after super.ProcessOpts() is called
+<span class="nc" id="L365">        super.processOpts();</span>
+
+<span class="nc bnc" id="L367" title="All 2 branches missed.">        if (SPRING_HTTP_INTERFACE.equals(library)) {</span>
+<span class="nc" id="L368">            documentationProvider = DocumentationProvider.NONE;</span>
+<span class="nc" id="L369">            annotationLibrary = AnnotationLibrary.NONE;</span>
+<span class="nc" id="L370">            useJakartaEe=true;</span>
+<span class="nc" id="L371">            useBeanValidation = false;</span>
+<span class="nc" id="L372">            performBeanValidation = false;</span>
+
+<span class="nc" id="L374">            additionalProperties.put(USE_JAKARTA_EE, useJakartaEe);</span>
+<span class="nc" id="L375">            additionalProperties.put(USE_BEANVALIDATION, useBeanValidation);</span>
+<span class="nc" id="L376">            additionalProperties.put(PERFORM_BEANVALIDATION, performBeanValidation);</span>
+<span class="nc" id="L377">            additionalProperties.put(DOCUMENTATION_PROVIDER, documentationProvider.toCliOptValue());</span>
+<span class="nc" id="L378">            additionalProperties.put(documentationProvider.getPropertyName(), true);</span>
+<span class="nc" id="L379">            additionalProperties.put(ANNOTATION_LIBRARY, annotationLibrary.toCliOptValue());</span>
+<span class="nc" id="L380">            additionalProperties.put(annotationLibrary.getPropertyName(), true);</span>
+
+<span class="nc" id="L382">            applyJakartaPackage();</span>
+
+<span class="nc" id="L384">            LOGGER.warn(&quot;For Spring HTTP Interface following options are disabled: documentProvider, annotationLibrary, useBeanValidation, performBeanValidation. &quot;</span>
+                + &quot;useJakartaEe defaulted to 'true'&quot;);
+        }
+
+<span class="nc bnc" id="L388" title="All 2 branches missed.">        if (DocumentationProvider.SPRINGFOX.equals(getDocumentationProvider())) {</span>
+<span class="nc" id="L389">            LOGGER.warn(&quot;The springfox documentation provider is deprecated for removal. Use the springdoc provider instead.&quot;);</span>
+        }
+
+        // clear model and api doc template as this codegen
+        // does not support auto-generated markdown doc at the moment
+        // TODO: add doc templates
+<span class="nc" id="L395">        modelDocTemplateFiles.remove(&quot;model_doc.mustache&quot;);</span>
+<span class="nc" id="L396">        apiDocTemplateFiles.remove(&quot;api_doc.mustache&quot;);</span>
+
+<span class="nc bnc" id="L398" title="All 2 branches missed.">        if (additionalProperties.containsKey(TITLE)) {</span>
+<span class="nc" id="L399">            this.setTitle((String) additionalProperties.get(TITLE));</span>
+        }
+
+<span class="nc bnc" id="L402" title="All 2 branches missed.">        if (additionalProperties.containsKey(CONFIG_PACKAGE)) {</span>
+<span class="nc" id="L403">            this.setConfigPackage((String) additionalProperties.get(CONFIG_PACKAGE));</span>
+        } else {
+<span class="nc" id="L405">            additionalProperties.put(CONFIG_PACKAGE, configPackage);</span>
+        }
+
+<span class="nc bnc" id="L408" title="All 2 branches missed.">        if (additionalProperties.containsKey(BASE_PACKAGE)) {</span>
+<span class="nc" id="L409">            this.setBasePackage((String) additionalProperties.get(BASE_PACKAGE));</span>
+        } else {
+<span class="nc" id="L411">            additionalProperties.put(BASE_PACKAGE, basePackage);</span>
+        }
+
+<span class="nc bnc" id="L414" title="All 2 branches missed.">        if (additionalProperties.containsKey(VIRTUAL_SERVICE)) {</span>
+<span class="nc" id="L415">            this.setVirtualService(Boolean.parseBoolean(additionalProperties.get(VIRTUAL_SERVICE).toString()));</span>
+        }
+
+<span class="nc bnc" id="L418" title="All 2 branches missed.">        if (additionalProperties.containsKey(INTERFACE_ONLY)) {</span>
+<span class="nc" id="L419">            this.setInterfaceOnly(Boolean.parseBoolean(additionalProperties.get(INTERFACE_ONLY).toString()));</span>
+        }
+
+<span class="nc bnc" id="L422" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_FEIGN_CLIENT_URL)) {</span>
+<span class="nc" id="L423">            this.setUseFeignClientUrl(Boolean.parseBoolean(additionalProperties.get(USE_FEIGN_CLIENT_URL).toString()));</span>
+        }
+<span class="nc" id="L425">        writePropertyBack(USE_FEIGN_CLIENT_URL, useFeignClientUrl);</span>
+
+<span class="nc bnc" id="L427" title="All 2 branches missed.">        if (additionalProperties.containsKey(DELEGATE_PATTERN)) {</span>
+<span class="nc" id="L428">            this.setDelegatePattern(Boolean.parseBoolean(additionalProperties.get(DELEGATE_PATTERN).toString()));</span>
+        }
+
+<span class="nc bnc" id="L431" title="All 2 branches missed.">        if (additionalProperties.containsKey(SINGLE_CONTENT_TYPES)) {</span>
+<span class="nc" id="L432">            this.setSingleContentTypes(Boolean.parseBoolean(additionalProperties.get(SINGLE_CONTENT_TYPES).toString()));</span>
+        }
+
+<span class="nc bnc" id="L435" title="All 2 branches missed.">        if (additionalProperties.containsKey(SKIP_DEFAULT_INTERFACE)) {</span>
+<span class="nc" id="L436">            this.setSkipDefaultInterface(</span>
+<span class="nc" id="L437">                    Boolean.parseBoolean(additionalProperties.get(SKIP_DEFAULT_INTERFACE).toString()));</span>
+        }
+
+<span class="nc bnc" id="L440" title="All 2 branches missed.">        if (additionalProperties.containsKey(ASYNC)) {</span>
+<span class="nc" id="L441">            this.setAsync(Boolean.parseBoolean(additionalProperties.get(ASYNC).toString()));</span>
+            // fix for issue/1164
+<span class="nc" id="L443">            convertPropertyToBooleanAndWriteBack(ASYNC);</span>
+        }
+
+<span class="nc bnc" id="L446" title="All 2 branches missed.">        if (additionalProperties.containsKey(REACTIVE)) {</span>
+<span class="nc bnc" id="L447" title="All 2 branches missed.">            if (SPRING_CLOUD_LIBRARY.equals(library)) {</span>
+<span class="nc" id="L448">                throw new IllegalArgumentException(&quot;Currently, reactive option doesn't supported by Spring Cloud&quot;);</span>
+            }
+<span class="nc" id="L450">            this.setReactive(Boolean.parseBoolean(additionalProperties.get(REACTIVE).toString()));</span>
+<span class="nc bnc" id="L451" title="All 2 branches missed.">            if (additionalProperties.containsKey(SSE)) {</span>
+<span class="nc" id="L452">                this.setSse(Boolean.parseBoolean(additionalProperties.get(SSE).toString()));</span>
+            }
+        }
+
+<span class="nc bnc" id="L456" title="All 2 branches missed.">        if (additionalProperties.containsKey(RESPONSE_WRAPPER)) {</span>
+<span class="nc" id="L457">            this.setResponseWrapper((String) additionalProperties.get(RESPONSE_WRAPPER));</span>
+        }
+
+<span class="nc bnc" id="L460" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_TAGS)) {</span>
+<span class="nc" id="L461">            this.setUseTags(Boolean.parseBoolean(additionalProperties.get(USE_TAGS).toString()));</span>
+        }
+
+<span class="nc bnc" id="L464" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_BEANVALIDATION)) {</span>
+<span class="nc" id="L465">            this.setUseBeanValidation(convertPropertyToBoolean(USE_BEANVALIDATION));</span>
+        }
+<span class="nc" id="L467">        writePropertyBack(USE_BEANVALIDATION, useBeanValidation);</span>
+
+<span class="nc bnc" id="L469" title="All 2 branches missed.">        if (additionalProperties.containsKey(PERFORM_BEANVALIDATION)) {</span>
+<span class="nc" id="L470">            this.setPerformBeanValidation(convertPropertyToBoolean(PERFORM_BEANVALIDATION));</span>
+        }
+<span class="nc" id="L472">        writePropertyBack(PERFORM_BEANVALIDATION, performBeanValidation);</span>
+
+<span class="nc bnc" id="L474" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_OPTIONAL)) {</span>
+<span class="nc" id="L475">            this.setUseOptional(convertPropertyToBoolean(USE_OPTIONAL));</span>
+        }
+
+<span class="nc bnc" id="L478" title="All 2 branches missed.">        if (additionalProperties.containsKey(API_FIRST)) {</span>
+<span class="nc" id="L479">            this.setApiFirst(Boolean.parseBoolean(additionalProperties.get(API_FIRST).toString()));</span>
+        }
+
+<span class="nc bnc" id="L482" title="All 2 branches missed.">        if (additionalProperties.containsKey(HATEOAS)) {</span>
+<span class="nc" id="L483">            this.setHateoas(Boolean.parseBoolean(additionalProperties.get(HATEOAS).toString()));</span>
+        }
+
+<span class="nc bnc" id="L486" title="All 2 branches missed.">        if (additionalProperties.containsKey(SPRING_CONTROLLER)) {</span>
+<span class="nc" id="L487">            this.setUseSpringController(convertPropertyToBoolean(SPRING_CONTROLLER));</span>
+        }
+<span class="nc" id="L489">        writePropertyBack(SPRING_CONTROLLER, useSpringController);</span>
+
+<span class="nc bnc" id="L491" title="All 2 branches missed.">        if (additionalProperties.containsKey(GENERATE_CONSTRUCTOR_WITH_REQUIRED_ARGS)) {</span>
+<span class="nc" id="L492">            this.generatedConstructorWithRequiredArgs = convertPropertyToBoolean(GENERATE_CONSTRUCTOR_WITH_REQUIRED_ARGS);</span>
+        }
+<span class="nc" id="L494">        writePropertyBack(GENERATE_CONSTRUCTOR_WITH_REQUIRED_ARGS, generatedConstructorWithRequiredArgs);</span>
+
+<span class="nc bnc" id="L496" title="All 2 branches missed.">        if (additionalProperties.containsKey(RETURN_SUCCESS_CODE)) {</span>
+<span class="nc" id="L497">            this.setReturnSuccessCode(Boolean.parseBoolean(additionalProperties.get(RETURN_SUCCESS_CODE).toString()));</span>
+        }
+
+<span class="nc bnc" id="L500" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_SWAGGER_UI)) {</span>
+<span class="nc" id="L501">            this.setUseSwaggerUI(convertPropertyToBoolean(USE_SWAGGER_UI));</span>
+        }
+
+<span class="nc bnc" id="L504" title="All 2 branches missed.">        if (getDocumentationProvider().equals(DocumentationProvider.NONE)) {</span>
+<span class="nc" id="L505">            this.setUseSwaggerUI(false);</span>
+        }
+
+<span class="nc" id="L508">        writePropertyBack(USE_SWAGGER_UI, useSwaggerUI);</span>
+
+<span class="nc bnc" id="L510" title="All 2 branches missed.">        if (additionalProperties.containsKey(UNHANDLED_EXCEPTION_HANDLING)) {</span>
+<span class="nc" id="L511">            this.setUnhandledException(</span>
+<span class="nc" id="L512">                    Boolean.parseBoolean(additionalProperties.get(UNHANDLED_EXCEPTION_HANDLING).toString()));</span>
+        }
+<span class="nc" id="L514">        additionalProperties.put(UNHANDLED_EXCEPTION_HANDLING, this.isUnhandledException());</span>
+
+<span class="nc bnc" id="L516" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_RESPONSE_ENTITY)) {</span>
+<span class="nc" id="L517">            this.setUseResponseEntity(</span>
+<span class="nc" id="L518">                    Boolean.parseBoolean(additionalProperties.get(USE_RESPONSE_ENTITY).toString()));</span>
+        }
+<span class="nc" id="L520">        writePropertyBack(USE_RESPONSE_ENTITY, useResponseEntity);</span>
+<span class="nc" id="L521">        additionalProperties.put(&quot;springHttpStatus&quot;, new SpringHttpStatusLambda());</span>
+
+<span class="nc bnc" id="L523" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_ENUM_CASE_INSENSITIVE)) {</span>
+<span class="nc" id="L524">            this.setUseEnumCaseInsensitive(Boolean.parseBoolean(additionalProperties.get(USE_ENUM_CASE_INSENSITIVE).toString()));</span>
+        }
+<span class="nc" id="L526">        writePropertyBack(USE_ENUM_CASE_INSENSITIVE, useEnumCaseInsensitive);</span>
+
+<span class="nc bnc" id="L528" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_SPRING_BOOT3)) {</span>
+<span class="nc" id="L529">            this.setUseSpringBoot3(convertPropertyToBoolean(USE_SPRING_BOOT3));</span>
+        }
+<span class="nc bnc" id="L531" title="All 2 branches missed.">        if (isUseSpringBoot3()) {</span>
+<span class="nc bnc" id="L532" title="All 2 branches missed.">            if (DocumentationProvider.SPRINGFOX.equals(getDocumentationProvider())) {</span>
+<span class="nc" id="L533">                throw new IllegalArgumentException(DocumentationProvider.SPRINGFOX.getPropertyName() + &quot; is not supported with Spring Boot &gt; 3.x&quot;);</span>
+            }
+<span class="nc bnc" id="L535" title="All 2 branches missed.">            if (AnnotationLibrary.SWAGGER1.equals(getAnnotationLibrary())) {</span>
+<span class="nc" id="L536">                throw new IllegalArgumentException(AnnotationLibrary.SWAGGER1.getPropertyName() + &quot; is not supported with Spring Boot &gt; 3.x&quot;);</span>
+            }
+<span class="nc" id="L538">            useJakartaEe=true;</span>
+<span class="nc" id="L539">            additionalProperties.put(USE_JAKARTA_EE, useJakartaEe);</span>
+<span class="nc" id="L540">            applyJakartaPackage();</span>
+        }
+<span class="nc" id="L542">        writePropertyBack(USE_SPRING_BOOT3, isUseSpringBoot3());</span>
+
+<span class="nc bnc" id="L544" title="All 2 branches missed.">        if (additionalProperties.containsKey(RESOURCE_FOLDER)) {</span>
+<span class="nc" id="L545">            this.setResourceFolder((String) additionalProperties.get(RESOURCE_FOLDER));</span>
+        }
+<span class="nc" id="L547">        additionalProperties.put(RESOURCE_FOLDER, resourceFolder);</span>
+
+
+<span class="nc" id="L550">        typeMapping.put(&quot;file&quot;, &quot;org.springframework.core.io.Resource&quot;);</span>
+<span class="nc" id="L551">        importMapping.put(&quot;org.springframework.core.io.Resource&quot;, &quot;org.springframework.core.io.Resource&quot;);</span>
+<span class="nc" id="L552">        importMapping.put(&quot;DateTimeFormat&quot;, &quot;org.springframework.format.annotation.DateTimeFormat&quot;);</span>
+<span class="nc" id="L553">        importMapping.put(&quot;ApiIgnore&quot;, &quot;springfox.documentation.annotations.ApiIgnore&quot;);</span>
+<span class="nc" id="L554">        importMapping.put(&quot;ParameterObject&quot;, &quot;org.springdoc.api.annotations.ParameterObject&quot;);</span>
+<span class="nc bnc" id="L555" title="All 2 branches missed.">        if (isUseSpringBoot3()) {</span>
+<span class="nc" id="L556">            importMapping.put(&quot;ParameterObject&quot;, &quot;org.springdoc.core.annotations.ParameterObject&quot;);</span>
+        }
+
+<span class="nc bnc" id="L559" title="All 2 branches missed.">        if (useOptional) {</span>
+<span class="nc" id="L560">            writePropertyBack(USE_OPTIONAL, useOptional);</span>
+        }
+
+<span class="nc bnc" id="L563" title="All 4 branches missed.">        if (interfaceOnly &amp;&amp; delegatePattern) {</span>
+<span class="nc" id="L564">            delegateMethod = true;</span>
+<span class="nc" id="L565">            additionalProperties.put(&quot;delegate-method&quot;, true);</span>
+        }
+
+<span class="nc bnc" id="L568" title="All 2 branches missed.">        if (isUseSpringBoot3()) {</span>
+<span class="nc" id="L569">            supportingFiles.add(new SupportingFile(&quot;pom-sb3.mustache&quot;, &quot;&quot;, &quot;pom.xml&quot;));</span>
+        } else {
+<span class="nc" id="L571">            supportingFiles.add(new SupportingFile(&quot;pom.mustache&quot;, &quot;&quot;, &quot;pom.xml&quot;));</span>
+        }
+
+<span class="nc" id="L574">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;));</span>
+
+<span class="nc bnc" id="L576" title="All 2 branches missed.">        if (!interfaceOnly) {</span>
+<span class="nc bnc" id="L577" title="All 2 branches missed.">            if (SPRING_BOOT.equals(library)) {</span>
+<span class="nc bnc" id="L578" title="All 4 branches missed.">                if (useSwaggerUI &amp;&amp; selectedDocumentationProviderRequiresSwaggerUiBootstrap()) {</span>
+<span class="nc" id="L579">                    supportingFiles.add(new SupportingFile(&quot;swagger-ui.mustache&quot;, &quot;src/main/resources/static&quot;, &quot;swagger-ui.html&quot;));</span>
+                }
+                // rename template to SpringBootApplication.mustache
+<span class="nc" id="L582">                supportingFiles.add(new SupportingFile(&quot;openapi2SpringBoot.mustache&quot;,</span>
+<span class="nc" id="L583">                        (sourceFolder + File.separator + basePackage).replace(&quot;.&quot;, java.io.File.separator),</span>
+                        &quot;OpenApiGeneratorApplication.java&quot;));
+<span class="nc" id="L585">                supportingFiles.add(new SupportingFile(&quot;SpringBootTest.mustache&quot;,</span>
+<span class="nc" id="L586">                    (testFolder + File.separator + basePackage).replace(&quot;.&quot;, java.io.File.separator),</span>
+                    &quot;OpenApiGeneratorApplicationTests.java&quot;));
+<span class="nc" id="L588">                supportingFiles.add(new SupportingFile(&quot;RFC3339DateFormat.mustache&quot;,</span>
+<span class="nc" id="L589">                        (sourceFolder + File.separator + basePackage).replace(&quot;.&quot;, java.io.File.separator),</span>
+                        &quot;RFC3339DateFormat.java&quot;));
+            }
+<span class="nc bnc" id="L592" title="All 2 branches missed.">            if (SPRING_CLOUD_LIBRARY.equals(library)) {</span>
+
+<span class="nc" id="L594">                supportingFiles.add(new SupportingFile(&quot;apiKeyRequestInterceptor.mustache&quot;,</span>
+<span class="nc" id="L595">                      (sourceFolder + File.separator + configPackage).replace(&quot;.&quot;, java.io.File.separator),</span>
+                      &quot;ApiKeyRequestInterceptor.java&quot;));
+
+<span class="nc bnc" id="L598" title="All 2 branches missed.">                if (ProcessUtils.hasOAuthMethods(openAPI)) {</span>
+<span class="nc" id="L599">                    supportingFiles.add(new SupportingFile(&quot;clientPropertiesConfiguration.mustache&quot;,</span>
+<span class="nc" id="L600">                            (sourceFolder + File.separator + configPackage).replace(&quot;.&quot;, java.io.File.separator),</span>
+                            &quot;ClientPropertiesConfiguration.java&quot;));
+                }
+
+<span class="nc" id="L604">                supportingFiles.add(new SupportingFile(&quot;clientConfiguration.mustache&quot;,</span>
+<span class="nc" id="L605">                        (sourceFolder + File.separator + configPackage).replace(&quot;.&quot;, java.io.File.separator),</span>
+                        &quot;ClientConfiguration.java&quot;));
+
+<span class="nc" id="L608">                apiTemplateFiles.put(&quot;apiClient.mustache&quot;, &quot;Client.java&quot;);</span>
+<span class="nc bnc" id="L609" title="All 2 branches missed.">                if (!additionalProperties.containsKey(SINGLE_CONTENT_TYPES)) {</span>
+<span class="nc" id="L610">                    additionalProperties.put(SINGLE_CONTENT_TYPES, &quot;true&quot;);</span>
+<span class="nc" id="L611">                    this.setSingleContentTypes(true);</span>
+                }
+                // @RequestMapping not supported with spring cloud openfeign.
+<span class="nc" id="L614">                setRequestMappingMode(RequestMappingMode.none);</span>
+<span class="nc" id="L615">                additionalProperties.put(USE_FEIGN_CLIENT, &quot;true&quot;);</span>
+<span class="nc bnc" id="L616" title="All 2 branches missed.">            } else if (SPRING_BOOT.equals(library)) {</span>
+<span class="nc" id="L617">                apiTemplateFiles.put(&quot;apiController.mustache&quot;, &quot;Controller.java&quot;);</span>
+<span class="nc" id="L618">                supportingFiles.add(new SupportingFile(&quot;application.mustache&quot;,</span>
+<span class="nc" id="L619">                        (&quot;src.main.resources&quot;).replace(&quot;.&quot;, java.io.File.separator), &quot;application.properties&quot;));</span>
+<span class="nc" id="L620">                supportingFiles.add(new SupportingFile(&quot;homeController.mustache&quot;,</span>
+<span class="nc" id="L621">                        (sourceFolder + File.separator + configPackage).replace(&quot;.&quot;, java.io.File.separator),</span>
+                        &quot;HomeController.java&quot;));
+<span class="nc" id="L623">                supportingFiles.add(new SupportingFile(&quot;openapi.mustache&quot;,</span>
+<span class="nc" id="L624">                        (&quot;src/main/resources&quot;).replace(&quot;/&quot;, java.io.File.separator), &quot;openapi.yaml&quot;));</span>
+<span class="nc bnc" id="L625" title="All 4 branches missed.">                if (!reactive &amp;&amp; !apiFirst){</span>
+<span class="nc bnc" id="L626" title="All 2 branches missed.">                    if (DocumentationProvider.SPRINGDOC.equals(getDocumentationProvider())){</span>
+<span class="nc" id="L627">                        supportingFiles.add(new SupportingFile(&quot;springdocDocumentationConfig.mustache&quot;,</span>
+<span class="nc" id="L628">                            (sourceFolder + File.separator + configPackage).replace(&quot;.&quot;, java.io.File.separator),</span>
+                            &quot;SpringDocConfiguration.java&quot;));
+<span class="nc bnc" id="L630" title="All 2 branches missed.">                    } else if (DocumentationProvider.SPRINGFOX.equals(getDocumentationProvider())) {</span>
+<span class="nc" id="L631">                        supportingFiles.add(new SupportingFile(&quot;openapiDocumentationConfig.mustache&quot;,</span>
+<span class="nc" id="L632">                            (sourceFolder + File.separator + configPackage).replace(&quot;.&quot;, java.io.File.separator),</span>
+                            &quot;SpringFoxConfiguration.java&quot;));
+                    }
+                }
+<span class="nc bnc" id="L636" title="All 2 branches missed.">            } else if (SPRING_HTTP_INTERFACE.equals(library)) {</span>
+<span class="nc" id="L637">                supportingFiles.add(new SupportingFile(&quot;httpInterfacesConfiguration.mustache&quot;,</span>
+<span class="nc" id="L638">                    (sourceFolder + File.separator + configPackage).replace(&quot;.&quot;, java.io.File.separator), &quot;HttpInterfacesAbstractConfigurator.java&quot;));</span>
+<span class="nc" id="L639">                writePropertyBack(USE_BEANVALIDATION, false);</span>
+            }
+        }
+
+<span class="nc bnc" id="L643" title="All 2 branches missed.">        if (SPRING_BOOT.equals(library)) {</span>
+<span class="nc" id="L644">            supportingFiles.add(new SupportingFile(&quot;apiUtil.mustache&quot;,</span>
+<span class="nc" id="L645">                    (sourceFolder + File.separator + apiPackage).replace(&quot;.&quot;, java.io.File.separator), &quot;ApiUtil.java&quot;));</span>
+        }
+
+<span class="nc bnc" id="L648" title="All 4 branches missed.">        if (!delegatePattern || delegateMethod) {</span>
+<span class="nc" id="L649">            additionalProperties.put(&quot;jdk8-no-delegate&quot;, true);</span>
+        }
+
+<span class="nc bnc" id="L652" title="All 4 branches missed.">        if (delegatePattern &amp;&amp; !delegateMethod) {</span>
+<span class="nc" id="L653">            additionalProperties.put(&quot;isDelegate&quot;, &quot;true&quot;);</span>
+<span class="nc" id="L654">            apiTemplateFiles.put(&quot;apiDelegate.mustache&quot;, &quot;Delegate.java&quot;);</span>
+        }
+
+<span class="nc" id="L657">        additionalProperties.put(&quot;javaVersion&quot;, &quot;1.8&quot;);</span>
+<span class="nc bnc" id="L658" title="All 2 branches missed.">        if (SPRING_CLOUD_LIBRARY.equals(library)) {</span>
+<span class="nc" id="L659">            additionalProperties.put(&quot;jdk8-default-interface&quot;, false);</span>
+        } else {
+<span class="nc bnc" id="L661" title="All 2 branches missed.">            additionalProperties.put(&quot;jdk8-default-interface&quot;, !skipDefaultInterface);</span>
+        }
+
+<span class="nc bnc" id="L664" title="All 2 branches missed.">        if (async) {</span>
+<span class="nc" id="L665">            additionalProperties.put(RESPONSE_WRAPPER, &quot;CompletableFuture&quot;);</span>
+        }
+<span class="nc bnc" id="L667" title="All 2 branches missed.">        if (reactive) {</span>
+            // The response wrapper when Reactive is enabled must depend on the return type:
+            // Flux&lt;X&gt; when X is an array
+            // Mono&lt;X&gt; otherwise
+            // But there are corner cases when also using response entity.
+            // When reactive is enabled, all this is managed in the mustache templates.
+<span class="nc" id="L673">            additionalProperties.put(RESPONSE_WRAPPER, &quot;&quot;);</span>
+        }
+
+        // Some well-known Spring or Spring-Cloud response wrappers
+<span class="nc bnc" id="L677" title="All 2 branches missed.">        if (isNotEmpty(responseWrapper)) {</span>
+<span class="nc" id="L678">            additionalProperties.put(&quot;jdk8-default-interface&quot;, false);</span>
+<span class="nc bnc" id="L679" title="All 6 branches missed.">            switch (responseWrapper) {</span>
+            case &quot;Future&quot;:
+            case &quot;Callable&quot;:
+            case &quot;CompletableFuture&quot;:
+<span class="nc" id="L683">                additionalProperties.put(RESPONSE_WRAPPER, &quot;java.util.concurrent.&quot; + responseWrapper);</span>
+<span class="nc" id="L684">                break;</span>
+            case &quot;ListenableFuture&quot;:
+<span class="nc" id="L686">                additionalProperties.put(RESPONSE_WRAPPER, &quot;org.springframework.util.concurrent.ListenableFuture&quot;);</span>
+<span class="nc" id="L687">                break;</span>
+            case &quot;DeferredResult&quot;:
+<span class="nc" id="L689">                additionalProperties.put(RESPONSE_WRAPPER,</span>
+                        &quot;org.springframework.web.context.request.async.DeferredResult&quot;);
+<span class="nc" id="L691">                break;</span>
+            case &quot;RxObservable&quot;:
+<span class="nc" id="L693">                additionalProperties.put(RESPONSE_WRAPPER, &quot;rx.Observable&quot;);</span>
+<span class="nc" id="L694">                break;</span>
+            case &quot;RxSingle&quot;:
+<span class="nc" id="L696">                additionalProperties.put(RESPONSE_WRAPPER, &quot;rx.Single&quot;);</span>
+<span class="nc" id="L697">                break;</span>
+            default:
+                break;
+            }
+        }
+
+<span class="nc bnc" id="L703" title="All 4 branches missed.">        switch (getRequestMappingMode()) {</span>
+            case api_interface:
+<span class="nc" id="L705">                additionalProperties.put(USE_REQUEST_MAPPING_ON_INTERFACE, true);</span>
+<span class="nc" id="L706">                break;</span>
+            case controller:
+<span class="nc" id="L708">                additionalProperties.put(USE_REQUEST_MAPPING_ON_CONTROLLER, true);</span>
+<span class="nc" id="L709">                break;</span>
+            case none:
+<span class="nc" id="L711">                additionalProperties.put(USE_REQUEST_MAPPING_ON_INTERFACE, false);</span>
+<span class="nc" id="L712">                additionalProperties.put(USE_REQUEST_MAPPING_ON_CONTROLLER, false);</span>
+                break;
+        }
+
+        // add lambda for mustache templates
+<span class="nc" id="L717">        additionalProperties.put(&quot;lambdaRemoveDoubleQuote&quot;, (Mustache.Lambda) (fragment, writer) -&gt; writer</span>
+<span class="nc" id="L718">                .write(fragment.execute().replaceAll(&quot;\&quot;&quot;, Matcher.quoteReplacement(&quot;&quot;))));</span>
+<span class="nc" id="L719">        additionalProperties.put(&quot;lambdaEscapeDoubleQuote&quot;, (Mustache.Lambda) (fragment, writer) -&gt; writer</span>
+<span class="nc" id="L720">                .write(fragment.execute().replaceAll(&quot;\&quot;&quot;, Matcher.quoteReplacement(&quot;\\\&quot;&quot;))));</span>
+<span class="nc" id="L721">        additionalProperties.put(&quot;lambdaRemoveLineBreak&quot;,</span>
+<span class="nc" id="L722">                (Mustache.Lambda) (fragment, writer) -&gt; writer.write(fragment.execute().replaceAll(&quot;\\r|\\n&quot;, &quot;&quot;)));</span>
+
+<span class="nc" id="L724">        additionalProperties.put(&quot;lambdaTrimWhitespace&quot;, new TrimWhitespaceLambda());</span>
+
+<span class="nc" id="L726">        additionalProperties.put(&quot;lambdaSplitString&quot;, new SplitStringLambda());</span>
+
+        // apiController: hide implementation behind undocumented flag to temporarily preserve code
+<span class="nc" id="L729">        additionalProperties.put(&quot;_api_controller_impl_&quot;, false);</span>
+        // HEADS-UP: Do not add more template file after this block
+<span class="nc bnc" id="L731" title="All 2 branches missed.">        if (apiFirst) {</span>
+<span class="nc" id="L732">            apiTemplateFiles.clear();</span>
+<span class="nc" id="L733">            modelTemplateFiles.clear();</span>
+        }
+<span class="nc" id="L735">        supportsAdditionalPropertiesWithComposedSchema = true;</span>
+<span class="nc" id="L736">    }</span>
+
+    private boolean containsEnums() {
+<span class="nc bnc" id="L739" title="All 2 branches missed.">        if (openAPI == null) {</span>
+<span class="nc" id="L740">            return false;</span>
+        }
+
+<span class="nc" id="L743">        Components components = this.openAPI.getComponents();</span>
+<span class="nc bnc" id="L744" title="All 4 branches missed.">        if (components == null || components.getSchemas() == null) {</span>
+<span class="nc" id="L745">            return  false;</span>
+        }
+
+<span class="nc" id="L748">        return components.getSchemas().values().stream()</span>
+<span class="nc bnc" id="L749" title="All 4 branches missed.">                .anyMatch(it -&gt; it.getEnum() != null &amp;&amp; !it.getEnum().isEmpty());</span>
+    }
+
+    private boolean supportLibraryUseTags(){
+<span class="nc bnc" id="L753" title="All 4 branches missed.">        return SPRING_BOOT.equals(library) || SPRING_CLOUD_LIBRARY.equals(library);</span>
+    }
+
+    @Override
+    public void addOperationToGroup(String tag, String resourcePath, Operation operation, CodegenOperation co, Map&lt;String, List&lt;CodegenOperation&gt;&gt; operations) {
+<span class="nc bnc" id="L758" title="All 4 branches missed.">        if (supportLibraryUseTags() &amp;&amp; !useTags) {</span>
+<span class="nc" id="L759">            String basePath = resourcePath;</span>
+<span class="nc bnc" id="L760" title="All 2 branches missed.">            if (basePath.startsWith(&quot;/&quot;)) {</span>
+<span class="nc" id="L761">                basePath = basePath.substring(1);</span>
+            }
+<span class="nc" id="L763">            final int pos = basePath.indexOf(&quot;/&quot;);</span>
+<span class="nc bnc" id="L764" title="All 2 branches missed.">            if (pos &gt; 0) {</span>
+<span class="nc" id="L765">                basePath = basePath.substring(0, pos);</span>
+            }
+
+<span class="nc bnc" id="L768" title="All 2 branches missed.">            if (basePath.isEmpty()) {</span>
+<span class="nc" id="L769">                basePath = &quot;default&quot;;</span>
+            } else {
+<span class="nc bnc" id="L771" title="All 2 branches missed.">                co.subresourceOperation = !co.path.isEmpty();</span>
+            }
+<span class="nc" id="L773">            final List&lt;CodegenOperation&gt; opList = operations.computeIfAbsent(basePath, k -&gt; new ArrayList&lt;&gt;());</span>
+<span class="nc" id="L774">            opList.add(co);</span>
+<span class="nc" id="L775">            co.baseName = basePath;</span>
+<span class="nc" id="L776">            return;</span>
+        }
+<span class="nc" id="L778">        super.addOperationToGroup(tag, resourcePath, operation, co, operations);</span>
+
+<span class="nc" id="L780">    }</span>
+
+    @Override
+    public void preprocessOpenAPI(OpenAPI openAPI) {
+<span class="nc" id="L784">        super.preprocessOpenAPI(openAPI);</span>
+
+<span class="nc bnc" id="L786" title="All 6 branches missed.">        if (!interfaceOnly &amp;&amp; SPRING_BOOT.equals(library) &amp;&amp; containsEnums()) {</span>
+<span class="nc" id="L787">            supportingFiles.add(new SupportingFile(&quot;converter.mustache&quot;,</span>
+<span class="nc" id="L788">                    (sourceFolder + File.separator + configPackage).replace(&quot;.&quot;, java.io.File.separator), &quot;EnumConverterConfiguration.java&quot;));</span>
+        }
+
+        /*
+         * TODO the following logic should not need anymore in OAS 3.0 if
+         * (&quot;/&quot;.equals(swagger.getBasePath())) { swagger.setBasePath(&quot;&quot;); }
+         */
+
+<span class="nc bnc" id="L796" title="All 2 branches missed.">        if (!additionalProperties.containsKey(TITLE)) {</span>
+            // From the title, compute a reasonable name for the package and the API
+<span class="nc" id="L798">            String title = openAPI.getInfo().getTitle();</span>
+
+            // Drop any API suffix
+<span class="nc bnc" id="L801" title="All 2 branches missed.">            if (title != null) {</span>
+<span class="nc" id="L802">                title = title.trim().replace(&quot; &quot;, &quot;-&quot;);</span>
+<span class="nc bnc" id="L803" title="All 2 branches missed.">                if (title.toUpperCase(Locale.ROOT).endsWith(&quot;API&quot;)) {</span>
+<span class="nc" id="L804">                    title = title.substring(0, title.length() - 3);</span>
+                }
+
+<span class="nc" id="L807">                this.title = camelize(sanitizeName(title), LOWERCASE_FIRST_LETTER);</span>
+            }
+<span class="nc" id="L809">            additionalProperties.put(TITLE, this.title);</span>
+        }
+
+<span class="nc bnc" id="L812" title="All 2 branches missed.">        if (!additionalProperties.containsKey(SERVER_PORT)) {</span>
+<span class="nc" id="L813">            final URL url = URLPathUtils.getServerURL(openAPI, serverVariableOverrides());</span>
+<span class="nc" id="L814">            additionalProperties.put(SERVER_PORT, URLPathUtils.getPort(url, 8080));</span>
+        }
+
+<span class="nc bnc" id="L817" title="All 2 branches missed.">        if (openAPI.getPaths() != null) {</span>
+<span class="nc bnc" id="L818" title="All 2 branches missed.">            for (final Map.Entry&lt;String, PathItem&gt; openAPIGetPathsEntry : openAPI.getPaths().entrySet()) {</span>
+<span class="nc" id="L819">                final String pathname = openAPIGetPathsEntry.getKey();</span>
+<span class="nc" id="L820">                final PathItem path = openAPIGetPathsEntry.getValue();</span>
+<span class="nc bnc" id="L821" title="All 2 branches missed.">                if (path.readOperations() != null) {</span>
+<span class="nc bnc" id="L822" title="All 2 branches missed.">                    for (final Operation operation : path.readOperations()) {</span>
+<span class="nc bnc" id="L823" title="All 2 branches missed.">                        if (operation.getTags() != null) {</span>
+<span class="nc" id="L824">                            final List&lt;Map&lt;String, String&gt;&gt; tags = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L825" title="All 2 branches missed.">                            for (final String tag : operation.getTags()) {</span>
+<span class="nc" id="L826">                                final Map&lt;String, String&gt; value = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L827">                                value.put(&quot;tag&quot;, tag);</span>
+<span class="nc" id="L828">                                tags.add(value);</span>
+<span class="nc" id="L829">                            }</span>
+<span class="nc bnc" id="L830" title="All 2 branches missed.">                            if (operation.getTags().size() &gt; 0) {</span>
+<span class="nc" id="L831">                                final String tag = operation.getTags().get(0);</span>
+<span class="nc" id="L832">                                operation.setTags(Arrays.asList(tag));</span>
+                            }
+<span class="nc" id="L834">                            operation.addExtension(&quot;x-tags&quot;, tags);</span>
+                        }
+<span class="nc" id="L836">                    }</span>
+                }
+<span class="nc" id="L838">            }</span>
+        }
+<span class="nc" id="L840">    }</span>
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L844">        final OperationMap operations = objs.getOperations();</span>
+<span class="nc bnc" id="L845" title="All 2 branches missed.">        if (operations != null) {</span>
+<span class="nc" id="L846">            final List&lt;CodegenOperation&gt; ops = operations.getOperation();</span>
+<span class="nc bnc" id="L847" title="All 2 branches missed.">            for (final CodegenOperation operation : ops) {</span>
+<span class="nc" id="L848">                final List&lt;CodegenResponse&gt; responses = operation.responses;</span>
+<span class="nc bnc" id="L849" title="All 2 branches missed.">                if (responses != null) {</span>
+<span class="nc bnc" id="L850" title="All 2 branches missed.">                    for (final CodegenResponse resp : responses) {</span>
+<span class="nc bnc" id="L851" title="All 2 branches missed.">                        if (&quot;0&quot;.equals(resp.code)) {</span>
+<span class="nc" id="L852">                            resp.code = &quot;200&quot;;</span>
+                        }
+<span class="nc" id="L854">                        doDataTypeAssignment(resp.dataType, new DataTypeAssigner() {</span>
+                            @Override
+                            public void setReturnType(final String returnType) {
+<span class="nc" id="L857">                                resp.dataType = returnType;</span>
+<span class="nc" id="L858">                            }</span>
+
+                            @Override
+                            public void setReturnContainer(final String returnContainer) {
+<span class="nc" id="L862">                                resp.containerType = returnContainer;</span>
+<span class="nc" id="L863">                            }</span>
+
+                            @Override
+                            public void setIsVoid(boolean isVoid) {
+<span class="nc" id="L867">                                resp.isVoid = isVoid;</span>
+<span class="nc" id="L868">                            }</span>
+                        });
+<span class="nc" id="L870">                    }</span>
+                }
+
+<span class="nc" id="L873">                doDataTypeAssignment(operation.returnType, new DataTypeAssigner() {</span>
+
+                    @Override
+                    public void setReturnType(final String returnType) {
+<span class="nc" id="L877">                        operation.returnType = returnType;</span>
+<span class="nc" id="L878">                    }</span>
+
+                    @Override
+                    public void setReturnContainer(final String returnContainer) {
+<span class="nc" id="L882">                        operation.returnContainer = returnContainer;</span>
+<span class="nc" id="L883">                    }</span>
+
+                    @Override
+                    public void setIsVoid(boolean isVoid) {
+<span class="nc" id="L887">                        operation.isVoid = isVoid;</span>
+<span class="nc" id="L888">                    }</span>
+                });
+
+<span class="nc" id="L891">                prepareVersioningParameters(ops);</span>
+<span class="nc" id="L892">                handleImplicitHeaders(operation);</span>
+<span class="nc" id="L893">            }</span>
+            // The tag for the controller is the first tag of the first operation
+<span class="nc" id="L895">            final CodegenOperation firstOperation = ops.get(0);</span>
+<span class="nc" id="L896">            final Tag firstTag = firstOperation.tags.get(0);</span>
+<span class="nc" id="L897">            final String firstTagName = firstTag.getName();</span>
+            // But use a sensible tag name if there is none
+<span class="nc bnc" id="L899" title="All 2 branches missed.">            objs.put(&quot;tagName&quot;, &quot;default&quot;.equals(firstTagName) ? firstOperation.baseName : firstTagName);</span>
+<span class="nc" id="L900">            objs.put(&quot;tagDescription&quot;, escapeText(firstTag.getDescription()));</span>
+        }
+
+<span class="nc" id="L903">        removeImport(objs, &quot;java.util.List&quot;);</span>
+
+<span class="nc" id="L905">        return objs;</span>
+    }
+
+    private interface DataTypeAssigner {
+        void setReturnType(String returnType);
+
+        void setReturnContainer(String returnContainer);
+
+        void setIsVoid(boolean isVoid);
+    }
+
+    /**
+     * @param returnType       The return type that needs to be converted
+     * @param dataTypeAssigner An object that will assign the data to the respective
+     *                         fields in the model.
+     */
+    private void doDataTypeAssignment(String returnType, DataTypeAssigner dataTypeAssigner) {
+<span class="nc" id="L922">        final String rt = returnType;</span>
+<span class="nc bnc" id="L923" title="All 2 branches missed.">        if (rt == null) {</span>
+<span class="nc" id="L924">            dataTypeAssigner.setReturnType(&quot;Void&quot;);</span>
+<span class="nc" id="L925">            dataTypeAssigner.setIsVoid(true);</span>
+<span class="nc bnc" id="L926" title="All 4 branches missed.">        } else if (rt.startsWith(&quot;List&quot;) || rt.startsWith(&quot;java.util.List&quot;)) {</span>
+<span class="nc" id="L927">            final int start = rt.indexOf(&quot;&lt;&quot;);</span>
+<span class="nc" id="L928">            final int end = rt.lastIndexOf(&quot;&gt;&quot;);</span>
+<span class="nc bnc" id="L929" title="All 4 branches missed.">            if (start &gt; 0 &amp;&amp; end &gt; 0) {</span>
+<span class="nc" id="L930">                dataTypeAssigner.setReturnType(rt.substring(start + 1, end).trim());</span>
+<span class="nc" id="L931">                dataTypeAssigner.setReturnContainer(&quot;List&quot;);</span>
+            }
+<span class="nc bnc" id="L933" title="All 4 branches missed.">        } else if (rt.startsWith(&quot;Map&quot;) || rt.startsWith(&quot;java.util.Map&quot;)) {</span>
+<span class="nc" id="L934">            final int start = rt.indexOf(&quot;&lt;&quot;);</span>
+<span class="nc" id="L935">            final int end = rt.lastIndexOf(&quot;&gt;&quot;);</span>
+<span class="nc bnc" id="L936" title="All 4 branches missed.">            if (start &gt; 0 &amp;&amp; end &gt; 0) {</span>
+<span class="nc" id="L937">                dataTypeAssigner.setReturnType(rt.substring(start + 1, end).split(&quot;,&quot;, 2)[1].trim());</span>
+<span class="nc" id="L938">                dataTypeAssigner.setReturnContainer(&quot;Map&quot;);</span>
+            }
+<span class="nc bnc" id="L940" title="All 4 branches missed.">        } else if (rt.startsWith(&quot;Set&quot;) || rt.startsWith(&quot;java.util.Set&quot;)) {</span>
+<span class="nc" id="L941">            final int start = rt.indexOf(&quot;&lt;&quot;);</span>
+<span class="nc" id="L942">            final int end = rt.lastIndexOf(&quot;&gt;&quot;);</span>
+<span class="nc bnc" id="L943" title="All 4 branches missed.">            if (start &gt; 0 &amp;&amp; end &gt; 0) {</span>
+<span class="nc" id="L944">                dataTypeAssigner.setReturnType(rt.substring(start + 1, end).trim());</span>
+<span class="nc" id="L945">                dataTypeAssigner.setReturnContainer(&quot;Set&quot;);</span>
+            }
+        }
+<span class="nc" id="L948">    }</span>
+
+    private void prepareVersioningParameters(List&lt;CodegenOperation&gt; operations) {
+<span class="nc bnc" id="L951" title="All 2 branches missed.">        for (CodegenOperation operation : operations) {</span>
+<span class="nc bnc" id="L952" title="All 2 branches missed.">            if (operation.getHasHeaderParams()) {</span>
+<span class="nc" id="L953">                List&lt;CodegenParameter&gt; versionParams = operation.headerParams.stream()</span>
+<span class="nc" id="L954">                    .filter(param -&gt; {</span>
+<span class="nc" id="L955">                        String xVersionParam = Objects.toString(param.vendorExtensions.get(VendorExtension.X_VERSION_PARAM.getName()), &quot;false&quot;);</span>
+<span class="nc" id="L956">                        return Boolean.parseBoolean(xVersionParam);</span>
+                    })
+<span class="nc" id="L958">                    .collect(Collectors.toList());</span>
+<span class="nc bnc" id="L959" title="All 2 branches missed.">                operation.hasVersionHeaders = !versionParams.isEmpty();</span>
+<span class="nc" id="L960">                operation.vendorExtensions.put(&quot;versionHeaderParamsList&quot;, versionParams);</span>
+            }
+
+<span class="nc bnc" id="L963" title="All 2 branches missed.">            if (operation.getHasQueryParams()) {</span>
+<span class="nc" id="L964">                List&lt;CodegenParameter&gt; versionParams = operation.queryParams.stream()</span>
+<span class="nc" id="L965">                    .filter(param -&gt; {</span>
+<span class="nc" id="L966">                        String xVersionParam = Objects.toString(param.vendorExtensions.get(VendorExtension.X_VERSION_PARAM.getName()), &quot;false&quot;);</span>
+<span class="nc" id="L967">                        return Boolean.parseBoolean(xVersionParam);</span>
+                    })
+<span class="nc" id="L969">                    .collect(Collectors.toList());</span>
+<span class="nc bnc" id="L970" title="All 2 branches missed.">                operation.hasVersionQueryParams = !versionParams.isEmpty();</span>
+<span class="nc" id="L971">                operation.vendorExtensions.put(&quot;versionQueryParamsList&quot;, versionParams);</span>
+            }
+<span class="nc" id="L973">        }</span>
+<span class="nc" id="L974">    }</span>
+
+    @Override
+    public Map&lt;String, Object&gt; postProcessSupportingFileData(Map&lt;String, Object&gt; objs) {
+<span class="nc" id="L978">        generateYAMLSpecFile(objs);</span>
+<span class="nc bnc" id="L979" title="All 2 branches missed.">        if (SPRING_CLOUD_LIBRARY.equals(library)) {</span>
+<span class="nc" id="L980">            final List&lt;CodegenSecurity&gt; authMethods = (List&lt;CodegenSecurity&gt;) objs.get(&quot;authMethods&quot;);</span>
+<span class="nc bnc" id="L981" title="All 2 branches missed.">            if (authMethods != null) {</span>
+<span class="nc bnc" id="L982" title="All 2 branches missed.">                for (final CodegenSecurity authMethod : authMethods) {</span>
+<span class="nc" id="L983">                    authMethod.name = camelize(sanitizeName(authMethod.name), LOWERCASE_FIRST_LETTER);</span>
+<span class="nc" id="L984">                }</span>
+            }
+        }
+<span class="nc" id="L987">        return objs;</span>
+    }
+
+    @Override
+    public String toApiName(String name) {
+<span class="nc bnc" id="L992" title="All 2 branches missed.">        if (name.length() == 0) {</span>
+<span class="nc" id="L993">            return &quot;DefaultApi&quot;;</span>
+        }
+<span class="nc" id="L995">        name = sanitizeName(name);</span>
+<span class="nc" id="L996">        return camelize(name) + apiNameSuffix;</span>
+    }
+
+    @Override
+    public void setParameterExampleValue(CodegenParameter p) {
+<span class="nc" id="L1001">        String type = p.baseType;</span>
+<span class="nc bnc" id="L1002" title="All 2 branches missed.">        if (type == null) {</span>
+<span class="nc" id="L1003">            type = p.dataType;</span>
+        }
+
+<span class="nc bnc" id="L1006" title="All 2 branches missed.">        if (&quot;File&quot;.equals(type)) {</span>
+            String example;
+
+<span class="nc bnc" id="L1009" title="All 2 branches missed.">            if (p.defaultValue == null) {</span>
+<span class="nc" id="L1010">                example = p.example;</span>
+            } else {
+<span class="nc" id="L1012">                example = p.defaultValue;</span>
+            }
+
+<span class="nc bnc" id="L1015" title="All 2 branches missed.">            if (example == null) {</span>
+<span class="nc" id="L1016">                example = &quot;/path/to/file&quot;;</span>
+            }
+<span class="nc" id="L1018">            example = &quot;new org.springframework.core.io.FileSystemResource(new java.io.File(\&quot;&quot; + escapeText(example)</span>
+                    + &quot;\&quot;))&quot;;
+<span class="nc" id="L1020">            p.example = example;</span>
+<span class="nc" id="L1021">        } else {</span>
+<span class="nc" id="L1022">            super.setParameterExampleValue(p);</span>
+        }
+<span class="nc" id="L1024">    }</span>
+
+    public void setTitle(String title) {
+<span class="nc" id="L1027">        this.title = title;</span>
+<span class="nc" id="L1028">    }</span>
+
+    public void setConfigPackage(String configPackage) {
+<span class="nc" id="L1031">        this.configPackage = configPackage;</span>
+<span class="nc" id="L1032">    }</span>
+
+    public String getConfigPackage() {
+<span class="fc" id="L1035">        return configPackage;</span>
+    }
+
+    public boolean isUnhandledException() {
+<span class="nc" id="L1039">        return unhandledException;</span>
+    }
+
+    public void setBasePackage(String basePackage) {
+<span class="nc" id="L1043">        this.basePackage = basePackage;</span>
+<span class="nc" id="L1044">    }</span>
+
+    public String getBasePackage() {
+<span class="fc" id="L1047">        return basePackage;</span>
+    }
+
+    public void setInterfaceOnly(boolean interfaceOnly) {
+<span class="nc" id="L1051">        this.interfaceOnly = interfaceOnly;</span>
+<span class="nc" id="L1052">    }</span>
+
+    public void setUseFeignClientUrl(boolean useFeignClientUrl) {
+<span class="nc" id="L1055">        this.useFeignClientUrl = useFeignClientUrl;</span>
+<span class="nc" id="L1056">    }</span>
+
+    public void setDelegatePattern(boolean delegatePattern) {
+<span class="nc" id="L1059">        this.delegatePattern = delegatePattern;</span>
+<span class="nc" id="L1060">    }</span>
+
+    public void setSingleContentTypes(boolean singleContentTypes) {
+<span class="nc" id="L1063">        this.singleContentTypes = singleContentTypes;</span>
+<span class="nc" id="L1064">    }</span>
+
+    public void setSkipDefaultInterface(boolean skipDefaultInterface) {
+<span class="nc" id="L1067">        this.skipDefaultInterface = skipDefaultInterface;</span>
+<span class="nc" id="L1068">    }</span>
+
+    public void setVirtualService(boolean virtualService) {
+<span class="nc" id="L1071">        this.virtualService = virtualService;</span>
+<span class="nc" id="L1072">    }</span>
+
+    public void setAsync(boolean async) {
+<span class="nc" id="L1075">        this.async = async;</span>
+<span class="nc" id="L1076">    }</span>
+
+    public void setReactive(boolean reactive) {
+<span class="nc" id="L1079">        this.reactive = reactive;</span>
+<span class="nc" id="L1080">    }</span>
+
+    public void setSse(boolean sse) {
+<span class="nc" id="L1083">        this.sse = sse;</span>
+<span class="nc" id="L1084">    }</span>
+
+    public void setResponseWrapper(String responseWrapper) {
+<span class="nc" id="L1087">        this.responseWrapper = responseWrapper;</span>
+<span class="nc" id="L1088">    }</span>
+
+    public void setUseTags(boolean useTags) {
+<span class="nc" id="L1091">        this.useTags = useTags;</span>
+<span class="nc" id="L1092">    }</span>
+
+    public void setApiFirst(boolean apiFirst) {
+<span class="nc" id="L1095">        this.apiFirst = apiFirst;</span>
+<span class="nc" id="L1096">    }</span>
+
+    public void setHateoas(boolean hateoas) {
+<span class="nc" id="L1099">        this.hateoas = hateoas;</span>
+<span class="nc" id="L1100">    }</span>
+
+    public void setUseSpringController(boolean useSpringController) {
+<span class="nc" id="L1103">        this.useSpringController = useSpringController;</span>
+<span class="nc" id="L1104">    }</span>
+
+    public void setReturnSuccessCode(boolean returnSuccessCode) {
+<span class="nc" id="L1107">        this.returnSuccessCode = returnSuccessCode;</span>
+<span class="nc" id="L1108">    }</span>
+
+    public void setUnhandledException(boolean unhandledException) {
+<span class="nc" id="L1111">        this.unhandledException = unhandledException;</span>
+<span class="nc" id="L1112">    }</span>
+
+    public void setUseResponseEntity(boolean useResponseEntity) {
+<span class="nc" id="L1115">        this.useResponseEntity = useResponseEntity;</span>
+<span class="nc" id="L1116">    }</span>
+
+    public void setUseEnumCaseInsensitive(boolean useEnumCaseInsensitive) {
+<span class="nc" id="L1119">        this.useEnumCaseInsensitive = useEnumCaseInsensitive;</span>
+<span class="nc" id="L1120">    }</span>
+
+    @Override
+    public void postProcessModelProperty(CodegenModel model, CodegenProperty property) {
+<span class="nc" id="L1124">        super.postProcessModelProperty(model, property);</span>
+
+        // add org.springframework.format.annotation.DateTimeFormat when needed
+<span class="nc bnc" id="L1127" title="All 4 branches missed.">        if (property.isDate || property.isDateTime) {</span>
+<span class="nc" id="L1128">            model.imports.add(&quot;DateTimeFormat&quot;);</span>
+        }
+
+<span class="nc bnc" id="L1131" title="All 2 branches missed.">        if (&quot;null&quot;.equals(property.example)) {</span>
+<span class="nc" id="L1132">            property.example = null;</span>
+        }
+
+        // Add imports for Jackson
+<span class="nc bnc" id="L1136" title="All 2 branches missed.">        if (!Boolean.TRUE.equals(model.isEnum)) {</span>
+<span class="nc" id="L1137">            model.imports.add(&quot;JsonProperty&quot;);</span>
+
+<span class="nc bnc" id="L1139" title="All 2 branches missed.">            if (Boolean.TRUE.equals(model.hasEnums)) {</span>
+<span class="nc" id="L1140">                model.imports.add(&quot;JsonValue&quot;);</span>
+            }
+        } else { // enum class
+            // Needed imports for Jackson's JsonCreator
+<span class="nc bnc" id="L1144" title="All 2 branches missed.">            if (additionalProperties.containsKey(JACKSON)) {</span>
+<span class="nc" id="L1145">                model.imports.add(&quot;JsonCreator&quot;);</span>
+            }
+        }
+
+        // Add imports for java.util.Arrays
+<span class="nc bnc" id="L1150" title="All 2 branches missed.">        if (property.isByteArray) {</span>
+<span class="nc" id="L1151">            model.imports.add(&quot;Arrays&quot;);</span>
+        }
+
+<span class="nc bnc" id="L1154" title="All 2 branches missed.">        if (model.getVendorExtensions().containsKey(&quot;x-jackson-optional-nullable-helpers&quot;)) {</span>
+<span class="nc" id="L1155">            model.imports.add(&quot;Arrays&quot;);</span>
+        }
+<span class="nc" id="L1157">    }</span>
+
+    @Override
+    public CodegenModel fromModel(String name, Schema model) {
+<span class="nc" id="L1161">        CodegenModel codegenModel = super.fromModel(name, model);</span>
+<span class="nc bnc" id="L1162" title="All 2 branches missed.">        if (getAnnotationLibrary() != AnnotationLibrary.SWAGGER1) {</span>
+            // remove swagger imports
+<span class="nc" id="L1164">            codegenModel.imports.remove(&quot;ApiModelProperty&quot;);</span>
+<span class="nc" id="L1165">            codegenModel.imports.remove(&quot;ApiModel&quot;);</span>
+        }
+
+<span class="nc" id="L1168">        return codegenModel;</span>
+    }
+
+    @Override
+    protected boolean isConstructorWithAllArgsAllowed(CodegenModel codegenModel) {
+<span class="nc bnc" id="L1173" title="All 4 branches missed.">        if (lombokAnnotations != null &amp;&amp; lombokAnnotations.containsKey(&quot;allArgsConstructor&quot;)) {</span>
+            // constructor generated by lombok
+<span class="nc" id="L1175">            return false;</span>
+        }
+<span class="nc bnc" id="L1177" title="All 4 branches missed.">        if ((!generatedConstructorWithRequiredArgs &amp;&amp; !codegenModel.vars.isEmpty() )</span>
+<span class="nc bnc" id="L1178" title="All 2 branches missed.">                || !codegenModel.optionalVars.isEmpty()) {</span>
+<span class="nc" id="L1179">            return super.isConstructorWithAllArgsAllowed(codegenModel);</span>
+        }
+<span class="nc" id="L1181">        return false;</span>
+    }
+
+    /*
+     * Add dynamic imports based on the parameters and vendor extensions of an operation.
+     * The imports are expanded by the mustache {{import}} tag available to model and api
+     * templates.
+     */
+    @Override
+    public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, List&lt;Server&gt; servers) {
+
+        // add Pageable import only if x-spring-paginated explicitly used
+        // this allows to use a custom Pageable schema without importing Spring Pageable.
+<span class="nc bnc" id="L1194" title="All 2 branches missed.">        if (Boolean.TRUE.equals(operation.getExtensions().get(&quot;x-spring-paginated&quot;))) {</span>
+<span class="nc" id="L1195">            importMapping.put(&quot;Pageable&quot;, &quot;org.springframework.data.domain.Pageable&quot;);</span>
+        }
+
+<span class="nc" id="L1198">        Set&lt;String&gt; provideArgsClassSet = reformatProvideArgsParams(operation);</span>
+
+<span class="nc" id="L1200">        CodegenOperation codegenOperation = super.fromOperation(path, httpMethod, operation, servers);</span>
+
+        // add org.springframework.format.annotation.DateTimeFormat when needed
+<span class="nc bnc" id="L1203" title="All 4 branches missed.">        codegenOperation.allParams.stream().filter(p -&gt; p.isDate || p.isDateTime).findFirst()</span>
+<span class="nc" id="L1204">            .ifPresent(p -&gt; codegenOperation.imports.add(&quot;DateTimeFormat&quot;));</span>
+
+        // add org.springframework.data.domain.Pageable import when needed
+<span class="nc bnc" id="L1207" title="All 2 branches missed.">        if (codegenOperation.vendorExtensions.containsKey(&quot;x-spring-paginated&quot;)) {</span>
+<span class="nc" id="L1208">            codegenOperation.imports.add(&quot;Pageable&quot;);</span>
+<span class="nc bnc" id="L1209" title="All 2 branches missed.">            if (DocumentationProvider.SPRINGFOX.equals(getDocumentationProvider())) {</span>
+<span class="nc" id="L1210">                codegenOperation.imports.add(&quot;ApiIgnore&quot;);</span>
+            }
+<span class="nc bnc" id="L1212" title="All 2 branches missed.">            if (DocumentationProvider.SPRINGDOC.equals(getDocumentationProvider())) {</span>
+<span class="nc" id="L1213">                codegenOperation.imports.add(&quot;ParameterObject&quot;);</span>
+            }
+        }
+<span class="nc bnc" id="L1216" title="All 4 branches missed.">        if (codegenOperation.vendorExtensions.containsKey(&quot;x-spring-provide-args&quot;) &amp;&amp; !provideArgsClassSet.isEmpty()) {</span>
+<span class="nc" id="L1217">            codegenOperation.imports.addAll(provideArgsClassSet);</span>
+        }
+
+<span class="nc bnc" id="L1220" title="All 2 branches missed.">        if (reactive) {</span>
+<span class="nc bnc" id="L1221" title="All 2 branches missed.">            if (DocumentationProvider.SPRINGFOX.equals(getDocumentationProvider())) {</span>
+<span class="nc" id="L1222">                codegenOperation.imports.add(&quot;ApiIgnore&quot;);</span>
+            }
+<span class="nc bnc" id="L1224" title="All 2 branches missed.">            if (sse) {</span>
+<span class="nc" id="L1225">                var MEDIA_EVENT_STREAM = &quot;text/event-stream&quot;;</span>
+                // inspecting used streaming media types
+                /*
+                 expected definition:
+                 content:
+                    text/event-stream:
+                        schema:
+                        type: array
+                        format: event-stream
+                        items:
+                            type: &lt;type&gt; or
+                            $ref: &lt;typeRef&gt;
+                 */
+<span class="nc" id="L1238">                Map&lt;String, List&lt;Schema&gt;&gt; schemaTypes = operation.getResponses().entrySet().stream()</span>
+<span class="nc" id="L1239">                        .map(e -&gt; Pair.of(e.getValue(), fromResponse(e.getKey(), e.getValue())))</span>
+<span class="nc" id="L1240">                        .filter(p -&gt; p.getRight().is2xx) // consider only success</span>
+<span class="nc" id="L1241">                        .map(p -&gt; p.getLeft().getContent().get(MEDIA_EVENT_STREAM))</span>
+<span class="nc" id="L1242">                        .map(MediaType::getSchema)</span>
+<span class="nc" id="L1243">                        .collect(Collectors.toList()).stream()</span>
+<span class="nc" id="L1244">                        .collect(Collectors.groupingBy(Schema::getType));</span>
+<span class="nc bnc" id="L1245" title="All 2 branches missed.">                if(schemaTypes.containsKey(&quot;array&quot;)) {</span>
+                    // we have a match with SSE pattern
+                    // double check potential conflicting, multiple specs
+<span class="nc bnc" id="L1248" title="All 2 branches missed.">                    if(schemaTypes.keySet().size() &gt; 1) {</span>
+<span class="nc" id="L1249">                        throw new RuntimeException(&quot;only 1 response media type supported, when SSE is detected&quot;);</span>
+                    }
+                    // double check schema format
+<span class="nc" id="L1252">                    List&lt;Schema&gt; eventTypes = schemaTypes.get(&quot;array&quot;);</span>
+<span class="nc bnc" id="L1253" title="All 4 branches missed.">                    if( eventTypes.stream().anyMatch(schema -&gt; !&quot;event-stream&quot;.equalsIgnoreCase(schema.getFormat()))) {</span>
+<span class="nc" id="L1254">                        throw new RuntimeException(&quot;schema format 'event-stream' is required, when SSE is detected&quot;);</span>
+                    }
+                    // double check item types
+<span class="nc" id="L1257">                    Set&lt;String&gt; itemTypes = eventTypes.stream()</span>
+<span class="nc bnc" id="L1258" title="All 2 branches missed.">                            .map(schema -&gt; schema.getItems().getType() != null</span>
+<span class="nc" id="L1259">                                    ? schema.getItems().getType()</span>
+<span class="nc" id="L1260">                                    : schema.getItems().get$ref())</span>
+<span class="nc" id="L1261">                            .collect(Collectors.toSet());</span>
+<span class="nc bnc" id="L1262" title="All 2 branches missed.">                    if(itemTypes.size() &gt; 1) {</span>
+<span class="nc" id="L1263">                        throw new RuntimeException(&quot;only single item type is supported, when SSE is detected&quot;);</span>
+                    }
+<span class="nc" id="L1265">                    codegenOperation.vendorExtensions.put(&quot;x-sse&quot;, true);</span>
+                } // Not an SSE compliant definition
+            }
+        }
+<span class="nc" id="L1269">        return codegenOperation;</span>
+    }
+
+    private Set&lt;String&gt; reformatProvideArgsParams(Operation operation) {
+<span class="nc" id="L1273">        Set&lt;String&gt; provideArgsClassSet = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L1274">        Object argObj = operation.getExtensions().get(&quot;x-spring-provide-args&quot;);</span>
+<span class="nc bnc" id="L1275" title="All 2 branches missed.">        if (argObj instanceof List) {</span>
+<span class="nc" id="L1276">            List&lt;String&gt; provideArgs = (List&lt;String&gt;) argObj;</span>
+<span class="nc bnc" id="L1277" title="All 2 branches missed.">            if (!provideArgs.isEmpty()) {</span>
+<span class="nc" id="L1278">                List&lt;String&gt; formatedArgs = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L1279" title="All 2 branches missed.">                for (String oneArg : provideArgs) {</span>
+<span class="nc bnc" id="L1280" title="All 2 branches missed.">                    if (StringUtils.isNotEmpty(oneArg)) {</span>
+<span class="nc" id="L1281">                        String regexp = &quot;(?&lt;AnnotationTag&gt;@)?(?&lt;ClassPath&gt;(?&lt;PackageName&gt;(\\w+\\.)*)(?&lt;ClassName&gt;\\w+))(?&lt;Params&gt;\\(.*?\\))?\\s?&quot;;</span>
+<span class="nc" id="L1282">                        Matcher matcher = Pattern.compile(regexp).matcher(oneArg);</span>
+<span class="nc" id="L1283">                        List&lt;String&gt; newArgs = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L1284" title="All 2 branches missed.">                        while (matcher.find()) {</span>
+<span class="nc" id="L1285">                            String className = matcher.group(&quot;ClassName&quot;);</span>
+<span class="nc" id="L1286">                            String classPath = matcher.group(&quot;ClassPath&quot;);</span>
+<span class="nc" id="L1287">                            String packageName = matcher.group(&quot;PackageName&quot;);</span>
+<span class="nc" id="L1288">                            String params = matcher.group(&quot;Params&quot;);</span>
+<span class="nc" id="L1289">                            String annoTag = matcher.group(&quot;AnnotationTag&quot;);</span>
+<span class="nc" id="L1290">                            String shortPhrase = StringUtils.join(annoTag, className, params);</span>
+<span class="nc" id="L1291">                            newArgs.add(shortPhrase);</span>
+<span class="nc bnc" id="L1292" title="All 2 branches missed.">                            if (StringUtils.isNotEmpty(packageName)) {</span>
+<span class="nc" id="L1293">                                importMapping.put(className, classPath);</span>
+<span class="nc" id="L1294">                                provideArgsClassSet.add(className);</span>
+<span class="nc" id="L1295">                                LOGGER.trace(&quot;put import mapping {} {}&quot;, className, classPath);</span>
+                            }
+<span class="nc" id="L1297">                        }</span>
+<span class="nc" id="L1298">                        String newArg = String.join(&quot; &quot;, newArgs);</span>
+<span class="nc" id="L1299">                        LOGGER.trace(&quot;new arg {} {}&quot;, newArg);</span>
+<span class="nc" id="L1300">                        formatedArgs.add(newArg);</span>
+                    }
+<span class="nc" id="L1302">                }</span>
+<span class="nc" id="L1303">                operation.getExtensions().put(&quot;x-spring-provide-args&quot;, formatedArgs);</span>
+            }
+        }
+<span class="nc" id="L1306">        return provideArgsClassSet;</span>
+    }
+
+
+    @Override
+    public ModelsMap postProcessModelsEnum(ModelsMap objs) {
+<span class="nc" id="L1312">        objs = super.postProcessModelsEnum(objs);</span>
+
+        // Add imports for Jackson
+<span class="nc" id="L1315">        final List&lt;Map&lt;String, String&gt;&gt; imports = objs.getImports();</span>
+<span class="nc bnc" id="L1316" title="All 2 branches missed.">        for (ModelMap mo : objs.getModels()) {</span>
+<span class="nc" id="L1317">            CodegenModel cm = mo.getModel();</span>
+<span class="nc" id="L1318">            boolean addNullableImports = false;</span>
+<span class="nc bnc" id="L1319" title="All 2 branches missed.">            for (CodegenProperty var : cm.vars) {</span>
+<span class="nc" id="L1320">                addNullableImports = isAddNullableImports(cm, addNullableImports, var);</span>
+<span class="nc" id="L1321">            }</span>
+<span class="nc bnc" id="L1322" title="All 4 branches missed.">            if (Boolean.TRUE.equals(cm.isEnum) &amp;&amp; cm.allowableValues != null) {</span>
+<span class="nc" id="L1323">                cm.imports.add(importMapping.get(&quot;JsonValue&quot;));</span>
+<span class="nc" id="L1324">                final Map&lt;String, String&gt; item = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L1325">                item.put(&quot;import&quot;, importMapping.get(&quot;JsonValue&quot;));</span>
+<span class="nc" id="L1326">                imports.add(item);</span>
+            }
+<span class="nc bnc" id="L1328" title="All 2 branches missed.">            if (addNullableImports) {</span>
+<span class="nc" id="L1329">                Map&lt;String, String&gt; imports2Classnames = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L1330">                imports2Classnames.put(&quot;NoSuchElementException&quot;, &quot;java.util.NoSuchElementException&quot;);</span>
+<span class="nc" id="L1331">                addImports(imports, cm, imports2Classnames);</span>
+            }
+<span class="nc" id="L1333">        }</span>
+
+<span class="nc" id="L1335">        return objs;</span>
+    }
+
+    @Override
+    public void setUseBeanValidation(boolean useBeanValidation) {
+<span class="nc" id="L1340">        this.useBeanValidation = useBeanValidation;</span>
+<span class="nc" id="L1341">    }</span>
+
+    @Override
+    public void setPerformBeanValidation(boolean performBeanValidation) {
+<span class="nc" id="L1345">        this.performBeanValidation = performBeanValidation;</span>
+<span class="nc" id="L1346">    }</span>
+
+    @Override
+    public void setUseOptional(boolean useOptional) {
+<span class="nc" id="L1350">        this.useOptional = useOptional;</span>
+<span class="nc" id="L1351">    }</span>
+
+    @Override
+    public void setUseSwaggerUI(boolean useSwaggerUI) {
+<span class="nc" id="L1355">        this.useSwaggerUI = useSwaggerUI;</span>
+<span class="nc" id="L1356">    }</span>
+
+    @Override
+    public List&lt;VendorExtension&gt; getSupportedVendorExtensions() {
+<span class="nc" id="L1360">        List&lt;VendorExtension&gt; extensions = super.getSupportedVendorExtensions();</span>
+<span class="nc" id="L1361">        extensions.add(VendorExtension.X_OPERATION_EXTRA_ANNOTATION);</span>
+<span class="nc" id="L1362">        extensions.add(VendorExtension.X_SPRING_PAGINATED);</span>
+<span class="nc" id="L1363">        extensions.add(VendorExtension.X_VERSION_PARAM);</span>
+<span class="nc" id="L1364">        extensions.add(VendorExtension.X_PATTERN_MESSAGE);</span>
+<span class="nc" id="L1365">        return extensions;</span>
+    }
+
+    public boolean isUseSpringBoot3() {
+<span class="nc" id="L1369">        return useSpringBoot3;</span>
+    }
+
+    public void setUseSpringBoot3(boolean useSpringBoot3) {
+<span class="nc" id="L1373">        this.useSpringBoot3 = useSpringBoot3;</span>
+<span class="nc" id="L1374">    }</span>
+
+    public RequestMappingMode getRequestMappingMode() {
+<span class="nc" id="L1377">        return requestMappingMode;</span>
+    }
+
+    public void setRequestMappingMode(RequestMappingMode requestMappingMode) {
+<span class="nc" id="L1381">        this.requestMappingMode = requestMappingMode;</span>
+<span class="nc" id="L1382">    }</span>
+
+    public void setResourceFolder( String resourceFolder ) {
+<span class="nc" id="L1385">        this.resourceFolder = resourceFolder;</span>
+<span class="nc" id="L1386">    }</span>
+
+    public String getResourceFolder() {
+<span class="fc" id="L1389">        return resourceFolder;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JavaMicroprofileServerCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">JavaMicroprofileServerCodegen.java</span></div><h1>JavaMicroprofileServerCodegen.java</h1><pre class="source lang-java linenums">package org.openapitools.codegen.languages;
+
+import java.io.File;
+import java.util.List;
+
+import org.openapitools.codegen.CodegenOperation;
+import org.openapitools.codegen.CodegenResponse;
+import org.openapitools.codegen.CodegenType;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+
+public class JavaMicroprofileServerCodegen extends JavaClientCodegen {
+    public static final String PROJECT_NAME = &quot;projectName&quot;;
+    public static final String MICROPROFILE_SERVER = &quot;microprofileServer&quot;;
+<span class="nc" id="L16">    protected boolean microprofileServer = true;</span>
+
+    public JavaMicroprofileServerCodegen() {
+<span class="nc" id="L19">        super();</span>
+
+<span class="nc" id="L21">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;microprofile&quot;;</span>
+<span class="nc" id="L22">        invokerPackage = &quot;org.openapitools.server&quot;;</span>
+<span class="nc" id="L23">        artifactId = &quot;openapi-microprofile-server&quot;;</span>
+<span class="nc" id="L24">        apiPackage = &quot;org.openapitools.server.api&quot;;</span>
+<span class="nc" id="L25">        modelPackage = &quot;org.openapitools.server.model&quot;;</span>
+<span class="nc" id="L26">        setLibrary(&quot;microprofile&quot;);</span>
+<span class="nc" id="L27">    }</span>
+
+    public CodegenType getTag() {
+<span class="nc" id="L30">        return CodegenType.SERVER;</span>
+    }
+
+    public String getName() {
+<span class="nc" id="L34">        return &quot;java-microprofile&quot;;</span>
+    }
+
+    public String getHelp() {
+<span class="nc" id="L38">        return &quot;Generates a microprofile server.&quot;;</span>
+    }
+    @Override
+    public void processOpts() {
+<span class="nc" id="L42">        super.processOpts();</span>
+<span class="nc" id="L43">        additionalProperties.put(MICROPROFILE_SERVER, microprofileServer);</span>
+<span class="nc" id="L44">    }</span>
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L48">        super.postProcessOperationsWithModels(objs, allModels);</span>
+<span class="nc" id="L49">        OperationMap operations = objs.getOperations();</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        if (operations != null) {</span>
+<span class="nc" id="L51">            List&lt;CodegenOperation&gt; ops = operations.getOperation();</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">            for (CodegenOperation operation : ops) {</span>
+<span class="nc" id="L53">                List&lt;CodegenResponse&gt; responses = operation.responses;</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">                if (multiple2xxResponsesSpecified(responses)) {</span>
+<span class="nc" id="L55">                    operation.vendorExtensions.put(&quot;x-multiple-2xx-response-operation&quot;, true);</span>
+                }
+<span class="nc" id="L57">            }</span>
+        }
+<span class="nc" id="L59">        return objs;</span>
+    }
+
+    private boolean multiple2xxResponsesSpecified(List&lt;CodegenResponse&gt; responses) {
+<span class="nc" id="L63">        int responseIs2xxCount = 0;</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">        for (CodegenResponse response : responses) {</span>
+<span class="nc bnc" id="L65" title="All 2 branches missed.">            if (response.is2xx) {</span>
+<span class="nc" id="L66">                responseIs2xxCount++;</span>
+            }
+<span class="nc" id="L68">        }</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">        return responseIs2xxCount &gt; 1;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

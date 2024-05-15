@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SpringHttpStatusLambda.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.templating.mustache</a> &gt; <span class="el_source">SpringHttpStatusLambda.java</span></div><h1>SpringHttpStatusLambda.java</h1><pre class="source lang-java linenums">package org.openapitools.codegen.templating.mustache;
+
+import com.samskivert.mustache.Mustache;
+import com.samskivert.mustache.Template;
+
+import java.io.IOException;
+import java.io.Writer;
+
+/**
+ * Returns the Spring {@code org.springframework.http.HttpStatus} enumeration for the given status text.
+ * It throws an IllegalArgumentException if the status text is handled by the Spring framework.
+ *
+ * Register:
+ * &lt;pre&gt;
+ * additionalProperties.put(&quot;springHttpStatus&quot;, new SpringHttpStatusLambda());
+ * &lt;/pre&gt;
+ *
+ * Use:
+ * &lt;pre&gt;
+ * {{#springHttpStatus}}{{statusCode}}{{/springHttpStatus}}
+ * &lt;/pre&gt;
+ */
+<span class="nc" id="L23">public class SpringHttpStatusLambda implements Mustache.Lambda {</span>
+
+    final static String HTTP_STATUS_PREFIX = &quot;HttpStatus.&quot;;
+
+    @Override
+    public void execute(Template.Fragment fragment, Writer writer) throws IOException {
+<span class="nc" id="L29">        final String httpCode = fragment.execute();</span>
+<span class="nc bnc" id="L30" title="All 62 branches missed.">        switch (httpCode) {</span>
+            case &quot;202&quot;:
+<span class="nc" id="L32">                writer.write(HTTP_STATUS_PREFIX + &quot;ACCEPTED&quot;);</span>
+<span class="nc" id="L33">                break;</span>
+            case &quot;208&quot;:
+<span class="nc" id="L35">                writer.write(HTTP_STATUS_PREFIX + &quot;ALREADY_REPORTED&quot;);</span>
+<span class="nc" id="L36">                break;</span>
+            case &quot;502&quot;:
+<span class="nc" id="L38">                writer.write(HTTP_STATUS_PREFIX + &quot;BAD_GATEWAY&quot;);</span>
+<span class="nc" id="L39">                break;</span>
+            case &quot;400&quot;:
+<span class="nc" id="L41">                writer.write(HTTP_STATUS_PREFIX + &quot;BAD_REQUEST&quot;);</span>
+<span class="nc" id="L42">                break;</span>
+            case &quot;509&quot;:
+<span class="nc" id="L44">                writer.write(HTTP_STATUS_PREFIX + &quot;BANDWIDTH_LIMIT_EXCEEDED&quot;);</span>
+<span class="nc" id="L45">                break;</span>
+            case &quot;409&quot;:
+<span class="nc" id="L47">                writer.write(HTTP_STATUS_PREFIX + &quot;CONFLICT&quot;);</span>
+<span class="nc" id="L48">                break;</span>
+            case &quot;100&quot;:
+<span class="nc" id="L50">                writer.write(HTTP_STATUS_PREFIX + &quot;CONTINUE&quot;);</span>
+<span class="nc" id="L51">                break;</span>
+            case &quot;201&quot;:
+<span class="nc" id="L53">                writer.write(HTTP_STATUS_PREFIX + &quot;CREATED&quot;);</span>
+<span class="nc" id="L54">                break;</span>
+            case &quot;103&quot;:
+<span class="nc" id="L56">                writer.write(HTTP_STATUS_PREFIX + &quot;EARLY_HINTS&quot;);</span>
+<span class="nc" id="L57">                break;</span>
+            case &quot;417&quot;:
+<span class="nc" id="L59">                writer.write(HTTP_STATUS_PREFIX + &quot;EXPECTATION_FAILED&quot;);</span>
+<span class="nc" id="L60">                break;</span>
+            case &quot;424&quot;:
+<span class="nc" id="L62">                writer.write(HTTP_STATUS_PREFIX + &quot;FAILED_DEPENDENCY&quot;);</span>
+<span class="nc" id="L63">                break;</span>
+            case &quot;403&quot;:
+<span class="nc" id="L65">                writer.write(HTTP_STATUS_PREFIX + &quot;FORBIDDEN&quot;);</span>
+<span class="nc" id="L66">                break;</span>
+            case &quot;302&quot;:
+<span class="nc" id="L68">                writer.write(HTTP_STATUS_PREFIX + &quot;FOUND&quot;);</span>
+<span class="nc" id="L69">                break;</span>
+            case &quot;504&quot;:
+<span class="nc" id="L71">                writer.write(HTTP_STATUS_PREFIX + &quot;GATEWAY_TIMEOUT&quot;);</span>
+<span class="nc" id="L72">                break;</span>
+            case &quot;410&quot;:
+<span class="nc" id="L74">                writer.write(HTTP_STATUS_PREFIX + &quot;GONE&quot;);</span>
+<span class="nc" id="L75">                break;</span>
+            case &quot;505&quot;:
+<span class="nc" id="L77">                writer.write(HTTP_STATUS_PREFIX + &quot;HTTP_VERSION_NOT_SUPPORTED&quot;);</span>
+<span class="nc" id="L78">                break;</span>
+            case &quot;418&quot;:
+<span class="nc" id="L80">                writer.write(HTTP_STATUS_PREFIX + &quot;I_AM_A_TEAPOT&quot;);</span>
+<span class="nc" id="L81">                break;</span>
+            case &quot;226&quot;:
+<span class="nc" id="L83">                writer.write(HTTP_STATUS_PREFIX + &quot;IM_USED&quot;);</span>
+<span class="nc" id="L84">                break;</span>
+            case &quot;507&quot;:
+<span class="nc" id="L86">                writer.write(HTTP_STATUS_PREFIX + &quot;INSUFFICIENT_STORAGE&quot;);</span>
+<span class="nc" id="L87">                break;</span>
+            case &quot;500&quot;:
+<span class="nc" id="L89">                writer.write(HTTP_STATUS_PREFIX + &quot;INTERNAL_SERVER_ERROR&quot;);</span>
+<span class="nc" id="L90">                break;</span>
+            case &quot;411&quot;:
+<span class="nc" id="L92">                writer.write(HTTP_STATUS_PREFIX + &quot;LENGTH_REQUIRED&quot;);</span>
+<span class="nc" id="L93">                break;</span>
+            case &quot;423&quot;:
+<span class="nc" id="L95">                writer.write(HTTP_STATUS_PREFIX + &quot;LOCKED&quot;);</span>
+<span class="nc" id="L96">                break;</span>
+            case &quot;508&quot;:
+<span class="nc" id="L98">                writer.write(HTTP_STATUS_PREFIX + &quot;LOOP_DETECTED&quot;);</span>
+<span class="nc" id="L99">                break;</span>
+            case &quot;405&quot;:
+<span class="nc" id="L101">                writer.write(HTTP_STATUS_PREFIX + &quot;METHOD_NOT_ALLOWED&quot;);</span>
+<span class="nc" id="L102">                break;</span>
+            case &quot;301&quot;:
+<span class="nc" id="L104">                writer.write(HTTP_STATUS_PREFIX + &quot;MOVED_PERMANENTLY&quot;);</span>
+<span class="nc" id="L105">                break;</span>
+            case &quot;207&quot;:
+<span class="nc" id="L107">                writer.write(HTTP_STATUS_PREFIX + &quot;MULTI_STATUS&quot;);</span>
+<span class="nc" id="L108">                break;</span>
+            case &quot;300&quot;:
+<span class="nc" id="L110">                writer.write(HTTP_STATUS_PREFIX + &quot;MULTIPLE_CHOICES&quot;);</span>
+<span class="nc" id="L111">                break;</span>
+            case &quot;511&quot;:
+<span class="nc" id="L113">                writer.write(HTTP_STATUS_PREFIX + &quot;NETWORK_AUTHENTICATION_REQUIRED&quot;);</span>
+<span class="nc" id="L114">                break;</span>
+            case &quot;204&quot;:
+<span class="nc" id="L116">                writer.write(HTTP_STATUS_PREFIX + &quot;NO_CONTENT&quot;);</span>
+<span class="nc" id="L117">                break;</span>
+            case &quot;203&quot;:
+<span class="nc" id="L119">                writer.write(HTTP_STATUS_PREFIX + &quot;NON_AUTHORITATIVE_INFORMATION&quot;);</span>
+<span class="nc" id="L120">                break;</span>
+            case &quot;406&quot;:
+<span class="nc" id="L122">                writer.write(HTTP_STATUS_PREFIX + &quot;NOT_ACCEPTABLE&quot;);</span>
+<span class="nc" id="L123">                break;</span>
+            case &quot;510&quot;:
+<span class="nc" id="L125">                writer.write(HTTP_STATUS_PREFIX + &quot;NOT_EXTENDED&quot;);</span>
+<span class="nc" id="L126">                break;</span>
+            case &quot;404&quot;:
+<span class="nc" id="L128">                writer.write(HTTP_STATUS_PREFIX + &quot;NOT_FOUND&quot;);</span>
+<span class="nc" id="L129">                break;</span>
+            case &quot;501&quot;:
+<span class="nc" id="L131">                writer.write(HTTP_STATUS_PREFIX + &quot;NOT_IMPLEMENTED&quot;);</span>
+<span class="nc" id="L132">                break;</span>
+            case &quot;304&quot;:
+<span class="nc" id="L134">                writer.write(HTTP_STATUS_PREFIX + &quot;NOT_MODIFIED&quot;);</span>
+<span class="nc" id="L135">                break;</span>
+            case &quot;&quot;:
+            case &quot;200&quot;:
+<span class="nc" id="L138">                writer.write(HTTP_STATUS_PREFIX + &quot;OK&quot;);</span>
+<span class="nc" id="L139">                break;</span>
+            case &quot;206&quot;:
+<span class="nc" id="L141">                writer.write(HTTP_STATUS_PREFIX + &quot;PARTIAL_CONTENT&quot;);</span>
+<span class="nc" id="L142">                break;</span>
+            case &quot;413&quot;:
+<span class="nc" id="L144">                writer.write(HTTP_STATUS_PREFIX + &quot;PAYLOAD_TOO_LARGE&quot;);</span>
+<span class="nc" id="L145">                break;</span>
+            case &quot;402&quot;:
+<span class="nc" id="L147">                writer.write(HTTP_STATUS_PREFIX + &quot;PAYMENT_REQUIRED&quot;);</span>
+<span class="nc" id="L148">                break;</span>
+            case &quot;308&quot;:
+<span class="nc" id="L150">                writer.write(HTTP_STATUS_PREFIX + &quot;PERMANENT_REDIRECT&quot;);</span>
+<span class="nc" id="L151">                break;</span>
+            case &quot;412&quot;:
+<span class="nc" id="L153">                writer.write(HTTP_STATUS_PREFIX + &quot;PRECONDITION_FAILED&quot;);</span>
+<span class="nc" id="L154">                break;</span>
+            case &quot;428&quot;:
+<span class="nc" id="L156">                writer.write(HTTP_STATUS_PREFIX + &quot;PRECONDITION_REQUIRED&quot;);</span>
+<span class="nc" id="L157">                break;</span>
+            case &quot;102&quot;:
+<span class="nc" id="L159">                writer.write(HTTP_STATUS_PREFIX + &quot;PROCESSING&quot;);</span>
+<span class="nc" id="L160">                break;</span>
+            case &quot;407&quot;:
+<span class="nc" id="L162">                writer.write(HTTP_STATUS_PREFIX + &quot;PROXY_AUTHENTICATION_REQUIRED&quot;);</span>
+<span class="nc" id="L163">                break;</span>
+            case &quot;431&quot;:
+<span class="nc" id="L165">                writer.write(HTTP_STATUS_PREFIX + &quot;REQUEST_HEADER_FIELDS_TOO_LARGE&quot;);</span>
+<span class="nc" id="L166">                break;</span>
+            case &quot;408&quot;:
+<span class="nc" id="L168">                writer.write(HTTP_STATUS_PREFIX + &quot;REQUEST_TIMEOUT&quot;);</span>
+<span class="nc" id="L169">                break;</span>
+            case &quot;416&quot;:
+<span class="nc" id="L171">                writer.write(HTTP_STATUS_PREFIX + &quot;REQUESTED_RANGE_NOT_SATISFIABLE&quot;);</span>
+<span class="nc" id="L172">                break;</span>
+            case &quot;205&quot;:
+<span class="nc" id="L174">                writer.write(HTTP_STATUS_PREFIX + &quot;RESET_CONTENT&quot;);</span>
+<span class="nc" id="L175">                break;</span>
+            case &quot;303&quot;:
+<span class="nc" id="L177">                writer.write(HTTP_STATUS_PREFIX + &quot;SEE_OTHER&quot;);</span>
+<span class="nc" id="L178">                break;</span>
+            case &quot;503&quot;:
+<span class="nc" id="L180">                writer.write(HTTP_STATUS_PREFIX + &quot;SERVICE_UNAVAILABLE&quot;);</span>
+<span class="nc" id="L181">                break;</span>
+            case &quot;101&quot;:
+<span class="nc" id="L183">                writer.write(HTTP_STATUS_PREFIX + &quot;SWITCHING_PROTOCOLS&quot;);</span>
+<span class="nc" id="L184">                break;</span>
+            case &quot;307&quot;:
+<span class="nc" id="L186">                writer.write(HTTP_STATUS_PREFIX + &quot;TEMPORARY_REDIRECT&quot;);</span>
+<span class="nc" id="L187">                break;</span>
+            case &quot;425&quot;:
+<span class="nc" id="L189">                writer.write(HTTP_STATUS_PREFIX + &quot;TOO_EARLY&quot;);</span>
+<span class="nc" id="L190">                break;</span>
+            case &quot;429&quot;:
+<span class="nc" id="L192">                writer.write(HTTP_STATUS_PREFIX + &quot;TOO_MANY_REQUESTS&quot;);</span>
+<span class="nc" id="L193">                break;</span>
+            case &quot;401&quot;:
+<span class="nc" id="L195">                writer.write(HTTP_STATUS_PREFIX + &quot;UNAUTHORIZED&quot;);</span>
+<span class="nc" id="L196">                break;</span>
+            case &quot;451&quot;:
+<span class="nc" id="L198">                writer.write(HTTP_STATUS_PREFIX + &quot;UNAVAILABLE_FOR_LEGAL_REASONS&quot;);</span>
+<span class="nc" id="L199">                break;</span>
+            case &quot;422&quot;:
+<span class="nc" id="L201">                writer.write(HTTP_STATUS_PREFIX + &quot;UNPROCESSABLE_ENTITY&quot;);</span>
+<span class="nc" id="L202">                break;</span>
+            case &quot;415&quot;:
+<span class="nc" id="L204">                writer.write(HTTP_STATUS_PREFIX + &quot;UNSUPPORTED_MEDIA_TYPE&quot;);</span>
+<span class="nc" id="L205">                break;</span>
+            case &quot;426&quot;:
+<span class="nc" id="L207">                writer.write(HTTP_STATUS_PREFIX + &quot;UPGRADE_REQUIRED&quot;);</span>
+<span class="nc" id="L208">                break;</span>
+            case &quot;414&quot;:
+<span class="nc" id="L210">                writer.write(HTTP_STATUS_PREFIX + &quot;URI_TOO_LONG&quot;);</span>
+<span class="nc" id="L211">                break;</span>
+            case &quot;506&quot;:
+<span class="nc" id="L213">                writer.write(HTTP_STATUS_PREFIX + &quot;VARIANT_ALSO_NEGOTIATES&quot;);</span>
+<span class="nc" id="L214">                break;</span>
+            default:
+<span class="nc" id="L216">               throw new IllegalArgumentException(&quot;The given HTTP status code: &quot; + httpCode</span>
+                       + &quot; is not supported by the 'org.springframework.http.HttpStatus' enum.&quot;);
+        }
+<span class="nc" id="L219">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Validate.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (executable)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.cmd</a> &gt; <span class="el_source">Validate.java</span></div><h1>Validate.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.cmd;
+
+import io.airlift.airline.Command;
+import io.airlift.airline.Option;
+
+import io.swagger.parser.OpenAPIParser;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.parser.core.models.ParseOptions;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import org.apache.commons.text.WordUtils;
+import org.openapitools.codegen.validation.ValidationResult;
+import org.openapitools.codegen.validations.oas.OpenApiEvaluator;
+import org.openapitools.codegen.validations.oas.RuleConfiguration;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+@SuppressWarnings({&quot;unused&quot;,&quot;java:S106&quot;})
+@Command(name = &quot;validate&quot;, description = &quot;Validate specification&quot;)
+<span class="nc" id="L38">public class Validate extends OpenApiGeneratorCommand {</span>
+
+    @Option(name = {&quot;-i&quot;, &quot;--input-spec&quot;}, title = &quot;spec file&quot;, required = true,
+            description = &quot;location of the OpenAPI spec, as URL or file (required)&quot;)
+    private String spec;
+
+    @Option(name = { &quot;--recommend&quot;}, title = &quot;recommend spec improvements&quot;)
+    private Boolean recommend;
+
+    @Override
+    public void execute() {
+<span class="nc" id="L49">        System.out.println(&quot;Validating spec (&quot; + spec + &quot;)&quot;);</span>
+<span class="nc" id="L50">        ParseOptions options = new ParseOptions();</span>
+<span class="nc" id="L51">        options.setResolve(true);</span>
+<span class="nc" id="L52">        SwaggerParseResult result = new OpenAPIParser().readLocation(spec, null, options);</span>
+<span class="nc" id="L53">        List&lt;String&gt; messageList = result.getMessages();</span>
+<span class="nc" id="L54">        Set&lt;String&gt; errors = new HashSet&lt;&gt;(messageList);</span>
+<span class="nc" id="L55">        Set&lt;String&gt; warnings = new HashSet&lt;&gt;();</span>
+
+<span class="nc" id="L57">        StringBuilder sb = new StringBuilder();</span>
+<span class="nc" id="L58">        OpenAPI specification = result.getOpenAPI();</span>
+
+<span class="nc" id="L60">        RuleConfiguration ruleConfiguration = new RuleConfiguration();</span>
+
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        if (recommend != null) ruleConfiguration.setEnableRecommendations(recommend);</span>
+<span class="nc" id="L63">        else ruleConfiguration.setEnableRecommendations(false);</span>
+
+<span class="nc" id="L65">        OpenApiEvaluator evaluator = new OpenApiEvaluator(ruleConfiguration);</span>
+<span class="nc" id="L66">        ValidationResult validationResult = evaluator.validate(specification);</span>
+
+        // TODO: We could also provide description here along with getMessage. getMessage is either a &quot;generic&quot; message or specific (e.g. Model 'Cat' has issues).
+        //       This would require that we parse the messageList coming from swagger-parser into a better structure.
+<span class="nc" id="L70">        validationResult.getWarnings().forEach(invalid -&gt; warnings.add(invalid.getMessage()));</span>
+<span class="nc" id="L71">        validationResult.getErrors().forEach(invalid -&gt; errors.add(invalid.getMessage()));</span>
+
+<span class="nc bnc" id="L73" title="All 2 branches missed.">        if (!errors.isEmpty()) {</span>
+<span class="nc" id="L74">            sb.append(&quot;Errors:&quot;).append(System.lineSeparator());</span>
+<span class="nc" id="L75">            errors.forEach(msg -&gt;</span>
+<span class="nc" id="L76">                    sb.append(&quot;\t- &quot;).append(WordUtils.wrap(msg, 90).replace(System.lineSeparator(), System.lineSeparator() + &quot;\t  &quot;)).append(System.lineSeparator())</span>
+            );
+        }
+
+<span class="nc bnc" id="L80" title="All 2 branches missed.">        if (!warnings.isEmpty()) {</span>
+<span class="nc" id="L81">            sb.append(&quot;Warnings: &quot;).append(System.lineSeparator());</span>
+<span class="nc" id="L82">            warnings.forEach(msg -&gt;</span>
+<span class="nc" id="L83">                    sb.append(&quot;\t- &quot;).append(WordUtils.wrap(msg, 90).replace(System.lineSeparator(), System.lineSeparator() + &quot;\t  &quot;)).append(System.lineSeparator())</span>
+            );
+        }
+
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        if (!errors.isEmpty()) {</span>
+<span class="nc" id="L88">            sb.append(System.lineSeparator());</span>
+<span class="nc" id="L89">            sb.append(&quot;[error] Spec has &quot;).append(errors.size()).append(&quot; errors.&quot;);</span>
+<span class="nc" id="L90">            System.err.println(sb.toString());</span>
+<span class="nc" id="L91">            System.exit(1);</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">        } else if (!warnings.isEmpty()) {</span>
+<span class="nc" id="L93">            sb.append(System.lineSeparator());</span>
+<span class="nc" id="L94">            sb.append(&quot;[info] Spec has &quot;).append(warnings.size()).append(&quot; recommendation(s).&quot;);</span>
+        } else {
+            // we say &quot;issues&quot; here rather than &quot;errors&quot; to account for both errors and issues.
+<span class="nc" id="L97">            sb.append(&quot;No validation issues detected.&quot;);</span>
+        }
+
+<span class="nc" id="L100">        System.out.println(sb.toString());</span>
+<span class="nc" id="L101">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

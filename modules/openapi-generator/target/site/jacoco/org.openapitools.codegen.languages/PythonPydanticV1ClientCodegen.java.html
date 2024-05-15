@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PythonPydanticV1ClientCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">PythonPydanticV1ClientCodegen.java</span></div><h1>PythonPydanticV1ClientCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.meta.GeneratorMetadata;
+import org.openapitools.codegen.meta.Stability;
+import org.openapitools.codegen.meta.features.*;
+import org.openapitools.codegen.meta.features.*;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.utils.ModelUtils;
+import org.openapitools.codegen.utils.ProcessUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.*;
+
+import static org.openapitools.codegen.utils.StringUtils.escape;
+import static org.openapitools.codegen.utils.StringUtils.underscore;
+
+public class PythonPydanticV1ClientCodegen extends AbstractPythonPydanticV1Codegen implements CodegenConfig {
+<span class="nc" id="L45">    private final Logger LOGGER = LoggerFactory.getLogger(PythonPydanticV1ClientCodegen.class);</span>
+
+    public static final String PACKAGE_URL = &quot;packageUrl&quot;;
+    public static final String DEFAULT_LIBRARY = &quot;urllib3&quot;;
+    public static final String RECURSION_LIMIT = &quot;recursionLimit&quot;;
+    public static final String DATETIME_FORMAT = &quot;datetimeFormat&quot;;
+    public static final String DATE_FORMAT = &quot;dateFormat&quot;;
+
+    protected String packageUrl;
+<span class="nc" id="L54">    protected String apiDocPath = &quot;docs/&quot;;</span>
+<span class="nc" id="L55">    protected String modelDocPath = &quot;docs/&quot;;</span>
+<span class="nc" id="L56">    protected boolean useOneOfDiscriminatorLookup = false; // use oneOf discriminator's mapping for model lookup</span>
+<span class="nc" id="L57">    protected String datetimeFormat = &quot;%Y-%m-%dT%H:%M:%S.%f%z&quot;;</span>
+<span class="nc" id="L58">    protected String dateFormat = &quot;%Y-%m-%d&quot;;</span>
+
+
+    private String testFolder;
+
+    public PythonPydanticV1ClientCodegen() {
+<span class="nc" id="L64">        super();</span>
+
+        // force sortParamsByRequiredFlag to true to make the api method signature less complicated
+<span class="nc" id="L67">        sortParamsByRequiredFlag = true;</span>
+
+<span class="nc" id="L69">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L70">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="nc" id="L71">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON, WireFormatFeature.XML, WireFormatFeature.Custom))</span>
+<span class="nc" id="L72">                .includeSecurityFeatures(SecurityFeature.SignatureAuth)</span>
+<span class="nc" id="L73">                .excludeGlobalFeatures(</span>
+                        GlobalFeature.XMLStructureDefinitions,
+                        GlobalFeature.Callbacks,
+                        GlobalFeature.LinkObjects,
+                        GlobalFeature.ParameterStyling
+                )
+<span class="nc" id="L79">                .includeSchemaSupportFeatures(</span>
+                        SchemaSupportFeature.Polymorphism,
+                        SchemaSupportFeature.allOf,
+                        SchemaSupportFeature.oneOf,
+                        SchemaSupportFeature.anyOf
+                )
+<span class="nc" id="L85">                .excludeParameterFeatures(</span>
+                        ParameterFeature.Cookie
+                )
+        );
+
+<span class="nc" id="L90">        generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
+<span class="nc" id="L91">                .stability(Stability.STABLE)</span>
+<span class="nc" id="L92">                .build();</span>
+
+        // clear import mapping (from default generator) as python does not use it
+        // at the moment
+<span class="nc" id="L96">        importMapping.clear();</span>
+
+        // override type mapping in abstract python codegen
+<span class="nc" id="L99">        typeMapping.put(&quot;array&quot;, &quot;List&quot;);</span>
+<span class="nc" id="L100">        typeMapping.put(&quot;set&quot;, &quot;List&quot;);</span>
+<span class="nc" id="L101">        typeMapping.put(&quot;map&quot;, &quot;Dict&quot;);</span>
+<span class="nc" id="L102">        typeMapping.put(&quot;decimal&quot;, &quot;decimal.Decimal&quot;);</span>
+<span class="nc" id="L103">        typeMapping.put(&quot;file&quot;, &quot;bytearray&quot;);</span>
+<span class="nc" id="L104">        typeMapping.put(&quot;binary&quot;, &quot;bytearray&quot;);</span>
+<span class="nc" id="L105">        typeMapping.put(&quot;ByteArray&quot;, &quot;bytearray&quot;);</span>
+
+<span class="nc" id="L107">        languageSpecificPrimitives.remove(&quot;file&quot;);</span>
+<span class="nc" id="L108">        languageSpecificPrimitives.add(&quot;decimal.Decimal&quot;);</span>
+<span class="nc" id="L109">        languageSpecificPrimitives.add(&quot;bytearray&quot;);</span>
+<span class="nc" id="L110">        languageSpecificPrimitives.add(&quot;none_type&quot;);</span>
+
+<span class="nc" id="L112">        supportsInheritance = true;</span>
+<span class="nc" id="L113">        modelPackage = &quot;models&quot;;</span>
+<span class="nc" id="L114">        apiPackage = &quot;api&quot;;</span>
+<span class="nc" id="L115">        outputFolder = &quot;generated-code&quot; + File.separatorChar + &quot;python&quot;;</span>
+
+<span class="nc" id="L117">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.py&quot;);</span>
+<span class="nc" id="L118">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.py&quot;);</span>
+
+<span class="nc" id="L120">        modelTestTemplateFiles.put(&quot;model_test.mustache&quot;, &quot;.py&quot;);</span>
+<span class="nc" id="L121">        apiTestTemplateFiles.put(&quot;api_test.mustache&quot;, &quot;.py&quot;);</span>
+
+<span class="nc" id="L123">        embeddedTemplateDir = templateDir = &quot;python-pydantic-v1&quot;;</span>
+
+<span class="nc" id="L125">        modelDocTemplateFiles.put(&quot;model_doc.mustache&quot;, &quot;.md&quot;);</span>
+<span class="nc" id="L126">        apiDocTemplateFiles.put(&quot;api_doc.mustache&quot;, &quot;.md&quot;);</span>
+
+<span class="nc" id="L128">        testFolder = &quot;test&quot;;</span>
+
+        // default HIDE_GENERATION_TIMESTAMP to true
+<span class="nc" id="L131">        hideGenerationTimestamp = Boolean.TRUE;</span>
+
+        // from https://docs.python.org/3/reference/lexical_analysis.html#keywords
+<span class="nc" id="L134">        setReservedWordsLowerCase(</span>
+<span class="nc" id="L135">                Arrays.asList(</span>
+                        // pydantic keyword
+                        &quot;schema&quot;, &quot;base64&quot;, &quot;json&quot;,
+                        &quot;date&quot;,
+                        // @property
+                        &quot;property&quot;,
+                        // python reserved words
+                        &quot;and&quot;, &quot;del&quot;, &quot;from&quot;, &quot;not&quot;, &quot;while&quot;, &quot;as&quot;, &quot;elif&quot;, &quot;global&quot;, &quot;or&quot;, &quot;with&quot;,
+                        &quot;assert&quot;, &quot;else&quot;, &quot;if&quot;, &quot;pass&quot;, &quot;yield&quot;, &quot;break&quot;, &quot;except&quot;, &quot;import&quot;,
+                        &quot;print&quot;, &quot;class&quot;, &quot;exec&quot;, &quot;in&quot;, &quot;raise&quot;, &quot;continue&quot;, &quot;finally&quot;, &quot;is&quot;,
+                        &quot;return&quot;, &quot;def&quot;, &quot;for&quot;, &quot;lambda&quot;, &quot;try&quot;, &quot;self&quot;, &quot;nonlocal&quot;, &quot;None&quot;, &quot;True&quot;,
+                        &quot;False&quot;, &quot;async&quot;, &quot;await&quot;));
+
+<span class="nc" id="L148">        cliOptions.clear();</span>
+<span class="nc" id="L149">        cliOptions.add(new CliOption(CodegenConstants.PACKAGE_NAME, &quot;python package name (convention: snake_case).&quot;)</span>
+<span class="nc" id="L150">                .defaultValue(&quot;openapi_client&quot;));</span>
+<span class="nc" id="L151">        cliOptions.add(new CliOption(CodegenConstants.PROJECT_NAME, &quot;python project name in setup.py (e.g. petstore-api).&quot;));</span>
+<span class="nc" id="L152">        cliOptions.add(new CliOption(CodegenConstants.PACKAGE_VERSION, &quot;python package version.&quot;)</span>
+<span class="nc" id="L153">                .defaultValue(&quot;1.0.0&quot;));</span>
+<span class="nc" id="L154">        cliOptions.add(new CliOption(PACKAGE_URL, &quot;python package URL.&quot;));</span>
+<span class="nc" id="L155">        cliOptions.add(new CliOption(CodegenConstants.HIDE_GENERATION_TIMESTAMP, CodegenConstants.HIDE_GENERATION_TIMESTAMP_DESC)</span>
+<span class="nc" id="L156">                .defaultValue(Boolean.TRUE.toString()));</span>
+<span class="nc" id="L157">        cliOptions.add(new CliOption(CodegenConstants.SOURCECODEONLY_GENERATION, CodegenConstants.SOURCECODEONLY_GENERATION_DESC)</span>
+<span class="nc" id="L158">                .defaultValue(Boolean.FALSE.toString()));</span>
+<span class="nc" id="L159">        cliOptions.add(new CliOption(RECURSION_LIMIT, &quot;Set the recursion limit. If not set, use the system default value.&quot;));</span>
+<span class="nc" id="L160">        cliOptions.add(new CliOption(MAP_NUMBER_TO, &quot;Map number to Union[StrictFloat, StrictInt], StrictStr or float.&quot;)</span>
+<span class="nc" id="L161">                .defaultValue(&quot;Union[StrictFloat, StrictInt]&quot;));</span>
+<span class="nc" id="L162">        cliOptions.add(new CliOption(DATETIME_FORMAT, &quot;datetime format for query parameters&quot;)</span>
+<span class="nc" id="L163">                .defaultValue(&quot;%Y-%m-%dT%H:%M:%S%z&quot;));</span>
+<span class="nc" id="L164">        cliOptions.add(new CliOption(DATE_FORMAT, &quot;date format for query parameters&quot;)</span>
+<span class="nc" id="L165">                .defaultValue(&quot;%Y-%m-%d&quot;));</span>
+<span class="nc" id="L166">        cliOptions.add(new CliOption(CodegenConstants.USE_ONEOF_DISCRIMINATOR_LOOKUP, CodegenConstants.USE_ONEOF_DISCRIMINATOR_LOOKUP_DESC).defaultValue(&quot;false&quot;));</span>
+
+<span class="nc" id="L168">        supportedLibraries.put(&quot;urllib3&quot;, &quot;urllib3-based client&quot;);</span>
+<span class="nc" id="L169">        supportedLibraries.put(&quot;asyncio&quot;, &quot;asyncio-based client&quot;);</span>
+<span class="nc" id="L170">        supportedLibraries.put(&quot;tornado&quot;, &quot;tornado-based client (deprecated)&quot;);</span>
+<span class="nc" id="L171">        CliOption libraryOption = new CliOption(CodegenConstants.LIBRARY, &quot;library template (sub-template) to use: asyncio, tornado (deprecated), urllib3&quot;);</span>
+<span class="nc" id="L172">        libraryOption.setDefault(DEFAULT_LIBRARY);</span>
+<span class="nc" id="L173">        cliOptions.add(libraryOption);</span>
+<span class="nc" id="L174">        setLibrary(DEFAULT_LIBRARY);</span>
+
+        // option to change how we process + set the data in the 'additionalProperties' keyword.
+<span class="nc" id="L177">        CliOption disallowAdditionalPropertiesIfNotPresentOpt = CliOption.newBoolean(</span>
+                CodegenConstants.DISALLOW_ADDITIONAL_PROPERTIES_IF_NOT_PRESENT,
+<span class="nc" id="L179">                CodegenConstants.DISALLOW_ADDITIONAL_PROPERTIES_IF_NOT_PRESENT_DESC).defaultValue(Boolean.TRUE.toString());</span>
+<span class="nc" id="L180">        Map&lt;String, String&gt; disallowAdditionalPropertiesIfNotPresentOpts = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L181">        disallowAdditionalPropertiesIfNotPresentOpts.put(&quot;false&quot;,</span>
+                &quot;The 'additionalProperties' implementation is compliant with the OAS and JSON schema specifications.&quot;);
+<span class="nc" id="L183">        disallowAdditionalPropertiesIfNotPresentOpts.put(&quot;true&quot;,</span>
+                &quot;Keep the old (incorrect) behaviour that 'additionalProperties' is set to false by default.&quot;);
+<span class="nc" id="L185">        disallowAdditionalPropertiesIfNotPresentOpt.setEnum(disallowAdditionalPropertiesIfNotPresentOpts);</span>
+<span class="nc" id="L186">        cliOptions.add(disallowAdditionalPropertiesIfNotPresentOpt);</span>
+<span class="nc" id="L187">        this.setDisallowAdditionalPropertiesIfNotPresent(true);</span>
+<span class="nc" id="L188">    }</span>
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L192">        this.setLegacyDiscriminatorBehavior(false);</span>
+
+<span class="nc" id="L194">        super.processOpts();</span>
+
+        // map to Dot instead of Period
+<span class="nc" id="L197">        specialCharReplacements.put(&quot;.&quot;, &quot;Dot&quot;);</span>
+
+<span class="nc bnc" id="L199" title="All 2 branches missed.">        if (StringUtils.isEmpty(System.getenv(&quot;PYTHON_POST_PROCESS_FILE&quot;))) {</span>
+<span class="nc" id="L200">            LOGGER.info(&quot;Environment variable PYTHON_POST_PROCESS_FILE not defined so the Python code may not be properly formatted. To define it, try 'export PYTHON_POST_PROCESS_FILE=\&quot;/usr/local/bin/yapf -i\&quot;' (Linux/Mac)&quot;);</span>
+<span class="nc" id="L201">            LOGGER.info(&quot;NOTE: To enable file post-processing, 'enablePostProcessFile' must be set to `true` (--enable-post-process-file for CLI).&quot;);</span>
+        }
+
+<span class="nc" id="L204">        Boolean excludeTests = false;</span>
+
+<span class="nc bnc" id="L206" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.PACKAGE_NAME)) {</span>
+<span class="nc" id="L207">            setPackageName((String) additionalProperties.get(CodegenConstants.PACKAGE_NAME));</span>
+        }
+
+<span class="nc bnc" id="L210" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.PROJECT_NAME)) {</span>
+<span class="nc" id="L211">            setProjectName((String) additionalProperties.get(CodegenConstants.PROJECT_NAME));</span>
+        } else {
+            // default: set project based on package name
+            // e.g. petstore_api (package name) =&gt; petstore-api (project name)
+<span class="nc" id="L215">            setProjectName(packageName.replaceAll(&quot;_&quot;, &quot;-&quot;));</span>
+        }
+
+<span class="nc bnc" id="L218" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.PACKAGE_VERSION)) {</span>
+<span class="nc" id="L219">            setPackageVersion((String) additionalProperties.get(CodegenConstants.PACKAGE_VERSION));</span>
+        }
+
+<span class="nc" id="L222">        additionalProperties.put(CodegenConstants.PROJECT_NAME, projectName);</span>
+<span class="nc" id="L223">        additionalProperties.put(CodegenConstants.PACKAGE_NAME, packageName);</span>
+<span class="nc" id="L224">        additionalProperties.put(CodegenConstants.PACKAGE_VERSION, packageVersion);</span>
+
+<span class="nc bnc" id="L226" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.EXCLUDE_TESTS)) {</span>
+<span class="nc" id="L227">            excludeTests = Boolean.valueOf(additionalProperties.get(CodegenConstants.EXCLUDE_TESTS).toString());</span>
+        }
+
+<span class="nc" id="L230">        Boolean generateSourceCodeOnly = false;</span>
+<span class="nc bnc" id="L231" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.SOURCECODEONLY_GENERATION)) {</span>
+<span class="nc" id="L232">            generateSourceCodeOnly = Boolean.valueOf(additionalProperties.get(CodegenConstants.SOURCECODEONLY_GENERATION).toString());</span>
+        }
+
+<span class="nc bnc" id="L235" title="All 2 branches missed.">        if (generateSourceCodeOnly) {</span>
+            // tests in &lt;package&gt;/test
+<span class="nc" id="L237">            testFolder = packagePath() + File.separatorChar + testFolder;</span>
+            // api/model docs in &lt;package&gt;/docs
+<span class="nc" id="L239">            apiDocPath = packagePath() + &quot;/&quot; + apiDocPath;</span>
+<span class="nc" id="L240">            modelDocPath = packagePath() + &quot;/&quot; + modelDocPath;</span>
+        }
+        // make api and model doc path available in mustache template
+<span class="nc" id="L243">        additionalProperties.put(&quot;apiDocPath&quot;, apiDocPath);</span>
+<span class="nc" id="L244">        additionalProperties.put(&quot;modelDocPath&quot;, modelDocPath);</span>
+
+<span class="nc bnc" id="L246" title="All 2 branches missed.">        if (additionalProperties.containsKey(PACKAGE_URL)) {</span>
+<span class="nc" id="L247">            setPackageUrl((String) additionalProperties.get(PACKAGE_URL));</span>
+        }
+
+        // check to see if setRecursionLimit is set and whether it's an integer
+<span class="nc bnc" id="L251" title="All 2 branches missed.">        if (additionalProperties.containsKey(RECURSION_LIMIT)) {</span>
+            try {
+<span class="nc" id="L253">                Integer.parseInt((String) additionalProperties.get(RECURSION_LIMIT));</span>
+<span class="nc" id="L254">            } catch (NumberFormatException | NullPointerException e) {</span>
+<span class="nc" id="L255">                throw new IllegalArgumentException(&quot;recursionLimit must be an integer, e.g. 2000.&quot;);</span>
+<span class="nc" id="L256">            }</span>
+        }
+
+<span class="nc bnc" id="L259" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.USE_ONEOF_DISCRIMINATOR_LOOKUP)) {</span>
+<span class="nc" id="L260">            setUseOneOfDiscriminatorLookup(convertPropertyToBooleanAndWriteBack(CodegenConstants.USE_ONEOF_DISCRIMINATOR_LOOKUP));</span>
+        } else {
+<span class="nc" id="L262">            additionalProperties.put(CodegenConstants.USE_ONEOF_DISCRIMINATOR_LOOKUP, useOneOfDiscriminatorLookup);</span>
+        }
+
+<span class="nc bnc" id="L265" title="All 2 branches missed.">        if (additionalProperties.containsKey(MAP_NUMBER_TO)) {</span>
+<span class="nc" id="L266">            setMapNumberTo(String.valueOf(additionalProperties.get(MAP_NUMBER_TO)));</span>
+        }
+
+<span class="nc bnc" id="L269" title="All 2 branches missed.">        if (additionalProperties.containsKey(DATETIME_FORMAT)) {</span>
+<span class="nc" id="L270">            setDatetimeFormat((String) additionalProperties.get(DATETIME_FORMAT));</span>
+        } else {
+<span class="nc" id="L272">            additionalProperties.put(DATETIME_FORMAT, datetimeFormat);</span>
+        }
+
+<span class="nc bnc" id="L275" title="All 2 branches missed.">        if (additionalProperties.containsKey(DATE_FORMAT)) {</span>
+<span class="nc" id="L276">            setDateFormat((String) additionalProperties.get(DATE_FORMAT));</span>
+        } else {
+<span class="nc" id="L278">            additionalProperties.put(DATE_FORMAT, dateFormat);</span>
+        }
+
+<span class="nc" id="L281">        String modelPath = packagePath() + File.separatorChar + modelPackage.replace('.', File.separatorChar);</span>
+<span class="nc" id="L282">        String apiPath = packagePath() + File.separatorChar + apiPackage.replace('.', File.separatorChar);</span>
+
+<span class="nc" id="L284">        String readmePath = &quot;README.md&quot;;</span>
+<span class="nc" id="L285">        String readmeTemplate = &quot;README.mustache&quot;;</span>
+<span class="nc bnc" id="L286" title="All 2 branches missed.">        if (generateSourceCodeOnly) {</span>
+<span class="nc" id="L287">            readmePath = packagePath() + &quot;_&quot; + readmePath;</span>
+<span class="nc" id="L288">            readmeTemplate = &quot;README_onlypackage.mustache&quot;;</span>
+        }
+<span class="nc" id="L290">        supportingFiles.add(new SupportingFile(readmeTemplate, &quot;&quot;, readmePath));</span>
+
+<span class="nc bnc" id="L292" title="All 2 branches missed.">        if (!generateSourceCodeOnly) {</span>
+<span class="nc" id="L293">            supportingFiles.add(new SupportingFile(&quot;tox.mustache&quot;, &quot;&quot;, &quot;tox.ini&quot;));</span>
+<span class="nc" id="L294">            supportingFiles.add(new SupportingFile(&quot;test-requirements.mustache&quot;, &quot;&quot;, &quot;test-requirements.txt&quot;));</span>
+<span class="nc" id="L295">            supportingFiles.add(new SupportingFile(&quot;requirements.mustache&quot;, &quot;&quot;, &quot;requirements.txt&quot;));</span>
+<span class="nc" id="L296">            supportingFiles.add(new SupportingFile(&quot;setup_cfg.mustache&quot;, &quot;&quot;, &quot;setup.cfg&quot;));</span>
+
+<span class="nc" id="L298">            supportingFiles.add(new SupportingFile(&quot;git_push.sh.mustache&quot;, &quot;&quot;, &quot;git_push.sh&quot;));</span>
+<span class="nc" id="L299">            supportingFiles.add(new SupportingFile(&quot;gitignore.mustache&quot;, &quot;&quot;, &quot;.gitignore&quot;));</span>
+<span class="nc" id="L300">            supportingFiles.add(new SupportingFile(&quot;travis.mustache&quot;, &quot;&quot;, &quot;.travis.yml&quot;));</span>
+<span class="nc" id="L301">            supportingFiles.add(new SupportingFile(&quot;github-workflow.mustache&quot;, &quot;.github/workflows&quot;, &quot;python.yml&quot;));</span>
+<span class="nc" id="L302">            supportingFiles.add(new SupportingFile(&quot;gitlab-ci.mustache&quot;, &quot;&quot;, &quot;.gitlab-ci.yml&quot;));</span>
+<span class="nc" id="L303">            supportingFiles.add(new SupportingFile(&quot;setup.mustache&quot;, &quot;&quot;, &quot;setup.py&quot;));</span>
+<span class="nc" id="L304">            supportingFiles.add(new SupportingFile(&quot;pyproject.mustache&quot;, &quot;&quot;, &quot;pyproject.toml&quot;));</span>
+<span class="nc" id="L305">            supportingFiles.add(new SupportingFile(&quot;py.typed.mustache&quot;, packagePath(), &quot;py.typed&quot;));</span>
+        }
+<span class="nc" id="L307">        supportingFiles.add(new SupportingFile(&quot;configuration.mustache&quot;, packagePath(), &quot;configuration.py&quot;));</span>
+<span class="nc" id="L308">        supportingFiles.add(new SupportingFile(&quot;__init__package.mustache&quot;, packagePath(), &quot;__init__.py&quot;));</span>
+<span class="nc" id="L309">        supportingFiles.add(new SupportingFile(&quot;__init__model.mustache&quot;, modelPath, &quot;__init__.py&quot;));</span>
+<span class="nc" id="L310">        supportingFiles.add(new SupportingFile(&quot;__init__api.mustache&quot;, apiPath, &quot;__init__.py&quot;));</span>
+        // Generate the 'signing.py' module, but only if the 'HTTP signature' security scheme is specified in the OAS.
+<span class="nc bnc" id="L312" title="All 2 branches missed.">        Map&lt;String, SecurityScheme&gt; securitySchemeMap = openAPI != null ?</span>
+<span class="nc bnc" id="L313" title="All 2 branches missed.">                (openAPI.getComponents() != null ? openAPI.getComponents().getSecuritySchemes() : null) : null;</span>
+<span class="nc" id="L314">        List&lt;CodegenSecurity&gt; authMethods = fromSecurity(securitySchemeMap);</span>
+<span class="nc bnc" id="L315" title="All 2 branches missed.">        if (ProcessUtils.hasHttpSignatureMethods(authMethods)) {</span>
+<span class="nc" id="L316">            supportingFiles.add(new SupportingFile(&quot;signing.mustache&quot;, packagePath(), &quot;signing.py&quot;));</span>
+        }
+
+        // If the package name consists of dots(openapi.client), then we need to create the directory structure like openapi/client with __init__ files.
+<span class="nc" id="L320">        String[] packageNameSplits = packageName.split(&quot;\\.&quot;);</span>
+<span class="nc" id="L321">        String currentPackagePath = &quot;&quot;;</span>
+<span class="nc bnc" id="L322" title="All 2 branches missed.">        for (int i = 0; i &lt; packageNameSplits.length - 1; i++) {</span>
+<span class="nc bnc" id="L323" title="All 2 branches missed.">            if (i &gt; 0) {</span>
+<span class="nc" id="L324">                currentPackagePath = currentPackagePath + File.separatorChar;</span>
+            }
+<span class="nc" id="L326">            currentPackagePath = currentPackagePath + packageNameSplits[i];</span>
+<span class="nc" id="L327">            supportingFiles.add(new SupportingFile(&quot;__init__.mustache&quot;, currentPackagePath, &quot;__init__.py&quot;));</span>
+        }
+
+<span class="nc" id="L330">        supportingFiles.add(new SupportingFile(&quot;exceptions.mustache&quot;, packagePath(), &quot;exceptions.py&quot;));</span>
+
+<span class="nc bnc" id="L332" title="All 2 branches missed.">        if (Boolean.FALSE.equals(excludeTests)) {</span>
+<span class="nc" id="L333">            supportingFiles.add(new SupportingFile(&quot;__init__.mustache&quot;, testFolder, &quot;__init__.py&quot;));</span>
+        }
+
+<span class="nc" id="L336">        supportingFiles.add(new SupportingFile(&quot;api_client.mustache&quot;, packagePath(), &quot;api_client.py&quot;));</span>
+<span class="nc" id="L337">        supportingFiles.add(new SupportingFile(&quot;api_response.mustache&quot;, packagePath(), &quot;api_response.py&quot;));</span>
+
+<span class="nc bnc" id="L339" title="All 2 branches missed.">        if (&quot;asyncio&quot;.equals(getLibrary())) {</span>
+<span class="nc" id="L340">            supportingFiles.add(new SupportingFile(&quot;asyncio/rest.mustache&quot;, packagePath(), &quot;rest.py&quot;));</span>
+<span class="nc" id="L341">            additionalProperties.put(&quot;asyncio&quot;, &quot;true&quot;);</span>
+<span class="nc bnc" id="L342" title="All 2 branches missed.">        } else if (&quot;tornado&quot;.equals(getLibrary())) {</span>
+<span class="nc" id="L343">            supportingFiles.add(new SupportingFile(&quot;tornado/rest.mustache&quot;, packagePath(), &quot;rest.py&quot;));</span>
+<span class="nc" id="L344">            additionalProperties.put(&quot;tornado&quot;, &quot;true&quot;);</span>
+        } else {
+<span class="nc" id="L346">            supportingFiles.add(new SupportingFile(&quot;rest.mustache&quot;, packagePath(), &quot;rest.py&quot;));</span>
+        }
+
+<span class="nc" id="L349">        modelPackage = this.packageName + &quot;.&quot; + modelPackage;</span>
+<span class="nc" id="L350">        apiPackage = this.packageName + &quot;.&quot; + apiPackage;</span>
+<span class="nc" id="L351">    }</span>
+
+    public void setUseOneOfDiscriminatorLookup(boolean useOneOfDiscriminatorLookup) {
+<span class="nc" id="L354">        this.useOneOfDiscriminatorLookup = useOneOfDiscriminatorLookup;</span>
+<span class="nc" id="L355">    }</span>
+
+    public boolean getUseOneOfDiscriminatorLookup() {
+<span class="nc" id="L358">        return this.useOneOfDiscriminatorLookup;</span>
+    }
+
+    @Override
+    public String toModelImport(String name) {
+        String modelImport;
+<span class="nc bnc" id="L364" title="All 2 branches missed.">        if (StringUtils.startsWithAny(name, &quot;import&quot;, &quot;from&quot;)) {</span>
+<span class="nc" id="L365">            modelImport = name;</span>
+        } else {
+<span class="nc" id="L367">            modelImport = &quot;from &quot;;</span>
+<span class="nc bnc" id="L368" title="All 2 branches missed.">            if (!&quot;&quot;.equals(modelPackage())) {</span>
+<span class="nc" id="L369">                modelImport += modelPackage() + &quot;.&quot;;</span>
+            }
+<span class="nc" id="L371">            modelImport += toModelFilename(name) + &quot; import &quot; + name;</span>
+        }
+<span class="nc" id="L373">        return modelImport;</span>
+    }
+
+    @Override
+    public CodegenType getTag() {
+<span class="nc" id="L378">        return CodegenType.CLIENT;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L383">        return &quot;python-pydantic-v1&quot;;</span>
+    }
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L388">        return &quot;Generates a Python client library.&quot;;</span>
+    }
+
+    @Override
+    public String apiDocFileFolder() {
+<span class="nc" id="L393">        return (outputFolder + File.separator + apiDocPath);</span>
+    }
+
+    @Override
+    public String modelDocFileFolder() {
+<span class="nc" id="L398">        return (outputFolder + File.separator + modelDocPath);</span>
+    }
+
+    @Override
+    public String toModelDocFilename(String name) {
+<span class="nc" id="L403">        return toModelName(name);</span>
+    }
+
+    @Override
+    public String toApiDocFilename(String name) {
+<span class="nc" id="L408">        return toApiName(name);</span>
+    }
+
+    @Override
+    public String apiFileFolder() {
+<span class="nc" id="L413">        return outputFolder + File.separatorChar + apiPackage().replace('.', File.separatorChar);</span>
+    }
+
+    @Override
+    public String modelFileFolder() {
+<span class="nc" id="L418">        return outputFolder + File.separatorChar + modelPackage().replace('.', File.separatorChar);</span>
+    }
+
+    @Override
+    public String apiTestFileFolder() {
+<span class="nc" id="L423">        return outputFolder + File.separatorChar + testFolder;</span>
+    }
+
+    @Override
+    public String modelTestFileFolder() {
+<span class="nc" id="L428">        return outputFolder + File.separatorChar + testFolder;</span>
+    }
+
+    public void setPackageUrl(String packageUrl) {
+<span class="nc" id="L432">        this.packageUrl = packageUrl;</span>
+<span class="nc" id="L433">    }</span>
+
+    public String packagePath() {
+<span class="nc" id="L436">        return packageName.replace('.', File.separatorChar);</span>
+    }
+
+    /**
+     * Generate Python package name from String `packageName`
+     * &lt;p&gt;
+     * (PEP 0008) Python packages should also have short, all-lowercase names,
+     * although the use of underscores is discouraged.
+     *
+     * @param packageName Package name
+     * @return Python package name that conforms to PEP 0008
+     */
+    @SuppressWarnings(&quot;static-method&quot;)
+    public String generatePackageName(String packageName) {
+<span class="nc" id="L450">        return underscore(packageName.replaceAll(&quot;[^\\w]+&quot;, &quot;&quot;));</span>
+    }
+
+    @Override
+    public String generatorLanguageVersion() {
+<span class="nc" id="L455">        return &quot;3.7+&quot;;</span>
+    }
+
+    @Override
+    protected void addAdditionPropertiesToCodeGenModel(CodegenModel codegenModel, Schema schema) {
+<span class="nc" id="L460">        final Schema additionalProperties = ModelUtils.getAdditionalProperties(schema);</span>
+
+<span class="nc bnc" id="L462" title="All 2 branches missed.">        if (additionalProperties != null) {</span>
+<span class="nc" id="L463">            codegenModel.additionalPropertiesType = getSchemaType(additionalProperties);</span>
+        }
+<span class="nc" id="L465">    }</span>
+
+    @Override
+    public String escapeReservedWord(String name) {
+<span class="nc bnc" id="L469" title="All 2 branches missed.">        if (this.reservedWordsMappings().containsKey(name)) {</span>
+<span class="nc" id="L470">            return this.reservedWordsMappings().get(name);</span>
+        }
+<span class="nc" id="L472">        return &quot;var_&quot; + name;</span>
+    }
+
+    public void setDatetimeFormat(String datetimeFormat) {
+<span class="nc" id="L476">        this.datetimeFormat = datetimeFormat;</span>
+<span class="nc" id="L477">    }</span>
+
+    public void setDateFormat(String dateFormat) {
+<span class="nc" id="L480">        this.dateFormat = dateFormat;</span>
+<span class="nc" id="L481">    }</span>
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

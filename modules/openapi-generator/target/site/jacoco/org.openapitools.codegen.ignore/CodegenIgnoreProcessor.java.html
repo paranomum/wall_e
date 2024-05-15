@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CodegenIgnoreProcessor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.ignore</a> &gt; <span class="el_source">CodegenIgnoreProcessor.java</span></div><h1>CodegenIgnoreProcessor.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.ignore;
+
+import org.openapitools.codegen.ignore.rules.DirectoryRule;
+import org.openapitools.codegen.ignore.rules.Rule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.*;
+
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
+/**
+ * Presents a processing utility for parsing and evaluating files containing common ignore patterns. (.openapi-generator-ignore)
+ */
+public class CodegenIgnoreProcessor {
+
+<span class="pc" id="L37">    private final Logger LOGGER = LoggerFactory.getLogger(CodegenIgnoreProcessor.class);</span>
+
+<span class="pc" id="L39">    private File ignoreFile = null;</span>
+
+<span class="pc" id="L41">    private List&lt;Rule&gt; exclusionRules = new ArrayList&lt;&gt;();</span>
+<span class="pc" id="L42">    private List&lt;Rule&gt; inclusionRules = new ArrayList&lt;&gt;();</span>
+
+    /**
+     * Loads the default ignore file (.openapi-generator-ignore) from the specified path.
+     *
+     * @param baseDirectory The base directory of the files to be processed. This contains the ignore file.
+     */
+    public CodegenIgnoreProcessor(final String baseDirectory) {
+<span class="fc" id="L50">        this(baseDirectory, &quot;.openapi-generator-ignore&quot;);</span>
+<span class="fc" id="L51">    }</span>
+
+    /**
+     * Loads the specified ignore file by name ([ignoreFile]) from the specified path.
+     *
+     * @param baseDirectory The base directory of the files to be processed. This contains the ignore file.
+     * @param ignoreFile    The file containing ignore patterns.
+     */
+    @SuppressWarnings(&quot;WeakerAccess&quot;)
+<span class="fc" id="L60">    public CodegenIgnoreProcessor(final String baseDirectory, final String ignoreFile) {</span>
+<span class="fc" id="L61">        final File directory = new File(baseDirectory);</span>
+<span class="fc" id="L62">        final File targetIgnoreFile = new File(directory, ignoreFile);</span>
+<span class="pc bpc" id="L63" title="2 of 4 branches missed.">        if (directory.exists() &amp;&amp; directory.isDirectory()) {</span>
+<span class="fc" id="L64">            loadFromFile(targetIgnoreFile);</span>
+        } else {
+<span class="nc" id="L66">            LOGGER.info(&quot;Output directory ({}) does not exist, or is inaccessible. No file (.openapi-generator-ignore) will be evaluated.&quot;, baseDirectory);</span>
+        }
+<span class="fc" id="L68">    }</span>
+
+    /**
+     * Constructs an instance of {@link CodegenIgnoreProcessor} from an ignore file defined by {@code targetIgnoreFile}.
+     *
+     * @param targetIgnoreFile The ignore file location.
+     */
+<span class="nc" id="L75">    public CodegenIgnoreProcessor(final File targetIgnoreFile) {</span>
+<span class="nc" id="L76">        loadFromFile(targetIgnoreFile);</span>
+<span class="nc" id="L77">    }</span>
+
+    private void loadFromFile(File targetIgnoreFile) {
+<span class="pc bpc" id="L80" title="3 of 4 branches missed.">        if (targetIgnoreFile.exists() &amp;&amp; targetIgnoreFile.isFile()) {</span>
+            try {
+<span class="nc" id="L82">                loadCodegenRules(targetIgnoreFile);</span>
+<span class="nc" id="L83">                this.ignoreFile = targetIgnoreFile;</span>
+<span class="nc" id="L84">            } catch (IOException e) {</span>
+<span class="nc" id="L85">                LOGGER.error(String.format(Locale.ROOT, &quot;Could not process %s.&quot;, targetIgnoreFile.getName()), e.getMessage());</span>
+<span class="nc" id="L86">            }</span>
+<span class="pc bpc" id="L87" title="1 of 2 branches missed.">        } else if (!&quot;.swagger-codegen-ignore&quot;.equals(targetIgnoreFile.getName())) {</span>
+<span class="fc" id="L88">            final File legacyIgnoreFile = new File(targetIgnoreFile.getParentFile(), &quot;.swagger-codegen-ignore&quot;);</span>
+<span class="pc bpc" id="L89" title="3 of 4 branches missed.">            if (legacyIgnoreFile.exists() &amp;&amp; legacyIgnoreFile.isFile()) {</span>
+<span class="nc" id="L90">                LOGGER.info(String.format(Locale.ROOT, &quot;Legacy support: '%s' file renamed to '%s'.&quot;, legacyIgnoreFile.getName(), targetIgnoreFile.getName()));</span>
+                try {
+<span class="nc" id="L92">                    Files.move(legacyIgnoreFile.toPath(), targetIgnoreFile.toPath(), REPLACE_EXISTING);</span>
+<span class="nc" id="L93">                    loadFromFile(targetIgnoreFile);</span>
+<span class="nc" id="L94">                } catch (IOException e) {</span>
+<span class="nc" id="L95">                    LOGGER.error(String.format(Locale.ROOT, &quot;Could not rename file: %s&quot;, e.getMessage()));</span>
+<span class="nc" id="L96">                }</span>
+            } else {
+                // log info message
+<span class="fc" id="L99">                LOGGER.info(String.format(Locale.ROOT, &quot;No %s file found.&quot;, targetIgnoreFile.getName()));</span>
+            }
+<span class="fc" id="L101">        } else {</span>
+            // log info message
+<span class="nc" id="L103">            LOGGER.info(String.format(Locale.ROOT, &quot;No %s file found.&quot;, targetIgnoreFile.getName()));</span>
+        }
+<span class="fc" id="L105">    }</span>
+
+    void loadCodegenRules(final File codegenIgnore) throws IOException {
+<span class="nc" id="L108">        try (FileInputStream fileInputStream = new FileInputStream(codegenIgnore);</span>
+<span class="nc" id="L109">             InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);</span>
+<span class="nc" id="L110">             BufferedReader reader = new BufferedReader(inputStreamReader)) {</span>
+            String line;
+
+            // NOTE: Comments that start with a : (e.g. //:) are pulled from git documentation for .gitignore
+            // see: https://github.com/git/git/blob/90f7b16b3adc78d4bbabbd426fb69aa78c714f71/Documentation/gitignore.txt
+<span class="nc bnc" id="L115" title="All 2 branches missed.">            while ((line = reader.readLine()) != null) {</span>
+<span class="nc" id="L116">                if(</span>
+                    //: A blank line matches no files, so it can serve as a separator for readability.
+<span class="nc bnc" id="L118" title="All 2 branches missed.">                    line.length() == 0</span>
+<span class="nc" id="L119">                ) continue;</span>
+
+<span class="nc" id="L121">                Rule rule = Rule.create(line);</span>
+
+                // rule could be null here if it's a COMMENT, for example
+<span class="nc bnc" id="L124" title="All 2 branches missed.">                if(rule != null) {</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">                    if (Boolean.TRUE.equals(rule.getNegated())) {</span>
+<span class="nc" id="L126">                        inclusionRules.add(rule);</span>
+                    } else {
+<span class="nc" id="L128">                        exclusionRules.add(rule);</span>
+                    }
+                }
+<span class="nc" id="L131">            }</span>
+        }
+<span class="nc" id="L133">    }</span>
+
+    /**
+     * Determines whether or not a file defined by {@code toEvaluate} is allowed,
+     * under the exclusion rules from the ignore file being processed.
+     *
+     * @param targetFile The file to check against exclusion rules from the ignore file.
+     * @return {@code false} if file matches any pattern in the ignore file (disallowed), otherwise {@code true} (allowed).
+     */
+    public boolean allowsFile(final File targetFile) {
+<span class="pc bpc" id="L143" title="1 of 2 branches missed.">        if(this.ignoreFile == null) return true;</span>
+
+<span class="nc" id="L145">        File file = new File(this.ignoreFile.getAbsoluteFile().getParentFile().toURI().relativize(targetFile.toURI()).getPath());</span>
+<span class="nc" id="L146">        boolean directoryExcluded = false;</span>
+<span class="nc" id="L147">        boolean exclude = false;</span>
+<span class="nc bnc" id="L148" title="All 4 branches missed.">        if(exclusionRules.size() == 0 &amp;&amp; inclusionRules.size() == 0) {</span>
+<span class="nc" id="L149">            return true;</span>
+        }
+
+        // NOTE: We *must* process all exclusion rules
+<span class="nc bnc" id="L153" title="All 2 branches missed.">        for (int i = 0; i &lt; exclusionRules.size(); i++) {</span>
+<span class="nc" id="L154">            Rule current = exclusionRules.get(i);</span>
+<span class="nc" id="L155">            Rule.Operation op = current.evaluate(file.getPath());</span>
+
+<span class="nc bnc" id="L157" title="All 5 branches missed.">            switch (op){</span>
+                case EXCLUDE:
+<span class="nc" id="L159">                    exclude = true;</span>
+
+                    // Include rule can't override rules that exclude a file by some parent directory.
+<span class="nc bnc" id="L162" title="All 2 branches missed.">                    if(current instanceof DirectoryRule) {</span>
+<span class="nc" id="L163">                        directoryExcluded = true;</span>
+                    }
+                    break;
+                case INCLUDE:
+                    // This won't happen here.
+<span class="nc" id="L168">                    break;</span>
+                case NOOP:
+<span class="nc" id="L170">                    break;</span>
+                case EXCLUDE_AND_TERMINATE:
+<span class="nc" id="L172">                    i = exclusionRules.size();</span>
+                    break;
+            }
+        }
+
+<span class="nc bnc" id="L177" title="All 2 branches missed.">        if(exclude) {</span>
+            // Only need to process inclusion rules if we've been excluded
+<span class="nc bnc" id="L179" title="All 4 branches missed.">            for (int i = 0; exclude &amp;&amp; i &lt; inclusionRules.size(); i++) {</span>
+<span class="nc" id="L180">                Rule current = inclusionRules.get(i);</span>
+<span class="nc" id="L181">                Rule.Operation op = current.evaluate(file.getPath());</span>
+
+                // At this point exclude=true means the file should be ignored.
+                // op == INCLUDE means we have to flip that flag.
+<span class="nc bnc" id="L185" title="All 2 branches missed.">                if(op.equals(Rule.Operation.INCLUDE)) {</span>
+<span class="nc bnc" id="L186" title="All 4 branches missed.">                    if(current instanceof DirectoryRule &amp;&amp; directoryExcluded) {</span>
+                        // e.g
+                        // baz/
+                        // !foo/bar/baz/
+                        // NOTE: Possibly surprising side effect:
+                        // foo/bar/baz/
+                        // !bar/
+<span class="nc" id="L193">                        exclude = false;</span>
+<span class="nc bnc" id="L194" title="All 2 branches missed.">                    } else if (!directoryExcluded) {</span>
+                        // e.g.
+                        // **/*.log
+                        // !ISSUE_1234.log
+<span class="nc" id="L198">                        exclude = false;</span>
+                    }
+                }
+            }
+        }
+
+<span class="nc" id="L204">        return Boolean.FALSE.equals(exclude);</span>
+    }
+
+    /**
+     * Allows a consumer to manually inspect explicit &quot;inclusion rules&quot;. That is, patterns in the ignore file which have been negated.
+     *
+     * @return A {@link Collections#unmodifiableList(List)} of rules which possibly negate exclusion rules in the ignore file.
+     */
+    public List&lt;Rule&gt; getInclusionRules() {
+<span class="nc" id="L213">        return Collections.unmodifiableList(inclusionRules);</span>
+    }
+
+    /**
+     * Allows a consumer to manually inspect all &quot;exclusion rules&quot;. That is, patterns in the ignore file which represent
+     * files and directories to be excluded, unless explicitly overridden by {@link CodegenIgnoreProcessor#getInclusionRules()} rules.
+     *
+     * NOTE: Existence in this list doesn't mean a file is excluded. The rule can be overridden by {@link CodegenIgnoreProcessor#getInclusionRules()} rules.
+     *
+     * @return A {@link Collections#unmodifiableList(List)} of rules which define exclusions by patterns in the ignore file.
+     */
+    public List&lt;Rule&gt; getExclusionRules() {
+<span class="nc" id="L225">        return Collections.unmodifiableList((exclusionRules));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

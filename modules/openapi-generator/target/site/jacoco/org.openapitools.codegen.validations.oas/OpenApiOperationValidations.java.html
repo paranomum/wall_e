@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OpenApiOperationValidations.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.validations.oas</a> &gt; <span class="el_source">OpenApiOperationValidations.java</span></div><h1>OpenApiOperationValidations.java</h1><pre class="source lang-java linenums">package org.openapitools.codegen.validations.oas;
+
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.parameters.RequestBody;
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.validation.GenericValidator;
+import org.openapitools.codegen.validation.ValidationRule;
+
+import java.util.ArrayList;
+import java.util.Locale;
+
+/**
+ * A standalone instance for evaluating rule and recommendations related to OAS {@link io.swagger.v3.oas.models.Operation}
+ */
+class OpenApiOperationValidations extends GenericValidator&lt;OperationWrapper&gt; {
+    OpenApiOperationValidations(RuleConfiguration ruleConfiguration) {
+<span class="nc" id="L17">        super(new ArrayList&lt;&gt;());</span>
+<span class="nc bnc" id="L18" title="All 2 branches missed.">        if (ruleConfiguration.isEnableRecommendations()) {</span>
+<span class="nc bnc" id="L19" title="All 2 branches missed.">            if (ruleConfiguration.isEnableApiRequestUriWithBodyRecommendation()) {</span>
+<span class="nc" id="L20">                rules.add(ValidationRule.warn(</span>
+                        &quot;API GET/HEAD defined with request body&quot;,
+                        &quot;While technically allowed, GET/HEAD with request body may indicate programming error, and is considered an anti-pattern.&quot;,
+                        OpenApiOperationValidations::checkAntipatternGetOrHeadWithBody
+                ));
+            }
+        }
+<span class="nc" id="L27">    }</span>
+
+    /**
+     * Determines whether a GET or HEAD operation is configured to expect a body.
+     * &lt;p&gt;
+     * RFC7231 describes this behavior as:
+     * &lt;p&gt;
+     * A payload within a GET request message has no defined semantics;
+     * sending a payload body on a GET request might cause some existing
+     * implementations to reject the request.
+     * &lt;p&gt;
+     * See https://tools.ietf.org/html/rfc7231#section-4.3.1
+     * &lt;p&gt;
+     * Because there are no defined semantics, and because some client and server implementations
+     * may silently ignore the entire body (see https://xhr.spec.whatwg.org/#the-send()-method) or
+     * throw an error (see https://fetch.spec.whatwg.org/#ref-for-dfn-throw%E2%91%A1%E2%91%A1),
+     * we maintain that the existence of a body for this operation is most likely programmer error and raise awareness.
+     *
+     * @param wrapper Wraps an operation with accompanying HTTP Method
+     * @return {@link ValidationRule.Pass} if the check succeeds, otherwise {@link ValidationRule.Fail}
+     */
+    private static ValidationRule.Result checkAntipatternGetOrHeadWithBody(OperationWrapper wrapper) {
+<span class="nc bnc" id="L49" title="All 2 branches missed.">        if (wrapper == null) {</span>
+<span class="nc" id="L50">            return ValidationRule.Pass.empty();</span>
+        }
+
+<span class="nc" id="L53">        ValidationRule.Result result = ValidationRule.Pass.empty();</span>
+
+<span class="nc bnc" id="L55" title="All 4 branches missed.">        if (wrapper.getHttpMethod() == PathItem.HttpMethod.GET || wrapper.getHttpMethod() == PathItem.HttpMethod.HEAD) {</span>
+<span class="nc" id="L56">            RequestBody body = wrapper.getOperation().getRequestBody();</span>
+
+<span class="nc bnc" id="L58" title="All 2 branches missed.">            if (body != null) {</span>
+<span class="nc bnc" id="L59" title="All 6 branches missed.">                if (StringUtils.isNotEmpty(body.get$ref()) || (body.getContent() != null &amp;&amp; body.getContent().size() &gt; 0)) {</span>
+<span class="nc" id="L60">                    result = new ValidationRule.Fail();</span>
+<span class="nc" id="L61">                    result.setDetails(String.format(</span>
+                            Locale.ROOT,
+                            &quot;%s %s contains a request body and is considered an anti-pattern.&quot;,
+<span class="nc" id="L64">                            wrapper.getHttpMethod().name(),</span>
+<span class="nc" id="L65">                            wrapper.getOperation().getOperationId())</span>
+                    );
+                }
+            }
+
+        }
+
+<span class="nc" id="L72">        return result;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

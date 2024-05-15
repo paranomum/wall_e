@@ -1,0 +1,37 @@
+---
+servers:
+- url: "http://localhost:8080"
+openapi: "3.0.0"
+paths:
+  /pet:
+    $ref: "./petstore.yaml#/paths/~1pet"
+  /user/{username}:
+    $ref: "./petstore.yaml#/paths/~1user~1{username}"
+  /pet/findByStatus:
+    $ref: "./petstore.yaml#/paths/~1pet~1findByStatus"
+  /user/createWithList:
+    $ref: "./petstore.yaml#/paths/~1user~1createWithList"
+  /pet/{petId}/uploadImage:
+    $ref: "./petstore.yaml#/paths/~1pet~1{petId}~1uploadImage"
+  /store/inventory:
+    $ref: "./petstore.yaml#/paths/~1store~1inventory"
+  /user/login:
+    $ref: "./petstore.yaml#/paths/~1user~1login"
+  /user:
+    $ref: "./petstore.yaml#/paths/~1user"
+  /user/createWithArray:
+    $ref: "./petstore.yaml#/paths/~1user~1createWithArray"
+  /pet/findByTags:
+    $ref: "./petstore.yaml#/paths/~1pet~1findByTags"
+  /store/order:
+    $ref: "./petstore.yaml#/paths/~1store~1order"
+  /user/logout:
+    $ref: "./petstore.yaml#/paths/~1user~1logout"
+  /pet/{petId}:
+    $ref: "./petstore.yaml#/paths/~1pet~1{petId}"
+  /store/order/{orderId}:
+    $ref: "./petstore.yaml#/paths/~1store~1order~1{orderId}"
+info:
+  title: "merged spec"
+  description: "merged spec"
+  version: "1.0.0"

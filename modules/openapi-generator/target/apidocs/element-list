@@ -1,0 +1,16 @@
+org.openapitools.codegen
+org.openapitools.codegen.auth
+org.openapitools.codegen.config
+org.openapitools.codegen.examples
+org.openapitools.codegen.exceptions
+org.openapitools.codegen.ignore
+org.openapitools.codegen.ignore.rules
+org.openapitools.codegen.languages
+org.openapitools.codegen.languages.features
+org.openapitools.codegen.model
+org.openapitools.codegen.serializer
+org.openapitools.codegen.templating
+org.openapitools.codegen.templating.handlebars
+org.openapitools.codegen.templating.mustache
+org.openapitools.codegen.utils
+org.openapitools.codegen.validations.oas

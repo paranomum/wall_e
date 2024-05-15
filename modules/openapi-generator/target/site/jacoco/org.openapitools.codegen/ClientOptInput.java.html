@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ClientOptInput.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen</a> &gt; <span class="el_source">ClientOptInput.java</span></div><h1>ClientOptInput.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.parser.core.models.AuthorizationValue;
+
+import org.openapitools.codegen.api.TemplateDefinition;
+import org.openapitools.codegen.auth.AuthParser;
+import org.openapitools.codegen.config.GeneratorSettings;
+
+import java.util.List;
+
+<span class="fc" id="L29">public class ClientOptInput {</span>
+    private CodegenConfig config;
+    private GeneratorSettings generatorSettings;
+    private OpenAPI openAPI;
+    private List&lt;AuthorizationValue&gt; auths;
+    private List&lt;TemplateDefinition&gt; userDefinedTemplates;
+
+    public ClientOptInput openAPI(OpenAPI openAPI) {
+<span class="fc" id="L37">        this.setOpenAPI(openAPI);</span>
+<span class="fc" id="L38">        return this;</span>
+    }
+
+    public ClientOptInput generatorSettings(GeneratorSettings generatorSettings) {
+<span class="fc" id="L42">        this.setGeneratorSettings(generatorSettings);</span>
+<span class="fc" id="L43">        return this;</span>
+    }
+
+    public ClientOptInput config(CodegenConfig codegenConfig) {
+<span class="fc" id="L47">        this.setConfig(codegenConfig);</span>
+<span class="fc" id="L48">        return this;</span>
+    }
+
+    public ClientOptInput userDefinedTemplates(List&lt;TemplateDefinition&gt; userDefinedTemplates) {
+<span class="fc" id="L52">        this.userDefinedTemplates = userDefinedTemplates;</span>
+<span class="fc" id="L53">        return this;</span>
+    }
+
+    @Deprecated
+    public ClientOptInput auth(String urlEncodedAuthString) {
+<span class="nc" id="L58">        this.setAuth(urlEncodedAuthString);</span>
+<span class="nc" id="L59">        return this;</span>
+    }
+
+    @Deprecated
+    public String getAuth() {
+<span class="nc" id="L64">        return AuthParser.reconstruct(auths);</span>
+    }
+
+    @Deprecated
+    public void setAuth(String urlEncodedAuthString) {
+<span class="nc" id="L69">        this.auths = AuthParser.parse(urlEncodedAuthString);</span>
+<span class="nc" id="L70">    }</span>
+
+    @Deprecated
+    public List&lt;AuthorizationValue&gt; getAuthorizationValues() {
+<span class="nc" id="L74">        return auths;</span>
+    }
+
+    @Deprecated
+    public CodegenConfig getConfig() {
+<span class="fc" id="L79">        return config;</span>
+    }
+
+    public List&lt;TemplateDefinition&gt; getUserDefinedTemplates() {
+        // not deprecated as this is added to match other functionality, we need to move to Context&lt;?&gt; instead of ClientOptInput.
+<span class="fc" id="L84">        return userDefinedTemplates;</span>
+    }
+
+    /**
+     * Sets the generator/config instance
+     *
+     * @deprecated use {@link #config(CodegenConfig)} instead
+     * @param config codegen config
+     */
+    @Deprecated
+    public void setConfig(CodegenConfig config) {
+<span class="fc" id="L95">        this.config = config;</span>
+        // TODO: ClientOptInputs needs to be retired
+<span class="pc bpc" id="L97" title="1 of 2 branches missed.">        if (this.openAPI != null) {</span>
+<span class="nc" id="L98">            this.config.setOpenAPI(this.openAPI);</span>
+        }
+<span class="fc" id="L100">    }</span>
+
+    @Deprecated
+    public GeneratorSettings getGeneratorSettings() {
+<span class="fc" id="L104">        return generatorSettings;</span>
+    }
+
+    @Deprecated
+    private void setGeneratorSettings(GeneratorSettings generatorSettings) {
+<span class="fc" id="L109">        this.generatorSettings = generatorSettings;</span>
+        // TODO: ClientOptInputs needs to be retired
+<span class="pc bpc" id="L111" title="1 of 2 branches missed.">        if (this.openAPI != null) {</span>
+<span class="nc" id="L112">            this.config.setOpenAPI(this.openAPI);</span>
+        }
+<span class="fc" id="L114">    }</span>
+
+    @Deprecated
+    public OpenAPI getOpenAPI() {
+<span class="fc" id="L118">        return openAPI;</span>
+    }
+
+    /**
+     * Sets the OpenAPI document
+     *
+     * @deprecated use {@link #openAPI(OpenAPI)} instead
+     * @param openAPI the specification
+     */
+    @Deprecated
+    public void setOpenAPI(OpenAPI openAPI) {
+<span class="fc" id="L129">        this.openAPI = openAPI;</span>
+        // TODO: ClientOptInputs needs to be retired
+<span class="pc bpc" id="L131" title="1 of 2 branches missed.">        if (this.config != null) {</span>
+<span class="fc" id="L132">            this.config.setOpenAPI(this.openAPI);</span>
+        }
+<span class="fc" id="L134">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

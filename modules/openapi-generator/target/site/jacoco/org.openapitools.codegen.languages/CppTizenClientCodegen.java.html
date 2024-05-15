@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CppTizenClientCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">CppTizenClientCodegen.java</span></div><h1>CppTizenClientCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.parser.util.SchemaTypeUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.CodegenConfig;
+import org.openapitools.codegen.CodegenType;
+import org.openapitools.codegen.SupportingFile;
+import org.openapitools.codegen.meta.features.*;
+import org.openapitools.codegen.utils.ModelUtils;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+
+import static org.openapitools.codegen.utils.CamelizeOption.LOWERCASE_FIRST_LETTER;
+import static org.openapitools.codegen.utils.StringUtils.camelize;
+
+public class CppTizenClientCodegen extends AbstractCppCodegen implements CodegenConfig {
+<span class="fc" id="L39">    protected static String PREFIX = &quot;ArtikCloud&quot;;</span>
+<span class="fc" id="L40">    protected String sourceFolder = &quot;src&quot;;</span>
+<span class="fc" id="L41">    protected String documentationFolder = &quot;doc&quot;;</span>
+
+    public CppTizenClientCodegen() {
+<span class="fc" id="L44">        super();</span>
+
+        // TODO: cpp-tizen maintainer review
+<span class="fc" id="L47">        modifyFeatureSet(features -&gt; features</span>
+<span class="fc" id="L48">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="fc" id="L49">                .securityFeatures(EnumSet.of(</span>
+                        SecurityFeature.BearerToken
+                ))
+<span class="fc" id="L52">                .excludeGlobalFeatures(</span>
+                        GlobalFeature.XMLStructureDefinitions,
+                        GlobalFeature.Callbacks,
+                        GlobalFeature.LinkObjects,
+                        GlobalFeature.ParameterStyling,
+                        GlobalFeature.MultiServer
+                )
+<span class="fc" id="L59">                .excludeSchemaSupportFeatures(</span>
+                        SchemaSupportFeature.Polymorphism
+                )
+<span class="fc" id="L62">                .excludeParameterFeatures(</span>
+                        ParameterFeature.Cookie
+                )
+        );
+
+<span class="fc" id="L67">        outputFolder = &quot;&quot;;</span>
+<span class="fc" id="L68">        modelTemplateFiles.put(&quot;model-header.mustache&quot;, &quot;.h&quot;);</span>
+<span class="fc" id="L69">        modelTemplateFiles.put(&quot;model-body.mustache&quot;, &quot;.cpp&quot;);</span>
+<span class="fc" id="L70">        apiTemplateFiles.put(&quot;api-header.mustache&quot;, &quot;.h&quot;);</span>
+<span class="fc" id="L71">        apiTemplateFiles.put(&quot;api-body.mustache&quot;, &quot;.cpp&quot;);</span>
+<span class="fc" id="L72">        embeddedTemplateDir = templateDir = &quot;cpp-tizen-client&quot;;</span>
+<span class="fc" id="L73">        modelPackage = &quot;&quot;;</span>
+
+<span class="fc" id="L75">        defaultIncludes = new HashSet&lt;&gt;(</span>
+<span class="fc" id="L76">                Arrays.asList(</span>
+                        &quot;bool&quot;,
+                        &quot;int&quot;,
+                        &quot;long long&quot;,
+                        &quot;double&quot;,
+                        &quot;float&quot;)
+        );
+<span class="fc" id="L83">        languageSpecificPrimitives = new HashSet&lt;&gt;(</span>
+<span class="fc" id="L84">                Arrays.asList(</span>
+                        &quot;bool&quot;,
+                        &quot;int&quot;,
+                        &quot;long long&quot;,
+                        &quot;double&quot;,
+                        &quot;float&quot;,
+                        &quot;std::string&quot;)
+        );
+
+<span class="fc" id="L93">        additionalProperties().put(&quot;prefix&quot;, PREFIX);</span>
+
+<span class="fc" id="L95">        setReservedWordsLowerCase(</span>
+<span class="fc" id="L96">                Arrays.asList(</span>
+                        &quot;alignas&quot;, &quot;alignof&quot;, &quot;and&quot;, &quot;and_eq&quot;, &quot;asm&quot;, &quot;atomic_cancel&quot;, &quot;atomic_commit&quot;, &quot;atomic_noexcept&quot;,
+                        &quot;auto&quot;, &quot;bitand&quot;, &quot;bitor&quot;, &quot;bool&quot;, &quot;break&quot;, &quot;case&quot;, &quot;catch&quot;, &quot;char&quot;, &quot;char16_t&quot;, &quot;char32_t&quot;,
+                        &quot;class&quot;, &quot;compl&quot;, &quot;concept&quot;, &quot;const&quot;, &quot;constexpr&quot;, &quot;const_cast&quot;, &quot;continue&quot;, &quot;decltype&quot;, &quot;default&quot;,
+                        &quot;delete&quot;, &quot;do&quot;, &quot;double&quot;, &quot;dynamic_cast&quot;, &quot;else&quot;, &quot;enum&quot;, &quot;explicit&quot;, &quot;export&quot;, &quot;extern&quot;, &quot;false&quot;,
+                        &quot;float&quot;, &quot;for&quot;, &quot;friend&quot;, &quot;goto&quot;, &quot;if&quot;, &quot;inline&quot;, &quot;int&quot;, &quot;import&quot;, &quot;long&quot;, &quot;module&quot;, &quot;mutable&quot;,
+                        &quot;namespace&quot;, &quot;new&quot;, &quot;noexcept&quot;, &quot;not&quot;, &quot;not_eq&quot;, &quot;nullptr&quot;, &quot;operator&quot;, &quot;or&quot;, &quot;or_eq&quot;, &quot;private&quot;,
+                        &quot;protected&quot;, &quot;public&quot;, &quot;register&quot;, &quot;reinterpret_cast&quot;, &quot;requires&quot;, &quot;return&quot;, &quot;short&quot;, &quot;signed&quot;,
+                        &quot;sizeof&quot;, &quot;static&quot;, &quot;static_assert&quot;, &quot;static_cast&quot;, &quot;struct&quot;, &quot;switch&quot;, &quot;synchronized&quot;, &quot;template&quot;,
+                        &quot;this&quot;, &quot;thread_local&quot;, &quot;throw&quot;, &quot;true&quot;, &quot;try&quot;, &quot;typedef&quot;, &quot;typeid&quot;, &quot;typename&quot;, &quot;union&quot;,
+                        &quot;unsigned&quot;, &quot;using&quot;, &quot;virtual&quot;, &quot;void&quot;, &quot;volatile&quot;, &quot;wchar_t&quot;, &quot;while&quot;, &quot;xor&quot;, &quot;xor_eq&quot;
+                ));
+
+<span class="fc" id="L109">        super.typeMapping = new HashMap&lt;&gt;();</span>
+
+        //typeMapping.put(&quot;Date&quot;, &quot;DateTime&quot;);
+        //typeMapping.put(&quot;DateTime&quot;, &quot;DateTime&quot;);
+<span class="fc" id="L113">        typeMapping.put(&quot;string&quot;, &quot;std::string&quot;);</span>
+<span class="fc" id="L114">        typeMapping.put(&quot;integer&quot;, &quot;int&quot;);</span>
+<span class="fc" id="L115">        typeMapping.put(&quot;float&quot;, &quot;float&quot;);</span>
+<span class="fc" id="L116">        typeMapping.put(&quot;long&quot;, &quot;long long&quot;);</span>
+<span class="fc" id="L117">        typeMapping.put(&quot;boolean&quot;, &quot;bool&quot;);</span>
+<span class="fc" id="L118">        typeMapping.put(&quot;double&quot;, &quot;double&quot;);</span>
+<span class="fc" id="L119">        typeMapping.put(&quot;array&quot;, &quot;std::list&quot;);</span>
+<span class="fc" id="L120">        typeMapping.put(&quot;map&quot;, &quot;std::map&quot;);</span>
+<span class="fc" id="L121">        typeMapping.put(&quot;number&quot;, &quot;long long&quot;);</span>
+<span class="fc" id="L122">        typeMapping.put(&quot;object&quot;, &quot;std::string&quot;);</span>
+<span class="fc" id="L123">        typeMapping.put(&quot;binary&quot;, &quot;std::string&quot;);</span>
+<span class="fc" id="L124">        typeMapping.put(&quot;password&quot;, &quot;std::string&quot;);</span>
+        //TODO:Maybe use better formats for dateTime?
+<span class="fc" id="L126">        typeMapping.put(&quot;file&quot;, &quot;std::string&quot;);</span>
+<span class="fc" id="L127">        typeMapping.put(&quot;DateTime&quot;, &quot;std::string&quot;);</span>
+<span class="fc" id="L128">        typeMapping.put(&quot;Date&quot;, &quot;std::string&quot;);</span>
+<span class="fc" id="L129">        typeMapping.put(&quot;UUID&quot;, &quot;std::string&quot;);</span>
+<span class="fc" id="L130">        typeMapping.put(&quot;URI&quot;, &quot;std::string&quot;);</span>
+
+<span class="fc" id="L132">        importMapping = new HashMap&lt;&gt;();</span>
+
+<span class="fc" id="L134">        supportingFiles.clear();</span>
+<span class="fc" id="L135">        supportingFiles.add(new SupportingFile(&quot;helpers-header.mustache&quot;, sourceFolder, &quot;Helpers.h&quot;));</span>
+<span class="fc" id="L136">        supportingFiles.add(new SupportingFile(&quot;helpers-body.mustache&quot;, sourceFolder, &quot;Helpers.cpp&quot;));</span>
+<span class="fc" id="L137">        supportingFiles.add(new SupportingFile(&quot;netclient-header.mustache&quot;, sourceFolder, &quot;NetClient.h&quot;));</span>
+<span class="fc" id="L138">        supportingFiles.add(new SupportingFile(&quot;netclient-body.mustache&quot;, sourceFolder, &quot;NetClient.cpp&quot;));</span>
+<span class="fc" id="L139">        supportingFiles.add(new SupportingFile(&quot;object.mustache&quot;, sourceFolder, &quot;Object.h&quot;));</span>
+<span class="fc" id="L140">        supportingFiles.add(new SupportingFile(&quot;requestinfo.mustache&quot;, sourceFolder, &quot;RequestInfo.h&quot;));</span>
+<span class="fc" id="L141">        supportingFiles.add(new SupportingFile(&quot;error-header.mustache&quot;, sourceFolder, &quot;Error.h&quot;));</span>
+<span class="fc" id="L142">        supportingFiles.add(new SupportingFile(&quot;error-body.mustache&quot;, sourceFolder, &quot;Error.cpp&quot;));</span>
+<span class="fc" id="L143">        supportingFiles.add(new SupportingFile(&quot;Doxyfile.mustache&quot;, documentationFolder, &quot;Doxyfile&quot;));</span>
+<span class="fc" id="L144">        supportingFiles.add(new SupportingFile(&quot;generateDocumentation.mustache&quot;, documentationFolder, &quot;generateDocumentation.sh&quot;));</span>
+<span class="fc" id="L145">        supportingFiles.add(new SupportingFile(&quot;doc-readme.mustache&quot;, documentationFolder, &quot;README.md&quot;));</span>
+<span class="fc" id="L146">    }</span>
+
+    @Override
+    public CodegenType getTag() {
+<span class="fc" id="L150">        return CodegenType.CLIENT;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="fc" id="L155">        return &quot;cpp-tizen&quot;;</span>
+    }
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L160">        return &quot;Generates a Samsung Tizen C++ client library.&quot;;</span>
+    }
+
+    @Override
+    public String toInstantiationType(Schema p) {
+<span class="nc bnc" id="L165" title="All 2 branches missed.">        if (ModelUtils.isMapSchema(p)) {</span>
+<span class="nc" id="L166">            return instantiationTypes.get(&quot;map&quot;);</span>
+<span class="nc bnc" id="L167" title="All 2 branches missed.">        } else if (ModelUtils.isArraySchema(p)) {</span>
+<span class="nc" id="L168">            return instantiationTypes.get(&quot;array&quot;);</span>
+        } else {
+<span class="nc" id="L170">            return null;</span>
+        }
+    }
+
+    @Override
+    public String getTypeDeclaration(String name) {
+<span class="nc bnc" id="L176" title="All 2 branches missed.">        if (languageSpecificPrimitives.contains(name)) {</span>
+<span class="nc" id="L177">            return name;</span>
+        } else {
+<span class="nc" id="L179">            return super.getTypeDeclaration(name);</span>
+        }
+    }
+
+    @Override
+    public String getSchemaType(Schema p) {
+<span class="nc" id="L185">        String openAPIType = super.getSchemaType(p);</span>
+<span class="nc" id="L186">        String type = null;</span>
+<span class="nc bnc" id="L187" title="All 2 branches missed.">        if (typeMapping.containsKey(openAPIType)) {</span>
+<span class="nc" id="L188">            type = typeMapping.get(openAPIType);</span>
+<span class="nc bnc" id="L189" title="All 2 branches missed.">            if (languageSpecificPrimitives.contains(type)) {</span>
+<span class="nc" id="L190">                return toModelName(type);</span>
+            }
+        } else {
+<span class="nc" id="L193">            type = openAPIType;</span>
+        }
+<span class="nc" id="L195">        return toModelName(type);</span>
+    }
+
+    @Override
+    public String getTypeDeclaration(Schema p) {
+<span class="nc" id="L200">        String openAPIType = getSchemaType(p);</span>
+<span class="nc bnc" id="L201" title="All 2 branches missed.">        if (languageSpecificPrimitives.contains(openAPIType)) {</span>
+<span class="nc" id="L202">            return toModelName(openAPIType);</span>
+        } else {
+<span class="nc" id="L204">            return openAPIType;</span>
+        }
+    }
+
+    @Override
+    public String toModelName(String type) {
+<span class="nc bnc" id="L210" title="All 2 branches missed.">        if (typeMapping.keySet().contains(type) ||</span>
+<span class="nc bnc" id="L211" title="All 2 branches missed.">                typeMapping.values().contains(type) ||</span>
+<span class="nc bnc" id="L212" title="All 2 branches missed.">                importMapping.values().contains(type) ||</span>
+<span class="nc bnc" id="L213" title="All 2 branches missed.">                defaultIncludes.contains(type) ||</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">                languageSpecificPrimitives.contains(type)) {</span>
+<span class="nc" id="L215">            return type;</span>
+        } else {
+<span class="nc" id="L217">            return Character.toUpperCase(type.charAt(0)) + type.substring(1);</span>
+        }
+    }
+
+    @Override
+    public String toModelImport(String name) {
+<span class="nc bnc" id="L223" title="All 2 branches missed.">        if (name.equals(&quot;std::string&quot;)) {</span>
+<span class="nc" id="L224">            return &quot;#include &lt;string&gt;&quot;;</span>
+<span class="nc bnc" id="L225" title="All 2 branches missed.">        } else if (name.equals(&quot;std::map&quot;)) {</span>
+<span class="nc" id="L226">            return &quot;#include &lt;map&gt;&quot;;</span>
+<span class="nc bnc" id="L227" title="All 2 branches missed.">        } else if (name.equals(&quot;std::list&quot;)) {</span>
+<span class="nc" id="L228">            return &quot;#include &lt;list&gt;&quot;;</span>
+        }
+<span class="nc" id="L230">        return &quot;#include \&quot;&quot; + name + &quot;.h\&quot;&quot;;</span>
+    }
+
+    //Might not be needed
+    @Override
+    public String toDefaultValue(Schema p) {
+<span class="nc bnc" id="L236" title="All 2 branches missed.">        if (ModelUtils.isBooleanSchema(p)) {</span>
+<span class="nc" id="L237">            return &quot;bool(false)&quot;;</span>
+<span class="nc bnc" id="L238" title="All 2 branches missed.">        } else if (ModelUtils.isNumberSchema(p)) {</span>
+<span class="nc bnc" id="L239" title="All 2 branches missed.">            if (SchemaTypeUtil.FLOAT_FORMAT.equals(p.getFormat())) {</span>
+<span class="nc" id="L240">                return &quot;float(0)&quot;;</span>
+            }
+<span class="nc" id="L242">            return &quot;double(0)&quot;;</span>
+
+<span class="nc bnc" id="L244" title="All 2 branches missed.">        } else if (ModelUtils.isIntegerSchema(p)) {</span>
+<span class="nc bnc" id="L245" title="All 2 branches missed.">            if (SchemaTypeUtil.INTEGER64_FORMAT.equals(p.getFormat())) {</span>
+<span class="nc" id="L246">                return &quot;long(0)&quot;;</span>
+            }
+<span class="nc" id="L248">            return &quot;int(0)&quot;;</span>
+<span class="nc bnc" id="L249" title="All 2 branches missed.">        } else if (ModelUtils.isMapSchema(p)) {</span>
+<span class="nc" id="L250">            return &quot;new std::map()&quot;;</span>
+<span class="nc bnc" id="L251" title="All 2 branches missed.">        } else if (ModelUtils.isArraySchema(p)) {</span>
+<span class="nc" id="L252">            return &quot;new std::list()&quot;;</span>
+<span class="nc bnc" id="L253" title="All 2 branches missed.">        } else if (!StringUtils.isEmpty(p.get$ref())) {</span>
+<span class="nc" id="L254">            return &quot;new &quot; + toModelName(ModelUtils.getSimpleRef(p.get$ref())) + &quot;()&quot;;</span>
+<span class="nc bnc" id="L255" title="All 4 branches missed.">        } else if (ModelUtils.isDateSchema(p) || ModelUtils.isDateTimeSchema(p)) {</span>
+<span class="nc" id="L256">            return &quot;null&quot;;</span>
+<span class="nc bnc" id="L257" title="All 2 branches missed.">        } else if (ModelUtils.isStringSchema(p)) {</span>
+<span class="nc" id="L258">            return &quot;std::string()&quot;;</span>
+        }
+<span class="nc" id="L260">        return &quot;null&quot;;</span>
+    }
+
+
+    @Override
+    public String apiFileFolder() {
+<span class="nc" id="L266">        return outputFolder + File.separator + sourceFolder;</span>
+    }
+
+    @Override
+    public String modelFileFolder() {
+<span class="nc" id="L271">        return outputFolder + File.separator + sourceFolder;</span>
+    }
+
+    @Override
+    public String toModelFilename(String name) {
+<span class="nc" id="L276">        return camelize(name);</span>
+    }
+
+    @Override
+    public String toApiName(String name) {
+<span class="nc" id="L281">        return camelize(name) + &quot;Manager&quot;;</span>
+    }
+
+    @Override
+    public String toApiFilename(String name) {
+<span class="nc" id="L286">        return camelize(name) + &quot;Manager&quot;;</span>
+    }
+
+    @Override
+    public String toVarName(String name) {
+<span class="nc" id="L291">        String paramName = name.replaceAll(&quot;[^a-zA-Z0-9_]&quot;, &quot;&quot;);</span>
+<span class="nc bnc" id="L292" title="All 2 branches missed.">        if (name.length() &gt; 0 ) {</span>
+            // additionalProperties name is &quot;&quot; so name.length() == 0
+<span class="nc" id="L294">            paramName = Character.toLowerCase(paramName.charAt(0)) + paramName.substring(1);</span>
+        }
+<span class="nc bnc" id="L296" title="All 2 branches missed.">        if (isReservedWord(paramName)) {</span>
+<span class="nc" id="L297">            return escapeReservedWord(paramName);</span>
+        }
+<span class="nc" id="L299">        return paramName;</span>
+    }
+
+    @Override
+    public String toOperationId(String operationId) {
+        // throw exception if method name is empty
+<span class="nc bnc" id="L305" title="All 2 branches missed.">        if (StringUtils.isEmpty(operationId)) {</span>
+<span class="nc" id="L306">            throw new RuntimeException(&quot;Empty method name (operationId) not allowed&quot;);</span>
+        }
+
+        // method name cannot use reserved keyword, e.g. return$
+<span class="nc bnc" id="L310" title="All 2 branches missed.">        if (isReservedWord(operationId)) {</span>
+<span class="nc" id="L311">            operationId = escapeReservedWord(operationId);</span>
+        }
+
+        // add_pet_by_id =&gt; addPetById
+<span class="nc" id="L315">        return camelize(operationId, LOWERCASE_FIRST_LETTER);</span>
+    }
+    /**
+     * Output the Getter name for boolean property, e.g. getActive
+     *
+     * @param name the name of the property
+     * @return getter name based on naming convention
+     */
+    @Override
+    public String toBooleanGetter(String name) {
+<span class="nc" id="L325">        return &quot;get&quot; + getterAndSetterCapitalize(name);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

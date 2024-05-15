@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+  <meta charset='utf-8'>
+  <title>TestNG reports</title>
+
+    <link type="text/css" href="testng-reports1.css" rel="stylesheet" id="ultra" />
+    <link type="text/css" href="testng-reports.css" rel="stylesheet" id="retro" disabled="false"/>
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript" src="testng-reports.js"></script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type='text/javascript'>
+      google.load('visualization', '1', {packages:['table']});
+      google.setOnLoadCallback(drawTable);
+      var suiteTableInitFunctions = new Array();
+      var suiteTableData = new Array();
+    </script>
+    <!--
+      <script type="text/javascript" src="jquery-ui/js/jquery-ui-1.8.16.custom.min.js"></script>
+     -->
+  </head>
+
+  <body>
+    <div class="top-banner-root">
+      <span class="top-banner-title-font">Test results</span>
+      <button id="button" class="button">Switch Retro Theme</button> <!-- button -->
+      <br/>
+      <span class="top-banner-font-1">1 suite</span>
+    </div> <!-- top-banner-root -->
+    <div class="navigator-root">
+      <div class="navigator-suite-header">
+        <span>All suites</span>
+        <a href="#" title="Collapse/expand all the suites" class="collapse-all-link">
+          <img src="collapseall.gif" class="collapse-all-icon">
+          </img> <!-- collapse-all-icon -->
+        </a> <!-- collapse-all-link -->
+      </div> <!-- navigator-suite-header -->
+      <div class="suite">
+        <div class="rounded-window">
+          <div class="suite-header light-rounded-window-top">
+            <a href="#" panel-name="suite-Surefire_suite" class="navigator-link">
+              <span class="suite-name border-passed">Surefire suite</span>
+            </a> <!-- navigator-link -->
+          </div> <!-- suite-header light-rounded-window-top -->
+          <div class="navigator-suite-content">
+            <div class="suite-section-title">
+              <span>Info</span>
+            </div> <!-- suite-section-title -->
+            <div class="suite-section-content">
+              <ul>
+                <li>
+                  <a href="#" panel-name="test-xml-Surefire_suite" class="navigator-link ">
+                    <span>[unset file name]</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" panel-name="testlist-Surefire_suite" class="navigator-link ">
+                    <span class="test-stats">1 test</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" panel-name="group-Surefire_suite" class="navigator-link ">
+                    <span>0 groups</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" panel-name="times-Surefire_suite" class="navigator-link ">
+                    <span>Times</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" panel-name="reporter-Surefire_suite" class="navigator-link ">
+                    <span>Reporter output</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" panel-name="ignored-methods-Surefire_suite" class="navigator-link ">
+                    <span>Ignored methods</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" panel-name="chronological-Surefire_suite" class="navigator-link ">
+                    <span>Chronological view</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+              </ul>
+            </div> <!-- suite-section-content -->
+            <div class="result-section">
+              <div class="suite-section-title">
+                <span>Results</span>
+              </div> <!-- suite-section-title -->
+              <div class="suite-section-content">
+                <ul>
+                  <li>
+                    <span class="method-stats">17 methods,   17 passed</span>
+                  </li>
+                  <li>
+                    <span class="method-list-title passed">Passed methods</span>
+                    <span class="show-or-hide-methods passed">
+                      <a href="#" panel-name="suite-Surefire_suite" class="hide-methods passed suite-Surefire_suite"> (hide)</a> <!-- hide-methods passed suite-Surefire_suite -->
+                      <a href="#" panel-name="suite-Surefire_suite" class="show-methods passed suite-Surefire_suite"> (show)</a> <!-- show-methods passed suite-Surefire_suite -->
+                    </span>
+                    <div class="method-list-content passed suite-Surefire_suite">
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-Surefire_suite" title="org.openapitools.codegen.validation.ValidationRuleTest" class="method navigator-link" hash-for-method="createMethodUsingLambda">createMethodUsingLambda</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-Surefire_suite" title="org.openapitools.codegen.validation.ValidationRuleTest" class="method navigator-link" hash-for-method="createMethodUsingMethodReference">createMethodUsingMethodReference</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-Surefire_suite" title="org.openapitools.codegen.config.WorkflowSettingsTest" class="method navigator-link" hash-for-method="customGlobalPropertiesAreSet">customGlobalPropertiesAreSet</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-Surefire_suite" title="org.openapitools.codegen.config.WorkflowSettingsTest" class="method navigator-link" hash-for-method="customOutputDirIsSet">customOutputDirIsSet</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-Surefire_suite" title="org.openapitools.codegen.config.WorkflowSettingsTest" class="method navigator-link" hash-for-method="defaultValuesCanBeChangedBuilder">defaultValuesCanBeChangedBuilder</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-Surefire_suite" title="org.openapitools.codegen.config.WorkflowSettingsTest" class="method navigator-link" hash-for-method="defaultValuesCanBeChangedClassConstructor">defaultValuesCanBeChangedClassConstructor</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-Surefire_suite" title="org.openapitools.codegen.config.WorkflowSettingsTest" class="method navigator-link" hash-for-method="defaultValuesNotOverriddenByNulls">defaultValuesNotOverriddenByNulls</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-Surefire_suite" title="org.openapitools.codegen.meta.FeatureSetTest" class="method navigator-link" hash-for-method="flattOnUnspecified">flattOnUnspecified</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-Surefire_suite" title="org.openapitools.codegen.meta.FeatureSetTest" class="method navigator-link" hash-for-method="flattenOnMultipleFeatures">flattenOnMultipleFeatures</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-Surefire_suite" title="org.openapitools.codegen.meta.FeatureSetTest" class="method navigator-link" hash-for-method="flattenOnSingleFeatures">flattenOnSingleFeatures</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-Surefire_suite" title="org.openapitools.codegen.validation.ValidatedTest" class="method navigator-link" hash-for-method="isValidFalseForInvalidType">isValidFalseForInvalidType</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-Surefire_suite" title="org.openapitools.codegen.validation.ValidatedTest" class="method navigator-link" hash-for-method="isValidTrueForValidType">isValidTrueForValidType</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-Surefire_suite" title="org.openapitools.codegen.config.WorkflowSettingsTest" class="method navigator-link" hash-for-method="newBuilderFromCopyShouldMutateGlobalProperties">newBuilderFromCopyShouldMutateGlobalProperties</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-Surefire_suite" title="org.openapitools.codegen.validation.GenericValidatorTest" class="method navigator-link" hash-for-method="testGenericValidatorErrorsAndWarnings">testGenericValidatorErrorsAndWarnings</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-Surefire_suite" title="org.openapitools.codegen.validation.GenericValidatorTest" class="method navigator-link" hash-for-method="testGenericValidatorMultipleConditionsFail">testGenericValidatorMultipleConditionsFail</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-Surefire_suite" title="org.openapitools.codegen.validation.GenericValidatorTest" class="method navigator-link" hash-for-method="testGenericValidatorSingleConditionFails">testGenericValidatorSingleConditionFails</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-Surefire_suite" title="org.openapitools.codegen.validation.GenericValidatorTest" class="method navigator-link" hash-for-method="testGenericValidatorSuccesses">testGenericValidatorSuccesses</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                    </div> <!-- method-list-content passed suite-Surefire_suite -->
+                  </li>
+                </ul>
+              </div> <!-- suite-section-content -->
+            </div> <!-- result-section -->
+          </div> <!-- navigator-suite-content -->
+        </div> <!-- rounded-window -->
+      </div> <!-- suite -->
+    </div> <!-- navigator-root -->
+    <div class="wrapper">
+      <div class="main-panel-root">
+        <div panel-name="suite-Surefire_suite" class="panel Surefire_suite">
+          <div class="suite-Surefire_suite-class-passed">
+            <div class="main-panel-header rounded-window-top">
+              <img src="passed.png"/>
+              <span class="class-name">org.openapitools.codegen.validation.GenericValidatorTest</span>
+            </div> <!-- main-panel-header rounded-window-top -->
+            <div class="main-panel-content rounded-window-bottom">
+              <div class="method">
+                <div class="method-content">
+                  <a name="testGenericValidatorErrorsAndWarnings">
+                  </a> <!-- testGenericValidatorErrorsAndWarnings -->
+                  <span class="method-name">testGenericValidatorErrorsAndWarnings</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="testGenericValidatorMultipleConditionsFail">
+                  </a> <!-- testGenericValidatorMultipleConditionsFail -->
+                  <span class="method-name">testGenericValidatorMultipleConditionsFail</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="testGenericValidatorSingleConditionFails">
+                  </a> <!-- testGenericValidatorSingleConditionFails -->
+                  <span class="method-name">testGenericValidatorSingleConditionFails</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="testGenericValidatorSuccesses">
+                  </a> <!-- testGenericValidatorSuccesses -->
+                  <span class="method-name">testGenericValidatorSuccesses</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+            </div> <!-- main-panel-content rounded-window-bottom -->
+          </div> <!-- suite-Surefire_suite-class-passed -->
+          <div class="suite-Surefire_suite-class-passed">
+            <div class="main-panel-header rounded-window-top">
+              <img src="passed.png"/>
+              <span class="class-name">org.openapitools.codegen.config.WorkflowSettingsTest</span>
+            </div> <!-- main-panel-header rounded-window-top -->
+            <div class="main-panel-content rounded-window-bottom">
+              <div class="method">
+                <div class="method-content">
+                  <a name="customGlobalPropertiesAreSet">
+                  </a> <!-- customGlobalPropertiesAreSet -->
+                  <span class="method-name">customGlobalPropertiesAreSet</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="customOutputDirIsSet">
+                  </a> <!-- customOutputDirIsSet -->
+                  <span class="method-name">customOutputDirIsSet</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="defaultValuesCanBeChangedBuilder">
+                  </a> <!-- defaultValuesCanBeChangedBuilder -->
+                  <span class="method-name">defaultValuesCanBeChangedBuilder</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="defaultValuesCanBeChangedClassConstructor">
+                  </a> <!-- defaultValuesCanBeChangedClassConstructor -->
+                  <span class="method-name">defaultValuesCanBeChangedClassConstructor</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="defaultValuesNotOverriddenByNulls">
+                  </a> <!-- defaultValuesNotOverriddenByNulls -->
+                  <span class="method-name">defaultValuesNotOverriddenByNulls</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="newBuilderFromCopyShouldMutateGlobalProperties">
+                  </a> <!-- newBuilderFromCopyShouldMutateGlobalProperties -->
+                  <span class="method-name">newBuilderFromCopyShouldMutateGlobalProperties</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+            </div> <!-- main-panel-content rounded-window-bottom -->
+          </div> <!-- suite-Surefire_suite-class-passed -->
+          <div class="suite-Surefire_suite-class-passed">
+            <div class="main-panel-header rounded-window-top">
+              <img src="passed.png"/>
+              <span class="class-name">org.openapitools.codegen.meta.FeatureSetTest</span>
+            </div> <!-- main-panel-header rounded-window-top -->
+            <div class="main-panel-content rounded-window-bottom">
+              <div class="method">
+                <div class="method-content">
+                  <a name="flattOnUnspecified">
+                  </a> <!-- flattOnUnspecified -->
+                  <span class="method-name">flattOnUnspecified</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="flattenOnMultipleFeatures">
+                  </a> <!-- flattenOnMultipleFeatures -->
+                  <span class="method-name">flattenOnMultipleFeatures</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="flattenOnSingleFeatures">
+                  </a> <!-- flattenOnSingleFeatures -->
+                  <span class="method-name">flattenOnSingleFeatures</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+            </div> <!-- main-panel-content rounded-window-bottom -->
+          </div> <!-- suite-Surefire_suite-class-passed -->
+          <div class="suite-Surefire_suite-class-passed">
+            <div class="main-panel-header rounded-window-top">
+              <img src="passed.png"/>
+              <span class="class-name">org.openapitools.codegen.validation.ValidationRuleTest</span>
+            </div> <!-- main-panel-header rounded-window-top -->
+            <div class="main-panel-content rounded-window-bottom">
+              <div class="method">
+                <div class="method-content">
+                  <a name="createMethodUsingLambda">
+                  </a> <!-- createMethodUsingLambda -->
+                  <span class="method-name">createMethodUsingLambda</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="createMethodUsingMethodReference">
+                  </a> <!-- createMethodUsingMethodReference -->
+                  <span class="method-name">createMethodUsingMethodReference</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+            </div> <!-- main-panel-content rounded-window-bottom -->
+          </div> <!-- suite-Surefire_suite-class-passed -->
+          <div class="suite-Surefire_suite-class-passed">
+            <div class="main-panel-header rounded-window-top">
+              <img src="passed.png"/>
+              <span class="class-name">org.openapitools.codegen.validation.ValidatedTest</span>
+            </div> <!-- main-panel-header rounded-window-top -->
+            <div class="main-panel-content rounded-window-bottom">
+              <div class="method">
+                <div class="method-content">
+                  <a name="isValidFalseForInvalidType">
+                  </a> <!-- isValidFalseForInvalidType -->
+                  <span class="method-name">isValidFalseForInvalidType</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="isValidTrueForValidType">
+                  </a> <!-- isValidTrueForValidType -->
+                  <span class="method-name">isValidTrueForValidType</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+            </div> <!-- main-panel-content rounded-window-bottom -->
+          </div> <!-- suite-Surefire_suite-class-passed -->
+        </div> <!-- panel Surefire_suite -->
+        <div panel-name="test-xml-Surefire_suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+            <pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE suite SYSTEM &quot;https://testng.org/testng-1.0.dtd&quot;&gt;
+&lt;suite parallel=&quot;classes&quot; name=&quot;Surefire suite&quot; verbose=&quot;0&quot;&gt;
+  &lt;test thread-count=&quot;5&quot; parallel=&quot;classes&quot; name=&quot;Surefire test&quot; verbose=&quot;0&quot;&gt;
+    &lt;classes&gt;
+      &lt;class name=&quot;org.openapitools.codegen.config.WorkflowSettingsTest&quot;/&gt;
+      &lt;class name=&quot;org.openapitools.codegen.meta.FeatureSetTest&quot;/&gt;
+      &lt;class name=&quot;org.openapitools.codegen.validation.ValidationRuleTest&quot;/&gt;
+      &lt;class name=&quot;org.openapitools.codegen.validation.ValidatedTest&quot;/&gt;
+      &lt;class name=&quot;org.openapitools.codegen.validation.GenericValidatorTest&quot;/&gt;
+    &lt;/classes&gt;
+  &lt;/test&gt; &lt;!-- Surefire test --&gt;
+&lt;/suite&gt; &lt;!-- Surefire suite --&gt;
+            </pre>
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="testlist-Surefire_suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">Tests for Surefire suite</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+            <ul>
+              <li>
+                <span class="test-name">Surefire test (5 classes)</span>
+              </li>
+            </ul>
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="group-Surefire_suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">Groups for Surefire suite</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="times-Surefire_suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">Times for Surefire suite</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+            <div class="times-div">
+              <script type="text/javascript">
+suiteTableInitFunctions.push('tableData_Surefire_suite');
+function tableData_Surefire_suite() {
+var data = new google.visualization.DataTable();
+data.addColumn('number', 'Number');
+data.addColumn('string', 'Method');
+data.addColumn('string', 'Class');
+data.addColumn('number', 'Time (ms)');
+data.addRows(17);
+data.setCell(0, 0, 0)
+data.setCell(0, 1, 'flattOnUnspecified')
+data.setCell(0, 2, 'org.openapitools.codegen.meta.FeatureSetTest')
+data.setCell(0, 3, 51);
+data.setCell(1, 0, 1)
+data.setCell(1, 1, 'testGenericValidatorErrorsAndWarnings')
+data.setCell(1, 2, 'org.openapitools.codegen.validation.GenericValidatorTest')
+data.setCell(1, 3, 36);
+data.setCell(2, 0, 2)
+data.setCell(2, 1, 'isValidFalseForInvalidType')
+data.setCell(2, 2, 'org.openapitools.codegen.validation.ValidatedTest')
+data.setCell(2, 3, 30);
+data.setCell(3, 0, 3)
+data.setCell(3, 1, 'customGlobalPropertiesAreSet')
+data.setCell(3, 2, 'org.openapitools.codegen.config.WorkflowSettingsTest')
+data.setCell(3, 3, 30);
+data.setCell(4, 0, 4)
+data.setCell(4, 1, 'createMethodUsingLambda')
+data.setCell(4, 2, 'org.openapitools.codegen.validation.ValidationRuleTest')
+data.setCell(4, 3, 29);
+data.setCell(5, 0, 5)
+data.setCell(5, 1, 'createMethodUsingMethodReference')
+data.setCell(5, 2, 'org.openapitools.codegen.validation.ValidationRuleTest')
+data.setCell(5, 3, 7);
+data.setCell(6, 0, 6)
+data.setCell(6, 1, 'flattenOnMultipleFeatures')
+data.setCell(6, 2, 'org.openapitools.codegen.meta.FeatureSetTest')
+data.setCell(6, 3, 5);
+data.setCell(7, 0, 7)
+data.setCell(7, 1, 'testGenericValidatorMultipleConditionsFail')
+data.setCell(7, 2, 'org.openapitools.codegen.validation.GenericValidatorTest')
+data.setCell(7, 3, 5);
+data.setCell(8, 0, 8)
+data.setCell(8, 1, 'flattenOnSingleFeatures')
+data.setCell(8, 2, 'org.openapitools.codegen.meta.FeatureSetTest')
+data.setCell(8, 3, 3);
+data.setCell(9, 0, 9)
+data.setCell(9, 1, 'customOutputDirIsSet')
+data.setCell(9, 2, 'org.openapitools.codegen.config.WorkflowSettingsTest')
+data.setCell(9, 3, 3);
+data.setCell(10, 0, 10)
+data.setCell(10, 1, 'defaultValuesCanBeChangedBuilder')
+data.setCell(10, 2, 'org.openapitools.codegen.config.WorkflowSettingsTest')
+data.setCell(10, 3, 2);
+data.setCell(11, 0, 11)
+data.setCell(11, 1, 'newBuilderFromCopyShouldMutateGlobalProperties')
+data.setCell(11, 2, 'org.openapitools.codegen.config.WorkflowSettingsTest')
+data.setCell(11, 3, 1);
+data.setCell(12, 0, 12)
+data.setCell(12, 1, 'testGenericValidatorSuccesses')
+data.setCell(12, 2, 'org.openapitools.codegen.validation.GenericValidatorTest')
+data.setCell(12, 3, 1);
+data.setCell(13, 0, 13)
+data.setCell(13, 1, 'defaultValuesCanBeChangedClassConstructor')
+data.setCell(13, 2, 'org.openapitools.codegen.config.WorkflowSettingsTest')
+data.setCell(13, 3, 1);
+data.setCell(14, 0, 14)
+data.setCell(14, 1, 'defaultValuesNotOverriddenByNulls')
+data.setCell(14, 2, 'org.openapitools.codegen.config.WorkflowSettingsTest')
+data.setCell(14, 3, 1);
+data.setCell(15, 0, 15)
+data.setCell(15, 1, 'testGenericValidatorSingleConditionFails')
+data.setCell(15, 2, 'org.openapitools.codegen.validation.GenericValidatorTest')
+data.setCell(15, 3, 0);
+data.setCell(16, 0, 16)
+data.setCell(16, 1, 'isValidTrueForValidType')
+data.setCell(16, 2, 'org.openapitools.codegen.validation.ValidatedTest')
+data.setCell(16, 3, 0);
+window.suiteTableData['Surefire_suite']= { tableData: data, tableDiv: 'times-div-Surefire_suite'}
+return data;
+}
+              </script>
+              <span class="suite-total-time">Total running time: 205 ms</span>
+              <div id="times-div-Surefire_suite">
+              </div> <!-- times-div-Surefire_suite -->
+            </div> <!-- times-div -->
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="reporter-Surefire_suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">Reporter output for Surefire suite</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="ignored-methods-Surefire_suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">0 ignored methods</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="chronological-Surefire_suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">Methods in chronological order</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+            <div class="chronological-class">
+              <div class="chronological-class-name">org.openapitools.codegen.validation.ValidatedTest</div> <!-- chronological-class-name -->
+              <div class="test-method">
+                <span class="method-name">isValidFalseForInvalidType</span>
+                <span class="method-start">0 ms</span>
+              </div> <!-- test-method -->
+            </div> <!-- chronological-class -->
+            <div class="chronological-class">
+              <div class="chronological-class-name">org.openapitools.codegen.meta.FeatureSetTest</div> <!-- chronological-class-name -->
+              <div class="test-method">
+                <span class="method-name">flattOnUnspecified</span>
+                <span class="method-start">0 ms</span>
+              </div> <!-- test-method -->
+            </div> <!-- chronological-class -->
+            <div class="chronological-class">
+              <div class="chronological-class-name">org.openapitools.codegen.validation.ValidationRuleTest</div> <!-- chronological-class-name -->
+              <div class="test-method">
+                <span class="method-name">createMethodUsingLambda</span>
+                <span class="method-start">1 ms</span>
+              </div> <!-- test-method -->
+            </div> <!-- chronological-class -->
+            <div class="chronological-class">
+              <div class="chronological-class-name">org.openapitools.codegen.config.WorkflowSettingsTest</div> <!-- chronological-class-name -->
+              <div class="test-method">
+                <span class="method-name">customGlobalPropertiesAreSet</span>
+                <span class="method-start">1 ms</span>
+              </div> <!-- test-method -->
+            </div> <!-- chronological-class -->
+            <div class="chronological-class">
+              <div class="chronological-class-name">org.openapitools.codegen.validation.GenericValidatorTest</div> <!-- chronological-class-name -->
+              <div class="test-method">
+                <span class="method-name">testGenericValidatorErrorsAndWarnings</span>
+                <span class="method-start">1 ms</span>
+              </div> <!-- test-method -->
+            </div> <!-- chronological-class -->
+            <div class="chronological-class">
+              <div class="chronological-class-name">org.openapitools.codegen.config.WorkflowSettingsTest</div> <!-- chronological-class-name -->
+              <div class="test-method">
+                <span class="method-name">customOutputDirIsSet</span>
+                <span class="method-start">38 ms</span>
+              </div> <!-- test-method -->
+            </div> <!-- chronological-class -->
+            <div class="chronological-class">
+              <div class="chronological-class-name">org.openapitools.codegen.validation.ValidatedTest</div> <!-- chronological-class-name -->
+              <div class="test-method">
+                <span class="method-name">isValidTrueForValidType</span>
+                <span class="method-start">38 ms</span>
+              </div> <!-- test-method -->
+            </div> <!-- chronological-class -->
+            <div class="chronological-class">
+              <div class="chronological-class-name">org.openapitools.codegen.validation.ValidationRuleTest</div> <!-- chronological-class-name -->
+              <div class="test-method">
+                <span class="method-name">createMethodUsingMethodReference</span>
+                <span class="method-start">40 ms</span>
+              </div> <!-- test-method -->
+            </div> <!-- chronological-class -->
+            <div class="chronological-class">
+              <div class="chronological-class-name">org.openapitools.codegen.validation.GenericValidatorTest</div> <!-- chronological-class-name -->
+              <div class="test-method">
+                <span class="method-name">testGenericValidatorMultipleConditionsFail</span>
+                <span class="method-start">52 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">testGenericValidatorSingleConditionFails</span>
+                <span class="method-start">58 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">testGenericValidatorSuccesses</span>
+                <span class="method-start">59 ms</span>
+              </div> <!-- test-method -->
+            </div> <!-- chronological-class -->
+            <div class="chronological-class">
+              <div class="chronological-class-name">org.openapitools.codegen.config.WorkflowSettingsTest</div> <!-- chronological-class-name -->
+              <div class="test-method">
+                <span class="method-name">defaultValuesCanBeChangedBuilder</span>
+                <span class="method-start">61 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">defaultValuesCanBeChangedClassConstructor</span>
+                <span class="method-start">64 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">defaultValuesNotOverriddenByNulls</span>
+                <span class="method-start">66 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">newBuilderFromCopyShouldMutateGlobalProperties</span>
+                <span class="method-start">68 ms</span>
+              </div> <!-- test-method -->
+            </div> <!-- chronological-class -->
+            <div class="chronological-class">
+              <div class="chronological-class-name">org.openapitools.codegen.meta.FeatureSetTest</div> <!-- chronological-class-name -->
+              <div class="test-method">
+                <span class="method-name">flattenOnMultipleFeatures</span>
+                <span class="method-start">70 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">flattenOnSingleFeatures</span>
+                <span class="method-start">77 ms</span>
+              </div> <!-- test-method -->
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+      </div> <!-- main-panel-root -->
+    </div> <!-- wrapper -->
+  </body>
+<script type="text/javascript" src="testng-reports2.js"></script>
+</html>

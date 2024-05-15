@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OnceLogger.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.utils</a> &gt; <span class="el_source">OnceLogger.java</span></div><h1>OnceLogger.java</h1><pre class="source lang-java linenums">package org.openapitools.codegen.utils;
+
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.Ticker;
+import org.openapitools.codegen.config.GlobalSettings;
+import org.slf4j.Logger;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
+import org.slf4j.ext.LoggerWrapper;
+
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+/**
+ * Provides calling code a way to log important messages only once, regardless of how many times the invocation has occurred.
+ * This can be used, for instance, to log a warning like &quot;One or more schemas aren't declared&quot; without logging that message
+ * for every time the schema is mentioned in a document.
+ *
+ * This implementation currently only supports single-argument string literal log methods (e.g. {@link Logger#debug(String)}).
+ */
+@SuppressWarnings(&quot;FieldCanBeLocal&quot;)
+public class OnceLogger extends LoggerWrapper {
+    /**
+     * Allow advanced users to modify cache size of the OnceLogger (more for performance tuning in hosted environments)
+     */
+    static final String CACHE_SIZE_PROPERTY = &quot;org.openapitools.codegen.utils.oncelogger.cachesize&quot;;
+
+    /**
+     * Allow advanced users to disable the OnceLogger (more for performance tuning in hosted environments).
+     * This is really only useful or necessary if this implementation causes issues.
+     */
+    static final String ENABLE_ONCE_LOGGER_PROPERTY = &quot;org.openapitools.codegen.utils.oncelogger.enabled&quot;;
+
+    /**
+     * Allow advanced users to modify cache expiration of the OnceLogger (more for performance tuning in hosted environments)
+     */
+    static final String EXPIRY_PROPERTY = &quot;org.openapitools.codegen.utils.oncelogger.expiry&quot;;
+
+    /**
+     * Internal message cache for logger decorated with the onceler.
+     */
+    static Cache&lt;String, AtomicInteger&gt; messageCountCache;
+
+    /**
+     * The fully qualified class name of the &lt;b&gt;logger instance&lt;/b&gt;,
+     * typically the logger class, logger bridge or a logger wrapper.
+     */
+<span class="fc" id="L49">    private static final String FQCN = OnceLogger.class.getName();</span>
+
+    /**
+     * Gets the marker instance. This can be used by supported log implementations to filter/manage logs coming from
+     * this implementation differently than others (i.e. make them stand out since they're to be logged once).
+     */
+<span class="fc" id="L55">    private static final Marker MARKER = MarkerFactory.getMarker(&quot;ONCE&quot;);</span>
+
+    /**
+     * The allowed size of the cache.
+     */
+<span class="fc" id="L60">    private static int maxCacheSize = Integer.parseInt(GlobalSettings.getProperty(CACHE_SIZE_PROPERTY, &quot;200&quot;));</span>
+
+    /**
+     * The millis to expire a cached log message.
+     */
+<span class="fc" id="L65">    private static int expireMillis = Integer.parseInt(GlobalSettings.getProperty(EXPIRY_PROPERTY, &quot;2000&quot;));</span>
+
+    /**
+     * The number of allowed repetitions.
+     */
+<span class="fc" id="L70">    private static int maxRepetitions = 1;</span>
+
+    OnceLogger(Logger logger) {
+<span class="fc" id="L73">        this(logger, FQCN);</span>
+<span class="fc" id="L74">    }</span>
+
+    OnceLogger(Logger logger, String fqcn) {
+<span class="fc" id="L77">        super(logger, fqcn);</span>
+<span class="fc" id="L78">    }</span>
+
+    static {
+<span class="fc" id="L81">        caffeineCache(Ticker.systemTicker(), expireMillis);</span>
+<span class="fc" id="L82">    }</span>
+
+    static void caffeineCache(Ticker ticker, int expireMillis) {
+        // Initializes a cache which holds an atomic counter of log message instances.
+        // The intent is to debounce log messages such that they occur at most [maxRepetitions] per [expireMillis].
+<span class="fc" id="L87">        messageCountCache = Caffeine.newBuilder()</span>
+<span class="fc" id="L88">                .maximumSize(maxCacheSize)</span>
+<span class="fc" id="L89">                .expireAfterWrite(expireMillis, TimeUnit.MILLISECONDS)</span>
+<span class="fc" id="L90">                .ticker(ticker)</span>
+<span class="fc" id="L91">                .build();</span>
+<span class="fc" id="L92">    }</span>
+
+    public static Logger once(Logger logger) {
+        try {
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">            if (Boolean.parseBoolean(GlobalSettings.getProperty(ENABLE_ONCE_LOGGER_PROPERTY, &quot;true&quot;))) {</span>
+<span class="fc" id="L97">                return new OnceLogger(logger);</span>
+            }
+<span class="nc" id="L99">        } catch (Exception ex) {</span>
+<span class="nc" id="L100">            logger.warn(&quot;Unable to wrap logger instance in OnceLogger. Falling back to non-decorated implementation, which may be noisy.&quot;);</span>
+<span class="nc" id="L101">        }</span>
+<span class="nc" id="L102">        return logger;</span>
+    }
+
+    /**
+     * Delegate to the appropriate method of the underlying logger.
+     *
+     * @param msg The log message.
+     */
+    @Override
+    public void trace(String msg) {
+<span class="nc bnc" id="L112" title="All 4 branches missed.">        if (!isTraceEnabled() || !isTraceEnabled(MARKER)) return;</span>
+
+<span class="nc bnc" id="L114" title="All 2 branches missed.">        if (shouldLog(msg)) super.trace(MARKER, msg);</span>
+<span class="nc" id="L115">    }</span>
+
+    @SuppressWarnings(&quot;ConstantConditions&quot;)
+    private boolean shouldLog(final String msg) {
+<span class="nc" id="L119">        AtomicInteger counter = messageCountCache.get(msg, i -&gt; new AtomicInteger(0));</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">        return counter.incrementAndGet() &lt;= maxRepetitions;</span>
+    }
+
+    /**
+     * Delegate to the appropriate method of the underlying logger.
+     *
+     * @param msg The log message.
+     */
+    @Override
+    public void debug(String msg) {
+<span class="nc bnc" id="L130" title="All 4 branches missed.">        if (!isDebugEnabled() || !isDebugEnabled(MARKER)) return;</span>
+
+<span class="nc bnc" id="L132" title="All 2 branches missed.">        if (shouldLog(msg)) super.debug(MARKER, msg);</span>
+<span class="nc" id="L133">    }</span>
+
+    /**
+     * Delegate to the appropriate method of the underlying logger.
+     *
+     * @param msg The log message.
+     */
+    @Override
+    public void info(String msg) {
+<span class="nc bnc" id="L142" title="All 4 branches missed.">        if (!isInfoEnabled() || !isInfoEnabled(MARKER)) return;</span>
+
+<span class="nc bnc" id="L144" title="All 2 branches missed.">        if (shouldLog(msg)) super.info(MARKER, msg);</span>
+<span class="nc" id="L145">    }</span>
+
+    /**
+     * Delegate to the appropriate method of the underlying logger.
+     *
+     * @param msg The log message.
+     */
+    @Override
+    public void warn(String msg) {
+<span class="nc bnc" id="L154" title="All 4 branches missed.">        if (!isWarnEnabled() || !isWarnEnabled(MARKER)) return;</span>
+
+<span class="nc bnc" id="L156" title="All 2 branches missed.">        if (shouldLog(msg)) super.warn(MARKER, msg);</span>
+<span class="nc" id="L157">    }</span>
+
+    /**
+     * Delegate to the appropriate method of the underlying logger.
+     *
+     * Use this method sparingly. If you're limiting error messages, ask yourself
+     * whether your log fits better as a warning.
+     *
+     * @param msg The log message.
+     */
+    @Override
+    public void error(String msg) {
+<span class="nc bnc" id="L169" title="All 4 branches missed.">        if (!isErrorEnabled() || !isErrorEnabled(MARKER)) return;</span>
+
+<span class="nc bnc" id="L171" title="All 2 branches missed.">        if (shouldLog(msg)) super.error(MARKER, msg);</span>
+<span class="nc" id="L172">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

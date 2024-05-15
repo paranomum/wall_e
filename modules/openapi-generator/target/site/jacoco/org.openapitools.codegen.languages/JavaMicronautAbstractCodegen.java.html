@@ -1,0 +1,740 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JavaMicronautAbstractCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">JavaMicronautAbstractCodegen.java</span></div><h1>JavaMicronautAbstractCodegen.java</h1><pre class="source lang-java linenums">package org.openapitools.codegen.languages;
+
+import com.google.common.collect.ImmutableMap;
+import com.samskivert.mustache.Mustache;
+import com.samskivert.mustache.Template;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.media.Schema;
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.languages.features.BeanValidationFeatures;
+import org.openapitools.codegen.languages.features.OptionalFeatures;
+import org.openapitools.codegen.meta.features.DocumentationFeature;
+import org.openapitools.codegen.meta.features.SecurityFeature;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.openapitools.codegen.CodegenConstants.INVOKER_PACKAGE;
+import static org.openapitools.codegen.utils.StringUtils.camelize;
+import static org.openapitools.codegen.utils.StringUtils.underscore;
+
+public abstract class JavaMicronautAbstractCodegen extends AbstractJavaCodegen implements BeanValidationFeatures, OptionalFeatures {
+    public static final String OPT_TITLE = &quot;title&quot;;
+    public static final String OPT_BUILD = &quot;build&quot;;
+    public static final String OPT_BUILD_GRADLE = &quot;gradle&quot;;
+    public static final String OPT_BUILD_MAVEN = &quot;maven&quot;;
+    public static final String OPT_BUILD_ALL = &quot;all&quot;;
+    public static final String OPT_TEST = &quot;test&quot;;
+    public static final String OPT_TEST_JUNIT = &quot;junit&quot;;
+    public static final String OPT_TEST_SPOCK = &quot;spock&quot;;
+    public static final String OPT_REQUIRED_PROPERTIES_IN_CONSTRUCTOR = &quot;requiredPropertiesInConstructor&quot;;
+    public static final String OPT_MICRONAUT_VERSION = &quot;micronautVersion&quot;;
+    public static final String OPT_USE_AUTH = &quot;useAuth&quot;;
+    public static final String OPT_VISITABLE = &quot;visitable&quot;;
+    public static final String OPT_DATE_LIBRARY_JAVA8 = &quot;java8&quot;;
+    public static final String OPT_DATE_LIBRARY_JAVA8_LOCAL_DATETIME = &quot;java8-localdatetime&quot;;
+    public static final String OPT_DATE_FORMAT = &quot;dateFormat&quot;;
+    public static final String OPT_DATETIME_FORMAT = &quot;datetimeFormat&quot;;
+    public static final String OPT_REACTIVE = &quot;reactive&quot;;
+    public static final String OPT_WRAP_IN_HTTP_RESPONSE = &quot;wrapInHttpResponse&quot;;
+    public static final String OPT_APPLICATION_NAME = &quot;applicationName&quot;;
+    public static final String OPT_GENERATE_SWAGGER_ANNOTATIONS = &quot;generateSwaggerAnnotations&quot;;
+    public static final String OPT_GENERATE_SWAGGER_ANNOTATIONS_SWAGGER_1 = &quot;swagger1&quot;;
+    public static final String OPT_GENERATE_SWAGGER_ANNOTATIONS_SWAGGER_2 = &quot;swagger2&quot;;
+    public static final String OPT_GENERATE_SWAGGER_ANNOTATIONS_TRUE = &quot;true&quot;;
+    public static final String OPT_GENERATE_SWAGGER_ANNOTATIONS_FALSE = &quot;false&quot;;
+    public static final String OPT_GENERATE_OPERATION_ONLY_FOR_FIRST_TAG = &quot;generateOperationOnlyForFirstTag&quot;;
+<span class="fc" id="L56">    public enum SERIALIZATION_LIBRARY_TYPE {jackson, micronaut_serde_jackson}</span>
+
+<span class="fc" id="L58">    protected final Logger LOGGER = LoggerFactory.getLogger(JavaMicronautAbstractCodegen.class);</span>
+
+    protected String title;
+    protected boolean useBeanValidation;
+    protected boolean useOptional;
+    protected boolean visitable;
+    protected String buildTool;
+    protected String testTool;
+<span class="fc" id="L66">    protected boolean requiredPropertiesInConstructor = true;</span>
+    protected String micronautVersion;
+    protected boolean reactive;
+    protected boolean wrapInHttpResponse;
+    protected String appName;
+    protected String generateSwaggerAnnotations;
+    protected boolean generateOperationOnlyForFirstTag;
+<span class="fc" id="L73">    protected String serializationLibrary = SERIALIZATION_LIBRARY_TYPE.jackson.name();</span>
+
+    public static final String CONTENT_TYPE_APPLICATION_FORM_URLENCODED = &quot;application/x-www-form-urlencoded&quot;;
+    public static final String CONTENT_TYPE_APPLICATION_JSON = &quot;application/json&quot;;
+    public static final String CONTENT_TYPE_MULTIPART_FORM_DATA = &quot;multipart/form-data&quot;;
+    public static final String CONTENT_TYPE_ANY = &quot;*/*&quot;;
+    public static final String DATE_FORMAT = &quot;yyyy-MM-dd&quot;;
+    public static final String DATETIME_FORMAT = DATE_FORMAT + &quot;'T'HH:mm:ss.SSS&quot;;
+    public static final String OFFSET_DATETIME_FORMAT = DATETIME_FORMAT + &quot;XXXX&quot;;
+
+    public JavaMicronautAbstractCodegen() {
+<span class="fc" id="L84">        super();</span>
+
+        // Set all the fields
+<span class="fc" id="L87">        useBeanValidation = true;</span>
+<span class="fc" id="L88">        useOptional = false;</span>
+<span class="fc" id="L89">        visitable = false;</span>
+<span class="fc" id="L90">        buildTool = OPT_BUILD_ALL;</span>
+<span class="fc" id="L91">        testTool = OPT_TEST_JUNIT;</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">        outputFolder = this instanceof JavaMicronautClientCodegen ?</span>
+<span class="fc" id="L93">                &quot;generated-code/java-micronaut-client&quot; : &quot;generated-code/java-micronaut&quot;;</span>
+<span class="fc" id="L94">        apiPackage = &quot;org.openapitools.api&quot;;</span>
+<span class="fc" id="L95">        modelPackage = &quot;org.openapitools.model&quot;;</span>
+<span class="fc" id="L96">        invokerPackage = &quot;org.openapitools&quot;;</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">        artifactId = this instanceof JavaMicronautClientCodegen ?</span>
+<span class="fc" id="L98">                &quot;openapi-micronaut-client&quot; : &quot;openapi-micronaut&quot;;</span>
+<span class="fc" id="L99">        embeddedTemplateDir = templateDir = &quot;java-micronaut&quot;;</span>
+<span class="fc" id="L100">        apiDocPath = &quot;docs/apis&quot;;</span>
+<span class="fc" id="L101">        modelDocPath = &quot;docs/models&quot;;</span>
+<span class="fc" id="L102">        dateLibrary = OPT_DATE_LIBRARY_JAVA8;</span>
+<span class="fc" id="L103">        micronautVersion = &quot;3.4.3&quot;;</span>
+<span class="fc" id="L104">        reactive = true;</span>
+<span class="fc" id="L105">        wrapInHttpResponse = false;</span>
+<span class="fc" id="L106">        appName = artifactId;</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        generateSwaggerAnnotations = this instanceof JavaMicronautClientCodegen ?</span>
+<span class="fc" id="L108">                OPT_GENERATE_SWAGGER_ANNOTATIONS_FALSE : OPT_GENERATE_SWAGGER_ANNOTATIONS_SWAGGER_2;</span>
+<span class="fc" id="L109">        generateOperationOnlyForFirstTag = this instanceof JavaMicronautServerCodegen;</span>
+
+        // Set implemented features for user information
+<span class="fc" id="L112">        modifyFeatureSet(features -&gt; features</span>
+<span class="fc" id="L113">                .includeDocumentationFeatures(</span>
+                        DocumentationFeature.Readme
+                )
+<span class="fc" id="L116">                .securityFeatures(EnumSet.of(</span>
+                        SecurityFeature.ApiKey,
+                        SecurityFeature.BasicAuth,
+                        SecurityFeature.OAuth2_Implicit,
+                        SecurityFeature.OAuth2_AuthorizationCode,
+                        SecurityFeature.OAuth2_ClientCredentials,
+                        SecurityFeature.OAuth2_Password,
+                        SecurityFeature.OpenIDConnect
+                ))
+        );
+
+        // Set additional properties
+<span class="fc" id="L128">        additionalProperties.put(&quot;openbrace&quot;, &quot;{&quot;);</span>
+<span class="fc" id="L129">        additionalProperties.put(&quot;closebrace&quot;, &quot;}&quot;);</span>
+
+        // Set client options that will be presented to user
+<span class="fc" id="L132">        updateOption(INVOKER_PACKAGE, this.getInvokerPackage());</span>
+<span class="fc" id="L133">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
+<span class="fc" id="L134">        updateOption(CodegenConstants.API_PACKAGE, apiPackage);</span>
+<span class="fc" id="L135">        updateOption(CodegenConstants.MODEL_PACKAGE, modelPackage);</span>
+
+<span class="fc" id="L137">        cliOptions.add(new CliOption(OPT_TITLE, &quot;Client service name&quot;).defaultValue(title));</span>
+<span class="fc" id="L138">        cliOptions.add(new CliOption(OPT_MICRONAUT_VERSION, &quot;Micronaut version, only &gt;=3.0.0 versions are supported&quot;).defaultValue(micronautVersion));</span>
+<span class="fc" id="L139">        cliOptions.add(new CliOption(OPT_APPLICATION_NAME, &quot;Micronaut application name (Defaults to the &quot; + CodegenConstants.ARTIFACT_ID + &quot; value)&quot;).defaultValue(appName));</span>
+<span class="fc" id="L140">        cliOptions.add(CliOption.newBoolean(USE_BEANVALIDATION, &quot;Use BeanValidation API annotations&quot;, useBeanValidation));</span>
+<span class="fc" id="L141">        cliOptions.add(CliOption.newBoolean(USE_OPTIONAL, &quot;Use Optional container for optional parameters&quot;, useOptional));</span>
+<span class="fc" id="L142">        cliOptions.add(CliOption.newBoolean(OPT_VISITABLE, &quot;Generate visitor for subtypes with a discriminator&quot;, visitable));</span>
+<span class="fc" id="L143">        cliOptions.add(CliOption.newBoolean(OPT_REQUIRED_PROPERTIES_IN_CONSTRUCTOR, &quot;Allow only to create models with all the required properties provided in constructor&quot;, requiredPropertiesInConstructor));</span>
+<span class="fc" id="L144">        cliOptions.add(CliOption.newBoolean(OPT_REACTIVE, &quot;Make the responses use Reactor Mono as wrapper&quot;, reactive));</span>
+<span class="fc" id="L145">        cliOptions.add(CliOption.newBoolean(OPT_WRAP_IN_HTTP_RESPONSE, &quot;Wrap the response in HttpResponse object&quot;, wrapInHttpResponse));</span>
+<span class="fc" id="L146">        cliOptions.add(CliOption.newBoolean(OPT_GENERATE_OPERATION_ONLY_FOR_FIRST_TAG, &quot;When false, the operation method will be duplicated in each of the tags if multiple tags are assigned to this operation. &quot; +</span>
+                &quot;If true, each operation will be generated only once in the first assigned tag.&quot;, generateOperationOnlyForFirstTag));
+
+<span class="fc" id="L149">        CliOption buildToolOption = new CliOption(OPT_BUILD, &quot;Specify for which build tool to generate files&quot;).defaultValue(buildTool);</span>
+<span class="fc" id="L150">        Map&lt;String, String&gt; buildToolOptionMap = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L151">        buildToolOptionMap.put(OPT_BUILD_GRADLE, &quot;Gradle configuration is generated for the project&quot;);</span>
+<span class="fc" id="L152">        buildToolOptionMap.put(OPT_BUILD_MAVEN, &quot;Maven configuration is generated for the project&quot;);</span>
+<span class="fc" id="L153">        buildToolOptionMap.put(OPT_BUILD_ALL, &quot;Both Gradle and Maven configurations are generated&quot;);</span>
+<span class="fc" id="L154">        buildToolOption.setEnum(buildToolOptionMap);</span>
+<span class="fc" id="L155">        cliOptions.add(buildToolOption);</span>
+
+<span class="fc" id="L157">        CliOption testToolOption = new CliOption(OPT_TEST, &quot;Specify which test tool to generate files for&quot;).defaultValue(testTool);</span>
+<span class="fc" id="L158">        Map&lt;String, String&gt; testToolOptionMap = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L159">        testToolOptionMap.put(OPT_TEST_JUNIT, &quot;Use JUnit as test tool&quot;);</span>
+<span class="fc" id="L160">        testToolOptionMap.put(OPT_TEST_SPOCK, &quot;Use Spock as test tool&quot;);</span>
+<span class="fc" id="L161">        testToolOption.setEnum(testToolOptionMap);</span>
+<span class="fc" id="L162">        cliOptions.add(testToolOption);</span>
+
+<span class="fc" id="L164">        CliOption generateSwaggerAnnotationsOption = new CliOption(OPT_GENERATE_SWAGGER_ANNOTATIONS, &quot;Specify if you want to generate swagger annotations and which version&quot;).defaultValue(generateSwaggerAnnotations);</span>
+<span class="fc" id="L165">        Map&lt;String, String&gt; generateSwaggerAnnotationsOptionMap = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L166">        generateSwaggerAnnotationsOptionMap.put(OPT_GENERATE_SWAGGER_ANNOTATIONS_SWAGGER_1, &quot;Use io.swagger:swagger-annotations for annotating operations and schemas&quot;);</span>
+<span class="fc" id="L167">        generateSwaggerAnnotationsOptionMap.put(OPT_GENERATE_SWAGGER_ANNOTATIONS_SWAGGER_2, &quot;Use io.swagger.core.v3:swagger-annotations for annotating operations and schemas&quot;);</span>
+<span class="fc" id="L168">        generateSwaggerAnnotationsOptionMap.put(OPT_GENERATE_SWAGGER_ANNOTATIONS_TRUE, &quot;Equivalent to \&quot;&quot; + OPT_GENERATE_SWAGGER_ANNOTATIONS_SWAGGER_2 + &quot;\&quot;&quot;);</span>
+<span class="fc" id="L169">        generateSwaggerAnnotationsOptionMap.put(OPT_GENERATE_SWAGGER_ANNOTATIONS_FALSE, &quot;Do not generate swagger annotations&quot;);</span>
+<span class="fc" id="L170">        generateSwaggerAnnotationsOption.setEnum(generateSwaggerAnnotationsOptionMap);</span>
+<span class="fc" id="L171">        cliOptions.add(generateSwaggerAnnotationsOption);</span>
+
+<span class="fc" id="L173">        cliOptions.add(new CliOption(OPT_DATE_FORMAT, &quot;Specify the format pattern of date as a string&quot;));</span>
+<span class="fc" id="L174">        cliOptions.add(new CliOption(OPT_DATETIME_FORMAT, &quot;Specify the format pattern of date-time as a string&quot;));</span>
+
+        // Modify the DATE_LIBRARY option to only have supported values
+<span class="fc" id="L177">        cliOptions.stream().filter(o -&gt; o.getOpt().equals(DATE_LIBRARY)).findFirst().ifPresent(opt -&gt; {</span>
+<span class="fc" id="L178">            Map&lt;String, String&gt; valuesEnum = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L179">            valuesEnum.put(OPT_DATE_LIBRARY_JAVA8, opt.getEnum().get(OPT_DATE_LIBRARY_JAVA8));</span>
+<span class="fc" id="L180">            valuesEnum.put(OPT_DATE_LIBRARY_JAVA8_LOCAL_DATETIME, opt.getEnum().get(OPT_DATE_LIBRARY_JAVA8_LOCAL_DATETIME));</span>
+<span class="fc" id="L181">            opt.setEnum(valuesEnum);</span>
+<span class="fc" id="L182">        });</span>
+
+<span class="fc" id="L184">        final CliOption serializationLibraryOpt = CliOption.newString(CodegenConstants.SERIALIZATION_LIBRARY, &quot;Serialization library for model&quot;);</span>
+<span class="fc" id="L185">        serializationLibraryOpt.defaultValue(SERIALIZATION_LIBRARY_TYPE.jackson.name());</span>
+<span class="fc" id="L186">        Map&lt;String, String&gt; serializationLibraryOptions = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L187">        serializationLibraryOptions.put(SERIALIZATION_LIBRARY_TYPE.jackson.name(), &quot;Jackson as serialization library&quot;);</span>
+<span class="fc" id="L188">        serializationLibraryOptions.put(SERIALIZATION_LIBRARY_TYPE.micronaut_serde_jackson.name(), &quot;Use micronaut-serialization with Jackson annotations&quot;);</span>
+<span class="fc" id="L189">        serializationLibraryOpt.setEnum(serializationLibraryOptions);</span>
+<span class="fc" id="L190">        cliOptions.add(serializationLibraryOpt);</span>
+
+        // Add reserved words
+<span class="fc" id="L193">        String[] reservedWordsArray = {</span>
+                &quot;client&quot;, &quot;format&quot;, &quot;queryvalue&quot;, &quot;queryparam&quot;, &quot;pathvariable&quot;, &quot;header&quot;, &quot;cookie&quot;,
+                &quot;authorization&quot;, &quot;body&quot;, &quot;application&quot;
+        };
+<span class="fc" id="L197">        reservedWords.addAll(Arrays.asList(reservedWordsArray));</span>
+<span class="fc" id="L198">    }</span>
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L202">        super.processOpts();</span>
+
+        // Get properties
+<span class="nc bnc" id="L205" title="All 2 branches missed.">        if (additionalProperties.containsKey(OPT_TITLE)) {</span>
+<span class="nc" id="L206">            this.title = (String) additionalProperties.get(OPT_TITLE);</span>
+        }
+
+<span class="nc bnc" id="L209" title="All 2 branches missed.">        if (additionalProperties.containsKey(INVOKER_PACKAGE)) {</span>
+<span class="nc" id="L210">            invokerPackage = (String) additionalProperties.get(INVOKER_PACKAGE);</span>
+        } else {
+<span class="nc" id="L212">            additionalProperties.put(INVOKER_PACKAGE, invokerPackage);</span>
+        }
+
+<span class="nc bnc" id="L215" title="All 2 branches missed.">        if (additionalProperties.containsKey(OPT_MICRONAUT_VERSION)) {</span>
+<span class="nc" id="L216">            micronautVersion = (String) additionalProperties.get(OPT_MICRONAUT_VERSION);</span>
+        } else {
+<span class="nc" id="L218">            additionalProperties.put(OPT_MICRONAUT_VERSION, micronautVersion);</span>
+        }
+
+<span class="nc bnc" id="L221" title="All 2 branches missed.">        if (additionalProperties.containsKey(OPT_APPLICATION_NAME)) {</span>
+<span class="nc" id="L222">            appName = (String) additionalProperties.get(OPT_APPLICATION_NAME);</span>
+        } else {
+<span class="nc" id="L224">            additionalProperties.put(OPT_APPLICATION_NAME, artifactId);</span>
+        }
+
+        // Get boolean properties
+<span class="nc bnc" id="L228" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_BEANVALIDATION)) {</span>
+<span class="nc" id="L229">            this.setUseBeanValidation(convertPropertyToBoolean(USE_BEANVALIDATION));</span>
+        }
+<span class="nc" id="L231">        writePropertyBack(USE_BEANVALIDATION, useBeanValidation);</span>
+
+<span class="nc bnc" id="L233" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_OPTIONAL)) {</span>
+<span class="nc" id="L234">            this.setUseOptional(convertPropertyToBoolean(USE_OPTIONAL));</span>
+        }
+<span class="nc" id="L236">        writePropertyBack(USE_OPTIONAL, useOptional);</span>
+
+<span class="nc bnc" id="L238" title="All 2 branches missed.">        if (additionalProperties.containsKey(OPT_VISITABLE)) {</span>
+<span class="nc" id="L239">            this.setVisitable(convertPropertyToBoolean(OPT_VISITABLE));</span>
+        }
+<span class="nc" id="L241">        writePropertyBack(OPT_VISITABLE, visitable);</span>
+
+<span class="nc bnc" id="L243" title="All 2 branches missed.">        if (additionalProperties.containsKey(OPT_REQUIRED_PROPERTIES_IN_CONSTRUCTOR)) {</span>
+<span class="nc" id="L244">            this.requiredPropertiesInConstructor = convertPropertyToBoolean(OPT_REQUIRED_PROPERTIES_IN_CONSTRUCTOR);</span>
+        }
+<span class="nc" id="L246">        writePropertyBack(OPT_REQUIRED_PROPERTIES_IN_CONSTRUCTOR, requiredPropertiesInConstructor);</span>
+
+<span class="nc bnc" id="L248" title="All 2 branches missed.">        if (additionalProperties.containsKey(OPT_REACTIVE)) {</span>
+<span class="nc" id="L249">            this.reactive = convertPropertyToBoolean(OPT_REACTIVE);</span>
+        }
+<span class="nc" id="L251">        writePropertyBack(OPT_REACTIVE, reactive);</span>
+
+<span class="nc bnc" id="L253" title="All 2 branches missed.">        if (additionalProperties.containsKey(OPT_WRAP_IN_HTTP_RESPONSE)) {</span>
+<span class="nc" id="L254">            this.wrapInHttpResponse = convertPropertyToBoolean(OPT_WRAP_IN_HTTP_RESPONSE);</span>
+        }
+<span class="nc" id="L256">        writePropertyBack(OPT_WRAP_IN_HTTP_RESPONSE, wrapInHttpResponse);</span>
+
+<span class="nc bnc" id="L258" title="All 2 branches missed.">        if (additionalProperties.containsKey(OPT_GENERATE_OPERATION_ONLY_FOR_FIRST_TAG)) {</span>
+<span class="nc" id="L259">            this.generateOperationOnlyForFirstTag = convertPropertyToBoolean(OPT_GENERATE_OPERATION_ONLY_FOR_FIRST_TAG);</span>
+        }
+<span class="nc" id="L261">        writePropertyBack(OPT_GENERATE_OPERATION_ONLY_FOR_FIRST_TAG, generateOperationOnlyForFirstTag);</span>
+
+        // Get enum properties
+<span class="nc bnc" id="L264" title="All 2 branches missed.">        if (additionalProperties.containsKey(OPT_BUILD)) {</span>
+<span class="nc bnc" id="L265" title="All 2 branches missed.">            switch ((String) additionalProperties.get(OPT_BUILD)) {</span>
+                case OPT_BUILD_GRADLE:
+                case OPT_BUILD_MAVEN:
+                case OPT_BUILD_ALL:
+<span class="nc" id="L269">                    this.buildTool = (String) additionalProperties.get(OPT_BUILD);</span>
+<span class="nc" id="L270">                    break;</span>
+                default:
+<span class="nc" id="L272">                    throw new RuntimeException(&quot;Build tool \&quot;&quot; + additionalProperties.get(OPT_BUILD) + &quot;\&quot; is not supported or misspelled.&quot;);</span>
+            }
+        }
+<span class="nc" id="L275">        additionalProperties.put(OPT_BUILD, buildTool);</span>
+
+<span class="nc bnc" id="L277" title="All 2 branches missed.">        if (additionalProperties.containsKey(OPT_TEST)) {</span>
+<span class="nc bnc" id="L278" title="All 2 branches missed.">            switch ((String) additionalProperties.get(OPT_TEST)) {</span>
+                case OPT_TEST_JUNIT:
+                case OPT_TEST_SPOCK:
+<span class="nc" id="L281">                    this.testTool = (String) additionalProperties.get(OPT_TEST);</span>
+<span class="nc" id="L282">                    break;</span>
+                default:
+<span class="nc" id="L284">                    throw new RuntimeException(&quot;Test tool \&quot;&quot; + additionalProperties.get(OPT_TEST) + &quot;\&quot; is not supported or misspelled.&quot;);</span>
+            }
+        }
+<span class="nc" id="L287">        additionalProperties.put(OPT_TEST, testTool);</span>
+<span class="nc bnc" id="L288" title="All 2 branches missed.">        if (testTool.equals(OPT_TEST_JUNIT)) {</span>
+<span class="nc" id="L289">            additionalProperties.put(&quot;isTestJunit&quot;, true);</span>
+<span class="nc bnc" id="L290" title="All 2 branches missed.">        } else if (testTool.equals(OPT_TEST_SPOCK)) {</span>
+<span class="nc" id="L291">            additionalProperties.put(&quot;isTestSpock&quot;, true);</span>
+        }
+
+<span class="nc bnc" id="L294" title="All 2 branches missed.">        if (additionalProperties.containsKey(OPT_GENERATE_SWAGGER_ANNOTATIONS)) {</span>
+<span class="nc" id="L295">            String value = String.valueOf(additionalProperties.get(OPT_GENERATE_SWAGGER_ANNOTATIONS));</span>
+<span class="nc bnc" id="L296" title="All 4 branches missed.">            switch (value) {</span>
+                case OPT_GENERATE_SWAGGER_ANNOTATIONS_SWAGGER_1:
+<span class="nc" id="L298">                    this.generateSwaggerAnnotations = OPT_GENERATE_SWAGGER_ANNOTATIONS_SWAGGER_1;</span>
+<span class="nc" id="L299">                    break;</span>
+                case OPT_GENERATE_SWAGGER_ANNOTATIONS_SWAGGER_2:
+                case OPT_GENERATE_SWAGGER_ANNOTATIONS_TRUE:
+<span class="nc" id="L302">                    this.generateSwaggerAnnotations = OPT_GENERATE_SWAGGER_ANNOTATIONS_SWAGGER_2;</span>
+<span class="nc" id="L303">                    break;</span>
+                case OPT_GENERATE_SWAGGER_ANNOTATIONS_FALSE:
+<span class="nc" id="L305">                    this.generateSwaggerAnnotations = OPT_GENERATE_SWAGGER_ANNOTATIONS_FALSE;</span>
+<span class="nc" id="L306">                    break;</span>
+                default:
+<span class="nc" id="L308">                    throw new RuntimeException(&quot;Value \&quot;&quot; + value + &quot;\&quot; for the &quot; + OPT_GENERATE_SWAGGER_ANNOTATIONS + &quot; parameter is unsupported or misspelled&quot;);</span>
+            }
+        }
+<span class="nc bnc" id="L311" title="All 2 branches missed.">        if (OPT_GENERATE_SWAGGER_ANNOTATIONS_SWAGGER_1.equals(this.generateSwaggerAnnotations)) {</span>
+<span class="nc" id="L312">            additionalProperties.put(&quot;generateSwagger1Annotations&quot;, true);</span>
+<span class="nc bnc" id="L313" title="All 2 branches missed.">        } else if (OPT_GENERATE_SWAGGER_ANNOTATIONS_SWAGGER_2.equals(this.generateSwaggerAnnotations)) {</span>
+<span class="nc" id="L314">            additionalProperties.put(&quot;generateSwagger2Annotations&quot;, true);</span>
+        }
+
+<span class="nc bnc" id="L317" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.SERIALIZATION_LIBRARY)) {</span>
+<span class="nc" id="L318">            setSerializationLibrary((String) additionalProperties.get(CodegenConstants.SERIALIZATION_LIBRARY));</span>
+        }
+<span class="nc" id="L320">        additionalProperties.put(this.serializationLibrary, true);</span>
+
+        // Add all the supporting files
+<span class="nc" id="L323">        String resourceFolder = projectFolder + &quot;/resources&quot;;</span>
+<span class="nc" id="L324">        supportingFiles.add(new SupportingFile(&quot;common/configuration/application.yml.mustache&quot;, resourceFolder, &quot;application.yml&quot;).doNotOverwrite());</span>
+<span class="nc" id="L325">        supportingFiles.add(new SupportingFile(&quot;common/configuration/logback.xml.mustache&quot;, resourceFolder, &quot;logback.xml&quot;).doNotOverwrite());</span>
+
+<span class="nc bnc" id="L327" title="All 4 branches missed.">        if (buildTool.equals(OPT_BUILD_GRADLE) || buildTool.equals(OPT_BUILD_ALL)) {</span>
+            // Gradle files
+<span class="nc" id="L329">            supportingFiles.add(new SupportingFile(&quot;common/configuration/gradle/build.gradle.mustache&quot;, &quot;&quot;, &quot;build.gradle&quot;).doNotOverwrite());</span>
+<span class="nc" id="L330">            supportingFiles.add(new SupportingFile(&quot;common/configuration/gradle/settings.gradle.mustache&quot;, &quot;&quot;, &quot;settings.gradle&quot;).doNotOverwrite());</span>
+<span class="nc" id="L331">            supportingFiles.add(new SupportingFile(&quot;common/configuration/gradle/gradle.properties.mustache&quot;, &quot;&quot;, &quot;gradle.properties&quot;).doNotOverwrite());</span>
+
+            // Gradlew files
+<span class="nc" id="L334">            final String gradleWrapperFolder = &quot;gradle/wrapper&quot;;</span>
+<span class="nc" id="L335">            supportingFiles.add(new SupportingFile(&quot;common/configuration/gradlew/gradlew.mustache&quot;, &quot;&quot;, &quot;gradlew&quot;));</span>
+<span class="nc" id="L336">            supportingFiles.add(new SupportingFile(&quot;common/configuration/gradlew/gradlew.bat.mustache&quot;, &quot;&quot;, &quot;gradlew.bat&quot;));</span>
+<span class="nc" id="L337">            supportingFiles.add(new SupportingFile(&quot;common/configuration/gradlew/gradle-wrapper.properties.mustache&quot;, gradleWrapperFolder, &quot;gradle-wrapper.properties&quot;));</span>
+<span class="nc" id="L338">            supportingFiles.add(new SupportingFile(&quot;common/configuration/gradlew/gradle-wrapper.jar&quot;, gradleWrapperFolder, &quot;gradle-wrapper.jar&quot;));</span>
+        }
+
+<span class="nc bnc" id="L341" title="All 4 branches missed.">        if (buildTool.equals(OPT_BUILD_MAVEN) || buildTool.equals(OPT_BUILD_ALL)) {</span>
+            // Maven files
+<span class="nc" id="L343">            supportingFiles.add(new SupportingFile(&quot;common/configuration/pom.xml.mustache&quot;, &quot;&quot;, &quot;pom.xml&quot;).doNotOverwrite());</span>
+
+            // Maven wrapper files
+<span class="nc" id="L346">            supportingFiles.add(new SupportingFile(&quot;common/configuration/mavenw/mvnw.mustache&quot;, &quot;&quot;, &quot;mvnw&quot;));</span>
+<span class="nc" id="L347">            supportingFiles.add(new SupportingFile(&quot;common/configuration/mavenw/mvnw.bat.mustache&quot;, &quot;&quot;, &quot;mvnw.bat&quot;));</span>
+<span class="nc" id="L348">            supportingFiles.add(new SupportingFile(&quot;common/configuration/mavenw/MavenWrapperDownloader.java.mustache&quot;, &quot;.mvn/wrapper&quot;, &quot;MavenWrapperDownloader.java&quot;));</span>
+<span class="nc" id="L349">            supportingFiles.add(new SupportingFile(&quot;common/configuration/mavenw/maven-wrapper.jar.mustache&quot;, &quot;.mvn/wrapper&quot;, &quot;maven-wrapper.jar&quot;));</span>
+<span class="nc" id="L350">            supportingFiles.add(new SupportingFile(&quot;common/configuration/mavenw/maven-wrapper.properties.mustache&quot;, &quot;.mvn/wrapper&quot;, &quot;maven-wrapper.properties&quot;));</span>
+        }
+
+        // Git files
+<span class="nc" id="L354">        supportingFiles.add(new SupportingFile(&quot;common/configuration/git/gitignore.mustache&quot;, &quot;&quot;, &quot;.gitignore&quot;).doNotOverwrite());</span>
+
+        // Use the default java time
+<span class="nc" id="L357">        additionalProperties.putIfAbsent(OPT_DATE_FORMAT, DATE_FORMAT);</span>
+<span class="nc bnc" id="L358" title="All 2 branches missed.">        if (dateLibrary.equals(OPT_DATE_LIBRARY_JAVA8)) {</span>
+<span class="nc" id="L359">            typeMapping.put(&quot;DateTime&quot;, &quot;OffsetDateTime&quot;);</span>
+<span class="nc" id="L360">            typeMapping.put(&quot;date&quot;, &quot;LocalDate&quot;);</span>
+<span class="nc" id="L361">            additionalProperties.putIfAbsent(OPT_DATETIME_FORMAT, OFFSET_DATETIME_FORMAT);</span>
+<span class="nc bnc" id="L362" title="All 2 branches missed.">        } else if (dateLibrary.equals(OPT_DATE_LIBRARY_JAVA8_LOCAL_DATETIME)) {</span>
+<span class="nc" id="L363">            typeMapping.put(&quot;DateTime&quot;, &quot;LocalDateTime&quot;);</span>
+<span class="nc" id="L364">            typeMapping.put(&quot;date&quot;, &quot;LocalDate&quot;);</span>
+<span class="nc" id="L365">            additionalProperties.putIfAbsent(OPT_DATETIME_FORMAT, DATETIME_FORMAT);</span>
+        }
+<span class="nc" id="L367">        importMapping.putIfAbsent(&quot;LocalDateTime&quot;, &quot;java.time.LocalDateTime&quot;);</span>
+<span class="nc" id="L368">        importMapping.putIfAbsent(&quot;OffsetDateTime&quot;, &quot;java.time.OffsetDateTime&quot;);</span>
+<span class="nc" id="L369">        importMapping.putIfAbsent(&quot;LocalDate&quot;, &quot;java.time.LocalDate&quot;);</span>
+
+        // Add documentation files
+<span class="nc" id="L372">        modelDocTemplateFiles.clear();</span>
+<span class="nc" id="L373">        modelDocTemplateFiles.put(&quot;common/doc/model_doc.mustache&quot;, &quot;.md&quot;);</span>
+
+        // Add model files
+<span class="nc" id="L376">        modelTemplateFiles.clear();</span>
+<span class="nc" id="L377">        modelTemplateFiles.put(&quot;common/model/model.mustache&quot;, &quot;.java&quot;);</span>
+
+        // Add test files
+<span class="nc" id="L380">        modelTestTemplateFiles.clear();</span>
+<span class="nc bnc" id="L381" title="All 2 branches missed.">        if (testTool.equals(OPT_TEST_JUNIT)) {</span>
+<span class="nc" id="L382">            modelTestTemplateFiles.put(&quot;common/test/model_test.mustache&quot;, &quot;.java&quot;);</span>
+<span class="nc bnc" id="L383" title="All 2 branches missed.">        } else if (testTool.equals(OPT_TEST_SPOCK)) {</span>
+<span class="nc" id="L384">            modelTestTemplateFiles.put(&quot;common/test/model_test.groovy.mustache&quot;, &quot;.groovy&quot;);</span>
+        }
+
+        // Set properties for documentation
+<span class="nc" id="L388">        final String invokerFolder = (sourceFolder + '/' + invokerPackage).replace(&quot;.&quot;, &quot;/&quot;);</span>
+<span class="nc" id="L389">        final String apiFolder = (sourceFolder + '/' + apiPackage()).replace('.', '/');</span>
+<span class="nc" id="L390">        final String modelFolder = (sourceFolder + '/' + modelPackage()).replace('.', '/');</span>
+<span class="nc" id="L391">        additionalProperties.put(&quot;invokerFolder&quot;, invokerFolder);</span>
+<span class="nc" id="L392">        additionalProperties.put(&quot;resourceFolder&quot;, resourceFolder);</span>
+<span class="nc" id="L393">        additionalProperties.put(&quot;apiFolder&quot;, apiFolder);</span>
+<span class="nc" id="L394">        additionalProperties.put(&quot;modelFolder&quot;, modelFolder);</span>
+<span class="nc" id="L395">    }</span>
+
+    @Override
+    public String apiTestFileFolder() {
+<span class="nc bnc" id="L399" title="All 2 branches missed.">        if (testTool.equals(OPT_TEST_SPOCK)) {</span>
+<span class="nc" id="L400">            return getOutputDir() + &quot;/src/test/groovy/&quot; + apiPackage().replaceAll(&quot;\\.&quot;, &quot;/&quot;);</span>
+        }
+<span class="nc" id="L402">        return getOutputDir() + &quot;/src/test/java/&quot; + apiPackage().replaceAll(&quot;\\.&quot;, &quot;/&quot;);</span>
+    }
+
+    @Override
+    public String modelTestFileFolder() {
+<span class="nc bnc" id="L407" title="All 2 branches missed.">        if (testTool.equals(OPT_TEST_SPOCK)) {</span>
+<span class="nc" id="L408">            return getOutputDir() + &quot;/src/test/groovy/&quot; + modelPackage().replaceAll(&quot;\\.&quot;, &quot;/&quot;);</span>
+        }
+<span class="nc" id="L410">        return getOutputDir() + &quot;/src/test/java/&quot; + modelPackage().replaceAll(&quot;\\.&quot;, &quot;/&quot;);</span>
+    }
+
+    @Override
+    public String toApiTestFilename(String name) {
+<span class="nc bnc" id="L415" title="All 2 branches missed.">        if (testTool.equals(OPT_TEST_SPOCK)) {</span>
+<span class="nc" id="L416">            return toApiName(name) + &quot;Spec&quot;;</span>
+        }
+<span class="nc" id="L418">        return toApiName(name) + &quot;Test&quot;;</span>
+    }
+
+    @Override
+    public String toModelTestFilename(String name) {
+<span class="nc bnc" id="L423" title="All 2 branches missed.">        if (testTool.equals(OPT_TEST_SPOCK)) {</span>
+<span class="nc" id="L424">            return toModelName(name) + &quot;Spec&quot;;</span>
+        }
+<span class="nc" id="L426">        return toModelName(name) + &quot;Test&quot;;</span>
+    }
+
+    @Override
+    public void setUseBeanValidation(boolean useBeanValidation) {
+<span class="nc" id="L431">        this.useBeanValidation = useBeanValidation;</span>
+<span class="nc" id="L432">    }</span>
+
+    @Override
+    public void setUseOptional(boolean useOptional) {
+<span class="nc" id="L436">        this.useOptional = useOptional;</span>
+<span class="nc" id="L437">    }</span>
+
+    public void setVisitable(boolean visitable) {
+<span class="nc" id="L440">        this.visitable = visitable;</span>
+<span class="nc" id="L441">    }</span>
+
+    @Override
+    public String toApiVarName(String name) {
+<span class="nc" id="L445">        String apiVarName = super.toApiVarName(name);</span>
+<span class="nc bnc" id="L446" title="All 2 branches missed.">        if (reservedWords.contains(apiVarName)) {</span>
+<span class="nc" id="L447">            apiVarName = escapeReservedWord(apiVarName);</span>
+        }
+<span class="nc" id="L449">        return apiVarName;</span>
+    }
+
+    public boolean isUseBeanValidation() {
+<span class="nc" id="L453">        return useBeanValidation;</span>
+    }
+
+    public boolean isUseOptional() {
+<span class="nc" id="L457">        return useOptional;</span>
+    }
+
+    public boolean isVisitable() {
+<span class="nc" id="L461">        return visitable;</span>
+    }
+
+    @Override
+    public String sanitizeTag(String tag) {
+        // Skip sanitization to get the original tag name in the addOperationToGroup() method.
+        // Inside that method tag is manually sanitized.
+<span class="nc" id="L468">        return tag;</span>
+    }
+
+    @Override
+    public void addOperationToGroup(String tag, String resourcePath, Operation operation, CodegenOperation
+            co, Map&lt;String, List&lt;CodegenOperation&gt;&gt; operations) {
+<span class="nc bnc" id="L474" title="All 4 branches missed.">        if (generateOperationOnlyForFirstTag &amp;&amp; !co.tags.get(0).getName().equals(tag)) {</span>
+            // This is not the first assigned to this operation tag;
+<span class="nc" id="L476">            return;</span>
+        }
+
+<span class="nc" id="L479">        super.addOperationToGroup(super.sanitizeTag(tag), resourcePath, operation, co, operations);</span>
+<span class="nc" id="L480">    }</span>
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L484">        objs = super.postProcessOperationsWithModels(objs, allModels);</span>
+
+<span class="nc" id="L486">        Map&lt;String, CodegenModel&gt; models = allModels.stream()</span>
+<span class="nc" id="L487">                .map(ModelMap::getModel)</span>
+<span class="nc" id="L488">                .collect(Collectors.toMap(v -&gt; v.classname, v -&gt; v));</span>
+<span class="nc" id="L489">        OperationMap operations = objs.getOperations();</span>
+<span class="nc" id="L490">        List&lt;CodegenOperation&gt; operationList = operations.getOperation();</span>
+
+<span class="nc bnc" id="L492" title="All 2 branches missed.">        for (CodegenOperation op : operationList) {</span>
+            // Set whether body is supported in request
+<span class="nc" id="L494">            op.vendorExtensions.put(&quot;methodAllowsBody&quot;,</span>
+<span class="nc bnc" id="L495" title="All 6 branches missed.">                    op.httpMethod.equals(&quot;PUT&quot;) || op.httpMethod.equals(&quot;POST&quot;) || op.httpMethod.equals(&quot;PATCH&quot;));</span>
+
+            // Set response example
+<span class="nc bnc" id="L498" title="All 2 branches missed.">            if (op.returnType != null) {</span>
+                String example;
+                String groovyExample;
+<span class="nc bnc" id="L501" title="All 2 branches missed.">                if (models.containsKey(op.returnType)) {</span>
+<span class="nc" id="L502">                    CodegenModel m = models.get(op.returnType);</span>
+<span class="nc" id="L503">                    List&lt;Object&gt; allowableValues = null;</span>
+<span class="nc bnc" id="L504" title="All 4 branches missed.">                    if (m.allowableValues != null &amp;&amp; m.allowableValues.containsKey(&quot;values&quot;)) {</span>
+<span class="nc" id="L505">                        allowableValues = (List&lt;Object&gt;) m.allowableValues.get(&quot;values&quot;);</span>
+                    }
+<span class="nc" id="L507">                    example = getExampleValue(m.defaultValue, null, m.classname, true,</span>
+                            allowableValues, null, null, m.requiredVars, false, false);
+<span class="nc" id="L509">                    groovyExample = getExampleValue(m.defaultValue, null, m.classname, true,</span>
+                            allowableValues, null, null, m.requiredVars, true, false);
+<span class="nc" id="L511">                } else {</span>
+<span class="nc" id="L512">                    example = getExampleValue(null, null, op.returnType, false, null,</span>
+                            op.returnBaseType, null, null, false, false);
+<span class="nc" id="L514">                    groovyExample = getExampleValue(null, null, op.returnType, false, null,</span>
+                            op.returnBaseType, null, null, true, false);
+                }
+<span class="nc" id="L517">                op.vendorExtensions.put(&quot;example&quot;, example);</span>
+<span class="nc" id="L518">                op.vendorExtensions.put(&quot;groovyExample&quot;, groovyExample);</span>
+            }
+
+            // Remove the &quot;*/*&quot; contentType from operations as it is ambiguous
+<span class="nc bnc" id="L522" title="All 2 branches missed.">            if (CONTENT_TYPE_ANY.equals(op.vendorExtensions.get(&quot;x-contentType&quot;))) {</span>
+<span class="nc" id="L523">                op.vendorExtensions.put(&quot;x-contentType&quot;, CONTENT_TYPE_APPLICATION_JSON);</span>
+            }
+<span class="nc bnc" id="L525" title="All 2 branches missed.">            op.consumes = op.consumes == null ? null : op.consumes.stream()</span>
+<span class="nc bnc" id="L526" title="All 2 branches missed.">                    .filter(contentType -&gt; !CONTENT_TYPE_ANY.equals(contentType.get(&quot;mediaType&quot;)))</span>
+<span class="nc" id="L527">                    .collect(Collectors.toList());</span>
+<span class="nc bnc" id="L528" title="All 2 branches missed.">            op.produces = op.produces == null ? null : op.produces.stream()</span>
+<span class="nc bnc" id="L529" title="All 2 branches missed.">                    .filter(contentType -&gt; !CONTENT_TYPE_ANY.equals(contentType.get(&quot;mediaType&quot;)))</span>
+<span class="nc" id="L530">                    .collect(Collectors.toList());</span>
+
+            // Force form parameters are only set if the content-type is according
+            // formParams correspond to urlencoded type
+            // bodyParams correspond to multipart body
+<span class="nc bnc" id="L535" title="All 2 branches missed.">            if (CONTENT_TYPE_APPLICATION_FORM_URLENCODED.equals(op.vendorExtensions.get(&quot;x-contentType&quot;))) {</span>
+<span class="nc" id="L536">                op.formParams.addAll(op.bodyParams);</span>
+<span class="nc" id="L537">                op.bodyParams.forEach(p -&gt; {</span>
+<span class="nc" id="L538">                    p.isBodyParam = false;</span>
+<span class="nc" id="L539">                    p.isFormParam = true;</span>
+<span class="nc" id="L540">                });</span>
+<span class="nc" id="L541">                op.bodyParams.clear();</span>
+<span class="nc bnc" id="L542" title="All 2 branches missed.">            } else if (CONTENT_TYPE_MULTIPART_FORM_DATA.equals(op.vendorExtensions.get(&quot;x-contentType&quot;))) {</span>
+<span class="nc" id="L543">                op.bodyParams.addAll(op.formParams);</span>
+<span class="nc" id="L544">                op.formParams.forEach(p -&gt; {</span>
+<span class="nc" id="L545">                    p.isBodyParam = true;</span>
+<span class="nc" id="L546">                    p.isFormParam = false;</span>
+<span class="nc" id="L547">                });</span>
+<span class="nc" id="L548">                op.formParams.clear();</span>
+            }
+<span class="nc" id="L550">        }</span>
+
+<span class="nc" id="L552">        return objs;</span>
+    }
+
+    @Override
+    public CodegenModel fromModel(String name, Schema model) {
+<span class="nc" id="L557">        CodegenModel codegenModel = super.fromModel(name, model);</span>
+<span class="nc" id="L558">        codegenModel.imports.remove(&quot;ApiModel&quot;);</span>
+<span class="nc" id="L559">        codegenModel.imports.remove(&quot;ApiModelProperty&quot;);</span>
+<span class="nc" id="L560">        return codegenModel;</span>
+    }
+
+    @Override
+    public Map&lt;String, ModelsMap&gt; postProcessAllModels(Map&lt;String, ModelsMap&gt; objs) {
+<span class="nc" id="L565">        objs = super.postProcessAllModels(objs);</span>
+
+<span class="nc bnc" id="L567" title="All 2 branches missed.">        for (ModelsMap models: objs.values()) {</span>
+<span class="nc" id="L568">            CodegenModel model = models.getModels().get(0).getModel();</span>
+<span class="nc bnc" id="L569" title="All 2 branches missed.">            if (model.getParentModel() != null) {</span>
+<span class="nc" id="L570">                model.vendorExtensions.put(&quot;requiredParentVars&quot;, model.getParentModel().requiredVars);</span>
+            }
+
+<span class="nc" id="L573">            List&lt;CodegenProperty&gt; requiredVars = model.vars.stream().filter(v -&gt; v.required).collect(Collectors.toList());</span>
+<span class="nc" id="L574">            model.vendorExtensions.put(&quot;requiredVars&quot;, requiredVars);</span>
+<span class="nc" id="L575">        }</span>
+
+<span class="nc" id="L577">        return objs;</span>
+    }
+
+    @Override
+    public void setParameterExampleValue(CodegenParameter p) {
+<span class="nc" id="L582">        p.vendorExtensions.put(&quot;groovyExample&quot;, getParameterExampleValue(p, true));</span>
+<span class="nc" id="L583">        p.example = getParameterExampleValue(p, false);</span>
+<span class="nc" id="L584">    }</span>
+
+    protected String getParameterExampleValue(CodegenParameter p, boolean groovy) {
+<span class="nc bnc" id="L587" title="All 2 branches missed.">        List&lt;Object&gt; allowableValues = p.allowableValues == null ? null : (List&lt;Object&gt;) p.allowableValues.get(&quot;values&quot;);</span>
+
+<span class="nc" id="L589">        return getExampleValue(p.defaultValue, p.example, p.dataType, p.isModel, allowableValues,</span>
+<span class="nc bnc" id="L590" title="All 2 branches missed.">                p.items == null ? null : p.items.dataType,</span>
+<span class="nc bnc" id="L591" title="All 2 branches missed.">                p.items == null ? null : p.items.defaultValue,</span>
+                p.requiredVars, groovy, false);
+    }
+
+    protected String getPropertyExampleValue(CodegenProperty p, boolean groovy) {
+<span class="nc bnc" id="L596" title="All 2 branches missed.">        List&lt;Object&gt; allowableValues = p.allowableValues == null ? null : (List&lt;Object&gt;) p.allowableValues.get(&quot;values&quot;);</span>
+
+<span class="nc" id="L598">        return getExampleValue(p.defaultValue, p.example, p.dataType, p.isModel, allowableValues,</span>
+<span class="nc bnc" id="L599" title="All 2 branches missed.">                p.items == null ? null : p.items.dataType,</span>
+<span class="nc bnc" id="L600" title="All 2 branches missed.">                p.items == null ? null : p.items.defaultValue,</span>
+                null, groovy, true);
+    }
+
+    public String getExampleValue(
+            String defaultValue, String example, String dataType, Boolean isModel, List&lt;Object&gt; allowableValues,
+            String itemsType, String itemsExample, List&lt;CodegenProperty&gt; requiredVars, boolean groovy, boolean isProperty
+    ) {
+<span class="nc bnc" id="L608" title="All 2 branches missed.">        example = defaultValue != null ? defaultValue : example;</span>
+<span class="nc bnc" id="L609" title="All 2 branches missed.">        String containerType = dataType == null ? null : dataType.split(&quot;&lt;&quot;)[0];</span>
+
+<span class="nc bnc" id="L611" title="All 2 branches missed.">        if (&quot;String&quot;.equals(dataType)) {</span>
+<span class="nc bnc" id="L612" title="All 2 branches missed.">            if (groovy) {</span>
+<span class="nc bnc" id="L613" title="All 2 branches missed.">                example = example != null ? &quot;'&quot; + escapeTextGroovy(example) + &quot;'&quot; : &quot;'example'&quot;;</span>
+            } else {
+<span class="nc bnc" id="L615" title="All 2 branches missed.">                example = example != null ? &quot;\&quot;&quot; + escapeText(example) + &quot;\&quot;&quot; : &quot;\&quot;example\&quot;&quot;;</span>
+            }
+<span class="nc bnc" id="L617" title="All 4 branches missed.">        } else if (&quot;Integer&quot;.equals(dataType) || &quot;Short&quot;.equals(dataType)) {</span>
+<span class="nc bnc" id="L618" title="All 2 branches missed.">            example = example != null ? example : &quot;56&quot;;</span>
+<span class="nc bnc" id="L619" title="All 2 branches missed.">        } else if (&quot;Long&quot;.equals(dataType)) {</span>
+<span class="nc bnc" id="L620" title="All 2 branches missed.">            example = StringUtils.appendIfMissingIgnoreCase(example != null ? example : &quot;56&quot;, &quot;L&quot;);</span>
+<span class="nc bnc" id="L621" title="All 2 branches missed.">        } else if (&quot;Float&quot;.equals(dataType)) {</span>
+<span class="nc bnc" id="L622" title="All 2 branches missed.">            example = StringUtils.appendIfMissingIgnoreCase(example != null ? example : &quot;3.4&quot;, &quot;F&quot;);</span>
+<span class="nc bnc" id="L623" title="All 2 branches missed.">        } else if (&quot;Double&quot;.equals(dataType)) {</span>
+<span class="nc bnc" id="L624" title="All 2 branches missed.">            example = StringUtils.appendIfMissingIgnoreCase(example != null ? example : &quot;3.4&quot;, &quot;D&quot;);</span>
+<span class="nc bnc" id="L625" title="All 2 branches missed.">        } else if (&quot;Boolean&quot;.equals(dataType)) {</span>
+<span class="nc bnc" id="L626" title="All 2 branches missed.">            example = example != null ? example : &quot;false&quot;;</span>
+<span class="nc bnc" id="L627" title="All 2 branches missed.">        } else if (&quot;File&quot;.equals(dataType)) {</span>
+<span class="nc" id="L628">            example = null;</span>
+<span class="nc bnc" id="L629" title="All 2 branches missed.">        } else if (&quot;OffsetDateTime&quot;.equals(dataType)) {</span>
+<span class="nc" id="L630">            example = &quot;OffsetDateTime.of(2001, 2, 3, 12, 0, 0, 0, java.time.ZoneOffset.of(\&quot;+02:00\&quot;))&quot;;</span>
+<span class="nc bnc" id="L631" title="All 2 branches missed.">        } else if (&quot;LocalDate&quot;.equals(dataType)) {</span>
+<span class="nc" id="L632">            example = &quot;LocalDate.of(2001, 2, 3)&quot;;</span>
+<span class="nc bnc" id="L633" title="All 2 branches missed.">        } else if (&quot;LocalDateTime&quot;.equals(dataType)) {</span>
+<span class="nc" id="L634">            example = &quot;LocalDateTime.of(2001, 2, 3, 4, 5)&quot;;</span>
+<span class="nc bnc" id="L635" title="All 2 branches missed.">        } else if (&quot;BigDecimal&quot;.equals(dataType)) {</span>
+<span class="nc" id="L636">            example = &quot;new BigDecimal(78)&quot;;</span>
+<span class="nc bnc" id="L637" title="All 4 branches missed.">        } else if (allowableValues != null &amp;&amp; !allowableValues.isEmpty()) {</span>
+            // This is an enum
+<span class="nc" id="L639">            Object value = example;</span>
+<span class="nc bnc" id="L640" title="All 4 branches missed.">            if (value == null || !allowableValues.contains(value)) {</span>
+<span class="nc" id="L641">                value = allowableValues.get(0);</span>
+            }
+<span class="nc bnc" id="L643" title="All 2 branches missed.">            if (isProperty) {</span>
+<span class="nc" id="L644">                dataType = importMapping.getOrDefault(dataType, modelPackage + '.' + dataType);</span>
+            }
+<span class="nc" id="L646">            example = dataType + &quot;.fromValue(\&quot;&quot; + value + &quot;\&quot;)&quot;;</span>
+<span class="nc bnc" id="L647" title="All 8 branches missed.">        } else if ((isModel != null &amp;&amp; isModel) || (isModel == null &amp;&amp; !languageSpecificPrimitives.contains(dataType))) {</span>
+<span class="nc bnc" id="L648" title="All 2 branches missed.">            if (requiredVars == null) {</span>
+<span class="nc" id="L649">                example = null;</span>
+            } else {
+<span class="nc bnc" id="L651" title="All 2 branches missed.">                if (requiredPropertiesInConstructor) {</span>
+<span class="nc" id="L652">                    StringBuilder builder = new StringBuilder();</span>
+<span class="nc bnc" id="L653" title="All 2 branches missed.">                    if (isProperty) {</span>
+<span class="nc" id="L654">                        dataType =  importMapping.getOrDefault(dataType, modelPackage + '.' + dataType);</span>
+                    }
+<span class="nc" id="L656">                    builder.append(&quot;new &quot;).append(dataType).append(&quot;(&quot;);</span>
+<span class="nc bnc" id="L657" title="All 2 branches missed.">                    for (int i = 0; i &lt; requiredVars.size(); ++i) {</span>
+<span class="nc bnc" id="L658" title="All 2 branches missed.">                        if (i != 0) {</span>
+<span class="nc" id="L659">                            builder.append(&quot;, &quot;);</span>
+                        }
+<span class="nc" id="L661">                        builder.append(getPropertyExampleValue(requiredVars.get(i), groovy));</span>
+                    }
+<span class="nc" id="L663">                    builder.append(&quot;)&quot;);</span>
+<span class="nc" id="L664">                    example = builder.toString();</span>
+<span class="nc" id="L665">                } else {</span>
+<span class="nc" id="L666">                    example = &quot;new &quot; + dataType + &quot;()&quot;;</span>
+                }
+            }
+        }
+
+<span class="nc bnc" id="L671" title="All 2 branches missed.">        if (&quot;List&quot;.equals(containerType)) {</span>
+            String innerExample;
+<span class="nc bnc" id="L673" title="All 2 branches missed.">            if (&quot;String&quot;.equals(itemsType)) {</span>
+<span class="nc bnc" id="L674" title="All 2 branches missed.">                itemsExample = itemsExample != null ? itemsExample : &quot;example&quot;;</span>
+<span class="nc bnc" id="L675" title="All 2 branches missed.">                if (groovy) {</span>
+<span class="nc" id="L676">                    innerExample = &quot;'&quot; + escapeTextGroovy(itemsExample) + &quot;'&quot;;</span>
+                } else {
+<span class="nc" id="L678">                    innerExample = &quot;\&quot;&quot; + escapeText(itemsExample) + &quot;\&quot;&quot;;</span>
+                }
+            } else {
+<span class="nc bnc" id="L681" title="All 2 branches missed.">                innerExample = itemsExample != null ? itemsExample : &quot;&quot;;</span>
+            }
+
+<span class="nc bnc" id="L684" title="All 2 branches missed.">            if (groovy) {</span>
+<span class="nc" id="L685">                example = &quot;[&quot; + innerExample + &quot;]&quot;;</span>
+            } else {
+<span class="nc" id="L687">                example = &quot;Arrays.asList(&quot; + innerExample + &quot;)&quot;;</span>
+            }
+<span class="nc bnc" id="L689" title="All 2 branches missed.">        } else if (&quot;Set&quot;.equals(containerType)) {</span>
+<span class="nc bnc" id="L690" title="All 2 branches missed.">            if (groovy) {</span>
+<span class="nc" id="L691">                example = &quot;[].asSet()&quot;;</span>
+            } else {
+<span class="nc" id="L693">                example = &quot;new HashSet&lt;&gt;()&quot;;</span>
+            }
+<span class="nc bnc" id="L695" title="All 2 branches missed.">        } else if (&quot;Map&quot;.equals(containerType)) {</span>
+<span class="nc bnc" id="L696" title="All 2 branches missed.">            if (groovy) {</span>
+<span class="nc" id="L697">                example = &quot;[:]&quot;;</span>
+            } else {
+<span class="nc" id="L699">                example = &quot;new HashMap&lt;&gt;()&quot;;</span>
+            }
+<span class="nc bnc" id="L701" title="All 2 branches missed.">        } else if (example == null) {</span>
+<span class="nc" id="L702">            example = &quot;null&quot;;</span>
+        }
+
+<span class="nc" id="L705">        return example;</span>
+    }
+
+    public String escapeTextGroovy(String text) {
+<span class="nc bnc" id="L709" title="All 2 branches missed.">        if (text == null) {</span>
+<span class="nc" id="L710">            return null;</span>
+        }
+<span class="nc" id="L712">        return escapeText(text).replaceAll(&quot;'&quot;, &quot;\\'&quot;);</span>
+    }
+
+    @Override
+    protected ImmutableMap.Builder&lt;String, Mustache.Lambda&gt; addMustacheLambdas() {
+<span class="fc" id="L717">        return super.addMustacheLambdas()</span>
+<span class="fc" id="L718">            .put(&quot;replaceDotsWithUnderscore&quot;, new ReplaceDotsWithUnderscoreLambda());</span>
+    }
+
+    private static class ReplaceDotsWithUnderscoreLambda implements Mustache.Lambda {
+        @Override
+        public void execute(final Template.Fragment fragment, final Writer writer) throws IOException {
+<span class="nc" id="L724">            writer.write(fragment.execute().replace('.', '_'));</span>
+<span class="nc" id="L725">        }</span>
+    }
+
+    public void setSerializationLibrary(final String serializationLibrary) {
+        try {
+<span class="nc" id="L730">            this.serializationLibrary = JavaMicronautAbstractCodegen.SERIALIZATION_LIBRARY_TYPE.valueOf(serializationLibrary).name();</span>
+<span class="nc" id="L731">        } catch (IllegalArgumentException ex) {</span>
+<span class="nc" id="L732">            StringBuilder sb = new StringBuilder(serializationLibrary + &quot; is an invalid enum property naming option. Please choose from:&quot;);</span>
+<span class="nc bnc" id="L733" title="All 2 branches missed.">            for (JavaMicronautAbstractCodegen.SERIALIZATION_LIBRARY_TYPE availableSerializationLibrary : JavaMicronautAbstractCodegen.SERIALIZATION_LIBRARY_TYPE.values()) {</span>
+<span class="nc" id="L734">                sb.append(&quot;\n  &quot;).append(availableSerializationLibrary.name());</span>
+            }
+<span class="nc" id="L736">            throw new RuntimeException(sb.toString());</span>
+<span class="nc" id="L737">        }</span>
+<span class="nc" id="L738">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

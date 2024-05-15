@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdaServerCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">AdaServerCodegen.java</span></div><h1>AdaServerCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import com.samskivert.mustache.Mustache;
+import com.samskivert.mustache.Template;
+import org.openapitools.codegen.CodegenConfig;
+import org.openapitools.codegen.CodegenConstants;
+import org.openapitools.codegen.CodegenType;
+import org.openapitools.codegen.SupportingFile;
+import org.openapitools.codegen.meta.features.*;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.EnumSet;
+import java.util.Locale;
+
+public class AdaServerCodegen extends AbstractAdaCodegen implements CodegenConfig {
+
+    public AdaServerCodegen() {
+<span class="fc" id="L37">        super();</span>
+
+        // Runtime library supports JSON, XML, OAuth2.
+        // Parameter Header and Cookie need some work.
+<span class="fc" id="L41">        modifyFeatureSet(features -&gt; features</span>
+<span class="fc" id="L42">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="fc" id="L43">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON, WireFormatFeature.XML))</span>
+<span class="fc" id="L44">                .securityFeatures(EnumSet.of(</span>
+                        SecurityFeature.OAuth2_Password,
+                        SecurityFeature.OAuth2_AuthorizationCode,
+                        SecurityFeature.OAuth2_ClientCredentials,
+                        SecurityFeature.OAuth2_Implicit,
+                        SecurityFeature.BearerToken
+                ))
+<span class="fc" id="L51">                .excludeGlobalFeatures(</span>
+                        GlobalFeature.XMLStructureDefinitions,
+                        GlobalFeature.Callbacks,
+                        GlobalFeature.LinkObjects,
+                        GlobalFeature.ParameterStyling
+                )
+<span class="fc" id="L57">                .excludeSchemaSupportFeatures(</span>
+                        SchemaSupportFeature.Polymorphism
+                )
+<span class="fc" id="L60">                .excludeParameterFeatures(</span>
+                        ParameterFeature.Header,
+                        ParameterFeature.Cookie
+                )
+<span class="fc" id="L64">                .includeClientModificationFeatures(ClientModificationFeature.BasePath)</span>
+        );
+<span class="fc" id="L66">    }</span>
+
+    @Override
+    public CodegenType getTag() {
+<span class="fc" id="L70">        return CodegenType.SERVER;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="fc" id="L75">        return &quot;ada-server&quot;;</span>
+    }
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L80">        return &quot;Generates an Ada server implementation (beta).&quot;;</span>
+    }
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L85">        super.processOpts();</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.PACKAGE_NAME)) {</span>
+<span class="nc" id="L87">            packageName = (String) additionalProperties.get(CodegenConstants.PACKAGE_NAME);</span>
+        }
+<span class="nc" id="L89">        String srcDir = &quot;src&quot; + File.separator;</span>
+<span class="nc" id="L90">        String awsDir = srcDir + &quot;aws&quot;;</span>
+<span class="nc" id="L91">        String ewsDir = srcDir + &quot;ews&quot;;</span>
+<span class="nc" id="L92">        String serverDir = srcDir + &quot;server&quot;;</span>
+<span class="nc" id="L93">        String modelDir = srcDir + &quot;model&quot;;</span>
+<span class="nc" id="L94">        String modelPrefix = toFilename(modelPackage);</span>
+<span class="nc" id="L95">        supportingFiles.add(new SupportingFile(&quot;model-spec.mustache&quot;, modelDir, modelPrefix + &quot;-models.ads&quot;));</span>
+<span class="nc" id="L96">        supportingFiles.add(new SupportingFile(&quot;model-body.mustache&quot;, modelDir, modelPrefix + &quot;-models.adb&quot;));</span>
+<span class="nc" id="L97">        supportingFiles.add(new SupportingFile(&quot;server-skeleton-spec.mustache&quot;, serverDir, modelPrefix + &quot;-skeletons.ads&quot;));</span>
+<span class="nc" id="L98">        supportingFiles.add(new SupportingFile(&quot;server-skeleton-body.mustache&quot;, serverDir, modelPrefix + &quot;-skeletons.adb&quot;));</span>
+<span class="nc" id="L99">        supportingFiles.add(new SupportingFile(&quot;server-spec.mustache&quot;, srcDir, modelPrefix + &quot;-servers.ads&quot;));</span>
+<span class="nc" id="L100">        supportingFiles.add(new SupportingFile(&quot;server-body.mustache&quot;, srcDir, modelPrefix + &quot;-servers.adb&quot;));</span>
+<span class="nc" id="L101">        supportingFiles.add(new SupportingFile(&quot;server-aws.mustache&quot;, awsDir, modelPrefix + &quot;_aws.adb&quot;));</span>
+<span class="nc" id="L102">        supportingFiles.add(new SupportingFile(&quot;server-ews.mustache&quot;, ewsDir, modelPrefix + &quot;_ews.adb&quot;));</span>
+
+<span class="nc" id="L104">        supportingFiles.add(new SupportingFile(&quot;openapi.mustache&quot;, &quot;web&quot; + File.separator + &quot;swagger&quot;, &quot;openapi.json&quot;));</span>
+
+<span class="nc bnc" id="L106" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.PROJECT_NAME)) {</span>
+<span class="nc" id="L107">            projectName = (String) additionalProperties.get(CodegenConstants.PROJECT_NAME);</span>
+        } else {
+            // default: set project based on package name
+            // e.g. petstore.api (package name) =&gt; petstore_api (project name)
+<span class="nc" id="L111">            projectName = packageName.replaceAll(&quot;\\.&quot;, &quot;_&quot;);</span>
+        }
+<span class="nc" id="L113">        String configBaseName = modelPackage.toLowerCase(Locale.ROOT);</span>
+<span class="nc" id="L114">        supportingFiles.add(new SupportingFile(&quot;gnat-project.mustache&quot;, &quot;&quot;, toFilename(projectName) + &quot;.gpr&quot;));</span>
+<span class="nc" id="L115">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;));</span>
+<span class="nc" id="L116">        supportingFiles.add(new SupportingFile(&quot;config.gpr&quot;, &quot;&quot;, &quot;config.gpr&quot;));</span>
+<span class="nc" id="L117">        supportingFiles.add(new SupportingFile(&quot;server-properties.mustache&quot;, &quot;&quot;, configBaseName + &quot;.properties&quot;));</span>
+
+        /*
+         * Additional Properties.  These values can be passed to the templates and
+         * are available in models, apis, and supporting files
+         */
+<span class="nc" id="L123">        additionalProperties.put(&quot;package&quot;, this.modelPackage);</span>
+<span class="nc" id="L124">        additionalProperties.put(&quot;packageConfig&quot;, configBaseName);</span>
+<span class="nc" id="L125">        additionalProperties.put(&quot;packageDir&quot;, &quot;server&quot;);</span>
+<span class="nc" id="L126">        additionalProperties.put(&quot;mainName&quot;, &quot;server&quot;);</span>
+<span class="nc" id="L127">        additionalProperties.put(&quot;isServer&quot;, &quot;true&quot;);</span>
+<span class="nc" id="L128">        additionalProperties.put(&quot;httpClientPackageName&quot;, httpClientPackageName);</span>
+<span class="nc" id="L129">        additionalProperties.put(&quot;openApiPackageName&quot;, openApiPackageName);</span>
+<span class="nc" id="L130">        additionalProperties.put(&quot;openApiGprName&quot;, openApiPackageName.toLowerCase(Locale.ROOT));</span>
+<span class="nc" id="L131">        additionalProperties.put(&quot;httpClientGprName&quot;, httpClientPackageName.toLowerCase(Locale.ROOT));</span>
+<span class="nc" id="L132">        additionalProperties.put(CodegenConstants.PROJECT_NAME, projectName);</span>
+
+<span class="nc" id="L134">        String names[] = this.modelPackage.split(&quot;\\.&quot;);</span>
+<span class="nc" id="L135">        String pkgName = names[0];</span>
+<span class="nc" id="L136">        additionalProperties.put(&quot;packageLevel1&quot;, pkgName);</span>
+<span class="nc" id="L137">        supportingFiles.add(new SupportingFile(&quot;package-spec-level1.mustache&quot;, &quot;src&quot;,</span>
+<span class="nc" id="L138">                            toFilename(names[0]) + &quot;.ads&quot;));</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">        if (names.length &gt; 1) {</span>
+<span class="nc" id="L140">            String fileName = toFilename(names[0]) + &quot;-&quot; + toFilename(names[1]) + &quot;.ads&quot;;</span>
+<span class="nc" id="L141">            pkgName = names[0] + &quot;.&quot; + names[1];</span>
+<span class="nc" id="L142">            additionalProperties.put(&quot;packageLevel2&quot;, pkgName);</span>
+<span class="nc" id="L143">            supportingFiles.add(new SupportingFile(&quot;package-spec-level2.mustache&quot;, &quot;src&quot;, fileName));</span>
+        }
+<span class="nc" id="L145">        pkgName = this.modelPackage;</span>
+<span class="nc" id="L146">        supportingFiles.add(new SupportingFile(&quot;server.mustache&quot;, &quot;src&quot;,</span>
+<span class="nc" id="L147">                toFilename(pkgName) + &quot;-server.adb&quot;));</span>
+<span class="nc" id="L148">        additionalProperties.put(&quot;packageName&quot;, toFilename(pkgName));</span>
+
+        // add lambda for mustache templates
+<span class="nc" id="L151">        additionalProperties.put(&quot;lambdaAdaComment&quot;, new Mustache.Lambda() {</span>
+            @Override
+            public void execute(Template.Fragment fragment, Writer writer) throws IOException {
+<span class="nc" id="L154">                String content = fragment.execute();</span>
+<span class="nc" id="L155">                content = content.trim().replaceAll(&quot;\n$&quot;, &quot;&quot;);</span>
+<span class="nc" id="L156">                writer.write(content.replaceAll(&quot;\n&quot;, &quot;\n   --  &quot;));</span>
+<span class="nc" id="L157">            }</span>
+        });
+<span class="nc" id="L159">    }</span>
+
+    @Override
+    public String apiFileFolder() {
+<span class="nc" id="L163">        return outputFolder + File.separator + apiPackage().replace('.', File.separatorChar);</span>
+    }
+
+    @Override
+    public String modelFileFolder() {
+<span class="nc" id="L168">        return outputFolder + File.separator + &quot;model&quot; + File.separator + modelPackage().replace('.', File.separatorChar);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

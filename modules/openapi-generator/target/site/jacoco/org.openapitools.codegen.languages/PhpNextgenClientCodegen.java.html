@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PhpNextgenClientCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">PhpNextgenClientCodegen.java</span></div><h1>PhpNextgenClientCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import io.swagger.v3.oas.models.media.Schema;
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.meta.GeneratorMetadata;
+import org.openapitools.codegen.meta.Stability;
+import org.openapitools.codegen.meta.features.*;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.utils.ModelUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+
+public class PhpNextgenClientCodegen extends AbstractPhpCodegen {
+<span class="nc" id="L42">    @SuppressWarnings(&quot;hiding&quot;)</span>
+<span class="nc" id="L43">    private final Logger LOGGER = LoggerFactory.getLogger(PhpNextgenClientCodegen.class);</span>
+
+    public PhpNextgenClientCodegen() {
+<span class="nc" id="L46">        super();</span>
+
+        // override default src and test folders to comply PSD skeleton
+<span class="nc" id="L49">        setSrcBasePath(&quot;src&quot;);</span>
+<span class="nc" id="L50">        setTestBasePath(&quot;tests&quot;);</span>
+
+        // mark as beta so far
+<span class="nc" id="L53">        this.generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
+<span class="nc" id="L54">                .stability(Stability.BETA).build();</span>
+
+<span class="nc" id="L56">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L57">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="nc" id="L58">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON, WireFormatFeature.XML))</span>
+<span class="nc" id="L59">                .securityFeatures(EnumSet.noneOf(SecurityFeature.class))</span>
+<span class="nc" id="L60">                .excludeGlobalFeatures(</span>
+                        GlobalFeature.XMLStructureDefinitions,
+                        GlobalFeature.Callbacks,
+                        GlobalFeature.LinkObjects,
+                        GlobalFeature.ParameterStyling
+                )
+<span class="nc" id="L66">                .excludeSchemaSupportFeatures(</span>
+                        SchemaSupportFeature.Polymorphism
+                )
+        );
+
+        // clear import mapping (from default generator) as php does not use it
+        // at the moment
+<span class="nc" id="L73">        importMapping.clear();</span>
+
+<span class="nc" id="L75">        setInvokerPackage(&quot;OpenAPI\\Client&quot;);</span>
+<span class="nc" id="L76">        setApiPackage(getInvokerPackage() + &quot;\\&quot; + apiDirName);</span>
+<span class="nc" id="L77">        setModelPackage(getInvokerPackage() + &quot;\\&quot; + modelDirName);</span>
+<span class="nc" id="L78">        setPackageName(&quot;OpenAPIClient-php&quot;);</span>
+<span class="nc" id="L79">        supportsInheritance = true;</span>
+<span class="nc" id="L80">        setOutputDir(&quot;generated-code&quot; + File.separator + &quot;php&quot;);</span>
+<span class="nc" id="L81">        modelTestTemplateFiles.put(&quot;model_test.mustache&quot;, &quot;.php&quot;);</span>
+<span class="nc" id="L82">        embeddedTemplateDir = templateDir = &quot;php-nextgen&quot;;</span>
+
+        // default HIDE_GENERATION_TIMESTAMP to true
+<span class="nc" id="L85">        hideGenerationTimestamp = Boolean.TRUE;</span>
+
+        // provide primitives to mustache template
+<span class="nc" id="L88">        List sortedLanguageSpecificPrimitives = new ArrayList(languageSpecificPrimitives);</span>
+<span class="nc" id="L89">        Collections.sort(sortedLanguageSpecificPrimitives);</span>
+<span class="nc" id="L90">        String primitives = &quot;'&quot; + StringUtils.join(sortedLanguageSpecificPrimitives, &quot;', '&quot;) + &quot;'&quot;;</span>
+<span class="nc" id="L91">        additionalProperties.put(&quot;primitives&quot;, primitives);</span>
+
+<span class="nc" id="L93">        cliOptions.add(new CliOption(CodegenConstants.HIDE_GENERATION_TIMESTAMP, CodegenConstants.ALLOW_UNICODE_IDENTIFIERS_DESC)</span>
+<span class="nc" id="L94">                .defaultValue(Boolean.TRUE.toString()));</span>
+<span class="nc" id="L95">    }</span>
+
+    @Override
+    public CodegenType getTag() {
+<span class="nc" id="L99">        return CodegenType.CLIENT;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L104">        return &quot;php-nextgen&quot;;</span>
+    }
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L109">        return &quot;Generates a PHP client library (beta).&quot;;</span>
+    }
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L114">        super.processOpts();</span>
+
+<span class="nc" id="L116">        supportingFiles.add(new SupportingFile(&quot;ApiException.mustache&quot;, toSrcPath(invokerPackage, srcBasePath), &quot;ApiException.php&quot;));</span>
+<span class="nc" id="L117">        supportingFiles.add(new SupportingFile(&quot;Configuration.mustache&quot;, toSrcPath(invokerPackage, srcBasePath), &quot;Configuration.php&quot;));</span>
+<span class="nc" id="L118">        supportingFiles.add(new SupportingFile(&quot;ObjectSerializer.mustache&quot;, toSrcPath(invokerPackage, srcBasePath), &quot;ObjectSerializer.php&quot;));</span>
+<span class="nc" id="L119">        supportingFiles.add(new SupportingFile(&quot;ModelInterface.mustache&quot;, toSrcPath(modelPackage, srcBasePath), &quot;ModelInterface.php&quot;));</span>
+<span class="nc" id="L120">        supportingFiles.add(new SupportingFile(&quot;HeaderSelector.mustache&quot;, toSrcPath(invokerPackage, srcBasePath), &quot;HeaderSelector.php&quot;));</span>
+<span class="nc" id="L121">        supportingFiles.add(new SupportingFile(&quot;composer.mustache&quot;, &quot;&quot;, &quot;composer.json&quot;));</span>
+<span class="nc" id="L122">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;));</span>
+<span class="nc" id="L123">        supportingFiles.add(new SupportingFile(&quot;phpunit.xml.mustache&quot;, &quot;&quot;, &quot;phpunit.xml.dist&quot;));</span>
+<span class="nc" id="L124">        supportingFiles.add(new SupportingFile(&quot;.travis.yml&quot;, &quot;&quot;, &quot;.travis.yml&quot;));</span>
+<span class="nc" id="L125">        supportingFiles.add(new SupportingFile(&quot;.php-cs-fixer.dist.php&quot;, &quot;&quot;, &quot;.php-cs-fixer.dist.php&quot;));</span>
+<span class="nc" id="L126">        supportingFiles.add(new SupportingFile(&quot;.phplint.mustache&quot;, &quot;&quot;, &quot;.phplint.yml&quot;));</span>
+<span class="nc" id="L127">        supportingFiles.add(new SupportingFile(&quot;git_push.sh.mustache&quot;, &quot;&quot;, &quot;git_push.sh&quot;));</span>
+<span class="nc" id="L128">    }</span>
+
+    @Override
+    public Map&lt;String, ModelsMap&gt; postProcessAllModels(Map&lt;String, ModelsMap&gt; objs) {
+<span class="nc" id="L132">        final Map&lt;String, ModelsMap&gt; processed = super.postProcessAllModels(objs);</span>
+
+<span class="nc bnc" id="L134" title="All 2 branches missed.">        for (Map.Entry&lt;String, ModelsMap&gt; entry : processed.entrySet()) {</span>
+<span class="nc" id="L135">            entry.setValue(postProcessModelsMap(entry.getValue()));</span>
+<span class="nc" id="L136">        }</span>
+
+<span class="nc" id="L138">        return processed;</span>
+    }
+
+    private ModelsMap postProcessModelsMap(ModelsMap objs) {
+<span class="nc bnc" id="L142" title="All 2 branches missed.">        for (ModelMap m : objs.getModels()) {</span>
+<span class="nc" id="L143">            CodegenModel model = m.getModel();</span>
+
+<span class="nc bnc" id="L145" title="All 2 branches missed.">            for (CodegenProperty prop : model.vars) {</span>
+                String propType;
+<span class="nc bnc" id="L147" title="All 4 branches missed.">                if (prop.isArray || prop.isMap) {</span>
+<span class="nc" id="L148">                    propType = &quot;array&quot;;</span>
+                } else {
+<span class="nc" id="L150">                    propType = prop.dataType;</span>
+                }
+
+<span class="nc bnc" id="L153" title="All 6 branches missed.">                if ((!prop.required || prop.isNullable) &amp;&amp; !propType.equals(&quot;mixed&quot;)) { // optional or nullable but not mixed</span>
+<span class="nc" id="L154">                    propType = &quot;?&quot; + propType;</span>
+                }
+
+<span class="nc" id="L157">                prop.vendorExtensions.putIfAbsent(&quot;x-php-prop-type&quot;, propType);</span>
+<span class="nc" id="L158">            }</span>
+
+<span class="nc bnc" id="L160" title="All 2 branches missed.">            if (model.isEnum) {</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">                for (Map&lt;String, Object&gt; enumVars : (List&lt;Map&lt;String, Object&gt;&gt;) model.getAllowableValues().get(&quot;enumVars&quot;)) {</span>
+<span class="nc bnc" id="L162" title="All 2 branches missed.">                    if ((Boolean) enumVars.get(&quot;isString&quot;)) {</span>
+<span class="nc" id="L163">                        model.vendorExtensions.putIfAbsent(&quot;x-php-enum-type&quot;, &quot;string&quot;);</span>
+                    } else {
+<span class="nc" id="L165">                        model.vendorExtensions.putIfAbsent(&quot;x-php-enum-type&quot;, &quot;int&quot;);</span>
+                    }
+<span class="nc" id="L167">                }</span>
+            }
+<span class="nc" id="L169">        }</span>
+<span class="nc" id="L170">        return objs;</span>
+    }
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L175">        objs = super.postProcessOperationsWithModels(objs, allModels);</span>
+<span class="nc" id="L176">        OperationMap operations = objs.getOperations();</span>
+<span class="nc bnc" id="L177" title="All 2 branches missed.">        for (CodegenOperation operation : operations.getOperation()) {</span>
+<span class="nc bnc" id="L178" title="All 2 branches missed.">            if (operation.returnType == null) {</span>
+<span class="nc" id="L179">                operation.vendorExtensions.putIfAbsent(&quot;x-php-return-type&quot;, &quot;void&quot;);</span>
+            } else {
+<span class="nc bnc" id="L181" title="All 2 branches missed.">                if (operation.returnProperty.isContainer) { // array or map</span>
+<span class="nc" id="L182">                    operation.vendorExtensions.putIfAbsent(&quot;x-php-return-type&quot;, &quot;array&quot;);</span>
+                } else {
+<span class="nc" id="L184">                    operation.vendorExtensions.putIfAbsent(&quot;x-php-return-type&quot;, operation.returnType);</span>
+                }
+            }
+
+<span class="nc bnc" id="L188" title="All 2 branches missed.">            for (CodegenParameter param : operation.allParams) {</span>
+<span class="nc bnc" id="L189" title="All 4 branches missed.">                if (param.isArray || param.isMap) {</span>
+<span class="nc" id="L190">                    param.vendorExtensions.putIfAbsent(&quot;x-php-param-type&quot;, &quot;array&quot;);</span>
+                } else {
+<span class="nc" id="L192">                    param.vendorExtensions.putIfAbsent(&quot;x-php-param-type&quot;, param.dataType);</span>
+                }
+<span class="nc" id="L194">            }</span>
+<span class="nc" id="L195">        }</span>
+
+<span class="nc" id="L197">        return objs;</span>
+    }
+
+    @Override
+    public String toDefaultValue(CodegenProperty codegenProperty, Schema schema) {
+
+<span class="nc bnc" id="L203" title="All 2 branches missed.">        if (codegenProperty.isArray) {</span>
+<span class="nc" id="L204">            schema = ModelUtils.getReferencedSchema(this.openAPI, schema);</span>
+
+<span class="nc bnc" id="L206" title="All 2 branches missed.">            if (schema.getDefault() != null) { // array schema has default value</span>
+<span class="nc" id="L207">                return &quot;[&quot; + schema.getDefault().toString() + &quot;]&quot;;</span>
+<span class="nc bnc" id="L208" title="All 2 branches missed.">            } else if (schema.getItems().getDefault() != null) { // array item schema has default value</span>
+<span class="nc" id="L209">                return &quot;[&quot; + toDefaultValue(schema.getItems()) + &quot;]&quot;;</span>
+            } else {
+<span class="nc" id="L211">                return null;</span>
+            }
+        }
+<span class="nc" id="L214">        return super.toDefaultValue(codegenProperty, schema);</span>
+    }
+
+    @Override
+    public String toDefaultParameterValue(CodegenProperty codegenProperty, Schema&lt;?&gt; schema) {
+<span class="nc" id="L219">        return toDefaultValue(codegenProperty, schema);</span>
+    }
+
+    @Override
+    public void setParameterExampleValue(CodegenParameter p) {
+<span class="nc bnc" id="L224" title="All 4 branches missed.">        if (p.isArray &amp;&amp; p.items.defaultValue != null) {</span>
+<span class="nc" id="L225">            p.example = p.defaultValue;</span>
+        } else {
+<span class="nc" id="L227">            super.setParameterExampleValue(p);</span>
+        }
+<span class="nc" id="L229">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,18 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+openapi-generator (executable),org.openapitools.codegen.cmd,AuthorTemplate,59,331,12,26,13,66,12,15,0,8
+openapi-generator (executable),org.openapitools.codegen.cmd,BuildInfo,100,42,4,2,23,15,7,2,4,2
+openapi-generator (executable),org.openapitools.codegen.cmd,GenerateBatch.new BeanDeserializerModifier() {...},0,22,0,2,0,5,0,3,0,2
+openapi-generator (executable),org.openapitools.codegen.cmd,Validate,195,0,10,0,36,0,11,0,6,0
+openapi-generator (executable),org.openapitools.codegen.cmd,GenerateBatch.DynamicSettingsRefSupport,11,118,5,23,2,29,6,12,1,3
+openapi-generator (executable),org.openapitools.codegen.cmd,GlobalOptions,0,3,0,0,0,1,0,1,0,1
+openapi-generator (executable),org.openapitools.codegen.cmd,CompletionCommand,100,0,8,0,30,0,9,0,5,0
+openapi-generator (executable),org.openapitools.codegen.cmd,Version,31,0,4,0,8,0,4,0,2,0
+openapi-generator (executable),org.openapitools.codegen.cmd,GenerateBatch,266,25,20,0,44,5,15,2,5,2
+openapi-generator (executable),org.openapitools.codegen.cmd,ConfigHelp,2361,0,108,0,395,0,97,0,42,0
+openapi-generator (executable),org.openapitools.codegen.cmd,Meta,409,0,4,0,51,0,9,0,7,0
+openapi-generator (executable),org.openapitools.codegen.cmd,ListGenerators,325,0,44,0,67,0,27,0,5,0
+openapi-generator (executable),org.openapitools.codegen.cmd,OpenApiGeneratorCommand,18,24,2,2,6,7,2,2,0,2
+openapi-generator (executable),org.openapitools.codegen.cmd,GenerateBatch.GenerationRunner,260,0,12,0,48,0,10,0,4,0
+openapi-generator (executable),org.openapitools.codegen.cmd,Generate,235,446,39,53,42,96,36,15,3,2
+openapi-generator (executable),org.openapitools.codegen.cmd,HelpCommand,8,0,0,0,3,0,2,0,2,0
+openapi-generator (executable),org.openapitools.codegen,OpenAPIGenerator,124,0,2,0,25,0,3,0,2,0

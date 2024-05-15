@@ -1,0 +1,970 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CrystalClientCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">CrystalClientCodegen.java</span></div><h1>CrystalClientCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Schema;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.meta.GeneratorMetadata;
+import org.openapitools.codegen.meta.Stability;
+import org.openapitools.codegen.meta.features.*;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.templating.mustache.PrefixWithHashLambda;
+import org.openapitools.codegen.utils.ModelUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.*;
+
+import static org.openapitools.codegen.utils.StringUtils.camelize;
+import static org.openapitools.codegen.utils.StringUtils.underscore;
+
+public class CrystalClientCodegen extends DefaultCodegen {
+<span class="fc" id="L49">    private final Logger LOGGER = LoggerFactory.getLogger(CrystalClientCodegen.class);</span>
+    private static final String NUMERIC_ENUM_PREFIX = &quot;N&quot;;
+<span class="fc" id="L51">    protected static int emptyMethodNameCounter = 0;</span>
+
+<span class="fc" id="L53">    protected String shardName = &quot;openapi_client&quot;;</span>
+<span class="fc" id="L54">    protected String moduleName = &quot;OpenAPIClient&quot;;</span>
+<span class="fc" id="L55">    protected String shardVersion = &quot;1.0.0&quot;;</span>
+<span class="fc" id="L56">    protected String specFolder = &quot;spec&quot;;</span>
+<span class="fc" id="L57">    protected String srcFolder = &quot;src&quot;;</span>
+<span class="fc" id="L58">    protected String shardLicense = &quot;unlicense&quot;;</span>
+<span class="fc" id="L59">    protected String shardHomepage = &quot;https://openapitools.org&quot;;</span>
+<span class="fc" id="L60">    protected String shardSummary = &quot;A Crystal SDK for the REST API&quot;;</span>
+<span class="fc" id="L61">    protected String shardDescription = &quot;This shard maps to a REST API&quot;;</span>
+<span class="fc" id="L62">    protected String shardAuthor = &quot;&quot;;</span>
+<span class="fc" id="L63">    protected String shardAuthorEmail = &quot;&quot;;</span>
+<span class="fc" id="L64">    protected String apiDocPath = &quot;docs/&quot;;</span>
+<span class="fc" id="L65">    protected String modelDocPath = &quot;docs/&quot;;</span>
+<span class="fc" id="L66">    protected List&lt;String&gt; primitiveTypes = new ArrayList&lt;String&gt;();</span>
+
+    public static final String SHARD_NAME = &quot;shardName&quot;;
+    public static final String MODULE_NAME = &quot;moduleName&quot;;
+    public static final String SHARD_VERSION = &quot;shardVersion&quot;;
+    public static final String SHARD_LICENSE = &quot;shardLicense&quot;;
+    public static final String SHARD_HOMEPAGE = &quot;shardHomepage&quot;;
+    public static final String SHARD_SUMMARY = &quot;shardSummary&quot;;
+    public static final String SHARD_DESCRIPTION = &quot;shardDescription&quot;;
+    public static final String SHARD_AUTHOR = &quot;shardAuthor&quot;;
+    public static final String SHARD_AUTHOR_EMAIL = &quot;shardAuthorEmail&quot;;
+
+    public CrystalClientCodegen() {
+<span class="fc" id="L79">        super();</span>
+
+<span class="fc" id="L81">        modifyFeatureSet(features -&gt; features</span>
+<span class="fc" id="L82">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="fc" id="L83">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON, WireFormatFeature.XML, WireFormatFeature.Custom))</span>
+<span class="fc" id="L84">                .securityFeatures(EnumSet.of(</span>
+                        SecurityFeature.BasicAuth,
+                        SecurityFeature.BearerToken,
+                        SecurityFeature.ApiKey,
+                        SecurityFeature.OAuth2_Implicit))
+<span class="fc" id="L89">                .excludeGlobalFeatures(</span>
+                        GlobalFeature.XMLStructureDefinitions,
+                        GlobalFeature.Callbacks,
+                        GlobalFeature.LinkObjects,
+                        GlobalFeature.ParameterStyling,
+                        GlobalFeature.ParameterizedServer,
+                        GlobalFeature.MultiServer)
+<span class="fc" id="L96">                .includeSchemaSupportFeatures(</span>
+                        SchemaSupportFeature.Polymorphism)
+<span class="fc" id="L98">                .excludeParameterFeatures(</span>
+                        ParameterFeature.Cookie)
+<span class="fc" id="L100">                .includeClientModificationFeatures(</span>
+                        ClientModificationFeature.BasePath,
+                        ClientModificationFeature.UserAgent));
+
+<span class="fc" id="L104">        generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
+<span class="fc" id="L105">                .stability(Stability.BETA)</span>
+<span class="fc" id="L106">                .build();</span>
+
+<span class="fc" id="L108">        supportsInheritance = true;</span>
+
+        // clear import mapping (from default generator) as crystal does not use it
+        // at the moment
+<span class="fc" id="L112">        importMapping.clear();</span>
+
+<span class="fc" id="L114">        embeddedTemplateDir = templateDir = &quot;crystal&quot;;</span>
+<span class="fc" id="L115">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;crystal&quot;;</span>
+
+<span class="fc" id="L117">        modelPackage = &quot;models&quot;;</span>
+<span class="fc" id="L118">        apiPackage = &quot;api&quot;;</span>
+<span class="fc" id="L119">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.cr&quot;);</span>
+<span class="fc" id="L120">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.cr&quot;);</span>
+
+<span class="fc" id="L122">        modelTestTemplateFiles.put(&quot;model_test.mustache&quot;, &quot;.cr&quot;);</span>
+<span class="fc" id="L123">        apiTestTemplateFiles.put(&quot;api_test.mustache&quot;, &quot;.cr&quot;);</span>
+
+        // TODO support auto-generated doc
+        // modelDocTemplateFiles.put(&quot;model_doc.mustache&quot;, &quot;.md&quot;);
+        // apiDocTemplateFiles.put(&quot;api_doc.mustache&quot;, &quot;.md&quot;);
+
+        // default HIDE_GENERATION_TIMESTAMP to true
+<span class="fc" id="L130">        hideGenerationTimestamp = Boolean.TRUE;</span>
+
+        // reserved word. Ref:
+        // https://github.com/crystal-lang/crystal/wiki/Crystal-for-Rubyists#available-keywords
+<span class="fc" id="L134">        reservedWords = new HashSet&lt;&gt;(</span>
+<span class="fc" id="L135">                Arrays.asList(</span>
+                        &quot;abstract&quot;, &quot;annotation&quot;, &quot;do&quot;, &quot;if&quot;, &quot;nil?&quot;, &quot;select&quot;, &quot;union&quot;,
+                        &quot;alias&quot;, &quot;else&quot;, &quot;in&quot;, &quot;of&quot;, &quot;self&quot;, &quot;unless&quot;,
+                        &quot;as&quot;, &quot;elsif&quot;, &quot;include&quot;, &quot;out&quot;, &quot;sizeof&quot;, &quot;until&quot;,
+                        &quot;as?&quot;, &quot;end&quot;, &quot;instance&quot;, &quot;sizeof&quot;, &quot;pointerof&quot;, &quot;struct&quot;, &quot;verbatim&quot;,
+                        &quot;asm&quot;, &quot;ensure&quot;, &quot;is_a?&quot;, &quot;private&quot;, &quot;super&quot;, &quot;when&quot;,
+                        &quot;begin&quot;, &quot;enum&quot;, &quot;lib&quot;, &quot;protected&quot;, &quot;then&quot;, &quot;while&quot;,
+                        &quot;break&quot;, &quot;extend&quot;, &quot;macro&quot;, &quot;require&quot;, &quot;true&quot;, &quot;with&quot;,
+                        &quot;case&quot;, &quot;false&quot;, &quot;module&quot;, &quot;rescue&quot;, &quot;type&quot;, &quot;yield&quot;,
+                        &quot;class&quot;, &quot;for&quot;, &quot;next&quot;, &quot;responds_to?&quot;, &quot;typeof&quot;,
+                        &quot;def&quot;, &quot;fun&quot;, &quot;nil&quot;, &quot;return&quot;, &quot;uninitialized&quot;));
+
+<span class="fc" id="L147">        languageSpecificPrimitives.clear();</span>
+<span class="fc" id="L148">        languageSpecificPrimitives.add(&quot;String&quot;);</span>
+<span class="fc" id="L149">        languageSpecificPrimitives.add(&quot;Boolean&quot;);</span>
+<span class="fc" id="L150">        languageSpecificPrimitives.add(&quot;Integer&quot;);</span>
+<span class="fc" id="L151">        languageSpecificPrimitives.add(&quot;Float&quot;);</span>
+<span class="fc" id="L152">        languageSpecificPrimitives.add(&quot;Date&quot;);</span>
+<span class="fc" id="L153">        languageSpecificPrimitives.add(&quot;Time&quot;);</span>
+<span class="fc" id="L154">        languageSpecificPrimitives.add(&quot;Array&quot;);</span>
+<span class="fc" id="L155">        languageSpecificPrimitives.add(&quot;Hash&quot;);</span>
+<span class="fc" id="L156">        languageSpecificPrimitives.add(&quot;::File&quot;);</span>
+<span class="fc" id="L157">        languageSpecificPrimitives.add(&quot;Object&quot;);</span>
+
+<span class="fc" id="L159">        typeMapping.clear();</span>
+<span class="fc" id="L160">        typeMapping.put(&quot;string&quot;, &quot;String&quot;);</span>
+<span class="fc" id="L161">        typeMapping.put(&quot;boolean&quot;, &quot;Bool&quot;);</span>
+<span class="fc" id="L162">        typeMapping.put(&quot;char&quot;, &quot;Char&quot;);</span>
+<span class="fc" id="L163">        typeMapping.put(&quot;int&quot;, &quot;Int32&quot;);</span>
+<span class="fc" id="L164">        typeMapping.put(&quot;integer&quot;, &quot;Int32&quot;);</span>
+<span class="fc" id="L165">        typeMapping.put(&quot;long&quot;, &quot;Int64&quot;);</span>
+<span class="fc" id="L166">        typeMapping.put(&quot;short&quot;, &quot;Int32&quot;);</span>
+<span class="fc" id="L167">        typeMapping.put(&quot;float&quot;, &quot;Float32&quot;);</span>
+<span class="fc" id="L168">        typeMapping.put(&quot;double&quot;, &quot;Float64&quot;);</span>
+<span class="fc" id="L169">        typeMapping.put(&quot;number&quot;, &quot;Float64&quot;);</span>
+<span class="fc" id="L170">        typeMapping.put(&quot;decimal&quot;, &quot;BigDecimal&quot;);</span>
+<span class="fc" id="L171">        typeMapping.put(&quot;date&quot;, &quot;Time&quot;);</span>
+<span class="fc" id="L172">        typeMapping.put(&quot;DateTime&quot;, &quot;Time&quot;);</span>
+<span class="fc" id="L173">        typeMapping.put(&quot;array&quot;, &quot;Array&quot;);</span>
+<span class="fc" id="L174">        typeMapping.put(&quot;List&quot;, &quot;Array&quot;);</span>
+<span class="fc" id="L175">        typeMapping.put(&quot;set&quot;, &quot;Set&quot;);</span>
+<span class="fc" id="L176">        typeMapping.put(&quot;map&quot;, &quot;Hash&quot;);</span>
+<span class="fc" id="L177">        typeMapping.put(&quot;object&quot;, &quot;Object&quot;);</span>
+<span class="fc" id="L178">        typeMapping.put(&quot;AnyType&quot;, &quot;Object&quot;);</span>
+<span class="fc" id="L179">        typeMapping.put(&quot;file&quot;, &quot;::File&quot;);</span>
+<span class="fc" id="L180">        typeMapping.put(&quot;binary&quot;, &quot;String&quot;);</span>
+<span class="fc" id="L181">        typeMapping.put(&quot;ByteArray&quot;, &quot;String&quot;);</span>
+<span class="fc" id="L182">        typeMapping.put(&quot;UUID&quot;, &quot;String&quot;);</span>
+<span class="fc" id="L183">        typeMapping.put(&quot;URI&quot;, &quot;String&quot;);</span>
+
+<span class="fc" id="L185">        instantiationTypes.put(&quot;map&quot;, &quot;Hash&quot;);</span>
+<span class="fc" id="L186">        instantiationTypes.put(&quot;array&quot;, &quot;Array&quot;);</span>
+<span class="fc" id="L187">        instantiationTypes.put(&quot;set&quot;, &quot;Set&quot;);</span>
+<span class="fc" id="L188">        primitiveTypes = new ArrayList&lt;String&gt;(typeMapping.values());</span>
+
+        // remove modelPackage and apiPackage added by default
+<span class="pc bpc" id="L191" title="1 of 2 branches missed.">        cliOptions.removeIf(opt -&gt; CodegenConstants.MODEL_PACKAGE.equals(opt.getOpt()) ||</span>
+<span class="pc bpc" id="L192" title="1 of 2 branches missed.">                CodegenConstants.API_PACKAGE.equals(opt.getOpt()));</span>
+
+<span class="fc" id="L194">        cliOptions.add(new CliOption(SHARD_NAME, &quot;shard name (e.g. twitter_client&quot;).defaultValue(&quot;openapi_client&quot;));</span>
+
+<span class="fc" id="L196">        cliOptions.add(new CliOption(MODULE_NAME, &quot;module name (e.g. TwitterClient&quot;).defaultValue(&quot;OpenAPIClient&quot;));</span>
+
+<span class="fc" id="L198">        cliOptions.add(new CliOption(SHARD_VERSION, &quot;shard version.&quot;).defaultValue(&quot;1.0.0&quot;));</span>
+
+<span class="fc" id="L200">        cliOptions.add(new CliOption(SHARD_LICENSE, &quot;shard license.&quot;).defaultValue(&quot;unlicense&quot;));</span>
+
+<span class="fc" id="L202">        cliOptions.add(new CliOption(SHARD_HOMEPAGE, &quot;shard homepage.&quot;).defaultValue(&quot;http://org.openapitools&quot;));</span>
+
+<span class="fc" id="L204">        cliOptions.add(</span>
+<span class="fc" id="L205">                new CliOption(SHARD_DESCRIPTION, &quot;shard description.&quot;).defaultValue(&quot;This shard maps to a REST API&quot;));</span>
+
+<span class="fc" id="L207">        cliOptions.add(new CliOption(SHARD_AUTHOR, &quot;shard author (only one is supported).&quot;));</span>
+
+<span class="fc" id="L209">        cliOptions.add(new CliOption(SHARD_AUTHOR_EMAIL, &quot;shard author email (only one is supported).&quot;));</span>
+
+<span class="fc" id="L211">        cliOptions.add(new CliOption(CodegenConstants.HIDE_GENERATION_TIMESTAMP,</span>
+<span class="fc" id="L212">                CodegenConstants.HIDE_GENERATION_TIMESTAMP_DESC).defaultValue(Boolean.TRUE.toString()));</span>
+<span class="fc" id="L213">    }</span>
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L217">        super.processOpts();</span>
+
+<span class="nc bnc" id="L219" title="All 2 branches missed.">        if (StringUtils.isEmpty(System.getenv(&quot;CRYSTAL_POST_PROCESS_FILE&quot;))) {</span>
+<span class="nc" id="L220">            LOGGER.info(</span>
+                    &quot;Hint: Environment variable 'CRYSTAL_POST_PROCESS_FILE' (optional) not defined. E.g. to format the source code, please try 'export CRYSTAL_POST_PROCESS_FILE=\&quot;/usr/local/bin/crystal tool format\&quot;' (Linux/Mac)&quot;);
+        }
+
+<span class="nc bnc" id="L224" title="All 2 branches missed.">        if (additionalProperties.containsKey(SHARD_NAME)) {</span>
+<span class="nc" id="L225">            setShardName((String) additionalProperties.get(SHARD_NAME));</span>
+        }
+<span class="nc" id="L227">        additionalProperties.put(SHARD_NAME, shardName);</span>
+
+<span class="nc bnc" id="L229" title="All 2 branches missed.">        if (additionalProperties.containsKey(MODULE_NAME)) {</span>
+<span class="nc" id="L230">            setModuleName((String) additionalProperties.get(MODULE_NAME));</span>
+        }
+<span class="nc" id="L232">        additionalProperties.put(MODULE_NAME, moduleName);</span>
+
+<span class="nc bnc" id="L234" title="All 2 branches missed.">        if (additionalProperties.containsKey(SHARD_VERSION)) {</span>
+<span class="nc" id="L235">            setShardVersion((String) additionalProperties.get(SHARD_VERSION));</span>
+        } else {
+            // not set, pass the default value to template
+<span class="nc" id="L238">            additionalProperties.put(SHARD_VERSION, shardVersion);</span>
+        }
+
+<span class="nc bnc" id="L241" title="All 2 branches missed.">        if (additionalProperties.containsKey(SHARD_LICENSE)) {</span>
+<span class="nc" id="L242">            setShardLicense((String) additionalProperties.get(SHARD_LICENSE));</span>
+        }
+
+<span class="nc bnc" id="L245" title="All 2 branches missed.">        if (additionalProperties.containsKey(SHARD_HOMEPAGE)) {</span>
+<span class="nc" id="L246">            setShardHomepage((String) additionalProperties.get(SHARD_HOMEPAGE));</span>
+        }
+
+<span class="nc bnc" id="L249" title="All 2 branches missed.">        if (additionalProperties.containsKey(SHARD_SUMMARY)) {</span>
+<span class="nc" id="L250">            setShardSummary((String) additionalProperties.get(SHARD_SUMMARY));</span>
+        }
+
+<span class="nc bnc" id="L253" title="All 2 branches missed.">        if (additionalProperties.containsKey(SHARD_DESCRIPTION)) {</span>
+<span class="nc" id="L254">            setShardDescription((String) additionalProperties.get(SHARD_DESCRIPTION));</span>
+        }
+
+<span class="nc bnc" id="L257" title="All 2 branches missed.">        if (additionalProperties.containsKey(SHARD_AUTHOR)) {</span>
+<span class="nc" id="L258">            setShardAuthor((String) additionalProperties.get(SHARD_AUTHOR));</span>
+        }
+
+<span class="nc bnc" id="L261" title="All 2 branches missed.">        if (additionalProperties.containsKey(SHARD_AUTHOR_EMAIL)) {</span>
+<span class="nc" id="L262">            setShardAuthorEmail((String) additionalProperties.get(SHARD_AUTHOR_EMAIL));</span>
+        }
+
+        // make api and model doc path available in mustache template
+<span class="nc" id="L266">        additionalProperties.put(&quot;apiDocPath&quot;, apiDocPath);</span>
+<span class="nc" id="L267">        additionalProperties.put(&quot;modelDocPath&quot;, modelDocPath);</span>
+
+        // use constant model/api package (folder path)
+<span class="nc" id="L270">        setModelPackage(&quot;models&quot;);</span>
+<span class="nc" id="L271">        setApiPackage(&quot;api&quot;);</span>
+
+<span class="nc" id="L273">        supportingFiles.add(new SupportingFile(&quot;shard_name.mustache&quot;, srcFolder, shardName + &quot;.cr&quot;));</span>
+<span class="nc" id="L274">        String shardFolder = srcFolder + File.separator + shardName;</span>
+<span class="nc" id="L275">        supportingFiles.add(new SupportingFile(&quot;api_error.mustache&quot;, shardFolder, &quot;api_error.cr&quot;));</span>
+<span class="nc" id="L276">        supportingFiles.add(new SupportingFile(&quot;configuration.mustache&quot;, shardFolder, &quot;configuration.cr&quot;));</span>
+<span class="nc" id="L277">        supportingFiles.add(new SupportingFile(&quot;api_client.mustache&quot;, shardFolder, &quot;api_client.cr&quot;));</span>
+<span class="nc" id="L278">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;));</span>
+<span class="nc" id="L279">        supportingFiles.add(new SupportingFile(&quot;git_push.sh.mustache&quot;, &quot;&quot;, &quot;git_push.sh&quot;));</span>
+<span class="nc" id="L280">        supportingFiles.add(new SupportingFile(&quot;gitignore.mustache&quot;, &quot;&quot;, &quot;.gitignore&quot;));</span>
+<span class="nc" id="L281">        supportingFiles.add(new SupportingFile(&quot;travis.mustache&quot;, &quot;&quot;, &quot;.travis.yml&quot;));</span>
+<span class="nc" id="L282">        supportingFiles.add(new SupportingFile(&quot;shard.mustache&quot;, &quot;&quot;, &quot;shard.yml&quot;));</span>
+
+        // crystal spec files
+<span class="nc" id="L285">        supportingFiles.add(new SupportingFile(&quot;spec_helper.mustache&quot;, specFolder, &quot;spec_helper.cr&quot;)</span>
+<span class="nc" id="L286">                .doNotOverwrite());</span>
+
+        // add lambda for mustache templates
+<span class="nc" id="L289">        additionalProperties.put(&quot;lambdaPrefixWithHash&quot;, new PrefixWithHashLambda());</span>
+
+<span class="nc" id="L291">    }</span>
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L295">        return &quot;Generates a Crystal client library (beta).&quot;;</span>
+    }
+
+    @Override
+    public CodegenType getTag() {
+<span class="fc" id="L300">        return CodegenType.CLIENT;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="fc" id="L305">        return &quot;crystal&quot;;</span>
+    }
+
+    @Override
+    public String apiFileFolder() {
+<span class="nc" id="L310">        return outputFolder + File.separator + srcFolder + File.separator + shardName + File.separator</span>
+<span class="nc" id="L311">                + apiPackage.replace(&quot;/&quot;, File.separator);</span>
+    }
+
+    @Override
+    public String modelFileFolder() {
+<span class="nc" id="L316">        return outputFolder + File.separator + srcFolder + File.separator + shardName + File.separator</span>
+<span class="nc" id="L317">                + modelPackage.replace(&quot;/&quot;, File.separator);</span>
+    }
+
+    @Override
+    public String apiTestFileFolder() {
+<span class="nc" id="L322">        return outputFolder + File.separator + specFolder + File.separator + apiPackage.replace(&quot;/&quot;, File.separator);</span>
+    }
+
+    @Override
+    public String modelTestFileFolder() {
+<span class="nc" id="L327">        return outputFolder + File.separator + specFolder + File.separator + modelPackage.replace(&quot;/&quot;, File.separator);</span>
+    }
+
+    @Override
+    public String apiDocFileFolder() {
+<span class="nc" id="L332">        return (outputFolder + &quot;/&quot; + apiDocPath).replace('/', File.separatorChar);</span>
+    }
+
+    @Override
+    public String modelDocFileFolder() {
+<span class="nc" id="L337">        return (outputFolder + &quot;/&quot; + modelDocPath).replace('/', File.separatorChar);</span>
+    }
+
+    @Override
+    public String getSchemaType(Schema schema) {
+<span class="nc" id="L342">        String openAPIType = super.getSchemaType(schema);</span>
+<span class="nc" id="L343">        String type = null;</span>
+<span class="nc bnc" id="L344" title="All 2 branches missed.">        if (typeMapping.containsKey(openAPIType)) {</span>
+<span class="nc" id="L345">            type = typeMapping.get(openAPIType);</span>
+<span class="nc bnc" id="L346" title="All 2 branches missed.">            if (languageSpecificPrimitives.contains(type)) {</span>
+<span class="nc" id="L347">                return type;</span>
+            }
+        } else {
+<span class="nc" id="L350">            type = openAPIType;</span>
+        }
+
+<span class="nc bnc" id="L353" title="All 2 branches missed.">        if (type == null) {</span>
+<span class="nc" id="L354">            return null;</span>
+        }
+
+<span class="nc" id="L357">        return toModelName(type);</span>
+    }
+
+    @Override
+    public String toModelImport(String name) {
+<span class="nc bnc" id="L362" title="All 2 branches missed.">        if (primitiveTypes.contains(name)) {</span>
+<span class="nc" id="L363">            return null;</span>
+        } else {
+<span class="nc" id="L365">            return toModelFilename(name);</span>
+        }
+    }
+
+    @Override
+    public String toModelName(final String name) {
+        // obtain the name from modelNameMapping directly if provided
+<span class="nc bnc" id="L372" title="All 2 branches missed.">        if (modelNameMapping.containsKey(name)) {</span>
+<span class="nc" id="L373">            return modelNameMapping.get(name);</span>
+        }
+
+        String modelName;
+<span class="nc" id="L377">        modelName = sanitizeModelName(name);</span>
+
+<span class="nc bnc" id="L379" title="All 2 branches missed.">        if (!StringUtils.isEmpty(modelNamePrefix)) {</span>
+<span class="nc" id="L380">            modelName = modelNamePrefix + &quot;_&quot; + modelName;</span>
+        }
+
+<span class="nc bnc" id="L383" title="All 2 branches missed.">        if (!StringUtils.isEmpty(modelNameSuffix)) {</span>
+<span class="nc" id="L384">            modelName = modelName + &quot;_&quot; + modelNameSuffix;</span>
+        }
+
+        // model name cannot use reserved keyword, e.g. return
+<span class="nc bnc" id="L388" title="All 2 branches missed.">        if (isReservedWord(modelName)) {</span>
+<span class="nc" id="L389">            modelName = camelize(&quot;Model&quot; + modelName);</span>
+<span class="nc" id="L390">            LOGGER.warn(&quot;{} (reserved word) cannot be used as model name. Renamed to {}&quot;, name, modelName);</span>
+<span class="nc" id="L391">            return modelName;</span>
+        }
+
+        // model name starts with number
+<span class="nc bnc" id="L395" title="All 2 branches missed.">        if (modelName.matches(&quot;^\\d.*&quot;)) {</span>
+<span class="nc" id="L396">            LOGGER.warn(&quot;{} (model name starts with number) cannot be used as model name. Renamed to {}&quot;, modelName,</span>
+<span class="nc" id="L397">                    camelize(&quot;model_&quot; + modelName));</span>
+<span class="nc" id="L398">            modelName = &quot;model_&quot; + modelName; // e.g. 200Response =&gt; Model200Response (after camelize)</span>
+        }
+
+        // camelize the model name
+        // phone_number =&gt; PhoneNumber
+<span class="nc" id="L403">        return camelize(modelName);</span>
+    }
+
+    public String sanitizeModelName(String modelName) {
+<span class="nc" id="L407">        String[] parts = modelName.split(&quot;::&quot;);</span>
+<span class="nc" id="L408">        ArrayList&lt;String&gt; new_parts = new ArrayList&lt;String&gt;();</span>
+<span class="nc bnc" id="L409" title="All 2 branches missed.">        for (String part : parts) {</span>
+<span class="nc" id="L410">            new_parts.add(sanitizeName(part));</span>
+        }
+<span class="nc" id="L412">        return String.join(&quot;::&quot;, new_parts);</span>
+    }
+
+    @Override
+    public String toModelFilename(String name) {
+        // obtain the name from modelNameMapping directly if provided
+<span class="nc bnc" id="L418" title="All 2 branches missed.">        if (modelNameMapping.containsKey(name)) {</span>
+<span class="nc" id="L419">            return underscore(modelNameMapping.get(name));</span>
+        }
+
+<span class="nc" id="L422">        return underscore(toModelName(name));</span>
+    }
+
+    @Override
+    public String toModelDocFilename(String name) {
+<span class="nc" id="L427">        return toModelName(name);</span>
+    }
+
+    @Override
+    public String toApiFilename(final String name) {
+        // replace - with _ e.g. created-at =&gt; created_at
+<span class="nc" id="L433">        String filename = name;</span>
+<span class="nc bnc" id="L434" title="All 4 branches missed.">        if (apiNameSuffix != null &amp;&amp; apiNameSuffix.length() &gt; 0) {</span>
+<span class="nc" id="L435">            filename = filename + &quot;_&quot; + apiNameSuffix;</span>
+        }
+
+<span class="nc" id="L438">        filename = filename.replaceAll(&quot;-&quot;, &quot;_&quot;);</span>
+
+        // e.g. PhoneNumberApi.cr =&gt; phone_number_api.cr
+<span class="nc" id="L441">        return underscore(filename);</span>
+    }
+
+    @Override
+    public String toApiDocFilename(String name) {
+<span class="nc" id="L446">        return toApiName(name);</span>
+    }
+
+    @Override
+    public String toApiTestFilename(String name) {
+<span class="nc" id="L451">        return toApiFilename(name) + &quot;_spec&quot;;</span>
+    }
+
+    @Override
+    public String toModelTestFilename(String name) {
+<span class="nc" id="L456">        return toModelFilename(name) + &quot;_spec&quot;;</span>
+    }
+
+    @Override
+    public String toApiName(String name) {
+<span class="nc" id="L461">        return super.toApiName(name);</span>
+    }
+
+    @Override
+    public String toEnumValue(String value, String datatype) {
+<span class="nc bnc" id="L466" title="All 4 branches missed.">        if (&quot;Integer&quot;.equals(datatype) || &quot;Float&quot;.equals(datatype)) {</span>
+<span class="nc" id="L467">            return value;</span>
+        } else {
+<span class="nc" id="L469">            return &quot;\&quot;&quot; + escapeText(value) + &quot;\&quot;&quot;;</span>
+        }
+    }
+
+    @Override
+    public String toEnumVarName(String name, String datatype) {
+<span class="nc bnc" id="L475" title="All 2 branches missed.">        if (name.length() == 0) {</span>
+<span class="nc" id="L476">            return &quot;EMPTY&quot;;</span>
+        }
+
+        // number
+<span class="nc bnc" id="L480" title="All 4 branches missed.">        if (&quot;Integer&quot;.equals(datatype) || &quot;Float&quot;.equals(datatype)) {</span>
+<span class="nc" id="L481">            String varName = name;</span>
+<span class="nc" id="L482">            varName = varName.replaceAll(&quot;-&quot;, &quot;MINUS_&quot;);</span>
+<span class="nc" id="L483">            varName = varName.replaceAll(&quot;\\+&quot;, &quot;PLUS_&quot;);</span>
+<span class="nc" id="L484">            varName = varName.replaceAll(&quot;\\.&quot;, &quot;_DOT_&quot;);</span>
+<span class="nc" id="L485">            return NUMERIC_ENUM_PREFIX + varName;</span>
+        }
+
+        // string
+<span class="nc" id="L489">        String enumName = sanitizeName(underscore(name).toUpperCase(Locale.ROOT));</span>
+<span class="nc" id="L490">        enumName = enumName.replaceFirst(&quot;^_&quot;, &quot;&quot;);</span>
+<span class="nc" id="L491">        enumName = enumName.replaceFirst(&quot;_$&quot;, &quot;&quot;);</span>
+
+<span class="nc bnc" id="L493" title="All 2 branches missed.">        if (enumName.matches(&quot;\\d.*&quot;)) { // starts with number</span>
+<span class="nc" id="L494">            return NUMERIC_ENUM_PREFIX + enumName;</span>
+        } else {
+<span class="nc" id="L496">            return enumName;</span>
+        }
+    }
+
+    @Override
+    public String toEnumName(CodegenProperty property) {
+<span class="nc" id="L502">        String enumName = underscore(toModelName(property.name)).toUpperCase(Locale.ROOT);</span>
+<span class="nc" id="L503">        enumName = enumName.replaceFirst(&quot;^_&quot;, &quot;&quot;);</span>
+<span class="nc" id="L504">        enumName = enumName.replaceFirst(&quot;_$&quot;, &quot;&quot;);</span>
+
+<span class="nc bnc" id="L506" title="All 2 branches missed.">        if (enumName.matches(&quot;\\d.*&quot;)) { // starts with number</span>
+<span class="nc" id="L507">            return NUMERIC_ENUM_PREFIX + enumName;</span>
+        } else {
+<span class="nc" id="L509">            return enumName;</span>
+        }
+    }
+
+    @Override
+    public ModelsMap postProcessModels(ModelsMap objs) {
+        // process enum in models
+<span class="nc" id="L516">        return postProcessModelsEnum(objs);</span>
+    }
+
+    @Override
+    public String toOperationId(String operationId) {
+        // rename to empty_method_name_1 (e.g.) if method name is empty
+<span class="nc bnc" id="L522" title="All 2 branches missed.">        if (StringUtils.isEmpty(operationId)) {</span>
+<span class="nc" id="L523">            operationId = underscore(&quot;empty_method_name_&quot; + emptyMethodNameCounter++);</span>
+<span class="nc" id="L524">            LOGGER.warn(&quot;Empty method name (operationId) found. Renamed to {}&quot;, operationId);</span>
+<span class="nc" id="L525">            return operationId;</span>
+        }
+
+        // method name cannot use reserved keyword, e.g. return
+<span class="nc bnc" id="L529" title="All 2 branches missed.">        if (isReservedWord(operationId)) {</span>
+<span class="nc" id="L530">            String newOperationId = underscore(&quot;call_&quot; + operationId);</span>
+<span class="nc" id="L531">            LOGGER.warn(&quot;{} (reserved word) cannot be used as method name. Renamed to {}&quot;, operationId, newOperationId);</span>
+<span class="nc" id="L532">            return newOperationId;</span>
+        }
+
+        // operationId starts with a number
+<span class="nc bnc" id="L536" title="All 2 branches missed.">        if (operationId.matches(&quot;^\\d.*&quot;)) {</span>
+<span class="nc" id="L537">            LOGGER.warn(&quot;{} (starting with a number) cannot be used as method name. Renamed to {}&quot;, operationId,</span>
+<span class="nc" id="L538">                    underscore(sanitizeName(&quot;call_&quot; + operationId)));</span>
+<span class="nc" id="L539">            operationId = &quot;call_&quot; + operationId;</span>
+        }
+
+<span class="nc" id="L542">        return underscore(sanitizeName(operationId));</span>
+    }
+
+    @Override
+    public String toApiImport(String name) {
+<span class="nc" id="L547">        return shardName + &quot;/&quot; + apiPackage() + &quot;/&quot; + toApiFilename(name);</span>
+    }
+
+    public void setShardName(String shardName) {
+<span class="nc" id="L551">        this.shardName = shardName;</span>
+<span class="nc" id="L552">    }</span>
+
+    public void setModuleName(String moduleName) {
+<span class="nc" id="L555">        this.moduleName = moduleName;</span>
+<span class="nc" id="L556">    }</span>
+
+    public void setShardVersion(String shardVersion) {
+<span class="nc" id="L559">        this.shardVersion = shardVersion;</span>
+<span class="nc" id="L560">    }</span>
+
+    public void setShardDescription(String shardDescription) {
+<span class="nc" id="L563">        this.shardDescription = shardDescription;</span>
+<span class="nc" id="L564">    }</span>
+
+    public void setShardSummary(String shardSummary) {
+<span class="nc" id="L567">        this.shardSummary = shardSummary;</span>
+<span class="nc" id="L568">    }</span>
+
+    public void setShardLicense(String shardLicense) {
+<span class="nc" id="L571">        this.shardLicense = shardLicense;</span>
+<span class="nc" id="L572">    }</span>
+
+    public void setShardHomepage(String shardHomepage) {
+<span class="nc" id="L575">        this.shardHomepage = shardHomepage;</span>
+<span class="nc" id="L576">    }</span>
+
+    public void setShardAuthor(String shardAuthor) {
+<span class="nc" id="L579">        this.shardAuthor = shardAuthor;</span>
+<span class="nc" id="L580">    }</span>
+
+    public void setShardAuthorEmail(String shardAuthorEmail) {
+<span class="nc" id="L583">        this.shardAuthorEmail = shardAuthorEmail;</span>
+<span class="nc" id="L584">    }</span>
+
+    @Override
+    protected void addAdditionPropertiesToCodeGenModel(CodegenModel codegenModel, Schema schema) {
+<span class="nc" id="L588">        final Schema additionalProperties = ModelUtils.getAdditionalProperties(schema);</span>
+
+<span class="nc bnc" id="L590" title="All 2 branches missed.">        if (additionalProperties != null) {</span>
+<span class="nc" id="L591">            codegenModel.additionalPropertiesType = getSchemaType(additionalProperties);</span>
+        }
+<span class="nc" id="L593">    }</span>
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L597">        objs = super.postProcessOperationsWithModels(objs, allModels);</span>
+<span class="nc bnc" id="L598" title="All 2 branches missed.">        if (isSkipOperationExample()) {</span>
+<span class="nc" id="L599">            return objs;</span>
+        }
+<span class="nc" id="L601">        OperationMap operations = objs.getOperations();</span>
+<span class="nc" id="L602">        HashMap&lt;String, CodegenModel&gt; modelMaps = ModelMap.toCodegenModelMap(allModels);</span>
+<span class="nc" id="L603">        HashMap&lt;String, Integer&gt; processedModelMaps = new HashMap&lt;&gt;();</span>
+
+<span class="nc" id="L605">        List&lt;CodegenOperation&gt; operationList = operations.getOperation();</span>
+<span class="nc bnc" id="L606" title="All 2 branches missed.">        for (CodegenOperation op : operationList) {</span>
+<span class="nc bnc" id="L607" title="All 2 branches missed.">            for (CodegenParameter p : op.allParams) {</span>
+<span class="nc" id="L608">                p.vendorExtensions.put(&quot;x-crystal-example&quot;, constructExampleCode(p, modelMaps, processedModelMaps));</span>
+<span class="nc" id="L609">            }</span>
+<span class="nc" id="L610">            processedModelMaps.clear();</span>
+<span class="nc bnc" id="L611" title="All 2 branches missed.">            for (CodegenParameter p : op.requiredParams) {</span>
+<span class="nc" id="L612">                p.vendorExtensions.put(&quot;x-crystal-example&quot;, constructExampleCode(p, modelMaps, processedModelMaps));</span>
+<span class="nc" id="L613">            }</span>
+<span class="nc" id="L614">            processedModelMaps.clear();</span>
+<span class="nc bnc" id="L615" title="All 2 branches missed.">            for (CodegenParameter p : op.optionalParams) {</span>
+<span class="nc" id="L616">                p.vendorExtensions.put(&quot;x-crystal-example&quot;, constructExampleCode(p, modelMaps, processedModelMaps));</span>
+<span class="nc" id="L617">            }</span>
+<span class="nc" id="L618">            processedModelMaps.clear();</span>
+<span class="nc bnc" id="L619" title="All 2 branches missed.">            for (CodegenParameter p : op.bodyParams) {</span>
+<span class="nc" id="L620">                p.vendorExtensions.put(&quot;x-crystal-example&quot;, constructExampleCode(p, modelMaps, processedModelMaps));</span>
+<span class="nc" id="L621">            }</span>
+<span class="nc" id="L622">            processedModelMaps.clear();</span>
+<span class="nc bnc" id="L623" title="All 2 branches missed.">            for (CodegenParameter p : op.pathParams) {</span>
+<span class="nc" id="L624">                p.vendorExtensions.put(&quot;x-crystal-example&quot;, constructExampleCode(p, modelMaps, processedModelMaps));</span>
+<span class="nc" id="L625">            }</span>
+<span class="nc" id="L626">            processedModelMaps.clear();</span>
+<span class="nc" id="L627">        }</span>
+
+<span class="nc" id="L629">        return objs;</span>
+    }
+
+    private String constructExampleCode(CodegenParameter codegenParameter, HashMap&lt;String, CodegenModel&gt; modelMaps,
+            HashMap&lt;String, Integer&gt; processedModelMap) {
+<span class="nc bnc" id="L634" title="All 2 branches missed.">        if (codegenParameter.isArray) { // array</span>
+<span class="nc bnc" id="L635" title="All 2 branches missed.">            if (codegenParameter.items == null) {</span>
+<span class="nc" id="L636">                return &quot;[]&quot;;</span>
+            }
+<span class="nc" id="L638">            return &quot;[&quot; + constructExampleCode(codegenParameter.items, modelMaps, processedModelMap) + &quot;]&quot;;</span>
+<span class="nc bnc" id="L639" title="All 2 branches missed.">        } else if (codegenParameter.isMap) {</span>
+<span class="nc bnc" id="L640" title="All 2 branches missed.">            if (codegenParameter.items == null) {</span>
+<span class="nc" id="L641">                return &quot;{}&quot;;</span>
+            }
+<span class="nc" id="L643">            return &quot;{ key: &quot; + constructExampleCode(codegenParameter.items, modelMaps, processedModelMap) + &quot;}&quot;;</span>
+<span class="nc bnc" id="L644" title="All 2 branches missed.">        } else if (codegenParameter.isPrimitiveType) { // primitive type</span>
+<span class="nc bnc" id="L645" title="All 2 branches missed.">            if (codegenParameter.isEnum) {</span>
+                // When inline enum, set example to first allowable value
+<span class="nc" id="L647">                List&lt;Object&gt; values = (List&lt;Object&gt;) codegenParameter.allowableValues.get(&quot;values&quot;);</span>
+<span class="nc" id="L648">                codegenParameter.example = String.valueOf(values.get(0));</span>
+            }
+<span class="nc bnc" id="L650" title="All 4 branches missed.">            if (codegenParameter.isString || &quot;String&quot;.equalsIgnoreCase(codegenParameter.baseType)) {</span>
+<span class="nc bnc" id="L651" title="All 4 branches missed.">                if (!StringUtils.isEmpty(codegenParameter.example) &amp;&amp; !&quot;null&quot;.equals(codegenParameter.example)) {</span>
+<span class="nc" id="L652">                    return &quot;'&quot; + codegenParameter.example + &quot;'&quot;;</span>
+                }
+<span class="nc" id="L654">                return &quot;'&quot; + codegenParameter.paramName + &quot;_example'&quot;;</span>
+<span class="nc bnc" id="L655" title="All 2 branches missed.">            } else if (codegenParameter.isBoolean) { // boolean</span>
+<span class="nc bnc" id="L656" title="All 2 branches missed.">                if (Boolean.parseBoolean(codegenParameter.example)) {</span>
+<span class="nc" id="L657">                    return &quot;true&quot;;</span>
+                }
+<span class="nc" id="L659">                return &quot;false&quot;;</span>
+<span class="nc bnc" id="L660" title="All 2 branches missed.">            } else if (codegenParameter.isUri) {</span>
+<span class="nc bnc" id="L661" title="All 4 branches missed.">                if (!StringUtils.isEmpty(codegenParameter.example) &amp;&amp; !&quot;null&quot;.equals(codegenParameter.example)) {</span>
+<span class="nc" id="L662">                    return &quot;'&quot; + codegenParameter.example + &quot;'&quot;;</span>
+                }
+<span class="nc" id="L664">                return &quot;'https://example.com'&quot;;</span>
+<span class="nc bnc" id="L665" title="All 2 branches missed.">            } else if (codegenParameter.isDateTime) {</span>
+<span class="nc bnc" id="L666" title="All 4 branches missed.">                if (!StringUtils.isEmpty(codegenParameter.example) &amp;&amp; !&quot;null&quot;.equals(codegenParameter.example)) {</span>
+<span class="nc" id="L667">                    return &quot;Time.parse('&quot; + codegenParameter.example + &quot;')&quot;;</span>
+                }
+<span class="nc" id="L669">                return &quot;Time.now&quot;;</span>
+<span class="nc bnc" id="L670" title="All 2 branches missed.">            } else if (codegenParameter.isDate) {</span>
+<span class="nc bnc" id="L671" title="All 4 branches missed.">                if (!StringUtils.isEmpty(codegenParameter.example) &amp;&amp; !&quot;null&quot;.equals(codegenParameter.example)) {</span>
+<span class="nc" id="L672">                    return &quot;Date.parse('&quot; + codegenParameter.example + &quot;')&quot;;</span>
+                }
+<span class="nc" id="L674">                return &quot;Date.today&quot;;</span>
+<span class="nc bnc" id="L675" title="All 2 branches missed.">            } else if (codegenParameter.isFile) {</span>
+<span class="nc" id="L676">                return &quot;File.new('/path/to/some/file')&quot;;</span>
+<span class="nc bnc" id="L677" title="All 2 branches missed.">            } else if (codegenParameter.isInteger) {</span>
+<span class="nc bnc" id="L678" title="All 4 branches missed.">                if (!StringUtils.isEmpty(codegenParameter.example) &amp;&amp; !&quot;null&quot;.equals(codegenParameter.example)) {</span>
+<span class="nc" id="L679">                    return codegenParameter.example;</span>
+                }
+<span class="nc" id="L681">                return &quot;37&quot;;</span>
+            } else { // number
+<span class="nc bnc" id="L683" title="All 4 branches missed.">                if (!StringUtils.isEmpty(codegenParameter.example) &amp;&amp; !&quot;null&quot;.equals(codegenParameter.example)) {</span>
+<span class="nc" id="L684">                    return codegenParameter.example;</span>
+                }
+<span class="nc" id="L686">                return &quot;3.56&quot;;</span>
+            }
+        } else { // model
+            // look up the model
+<span class="nc bnc" id="L690" title="All 2 branches missed.">            if (modelMaps.containsKey(codegenParameter.dataType)) {</span>
+<span class="nc" id="L691">                return constructExampleCode(modelMaps.get(codegenParameter.dataType), modelMaps, processedModelMap);</span>
+            } else {
+                // LOGGER.error(&quot;Error in constructing examples. Failed to look up the model &quot; +
+                // codegenParameter.dataType);
+<span class="nc" id="L695">                return &quot;TODO&quot;;</span>
+            }
+        }
+    }
+
+    private String constructExampleCode(CodegenProperty codegenProperty, HashMap&lt;String, CodegenModel&gt; modelMaps,
+            HashMap&lt;String, Integer&gt; processedModelMap) {
+<span class="nc bnc" id="L702" title="All 2 branches missed.">        if (codegenProperty.isArray) { // array</span>
+<span class="nc" id="L703">            return &quot;[&quot; + constructExampleCode(codegenProperty.items, modelMaps, processedModelMap) + &quot;]&quot;;</span>
+<span class="nc bnc" id="L704" title="All 2 branches missed.">        } else if (codegenProperty.isMap) {</span>
+<span class="nc bnc" id="L705" title="All 2 branches missed.">            if (codegenProperty.items != null) {</span>
+<span class="nc" id="L706">                return &quot;{ key: &quot; + constructExampleCode(codegenProperty.items, modelMaps, processedModelMap) + &quot;}&quot;;</span>
+            } else {
+<span class="nc" id="L708">                return &quot;{ ... }&quot;;</span>
+            }
+<span class="nc bnc" id="L710" title="All 2 branches missed.">        } else if (codegenProperty.isPrimitiveType) { // primitive type</span>
+<span class="nc bnc" id="L711" title="All 2 branches missed.">            if (codegenProperty.isEnum) {</span>
+                // When inline enum, set example to first allowable value
+<span class="nc" id="L713">                List&lt;Object&gt; values = (List&lt;Object&gt;) codegenProperty.allowableValues.get(&quot;values&quot;);</span>
+<span class="nc" id="L714">                codegenProperty.example = String.valueOf(values.get(0));</span>
+            }
+<span class="nc bnc" id="L716" title="All 4 branches missed.">            if (codegenProperty.isString || &quot;String&quot;.equalsIgnoreCase(codegenProperty.baseType)) {</span>
+<span class="nc bnc" id="L717" title="All 4 branches missed.">                if (!StringUtils.isEmpty(codegenProperty.example) &amp;&amp; !&quot;null&quot;.equals(codegenProperty.example)) {</span>
+<span class="nc" id="L718">                    return &quot;'&quot; + codegenProperty.example + &quot;'&quot;;</span>
+                } else {
+<span class="nc" id="L720">                    return &quot;'&quot; + codegenProperty.name + &quot;_example'&quot;;</span>
+                }
+<span class="nc bnc" id="L722" title="All 2 branches missed.">            } else if (codegenProperty.isBoolean) { // boolean</span>
+<span class="nc bnc" id="L723" title="All 2 branches missed.">                if (Boolean.parseBoolean(codegenProperty.example)) {</span>
+<span class="nc" id="L724">                    return &quot;true&quot;;</span>
+                } else {
+<span class="nc" id="L726">                    return &quot;false&quot;;</span>
+                }
+<span class="nc bnc" id="L728" title="All 2 branches missed.">            } else if (codegenProperty.isUri) {</span>
+<span class="nc bnc" id="L729" title="All 4 branches missed.">                if (!StringUtils.isEmpty(codegenProperty.example) &amp;&amp; !&quot;null&quot;.equals(codegenProperty.example)) {</span>
+<span class="nc" id="L730">                    return &quot;'&quot; + codegenProperty.example + &quot;'&quot;;</span>
+                }
+<span class="nc" id="L732">                return &quot;'https://example.com'&quot;;</span>
+<span class="nc bnc" id="L733" title="All 2 branches missed.">            } else if (codegenProperty.isDateTime) {</span>
+<span class="nc bnc" id="L734" title="All 4 branches missed.">                if (!StringUtils.isEmpty(codegenProperty.example) &amp;&amp; !&quot;null&quot;.equals(codegenProperty.example)) {</span>
+<span class="nc" id="L735">                    return &quot;Time.parse('&quot; + codegenProperty.example + &quot;')&quot;;</span>
+                }
+<span class="nc" id="L737">                return &quot;Time.now&quot;;</span>
+<span class="nc bnc" id="L738" title="All 2 branches missed.">            } else if (codegenProperty.isDate) {</span>
+<span class="nc bnc" id="L739" title="All 4 branches missed.">                if (!StringUtils.isEmpty(codegenProperty.example) &amp;&amp; !&quot;null&quot;.equals(codegenProperty.example)) {</span>
+<span class="nc" id="L740">                    return &quot;Date.parse('&quot; + codegenProperty.example + &quot;')&quot;;</span>
+                }
+<span class="nc" id="L742">                return &quot;Date.today&quot;;</span>
+<span class="nc bnc" id="L743" title="All 2 branches missed.">            } else if (codegenProperty.isFile) {</span>
+<span class="nc" id="L744">                return &quot;File.new('/path/to/some/file')&quot;;</span>
+<span class="nc bnc" id="L745" title="All 2 branches missed.">            } else if (codegenProperty.isInteger) {</span>
+<span class="nc bnc" id="L746" title="All 4 branches missed.">                if (!StringUtils.isEmpty(codegenProperty.example) &amp;&amp; !&quot;null&quot;.equals(codegenProperty.example)) {</span>
+<span class="nc" id="L747">                    return codegenProperty.example;</span>
+                }
+<span class="nc" id="L749">                return &quot;37&quot;;</span>
+            } else { // number
+<span class="nc bnc" id="L751" title="All 4 branches missed.">                if (!StringUtils.isEmpty(codegenProperty.example) &amp;&amp; !&quot;null&quot;.equals(codegenProperty.example)) {</span>
+<span class="nc" id="L752">                    return codegenProperty.example;</span>
+                }
+<span class="nc" id="L754">                return &quot;3.56&quot;;</span>
+            }
+        } else { // model
+            // look up the model
+<span class="nc bnc" id="L758" title="All 2 branches missed.">            if (modelMaps.containsKey(codegenProperty.dataType)) {</span>
+<span class="nc" id="L759">                return constructExampleCode(modelMaps.get(codegenProperty.dataType), modelMaps, processedModelMap);</span>
+            } else {
+                // LOGGER.error(&quot;Error in constructing examples. Failed to look up the model &quot; +
+                // codegenParameter.dataType);
+<span class="nc" id="L763">                return &quot;TODO&quot;;</span>
+            }
+        }
+    }
+
+    private String constructExampleCode(CodegenModel codegenModel, HashMap&lt;String, CodegenModel&gt; modelMaps,
+            HashMap&lt;String, Integer&gt; processedModelMap) {
+        // break infinite recursion. Return, in case a model is already processed in the
+        // current context.
+<span class="nc" id="L772">        String model = codegenModel.name;</span>
+<span class="nc bnc" id="L773" title="All 2 branches missed.">        if (processedModelMap.containsKey(model)) {</span>
+<span class="nc" id="L774">            int count = processedModelMap.get(model);</span>
+<span class="nc bnc" id="L775" title="All 2 branches missed.">            if (count == 1) {</span>
+<span class="nc" id="L776">                processedModelMap.put(model, 2);</span>
+<span class="nc bnc" id="L777" title="All 2 branches missed.">            } else if (count == 2) {</span>
+<span class="nc" id="L778">                return &quot;&quot;;</span>
+            } else {
+<span class="nc" id="L780">                throw new RuntimeException(&quot;Invalid count when constructing example: &quot; + count);</span>
+            }
+<span class="nc bnc" id="L782" title="All 2 branches missed.">        } else if (codegenModel.isEnum) {</span>
+<span class="nc" id="L783">            List&lt;Map&lt;String, String&gt;&gt; enumVars = (List&lt;Map&lt;String, String&gt;&gt;) codegenModel.allowableValues</span>
+<span class="nc" id="L784">                    .get(&quot;enumVars&quot;);</span>
+<span class="nc" id="L785">            return moduleName + &quot;::&quot; + codegenModel.classname + &quot;::&quot; + enumVars.get(0).get(&quot;name&quot;);</span>
+<span class="nc bnc" id="L786" title="All 4 branches missed.">        } else if (codegenModel.oneOf != null &amp;&amp; !codegenModel.oneOf.isEmpty()) {</span>
+<span class="nc" id="L787">            String subModel = (String) codegenModel.oneOf.toArray()[0];</span>
+<span class="nc" id="L788">            String oneOf = constructExampleCode(modelMaps.get(subModel), modelMaps, processedModelMap);</span>
+<span class="nc" id="L789">            return oneOf;</span>
+        } else {
+<span class="nc" id="L791">            processedModelMap.put(model, 1);</span>
+        }
+
+<span class="nc" id="L794">        List&lt;String&gt; propertyExamples = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L795" title="All 2 branches missed.">        for (CodegenProperty codegenProperty : codegenModel.requiredVars) {</span>
+<span class="nc" id="L796">            propertyExamples.add(</span>
+<span class="nc" id="L797">                    codegenProperty.name + &quot;: &quot; + constructExampleCode(codegenProperty, modelMaps, processedModelMap));</span>
+<span class="nc" id="L798">        }</span>
+<span class="nc" id="L799">        String example = moduleName + &quot;::&quot; + toModelName(model) + &quot;.new&quot;;</span>
+<span class="nc bnc" id="L800" title="All 2 branches missed.">        if (!propertyExamples.isEmpty()) {</span>
+<span class="nc" id="L801">            example += &quot;({&quot; + StringUtils.join(propertyExamples, &quot;, &quot;) + &quot;})&quot;;</span>
+        }
+<span class="nc" id="L803">        return example;</span>
+    }
+
+    @Override
+    public String escapeReservedWord(String name) {
+<span class="nc bnc" id="L808" title="All 2 branches missed.">        if (this.reservedWordsMappings().containsKey(name)) {</span>
+<span class="nc" id="L809">            return this.reservedWordsMappings().get(name);</span>
+        }
+<span class="nc" id="L811">        return &quot;_&quot; + name;</span>
+    }
+
+    @Override
+    public String getTypeDeclaration(Schema schema) {
+<span class="nc bnc" id="L816" title="All 2 branches missed.">        if (ModelUtils.isArraySchema(schema)) {</span>
+<span class="nc" id="L817">            Schema inner = ModelUtils.getSchemaItems(schema);</span>
+<span class="nc" id="L818">            return getSchemaType(schema) + &quot;(&quot; + getTypeDeclaration(inner) + &quot;)&quot;;</span>
+<span class="nc bnc" id="L819" title="All 2 branches missed.">        } else if (ModelUtils.isMapSchema(schema)) {</span>
+<span class="nc" id="L820">            Schema inner = ModelUtils.getAdditionalProperties(schema);</span>
+<span class="nc" id="L821">            return getSchemaType(schema) + &quot;(String, &quot; + getTypeDeclaration(inner) + &quot;)&quot;;</span>
+        }
+
+<span class="nc" id="L824">        return super.getTypeDeclaration(schema);</span>
+    }
+
+    @Override
+    public String toInstantiationType(Schema schema) {
+<span class="nc bnc" id="L829" title="All 2 branches missed.">        if (ModelUtils.isMapSchema(schema)) {</span>
+<span class="nc" id="L830">            return instantiationTypes.get(&quot;map&quot;);</span>
+<span class="nc bnc" id="L831" title="All 2 branches missed.">        } else if (ModelUtils.isArraySchema(schema)) {</span>
+            String parentType;
+<span class="nc bnc" id="L833" title="All 2 branches missed.">            if (ModelUtils.isSet(schema)) {</span>
+<span class="nc" id="L834">                parentType = &quot;set&quot;;</span>
+            } else {
+<span class="nc" id="L836">                parentType = &quot;array&quot;;</span>
+            }
+<span class="nc" id="L838">            return instantiationTypes.get(parentType);</span>
+        }
+<span class="nc" id="L840">        return super.toInstantiationType(schema);</span>
+    }
+
+    @Override
+    public String toDefaultValue(Schema p) {
+<span class="nc" id="L845">        p = ModelUtils.getReferencedSchema(this.openAPI, p);</span>
+<span class="nc bnc" id="L846" title="All 6 branches missed.">        if (ModelUtils.isIntegerSchema(p) || ModelUtils.isNumberSchema(p) || ModelUtils.isBooleanSchema(p)) {</span>
+<span class="nc bnc" id="L847" title="All 2 branches missed.">            if (p.getDefault() != null) {</span>
+<span class="nc" id="L848">                return p.getDefault().toString();</span>
+            }
+<span class="nc bnc" id="L850" title="All 2 branches missed.">        } else if (ModelUtils.isStringSchema(p)) {</span>
+<span class="nc bnc" id="L851" title="All 2 branches missed.">            if (p.getDefault() != null) {</span>
+<span class="nc bnc" id="L852" title="All 2 branches missed.">                if (p.getDefault() instanceof Date) {</span>
+<span class="nc" id="L853">                    Date date = (Date) p.getDefault();</span>
+<span class="nc" id="L854">                    LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();</span>
+<span class="nc" id="L855">                    return &quot;Date.parse(\&quot;&quot; + String.format(Locale.ROOT, localDate.toString(), &quot;&quot;) + &quot;\&quot;)&quot;;</span>
+<span class="nc bnc" id="L856" title="All 2 branches missed.">                } else if (p.getDefault() instanceof java.time.OffsetDateTime) {</span>
+<span class="nc" id="L857">                    return &quot;Time.parse(\&quot;&quot; + String.format(Locale.ROOT, ((java.time.OffsetDateTime) p.getDefault())</span>
+<span class="nc" id="L858">                            .atZoneSameInstant(ZoneId.systemDefault()).toString(), &quot;&quot;) + &quot;\&quot;)&quot;;</span>
+                } else {
+<span class="nc" id="L860">                    return &quot;\&quot;&quot; + escapeText((String.valueOf(p.getDefault()))) + &quot;\&quot;&quot;;</span>
+                }
+            }
+        }
+
+<span class="nc" id="L865">        return null;</span>
+    }
+
+    @Override
+    public String toEnumDefaultValue(String value, String datatype) {
+<span class="nc" id="L870">        return datatype + &quot;::&quot; + value;</span>
+    }
+
+    @Override
+    public String toVarName(final String name) {
+        // obtain the name from nameMapping directly if provided
+<span class="nc bnc" id="L876" title="All 2 branches missed.">        if (nameMapping.containsKey(name)) {</span>
+<span class="nc" id="L877">            return nameMapping.get(name);</span>
+        }
+
+        String varName;
+        // sanitize name
+<span class="nc" id="L882">        varName = sanitizeName(name);</span>
+        // if it's all upper case, convert to lower case
+<span class="nc bnc" id="L884" title="All 2 branches missed.">        if (name.matches(&quot;^[A-Z_]*$&quot;)) {</span>
+<span class="nc" id="L885">            varName = varName.toLowerCase(Locale.ROOT);</span>
+        }
+
+        // camelize (lower first character) the variable name
+        // petId =&gt; pet_id
+<span class="nc" id="L890">        varName = underscore(varName);</span>
+
+        // for reserved word or word starting with number, append _
+<span class="nc bnc" id="L893" title="All 4 branches missed.">        if (isReservedWord(varName) || varName.matches(&quot;^\\d.*&quot;)) {</span>
+<span class="nc" id="L894">            varName = escapeReservedWord(varName);</span>
+        }
+
+<span class="nc" id="L897">        return varName;</span>
+    }
+
+    @Override
+    public String toRegularExpression(String pattern) {
+<span class="nc" id="L902">        return addRegularExpressionDelimiter(pattern);</span>
+    }
+
+    @Override
+    public String toParamName(String name) {
+        // obtain the name from parameterNameMapping directly if provided
+<span class="nc bnc" id="L908" title="All 2 branches missed.">        if (parameterNameMapping.containsKey(name)) {</span>
+<span class="nc" id="L909">            return parameterNameMapping.get(name);</span>
+        }
+
+        // should be the same as variable name
+<span class="nc" id="L913">        return toVarName(name);</span>
+    }
+
+    @Override
+    public String escapeQuotationMark(String input) {
+        // remove ' to avoid code injection
+<span class="nc" id="L919">        return input.replace(&quot;'&quot;, &quot;&quot;);</span>
+    }
+
+    @Override
+    public String escapeUnsafeCharacters(String input) {
+<span class="nc" id="L924">        return input.replace(&quot;=end&quot;, &quot;=_end&quot;).replace(&quot;=begin&quot;, &quot;=_begin&quot;).replace(&quot;#{&quot;, &quot;\\#{&quot;);</span>
+    }
+
+    @Override
+    public void postProcessFile(File file, String fileType) {
+<span class="nc bnc" id="L929" title="All 2 branches missed.">        if (file == null) {</span>
+<span class="nc" id="L930">            return;</span>
+        }
+<span class="nc" id="L932">        String crystalPostProcessFile = System.getenv(&quot;CRYSTAL_POST_PROCESS_FILE&quot;);</span>
+<span class="nc bnc" id="L933" title="All 2 branches missed.">        if (StringUtils.isEmpty(crystalPostProcessFile)) {</span>
+<span class="nc" id="L934">            return; // skip if CRYSTAL_POST_PROCESS_FILE env variable is not defined</span>
+        }
+        // only process files with cr extension
+<span class="nc bnc" id="L937" title="All 2 branches missed.">        if (&quot;cr&quot;.equals(FilenameUtils.getExtension(file.toString()))) {</span>
+<span class="nc" id="L938">            String command = crystalPostProcessFile + &quot; &quot; + file;</span>
+            try {
+<span class="nc" id="L940">                Process p = Runtime.getRuntime().exec(command);</span>
+<span class="nc" id="L941">                int exitValue = p.waitFor();</span>
+<span class="nc bnc" id="L942" title="All 2 branches missed.">                if (exitValue != 0) {</span>
+<span class="nc" id="L943">                    try (InputStreamReader inputStreamReader = new InputStreamReader(p.getErrorStream(),</span>
+                            StandardCharsets.UTF_8);
+<span class="nc" id="L945">                            BufferedReader br = new BufferedReader(inputStreamReader)) {</span>
+<span class="nc" id="L946">                        StringBuilder sb = new StringBuilder();</span>
+                        String line;
+<span class="nc bnc" id="L948" title="All 2 branches missed.">                        while ((line = br.readLine()) != null) {</span>
+<span class="nc" id="L949">                            sb.append(line);</span>
+                        }
+<span class="nc" id="L951">                        LOGGER.error(&quot;Error running the command ({}). Exit value: {}, Error output: {}&quot;, command,</span>
+<span class="nc" id="L952">                                exitValue, sb);</span>
+                    }
+                } else {
+<span class="nc" id="L955">                    LOGGER.info(&quot;Successfully executed: {}&quot;, command);</span>
+                }
+<span class="nc" id="L957">            } catch (InterruptedException | IOException e) {</span>
+<span class="nc" id="L958">                LOGGER.error(&quot;Error running the command ({}). Exception: {}&quot;, command, e.getMessage());</span>
+                // Restore interrupted state
+<span class="nc" id="L960">                Thread.currentThread().interrupt();</span>
+<span class="nc" id="L961">            }</span>
+        }
+<span class="nc" id="L963">    }</span>
+
+    @Override
+    public GeneratorLanguage generatorLanguage() {
+<span class="nc" id="L967">        return GeneratorLanguage.CRYSTAL;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

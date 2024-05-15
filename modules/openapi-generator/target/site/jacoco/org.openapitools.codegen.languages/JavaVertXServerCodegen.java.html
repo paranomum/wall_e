@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JavaVertXServerCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">JavaVertXServerCodegen.java</span></div><h1>JavaVertXServerCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.PathItem.HttpMethod;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.servers.Server;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.meta.GeneratorMetadata;
+import org.openapitools.codegen.meta.Stability;
+import org.openapitools.codegen.meta.features.DocumentationFeature;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.utils.URLPathUtils;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.net.URL;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class JavaVertXServerCodegen extends AbstractJavaCodegen {
+<span class="fc" id="L48">    private final Logger LOGGER = LoggerFactory.getLogger(JavaVertXServerCodegen.class);</span>
+
+<span class="fc" id="L50">    protected String resourceFolder = &quot;src/main/resources&quot;;</span>
+<span class="fc" id="L51">    protected String rootPackage = &quot;org.openapitools.server.api&quot;;</span>
+<span class="fc" id="L52">    protected String apiVersion = &quot;1.0.0-SNAPSHOT&quot;;</span>
+
+    public static final String ROOT_PACKAGE = &quot;rootPackage&quot;;
+
+    public static final String RX_INTERFACE_OPTION = &quot;rxInterface&quot;;
+    public static final String RX_VERSION_2_OPTION = &quot;rxVersion2&quot;;
+    public static final String VERTX_SWAGGER_ROUTER_VERSION_OPTION = &quot;vertxSwaggerRouterVersion&quot;;
+
+    /**
+     * A Java Vert.X generator. It uses java8 date API. It can be configured with 2 CLI options :
+     * &lt;p&gt;
+     * rxInterface : type Boolean if true, API interfaces are generated with RX and methods return
+     * Single and Comparable. default : false
+     * &lt;p&gt;
+     * vertxSwaggerRouterVersion : type String Specify the version of the swagger router library
+     */
+    public JavaVertXServerCodegen() {
+<span class="fc" id="L69">        super();</span>
+
+<span class="fc" id="L71">        modifyFeatureSet(features -&gt; features.includeDocumentationFeatures(DocumentationFeature.Readme));</span>
+
+<span class="fc" id="L73">        generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
+<span class="fc" id="L74">            .stability(Stability.DEPRECATED)</span>
+<span class="fc" id="L75">            .build();</span>
+
+        // set the output folder here
+<span class="fc" id="L78">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;javaVertXServer&quot;;</span>
+
+<span class="fc" id="L80">        modelTemplateFiles.clear();</span>
+<span class="fc" id="L81">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.java&quot;);</span>
+
+<span class="fc" id="L83">        apiTemplateFiles.clear();</span>
+<span class="fc" id="L84">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.java&quot;);</span>
+<span class="fc" id="L85">        apiTemplateFiles.put(&quot;apiVerticle.mustache&quot;, &quot;Verticle.java&quot;);</span>
+<span class="fc" id="L86">        apiTemplateFiles.put(&quot;apiException.mustache&quot;, &quot;Exception.java&quot;);</span>
+
+<span class="fc" id="L88">        embeddedTemplateDir = templateDir = &quot;JavaVertXServer&quot;;</span>
+
+<span class="fc" id="L90">        apiPackage = rootPackage + &quot;.verticle&quot;;</span>
+<span class="fc" id="L91">        modelPackage = rootPackage + &quot;.model&quot;;</span>
+<span class="fc" id="L92">        artifactId = &quot;openapi-java-vertx-server&quot;;</span>
+<span class="fc" id="L93">        artifactVersion = apiVersion;</span>
+<span class="fc" id="L94">        this.setDateLibrary(&quot;java8&quot;);</span>
+
+        // clioOptions default redefinition need to be updated
+<span class="fc" id="L97">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
+<span class="fc" id="L98">        updateOption(CodegenConstants.ARTIFACT_VERSION, this.getArtifactVersion());</span>
+<span class="fc" id="L99">        updateOption(CodegenConstants.API_PACKAGE, apiPackage);</span>
+<span class="fc" id="L100">        updateOption(CodegenConstants.MODEL_PACKAGE, modelPackage);</span>
+<span class="fc" id="L101">        updateOption(DATE_LIBRARY, this.getDateLibrary());</span>
+
+<span class="fc" id="L103">        additionalProperties.put(ROOT_PACKAGE, rootPackage);</span>
+
+<span class="fc" id="L105">        cliOptions.add(CliOption.newBoolean(RX_INTERFACE_OPTION,</span>
+                &quot;When specified, API interfaces are generated with RX &quot;
+                        + &quot;and methods return Single&lt;&gt; and Comparable.&quot;));
+<span class="fc" id="L108">        cliOptions.add(CliOption.newBoolean(RX_VERSION_2_OPTION,</span>
+                &quot;When specified in combination with rxInterface, &quot;
+                        + &quot;API interfaces are generated with RxJava2.&quot;));
+<span class="fc" id="L111">        cliOptions.add(CliOption.newString(VERTX_SWAGGER_ROUTER_VERSION_OPTION,</span>
+                &quot;Specify the version of the swagger router library&quot;));
+
+<span class="fc" id="L114">    }</span>
+
+    /**
+     * Configures the type of generator.
+     *
+     * @return the CodegenType for this generator
+     * @see org.openapitools.codegen.CodegenType
+     */
+    public CodegenType getTag() {
+<span class="fc" id="L123">        return CodegenType.SERVER;</span>
+    }
+
+    /**
+     * Configures a friendly name for the generator. This will be used by the generator to select
+     * the library with the -g flag.
+     *
+     * @return the friendly name for the generator
+     */
+    public String getName() {
+<span class="fc" id="L133">        return &quot;java-vertx&quot;;</span>
+    }
+
+    /**
+     * Returns human-friendly help for the generator. Provide the consumer with help tips,
+     * parameters here
+     *
+     * @return A string value for the help message
+     */
+    public String getHelp() {
+<span class="nc" id="L143">        return &quot;Generates a java-Vert.X Server library.&quot;;</span>
+    }
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L148">        super.processOpts();</span>
+
+<span class="nc" id="L150">        LOGGER.warn(&quot;IMPORTANT: This generator has been deprecated. Please use `java-vertx-web` instead&quot;);</span>
+
+<span class="nc" id="L152">        apiTestTemplateFiles.clear();</span>
+
+<span class="nc" id="L154">        importMapping.remove(&quot;JsonCreator&quot;);</span>
+<span class="nc" id="L155">        importMapping.remove(&quot;com.fasterxml.jackson.annotation.JsonProperty&quot;);</span>
+<span class="nc" id="L156">        importMapping.put(&quot;JsonInclude&quot;, &quot;com.fasterxml.jackson.annotation.JsonInclude&quot;);</span>
+<span class="nc" id="L157">        importMapping.put(&quot;JsonProperty&quot;, &quot;com.fasterxml.jackson.annotation.JsonProperty&quot;);</span>
+<span class="nc" id="L158">        importMapping.put(&quot;JsonValue&quot;, &quot;com.fasterxml.jackson.annotation.JsonValue&quot;);</span>
+<span class="nc" id="L159">        importMapping.put(&quot;MainApiException&quot;, rootPackage + &quot;.MainApiException&quot;);</span>
+
+<span class="nc" id="L161">        modelDocTemplateFiles.clear();</span>
+<span class="nc" id="L162">        apiDocTemplateFiles.clear();</span>
+
+<span class="nc" id="L164">        supportingFiles.clear();</span>
+<span class="nc" id="L165">        supportingFiles.add(new SupportingFile(&quot;openapi.mustache&quot;, resourceFolder, &quot;openapi.json&quot;));</span>
+<span class="nc" id="L166">        supportingFiles.add(new SupportingFile(&quot;MainApiVerticle.mustache&quot;,</span>
+<span class="nc" id="L167">                sourceFolder + File.separator + rootPackage.replace(&quot;.&quot;, File.separator),</span>
+                &quot;MainApiVerticle.java&quot;));
+<span class="nc" id="L169">        supportingFiles.add(new SupportingFile(&quot;MainApiException.mustache&quot;,</span>
+<span class="nc" id="L170">                sourceFolder + File.separator + rootPackage.replace(&quot;.&quot;, File.separator),</span>
+                &quot;MainApiException.java&quot;));
+
+<span class="nc" id="L173">        supportingFiles.add(new SupportingFile(&quot;vertx-default-jul-logging.mustache&quot;,</span>
+                resourceFolder, &quot;vertx-default-jul-logging.properties&quot;)
+<span class="nc" id="L175">                .doNotOverwrite());</span>
+<span class="nc" id="L176">        supportingFiles.add(new SupportingFile(&quot;pom.mustache&quot;, &quot;&quot;, &quot;pom.xml&quot;)</span>
+<span class="nc" id="L177">                .doNotOverwrite());</span>
+<span class="nc" id="L178">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;)</span>
+<span class="nc" id="L179">                .doNotOverwrite());</span>
+<span class="nc" id="L180">    }</span>
+
+    @Override
+    public void postProcessModelProperty(CodegenModel model, CodegenProperty property) {
+<span class="nc" id="L184">        super.postProcessModelProperty(model, property);</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">        if (!model.isEnum) {</span>
+<span class="nc" id="L186">            model.imports.add(&quot;JsonInclude&quot;);</span>
+<span class="nc" id="L187">            model.imports.add(&quot;JsonProperty&quot;);</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">            if (model.hasEnums) {</span>
+<span class="nc" id="L189">                model.imports.add(&quot;JsonValue&quot;);</span>
+            }
+        }
+
+<span class="nc" id="L193">    }</span>
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L197">        OperationsMap newObjs = super.postProcessOperationsWithModels(objs, allModels);</span>
+<span class="nc" id="L198">        OperationMap operations = newObjs.getOperations();</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">        if (operations != null) {</span>
+<span class="nc" id="L200">            List&lt;CodegenOperation&gt; ops = operations.getOperation();</span>
+<span class="nc bnc" id="L201" title="All 2 branches missed.">            for (CodegenOperation operation : ops) {</span>
+<span class="nc" id="L202">                operation.httpMethod = operation.httpMethod.toLowerCase(Locale.ROOT);</span>
+
+<span class="nc bnc" id="L204" title="All 2 branches missed.">                if (&quot;Void&quot;.equalsIgnoreCase(operation.returnType)) {</span>
+<span class="nc" id="L205">                    operation.returnType = null;</span>
+                }
+
+<span class="nc bnc" id="L208" title="All 2 branches missed.">                if (operation.getHasPathParams()) {</span>
+<span class="nc" id="L209">                    operation.path = camelizePath(operation.path);</span>
+                }
+
+<span class="nc" id="L212">            }</span>
+        }
+<span class="nc" id="L214">        return newObjs;</span>
+    }
+
+    @Override
+    public Map&lt;String, Object&gt; postProcessSupportingFileData(Map&lt;String, Object&gt; objs) {
+<span class="nc" id="L219">        generateJSONSpecFile(objs);</span>
+<span class="nc" id="L220">        return super.postProcessSupportingFileData(objs);</span>
+    }
+
+
+    @Override
+    public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, List&lt;Server&gt; servers) {
+<span class="nc" id="L226">        CodegenOperation codegenOperation =</span>
+<span class="nc" id="L227">                super.fromOperation(path, httpMethod, operation, servers);</span>
+<span class="nc" id="L228">        codegenOperation.imports.add(&quot;MainApiException&quot;);</span>
+<span class="nc" id="L229">        return codegenOperation;</span>
+    }
+
+    @Override
+    public CodegenModel fromModel(String name, Schema model) {
+<span class="nc" id="L234">        CodegenModel codegenModel = super.fromModel(name, model);</span>
+<span class="nc" id="L235">        codegenModel.imports.remove(&quot;ApiModel&quot;);</span>
+<span class="nc" id="L236">        codegenModel.imports.remove(&quot;ApiModelProperty&quot;);</span>
+<span class="nc" id="L237">        return codegenModel;</span>
+    }
+
+    @Override
+    public void preprocessOpenAPI(OpenAPI openAPI) {
+<span class="nc" id="L242">        super.preprocessOpenAPI(openAPI);</span>
+
+        // add server port from the swagger file, 8080 by default
+<span class="nc" id="L245">        URL url = URLPathUtils.getServerURL(openAPI, serverVariableOverrides());</span>
+<span class="nc" id="L246">        this.additionalProperties.put(&quot;serverPort&quot;, URLPathUtils.getPort(url, 8080));</span>
+
+        // retrieve api version from swagger file, 1.0.0-SNAPSHOT by default
+        // set in super.preprocessOpenAPI
+        /*
+        if (openAPI.getInfo() != null &amp;&amp; openAPI.getInfo().getVersion() != null) {
+            artifactVersion = apiVersion = openAPI.getInfo().getVersion();
+        } else {
+            artifactVersion = apiVersion;
+        }*/
+
+        /*
+         * manage operation &amp; custom serviceId because operationId field is not
+         * required and may be empty
+         */
+<span class="nc" id="L261">        Map&lt;String, PathItem&gt; paths = openAPI.getPaths();</span>
+<span class="nc bnc" id="L262" title="All 2 branches missed.">        if (paths != null) {</span>
+<span class="nc bnc" id="L263" title="All 2 branches missed.">            for (Entry&lt;String, PathItem&gt; entry : paths.entrySet()) {</span>
+<span class="nc" id="L264">                manageOperationNames(entry.getValue(), entry.getKey());</span>
+<span class="nc" id="L265">            }</span>
+        }
+<span class="nc" id="L267">        this.additionalProperties.remove(&quot;gson&quot;);</span>
+<span class="nc" id="L268">    }</span>
+
+    private void manageOperationNames(PathItem path, String pathname) {
+        String serviceIdTemp;
+
+<span class="nc" id="L273">        Map&lt;HttpMethod, Operation&gt; operationMap = path.readOperationsMap();</span>
+<span class="nc bnc" id="L274" title="All 2 branches missed.">        if (operationMap != null) {</span>
+<span class="nc bnc" id="L275" title="All 2 branches missed.">            for (Entry&lt;HttpMethod, Operation&gt; entry : operationMap.entrySet()) {</span>
+<span class="nc" id="L276">                serviceIdTemp = computeServiceId(pathname, entry);</span>
+<span class="nc" id="L277">                entry.getValue().addExtension(&quot;x-serviceid&quot;, serviceIdTemp);</span>
+<span class="nc" id="L278">                entry.getValue().addExtension(&quot;x-serviceid-varname&quot;,</span>
+<span class="nc" id="L279">                        serviceIdTemp.toUpperCase(Locale.ROOT) + &quot;_SERVICE_ID&quot;);</span>
+<span class="nc" id="L280">            }</span>
+        }
+<span class="nc" id="L282">    }</span>
+
+    private String computeServiceId(String pathname, Entry&lt;HttpMethod, Operation&gt; entry) {
+<span class="nc" id="L285">        String operationId = entry.getValue().getOperationId();</span>
+<span class="nc bnc" id="L286" title="All 2 branches missed.">        return (operationId != null) ? operationId</span>
+<span class="nc" id="L287">                : entry.getKey().name()</span>
+<span class="nc" id="L288">                + pathname.replaceAll(&quot;-&quot;, &quot;_&quot;).replaceAll(&quot;/&quot;, &quot;_&quot;).replaceAll(&quot;[{}]&quot;, &quot;&quot;);</span>
+    }
+
+    protected String extractPortFromHost(String host) {
+<span class="nc bnc" id="L292" title="All 2 branches missed.">        if (host != null) {</span>
+<span class="nc" id="L293">            int portSeparatorIndex = host.indexOf(':');</span>
+<span class="nc bnc" id="L294" title="All 4 branches missed.">            if (portSeparatorIndex &gt;= 0 &amp;&amp; portSeparatorIndex + 1 &lt; host.length()) {</span>
+<span class="nc" id="L295">                return host.substring(portSeparatorIndex + 1);</span>
+            }
+        }
+<span class="nc" id="L298">        return &quot;8080&quot;;</span>
+    }
+
+    private String camelizePath(String path) {
+<span class="nc" id="L302">        String word = path;</span>
+<span class="nc" id="L303">        Pattern pattern = Pattern.compile(&quot;\\{([^/]*)\\}&quot;);</span>
+<span class="nc" id="L304">        Matcher matcher = pattern.matcher(word);</span>
+<span class="nc bnc" id="L305" title="All 2 branches missed.">        while (matcher.find()) {</span>
+<span class="nc" id="L306">            word = matcher.replaceFirst(&quot;:&quot; + matcher.group(1));</span>
+<span class="nc" id="L307">            matcher = pattern.matcher(word);</span>
+        }
+<span class="nc" id="L309">        pattern = Pattern.compile(&quot;(_)(.)&quot;);</span>
+<span class="nc" id="L310">        matcher = pattern.matcher(word);</span>
+<span class="nc bnc" id="L311" title="All 2 branches missed.">        while (matcher.find()) {</span>
+<span class="nc" id="L312">            word = matcher.replaceFirst(matcher.group(2).toUpperCase(Locale.ROOT));</span>
+<span class="nc" id="L313">            matcher = pattern.matcher(word);</span>
+        }
+<span class="nc" id="L315">        return word;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

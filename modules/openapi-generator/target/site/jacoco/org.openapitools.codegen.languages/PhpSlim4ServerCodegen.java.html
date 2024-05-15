@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PhpSlim4ServerCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">PhpSlim4ServerCodegen.java</span></div><h1>PhpSlim4ServerCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.CodegenType;
+import org.openapitools.codegen.CodegenOperation;
+import org.openapitools.codegen.CodegenSecurity;
+import org.openapitools.codegen.CliOption;
+import org.openapitools.codegen.CodegenConstants;
+import org.openapitools.codegen.SupportingFile;
+import org.openapitools.codegen.meta.GeneratorMetadata;
+import org.openapitools.codegen.meta.Stability;
+import org.openapitools.codegen.meta.features.*;
+import org.openapitools.codegen.model.ApiInfoMap;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.*;
+
+import static org.openapitools.codegen.utils.StringUtils.camelize;
+
+public class PhpSlim4ServerCodegen extends AbstractPhpCodegen {
+<span class="nc" id="L48">    private final Logger LOGGER = LoggerFactory.getLogger(PhpSlim4ServerCodegen.class);</span>
+
+    public static final String USER_CLASSNAME_KEY = &quot;userClassname&quot;;
+    public static final String PSR7_IMPLEMENTATION = &quot;psr7Implementation&quot;;
+
+<span class="nc" id="L53">    protected String groupId = &quot;org.openapitools&quot;;</span>
+<span class="nc" id="L54">    protected String artifactId = &quot;openapi-server&quot;;</span>
+<span class="nc" id="L55">    protected String authDirName = &quot;Auth&quot;;</span>
+<span class="nc" id="L56">    protected String authPackage = &quot;&quot;;</span>
+<span class="nc" id="L57">    protected String appDirName = &quot;App&quot;;</span>
+<span class="nc" id="L58">    protected String appPackage = &quot;&quot;;</span>
+<span class="nc" id="L59">    protected String psr7Implementation = &quot;slim-psr7&quot;;</span>
+<span class="nc" id="L60">    protected String interfacesDirName = &quot;Interfaces&quot;;</span>
+<span class="nc" id="L61">    protected String interfacesPackage = &quot;&quot;;</span>
+
+    public PhpSlim4ServerCodegen() {
+<span class="nc" id="L64">        super();</span>
+
+        // PDS skeleton recommends tests folder
+        // https://github.com/php-pds/skeleton
+<span class="nc" id="L68">        this.testBasePath = &quot;tests&quot;;</span>
+
+<span class="nc" id="L70">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L71">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="nc" id="L72">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON, WireFormatFeature.XML))</span>
+<span class="nc" id="L73">                .securityFeatures(EnumSet.of(</span>
+                        SecurityFeature.BasicAuth,
+                        SecurityFeature.BearerToken,
+                        SecurityFeature.ApiKey,
+                        SecurityFeature.OAuth2_Implicit))
+<span class="nc" id="L78">                .excludeGlobalFeatures(</span>
+                        GlobalFeature.XMLStructureDefinitions,
+                        GlobalFeature.Callbacks,
+                        GlobalFeature.LinkObjects,
+                        GlobalFeature.ParameterStyling
+                )
+<span class="nc" id="L84">                .excludeSchemaSupportFeatures(</span>
+                        SchemaSupportFeature.Polymorphism
+                )
+<span class="nc" id="L87">                .includeClientModificationFeatures(ClientModificationFeature.MockServer)</span>
+        );
+
+<span class="nc" id="L90">        generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
+<span class="nc" id="L91">                .stability(Stability.STABLE)</span>
+<span class="nc" id="L92">                .build();</span>
+
+        // clear import mapping (from default generator) as slim does not use it
+        // at the moment
+<span class="nc" id="L96">        importMapping.clear();</span>
+
+<span class="nc" id="L98">        variableNamingConvention = &quot;camelCase&quot;;</span>
+<span class="nc" id="L99">        artifactVersion = &quot;1.0.0&quot;;</span>
+<span class="nc" id="L100">        setInvokerPackage(&quot;OpenAPIServer&quot;);</span>
+<span class="nc" id="L101">        apiPackage = invokerPackage + &quot;\\&quot; + apiDirName;</span>
+<span class="nc" id="L102">        modelPackage = invokerPackage + &quot;\\&quot; + modelDirName;</span>
+<span class="nc" id="L103">        authPackage = invokerPackage + &quot;\\&quot; + authDirName;</span>
+<span class="nc" id="L104">        interfacesPackage = invokerPackage + &quot;\\&quot; + interfacesDirName;</span>
+<span class="nc" id="L105">        appPackage = invokerPackage + &quot;\\&quot; + appDirName;</span>
+<span class="nc" id="L106">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;slim4&quot;;</span>
+
+<span class="nc" id="L108">        modelTestTemplateFiles.put(&quot;model_test.mustache&quot;, &quot;.php&quot;);</span>
+        // no doc files
+<span class="nc" id="L110">        modelDocTemplateFiles.clear();</span>
+<span class="nc" id="L111">        apiDocTemplateFiles.clear();</span>
+
+<span class="nc" id="L113">        embeddedTemplateDir = templateDir = &quot;php-slim4-server&quot;;</span>
+
+<span class="nc" id="L115">        additionalProperties.put(CodegenConstants.GROUP_ID, groupId);</span>
+<span class="nc" id="L116">        additionalProperties.put(CodegenConstants.ARTIFACT_ID, artifactId);</span>
+
+        // override cliOptions from AbstractPhpCodegen
+<span class="nc" id="L119">        updateOption(AbstractPhpCodegen.VARIABLE_NAMING_CONVENTION, &quot;camelCase&quot;);</span>
+
+        // Slim 4 can use any PSR-7 implementation
+        // https://www.slimframework.com/docs/v4/concepts/value-objects.html
+<span class="nc" id="L123">        CliOption psr7Option = new CliOption(PSR7_IMPLEMENTATION,</span>
+                &quot;Slim 4 provides its own PSR-7 implementation so that it works out of the box. However, you are free to replace Slim’s default PSR-7 objects with a third-party implementation. Ref: https://www.slimframework.com/docs/v4/concepts/value-objects.html&quot;);
+
+<span class="nc" id="L126">        psr7Option.addEnum(&quot;slim-psr7&quot;, &quot;Slim PSR-7 Message implementation&quot;)</span>
+<span class="nc" id="L127">                .addEnum(&quot;nyholm-psr7&quot;, &quot;Nyholm PSR-7 Message implementation&quot;)</span>
+<span class="nc" id="L128">                .addEnum(&quot;guzzle-psr7&quot;, &quot;Guzzle PSR-7 Message implementation&quot;)</span>
+<span class="nc" id="L129">                .addEnum(&quot;zend-diactoros&quot;, &quot;Zend Diactoros PSR-7 Message implementation&quot;)</span>
+<span class="nc" id="L130">                .setDefault(&quot;slim-psr7&quot;);</span>
+
+<span class="nc" id="L132">        cliOptions.add(psr7Option);</span>
+<span class="nc" id="L133">    }</span>
+
+    @Override
+    public CodegenType getTag() {
+<span class="nc" id="L137">        return CodegenType.SERVER;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L142">        return &quot;php-slim4&quot;;</span>
+    }
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L147">        return &quot;Generates a PHP Slim 4 Framework server library(with Mock server).&quot;;</span>
+    }
+
+    @Override
+    public String apiFileFolder() {
+<span class="nc bnc" id="L152" title="All 2 branches missed.">        if (apiPackage.startsWith(invokerPackage + &quot;\\&quot;)) {</span>
+            // need to strip out invokerPackage from path
+<span class="nc" id="L154">            return (outputFolder + File.separator + toSrcPath(StringUtils.removeStart(apiPackage, invokerPackage + &quot;\\&quot;), srcBasePath));</span>
+        }
+<span class="nc" id="L156">        return (outputFolder + File.separator + toSrcPath(apiPackage, srcBasePath));</span>
+    }
+
+    @Override
+    public String modelFileFolder() {
+<span class="nc bnc" id="L161" title="All 2 branches missed.">        if (modelPackage.startsWith(invokerPackage + &quot;\\&quot;)) {</span>
+            // need to strip out invokerPackage from path
+<span class="nc" id="L163">            return (outputFolder + File.separator + toSrcPath(StringUtils.removeStart(modelPackage, invokerPackage + &quot;\\&quot;), srcBasePath));</span>
+        }
+<span class="nc" id="L165">        return (outputFolder + File.separator + toSrcPath(modelPackage, srcBasePath));</span>
+    }
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L170">        super.processOpts();</span>
+
+<span class="nc bnc" id="L172" title="All 4 branches missed.">        Boolean generateModels = additionalProperties.containsKey(CodegenConstants.GENERATE_MODELS) &amp;&amp; Boolean.TRUE.equals(additionalProperties.get(CodegenConstants.GENERATE_MODELS));</span>
+<span class="nc bnc" id="L173" title="All 4 branches missed.">        Boolean generateApiTests = additionalProperties.containsKey(CodegenConstants.GENERATE_API_TESTS) &amp;&amp; Boolean.TRUE.equals(additionalProperties.get(CodegenConstants.GENERATE_API_TESTS));</span>
+<span class="nc bnc" id="L174" title="All 4 branches missed.">        Boolean generateModelTests = additionalProperties.containsKey(CodegenConstants.GENERATE_MODEL_TESTS) &amp;&amp; Boolean.TRUE.equals(additionalProperties.get(CodegenConstants.GENERATE_MODEL_TESTS));</span>
+
+<span class="nc bnc" id="L176" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.INVOKER_PACKAGE)) {</span>
+            // Update the invokerPackage for the default authPackage
+<span class="nc" id="L178">            authPackage = invokerPackage + &quot;\\&quot; + authDirName;</span>
+            // Update interfacesPackage
+<span class="nc" id="L180">            interfacesPackage = invokerPackage + &quot;\\&quot; + interfacesDirName;</span>
+            // update appPackage
+<span class="nc" id="L182">            appPackage = invokerPackage + &quot;\\&quot; + appDirName;</span>
+        }
+
+        // make auth src path available in mustache template
+<span class="nc" id="L186">        additionalProperties.put(&quot;authPackage&quot;, authPackage);</span>
+<span class="nc" id="L187">        additionalProperties.put(&quot;authSrcPath&quot;, &quot;./&quot; + toSrcPath(authPackage, srcBasePath));</span>
+
+        // same for interfaces package
+<span class="nc" id="L190">        additionalProperties.put(&quot;interfacesPackage&quot;, interfacesPackage);</span>
+<span class="nc" id="L191">        additionalProperties.put(&quot;interfacesSrcPath&quot;, &quot;./&quot; + toSrcPath(interfacesPackage, srcBasePath));</span>
+<span class="nc" id="L192">        additionalProperties.put(&quot;interfacesTestPath&quot;, &quot;./&quot; + toSrcPath(interfacesPackage, testBasePath));</span>
+
+        // same for app classes
+<span class="nc" id="L195">        additionalProperties.put(&quot;appPackage&quot;, appPackage);</span>
+<span class="nc" id="L196">        additionalProperties.put(&quot;appSrcPath&quot;, &quot;./&quot; + toSrcPath(appPackage, srcBasePath));</span>
+
+<span class="nc bnc" id="L198" title="All 2 branches missed.">        if (additionalProperties.containsKey(PSR7_IMPLEMENTATION)) {</span>
+<span class="nc" id="L199">            this.setPsr7Implementation((String) additionalProperties.get(PSR7_IMPLEMENTATION));</span>
+        }
+
+        // reset implementation flags
+<span class="nc" id="L203">        additionalProperties.put(&quot;isSlimPsr7&quot;, Boolean.FALSE);</span>
+<span class="nc" id="L204">        additionalProperties.put(&quot;isNyholmPsr7&quot;, Boolean.FALSE);</span>
+<span class="nc" id="L205">        additionalProperties.put(&quot;isGuzzlePsr7&quot;, Boolean.FALSE);</span>
+<span class="nc" id="L206">        additionalProperties.put(&quot;isZendDiactoros&quot;, Boolean.FALSE);</span>
+
+        // set specific PSR-7 implementation flag
+<span class="nc bnc" id="L209" title="All 5 branches missed.">        switch (getPsr7Implementation()) {</span>
+            case &quot;slim-psr7&quot;:
+<span class="nc" id="L211">                additionalProperties.put(&quot;isSlimPsr7&quot;, Boolean.TRUE);</span>
+<span class="nc" id="L212">                break;</span>
+            case &quot;nyholm-psr7&quot;:
+<span class="nc" id="L214">                additionalProperties.put(&quot;isNyholmPsr7&quot;, Boolean.TRUE);</span>
+<span class="nc" id="L215">                break;</span>
+            case &quot;guzzle-psr7&quot;:
+<span class="nc" id="L217">                additionalProperties.put(&quot;isGuzzlePsr7&quot;, Boolean.TRUE);</span>
+<span class="nc" id="L218">                break;</span>
+            case &quot;zend-diactoros&quot;:
+<span class="nc" id="L220">                additionalProperties.put(&quot;isZendDiactoros&quot;, Boolean.TRUE);</span>
+<span class="nc" id="L221">                break;</span>
+            default:
+<span class="nc" id="L223">                LOGGER.warn(</span>
+                        &quot;\&quot;{}\&quot; is invalid \&quot;psr7Implementation\&quot; codegen option. Default \&quot;slim-psr7\&quot; used instead.&quot;,
+<span class="nc" id="L225">                        getPsr7Implementation());</span>
+<span class="nc" id="L226">                additionalProperties.put(&quot;isSlimPsr7&quot;, Boolean.TRUE);</span>
+        }
+
+<span class="nc" id="L229">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;));</span>
+<span class="nc" id="L230">        supportingFiles.add(new SupportingFile(&quot;composer.mustache&quot;, &quot;&quot;, &quot;composer.json&quot;));</span>
+<span class="nc" id="L231">        supportingFiles.add(new SupportingFile(&quot;index.mustache&quot;, &quot;public&quot;, &quot;index.php&quot;));</span>
+<span class="nc" id="L232">        supportingFiles.add(new SupportingFile(&quot;.htaccess&quot;, &quot;public&quot;, &quot;.htaccess&quot;));</span>
+<span class="nc" id="L233">        supportingFiles.add(new SupportingFile(&quot;register_dependencies.mustache&quot;, toSrcPath(appPackage, srcBasePath), &quot;RegisterDependencies.php&quot;));</span>
+<span class="nc" id="L234">        supportingFiles.add(new SupportingFile(&quot;register_middlewares.mustache&quot;, toSrcPath(appPackage, srcBasePath), &quot;RegisterMiddlewares.php&quot;));</span>
+<span class="nc" id="L235">        supportingFiles.add(new SupportingFile(&quot;register_routes.mustache&quot;, toSrcPath(appPackage, srcBasePath), &quot;RegisterRoutes.php&quot;));</span>
+<span class="nc" id="L236">        supportingFiles.add(new SupportingFile(&quot;response_emitter.mustache&quot;, toSrcPath(appPackage, srcBasePath), &quot;ResponseEmitter.php&quot;));</span>
+
+        // don't generate phpunit config when tests generation disabled
+<span class="nc bnc" id="L239" title="All 4 branches missed.">        if (Boolean.TRUE.equals(generateApiTests) || Boolean.TRUE.equals(generateModelTests)) {</span>
+<span class="nc" id="L240">            supportingFiles.add(new SupportingFile(&quot;phpunit.xml.mustache&quot;, &quot;&quot;, &quot;phpunit.xml.dist&quot;));</span>
+<span class="nc" id="L241">            additionalProperties.put(&quot;generateTests&quot;, Boolean.TRUE);</span>
+        }
+
+<span class="nc" id="L244">        supportingFiles.add(new SupportingFile(&quot;phpcs.xml.mustache&quot;, &quot;&quot;, &quot;phpcs.xml.dist&quot;));</span>
+
+<span class="nc" id="L246">        supportingFiles.add(new SupportingFile(&quot;htaccess_deny_all&quot;, &quot;config&quot;, &quot;.htaccess&quot;));</span>
+<span class="nc" id="L247">        supportingFiles.add(new SupportingFile(&quot;config_dev_default.mustache&quot;, &quot;config&quot; + File.separator + &quot;dev&quot;, &quot;default.inc.php&quot;));</span>
+<span class="nc" id="L248">        supportingFiles.add(new SupportingFile(&quot;config_prod_default.mustache&quot;, &quot;config&quot; + File.separator + &quot;prod&quot;, &quot;default.inc.php&quot;));</span>
+        // add restricted htaccess to create log folder
+<span class="nc" id="L250">        supportingFiles.add(new SupportingFile(&quot;htaccess_deny_all&quot;, &quot;logs&quot;, &quot;.htaccess&quot;));</span>
+
+<span class="nc bnc" id="L252" title="All 2 branches missed.">        if (Boolean.TRUE.equals(generateModels)) {</span>
+<span class="nc" id="L253">            supportingFiles.add(new SupportingFile(&quot;base_model.mustache&quot;, toSrcPath(invokerPackage, srcBasePath), &quot;BaseModel.php&quot;));</span>
+        }
+
+<span class="nc bnc" id="L256" title="All 2 branches missed.">        if (Boolean.TRUE.equals(generateModelTests)) {</span>
+<span class="nc" id="L257">            supportingFiles.add(new SupportingFile(&quot;base_model_test.mustache&quot;, toSrcPath(invokerPackage, testBasePath), &quot;BaseModelTest.php&quot;));</span>
+        }
+
+        // based on example from link
+        // @see https://github.com/shivammathur/setup-php/blob/master/examples/slim-framework.yml
+<span class="nc" id="L262">        supportingFiles.add(new SupportingFile(&quot;github_action.yml.mustache&quot;, &quot;.github&quot; + File.separator + &quot;workflows&quot; + File.separator, &quot;main.yml&quot;));</span>
+<span class="nc" id="L263">    }</span>
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L267">        OperationMap operations = objs.getOperations();</span>
+<span class="nc" id="L268">        List&lt;CodegenOperation&gt; operationList = operations.getOperation();</span>
+<span class="nc" id="L269">        addUserClassnameToOperations(operations);</span>
+<span class="nc" id="L270">        escapeMediaType(operationList);</span>
+<span class="nc" id="L271">        return objs;</span>
+    }
+
+    @Override
+    public Map&lt;String, Object&gt; postProcessSupportingFileData(Map&lt;String, Object&gt; objs) {
+<span class="nc" id="L276">        ApiInfoMap apiInfo = (ApiInfoMap) objs.get(&quot;apiInfo&quot;);</span>
+<span class="nc bnc" id="L277" title="All 2 branches missed.">        for (OperationsMap api : apiInfo.getApis()) {</span>
+<span class="nc" id="L278">            List&lt;CodegenOperation&gt; operationList = api.getOperations().getOperation();</span>
+
+            // Sort operations to avoid static routes shadowing
+            // ref: https://github.com/nikic/FastRoute/blob/master/src/DataGenerator/RegexBasedAbstract.php#L92-L101
+<span class="nc" id="L282">            operationList.sort((one, another) -&gt; {</span>
+<span class="nc bnc" id="L283" title="All 4 branches missed.">                    if (one.getHasPathParams() &amp;&amp; !another.getHasPathParams()) return 1;</span>
+<span class="nc bnc" id="L284" title="All 4 branches missed.">                    if (!one.getHasPathParams() &amp;&amp; another.getHasPathParams()) return -1;</span>
+<span class="nc" id="L285">                    return 0;</span>
+            });
+<span class="nc" id="L287">        }</span>
+
+        // generate authenticator only when hasAuthMethods === true
+<span class="nc bnc" id="L290" title="All 4 branches missed.">        if (objs.containsKey(&quot;hasAuthMethods&quot;) &amp;&amp; Boolean.TRUE.equals(objs.get(&quot;hasAuthMethods&quot;))) {</span>
+<span class="nc" id="L291">            supportingFiles.add(new SupportingFile(&quot;abstract_authenticator.mustache&quot;, toSrcPath(authPackage, srcBasePath), toAbstractName(&quot;Authenticator&quot;) + &quot;.php&quot;));</span>
+        }
+<span class="nc" id="L293">        return objs;</span>
+    }
+
+    @Override
+    public String toApiName(String name) {
+<span class="nc bnc" id="L298" title="All 2 branches missed.">        if (name.length() == 0) {</span>
+<span class="nc" id="L299">            return toAbstractName(&quot;DefaultApi&quot;);</span>
+        }
+<span class="nc" id="L301">        return toAbstractName(camelize(name) + &quot;Api&quot;);</span>
+    }
+
+    @Override
+    public String toApiTestFilename(String name) {
+<span class="nc bnc" id="L306" title="All 2 branches missed.">        if (name.length() == 0) {</span>
+<span class="nc" id="L307">            return &quot;DefaultApiTest&quot;;</span>
+        }
+<span class="nc" id="L309">        return camelize(name) + &quot;ApiTest&quot;;</span>
+    }
+
+    /**
+     * Strips out abstract prefix and suffix from classname and puts it in &quot;userClassname&quot; property of operations object.
+     *
+     * @param operations codegen object with operations
+     */
+    private void addUserClassnameToOperations(OperationMap operations) {
+<span class="nc" id="L318">        String classname = operations.getClassname();</span>
+<span class="nc" id="L319">        classname = classname.replaceAll(&quot;^&quot; + abstractNamePrefix, &quot;&quot;);</span>
+<span class="nc" id="L320">        classname = classname.replaceAll(abstractNameSuffix + &quot;$&quot;, &quot;&quot;);</span>
+<span class="nc" id="L321">        operations.put(USER_CLASSNAME_KEY, classname);</span>
+<span class="nc" id="L322">    }</span>
+
+    @Override
+    public String encodePath(String input) {
+<span class="nc bnc" id="L326" title="All 2 branches missed.">        if (input == null) {</span>
+<span class="nc" id="L327">            return input;</span>
+        }
+
+        // from DefaultCodegen.java
+        // remove \t, \n, \r
+        // replace \ with \\
+        // replace &quot; with \&quot;
+        // outer unescape to retain the original multi-byte characters
+        // finally escalate characters avoiding code injection
+<span class="nc" id="L336">        input = super.escapeUnsafeCharacters(</span>
+<span class="nc" id="L337">                StringEscapeUtils.unescapeJava(</span>
+<span class="nc" id="L338">                        StringEscapeUtils.escapeJava(input)</span>
+<span class="nc" id="L339">                                .replace(&quot;\\/&quot;, &quot;/&quot;))</span>
+<span class="nc" id="L340">                        .replaceAll(&quot;[\\t\\n\\r]&quot;, &quot; &quot;)</span>
+<span class="nc" id="L341">                        .replace(&quot;\\&quot;, &quot;\\\\&quot;));</span>
+        // .replace(&quot;\&quot;&quot;, &quot;\\\&quot;&quot;));
+
+        // from AbstractPhpCodegen.java
+        // Trim the string to avoid leading and trailing spaces.
+<span class="nc" id="L346">        input = input.trim();</span>
+        try {
+
+<span class="nc" id="L349">            input = URLEncoder.encode(input, &quot;UTF-8&quot;)</span>
+<span class="nc" id="L350">                    .replaceAll(&quot;\\+&quot;, &quot;%20&quot;)</span>
+<span class="nc" id="L351">                    .replaceAll(&quot;\\%2F&quot;, &quot;/&quot;)</span>
+<span class="nc" id="L352">                    .replaceAll(&quot;\\%7B&quot;, &quot;{&quot;) // keep { part of complex placeholders</span>
+<span class="nc" id="L353">                    .replaceAll(&quot;\\%7D&quot;, &quot;}&quot;) // } part</span>
+<span class="nc" id="L354">                    .replaceAll(&quot;\\%5B&quot;, &quot;[&quot;) // [ part</span>
+<span class="nc" id="L355">                    .replaceAll(&quot;\\%5D&quot;, &quot;]&quot;) // ] part</span>
+<span class="nc" id="L356">                    .replaceAll(&quot;\\%3A&quot;, &quot;:&quot;) // : part</span>
+<span class="nc" id="L357">                    .replaceAll(&quot;\\%2B&quot;, &quot;+&quot;) // + part</span>
+<span class="nc" id="L358">                    .replaceAll(&quot;\\%5C\\%5Cd&quot;, &quot;\\\\d&quot;); // \d part</span>
+<span class="nc" id="L359">        } catch (UnsupportedEncodingException e) {</span>
+            // continue
+<span class="nc" id="L361">            LOGGER.error(e.getMessage(), e);</span>
+<span class="nc" id="L362">        }</span>
+<span class="nc" id="L363">        return input;</span>
+    }
+
+    @Override
+    public CodegenOperation fromOperation(String path,
+                                          String httpMethod,
+                                          Operation operation,
+                                          List&lt;Server&gt; servers) {
+<span class="nc" id="L371">        CodegenOperation op = super.fromOperation(path, httpMethod, operation, servers);</span>
+<span class="nc" id="L372">        op.path = encodePath(path);</span>
+<span class="nc" id="L373">        return op;</span>
+    }
+
+    /**
+     * Set PSR-7 implementation package.
+     * Ref: https://www.slimframework.com/docs/v4/concepts/value-objects.html
+     *
+     * @param psr7Implementation PSR-7 implementation package
+     */
+    public void setPsr7Implementation(String psr7Implementation) {
+<span class="nc bnc" id="L383" title="All 2 branches missed.">        switch (psr7Implementation) {</span>
+            case &quot;slim-psr7&quot;:
+            case &quot;nyholm-psr7&quot;:
+            case &quot;guzzle-psr7&quot;:
+            case &quot;zend-diactoros&quot;:
+<span class="nc" id="L388">                this.psr7Implementation = psr7Implementation;</span>
+<span class="nc" id="L389">                break;</span>
+            default:
+<span class="nc" id="L391">                this.psr7Implementation = &quot;slim-psr7&quot;;</span>
+<span class="nc" id="L392">                LOGGER.warn(&quot;\&quot;{}\&quot; is invalid \&quot;psr7Implementation\&quot; argument. Default \&quot;slim-psr7\&quot; used instead.&quot;,</span>
+                        psr7Implementation);
+        }
+<span class="nc" id="L395">    }</span>
+
+    /**
+     * Returns PSR-7 implementation package.
+     *
+     * @return PSR-7 implementation package
+     */
+    public String getPsr7Implementation() {
+<span class="nc" id="L403">        return this.psr7Implementation;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

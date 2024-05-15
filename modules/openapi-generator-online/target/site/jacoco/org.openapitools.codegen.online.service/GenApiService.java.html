@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GenApiService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator-online</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.online.service</a> &gt; <span class="el_source">GenApiService.java</span></div><h1>GenApiService.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.online.service;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.CliOption;
+import org.openapitools.codegen.CodegenConfig;
+import org.openapitools.codegen.CodegenConfigLoader;
+import org.openapitools.codegen.CodegenType;
+import org.openapitools.codegen.online.api.GenApiDelegate;
+import org.openapitools.codegen.online.model.Generated;
+import org.openapitools.codegen.online.model.GeneratorInput;
+import org.openapitools.codegen.online.model.ResponseCode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+
+@Service
+<span class="fc" id="L51">public class GenApiService implements GenApiDelegate {</span>
+
+<span class="fc" id="L53">    private static List&lt;String&gt; clients = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L54">    private static List&lt;String&gt; servers = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L55">    private static Map&lt;String, Generated&gt; fileMap = new HashMap&lt;&gt;();</span>
+
+    static {
+<span class="fc" id="L58">        List&lt;CodegenConfig&gt; extensions = CodegenConfigLoader.getAll();</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">        for (CodegenConfig config : extensions) {</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">            if (config.getTag().equals(CodegenType.CLIENT)</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">                    || config.getTag().equals(CodegenType.DOCUMENTATION)) {</span>
+<span class="fc" id="L62">                clients.add(config.getName());</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">            } else if (config.getTag().equals(CodegenType.SERVER)) {</span>
+<span class="fc" id="L64">                servers.add(config.getName());</span>
+            }
+<span class="fc" id="L66">        }</span>
+
+<span class="fc" id="L68">        clients.sort(String.CASE_INSENSITIVE_ORDER);</span>
+<span class="fc" id="L69">        servers.sort(String.CASE_INSENSITIVE_ORDER);</span>
+<span class="fc" id="L70">    }</span>
+
+    @Autowired
+    private NativeWebRequest request;
+
+    @Override
+    public Optional&lt;NativeWebRequest&gt; getRequest() {
+<span class="nc" id="L77">        return Optional.ofNullable(request);</span>
+    }
+
+    @Override
+    public ResponseEntity&lt;Resource&gt; downloadFile(String fileId) {
+<span class="fc" id="L82">        Generated g = fileMap.get(fileId);</span>
+<span class="fc" id="L83">        System.out.println(&quot;looking for fileId &quot; + fileId);</span>
+<span class="fc" id="L84">        System.out.println(&quot;got filename &quot; + g.getFilename());</span>
+
+<span class="fc" id="L86">        File file = new File(g.getFilename());</span>
+<span class="fc" id="L87">        Path path = Paths.get(file.getAbsolutePath());</span>
+        ByteArrayResource resource;
+        try {
+<span class="fc" id="L90">            resource = new ByteArrayResource(Files.readAllBytes(path));</span>
+<span class="nc" id="L91">        } catch (FileNotFoundException e) {</span>
+<span class="nc" id="L92">            throw new ResponseStatusException(HttpStatus.NOT_FOUND, &quot;File not found&quot;, e);</span>
+<span class="nc" id="L93">        } catch (IOException e) {</span>
+<span class="nc" id="L94">            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, &quot;I/O error while reading file&quot;, e);</span>
+<span class="fc" id="L95">        }</span>
+        try {
+<span class="fc" id="L97">            FileUtils.deleteDirectory(file.getParentFile());</span>
+<span class="nc" id="L98">        } catch (IOException e) {</span>
+<span class="nc" id="L99">            System.out.println(&quot;failed to delete file &quot; + file.getAbsolutePath());</span>
+<span class="fc" id="L100">        }</span>
+<span class="fc" id="L101">        return ResponseEntity</span>
+<span class="fc" id="L102">                .ok()</span>
+<span class="fc" id="L103">                .contentType(MediaType.valueOf(&quot;application/zip&quot;))</span>
+<span class="fc" id="L104">                .header(&quot;Content-Disposition&quot;,</span>
+<span class="fc" id="L105">                        &quot;attachment; filename=\&quot;&quot; + g.getFriendlyName() + &quot;-generated.zip\&quot;&quot;)</span>
+<span class="fc" id="L106">                .header(&quot;Accept-Range&quot;, &quot;bytes&quot;)</span>
+                //.header(&quot;Content-Length&quot;, bytes.length)
+<span class="fc" id="L108">                .body(resource);</span>
+    }
+
+    @Override
+    public ResponseEntity&lt;ResponseCode&gt; generateClient(String language, GeneratorInput generatorInput) {
+<span class="fc" id="L113">        String filename = Generator.generateClient(language, generatorInput);</span>
+<span class="fc" id="L114">        return getResponse(filename, language + &quot;-client&quot;);</span>
+    }
+
+    @Override
+    public ResponseEntity&lt;Map&lt;String, CliOption&gt;&gt; getClientOptions(String language) {
+<span class="fc" id="L119">        Map&lt;String, CliOption&gt; opts = Generator.getOptions(language);</span>
+
+<span class="pc bpc" id="L121" title="1 of 2 branches missed.">        if (opts != null) {</span>
+<span class="fc" id="L122">            return ResponseEntity.ok().body(opts);</span>
+        } else {
+<span class="nc" id="L124">            return ResponseEntity.notFound().build();</span>
+        }
+    }
+
+    @Override
+    public ResponseEntity&lt;Map&lt;String, CliOption&gt;&gt; getServerOptions(String framework) {
+<span class="fc" id="L130">        Map&lt;String, CliOption&gt; opts = Generator.getOptions(framework);</span>
+
+<span class="pc bpc" id="L132" title="1 of 2 branches missed.">        if (opts != null) {</span>
+<span class="fc" id="L133">            return ResponseEntity.ok().body(opts);</span>
+        } else {
+<span class="nc" id="L135">            return ResponseEntity.notFound().build();</span>
+        }
+    }
+
+    @Override
+    public ResponseEntity&lt;List&lt;String&gt;&gt; clientOptions() {
+<span class="fc" id="L141">        return ResponseEntity.ok().body(clients);</span>
+    }
+
+    @Override
+    public ResponseEntity&lt;List&lt;String&gt;&gt; serverOptions() {
+<span class="fc" id="L146">        return ResponseEntity.ok().body(servers);</span>
+    }
+
+    @Override
+    public ResponseEntity&lt;ResponseCode&gt; generateServerForLanguage(String framework, GeneratorInput generatorInput) {
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">        if (framework == null) {</span>
+<span class="nc" id="L152">            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, &quot;Framework is required&quot;);</span>
+        }
+<span class="fc" id="L154">        String filename = Generator.generateServer(framework, generatorInput);</span>
+<span class="fc" id="L155">        System.out.println(&quot;generated name: &quot; + filename);</span>
+
+<span class="fc" id="L157">        return getResponse(filename, framework + &quot;-server&quot;);</span>
+    }
+
+    private ResponseEntity&lt;ResponseCode&gt; getResponse(String filename, String friendlyName) {
+<span class="fc" id="L161">        String host = System.getenv(&quot;GENERATOR_HOST&quot;);</span>
+
+        UriComponentsBuilder uriBuilder;
+<span class="pc bpc" id="L164" title="1 of 2 branches missed.">        if (!StringUtils.isBlank(host)) {</span>
+<span class="nc" id="L165">            uriBuilder = UriComponentsBuilder.fromUriString(host);</span>
+        } else {
+<span class="fc" id="L167">            uriBuilder = ServletUriComponentsBuilder.fromCurrentContextPath();</span>
+        }
+
+<span class="pc bpc" id="L170" title="1 of 2 branches missed.">        if (filename != null) {</span>
+<span class="fc" id="L171">            String code = UUID.randomUUID().toString();</span>
+<span class="fc" id="L172">            Generated g = new Generated();</span>
+<span class="fc" id="L173">            g.setFilename(filename);</span>
+<span class="fc" id="L174">            g.setFriendlyName(friendlyName);</span>
+<span class="fc" id="L175">            fileMap.put(code, g);</span>
+<span class="fc" id="L176">            System.out.println(code + &quot;, &quot; + filename);</span>
+<span class="fc" id="L177">            String link = uriBuilder.path(&quot;/api/gen/download/&quot;).path(code).toUriString();</span>
+<span class="fc" id="L178">            return ResponseEntity.ok().body(new ResponseCode(code, link));</span>
+        } else {
+<span class="nc" id="L180">            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
+        }
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

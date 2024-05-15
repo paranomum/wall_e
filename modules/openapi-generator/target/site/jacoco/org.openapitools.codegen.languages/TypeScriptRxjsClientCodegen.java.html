@@ -1,0 +1,431 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TypeScriptRxjsClientCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">TypeScriptRxjsClientCodegen.java</span></div><h1>TypeScriptRxjsClientCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * See: https://opensource.stackexchange.com/questions/7300/copyright-notice-in-the-file-header-apache-v2-license/7301#7301
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.parser.util.SchemaTypeUtil;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.meta.features.DocumentationFeature;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.utils.ModelUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.*;
+
+public class TypeScriptRxjsClientCodegen extends AbstractTypeScriptClientCodegen {
+<span class="nc" id="L36">    private final Logger LOGGER = LoggerFactory.getLogger(AbstractTypeScriptClientCodegen.class);</span>
+
+    public static final String NPM_REPOSITORY = &quot;npmRepository&quot;;
+    public static final String WITH_PROGRESS_SUBSCRIBER = &quot;withProgressSubscriber&quot;;
+
+<span class="nc" id="L41">    protected String npmRepository = null;</span>
+<span class="nc" id="L42">    protected Set&lt;String&gt; reservedParamNames = new HashSet&lt;&gt;();</span>
+
+    public TypeScriptRxjsClientCodegen() {
+<span class="nc" id="L45">        super();</span>
+
+<span class="nc" id="L47">        modifyFeatureSet(features -&gt; features.includeDocumentationFeatures(DocumentationFeature.Readme));</span>
+
+<span class="nc" id="L49">        outputFolder = &quot;generated-code/typescript-rxjs&quot;;</span>
+<span class="nc" id="L50">        embeddedTemplateDir = templateDir = &quot;typescript-rxjs&quot;;</span>
+
+<span class="nc" id="L52">        this.apiPackage = &quot;apis&quot;;</span>
+<span class="nc" id="L53">        this.apiTemplateFiles.put(&quot;apis.mustache&quot;, &quot;.ts&quot;);</span>
+<span class="nc" id="L54">        this.modelPackage = &quot;models&quot;;</span>
+<span class="nc" id="L55">        this.modelTemplateFiles.put(&quot;models.mustache&quot;, &quot;.ts&quot;);</span>
+<span class="nc" id="L56">        this.addExtraReservedWords();</span>
+
+<span class="nc" id="L58">        languageSpecificPrimitives.add(&quot;Blob&quot;);</span>
+<span class="nc" id="L59">        typeMapping.put(&quot;file&quot;, &quot;Blob&quot;);</span>
+
+<span class="nc" id="L61">        this.cliOptions.add(new CliOption(NPM_REPOSITORY, &quot;Use this property to set an url your private npmRepo in the package.json&quot;));</span>
+<span class="nc" id="L62">        this.cliOptions.add(new CliOption(WITH_PROGRESS_SUBSCRIBER, &quot;Setting this property to true will generate API controller methods with support for subscribing to request progress.&quot;, SchemaTypeUtil.BOOLEAN_TYPE).defaultValue(Boolean.FALSE.toString()));</span>
+
+        // these are used in the api template for more efficient destructuring
+<span class="nc" id="L65">        this.reservedParamNames.add(&quot;headers&quot;);</span>
+<span class="nc" id="L66">        this.reservedParamNames.add(&quot;query&quot;);</span>
+<span class="nc" id="L67">        this.reservedParamNames.add(&quot;formData&quot;);</span>
+<span class="nc" id="L68">    }</span>
+
+    @Override
+    public String getName() {
+<span class="nc" id="L72">        return &quot;typescript-rxjs&quot;;</span>
+    }
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L77">        return &quot;Generates a TypeScript client library using Rxjs API.&quot;;</span>
+    }
+
+    public String getNpmRepository() {
+<span class="nc" id="L81">        return npmRepository;</span>
+    }
+
+    public void setNpmRepository(String npmRepository) {
+<span class="nc" id="L85">        this.npmRepository = npmRepository;</span>
+<span class="nc" id="L86">    }</span>
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L90">        super.processOpts();</span>
+<span class="nc" id="L91">        supportingFiles.add(new SupportingFile(&quot;index.mustache&quot;, &quot;&quot;, &quot;index.ts&quot;));</span>
+<span class="nc" id="L92">        supportingFiles.add(new SupportingFile(&quot;runtime.mustache&quot;, &quot;&quot;, &quot;runtime.ts&quot;));</span>
+<span class="nc" id="L93">        supportingFiles.add(new SupportingFile(&quot;servers.mustache&quot;, &quot;&quot;, &quot;servers.ts&quot;));</span>
+<span class="nc" id="L94">        supportingFiles.add(new SupportingFile(&quot;apis.index.mustache&quot;, apiPackage().replace('.', File.separatorChar), &quot;index.ts&quot;));</span>
+<span class="nc" id="L95">        supportingFiles.add(new SupportingFile(&quot;models.index.mustache&quot;, modelPackage().replace('.', File.separatorChar), &quot;index.ts&quot;));</span>
+<span class="nc" id="L96">        supportingFiles.add(new SupportingFile(&quot;tsconfig.mustache&quot;, &quot;&quot;, &quot;tsconfig.json&quot;));</span>
+<span class="nc" id="L97">        supportingFiles.add(new SupportingFile(&quot;gitignore&quot;, &quot;&quot;, &quot;.gitignore&quot;));</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">        if (additionalProperties.containsKey(NPM_NAME)) {</span>
+<span class="nc" id="L99">            addNpmPackageGeneration();</span>
+        }
+<span class="nc" id="L101">    }</span>
+
+    @Override
+    public boolean isDataTypeFile(final String dataType) {
+<span class="nc" id="L105">        return &quot;Blob&quot;.equals(dataType);</span>
+    }
+
+    @Override
+    public String getTypeDeclaration(Schema p) {
+<span class="nc bnc" id="L110" title="All 2 branches missed.">        if (ModelUtils.isFileSchema(p)) {</span>
+<span class="nc" id="L111">            return &quot;Blob&quot;;</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">        } else if (ModelUtils.isBinarySchema(p)) {</span>
+<span class="nc" id="L113">            return &quot;Blob&quot;;</span>
+        }
+<span class="nc" id="L115">        return super.getTypeDeclaration(p);</span>
+    }
+
+    @Override
+    protected void addAdditionPropertiesToCodeGenModel(CodegenModel codegenModel, Schema schema) {
+<span class="nc" id="L120">        codegenModel.additionalPropertiesType = getTypeDeclaration(ModelUtils.getAdditionalProperties(schema));</span>
+<span class="nc" id="L121">        addImport(codegenModel, codegenModel.additionalPropertiesType);</span>
+<span class="nc" id="L122">    }</span>
+
+    @Override
+    public ModelsMap postProcessModels(ModelsMap objs) {
+        // process enum in models
+<span class="nc" id="L127">        List&lt;ModelMap&gt; models = postProcessModelsEnum(objs).getModels();</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">        for (ModelMap mo : models) {</span>
+<span class="nc" id="L129">            CodegenModel cm = mo.getModel();</span>
+<span class="nc" id="L130">            cm.imports = new TreeSet&lt;&gt;(cm.imports);</span>
+            // name enum with model name, e.g. StatusEnum =&gt; PetStatusEnum
+<span class="nc bnc" id="L132" title="All 2 branches missed.">            for (CodegenProperty var : cm.vars) {</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">                if (Boolean.TRUE.equals(var.isEnum)) {</span>
+                    // behaviour for enum names is specific for typescript to not use namespaces
+<span class="nc" id="L135">                    var.datatypeWithEnum = var.datatypeWithEnum.replace(var.enumName, cm.classname + var.enumName);</span>
+                }
+<span class="nc" id="L137">            }</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">            if (cm.parent != null) {</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">                for (CodegenProperty var : cm.allVars) {</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">                    if (Boolean.TRUE.equals(var.isEnum)) {</span>
+<span class="nc" id="L141">                        var.datatypeWithEnum = var.datatypeWithEnum</span>
+<span class="nc" id="L142">                                .replace(var.enumName, cm.classname + var.enumName);</span>
+                    }
+<span class="nc" id="L144">                }</span>
+            }
+<span class="nc" id="L146">        }</span>
+
+<span class="nc" id="L148">        return objs;</span>
+    }
+
+    @Override
+    public Map&lt;String, ModelsMap&gt; postProcessAllModels(Map&lt;String, ModelsMap&gt; objs) {
+<span class="nc" id="L153">        Map&lt;String, ModelsMap&gt; result = super.postProcessAllModels(objs);</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">        for (ModelsMap entry : result.values()) {</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">            for (ModelMap model : entry.getModels()) {</span>
+<span class="nc" id="L156">                CodegenModel codegenModel = model.getModel();</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">                model.put(&quot;hasImports&quot;, codegenModel.imports.size() &gt; 0);</span>
+<span class="nc" id="L158">            }</span>
+<span class="nc" id="L159">        }</span>
+<span class="nc" id="L160">        return result;</span>
+    }
+
+    @Override
+    public void postProcessParameter(CodegenParameter parameter) {
+<span class="nc" id="L165">        super.postProcessParameter(parameter);</span>
+<span class="nc" id="L166">        parameter.dataType = applyLocalTypeMapping(parameter.dataType);</span>
+<span class="nc" id="L167">    }</span>
+
+    @Override
+    public String getSchemaType(Schema p) {
+<span class="nc" id="L171">        String openAPIType = super.getSchemaType(p);</span>
+<span class="nc bnc" id="L172" title="All 2 branches missed.">        if (isLanguagePrimitive(openAPIType)) {</span>
+<span class="nc" id="L173">            return openAPIType;</span>
+        }
+<span class="nc" id="L175">        applyLocalTypeMapping(openAPIType);</span>
+<span class="nc" id="L176">        return openAPIType;</span>
+    }
+
+    private String applyLocalTypeMapping(String type) {
+<span class="nc bnc" id="L180" title="All 2 branches missed.">        if (typeMapping.containsKey(type)) {</span>
+<span class="nc" id="L181">            type = typeMapping.get(type);</span>
+        }
+<span class="nc" id="L183">        return type;</span>
+    }
+
+    private boolean isLanguagePrimitive(String type) {
+<span class="nc" id="L187">        return languageSpecificPrimitives.contains(type);</span>
+    }
+
+    private void addNpmPackageGeneration() {
+<span class="nc bnc" id="L191" title="All 2 branches missed.">        if (additionalProperties.containsKey(NPM_REPOSITORY)) {</span>
+<span class="nc" id="L192">            this.setNpmRepository(additionalProperties.get(NPM_REPOSITORY).toString());</span>
+        }
+
+        // Files for building our lib
+<span class="nc" id="L196">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;));</span>
+<span class="nc" id="L197">        supportingFiles.add(new SupportingFile(&quot;package.mustache&quot;, &quot;&quot;, &quot;package.json&quot;));</span>
+<span class="nc" id="L198">    }</span>
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap operations, List&lt;ModelMap&gt; allModels) {
+        // Convert List of CodegenOperation to List of ExtendedCodegenOperation
+<span class="nc" id="L203">        List&lt;CodegenOperation&gt; os = operations.getOperations().getOperation();</span>
+<span class="nc" id="L204">        List&lt;ExtendedCodegenOperation&gt; newOs = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L205" title="All 2 branches missed.">        for (CodegenOperation o : os) {</span>
+<span class="nc" id="L206">            newOs.add(new ExtendedCodegenOperation(o));</span>
+<span class="nc" id="L207">        }</span>
+<span class="nc" id="L208">        operations.getOperations().setOperation(newOs);</span>
+
+<span class="nc" id="L210">        this.addOperationModelImportInformation(operations);</span>
+<span class="nc" id="L211">        this.updateOperationParameterEnumInformation(operations);</span>
+<span class="nc" id="L212">        this.addConditionalImportInformation(operations);</span>
+
+<span class="nc" id="L214">        return operations;</span>
+    }
+
+    private void addOperationModelImportInformation(OperationsMap operations) {
+        // This method will add extra information to the operations.imports array.
+        // The api template uses this information to import all the required
+        // models for a given operation.
+<span class="nc" id="L221">        List&lt;Map&lt;String, String&gt;&gt; imports = operations.getImports();</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">        for (Map&lt;String, String&gt; im : imports) {</span>
+<span class="nc" id="L223">            im.put(&quot;className&quot;, im.get(&quot;import&quot;).replace(&quot;models.&quot;, &quot;&quot;));</span>
+<span class="nc" id="L224">        }</span>
+<span class="nc" id="L225">    }</span>
+
+    private void updateOperationParameterEnumInformation(OperationsMap operations) {
+        // This method will add extra information as to whether or not we have enums and
+        // update their names with the operation.id prefixed.
+<span class="nc" id="L230">        boolean hasEnums = false;</span>
+<span class="nc bnc" id="L231" title="All 2 branches missed.">        for (CodegenOperation _op : operations.getOperations().getOperation()) {</span>
+<span class="nc" id="L232">            ExtendedCodegenOperation op = (ExtendedCodegenOperation) _op;</span>
+<span class="nc bnc" id="L233" title="All 2 branches missed.">            for (CodegenParameter param : op.allParams) {</span>
+<span class="nc bnc" id="L234" title="All 2 branches missed.">                if (Boolean.TRUE.equals(param.isEnum)) {</span>
+<span class="nc" id="L235">                    hasEnums = true;</span>
+<span class="nc" id="L236">                    param.datatypeWithEnum = param.datatypeWithEnum</span>
+<span class="nc" id="L237">                            .replace(param.enumName, op.operationIdCamelCase + param.enumName);</span>
+                }
+<span class="nc" id="L239">            }</span>
+<span class="nc" id="L240">        }</span>
+
+<span class="nc" id="L242">        operations.put(&quot;hasEnums&quot;, hasEnums);</span>
+<span class="nc" id="L243">    }</span>
+
+    private void setParamNameAlternative(CodegenParameter param, String paramName, String paramNameAlternative) {
+
+<span class="nc bnc" id="L247" title="All 2 branches missed.">        if (param.paramName.equals(paramName)) {</span>
+<span class="nc" id="L248">            param.vendorExtensions.put(&quot;x-param-name-alternative&quot;, paramNameAlternative);</span>
+        }
+<span class="nc" id="L250">    }</span>
+
+    private void addConditionalImportInformation(OperationsMap operations) {
+        // This method will determine if there are required parameters and if there are list containers
+
+<span class="nc" id="L255">        boolean hasRequiredParams = false;</span>
+<span class="nc" id="L256">        boolean hasListContainers = false;</span>
+<span class="nc" id="L257">        boolean hasHttpHeaders = false;</span>
+<span class="nc" id="L258">        boolean hasQueryParams = false;</span>
+<span class="nc" id="L259">        boolean hasPathParams = false;</span>
+
+<span class="nc bnc" id="L261" title="All 2 branches missed.">        for (CodegenOperation _op : operations.getOperations().getOperation()) {</span>
+<span class="nc" id="L262">            ExtendedCodegenOperation op = (ExtendedCodegenOperation) _op;</span>
+<span class="nc bnc" id="L263" title="All 2 branches missed.">            if (op.getHasRequiredParams()) {</span>
+<span class="nc" id="L264">                hasRequiredParams = true;</span>
+            }
+
+<span class="nc bnc" id="L267" title="All 2 branches missed.">            for (CodegenParameter p : op.allParams) {</span>
+<span class="nc" id="L268">                String paramNameAlternative = null;</span>
+
+<span class="nc bnc" id="L270" title="All 2 branches missed.">                if (this.reservedParamNames.contains(p.paramName)) {</span>
+<span class="nc" id="L271">                    paramNameAlternative = p.paramName + &quot;Alias&quot;;</span>
+<span class="nc" id="L272">                    LOGGER.info(&quot;param: {} isReserved ––&gt; {}&quot;, p.paramName, paramNameAlternative);</span>
+                }
+<span class="nc" id="L274">                setParamNameAlternative(p, p.paramName, paramNameAlternative);</span>
+
+<span class="nc bnc" id="L276" title="All 2 branches missed.">                for (CodegenParameter param : op.headerParams) {</span>
+<span class="nc bnc" id="L277" title="All 2 branches missed.">                    if (param.isArray) {</span>
+<span class="nc" id="L278">                        hasListContainers = true;</span>
+                    }
+<span class="nc" id="L280">                    setParamNameAlternative(param, p.paramName, paramNameAlternative);</span>
+<span class="nc" id="L281">                }</span>
+
+<span class="nc bnc" id="L283" title="All 2 branches missed.">                for (CodegenParameter param : op.queryParams) {</span>
+<span class="nc bnc" id="L284" title="All 4 branches missed.">                    if (param.isArray &amp;&amp; !param.isCollectionFormatMulti) {</span>
+<span class="nc" id="L285">                        hasListContainers = true;</span>
+                    }
+<span class="nc bnc" id="L287" title="All 2 branches missed.">                    if (param.required) {</span>
+<span class="nc" id="L288">                        op.hasRequiredQueryParams = true;</span>
+                    } else {
+<span class="nc" id="L290">                        op.hasOptionalQueryParams = true;</span>
+                    }
+<span class="nc" id="L292">                    setParamNameAlternative(param, p.paramName, paramNameAlternative);</span>
+<span class="nc" id="L293">                }</span>
+
+<span class="nc bnc" id="L295" title="All 2 branches missed.">                for (CodegenParameter param : op.formParams) {</span>
+<span class="nc bnc" id="L296" title="All 4 branches missed.">                    if (param.isArray &amp;&amp; !param.isCollectionFormatMulti) {</span>
+<span class="nc" id="L297">                        hasListContainers = true;</span>
+                    }
+<span class="nc" id="L299">                    setParamNameAlternative(param, p.paramName, paramNameAlternative);</span>
+<span class="nc" id="L300">                }</span>
+
+<span class="nc bnc" id="L302" title="All 2 branches missed.">                for (CodegenParameter param : op.pathParams) {</span>
+<span class="nc" id="L303">                    setParamNameAlternative(param, p.paramName, paramNameAlternative);</span>
+<span class="nc" id="L304">                }</span>
+<span class="nc" id="L305">            }</span>
+
+<span class="nc bnc" id="L307" title="All 2 branches missed.">            if (op.hasHttpHeaders) {</span>
+<span class="nc" id="L308">                hasHttpHeaders = true;</span>
+            }
+<span class="nc bnc" id="L310" title="All 2 branches missed.">            if (op.getHasQueryParams()) {</span>
+<span class="nc" id="L311">                hasQueryParams = true;</span>
+            }
+<span class="nc bnc" id="L313" title="All 2 branches missed.">            if (op.getHasPathParams()) {</span>
+<span class="nc" id="L314">                hasPathParams = true;</span>
+            }
+<span class="nc" id="L316">        }</span>
+
+<span class="nc" id="L318">        operations.put(&quot;hasRequiredParams&quot;, hasRequiredParams);</span>
+<span class="nc" id="L319">        operations.put(&quot;hasListContainers&quot;, hasListContainers);</span>
+<span class="nc" id="L320">        operations.put(&quot;hasHttpHeaders&quot;, hasHttpHeaders);</span>
+<span class="nc" id="L321">        operations.put(&quot;hasQueryParams&quot;, hasQueryParams);</span>
+<span class="nc" id="L322">        operations.put(&quot;hasPathParams&quot;, hasPathParams);</span>
+<span class="nc" id="L323">    }</span>
+
+    private void addExtraReservedWords() {
+<span class="nc" id="L326">        this.reservedWords.add(&quot;BASE_PATH&quot;);</span>
+<span class="nc" id="L327">        this.reservedWords.add(&quot;BaseAPI&quot;);</span>
+<span class="nc" id="L328">        this.reservedWords.add(&quot;COLLECTION_FORMATS&quot;);</span>
+<span class="nc" id="L329">        this.reservedWords.add(&quot;ConfigurationParameters&quot;);</span>
+<span class="nc" id="L330">        this.reservedWords.add(&quot;Configuration&quot;);</span>
+<span class="nc" id="L331">        this.reservedWords.add(&quot;HttpMethod&quot;);</span>
+<span class="nc" id="L332">        this.reservedWords.add(&quot;HttpHeaders&quot;);</span>
+<span class="nc" id="L333">        this.reservedWords.add(&quot;HttpQuery&quot;);</span>
+<span class="nc" id="L334">        this.reservedWords.add(&quot;HttpBody&quot;);</span>
+<span class="nc" id="L335">        this.reservedWords.add(&quot;RequestArgs&quot;);</span>
+<span class="nc" id="L336">        this.reservedWords.add(&quot;RequestOpts&quot;);</span>
+<span class="nc" id="L337">        this.reservedWords.add(&quot;ResponseArgs&quot;);</span>
+<span class="nc" id="L338">        this.reservedWords.add(&quot;Middleware&quot;);</span>
+<span class="nc" id="L339">        this.reservedWords.add(&quot;AjaxRequest&quot;);</span>
+<span class="nc" id="L340">        this.reservedWords.add(&quot;AjaxResponse&quot;);</span>
+<span class="nc" id="L341">        this.reservedWords.add(&quot;servers&quot;);</span>
+<span class="nc" id="L342">    }</span>
+
+    class ExtendedCodegenOperation extends CodegenOperation {
+        public boolean hasHttpHeaders;
+        public boolean hasRequiredQueryParams;
+        public boolean hasOptionalQueryParams;
+
+<span class="nc" id="L349">        public ExtendedCodegenOperation(CodegenOperation o) {</span>
+<span class="nc" id="L350">            super();</span>
+
+            // Copy all fields of CodegenOperation
+<span class="nc" id="L353">            this.responseHeaders.addAll(o.responseHeaders);</span>
+<span class="nc" id="L354">            this.hasAuthMethods = o.hasAuthMethods;</span>
+<span class="nc" id="L355">            this.hasConsumes = o.hasConsumes;</span>
+<span class="nc" id="L356">            this.hasProduces = o.hasProduces;</span>
+<span class="nc" id="L357">            this.hasParams = o.hasParams;</span>
+<span class="nc" id="L358">            this.hasOptionalParams = o.hasOptionalParams;</span>
+<span class="nc" id="L359">            this.hasRequiredParams = o.hasRequiredParams;</span>
+<span class="nc" id="L360">            this.returnTypeIsPrimitive = o.returnTypeIsPrimitive;</span>
+<span class="nc" id="L361">            this.returnSimpleType = o.returnSimpleType;</span>
+<span class="nc" id="L362">            this.subresourceOperation = o.subresourceOperation;</span>
+<span class="nc" id="L363">            this.isMap = o.isMap;</span>
+<span class="nc" id="L364">            this.isArray = o.isArray;</span>
+<span class="nc" id="L365">            this.isMultipart = o.isMultipart;</span>
+<span class="nc" id="L366">            this.isResponseBinary = o.isResponseBinary;</span>
+<span class="nc" id="L367">            this.isResponseFile = o.isResponseFile;</span>
+<span class="nc" id="L368">            this.hasReference = o.hasReference;</span>
+<span class="nc" id="L369">            this.isRestfulIndex = o.isRestfulIndex;</span>
+<span class="nc" id="L370">            this.isRestfulShow = o.isRestfulShow;</span>
+<span class="nc" id="L371">            this.isRestfulCreate = o.isRestfulCreate;</span>
+<span class="nc" id="L372">            this.isRestfulUpdate = o.isRestfulUpdate;</span>
+<span class="nc" id="L373">            this.isRestfulDestroy = o.isRestfulDestroy;</span>
+<span class="nc" id="L374">            this.isRestful = o.isRestful;</span>
+<span class="nc" id="L375">            this.isDeprecated = o.isDeprecated;</span>
+<span class="nc" id="L376">            this.isCallbackRequest = o.isCallbackRequest;</span>
+<span class="nc" id="L377">            this.path = o.path;</span>
+<span class="nc" id="L378">            this.operationId = o.operationId;</span>
+<span class="nc" id="L379">            this.returnType = o.returnType;</span>
+<span class="nc" id="L380">            this.httpMethod = o.httpMethod;</span>
+<span class="nc" id="L381">            this.returnBaseType = o.returnBaseType;</span>
+<span class="nc" id="L382">            this.returnContainer = o.returnContainer;</span>
+<span class="nc" id="L383">            this.summary = o.summary;</span>
+<span class="nc" id="L384">            this.unescapedNotes = o.unescapedNotes;</span>
+<span class="nc" id="L385">            this.notes = o.notes;</span>
+<span class="nc" id="L386">            this.baseName = o.baseName;</span>
+<span class="nc" id="L387">            this.defaultResponse = o.defaultResponse;</span>
+<span class="nc" id="L388">            this.discriminator = o.discriminator;</span>
+<span class="nc" id="L389">            this.consumes = o.consumes;</span>
+<span class="nc" id="L390">            this.produces = o.produces;</span>
+<span class="nc" id="L391">            this.prioritizedContentTypes = o.prioritizedContentTypes;</span>
+<span class="nc" id="L392">            this.servers = o.servers;</span>
+<span class="nc" id="L393">            this.bodyParam = o.bodyParam;</span>
+<span class="nc" id="L394">            this.allParams = o.allParams;</span>
+<span class="nc" id="L395">            this.bodyParams = o.bodyParams;</span>
+<span class="nc" id="L396">            this.pathParams = o.pathParams;</span>
+<span class="nc" id="L397">            this.queryParams = o.queryParams;</span>
+<span class="nc" id="L398">            this.headerParams = o.headerParams;</span>
+<span class="nc" id="L399">            this.formParams = o.formParams;</span>
+<span class="nc" id="L400">            this.cookieParams = o.cookieParams;</span>
+<span class="nc" id="L401">            this.requiredParams = o.requiredParams;</span>
+<span class="nc" id="L402">            this.optionalParams = o.optionalParams;</span>
+<span class="nc" id="L403">            this.authMethods = o.authMethods;</span>
+<span class="nc" id="L404">            this.tags = o.tags;</span>
+<span class="nc" id="L405">            this.responses = o.responses;</span>
+<span class="nc" id="L406">            this.callbacks = o.callbacks;</span>
+<span class="nc" id="L407">            this.imports = o.imports;</span>
+<span class="nc" id="L408">            this.examples = o.examples;</span>
+<span class="nc" id="L409">            this.requestBodyExamples = o.requestBodyExamples;</span>
+<span class="nc" id="L410">            this.externalDocs = o.externalDocs;</span>
+<span class="nc" id="L411">            this.vendorExtensions = o.vendorExtensions;</span>
+<span class="nc" id="L412">            this.nickname = o.nickname;</span>
+<span class="nc" id="L413">            this.operationIdOriginal = o.operationIdOriginal;</span>
+<span class="nc" id="L414">            this.operationIdLowerCase = o.operationIdLowerCase;</span>
+<span class="nc" id="L415">            this.operationIdCamelCase = o.operationIdCamelCase;</span>
+<span class="nc" id="L416">            this.operationIdSnakeCase = o.operationIdSnakeCase;</span>
+
+            // new fields
+<span class="nc bnc" id="L419" title="All 6 branches missed.">            this.hasHttpHeaders = o.getHasHeaderParams() || o.getHasBodyParam() || o.hasAuthMethods;</span>
+<span class="nc" id="L420">            this.hasRequiredQueryParams = false; // will be updated within addConditionalImportInformation</span>
+<span class="nc" id="L421">            this.hasOptionalQueryParams = false; // will be updated within addConditionalImportInformation</span>
+<span class="nc" id="L422">        }</span>
+    }
+
+    @Override
+    protected void addImport(Schema composed, Schema childSchema, CodegenModel model, String modelName) {
+        // import everything (including child schema of a composed schema)
+<span class="nc" id="L428">        addImport(model, modelName);</span>
+<span class="nc" id="L429">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

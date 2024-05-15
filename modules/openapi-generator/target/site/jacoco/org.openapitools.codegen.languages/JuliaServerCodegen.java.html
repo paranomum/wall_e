@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JuliaServerCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">JuliaServerCodegen.java</span></div><h1>JuliaServerCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.meta.GeneratorMetadata;
+import org.openapitools.codegen.meta.Stability;
+
+import java.io.File;
+
+public class JuliaServerCodegen extends AbstractJuliaCodegen {
+    /**
+     * Configures the type of generator.
+     *
+     * @return the CodegenType for this generator
+     * @see org.openapitools.codegen.CodegenType
+     */
+    public CodegenType getTag() {
+<span class="nc" id="L33">        return CodegenType.SERVER;</span>
+    }
+
+    /**
+     * Configures the name of the generator.
+     * This will be used to refer to the generator when configuration is read from config files.
+     *
+     * @return the name of the generator
+     */
+    public String getName() {
+<span class="nc" id="L43">        return &quot;julia-server&quot;;</span>
+    }
+
+    /**
+     * Configures a help message for the generator.
+     * TODO: add parameters, tips here
+     *
+     * @return the help message for the generator
+     */
+    public String getHelp() {
+<span class="nc" id="L53">        return &quot;Generates a julia server.&quot;;</span>
+    }
+
+    public JuliaServerCodegen() {
+<span class="nc" id="L57">        super();</span>
+
+<span class="nc" id="L59">        generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
+<span class="nc" id="L60">                .stability(Stability.BETA)</span>
+<span class="nc" id="L61">                .build();</span>
+
+<span class="nc" id="L63">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;julia-server&quot;;</span>
+<span class="nc" id="L64">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.jl&quot;);</span>
+<span class="nc" id="L65">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.jl&quot;);</span>
+<span class="nc" id="L66">        embeddedTemplateDir = templateDir = &quot;julia-server&quot;;</span>
+<span class="nc" id="L67">        modelDocTemplateFiles.put(&quot;model_doc.mustache&quot;, &quot;.md&quot;);</span>
+<span class="nc" id="L68">        apiDocTemplateFiles.put(&quot;api_doc.mustache&quot;, &quot;.md&quot;);</span>
+
+<span class="nc" id="L70">        supportingFiles.clear();</span>
+<span class="nc" id="L71">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;README.md&quot;));</span>
+
+<span class="nc" id="L73">        cliOptions.clear();</span>
+<span class="nc" id="L74">        cliOptions.add(new CliOption(CodegenConstants.PACKAGE_NAME, &quot;Julia server package name.&quot;).defaultValue(&quot;APIServer&quot;));</span>
+<span class="nc" id="L75">        cliOptions.add(new CliOption(&quot;exportModels&quot;, &quot;Whether to generate code to export model names.&quot;).defaultValue(&quot;false&quot;));</span>
+<span class="nc" id="L76">    }</span>
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L80">        super.processOpts();</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.PACKAGE_NAME)) {</span>
+<span class="nc" id="L82">            setPackageName((String) additionalProperties.get(CodegenConstants.PACKAGE_NAME));</span>
+        } else {
+<span class="nc" id="L84">            setPackageName(&quot;APIServer&quot;);</span>
+<span class="nc" id="L85">            additionalProperties.put(CodegenConstants.PACKAGE_NAME, packageName);</span>
+        }
+
+<span class="nc bnc" id="L88" title="All 2 branches missed.">        if (additionalProperties.containsKey(&quot;exportModels&quot;)) {</span>
+<span class="nc" id="L89">            setExportModels(Boolean.parseBoolean((String) additionalProperties.get(&quot;exportModels&quot;)));</span>
+        }
+<span class="nc" id="L91">        additionalProperties.put(&quot;exportModels&quot;, exportModels);</span>
+
+<span class="nc" id="L93">        additionalProperties.put(&quot;apiDocPath&quot;, apiDocPath);</span>
+<span class="nc" id="L94">        additionalProperties.put(&quot;modelDocPath&quot;, modelDocPath);</span>
+<span class="nc" id="L95">        supportingFiles.add(new SupportingFile(&quot;server.mustache&quot;, srcPath, packageName + &quot;.jl&quot;));</span>
+<span class="nc" id="L96">        supportingFiles.add(new SupportingFile(&quot;modelincludes.mustache&quot;, srcPath, &quot;modelincludes.jl&quot;));</span>
+<span class="nc" id="L97">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

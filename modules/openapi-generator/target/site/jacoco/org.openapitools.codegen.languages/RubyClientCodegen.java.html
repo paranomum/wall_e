@@ -1,0 +1,859 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RubyClientCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">RubyClientCodegen.java</span></div><h1>RubyClientCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import com.samskivert.mustache.Mustache;
+import com.samskivert.mustache.Template;
+import io.swagger.v3.oas.models.media.Schema;
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.meta.features.*;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.utils.ModelUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.*;
+
+import static org.openapitools.codegen.utils.StringUtils.camelize;
+import static org.openapitools.codegen.utils.StringUtils.underscore;
+
+public class RubyClientCodegen extends AbstractRubyCodegen {
+    public static final String GEM_VERSION = &quot;gemVersion&quot;;
+    public static final String GEM_LICENSE = &quot;gemLicense&quot;;
+    public static final String GEM_REQUIRED_RUBY_VERSION = &quot;gemRequiredRubyVersion&quot;;
+    public static final String GEM_HOMEPAGE = &quot;gemHomepage&quot;;
+    public static final String GEM_SUMMARY = &quot;gemSummary&quot;;
+    public static final String GEM_DESCRIPTION = &quot;gemDescription&quot;;
+    public static final String GEM_AUTHOR = &quot;gemAuthor&quot;;
+    public static final String GEM_AUTHOR_EMAIL = &quot;gemAuthorEmail&quot;;
+    public static final String GEM_METADATA = &quot;gemMetadata&quot;;
+    public static final String FARADAY = &quot;faraday&quot;;
+    public static final String HTTPX = &quot;httpx&quot;;
+    public static final String TYPHOEUS = &quot;typhoeus&quot;;
+    public static final String USE_AUTOLOAD = &quot;useAutoload&quot;;
+<span class="nc" id="L56">    private final Logger LOGGER = LoggerFactory.getLogger(RubyClientCodegen.class);</span>
+    private static final String NUMERIC_ENUM_PREFIX = &quot;N&quot;;
+<span class="nc" id="L58">    protected static int emptyMethodNameCounter = 0;</span>
+    protected String gemName;
+    protected String moduleName;
+<span class="nc" id="L61">    protected String gemVersion = &quot;1.0.0&quot;;</span>
+<span class="nc" id="L62">    protected String specFolder = &quot;spec&quot;;</span>
+<span class="nc" id="L63">    protected String libFolder = &quot;lib&quot;;</span>
+<span class="nc" id="L64">    protected String gemLicense = &quot;unlicense&quot;;</span>
+<span class="nc" id="L65">    protected String gemRequiredRubyVersion = &quot;&gt;= 1.9&quot;;</span>
+<span class="nc" id="L66">    protected String gemHomepage = &quot;https://openapitools.org&quot;;</span>
+<span class="nc" id="L67">    protected String gemSummary = &quot;A Ruby SDK for the REST API&quot;;</span>
+<span class="nc" id="L68">    protected String gemDescription = &quot;This gem maps to a REST API&quot;;</span>
+<span class="nc" id="L69">    protected String gemAuthor = &quot;&quot;;</span>
+<span class="nc" id="L70">    protected String gemMetadata = &quot;{}&quot;;</span>
+<span class="nc" id="L71">    protected String gemAuthorEmail = &quot;&quot;;</span>
+<span class="nc" id="L72">    protected String apiDocPath = &quot;docs/&quot;;</span>
+<span class="nc" id="L73">    protected String modelDocPath = &quot;docs/&quot;;</span>
+<span class="nc" id="L74">    protected boolean useAutoload = false;</span>
+
+<span class="nc" id="L76">    private Map&lt;String, String&gt; schemaKeyToModelNameCache = new HashMap&lt;&gt;();</span>
+
+    public RubyClientCodegen() {
+<span class="nc" id="L79">        super();</span>
+
+<span class="nc" id="L81">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L82">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="nc" id="L83">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON, WireFormatFeature.XML, WireFormatFeature.Custom))</span>
+<span class="nc" id="L84">                .securityFeatures(EnumSet.of(</span>
+                        SecurityFeature.BasicAuth,
+                        SecurityFeature.BearerToken,
+                        SecurityFeature.ApiKey,
+                        SecurityFeature.OAuth2_Implicit
+                ))
+<span class="nc" id="L90">                .excludeGlobalFeatures(</span>
+                        GlobalFeature.XMLStructureDefinitions,
+                        GlobalFeature.Callbacks,
+                        GlobalFeature.LinkObjects,
+                        GlobalFeature.ParameterStyling,
+                        GlobalFeature.ParameterizedServer,
+                        GlobalFeature.MultiServer
+                )
+<span class="nc" id="L98">                .includeSchemaSupportFeatures(</span>
+                        SchemaSupportFeature.Polymorphism
+                )
+<span class="nc" id="L101">                .excludeParameterFeatures(</span>
+                        ParameterFeature.Cookie
+                )
+<span class="nc" id="L104">                .includeClientModificationFeatures(</span>
+                        ClientModificationFeature.BasePath,
+                        ClientModificationFeature.UserAgent
+                )
+        );
+
+<span class="nc" id="L110">        supportsInheritance = true;</span>
+
+        // clear import mapping (from default generator) as ruby does not use it
+        // at the moment
+<span class="nc" id="L114">        importMapping.clear();</span>
+
+<span class="nc" id="L116">        modelPackage = &quot;models&quot;;</span>
+<span class="nc" id="L117">        apiPackage = &quot;api&quot;;</span>
+<span class="nc" id="L118">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;ruby&quot;;</span>
+<span class="nc" id="L119">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.rb&quot;);</span>
+<span class="nc" id="L120">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.rb&quot;);</span>
+<span class="nc" id="L121">        modelDocTemplateFiles.put(&quot;model_doc.mustache&quot;, &quot;.md&quot;);</span>
+<span class="nc" id="L122">        apiDocTemplateFiles.put(&quot;api_doc.mustache&quot;, &quot;.md&quot;);</span>
+<span class="nc" id="L123">        embeddedTemplateDir = templateDir = &quot;ruby-client&quot;;</span>
+
+<span class="nc" id="L125">        modelTestTemplateFiles.put(&quot;model_test.mustache&quot;, &quot;.rb&quot;);</span>
+<span class="nc" id="L126">        apiTestTemplateFiles.put(&quot;api_test.mustache&quot;, &quot;.rb&quot;);</span>
+
+        // default HIDE_GENERATION_TIMESTAMP to true
+<span class="nc" id="L129">        hideGenerationTimestamp = Boolean.TRUE;</span>
+
+        // local variable names used in API methods (endpoints)
+<span class="nc bnc" id="L132" title="All 2 branches missed.">        for (String word : Arrays.asList(</span>
+                &quot;local_var_path&quot;, &quot;query_params&quot;, &quot;header_params&quot;, &quot;_header_accept&quot;, &quot;_header_accept_result&quot;,
+                &quot;_header_content_type&quot;, &quot;form_params&quot;, &quot;post_body&quot;, &quot;auth_names&quot;, &quot;send&quot;)) {
+<span class="nc" id="L135">            reservedWords.add(word.toLowerCase(Locale.ROOT));</span>
+<span class="nc" id="L136">        }</span>
+
+        // primitives in ruby lang
+<span class="nc" id="L139">        languageSpecificPrimitives.add(&quot;int&quot;);</span>
+<span class="nc" id="L140">        languageSpecificPrimitives.add(&quot;array&quot;);</span>
+<span class="nc" id="L141">        languageSpecificPrimitives.add(&quot;map&quot;);</span>
+<span class="nc" id="L142">        languageSpecificPrimitives.add(&quot;string&quot;);</span>
+
+        // remove modelPackage and apiPackage added by default
+<span class="nc bnc" id="L145" title="All 2 branches missed.">        cliOptions.removeIf(opt -&gt; CodegenConstants.MODEL_PACKAGE.equals(opt.getOpt()) ||</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">                CodegenConstants.API_PACKAGE.equals(opt.getOpt()));</span>
+
+<span class="nc" id="L148">        cliOptions.add(new CliOption(CodegenConstants.GEM_NAME, CodegenConstants.GEM_NAME_DESC).</span>
+<span class="nc" id="L149">                defaultValue(&quot;openapi_client&quot;));</span>
+
+<span class="nc" id="L151">        cliOptions.add(new CliOption(CodegenConstants.MODULE_NAME, CodegenConstants.MODULE_NAME_DESC).</span>
+<span class="nc" id="L152">                defaultValue(&quot;OpenAPIClient&quot;));</span>
+
+<span class="nc" id="L154">        cliOptions.add(new CliOption(GEM_VERSION, &quot;gem version.&quot;).defaultValue(&quot;1.0.0&quot;));</span>
+
+<span class="nc" id="L156">        cliOptions.add(new CliOption(GEM_LICENSE, &quot;gem license. &quot;).</span>
+<span class="nc" id="L157">                defaultValue(&quot;unlicense&quot;));</span>
+
+<span class="nc" id="L159">        cliOptions.add(new CliOption(GEM_REQUIRED_RUBY_VERSION, &quot;gem required Ruby version. &quot;).</span>
+<span class="nc" id="L160">                defaultValue(&quot;&gt;= 2.4&quot;));</span>
+
+<span class="nc" id="L162">        cliOptions.add(new CliOption(GEM_HOMEPAGE, &quot;gem homepage. &quot;).</span>
+<span class="nc" id="L163">                defaultValue(&quot;https://openapi-generator.tech&quot;));</span>
+
+<span class="nc" id="L165">        cliOptions.add(new CliOption(GEM_SUMMARY, &quot;gem summary. &quot;).</span>
+<span class="nc" id="L166">                defaultValue(&quot;A ruby wrapper for the REST APIs&quot;));</span>
+
+<span class="nc" id="L168">        cliOptions.add(new CliOption(GEM_DESCRIPTION, &quot;gem description. &quot;).</span>
+<span class="nc" id="L169">                defaultValue(&quot;This gem maps to a REST API&quot;));</span>
+
+<span class="nc" id="L171">        cliOptions.add(new CliOption(GEM_AUTHOR, &quot;gem author (only one is supported).&quot;).defaultValue(&quot;OpenAPI-Generator&quot;));</span>
+
+<span class="nc" id="L173">        cliOptions.add(new CliOption(GEM_AUTHOR_EMAIL, &quot;gem author email (only one is supported).&quot;));</span>
+
+<span class="nc" id="L175">        cliOptions.add(new CliOption(GEM_METADATA, &quot;gem metadata.&quot;).</span>
+<span class="nc" id="L176">                defaultValue(&quot;{}&quot;));</span>
+
+<span class="nc" id="L178">        cliOptions.add(new CliOption(CodegenConstants.HIDE_GENERATION_TIMESTAMP, CodegenConstants.HIDE_GENERATION_TIMESTAMP_DESC).</span>
+<span class="nc" id="L179">                defaultValue(Boolean.TRUE.toString()));</span>
+
+<span class="nc" id="L181">        cliOptions.add(CliOption.newBoolean(USE_AUTOLOAD, &quot;Use autoload instead of require to load modules.&quot;).</span>
+<span class="nc" id="L182">                defaultValue(Boolean.FALSE.toString()));</span>
+
+<span class="nc" id="L184">        supportedLibraries.put(FARADAY, &quot;Faraday &gt;= 1.0.1 (https://github.com/lostisland/faraday)&quot;);</span>
+<span class="nc" id="L185">        supportedLibraries.put(HTTPX, &quot;HTTPX &gt;= 1.0.0 (https://gitlab.com/os85/httpx)&quot;);</span>
+<span class="nc" id="L186">        supportedLibraries.put(TYPHOEUS, &quot;Typhoeus &gt;= 1.0.1 (https://github.com/typhoeus/typhoeus)&quot;);</span>
+
+<span class="nc" id="L188">        CliOption libraryOption = new CliOption(CodegenConstants.LIBRARY, &quot;HTTP library template (sub-template) to use&quot;);</span>
+<span class="nc" id="L189">        libraryOption.setEnum(supportedLibraries);</span>
+        // set TYPHOEUS as the default
+<span class="nc" id="L191">        libraryOption.setDefault(TYPHOEUS);</span>
+<span class="nc" id="L192">        cliOptions.add(libraryOption);</span>
+<span class="nc" id="L193">        setLibrary(TYPHOEUS);</span>
+<span class="nc" id="L194">    }</span>
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L198">        super.processOpts();</span>
+
+<span class="nc bnc" id="L200" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.GEM_NAME)) {</span>
+<span class="nc" id="L201">            setGemName((String) additionalProperties.get(CodegenConstants.GEM_NAME));</span>
+        }
+<span class="nc bnc" id="L203" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.MODULE_NAME)) {</span>
+<span class="nc" id="L204">            setModuleName((String) additionalProperties.get(CodegenConstants.MODULE_NAME));</span>
+        }
+
+<span class="nc bnc" id="L207" title="All 4 branches missed.">        if (gemName == null &amp;&amp; moduleName == null) {</span>
+<span class="nc" id="L208">            setGemName(&quot;openapi_client&quot;);</span>
+<span class="nc" id="L209">            setModuleName(generateModuleName(gemName));</span>
+<span class="nc bnc" id="L210" title="All 2 branches missed.">        } else if (gemName == null) {</span>
+<span class="nc" id="L211">            setGemName(generateGemName(moduleName));</span>
+<span class="nc bnc" id="L212" title="All 2 branches missed.">        } else if (moduleName == null) {</span>
+<span class="nc" id="L213">            setModuleName(generateModuleName(gemName));</span>
+        }
+
+<span class="nc" id="L216">        additionalProperties.put(CodegenConstants.GEM_NAME, gemName);</span>
+<span class="nc" id="L217">        additionalProperties.put(CodegenConstants.MODULE_NAME, moduleName);</span>
+
+<span class="nc bnc" id="L219" title="All 2 branches missed.">        if (additionalProperties.containsKey(GEM_VERSION)) {</span>
+<span class="nc" id="L220">            setGemVersion((String) additionalProperties.get(GEM_VERSION));</span>
+        } else {
+            // not set, pass the default value to template
+<span class="nc" id="L223">            additionalProperties.put(GEM_VERSION, gemVersion);</span>
+        }
+
+<span class="nc bnc" id="L226" title="All 2 branches missed.">        if (additionalProperties.containsKey(GEM_LICENSE)) {</span>
+<span class="nc" id="L227">            setGemLicense((String) additionalProperties.get(GEM_LICENSE));</span>
+        }
+
+<span class="nc bnc" id="L230" title="All 2 branches missed.">        if (additionalProperties.containsKey(GEM_REQUIRED_RUBY_VERSION)) {</span>
+<span class="nc" id="L231">            setGemRequiredRubyVersion((String) additionalProperties.get(GEM_REQUIRED_RUBY_VERSION));</span>
+        }
+
+<span class="nc bnc" id="L234" title="All 2 branches missed.">        if (additionalProperties.containsKey(GEM_HOMEPAGE)) {</span>
+<span class="nc" id="L235">            setGemHomepage((String) additionalProperties.get(GEM_HOMEPAGE));</span>
+        }
+
+<span class="nc bnc" id="L238" title="All 2 branches missed.">        if (additionalProperties.containsKey(GEM_SUMMARY)) {</span>
+<span class="nc" id="L239">            setGemSummary((String) additionalProperties.get(GEM_SUMMARY));</span>
+        }
+
+<span class="nc bnc" id="L242" title="All 2 branches missed.">        if (additionalProperties.containsKey(GEM_DESCRIPTION)) {</span>
+<span class="nc" id="L243">            setGemDescription((String) additionalProperties.get(GEM_DESCRIPTION));</span>
+        }
+
+<span class="nc bnc" id="L246" title="All 2 branches missed.">        if (additionalProperties.containsKey(GEM_AUTHOR)) {</span>
+<span class="nc" id="L247">            setGemAuthor((String) additionalProperties.get(GEM_AUTHOR));</span>
+        }
+
+<span class="nc bnc" id="L250" title="All 2 branches missed.">        if (additionalProperties.containsKey(GEM_AUTHOR_EMAIL)) {</span>
+<span class="nc" id="L251">            setGemAuthorEmail((String) additionalProperties.get(GEM_AUTHOR_EMAIL));</span>
+        }
+
+<span class="nc bnc" id="L254" title="All 2 branches missed.">        if (additionalProperties.containsKey(GEM_METADATA)) {</span>
+<span class="nc" id="L255">            setGemMetadata((String) additionalProperties.get(GEM_METADATA));</span>
+        }
+
+<span class="nc bnc" id="L258" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_AUTOLOAD)) {</span>
+<span class="nc" id="L259">            setUseAutoload(convertPropertyToBooleanAndWriteBack(USE_AUTOLOAD));</span>
+        }
+
+        // make api and model doc path available in mustache template
+<span class="nc" id="L263">        additionalProperties.put(&quot;apiDocPath&quot;, apiDocPath);</span>
+<span class="nc" id="L264">        additionalProperties.put(&quot;modelDocPath&quot;, modelDocPath);</span>
+
+        // use constant model/api package (folder path)
+<span class="nc" id="L267">        setModelPackage(&quot;models&quot;);</span>
+<span class="nc" id="L268">        setApiPackage(&quot;api&quot;);</span>
+
+<span class="nc" id="L270">        supportingFiles.add(new SupportingFile(&quot;gem.mustache&quot;, libFolder, gemName + &quot;.rb&quot;));</span>
+<span class="nc" id="L271">        String gemFolder = libFolder + File.separator + gemName;</span>
+<span class="nc" id="L272">        supportingFiles.add(new SupportingFile(&quot;api_error.mustache&quot;, gemFolder, &quot;api_error.rb&quot;));</span>
+<span class="nc" id="L273">        supportingFiles.add(new SupportingFile(&quot;version.mustache&quot;, gemFolder, &quot;version.rb&quot;));</span>
+<span class="nc" id="L274">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;));</span>
+<span class="nc" id="L275">        supportingFiles.add(new SupportingFile(&quot;git_push.sh.mustache&quot;, &quot;&quot;, &quot;git_push.sh&quot;));</span>
+<span class="nc" id="L276">        supportingFiles.add(new SupportingFile(&quot;gitignore.mustache&quot;, &quot;&quot;, &quot;.gitignore&quot;));</span>
+<span class="nc" id="L277">        supportingFiles.add(new SupportingFile(&quot;Rakefile.mustache&quot;, &quot;&quot;, &quot;Rakefile&quot;));</span>
+<span class="nc" id="L278">        supportingFiles.add(new SupportingFile(&quot;Gemfile.mustache&quot;, &quot;&quot;, &quot;Gemfile&quot;));</span>
+<span class="nc" id="L279">        supportingFiles.add(new SupportingFile(&quot;rubocop.mustache&quot;, &quot;&quot;, &quot;.rubocop.yml&quot;));</span>
+<span class="nc" id="L280">        supportingFiles.add(new SupportingFile(&quot;travis.mustache&quot;, &quot;&quot;, &quot;.travis.yml&quot;));</span>
+<span class="nc" id="L281">        supportingFiles.add(new SupportingFile(&quot;gitlab-ci.mustache&quot;, &quot;&quot;, &quot;.gitlab-ci.yml&quot;));</span>
+<span class="nc" id="L282">        supportingFiles.add(new SupportingFile(&quot;gemspec.mustache&quot;, &quot;&quot;, gemName + &quot;.gemspec&quot;));</span>
+<span class="nc" id="L283">        supportingFiles.add(new SupportingFile(&quot;configuration.mustache&quot;, gemFolder, &quot;configuration.rb&quot;));</span>
+<span class="nc" id="L284">        supportingFiles.add(new SupportingFile(&quot;api_client.mustache&quot;, gemFolder, &quot;api_client.rb&quot;));</span>
+
+<span class="nc bnc" id="L286" title="All 2 branches missed.">        if (TYPHOEUS.equals(getLibrary())) {</span>
+            // for Typhoeus
+<span class="nc" id="L288">            additionalProperties.put(&quot;isTyphoeus&quot;, Boolean.TRUE);</span>
+<span class="nc bnc" id="L289" title="All 2 branches missed.">        } else if (FARADAY.equals(getLibrary())) {</span>
+            // for Faraday
+<span class="nc" id="L291">            additionalProperties.put(&quot;isFaraday&quot;, Boolean.TRUE);</span>
+<span class="nc bnc" id="L292" title="All 2 branches missed.">        } else if (HTTPX.equals(getLibrary())) {</span>
+            // for Faraday
+<span class="nc" id="L294">            additionalProperties.put(&quot;isHttpx&quot;, Boolean.TRUE);</span>
+        } else {
+<span class="nc" id="L296">            throw new RuntimeException(&quot;Invalid HTTP library &quot; + getLibrary() + &quot;. Only faraday, typhoeus and httpx are supported.&quot;);</span>
+        }
+
+        // test files should not be overwritten
+<span class="nc" id="L300">        supportingFiles.add(new SupportingFile(&quot;rspec.mustache&quot;, &quot;&quot;, &quot;.rspec&quot;)</span>
+<span class="nc" id="L301">                .doNotOverwrite());</span>
+<span class="nc" id="L302">        supportingFiles.add(new SupportingFile(&quot;spec_helper.mustache&quot;, specFolder, &quot;spec_helper.rb&quot;)</span>
+<span class="nc" id="L303">                .doNotOverwrite());</span>
+
+        // add lambda to convert a symbol to a string if an underscore is included (e.g. :'user_uuid' =&gt; 'user_uuid')
+<span class="nc" id="L306">        additionalProperties.put(&quot;lambdaFixHeaderKey&quot;, new Mustache.Lambda() {</span>
+            @Override
+            public void execute(Template.Fragment fragment, Writer writer) throws IOException {
+<span class="nc" id="L309">                String content = fragment.execute();</span>
+<span class="nc bnc" id="L310" title="All 2 branches missed.">                if (content.contains(&quot;_&quot;)) {</span>
+<span class="nc" id="L311">                    content = content.substring(1);</span>
+                }
+<span class="nc" id="L313">                writer.write(content);</span>
+<span class="nc" id="L314">            }</span>
+        });
+<span class="nc" id="L316">    }</span>
+
+    @Override
+    public CodegenType getTag() {
+<span class="nc" id="L320">        return CodegenType.CLIENT;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L325">        return &quot;ruby&quot;;</span>
+    }
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L330">        return &quot;Generates a Ruby client library.&quot;;</span>
+    }
+
+    /**
+     * Generate Ruby module name from the gem name, e.g. use &quot;OpenAPIClient&quot; for &quot;openapi_client&quot;.
+     *
+     * @param gemName Ruby gem name
+     * @return Ruby module name
+     */
+    @SuppressWarnings(&quot;static-method&quot;)
+    public String generateModuleName(String gemName) {
+<span class="nc" id="L341">        return camelize(gemName.replaceAll(&quot;[^\\w]+&quot;, &quot;_&quot;));</span>
+    }
+
+    /**
+     * Generate Ruby gem name from the module name, e.g. use &quot;openapi_client&quot; for &quot;OpenAPIClient&quot;.
+     *
+     * @param moduleName Ruby module name
+     * @return Ruby gem name
+     */
+    @SuppressWarnings(&quot;static-method&quot;)
+    public String generateGemName(String moduleName) {
+<span class="nc" id="L352">        return underscore(moduleName.replaceAll(&quot;[^\\w]+&quot;, &quot;&quot;));</span>
+    }
+
+    @Override
+    public String apiFileFolder() {
+<span class="nc" id="L357">        return outputFolder + File.separator + libFolder + File.separator + gemName + File.separator + apiPackage.replace(&quot;/&quot;, File.separator);</span>
+    }
+
+    @Override
+    public String modelFileFolder() {
+<span class="nc" id="L362">        return outputFolder + File.separator + libFolder + File.separator + gemName + File.separator + modelPackage.replace(&quot;/&quot;, File.separator);</span>
+    }
+
+    @Override
+    public String apiTestFileFolder() {
+<span class="nc" id="L367">        return outputFolder + File.separator + specFolder + File.separator + apiPackage.replace(&quot;/&quot;, File.separator);</span>
+    }
+
+    @Override
+    public String modelTestFileFolder() {
+<span class="nc" id="L372">        return outputFolder + File.separator + specFolder + File.separator + modelPackage.replace(&quot;/&quot;, File.separator);</span>
+    }
+
+    @Override
+    public String apiDocFileFolder() {
+<span class="nc" id="L377">        return (outputFolder + &quot;/&quot; + apiDocPath).replace('/', File.separatorChar);</span>
+    }
+
+    @Override
+    public String modelDocFileFolder() {
+<span class="nc" id="L382">        return (outputFolder + &quot;/&quot; + modelDocPath).replace('/', File.separatorChar);</span>
+    }
+
+    @Override
+    public String getSchemaType(Schema schema) {
+<span class="nc" id="L387">        String openAPIType = super.getSchemaType(schema);</span>
+<span class="nc" id="L388">        String type = null;</span>
+<span class="nc bnc" id="L389" title="All 2 branches missed.">        if (typeMapping.containsKey(openAPIType)) {</span>
+<span class="nc" id="L390">            type = typeMapping.get(openAPIType);</span>
+<span class="nc bnc" id="L391" title="All 2 branches missed.">            if (languageSpecificPrimitives.contains(type)) {</span>
+<span class="nc" id="L392">                return type;</span>
+            }
+        } else {
+<span class="nc" id="L395">            type = openAPIType;</span>
+        }
+
+<span class="nc bnc" id="L398" title="All 2 branches missed.">        if (type == null) {</span>
+<span class="nc" id="L399">            return null;</span>
+        }
+
+<span class="nc" id="L402">        return toModelName(type);</span>
+    }
+
+    @Override
+    public String toModelName(final String name) {
+        // We need to check if schema-mapping has a different model for this class, so we use it
+        // instead of the auto-generated one.
+<span class="nc bnc" id="L409" title="All 2 branches missed.">        if (schemaMapping.containsKey(name)) {</span>
+<span class="nc" id="L410">            return schemaMapping.get(name);</span>
+        }
+
+<span class="nc bnc" id="L413" title="All 2 branches missed.">        if (modelNameMapping.containsKey(name)) {</span>
+<span class="nc" id="L414">            return modelNameMapping.get(name);</span>
+        }
+
+        // memoization
+<span class="nc" id="L418">        String origName = name;</span>
+<span class="nc bnc" id="L419" title="All 2 branches missed.">        if (schemaKeyToModelNameCache.containsKey(origName)) {</span>
+<span class="nc" id="L420">            return schemaKeyToModelNameCache.get(origName);</span>
+        }
+
+        String modelName;
+<span class="nc" id="L424">        modelName = sanitizeName(name);</span>
+
+<span class="nc bnc" id="L426" title="All 2 branches missed.">        if (!StringUtils.isEmpty(modelNamePrefix)) {</span>
+<span class="nc" id="L427">            modelName = modelNamePrefix + &quot;_&quot; + modelName;</span>
+        }
+
+<span class="nc bnc" id="L430" title="All 2 branches missed.">        if (!StringUtils.isEmpty(modelNameSuffix)) {</span>
+<span class="nc" id="L431">            modelName = modelName + &quot;_&quot; + modelNameSuffix;</span>
+        }
+
+        // model name cannot use reserved keyword, e.g. return
+<span class="nc bnc" id="L435" title="All 2 branches missed.">        if (isReservedWord(modelName)) {</span>
+<span class="nc" id="L436">            modelName = camelize(&quot;Model&quot; + modelName);</span>
+<span class="nc" id="L437">            LOGGER.warn(&quot;{} (reserved word) cannot be used as model name. Renamed to {}&quot;, name, modelName);</span>
+<span class="nc" id="L438">            schemaKeyToModelNameCache.put(origName, modelName);</span>
+<span class="nc" id="L439">            return modelName;</span>
+        }
+
+        // model name starts with number
+<span class="nc bnc" id="L443" title="All 2 branches missed.">        if (modelName.matches(&quot;^\\d.*&quot;)) {</span>
+<span class="nc" id="L444">            LOGGER.warn(&quot;{} (model name starts with number) cannot be used as model name. Renamed to {}&quot;, modelName,</span>
+<span class="nc" id="L445">                    camelize(&quot;model_&quot; + modelName));</span>
+<span class="nc" id="L446">            modelName = &quot;model_&quot; + modelName; // e.g. 200Response =&gt; Model200Response (after camelize)</span>
+        }
+
+        // camelize the model name
+        // phone_number =&gt; PhoneNumber
+<span class="nc" id="L451">        String camelizedName = camelize(modelName);</span>
+<span class="nc" id="L452">        schemaKeyToModelNameCache.put(origName, camelizedName);</span>
+<span class="nc" id="L453">        return camelizedName;</span>
+    }
+
+    @Override
+    public String toModelFilename(String name) {
+<span class="nc" id="L458">        return underscore(toModelName(name));</span>
+    }
+
+    @Override
+    public String toModelDocFilename(String name) {
+<span class="nc" id="L463">        return toModelName(name);</span>
+    }
+
+    @Override
+    public String toApiFilename(final String name) {
+        // replace - with _ e.g. created-at =&gt; created_at
+<span class="nc" id="L469">        String filename = name;</span>
+<span class="nc bnc" id="L470" title="All 4 branches missed.">        if (apiNameSuffix != null &amp;&amp; apiNameSuffix.length() &gt; 0) {</span>
+<span class="nc" id="L471">            filename = filename + &quot;_&quot; + apiNameSuffix;</span>
+        }
+
+<span class="nc" id="L474">        filename = filename.replaceAll(&quot;-&quot;, &quot;_&quot;);</span>
+
+        // e.g. PhoneNumberApi.rb =&gt; phone_number_api.rb
+<span class="nc" id="L477">        return underscore(filename);</span>
+    }
+
+    @Override
+    public String toApiDocFilename(String name) {
+<span class="nc" id="L482">        return toApiName(name);</span>
+    }
+
+    @Override
+    public String toApiTestFilename(String name) {
+<span class="nc" id="L487">        return toApiFilename(name) + &quot;_spec&quot;;</span>
+    }
+
+    @Override
+    public String toModelTestFilename(String name) {
+<span class="nc" id="L492">        return toModelFilename(name) + &quot;_spec&quot;;</span>
+    }
+
+    @Override
+    public String toApiName(String name) {
+<span class="nc" id="L497">        return super.toApiName(name);</span>
+    }
+
+    @Override
+    public String toEnumValue(String value, String datatype) {
+<span class="nc bnc" id="L502" title="All 4 branches missed.">        if (&quot;Integer&quot;.equals(datatype) || &quot;Float&quot;.equals(datatype)) {</span>
+<span class="nc" id="L503">            return value;</span>
+        } else {
+<span class="nc" id="L505">            return &quot;\&quot;&quot; + escapeText(value) + &quot;\&quot;&quot;;</span>
+        }
+    }
+
+    @Override
+    public String toEnumVarName(String name, String datatype) {
+<span class="nc bnc" id="L511" title="All 2 branches missed.">        if (enumNameMapping.containsKey(name)) {</span>
+<span class="nc" id="L512">            return enumNameMapping.get(name);</span>
+        }
+
+<span class="nc bnc" id="L515" title="All 2 branches missed.">        if (name.length() == 0) {</span>
+<span class="nc" id="L516">            return &quot;EMPTY&quot;;</span>
+        }
+
+        // number
+<span class="nc bnc" id="L520" title="All 4 branches missed.">        if (&quot;Integer&quot;.equals(datatype) || &quot;Float&quot;.equals(datatype)) {</span>
+<span class="nc" id="L521">            String varName = name;</span>
+<span class="nc" id="L522">            varName = varName.replaceAll(&quot;-&quot;, &quot;MINUS_&quot;);</span>
+<span class="nc" id="L523">            varName = varName.replaceAll(&quot;\\+&quot;, &quot;PLUS_&quot;);</span>
+<span class="nc" id="L524">            varName = varName.replaceAll(&quot;\\.&quot;, &quot;_DOT_&quot;);</span>
+<span class="nc" id="L525">            return NUMERIC_ENUM_PREFIX + varName;</span>
+        }
+
+        // string
+<span class="nc" id="L529">        String enumName = sanitizeName(underscore(name).toUpperCase(Locale.ROOT));</span>
+<span class="nc" id="L530">        enumName = enumName.replaceFirst(&quot;^_&quot;, &quot;&quot;);</span>
+<span class="nc" id="L531">        enumName = enumName.replaceFirst(&quot;_$&quot;, &quot;&quot;);</span>
+
+<span class="nc bnc" id="L533" title="All 2 branches missed.">        if (enumName.matches(&quot;\\d.*&quot;)) { // starts with number</span>
+<span class="nc" id="L534">            return NUMERIC_ENUM_PREFIX + enumName;</span>
+        } else {
+<span class="nc" id="L536">            return enumName;</span>
+        }
+    }
+
+    @Override
+    public String toEnumName(CodegenProperty property) {
+<span class="nc bnc" id="L542" title="All 2 branches missed.">        if (enumNameMapping.containsKey(property.name)) {</span>
+<span class="nc" id="L543">            return enumNameMapping.get(property.name);</span>
+        }
+
+<span class="nc" id="L546">        String enumName = underscore(toModelName(property.name)).toUpperCase(Locale.ROOT);</span>
+<span class="nc" id="L547">        enumName = enumName.replaceFirst(&quot;^_&quot;, &quot;&quot;);</span>
+<span class="nc" id="L548">        enumName = enumName.replaceFirst(&quot;_$&quot;, &quot;&quot;);</span>
+
+<span class="nc bnc" id="L550" title="All 2 branches missed.">        if (enumName.matches(&quot;\\d.*&quot;)) { // starts with number</span>
+<span class="nc" id="L551">            return NUMERIC_ENUM_PREFIX + enumName;</span>
+        } else {
+<span class="nc" id="L553">            return enumName;</span>
+        }
+    }
+
+    @Override
+    public ModelsMap postProcessModels(ModelsMap objs) {
+        // process enum in models
+<span class="nc" id="L560">        return postProcessModelsEnum(objs);</span>
+    }
+
+    @Override
+    public String toOperationId(String operationId) {
+        // rename to empty_method_name_1 (e.g.) if method name is empty
+<span class="nc bnc" id="L566" title="All 2 branches missed.">        if (StringUtils.isEmpty(operationId)) {</span>
+<span class="nc" id="L567">            operationId = underscore(&quot;empty_method_name_&quot; + emptyMethodNameCounter++);</span>
+<span class="nc" id="L568">            LOGGER.warn(&quot;Empty method name (operationId) found. Renamed to {}&quot;, operationId);</span>
+<span class="nc" id="L569">            return operationId;</span>
+        }
+
+        // method name cannot use reserved keyword, e.g. return
+<span class="nc bnc" id="L573" title="All 2 branches missed.">        if (isReservedWord(operationId)) {</span>
+<span class="nc" id="L574">            String newOperationId = underscore(&quot;call_&quot; + operationId);</span>
+<span class="nc" id="L575">            LOGGER.warn(&quot;{} (reserved word) cannot be used as method name. Renamed to {}&quot;, operationId, newOperationId);</span>
+<span class="nc" id="L576">            return newOperationId;</span>
+        }
+
+        // operationId starts with a number
+<span class="nc bnc" id="L580" title="All 2 branches missed.">        if (operationId.matches(&quot;^\\d.*&quot;)) {</span>
+<span class="nc" id="L581">            LOGGER.warn(&quot;{} (starting with a number) cannot be used as method name. Renamed to {}&quot;, operationId, underscore(sanitizeName(&quot;call_&quot; + operationId)));</span>
+<span class="nc" id="L582">            operationId = &quot;call_&quot; + operationId;</span>
+        }
+
+<span class="nc" id="L585">        return underscore(sanitizeName(operationId));</span>
+    }
+
+    @Override
+    public String toApiImport(String name) {
+<span class="nc" id="L590">        return gemName + &quot;/&quot; + apiPackage() + &quot;/&quot; + toApiFilename(name);</span>
+    }
+
+    public void setGemName(String gemName) {
+<span class="nc" id="L594">        this.gemName = gemName;</span>
+<span class="nc" id="L595">    }</span>
+
+    public void setModuleName(String moduleName) {
+<span class="nc" id="L598">        this.moduleName = moduleName;</span>
+<span class="nc" id="L599">    }</span>
+
+    public void setGemVersion(String gemVersion) {
+<span class="nc" id="L602">        this.gemVersion = gemVersion;</span>
+<span class="nc" id="L603">    }</span>
+
+    public void setGemDescription(String gemDescription) {
+<span class="nc" id="L606">        this.gemDescription = gemDescription;</span>
+<span class="nc" id="L607">    }</span>
+
+    public void setGemSummary(String gemSummary) {
+<span class="nc" id="L610">        this.gemSummary = gemSummary;</span>
+<span class="nc" id="L611">    }</span>
+
+    public void setGemLicense(String gemLicense) {
+<span class="nc" id="L614">        this.gemLicense = gemLicense;</span>
+<span class="nc" id="L615">    }</span>
+
+    public void setGemRequiredRubyVersion(String gemRequiredRubyVersion) {
+<span class="nc" id="L618">        this.gemRequiredRubyVersion = gemRequiredRubyVersion;</span>
+<span class="nc" id="L619">    }</span>
+
+    public void setGemHomepage(String gemHomepage) {
+<span class="nc" id="L622">        this.gemHomepage = gemHomepage;</span>
+<span class="nc" id="L623">    }</span>
+
+    public void setGemAuthor(String gemAuthor) {
+<span class="nc" id="L626">        this.gemAuthor = gemAuthor;</span>
+<span class="nc" id="L627">    }</span>
+
+    public void setGemAuthorEmail(String gemAuthorEmail) {
+<span class="nc" id="L630">        this.gemAuthorEmail = gemAuthorEmail;</span>
+<span class="nc" id="L631">    }</span>
+
+    public void setGemMetadata(String gemMetadata) {
+<span class="nc" id="L634">        this.gemMetadata = gemMetadata;</span>
+<span class="nc" id="L635">    }</span>
+
+    public void setUseAutoload(boolean useAutoload) {
+<span class="nc" id="L638">        this.useAutoload = useAutoload;</span>
+<span class="nc" id="L639">    }</span>
+
+    @Override
+    protected void addAdditionPropertiesToCodeGenModel(CodegenModel codegenModel, Schema schema) {
+<span class="nc" id="L643">        final Schema additionalProperties = ModelUtils.getAdditionalProperties(schema);</span>
+
+<span class="nc bnc" id="L645" title="All 2 branches missed.">        if (additionalProperties != null) {</span>
+<span class="nc" id="L646">            codegenModel.additionalPropertiesType = getSchemaType(additionalProperties);</span>
+        }
+<span class="nc" id="L648">    }</span>
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L652">        objs = super.postProcessOperationsWithModels(objs, allModels);</span>
+<span class="nc" id="L653">        OperationMap operations = objs.getOperations();</span>
+<span class="nc" id="L654">        HashMap&lt;String, CodegenModel&gt; modelMaps = ModelMap.toCodegenModelMap(allModels);</span>
+<span class="nc" id="L655">        HashMap&lt;String, Integer&gt; processedModelMaps = new HashMap&lt;&gt;();</span>
+
+<span class="nc" id="L657">        List&lt;CodegenOperation&gt; operationList = operations.getOperation();</span>
+<span class="nc bnc" id="L658" title="All 2 branches missed.">        for (CodegenOperation op : operationList) {</span>
+<span class="nc bnc" id="L659" title="All 2 branches missed.">            for (CodegenParameter p : op.allParams) {</span>
+<span class="nc" id="L660">                p.vendorExtensions.put(&quot;x-ruby-example&quot;, constructExampleCode(p, modelMaps, processedModelMaps));</span>
+<span class="nc" id="L661">            }</span>
+<span class="nc" id="L662">            processedModelMaps.clear();</span>
+<span class="nc bnc" id="L663" title="All 2 branches missed.">            for (CodegenParameter p : op.requiredParams) {</span>
+<span class="nc" id="L664">                p.vendorExtensions.put(&quot;x-ruby-example&quot;, constructExampleCode(p, modelMaps, processedModelMaps));</span>
+<span class="nc" id="L665">            }</span>
+<span class="nc" id="L666">            processedModelMaps.clear();</span>
+<span class="nc bnc" id="L667" title="All 2 branches missed.">            for (CodegenParameter p : op.optionalParams) {</span>
+<span class="nc" id="L668">                p.vendorExtensions.put(&quot;x-ruby-example&quot;, constructExampleCode(p, modelMaps, processedModelMaps));</span>
+<span class="nc" id="L669">            }</span>
+<span class="nc" id="L670">            processedModelMaps.clear();</span>
+<span class="nc bnc" id="L671" title="All 2 branches missed.">            for (CodegenParameter p : op.bodyParams) {</span>
+<span class="nc" id="L672">                p.vendorExtensions.put(&quot;x-ruby-example&quot;, constructExampleCode(p, modelMaps, processedModelMaps));</span>
+<span class="nc" id="L673">            }</span>
+<span class="nc" id="L674">            processedModelMaps.clear();</span>
+<span class="nc bnc" id="L675" title="All 2 branches missed.">            for (CodegenParameter p : op.pathParams) {</span>
+<span class="nc" id="L676">                p.vendorExtensions.put(&quot;x-ruby-example&quot;, constructExampleCode(p, modelMaps, processedModelMaps));</span>
+<span class="nc" id="L677">            }</span>
+<span class="nc" id="L678">            processedModelMaps.clear();</span>
+<span class="nc" id="L679">        }</span>
+
+<span class="nc" id="L681">        return objs;</span>
+    }
+
+    private String constructExampleCode(CodegenParameter codegenParameter, HashMap&lt;String, CodegenModel&gt; modelMaps, HashMap&lt;String, Integer&gt; processedModelMap) {
+<span class="nc bnc" id="L685" title="All 2 branches missed.">        if (codegenParameter.isArray) { // array</span>
+<span class="nc" id="L686">            return &quot;[&quot; + constructExampleCode(codegenParameter.items, modelMaps, processedModelMap) + &quot;]&quot;;</span>
+<span class="nc bnc" id="L687" title="All 2 branches missed.">        } else if (codegenParameter.isMap) {</span>
+<span class="nc bnc" id="L688" title="All 2 branches missed.">            if (codegenParameter.items == null) {</span>
+<span class="nc" id="L689">                return &quot;{ ... }&quot;;</span>
+            }
+<span class="nc" id="L691">            return &quot;{ key: &quot; + constructExampleCode(codegenParameter.items, modelMaps, processedModelMap) + &quot;}&quot;;</span>
+<span class="nc bnc" id="L692" title="All 2 branches missed.">        } else if (codegenParameter.isPrimitiveType) { // primitive type</span>
+<span class="nc bnc" id="L693" title="All 2 branches missed.">            if (codegenParameter.isEnum) {</span>
+                // When inline enum, set example to first allowable value
+<span class="nc" id="L695">                List&lt;Object&gt; values = (List&lt;Object&gt;) codegenParameter.allowableValues.get(&quot;values&quot;);</span>
+<span class="nc" id="L696">                codegenParameter.example = String.valueOf(values.get(0));</span>
+            }
+<span class="nc bnc" id="L698" title="All 4 branches missed.">            if (codegenParameter.isString || &quot;String&quot;.equalsIgnoreCase(codegenParameter.baseType)) {</span>
+<span class="nc bnc" id="L699" title="All 4 branches missed.">                if (!StringUtils.isEmpty(codegenParameter.example) &amp;&amp; !&quot;null&quot;.equals(codegenParameter.example)) {</span>
+<span class="nc" id="L700">                    return &quot;'&quot; + codegenParameter.example + &quot;'&quot;;</span>
+                }
+<span class="nc" id="L702">                return &quot;'&quot; + codegenParameter.paramName + &quot;_example'&quot;;</span>
+<span class="nc bnc" id="L703" title="All 2 branches missed.">            } else if (codegenParameter.isBoolean) { // boolean</span>
+<span class="nc bnc" id="L704" title="All 2 branches missed.">                if (Boolean.parseBoolean(codegenParameter.example)) {</span>
+<span class="nc" id="L705">                    return &quot;true&quot;;</span>
+                }
+<span class="nc" id="L707">                return &quot;false&quot;;</span>
+<span class="nc bnc" id="L708" title="All 2 branches missed.">            } else if (codegenParameter.isUri) {</span>
+<span class="nc bnc" id="L709" title="All 4 branches missed.">                if (!StringUtils.isEmpty(codegenParameter.example) &amp;&amp; !&quot;null&quot;.equals(codegenParameter.example)) {</span>
+<span class="nc" id="L710">                    return &quot;'&quot; + codegenParameter.example + &quot;'&quot;;</span>
+                }
+<span class="nc" id="L712">                return &quot;'https://example.com'&quot;;</span>
+<span class="nc bnc" id="L713" title="All 2 branches missed.">            } else if (codegenParameter.isDateTime) {</span>
+<span class="nc bnc" id="L714" title="All 4 branches missed.">                if (!StringUtils.isEmpty(codegenParameter.example) &amp;&amp; !&quot;null&quot;.equals(codegenParameter.example)) {</span>
+<span class="nc" id="L715">                    return &quot;Time.parse('&quot; + codegenParameter.example + &quot;')&quot;;</span>
+                }
+<span class="nc" id="L717">                return &quot;Time.now&quot;;</span>
+<span class="nc bnc" id="L718" title="All 2 branches missed.">            } else if (codegenParameter.isDate) {</span>
+<span class="nc bnc" id="L719" title="All 4 branches missed.">                if (!StringUtils.isEmpty(codegenParameter.example) &amp;&amp; !&quot;null&quot;.equals(codegenParameter.example)) {</span>
+<span class="nc" id="L720">                    return &quot;Date.parse('&quot; + codegenParameter.example + &quot;')&quot;;</span>
+                }
+<span class="nc" id="L722">                return &quot;Date.today&quot;;</span>
+<span class="nc bnc" id="L723" title="All 2 branches missed.">            } else if (codegenParameter.isFile) {</span>
+<span class="nc" id="L724">                return &quot;File.new('/path/to/some/file')&quot;;</span>
+<span class="nc bnc" id="L725" title="All 2 branches missed.">            } else if (codegenParameter.isInteger) {</span>
+<span class="nc bnc" id="L726" title="All 4 branches missed.">                if (!StringUtils.isEmpty(codegenParameter.example) &amp;&amp; !&quot;null&quot;.equals(codegenParameter.example)) {</span>
+<span class="nc" id="L727">                    return codegenParameter.example;</span>
+                }
+<span class="nc" id="L729">                return &quot;37&quot;;</span>
+            } else { // number
+<span class="nc bnc" id="L731" title="All 4 branches missed.">                if (!StringUtils.isEmpty(codegenParameter.example) &amp;&amp; !&quot;null&quot;.equals(codegenParameter.example)) {</span>
+<span class="nc" id="L732">                    return codegenParameter.example;</span>
+                }
+<span class="nc" id="L734">                return &quot;3.56&quot;;</span>
+            }
+        } else { // model
+            // look up the model
+<span class="nc bnc" id="L738" title="All 2 branches missed.">            if (modelMaps.containsKey(codegenParameter.dataType)) {</span>
+<span class="nc" id="L739">                return constructExampleCode(modelMaps.get(codegenParameter.dataType), modelMaps, processedModelMap);</span>
+            } else {
+                //LOGGER.error(&quot;Error in constructing examples. Failed to look up the model &quot; + codegenParameter.dataType);
+<span class="nc" id="L742">                return &quot;TODO&quot;;</span>
+            }
+        }
+    }
+
+    private String constructExampleCode(CodegenProperty codegenProperty, HashMap&lt;String, CodegenModel&gt; modelMaps, HashMap&lt;String, Integer&gt; processedModelMap) {
+<span class="nc bnc" id="L748" title="All 2 branches missed.">        if (codegenProperty.isArray) { // array</span>
+<span class="nc bnc" id="L749" title="All 4 branches missed.">            if (!StringUtils.isEmpty(codegenProperty.example) &amp;&amp; !&quot;null&quot;.equals(codegenProperty.example)) {</span>
+<span class="nc" id="L750">                String value = codegenProperty.example;</span>
+<span class="nc" id="L751">                value = value.replaceAll(&quot;,&quot;, &quot;, &quot;);</span>
+<span class="nc" id="L752">                value = value.replaceAll(&quot;:&quot;, &quot;: &quot;);</span>
+<span class="nc" id="L753">                return value;</span>
+            }
+<span class="nc" id="L755">            return &quot;[&quot; + constructExampleCode(codegenProperty.items, modelMaps, processedModelMap) + &quot;]&quot;;</span>
+<span class="nc bnc" id="L756" title="All 2 branches missed.">        } else if (codegenProperty.isMap) {</span>
+<span class="nc bnc" id="L757" title="All 2 branches missed.">            if (codegenProperty.items != null) {</span>
+<span class="nc" id="L758">                return &quot;{ key: &quot; + constructExampleCode(codegenProperty.items, modelMaps, processedModelMap) + &quot;}&quot;;</span>
+            } else {
+<span class="nc" id="L760">                return &quot;{ ... }&quot;;</span>
+            }
+<span class="nc bnc" id="L762" title="All 2 branches missed.">        } else if (codegenProperty.isPrimitiveType) { // primitive type</span>
+<span class="nc bnc" id="L763" title="All 2 branches missed.">            if (codegenProperty.isEnum) {</span>
+                // When inline enum, set example to first allowable value
+<span class="nc" id="L765">                List&lt;Object&gt; values = (List&lt;Object&gt;) codegenProperty.allowableValues.get(&quot;values&quot;);</span>
+<span class="nc" id="L766">                codegenProperty.example = String.valueOf(values.get(0));</span>
+            }
+<span class="nc bnc" id="L768" title="All 4 branches missed.">            if (codegenProperty.isString || &quot;String&quot;.equalsIgnoreCase(codegenProperty.baseType)) {</span>
+<span class="nc bnc" id="L769" title="All 4 branches missed.">                if (!StringUtils.isEmpty(codegenProperty.example) &amp;&amp; !&quot;null&quot;.equals(codegenProperty.example)) {</span>
+<span class="nc" id="L770">                    return &quot;'&quot; + codegenProperty.example + &quot;'&quot;;</span>
+                } else {
+<span class="nc" id="L772">                    return &quot;'&quot; + codegenProperty.name + &quot;_example'&quot;;</span>
+                }
+<span class="nc bnc" id="L774" title="All 2 branches missed.">            } else if (codegenProperty.isBoolean) { // boolean</span>
+<span class="nc bnc" id="L775" title="All 2 branches missed.">                if (Boolean.parseBoolean(codegenProperty.example)) {</span>
+<span class="nc" id="L776">                    return &quot;true&quot;;</span>
+                } else {
+<span class="nc" id="L778">                    return &quot;false&quot;;</span>
+                }
+<span class="nc bnc" id="L780" title="All 2 branches missed.">            } else if (codegenProperty.isUri) {</span>
+<span class="nc bnc" id="L781" title="All 4 branches missed.">                if (!StringUtils.isEmpty(codegenProperty.example) &amp;&amp; !&quot;null&quot;.equals(codegenProperty.example)) {</span>
+<span class="nc" id="L782">                    return &quot;'&quot; + codegenProperty.example + &quot;'&quot;;</span>
+                }
+<span class="nc" id="L784">                return &quot;'https://example.com'&quot;;</span>
+<span class="nc bnc" id="L785" title="All 2 branches missed.">            } else if (codegenProperty.isDateTime) {</span>
+<span class="nc bnc" id="L786" title="All 4 branches missed.">                if (!StringUtils.isEmpty(codegenProperty.example) &amp;&amp; !&quot;null&quot;.equals(codegenProperty.example)) {</span>
+<span class="nc" id="L787">                    return &quot;Time.parse('&quot; + codegenProperty.example + &quot;')&quot;;</span>
+                }
+<span class="nc" id="L789">                return &quot;Time.now&quot;;</span>
+<span class="nc bnc" id="L790" title="All 2 branches missed.">            } else if (codegenProperty.isDate) {</span>
+<span class="nc bnc" id="L791" title="All 4 branches missed.">                if (!StringUtils.isEmpty(codegenProperty.example) &amp;&amp; !&quot;null&quot;.equals(codegenProperty.example)) {</span>
+<span class="nc" id="L792">                    return &quot;Date.parse('&quot; + codegenProperty.example + &quot;')&quot;;</span>
+                }
+<span class="nc" id="L794">                return &quot;Date.today&quot;;</span>
+<span class="nc bnc" id="L795" title="All 2 branches missed.">            } else if (codegenProperty.isFile) {</span>
+<span class="nc" id="L796">                return &quot;File.new('/path/to/some/file')&quot;;</span>
+<span class="nc bnc" id="L797" title="All 2 branches missed.">            } else if (codegenProperty.isInteger) {</span>
+<span class="nc bnc" id="L798" title="All 4 branches missed.">                if (!StringUtils.isEmpty(codegenProperty.example) &amp;&amp; !&quot;null&quot;.equals(codegenProperty.example)) {</span>
+<span class="nc" id="L799">                    return codegenProperty.example;</span>
+                }
+<span class="nc" id="L801">                return &quot;37&quot;;</span>
+            } else { // number
+<span class="nc bnc" id="L803" title="All 4 branches missed.">                if (!StringUtils.isEmpty(codegenProperty.example) &amp;&amp; !&quot;null&quot;.equals(codegenProperty.example)) {</span>
+<span class="nc" id="L804">                    return codegenProperty.example;</span>
+                }
+<span class="nc" id="L806">                return &quot;3.56&quot;;</span>
+            }
+        } else { // model
+            // look up the model
+<span class="nc bnc" id="L810" title="All 2 branches missed.">            if (modelMaps.containsKey(codegenProperty.dataType)) {</span>
+<span class="nc" id="L811">                return constructExampleCode(modelMaps.get(codegenProperty.dataType), modelMaps, processedModelMap);</span>
+            } else {
+                //LOGGER.error(&quot;Error in constructing examples. Failed to look up the model &quot; + codegenParameter.dataType);
+<span class="nc" id="L814">                return &quot;TODO&quot;;</span>
+            }
+        }
+    }
+
+    private String constructExampleCode(CodegenModel codegenModel, HashMap&lt;String, CodegenModel&gt; modelMaps, HashMap&lt;String, Integer&gt; processedModelMap) {
+        // break infinite recursion. Return, in case a model is already processed in the current context.
+<span class="nc" id="L821">        String model = codegenModel.name;</span>
+<span class="nc bnc" id="L822" title="All 2 branches missed.">        if (processedModelMap.containsKey(model)) {</span>
+<span class="nc" id="L823">            int count = processedModelMap.get(model);</span>
+<span class="nc bnc" id="L824" title="All 2 branches missed.">            if (count == 1) {</span>
+<span class="nc" id="L825">                processedModelMap.put(model, 2);</span>
+<span class="nc bnc" id="L826" title="All 2 branches missed.">            } else if (count == 2) {</span>
+<span class="nc" id="L827">                return &quot;&quot;;</span>
+            } else {
+<span class="nc" id="L829">                throw new RuntimeException(&quot;Invalid count when constructing example: &quot; + count);</span>
+            }
+<span class="nc bnc" id="L831" title="All 2 branches missed.">        } else if (codegenModel.isEnum) {</span>
+<span class="nc" id="L832">            List&lt;Map&lt;String, String&gt;&gt; enumVars = (List&lt;Map&lt;String, String&gt;&gt;) codegenModel.allowableValues.get(&quot;enumVars&quot;);</span>
+<span class="nc" id="L833">            return moduleName + &quot;::&quot; + codegenModel.classname + &quot;::&quot; + enumVars.get(0).get(&quot;name&quot;);</span>
+<span class="nc bnc" id="L834" title="All 4 branches missed.">        } else if (codegenModel.oneOf != null &amp;&amp; !codegenModel.oneOf.isEmpty()) {</span>
+<span class="nc" id="L835">            String subModel = (String) codegenModel.oneOf.toArray()[0];</span>
+<span class="nc bnc" id="L836" title="All 2 branches missed.">            if (modelMaps.containsKey(subModel)) {</span>
+                // oneOf models
+<span class="nc" id="L838">                return constructExampleCode(modelMaps.get(subModel), modelMaps, processedModelMap);</span>
+            } else {
+                // TODO oneOf primitive type not supported at the moment
+<span class="nc" id="L841">                LOGGER.warn(&quot;oneOf example value not supported at the moment.&quot;);</span>
+<span class="nc" id="L842">                return &quot;nil&quot;;</span>
+            }
+        } else {
+<span class="nc" id="L845">            processedModelMap.put(model, 1);</span>
+        }
+
+<span class="nc" id="L848">        List&lt;String&gt; propertyExamples = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L849" title="All 2 branches missed.">        for (CodegenProperty codegenProperty : codegenModel.requiredVars) {</span>
+<span class="nc" id="L850">            propertyExamples.add(codegenProperty.name + &quot;: &quot; + constructExampleCode(codegenProperty, modelMaps, processedModelMap));</span>
+<span class="nc" id="L851">        }</span>
+<span class="nc" id="L852">        String example = moduleName + &quot;::&quot; + toModelName(model) + &quot;.new&quot;;</span>
+<span class="nc bnc" id="L853" title="All 2 branches missed.">        if (!propertyExamples.isEmpty()) {</span>
+<span class="nc" id="L854">            example += &quot;({&quot; + StringUtils.join(propertyExamples, &quot;, &quot;) + &quot;})&quot;;</span>
+        }
+<span class="nc" id="L856">        return example;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

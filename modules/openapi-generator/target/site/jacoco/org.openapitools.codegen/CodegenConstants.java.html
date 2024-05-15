@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CodegenConstants.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen</a> &gt; <span class="el_source">CodegenConstants.java</span></div><h1>CodegenConstants.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen;
+
+/**
+ * A class for storing constants that are used throughout the project.
+ */
+<span class="nc" id="L23">public class CodegenConstants {</span>
+    /* System Properties */
+    // NOTE: We may want to move these to a separate class to avoid confusion or modification.
+    public static final String APIS = &quot;apis&quot;;
+    public static final String MODELS = &quot;models&quot;;
+    public static final String SUPPORTING_FILES = &quot;supportingFiles&quot;;
+    public static final String MODEL_TESTS = &quot;modelTests&quot;;
+    public static final String MODEL_DOCS = &quot;modelDocs&quot;;
+    public static final String WEBHOOKS = &quot;webhooks&quot;;
+    public static final String API_TESTS = &quot;apiTests&quot;;
+    public static final String API_DOCS = &quot;apiDocs&quot;;
+
+    public static final String WITH_XML = &quot;withXml&quot;;
+    public static final String SKIP_FORM_MODEL = &quot;skipFormModel&quot;;
+    /* /end System Properties */
+
+    public static final String API_NAME = &quot;apiName&quot;;
+
+    public static final String API_PACKAGE = &quot;apiPackage&quot;;
+    public static final String API_PACKAGE_DESC = &quot;package for generated api classes&quot;;
+
+    public static final String API_SUFFIX = &quot;apiSuffix&quot;;
+    public static final String API_SUFFIX_DESC = &quot;suffix for api classes&quot;;
+
+    public static final String AUTOSET_CONSTANTS = &quot;autosetConstants&quot;;
+
+    public static final String MODEL_PACKAGE = &quot;modelPackage&quot;;
+    public static final String MODEL_PACKAGE_DESC = &quot;package for generated models&quot;;
+
+    public static final String TEMPLATE_DIR = &quot;templateDir&quot;;
+
+    public static final String ALLOW_UNICODE_IDENTIFIERS = &quot;allowUnicodeIdentifiers&quot;;
+    public static final String ALLOW_UNICODE_IDENTIFIERS_DESC = &quot;boolean, toggles whether unicode identifiers are allowed in names or not, default is false&quot;;
+
+    public static final String INVOKER_PACKAGE = &quot;invokerPackage&quot;;
+    public static final String INVOKER_PACKAGE_DESC = &quot;root package for generated code&quot;;
+
+    public static final String PHP_INVOKER_PACKAGE = &quot;phpInvokerPackage&quot;;
+    public static final String PHP_INVOKER_PACKAGE_DESC = &quot;root package for generated php code&quot;;
+
+    public static final String PERL_MODULE_NAME = &quot;perlModuleName&quot;;
+    public static final String PERL_MODULE_NAME_DESC = &quot;root module name for generated perl code&quot;;
+
+    public static final String MODULE_NAME = &quot;moduleName&quot;;
+    public static final String MODULE_NAME_DESC = &quot;top module name (convention: CamelCase, usually corresponding to gem name).&quot;;
+
+    public static final String GEM_NAME = &quot;gemName&quot;;
+    public static final String GEM_NAME_DESC = &quot;gem name (convention: underscore_case).&quot;;
+
+    public static final String PYTHON_PACKAGE_NAME = &quot;pythonPackageName&quot;;
+    public static final String PYTHON_PACKAGE_NAME_DESC = &quot;package name for generated python code&quot;;
+
+    public static final String PYTHON_ATTR_NONE_IF_UNSET = &quot;pythonAttrNoneIfUnset&quot;;
+    public static final String PYTHON_ATTR_NONE_IF_UNSET_DESC = &quot;when accessing unset attribute, return `None` instead of raising `ApiAttributeError`&quot;;
+
+    public static final String WITH_GO_CODEGEN_COMMENT = &quot;withGoCodegenComment&quot;;
+    public static final String WITH_GO_CODEGEN_COMMENT_DESC = &quot;whether to include Go codegen comment to disable Go Lint and collapse by default in GitHub PRs and diffs&quot;;
+
+    public static final String WITH_AWSV4_SIGNATURE_COMMENT = &quot;withAWSV4Signature&quot;;
+    public static final String WITH_AWSV4_SIGNATURE_COMMENT_DESC = &quot;whether to include AWS v4 signature support&quot;;
+
+    public static final String IS_GO_SUBMODULE = &quot;isGoSubmodule&quot;;
+    public static final String IS_GO_SUBMODULE_DESC = &quot;whether the generated Go module is a submodule&quot;;
+
+    public static final String GROUP_ID = &quot;groupId&quot;;
+    public static final String GROUP_ID_DESC = &quot;groupId in generated pom.xml&quot;;
+
+    public static final String ARTIFACT_ID = &quot;artifactId&quot;;
+    public static final String ARTIFACT_ID_DESC = &quot;artifactId in generated pom.xml. This also becomes part of the generated library's filename&quot;;
+
+    public static final String ARTIFACT_VERSION = &quot;artifactVersion&quot;;
+    public static final String ARTIFACT_VERSION_DESC = &quot;artifact version in generated pom.xml. This also becomes part of the generated library's filename. If not provided, uses the version from the OpenAPI specification file. If that's also not present, uses the default value of the artifactVersion option.&quot;;
+
+    public static final String ARTIFACT_URL = &quot;artifactUrl&quot;;
+    public static final String ARTIFACT_URL_DESC = &quot;artifact URL in generated pom.xml&quot;;
+
+    public static final String ARTIFACT_DESCRIPTION = &quot;artifactDescription&quot;;
+    public static final String ARTIFACT_DESCRIPTION_DESC = &quot;artifact description in generated pom.xml&quot;;
+
+    public static final String SCM_CONNECTION = &quot;scmConnection&quot;;
+    public static final String SCM_CONNECTION_DESC = &quot;SCM connection in generated pom.xml&quot;;
+
+    public static final String SCM_DEVELOPER_CONNECTION = &quot;scmDeveloperConnection&quot;;
+    public static final String SCM_DEVELOPER_CONNECTION_DESC = &quot;SCM developer connection in generated pom.xml&quot;;
+
+    public static final String SCM_URL = &quot;scmUrl&quot;;
+    public static final String SCM_URL_DESC = &quot;SCM URL in generated pom.xml&quot;;
+
+    public static final String DEVELOPER_NAME = &quot;developerName&quot;;
+    public static final String DEVELOPER_NAME_DESC = &quot;developer name in generated pom.xml&quot;;
+
+    public static final String DEVELOPER_EMAIL = &quot;developerEmail&quot;;
+    public static final String DEVELOPER_EMAIL_DESC = &quot;developer email in generated pom.xml&quot;;
+
+    public static final String DEVELOPER_ORGANIZATION = &quot;developerOrganization&quot;;
+    public static final String DEVELOPER_ORGANIZATION_DESC = &quot;developer organization in generated pom.xml&quot;;
+
+    public static final String DEVELOPER_ORGANIZATION_URL = &quot;developerOrganizationUrl&quot;;
+    public static final String DEVELOPER_ORGANIZATION_URL_DESC = &quot;developer organization URL in generated pom.xml&quot;;
+
+    public static final String LICENSE_NAME = &quot;licenseName&quot;;
+    public static final String LICENSE_NAME_DESC = &quot;The name of the license&quot;;
+
+    public static final String LICENSE_ID = &quot;licenseId&quot;;
+    public static final String LICENSE_ID_DESC = &quot;The identifier of the license&quot;;
+
+    public static final String LICENSE_URL = &quot;licenseUrl&quot;;
+    public static final String LICENSE_URL_DESC = &quot;The URL of the license&quot;;
+
+    public static final String SOURCE_FOLDER = &quot;sourceFolder&quot;;
+    public static final String SOURCE_FOLDER_DESC = &quot;source folder for generated code&quot;;
+
+    public static final String IMPL_FOLDER = &quot;implFolder&quot;;
+    public static final String IMPL_FOLDER_DESC = &quot;folder for generated implementation code&quot;;
+
+    public static final String SERIALIZABLE_MODEL = &quot;serializableModel&quot;;
+    public static final String SERIALIZABLE_MODEL_DESC = &quot;boolean - toggle \&quot;implements Serializable\&quot; for generated models&quot;;
+
+    public static final String SERIALIZE_BIG_DECIMAL_AS_STRING = &quot;bigDecimalAsString&quot;;
+    public static final String SERIALIZE_BIG_DECIMAL_AS_STRING_DESC = &quot;Treat BigDecimal values as Strings to avoid precision loss.&quot;;
+
+    public static final String LIBRARY = &quot;library&quot;;
+    public static final String LIBRARY_DESC = &quot;library template (sub-template)&quot;;
+
+    public static final String SORT_PARAMS_BY_REQUIRED_FLAG = &quot;sortParamsByRequiredFlag&quot;;
+    public static final String SORT_PARAMS_BY_REQUIRED_FLAG_DESC = &quot;Sort method arguments to place required parameters before optional parameters.&quot;;
+
+    public static final String SORT_MODEL_PROPERTIES_BY_REQUIRED_FLAG = &quot;sortModelPropertiesByRequiredFlag&quot;;
+    public static final String SORT_MODEL_PROPERTIES_BY_REQUIRED_FLAG_DESC = &quot;Sort model properties to place required parameters before optional parameters.&quot;;
+
+    public static final String PREPEND_FORM_OR_BODY_PARAMETERS = &quot;prependFormOrBodyParameters&quot;;
+    public static final String PREPEND_FORM_OR_BODY_PARAMETERS_DESC = &quot;Add form or body parameters to the beginning of the parameter list.&quot;;
+
+    public static final String USE_DATETIME_OFFSET = &quot;useDateTimeOffset&quot;;
+    public static final String USE_DATETIME_OFFSET_DESC = &quot;Use DateTimeOffset to model date-time properties&quot;;
+
+    public static final String USE_DATETIME_FOR_DATE = &quot;useDateTimeForDate&quot;;
+    public static final String USE_DATETIME_FOR_DATE_DESC = &quot;Use DateTime to model date properties even if DateOnly supported. (.net 6.0+ only)&quot;;
+
+    public static final String ENSURE_UNIQUE_PARAMS = &quot;ensureUniqueParams&quot;;
+    public static final String ENSURE_UNIQUE_PARAMS_DESC = &quot;Whether to ensure parameter names are unique in an operation (rename parameters that are not).&quot;;
+
+    public static final String PROJECT_NAME = &quot;projectName&quot;;
+    public static final String PACKAGE_NAME = &quot;packageName&quot;;
+    public static final String PACKAGE_NAME_DESC = &quot;package for generated classes (where supported)&quot;;
+
+    public static final String PACKAGE_VERSION = &quot;packageVersion&quot;;
+
+    public static final String PACKAGE_TITLE = &quot;packageTitle&quot;;
+    public static final String PACKAGE_TITLE_DESC = &quot;Specifies an AssemblyTitle for the .NET Framework global assembly attributes stored in the AssemblyInfo file.&quot;;
+    public static final String PACKAGE_PRODUCTNAME = &quot;packageProductName&quot;;
+    public static final String PACKAGE_PRODUCTNAME_DESC = &quot;Specifies an AssemblyProduct for the .NET Framework global assembly attributes stored in the AssemblyInfo file.&quot;;
+    public static final String PACKAGE_DESCRIPTION = &quot;packageDescription&quot;;
+    public static final String PACKAGE_DESCRIPTION_DESC = &quot;Specifies a AssemblyDescription for the .NET Framework global assembly attributes stored in the AssemblyInfo file.&quot;;
+    public static final String PACKAGE_COMPANY = &quot;packageCompany&quot;;
+    public static final String PACKAGE_COMPANY_DESC = &quot;Specifies an AssemblyCompany for the .NET Framework global assembly attributes stored in the AssemblyInfo file.&quot;;
+    public static final String PACKAGE_AUTHORS = &quot;packageAuthors&quot;;
+    public static final String PACKAGE_AUTHORS_DESC = &quot;Specifies Authors property in the .NET Core project file.&quot;;
+    public static final String PACKAGE_AUTHORS_URL = &quot;packageAuthorsUrl&quot;;
+    public static final String PACKAGE_AUTHORS_URL_DESC = &quot;Specifies Authors URL property in the PHP composer.json file.&quot;;
+    public static final String PACKAGE_COPYRIGHT = &quot;packageCopyright&quot;;
+    public static final String PACKAGE_COPYRIGHT_DESC = &quot;Specifies an AssemblyCopyright for the .NET Framework global assembly attributes stored in the AssemblyInfo file.&quot;;
+    public static final String COMPOSER_PACKAGE_NAME = &quot;composerPackageName&quot;;
+    public static final String COMPOSER_PACKAGE_NAME_DESC = &quot;The name to use in the composer package name field. e.g. `vendor/project` (must be lowercase and consist of words separated by `-`, `.` or `_`).&quot;;
+
+    public static final String POD_VERSION = &quot;podVersion&quot;;
+
+    public static final String OPTIONAL_METHOD_ARGUMENT = &quot;optionalMethodArgument&quot;;
+    public static final String OPTIONAL_METHOD_ARGUMENT_DESC = &quot;Optional method argument, e.g. void square(int x=10) (.net 4.0+ only).&quot;;
+
+    public static final String OPTIONAL_ASSEMBLY_INFO = &quot;optionalAssemblyInfo&quot;;
+    public static final String OPTIONAL_ASSEMBLY_INFO_DESC = &quot;Generate AssemblyInfo.cs.&quot;;
+
+    public static final String OPTIONAL_EMIT_DEFAULT_VALUES = &quot;optionalEmitDefaultValues&quot;;
+    public static final String OPTIONAL_EMIT_DEFAULT_VALUES_DESC = &quot;Set DataMember's EmitDefaultValue.&quot;;
+
+    public static final String OPTIONAL_CONDITIONAL_SERIALIZATION = &quot;conditionalSerialization&quot;;
+    public static final String OPTIONAL_CONDITIONAL_SERIALIZATION_DESC = &quot;Serialize only those properties which are initialized by user, accepted values are true or false, default value is false.&quot;;
+
+    public static final String NETCORE_PROJECT_FILE = &quot;netCoreProjectFile&quot;;
+    public static final String NETCORE_PROJECT_FILE_DESC = &quot;Use the new format (.NET Core) for .NET project files (.csproj).&quot;;
+
+    public static final String USE_COLLECTION = &quot;useCollection&quot;;
+    public static final String USE_COLLECTION_DESC = &quot;Deserialize array types to Collection&lt;T&gt; instead of List&lt;T&gt;.&quot;;
+
+    public static final String INTERFACE_PREFIX = &quot;interfacePrefix&quot;;
+    public static final String INTERFACE_PREFIX_DESC = &quot;Prefix interfaces with a community standard or widely accepted prefix.&quot;;
+
+    public static final String RETURN_ICOLLECTION = &quot;returnICollection&quot;;
+    public static final String RETURN_ICOLLECTION_DESC = &quot;Return ICollection&lt;T&gt; instead of the concrete type.&quot;;
+
+    public static final String OPTIONAL_PROJECT_FILE = &quot;optionalProjectFile&quot;;
+    public static final String OPTIONAL_PROJECT_FILE_DESC = &quot;Generate {PackageName}.csproj.&quot;;
+
+    public static final String OPTIONAL_PROJECT_GUID = &quot;packageGuid&quot;;
+    public static final String OPTIONAL_PROJECT_GUID_DESC = &quot;The GUID that will be associated with the C# project&quot;;
+
+    public static final String MODEL_PROPERTY_NAMING = &quot;modelPropertyNaming&quot;;
+    public static final String MODEL_PROPERTY_NAMING_DESC = &quot;Naming convention for the property: 'camelCase', 'PascalCase', 'snake_case' and 'original', which keeps the original name&quot;;
+
+    public static final String PARAM_NAMING = &quot;paramNaming&quot;;
+    public static final String PARAM_NAMING_DESC = &quot;Naming convention for parameters: 'camelCase', 'PascalCase', 'snake_case' and 'original', which keeps the original name&quot;;
+
+    public static final String DOTNET_FRAMEWORK = &quot;targetFramework&quot;;
+    public static final String DOTNET_FRAMEWORK_DESC = &quot;The target .NET framework version. To target multiple frameworks, use `;` as the separator, e.g. `netstandard2.1;netcoreapp3.1`&quot;;
+
+    public static final String NULLABLE_REFERENCE_TYPES = &quot;nullableReferenceTypes&quot;;
+    public static final String NULLABLE_REFERENCE_TYPES_DESC = &quot;Use nullable annotations in the project. Only supported on C# 8 / ASP.NET Core 3.1 or newer.&quot;;
+
+    public static final String TEMPLATING_ENGINE = &quot;templatingEngine&quot;;
+    public static final String TEMPLATING_ENGINE_DESC = &quot;The templating engine plugin to use: \&quot;mustache\&quot; (default) or \&quot;handlebars\&quot; (beta)&quot;;
+
+<span class="fc" id="L235">    public static enum PARAM_NAMING_TYPE {camelCase, PascalCase, snake_case, original}</span>
+
+<span class="fc" id="L237">    public static enum MODEL_PROPERTY_NAMING_TYPE {camelCase, PascalCase, snake_case, original}</span>
+
+<span class="fc" id="L239">    public static enum ENUM_PROPERTY_NAMING_TYPE {camelCase, PascalCase, snake_case, original, UPPERCASE}</span>
+
+    public static final String ENUM_PROPERTY_NAMING = &quot;enumPropertyNaming&quot;;
+    public static final String ENUM_PROPERTY_NAMING_DESC = &quot;Naming convention for enum properties: 'camelCase', 'PascalCase', 'snake_case', 'UPPERCASE', and 'original'&quot;;
+
+    // Allow different language generators to offer an option of serialization library. Each language specific
+    // Codegen constants should define a description and provide proper input validation for the value of serializationLibrary
+    public static final String SERIALIZATION_LIBRARY = &quot;serializationLibrary&quot;;
+
+    public static final String API_NAME_PREFIX = &quot;apiNamePrefix&quot;;
+    public static final String API_NAME_PREFIX_DESC = &quot;Prefix that will be appended to all API names ('tags'). Default: empty string. e.g. Pet =&gt; Pet.&quot;;
+
+    public static final String API_NAME_SUFFIX = &quot;apiNameSuffix&quot;;
+    public static final String API_NAME_SUFFIX_DESC = &quot;Suffix that will be appended to all API names ('tags'). Default: Api. e.g. Pet =&gt; PetApi. Note: Only ruby, python, jaxrs generators support this feature at the moment.&quot;;
+
+    public static final String MODEL_NAME_PREFIX = &quot;modelNamePrefix&quot;;
+    public static final String MODEL_NAME_PREFIX_DESC = &quot;Prefix that will be prepended to all model names.&quot;;
+
+    public static final String MODEL_NAME_SUFFIX = &quot;modelNameSuffix&quot;;
+    public static final String MODEL_NAME_SUFFIX_DESC = &quot;Suffix that will be appended to all model names.&quot;;
+
+    public static final String ENUM_NAME_SUFFIX = &quot;enumNameSuffix&quot;;
+    public static final String ENUM_NAME_SUFFIX_DESC = &quot;Suffix that will be appended to all enum names.&quot;;
+
+    public static final String ENUM_VALUE_SUFFIX = &quot;enumValueSuffix&quot;;
+    public static final String ENUM_VALUE_SUFFIX_DESC = &quot;Suffix that will be appended to all enum values. Note: For clients this may impact serialization and deserialization of enum values.&quot;;
+
+    public static final String GIT_HOST = &quot;gitHost&quot;;
+    public static final String GIT_HOST_DESC = &quot;Git host, e.g. gitlab.com.&quot;;
+
+    public static final String GIT_USER_ID = &quot;gitUserId&quot;;
+    public static final String GIT_USER_ID_DESC = &quot;Git user ID, e.g. openapitools.&quot;;
+
+    public static final String GIT_REPO_ID = &quot;gitRepoId&quot;;
+    public static final String GIT_REPO_ID_DESC = &quot;Git repo ID, e.g. openapi-generator.&quot;;
+
+    public static final String RELEASE_NOTE = &quot;releaseNote&quot;;
+    public static final String RELEASE_NOTE_DESC = &quot;Release note, default to 'Minor update'.&quot;;
+
+    public static final String HTTP_USER_AGENT = &quot;httpUserAgent&quot;;
+    public static final String HTTP_USER_AGENT_DESC = &quot;HTTP user agent, e.g. codegen_csharp_api_client, default to 'OpenAPI-Generator/{packageVersion}/{language}'&quot;;
+
+    public static final String SUPPORTS_ES6 = &quot;supportsES6&quot;;
+    public static final String SUPPORTS_ES6_DESC = &quot;Generate code that conforms to ES6.&quot;;
+
+    public static final String SUPPORTS_ASYNC = &quot;supportsAsync&quot;;
+    public static final String SUPPORTS_ASYNC_DESC = &quot;Generate code that supports async operations.&quot;;
+
+    public static final String EXCLUDE_TESTS = &quot;excludeTests&quot;;
+    public static final String EXCLUDE_TESTS_DESC = &quot;Specifies that no tests are to be generated.&quot;;
+
+    public static final String SOURCECODEONLY_GENERATION = &quot;generateSourceCodeOnly&quot;;
+    public static final String SOURCECODEONLY_GENERATION_DESC = &quot;Specifies that only a library source code is to be generated.&quot;;
+
+    public static final String PARCELIZE_MODELS = &quot;parcelizeModels&quot;;
+    public static final String PARCELIZE_MODELS_DESC = &quot;toggle \&quot;@Parcelize\&quot; for generated models&quot;;
+
+    public static final String CASE_INSENSITIVE_RESPONSE_HEADERS = &quot;caseInsensitiveResponseHeaders&quot;;
+    public static final String CASE_INSENSITIVE_RESPONSE_HEADERS_DESC = &quot;Make API response's headers case-insensitive&quot;;
+
+    // Not user-configurable. System provided for use in templates.
+
+    public static final String GENERATE_APIS = &quot;generateApis&quot;;
+    public static final String GENERATE_API_DOCS = &quot;generateApiDocs&quot;;
+    public static final String GENERATE_WEBHOOKS = &quot;generateWebhooks&quot;;
+
+    public static final String GENERATE_API_TESTS = &quot;generateApiTests&quot;;
+    public static final String GENERATE_API_TESTS_DESC = &quot;Specifies that api tests are to be generated.&quot;;
+
+    // Not user-configurable. System provided for use in templates.
+    public static final String GENERATE_MODELS = &quot;generateModels&quot;;
+    public static final String GENERATE_MODEL_DOCS = &quot;generateModelDocs&quot;;
+
+    public static final String VIRTUAL_SERVICE = &quot;virtualService&quot;;
+    public static final String VIRTUAL_SERVICE_DESC = &quot;Generate Spring boot rest service as virtual service with Virtualan&quot;;
+
+    public static final String GENERATE_MODEL_TESTS = &quot;generateModelTests&quot;;
+    public static final String GENERATE_MODEL_TESTS_DESC = &quot;Specifies that model tests are to be generated.&quot;;
+
+    public static final String HIDE_GENERATION_TIMESTAMP = &quot;hideGenerationTimestamp&quot;;
+    public static final String HIDE_GENERATION_TIMESTAMP_DESC = &quot;Hides the generation timestamp when files are generated.&quot;;
+
+    public static final String GENERATE_PROPERTY_CHANGED = &quot;generatePropertyChanged&quot;;
+    public static final String GENERATE_PROPERTY_CHANGED_DESC = &quot;Specifies that models support raising property changed events.&quot;;
+
+    public static final String NON_PUBLIC_API = &quot;nonPublicApi&quot;;
+    public static final String NON_PUBLIC_API_DESC = &quot;Generates code with reduced access modifiers; allows embedding elsewhere without exposing non-public API calls to consumers.&quot;;
+
+    public static final String VALIDATABLE = &quot;validatable&quot;;
+    public static final String VALIDATABLE_DESC = &quot;Generates self-validatable models.&quot;;
+
+    public static final String EQUATABLE = &quot;equatable&quot;;
+    public static final String EQUATABLE_DESC = &quot;Overrides Equals and GetHashCode methods.&quot;;
+
+    public static final String IGNORE_FILE_OVERRIDE = &quot;ignoreFileOverride&quot;;
+    public static final String IGNORE_FILE_OVERRIDE_DESC = &quot;Specifies an override location for the .openapi-generator-ignore file. Most useful on initial generation.&quot;;
+
+    public static final String REMOVE_OPERATION_ID_PREFIX = &quot;removeOperationIdPrefix&quot;;
+    public static final String REMOVE_OPERATION_ID_PREFIX_DESC = &quot;Remove prefix of operationId, e.g. config_getId =&gt; getId&quot;;
+
+    public static final String REMOVE_OPERATION_ID_PREFIX_DELIMITER = &quot;removeOperationIdPrefixDelimiter&quot;;
+    public static final String REMOVE_OPERATION_ID_PREFIX_DELIMITER_DESC = &quot;Character to use as a delimiter for the prefix. Default: '_'&quot;;
+
+    public static final String REMOVE_OPERATION_ID_PREFIX_COUNT = &quot;removeOperationIdPrefixCount&quot;;
+    public static final String REMOVE_OPERATION_ID_PREFIX_COUNT_DESC = &quot;Count of delimiter for the prefix. Use -1 for last Default: 1&quot;;
+
+    public static final String SKIP_OPERATION_EXAMPLE = &quot;skipOperationExample&quot;;
+    public static final String SKIP_OPERATION_EXAMPLE_DESC = &quot;Skip examples defined in operations to avoid out of memory errors.&quot;;
+
+    public static final String STRIP_PACKAGE_NAME = &quot;stripPackageName&quot;;
+    public static final String STRIP_PACKAGE_NAME_DESC = &quot;Whether to strip leading dot-separated packages from generated model classes&quot;;
+
+    public static final String DOCEXTENSION = &quot;docExtension&quot;;
+    public static final String DOCEXTENSION_DESC = &quot;The extension of the generated documentation files, defaults to markdown, .md&quot;;
+
+    public static final String DATABASE_ADAPTER = &quot;databaseAdapter&quot;;
+    public static final String DATABASE_ADAPTER_DESC = &quot;The adapter for database (e.g. mysql, sqlite). Default: sqlite&quot;;
+
+    public static final String PARENT_GROUP_ID = &quot;parentGroupId&quot;;
+    public static final String PARENT_GROUP_ID_DESC = &quot;parent groupId in generated pom N.B. parentGroupId, parentArtifactId and parentVersion must all be specified for any of them to take effect&quot;;
+
+    public static final String PARENT_ARTIFACT_ID = &quot;parentArtifactId&quot;;
+    public static final String PARENT_ARTIFACT_ID_DESC = &quot;parent artifactId in generated pom N.B. parentGroupId, parentArtifactId and parentVersion must all be specified for any of them to take effect&quot;;
+
+    public static final String PARENT_VERSION = &quot;parentVersion&quot;;
+    public static final String PARENT_VERSION_DESC = &quot;parent version in generated pom N.B. parentGroupId, parentArtifactId and parentVersion must all be specified for any of them to take effect&quot;;
+
+    public static final String ENABLE_POST_PROCESS_FILE = &quot;enablePostProcessFile&quot;;
+    public static final String ENABLE_POST_PROCESS_FILE_DESC = &quot;Enable post-processing file using environment variables.&quot;;
+
+    public static final String OPEN_API_SPEC_NAME = &quot;openAPISpecName&quot;;
+
+    public static final String GENERATE_ALIAS_AS_MODEL = &quot;generateAliasAsModel&quot;;
+    public static final String GENERATE_ALIAS_AS_MODEL_DESC = &quot;Generate model implementation for aliases to map and array schemas. &quot; +
+        &quot;An 'alias' is an array, map, or list which is defined inline in a OpenAPI document and becomes a model in the generated code. &quot; +
+        &quot;A 'map' schema is an object that can have undeclared properties, i.e. the 'additionalproperties' attribute is set on that object. &quot; +
+        &quot;An 'array' schema is a list of sub schemas in a OAS document&quot;;
+
+    public static final String USE_COMPARE_NET_OBJECTS = &quot;useCompareNetObjects&quot;;
+    public static final String USE_COMPARE_NET_OBJECTS_DESC = &quot;Use KellermanSoftware.CompareNetObjects for deep recursive object comparison. WARNING: this option incurs potential performance impact.&quot;;
+
+    public static final String SNAPSHOT_VERSION = &quot;snapshotVersion&quot;;
+    public static final String SNAPSHOT_VERSION_DESC = &quot;Uses a SNAPSHOT version.&quot;;
+
+    public static final String EXCEPTION_ON_FAILURE = &quot;returnExceptionOnFailure&quot;;
+    public static final String EXCEPTION_ON_FAILURE_DESC = &quot;Throw an exception on non success response codes&quot;;
+
+    public static final String ENUM_CLASS_PREFIX = &quot;enumClassPrefix&quot;;
+    public static final String ENUM_CLASS_PREFIX_DESC = &quot;Prefix enum with class name&quot;;
+
+    public static final String PACKAGE_TAGS = &quot;packageTags&quot;;
+    public static final String PACKAGE_TAGS_DESC = &quot;Tags to identify the package&quot;;
+
+    public static final String REMOVE_ENUM_VALUE_PREFIX = &quot;removeEnumValuePrefix&quot;;
+    public static final String REMOVE_ENUM_VALUE_PREFIX_DESC = &quot;Remove the common prefix of enum values&quot;;
+
+    public static final String SKIP_ONEOF_ANYOF_GETTER = &quot;skipOneOfAnyOfGetter&quot;;
+    public static final String SKIP_ONEOF_ANYOF_GETTER_DESC = &quot;Skip the generation of getter for sub-schemas in oneOf/anyOf models.&quot;;
+
+    public static final String LEGACY_DISCRIMINATOR_BEHAVIOR = &quot;legacyDiscriminatorBehavior&quot;;
+    public static final String LEGACY_DISCRIMINATOR_BEHAVIOR_DESC = &quot;Set to false for generators with better support for discriminators. (Python, Java, Go, PowerShell, C# have this enabled by default).&quot;;
+
+    public static final String USE_SINGLE_REQUEST_PARAMETER = &quot;useSingleRequestParameter&quot;;
+    public static final String USE_SINGLE_REQUEST_PARAMETER_DESC = &quot;Setting this property to true will generate functions with a single argument containing all API endpoint parameters instead of one argument per parameter.&quot;;
+
+    public static final String DISALLOW_ADDITIONAL_PROPERTIES_IF_NOT_PRESENT = &quot;disallowAdditionalPropertiesIfNotPresent&quot;;
+    public static final String DISALLOW_ADDITIONAL_PROPERTIES_IF_NOT_PRESENT_DESC =
+        &quot;If false, the 'additionalProperties' implementation (set to true by default) is compliant with the OAS and JSON schema specifications. &quot; +
+        &quot;If true (default), keep the old (incorrect) behaviour that 'additionalProperties' is set to false by default.&quot;;
+
+    public static final String UNSUPPORTED_V310_SPEC_MSG =
+                    &quot;Generation using 3.1.0 specs is in development and is not officially supported yet. &quot; +
+                    &quot;If you would like to expedite development, please consider woking on the open issues in the 3.1.0 project: https://github.com/orgs/OpenAPITools/projects/4/views/1 &quot; +
+                    &quot;and reach out to our team on Slack at https://join.slack.com/t/openapi-generator/shared_invite/zt-12jxxd7p2-XUeQM~4pzsU9x~eGLQqX2g&quot;;
+
+    public static final String ENUM_UNKNOWN_DEFAULT_CASE = &quot;enumUnknownDefaultCase&quot;;
+    public static final String ENUM_UNKNOWN_DEFAULT_CASE_DESC =
+            &quot;If the server adds new enum cases, that are unknown by an old spec/client, the client will fail to parse the network response.&quot; +
+            &quot;With this option enabled, each enum will have a new case, 'unknown_default_open_api', so that when the server sends an enum case that is not known by the client/spec, they can safely fallback to this case.&quot;;
+
+    public static final String USE_ONEOF_DISCRIMINATOR_LOOKUP = &quot;useOneOfDiscriminatorLookup&quot;;
+    public static final String USE_ONEOF_DISCRIMINATOR_LOOKUP_DESC = &quot;Use the discriminator's mapping in oneOf to speed up the model lookup. IMPORTANT: Validation (e.g. one and only one match in oneOf's schemas) will be skipped.&quot;;
+
+    public static final String INIT_REQUIRED_VARS = &quot;initRequiredVars&quot;;
+    public static final String INIT_REQUIRED_VARS_DESC = &quot;If set to true then the required variables are included as positional arguments in __init__ and _from_openapi_data methods. Note: this can break some composition use cases. To learn more read PR #8802.&quot;;
+
+    public static final String ERROR_OBJECT_TYPE = &quot;errorObjectType&quot;;
+
+    public static final String NON_COMPLIANT_USE_DISCR_IF_COMPOSITION_FAILS = &quot;nonCompliantUseDiscriminatorIfCompositionFails&quot;;
+    public static final String NON_COMPLIANT_USE_DISCR_IF_COMPOSITION_FAILS_DESC =
+            &quot;When true, If the payload fails to validate against composed schemas (allOf/anyOf/oneOf/not) and a &quot; +
+                    &quot;discriminator is present, then ignore the composition validation errors and attempt to use the &quot; +
+                    &quot;discriminator to validate the payload.&lt;br /&gt;&quot; +
+                    &quot;Note: setting this to true makes the generated client not comply with json schema because it ignores &quot; +
+                    &quot;composition validation errors. Please consider making your schemas more restrictive rather than &quot; +
+                    &quot;setting this to true. You can do that by:&lt;ul&gt;&quot; +
+                    &quot;&lt;li&gt;defining the propertyName as an enum with only one value in the schemas that are in your discriminator map&lt;/li&gt;&quot; +
+                    &quot;&lt;li&gt;setting additionalProperties: false in your schemas&lt;/li&gt;&lt;/ul&gt;&quot;;
+
+    public static final String FASTAPI_IMPLEMENTATION_PACKAGE = &quot;fastapiImplementationPackage&quot;;
+
+    public static final String WITH_GO_MOD = &quot;withGoMod&quot;;
+
+    public static final String GENERATE_MARSHAL_JSON = &quot;generateMarshalJSON&quot;;
+    public static final String GENERATE_MARSHAL_JSON_DESC = &quot;Generate MarshalJSON method&quot;;
+
+    public static final String GENERATE_UNMARSHAL_JSON = &quot;generateUnmarshalJSON&quot;;
+    public static final String GENERATE_UNMARSHAL_JSON_DESC = &quot;Generate UnmarshalJSON method&quot;;
+    public static final String MAX_ATTEMPTS_FOR_RETRY = &quot;maxAttemptsForRetry&quot;;
+
+    public static final String WAIT_TIME_OF_THREAD = &quot;waitTimeMillis&quot;;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

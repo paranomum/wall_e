@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TemplatingEngineAdapter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator-core</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.api</a> &gt; <span class="el_source">TemplatingEngineAdapter.java</span></div><h1>TemplatingEngineAdapter.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2019 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.api;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Map;
+
+/**
+ * Each templating engine is called by an Adapter, selected at runtime
+ */
+public interface TemplatingEngineAdapter {
+
+    /**
+     * Provides an identifier used to load the adapter. This could be a name, uuid, or any other string.
+     *
+     * @return A string identifier.
+     */
+    String getIdentifier();
+
+    /**
+     * During generation, if a supporting file has a file extension that is
+     * inside that array, then it is considered a templated supporting file
+     * and we use the templating engine adapter to generate it
+     *
+     * @return string array of the valid file extensions for this templating engine
+     */
+    String[] getFileExtensions();
+
+    /**
+     * Determine if the adapter handles compilation of the file
+     * @param filename The template filename
+     *
+     * @return True if the file should be compiled by this adapter, else false.
+     */
+    default boolean handlesFile(String filename) {
+<span class="nc bnc" id="L55" title="All 6 branches missed.">        return filename != null &amp;&amp; filename.length() &gt; 0 &amp;&amp; Arrays.stream(getFileExtensions()).anyMatch(i -&gt; filename.endsWith(&quot;.&quot; + i));</span>
+    }
+
+    /**
+     * Compiles a template into a string
+     *
+     * @param executor    From where we can fetch the templates content (e.g. an instance of DefaultGenerator)
+     * @param bundle       The map of values to pass to the template
+     * @param templateFile The name of the template (e.g. model.mustache )
+     * @return the processed template result
+     * @throws IOException an error occurred in the template processing
+     */
+    String compileTemplate(TemplatingExecutor executor, Map&lt;String, Object&gt; bundle,
+                           String templateFile) throws IOException;
+
+    /**
+     * Determines whether the template file with supported extensions exists. This may be on the filesystem,
+     * external filesystem, or classpath (implementation is up to TemplatingGenerator).
+     *
+     * @param generator    The generator holding details about file resolution
+     * @param templateFile The original target filename
+     * @return True if the template is available in the template search path, false if it can not be found
+     */
+    @SuppressWarnings({&quot;java:S2093&quot;}) // ignore java:S2093 because we have double-assignment to the closeable
+    default boolean templateExists(TemplatingExecutor generator, String templateFile) {
+<span class="nc" id="L80">        return Arrays.stream(getFileExtensions()).anyMatch(ext -&gt; {</span>
+<span class="nc" id="L81">            int idx = templateFile.lastIndexOf('.');</span>
+            String baseName;
+<span class="nc bnc" id="L83" title="All 4 branches missed.">            if (idx &gt; 0 &amp;&amp; idx &lt; templateFile.length() - 1) {</span>
+<span class="nc" id="L84">                baseName = templateFile.substring(0, idx);</span>
+            } else {
+<span class="nc" id="L86">                baseName = templateFile;</span>
+            }
+
+<span class="nc" id="L89">            Path path = generator.getFullTemplatePath(String.format(Locale.ROOT, &quot;%s.%s&quot;, baseName, ext));</span>
+
+<span class="nc" id="L91">            InputStream is = null;</span>
+            try {
+<span class="nc bnc" id="L93" title="All 2 branches missed.">                String resourcePath = System.getProperty(&quot;os.name&quot;).startsWith(&quot;Windows&quot;) ?</span>
+<span class="nc" id="L94">                        path.toString().replace(&quot;\\&quot;, &quot;/&quot;) :</span>
+<span class="nc" id="L95">                        path.toString();</span>
+<span class="nc" id="L96">                is = this.getClass().getClassLoader().getResourceAsStream(resourcePath);</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">                if (is == null) {</span>
+<span class="nc" id="L98">                    is = new FileInputStream(path.toFile());</span>
+                }
+
+<span class="nc bnc" id="L101" title="All 2 branches missed.">                return is.available() &gt; 0;</span>
+<span class="nc" id="L102">            } catch (IOException e) {</span>
+                // ignore
+            } finally {
+                try {
+<span class="nc bnc" id="L106" title="All 2 branches missed.">                    if (is != null) is.close();</span>
+<span class="nc" id="L107">                } catch (IOException e) {</span>
+                    // ignore
+<span class="nc" id="L109">                }</span>
+            }
+<span class="nc" id="L111">            return false;</span>
+        });
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,1390 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Swift5ClientCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">Swift5ClientCodegen.java</span></div><h1>Swift5ClientCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Schema;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.WordUtils;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.meta.GeneratorMetadata;
+import org.openapitools.codegen.meta.Stability;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.utils.ModelUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.time.OffsetDateTime;
+import java.time.Instant;
+import java.time.temporal.ChronoField;
+import java.util.concurrent.TimeUnit;
+
+import static org.openapitools.codegen.utils.CamelizeOption.LOWERCASE_FIRST_LETTER;
+import static org.openapitools.codegen.utils.StringUtils.camelize;
+
+public class Swift5ClientCodegen extends DefaultCodegen implements CodegenConfig {
+<span class="nc" id="L49">    private final Logger LOGGER = LoggerFactory.getLogger(Swift5ClientCodegen.class);</span>
+
+    public static final String PROJECT_NAME = &quot;projectName&quot;;
+    public static final String RESPONSE_AS = &quot;responseAs&quot;;
+    public static final String OBJC_COMPATIBLE = &quot;objcCompatible&quot;;
+    public static final String POD_SOURCE = &quot;podSource&quot;;
+    public static final String POD_AUTHORS = &quot;podAuthors&quot;;
+    public static final String POD_SOCIAL_MEDIA_URL = &quot;podSocialMediaURL&quot;;
+    public static final String POD_LICENSE = &quot;podLicense&quot;;
+    public static final String POD_HOMEPAGE = &quot;podHomepage&quot;;
+    public static final String POD_SUMMARY = &quot;podSummary&quot;;
+    public static final String POD_DESCRIPTION = &quot;podDescription&quot;;
+    public static final String POD_SCREENSHOTS = &quot;podScreenshots&quot;;
+    public static final String POD_DOCUMENTATION_URL = &quot;podDocumentationURL&quot;;
+    public static final String READONLY_PROPERTIES = &quot;readonlyProperties&quot;;
+    public static final String SWIFT_USE_API_NAMESPACE = &quot;swiftUseApiNamespace&quot;;
+    public static final String DEFAULT_POD_AUTHORS = &quot;OpenAPI Generator&quot;;
+    public static final String LENIENT_TYPE_CAST = &quot;lenientTypeCast&quot;;
+    public static final String USE_SPM_FILE_STRUCTURE = &quot;useSPMFileStructure&quot;;
+    public static final String SWIFT_PACKAGE_PATH = &quot;swiftPackagePath&quot;;
+    public static final String USE_CLASSES = &quot;useClasses&quot;;
+    public static final String USE_BACKTICK_ESCAPES = &quot;useBacktickEscapes&quot;;
+    public static final String GENERATE_MODEL_ADDITIONAL_PROPERTIES = &quot;generateModelAdditionalProperties&quot;;
+    public static final String HASHABLE_MODELS = &quot;hashableModels&quot;;
+    public static final String USE_JSON_ENCODABLE = &quot;useJsonEncodable&quot;;
+    public static final String MAP_FILE_BINARY_TO_DATA = &quot;mapFileBinaryToData&quot;;
+    public static final String USE_CUSTOM_DATE_WITHOUT_TIME = &quot;useCustomDateWithoutTime&quot;;
+    public static final String VALIDATABLE = &quot;validatable&quot;;
+    protected static final String LIBRARY_ALAMOFIRE = &quot;alamofire&quot;;
+    protected static final String LIBRARY_URLSESSION = &quot;urlsession&quot;;
+    protected static final String LIBRARY_VAPOR = &quot;vapor&quot;;
+    protected static final String RESPONSE_LIBRARY_PROMISE_KIT = &quot;PromiseKit&quot;;
+    protected static final String RESPONSE_LIBRARY_RX_SWIFT = &quot;RxSwift&quot;;
+    protected static final String RESPONSE_LIBRARY_RESULT = &quot;Result&quot;;
+    protected static final String RESPONSE_LIBRARY_COMBINE = &quot;Combine&quot;;
+    protected static final String RESPONSE_LIBRARY_ASYNC_AWAIT = &quot;AsyncAwait&quot;;
+<span class="nc" id="L85">    protected static final String[] RESPONSE_LIBRARIES = {RESPONSE_LIBRARY_PROMISE_KIT, RESPONSE_LIBRARY_RX_SWIFT, RESPONSE_LIBRARY_RESULT, RESPONSE_LIBRARY_COMBINE, RESPONSE_LIBRARY_ASYNC_AWAIT};</span>
+<span class="nc" id="L86">    protected String projectName = &quot;OpenAPIClient&quot;;</span>
+<span class="nc" id="L87">    protected boolean nonPublicApi = false;</span>
+<span class="nc" id="L88">    protected boolean objcCompatible = false;</span>
+<span class="nc" id="L89">    protected boolean lenientTypeCast = false;</span>
+<span class="nc" id="L90">    protected boolean readonlyProperties = false;</span>
+<span class="nc" id="L91">    protected boolean swiftUseApiNamespace = false;</span>
+<span class="nc" id="L92">    protected boolean useSPMFileStructure = false;</span>
+<span class="nc" id="L93">    protected String swiftPackagePath = &quot;Classes&quot; + File.separator + &quot;OpenAPIs&quot;;</span>
+<span class="nc" id="L94">    protected boolean useClasses = false;</span>
+<span class="nc" id="L95">    protected boolean useBacktickEscapes = false;</span>
+<span class="nc" id="L96">    protected boolean generateModelAdditionalProperties = true;</span>
+<span class="nc" id="L97">    protected boolean hashableModels = true;</span>
+<span class="nc" id="L98">    protected boolean useJsonEncodable = true;</span>
+<span class="nc" id="L99">    protected boolean mapFileBinaryToData = false;</span>
+<span class="nc" id="L100">    protected boolean useCustomDateWithoutTime = false;</span>
+<span class="nc" id="L101">    protected boolean validatable = true;</span>
+<span class="nc" id="L102">    protected String[] responseAs = new String[0];</span>
+<span class="nc" id="L103">    protected String sourceFolder = swiftPackagePath;</span>
+    protected HashSet objcReservedWords;
+<span class="nc" id="L105">    protected String apiDocPath = &quot;docs/&quot;;</span>
+<span class="nc" id="L106">    protected String modelDocPath = &quot;docs/&quot;;</span>
+
+    /**
+     * Constructor for the swift5 language codegen module.
+     */
+    public Swift5ClientCodegen() {
+<span class="nc" id="L112">        super();</span>
+<span class="nc" id="L113">        this.useOneOfInterfaces = true;</span>
+
+<span class="nc" id="L115">        generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
+<span class="nc" id="L116">                .stability(Stability.STABLE)</span>
+<span class="nc" id="L117">                .build();</span>
+
+<span class="nc" id="L119">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;swift&quot;;</span>
+<span class="nc" id="L120">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.swift&quot;);</span>
+<span class="nc" id="L121">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.swift&quot;);</span>
+<span class="nc" id="L122">        embeddedTemplateDir = templateDir = &quot;swift5&quot;;</span>
+<span class="nc" id="L123">        apiPackage = File.separator + &quot;APIs&quot;;</span>
+<span class="nc" id="L124">        modelPackage = File.separator + &quot;Models&quot;;</span>
+<span class="nc" id="L125">        modelDocTemplateFiles.put(&quot;model_doc.mustache&quot;, &quot;.md&quot;);</span>
+<span class="nc" id="L126">        apiDocTemplateFiles.put(&quot;api_doc.mustache&quot;, &quot;.md&quot;);</span>
+
+<span class="nc" id="L128">        languageSpecificPrimitives = new HashSet&lt;&gt;(</span>
+<span class="nc" id="L129">                Arrays.asList(</span>
+                        &quot;Int&quot;,
+                        &quot;Int32&quot;,
+                        &quot;Int64&quot;,
+                        &quot;Float&quot;,
+                        &quot;Double&quot;,
+                        &quot;Bool&quot;,
+                        &quot;Void&quot;,
+                        &quot;String&quot;,
+                        &quot;Data&quot;,
+                        &quot;Date&quot;,
+                        &quot;OpenAPIDateWithoutTime&quot;,
+                        &quot;Character&quot;,
+                        &quot;UUID&quot;,
+                        &quot;URL&quot;,
+                        &quot;AnyObject&quot;,
+                        &quot;Any&quot;,
+                        &quot;Decimal&quot;,
+                        &quot;AnyCodable&quot;) // from AnyCodable dependency
+        );
+<span class="nc" id="L149">        defaultIncludes = new HashSet&lt;&gt;(</span>
+<span class="nc" id="L150">                Arrays.asList(</span>
+                        &quot;Data&quot;,
+                        &quot;Date&quot;,
+                        &quot;URL&quot;, // for file
+                        &quot;UUID&quot;,
+                        &quot;Array&quot;,
+                        &quot;Dictionary&quot;,
+                        &quot;Set&quot;,
+                        &quot;Any&quot;,
+                        &quot;Empty&quot;,
+                        &quot;AnyObject&quot;,
+                        &quot;Any&quot;,
+                        &quot;Decimal&quot;)
+        );
+
+<span class="nc" id="L165">        objcReservedWords = new HashSet&lt;&gt;(</span>
+<span class="nc" id="L166">                Arrays.asList(</span>
+                        // Added for Objective-C compatibility
+                        &quot;id&quot;, &quot;description&quot;, &quot;NSArray&quot;, &quot;NSURL&quot;, &quot;CGFloat&quot;, &quot;NSSet&quot;, &quot;NSString&quot;, &quot;NSInteger&quot;, &quot;NSUInteger&quot;,
+                        &quot;NSError&quot;, &quot;NSDictionary&quot;,
+                        // 'Property 'hash' with type 'String' cannot override a property with type 'Int' (when objcCompatible=true)
+                        &quot;hash&quot;,
+                        // Cannot override with a stored property 'className'
+                        &quot;className&quot;
+                )
+        );
+
+<span class="nc" id="L177">        reservedWords = new HashSet&lt;&gt;(</span>
+<span class="nc" id="L178">                Arrays.asList(</span>
+                        // name used by swift client
+                        &quot;ErrorResponse&quot;, &quot;Response&quot;,
+
+                        // Swift keywords. This list is taken from here:
+                        // https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/LexicalStructure.html#//apple_ref/doc/uid/TP40014097-CH30-ID410
+                        //
+                        // Keywords used in declarations
+                        &quot;associatedtype&quot;, &quot;class&quot;, &quot;deinit&quot;, &quot;enum&quot;, &quot;extension&quot;, &quot;fileprivate&quot;, &quot;func&quot;, &quot;import&quot;, &quot;init&quot;,
+                        &quot;inout&quot;, &quot;internal&quot;, &quot;let&quot;, &quot;open&quot;, &quot;operator&quot;, &quot;private&quot;, &quot;protocol&quot;, &quot;public&quot;, &quot;static&quot;, &quot;struct&quot;,
+                        &quot;subscript&quot;, &quot;typealias&quot;, &quot;var&quot;,
+                        // Keywords uses in statements
+                        &quot;break&quot;, &quot;case&quot;, &quot;continue&quot;, &quot;default&quot;, &quot;defer&quot;, &quot;do&quot;, &quot;else&quot;, &quot;fallthrough&quot;, &quot;for&quot;, &quot;guard&quot;, &quot;if&quot;,
+                        &quot;in&quot;, &quot;repeat&quot;, &quot;return&quot;, &quot;switch&quot;, &quot;where&quot;, &quot;while&quot;,
+                        // Keywords used in expressions and types
+                        &quot;as&quot;, &quot;Any&quot;, &quot;catch&quot;, &quot;false&quot;, &quot;is&quot;, &quot;nil&quot;, &quot;rethrows&quot;, &quot;super&quot;, &quot;self&quot;, &quot;Self&quot;, &quot;throw&quot;, &quot;throws&quot;, &quot;true&quot;, &quot;try&quot;,
+                        // Keywords used in patterns
+                        &quot;_&quot;,
+                        // Keywords that begin with a number sign
+                        &quot;#available&quot;, &quot;#colorLiteral&quot;, &quot;#column&quot;, &quot;#else&quot;, &quot;#elseif&quot;, &quot;#endif&quot;, &quot;#file&quot;, &quot;#fileLiteral&quot;, &quot;#function&quot;, &quot;#if&quot;,
+                        &quot;#imageLiteral&quot;, &quot;#line&quot;, &quot;#selector&quot;, &quot;#sourceLocation&quot;,
+                        // Keywords reserved in particular contexts
+                        &quot;associativity&quot;, &quot;convenience&quot;, &quot;dynamic&quot;, &quot;didSet&quot;, &quot;final&quot;, &quot;get&quot;, &quot;infix&quot;, &quot;indirect&quot;, &quot;lazy&quot;, &quot;left&quot;,
+                        &quot;mutating&quot;, &quot;none&quot;, &quot;nonmutating&quot;, &quot;optional&quot;, &quot;override&quot;, &quot;postfix&quot;, &quot;precedence&quot;, &quot;prefix&quot;, &quot;Protocol&quot;,
+                        &quot;required&quot;, &quot;right&quot;, &quot;set&quot;, &quot;Type&quot;, &quot;unowned&quot;, &quot;weak&quot;, &quot;willSet&quot;,
+
+                        //
+                        // Swift Standard Library types
+                        // https://developer.apple.com/documentation/swift
+                        //
+                        // Numbers and Basic Values
+                        &quot;Bool&quot;, &quot;Int&quot;, &quot;Double&quot;, &quot;Float&quot;, &quot;Range&quot;, &quot;ClosedRange&quot;, &quot;Error&quot;, &quot;Optional&quot;,
+                        // Special-Use Numeric Types
+                        &quot;UInt&quot;, &quot;UInt8&quot;, &quot;UInt16&quot;, &quot;UInt32&quot;, &quot;UInt64&quot;, &quot;Int8&quot;, &quot;Int16&quot;, &quot;Int32&quot;, &quot;Int64&quot;, &quot;Float80&quot;, &quot;Float32&quot;, &quot;Float64&quot;,
+                        // Strings and Text
+                        &quot;String&quot;, &quot;Character&quot;, &quot;Unicode&quot;, &quot;StaticString&quot;,
+                        // Collections
+                        &quot;Array&quot;, &quot;Dictionary&quot;, &quot;Set&quot;, &quot;OptionSet&quot;, &quot;CountableRange&quot;, &quot;CountableClosedRange&quot;,
+
+                        // The following are commonly-used Foundation types
+                        &quot;URL&quot;, &quot;Data&quot;, &quot;Codable&quot;, &quot;Encodable&quot;, &quot;Decodable&quot;,
+
+                        // The following are other words we want to reserve
+                        &quot;Void&quot;, &quot;AnyObject&quot;, &quot;Class&quot;, &quot;dynamicType&quot;, &quot;COLUMN&quot;, &quot;FILE&quot;, &quot;FUNCTION&quot;, &quot;LINE&quot;
+                )
+        );
+
+<span class="nc" id="L225">        typeMapping = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L226">        typeMapping.put(&quot;array&quot;, &quot;Array&quot;);</span>
+<span class="nc" id="L227">        typeMapping.put(&quot;map&quot;, &quot;Dictionary&quot;);</span>
+<span class="nc" id="L228">        typeMapping.put(&quot;set&quot;, &quot;Set&quot;);</span>
+<span class="nc" id="L229">        typeMapping.put(&quot;Date&quot;, &quot;Date&quot;);</span>
+<span class="nc" id="L230">        typeMapping.put(&quot;DateTime&quot;, &quot;Date&quot;);</span>
+<span class="nc" id="L231">        typeMapping.put(&quot;boolean&quot;, &quot;Bool&quot;);</span>
+<span class="nc" id="L232">        typeMapping.put(&quot;string&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L233">        typeMapping.put(&quot;char&quot;, &quot;Character&quot;);</span>
+<span class="nc" id="L234">        typeMapping.put(&quot;short&quot;, &quot;Int&quot;);</span>
+<span class="nc" id="L235">        typeMapping.put(&quot;int&quot;, &quot;Int&quot;);</span>
+<span class="nc" id="L236">        typeMapping.put(&quot;long&quot;, &quot;Int64&quot;);</span>
+<span class="nc" id="L237">        typeMapping.put(&quot;integer&quot;, &quot;Int&quot;);</span>
+<span class="nc" id="L238">        typeMapping.put(&quot;Integer&quot;, &quot;Int&quot;);</span>
+<span class="nc" id="L239">        typeMapping.put(&quot;float&quot;, &quot;Float&quot;);</span>
+<span class="nc" id="L240">        typeMapping.put(&quot;number&quot;, &quot;Double&quot;);</span>
+<span class="nc" id="L241">        typeMapping.put(&quot;double&quot;, &quot;Double&quot;);</span>
+<span class="nc" id="L242">        typeMapping.put(&quot;file&quot;, &quot;URL&quot;);</span>
+<span class="nc" id="L243">        typeMapping.put(&quot;binary&quot;, &quot;URL&quot;);</span>
+<span class="nc" id="L244">        typeMapping.put(&quot;ByteArray&quot;, &quot;Data&quot;);</span>
+<span class="nc" id="L245">        typeMapping.put(&quot;UUID&quot;, &quot;UUID&quot;);</span>
+<span class="nc" id="L246">        typeMapping.put(&quot;URI&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L247">        typeMapping.put(&quot;decimal&quot;, &quot;Decimal&quot;);</span>
+<span class="nc" id="L248">        typeMapping.put(&quot;object&quot;, &quot;AnyCodable&quot;);</span>
+<span class="nc" id="L249">        typeMapping.put(&quot;AnyType&quot;, &quot;AnyCodable&quot;);</span>
+
+<span class="nc" id="L251">        importMapping = new HashMap&lt;&gt;();</span>
+
+<span class="nc" id="L253">        cliOptions.add(new CliOption(PROJECT_NAME, &quot;Project name in Xcode&quot;));</span>
+<span class="nc" id="L254">        cliOptions.add(new CliOption(RESPONSE_AS,</span>
+                &quot;Optionally use libraries to manage response.  Currently &quot;
+<span class="nc" id="L256">                        + StringUtils.join(RESPONSE_LIBRARIES, &quot;, &quot;)</span>
+                        + &quot; are available.&quot;));
+<span class="nc" id="L258">        cliOptions.add(new CliOption(CodegenConstants.NON_PUBLIC_API,</span>
+                CodegenConstants.NON_PUBLIC_API_DESC
+                        + &quot;(default: false)&quot;));
+<span class="nc" id="L261">        cliOptions.add(new CliOption(OBJC_COMPATIBLE,</span>
+                &quot;Add additional properties and methods for Objective-C &quot;
+                        + &quot;compatibility (default: false)&quot;));
+<span class="nc" id="L264">        cliOptions.add(new CliOption(POD_SOURCE, &quot;Source information used for Podspec&quot;));</span>
+<span class="nc" id="L265">        cliOptions.add(new CliOption(CodegenConstants.POD_VERSION, &quot;Version used for Podspec&quot;));</span>
+<span class="nc" id="L266">        cliOptions.add(new CliOption(POD_AUTHORS, &quot;Authors used for Podspec&quot;));</span>
+<span class="nc" id="L267">        cliOptions.add(new CliOption(POD_SOCIAL_MEDIA_URL, &quot;Social Media URL used for Podspec&quot;));</span>
+<span class="nc" id="L268">        cliOptions.add(new CliOption(POD_LICENSE, &quot;License used for Podspec&quot;));</span>
+<span class="nc" id="L269">        cliOptions.add(new CliOption(POD_HOMEPAGE, &quot;Homepage used for Podspec&quot;));</span>
+<span class="nc" id="L270">        cliOptions.add(new CliOption(POD_SUMMARY, &quot;Summary used for Podspec&quot;));</span>
+<span class="nc" id="L271">        cliOptions.add(new CliOption(POD_DESCRIPTION, &quot;Description used for Podspec&quot;));</span>
+<span class="nc" id="L272">        cliOptions.add(new CliOption(POD_SCREENSHOTS, &quot;Screenshots used for Podspec&quot;));</span>
+<span class="nc" id="L273">        cliOptions.add(new CliOption(POD_DOCUMENTATION_URL,</span>
+                &quot;Documentation URL used for Podspec&quot;));
+<span class="nc" id="L275">        cliOptions.add(new CliOption(READONLY_PROPERTIES, &quot;Make properties &quot;</span>
+                + &quot;readonly (default: false)&quot;));
+<span class="nc" id="L277">        cliOptions.add(new CliOption(SWIFT_USE_API_NAMESPACE,</span>
+                &quot;Flag to make all the API classes inner-class &quot;
+                        + &quot;of {{projectName}}API&quot;));
+<span class="nc" id="L280">        cliOptions.add(new CliOption(CodegenConstants.HIDE_GENERATION_TIMESTAMP,</span>
+                CodegenConstants.HIDE_GENERATION_TIMESTAMP_DESC)
+<span class="nc" id="L282">                .defaultValue(Boolean.TRUE.toString()));</span>
+<span class="nc" id="L283">        cliOptions.add(new CliOption(LENIENT_TYPE_CAST,</span>
+                &quot;Accept and cast values for simple types (string-&gt;bool, &quot;
+                        + &quot;string-&gt;int, int-&gt;string)&quot;)
+<span class="nc" id="L286">                .defaultValue(Boolean.FALSE.toString()));</span>
+<span class="nc" id="L287">        cliOptions.add(new CliOption(USE_BACKTICK_ESCAPES,</span>
+                &quot;Escape reserved words using backticks (default: false)&quot;)
+<span class="nc" id="L289">                .defaultValue(Boolean.FALSE.toString()));</span>
+<span class="nc" id="L290">        cliOptions.add(new CliOption(GENERATE_MODEL_ADDITIONAL_PROPERTIES,</span>
+                &quot;Generate model additional properties (default: true)&quot;)
+<span class="nc" id="L292">                .defaultValue(Boolean.TRUE.toString()));</span>
+
+<span class="nc" id="L294">        cliOptions.add(new CliOption(CodegenConstants.API_NAME_PREFIX, CodegenConstants.API_NAME_PREFIX_DESC));</span>
+<span class="nc" id="L295">        cliOptions.add(new CliOption(USE_SPM_FILE_STRUCTURE, &quot;Use SPM file structure&quot;</span>
+                + &quot; and set the source path to Sources&quot; + File.separator + &quot;{{projectName}} (default: false).&quot;));
+<span class="nc" id="L297">        cliOptions.add(new CliOption(SWIFT_PACKAGE_PATH, &quot;Set a custom source path instead of &quot;</span>
+                + projectName + File.separator + &quot;Classes&quot; + File.separator + &quot;OpenAPIs&quot; + &quot;.&quot;));
+<span class="nc" id="L299">        cliOptions.add(new CliOption(USE_CLASSES, &quot;Use final classes for models instead of structs (default: false)&quot;)</span>
+<span class="nc" id="L300">                .defaultValue(Boolean.FALSE.toString()));</span>
+
+<span class="nc" id="L302">        cliOptions.add(new CliOption(HASHABLE_MODELS,</span>
+                &quot;Make hashable models (default: true)&quot;)
+<span class="nc" id="L304">                .defaultValue(Boolean.TRUE.toString()));</span>
+
+<span class="nc" id="L306">        cliOptions.add(new CliOption(USE_JSON_ENCODABLE,</span>
+                &quot;Make models conform to JSONEncodable protocol (default: true)&quot;)
+<span class="nc" id="L308">                .defaultValue(Boolean.TRUE.toString()));</span>
+
+<span class="nc" id="L310">        cliOptions.add(new CliOption(MAP_FILE_BINARY_TO_DATA,</span>
+                &quot;[WARNING] This option will be removed and enabled by default in the future once we've enhanced the code to work with `Data` in all the different situations. Map File and Binary to Data (default: false)&quot;)
+<span class="nc" id="L312">                .defaultValue(Boolean.FALSE.toString()));</span>
+
+<span class="nc" id="L314">        cliOptions.add(new CliOption(USE_CUSTOM_DATE_WITHOUT_TIME,</span>
+                &quot;Uses a custom type to decode and encode dates without time information to support OpenAPIs date format (default: false)&quot;)
+<span class="nc" id="L316">                .defaultValue(Boolean.FALSE.toString()));</span>
+
+<span class="nc" id="L318">        cliOptions.add(new CliOption(VALIDATABLE,</span>
+                &quot;Make validation rules and validator for model properies (default: true)&quot;)
+<span class="nc" id="L320">                .defaultValue(Boolean.TRUE.toString()));</span>
+
+<span class="nc" id="L322">        supportedLibraries.put(LIBRARY_URLSESSION, &quot;[DEFAULT] HTTP client: URLSession&quot;);</span>
+<span class="nc" id="L323">        supportedLibraries.put(LIBRARY_ALAMOFIRE, &quot;HTTP client: Alamofire&quot;);</span>
+<span class="nc" id="L324">        supportedLibraries.put(LIBRARY_VAPOR, &quot;HTTP client: Vapor&quot;);</span>
+
+<span class="nc" id="L326">        CliOption libraryOption = new CliOption(CodegenConstants.LIBRARY, &quot;Library template (sub-template) to use&quot;);</span>
+<span class="nc" id="L327">        libraryOption.setEnum(supportedLibraries);</span>
+<span class="nc" id="L328">        libraryOption.setDefault(LIBRARY_URLSESSION);</span>
+<span class="nc" id="L329">        cliOptions.add(libraryOption);</span>
+<span class="nc" id="L330">        setLibrary(LIBRARY_URLSESSION);</span>
+<span class="nc" id="L331">    }</span>
+
+    private static CodegenModel reconcileProperties(CodegenModel codegenModel,
+                                                    CodegenModel parentCodegenModel) {
+        // To support inheritance in this generator, we will analyze
+        // the parent and child models, look for properties that match, and remove
+        // them from the child models and leave them in the parent.
+        // Because the child models extend the parents, the properties
+        // will be available via the parent.
+
+        // Get the properties for the parent and child models
+<span class="nc" id="L342">        final List&lt;CodegenProperty&gt; parentModelCodegenProperties = parentCodegenModel.vars;</span>
+<span class="nc" id="L343">        List&lt;CodegenProperty&gt; codegenProperties = codegenModel.vars;</span>
+<span class="nc" id="L344">        codegenModel.allVars = new ArrayList&lt;CodegenProperty&gt;(codegenProperties);</span>
+<span class="nc" id="L345">        codegenModel.parentVars = parentCodegenModel.allVars;</span>
+
+        // Iterate over all of the parent model properties
+<span class="nc" id="L348">        boolean removedChildProperty = false;</span>
+
+<span class="nc bnc" id="L350" title="All 2 branches missed.">        for (CodegenProperty parentModelCodegenProperty : parentModelCodegenProperties) {</span>
+            // Now that we have found a prop in the parent class,
+            // and search the child class for the same prop.
+<span class="nc" id="L353">            Iterator&lt;CodegenProperty&gt; iterator = codegenProperties.iterator();</span>
+<span class="nc bnc" id="L354" title="All 2 branches missed.">            while (iterator.hasNext()) {</span>
+<span class="nc" id="L355">                CodegenProperty codegenProperty = iterator.next();</span>
+<span class="nc bnc" id="L356" title="All 2 branches missed.">                if (codegenProperty.baseName.equals(parentModelCodegenProperty.baseName)) {</span>
+                    // We found a property in the child class that is
+                    // a duplicate of the one in the parent, so remove it.
+<span class="nc" id="L359">                    iterator.remove();</span>
+<span class="nc" id="L360">                    removedChildProperty = true;</span>
+                }
+<span class="nc" id="L362">            }</span>
+<span class="nc" id="L363">        }</span>
+
+<span class="nc bnc" id="L365" title="All 2 branches missed.">        if (removedChildProperty) {</span>
+<span class="nc" id="L366">            codegenModel.vars = codegenProperties;</span>
+        }
+
+
+<span class="nc" id="L370">        return codegenModel;</span>
+    }
+
+    @Override
+    public CodegenType getTag() {
+<span class="nc" id="L375">        return CodegenType.CLIENT;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L380">        return &quot;swift5&quot;;</span>
+    }
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L385">        return &quot;Generates a Swift 5.x client library.&quot;;</span>
+    }
+
+    @Override
+    protected void addAdditionPropertiesToCodeGenModel(CodegenModel codegenModel,
+                                                       Schema schema) {
+
+<span class="nc" id="L392">        final Schema additionalProperties = ModelUtils.getAdditionalProperties(schema);</span>
+
+<span class="nc bnc" id="L394" title="All 2 branches missed.">        if (additionalProperties != null) {</span>
+<span class="nc" id="L395">            Schema inner = null;</span>
+<span class="nc bnc" id="L396" title="All 2 branches missed.">            if (ModelUtils.isArraySchema(schema)) {</span>
+<span class="nc" id="L397">                inner = ModelUtils.getSchemaItems(schema);</span>
+<span class="nc bnc" id="L398" title="All 2 branches missed.">            } else if (ModelUtils.isMapSchema(schema)) {</span>
+<span class="nc" id="L399">                inner = ModelUtils.getAdditionalProperties(schema);</span>
+            }
+
+<span class="nc bnc" id="L402" title="All 2 branches missed.">            codegenModel.additionalPropertiesType = inner != null ? getTypeDeclaration(inner) : getSchemaType(additionalProperties);</span>
+        }
+<span class="nc" id="L404">    }</span>
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L408">        super.processOpts();</span>
+
+<span class="nc bnc" id="L410" title="All 2 branches missed.">        if (StringUtils.isEmpty(System.getenv(&quot;SWIFT_POST_PROCESS_FILE&quot;))) {</span>
+<span class="nc" id="L411">            LOGGER.info(&quot;Environment variable SWIFT_POST_PROCESS_FILE not defined so the Swift code may not be properly formatted. To define it, try 'export SWIFT_POST_PROCESS_FILE=/usr/local/bin/swiftformat' (Linux/Mac)&quot;);</span>
+<span class="nc" id="L412">            LOGGER.info(&quot;NOTE: To enable file post-processing, 'enablePostProcessFile' must be set to `true` (--enable-post-process-file for CLI).&quot;);</span>
+        }
+
+        // Setup project name
+<span class="nc bnc" id="L416" title="All 2 branches missed.">        if (additionalProperties.containsKey(PROJECT_NAME)) {</span>
+<span class="nc" id="L417">            setProjectName((String) additionalProperties.get(PROJECT_NAME));</span>
+        } else {
+<span class="nc" id="L419">            additionalProperties.put(PROJECT_NAME, projectName);</span>
+        }
+<span class="nc" id="L421">        sourceFolder = projectName + File.separator + sourceFolder;</span>
+
+        // Setup nonPublicApi option, which generates code with reduced access
+        // modifiers; allows embedding elsewhere without exposing non-public API calls
+        // to consumers
+<span class="nc bnc" id="L426" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.NON_PUBLIC_API)) {</span>
+<span class="nc" id="L427">            setNonPublicApi(convertPropertyToBooleanAndWriteBack(CodegenConstants.NON_PUBLIC_API));</span>
+        }
+<span class="nc" id="L429">        additionalProperties.put(CodegenConstants.NON_PUBLIC_API, nonPublicApi);</span>
+
+        // Setup objcCompatible option, which adds additional properties
+        // and methods for Objective-C compatibility
+<span class="nc bnc" id="L433" title="All 2 branches missed.">        if (additionalProperties.containsKey(OBJC_COMPATIBLE)) {</span>
+<span class="nc" id="L434">            setObjcCompatible(convertPropertyToBooleanAndWriteBack(OBJC_COMPATIBLE));</span>
+        }
+<span class="nc" id="L436">        additionalProperties.put(OBJC_COMPATIBLE, objcCompatible);</span>
+
+        // add objc reserved words
+<span class="nc bnc" id="L439" title="All 2 branches missed.">        if (Boolean.TRUE.equals(objcCompatible)) {</span>
+<span class="nc" id="L440">            reservedWords.addAll(objcReservedWords);</span>
+        }
+
+<span class="nc bnc" id="L443" title="All 2 branches missed.">        if (additionalProperties.containsKey(RESPONSE_AS)) {</span>
+<span class="nc" id="L444">            Object responseAsObject = additionalProperties.get(RESPONSE_AS);</span>
+<span class="nc bnc" id="L445" title="All 2 branches missed.">            if (responseAsObject instanceof String) {</span>
+<span class="nc" id="L446">                setResponseAs(((String) responseAsObject).split(&quot;,&quot;));</span>
+            } else {
+<span class="nc" id="L448">                setResponseAs((String[]) responseAsObject);</span>
+            }
+        }
+<span class="nc" id="L451">        additionalProperties.put(RESPONSE_AS, responseAs);</span>
+<span class="nc bnc" id="L452" title="All 2 branches missed.">        if (ArrayUtils.contains(responseAs, RESPONSE_LIBRARY_PROMISE_KIT)) {</span>
+<span class="nc" id="L453">            additionalProperties.put(&quot;usePromiseKit&quot;, true);</span>
+        }
+<span class="nc bnc" id="L455" title="All 2 branches missed.">        if (ArrayUtils.contains(responseAs, RESPONSE_LIBRARY_RX_SWIFT)) {</span>
+<span class="nc" id="L456">            additionalProperties.put(&quot;useRxSwift&quot;, true);</span>
+        }
+<span class="nc bnc" id="L458" title="All 2 branches missed.">        if (ArrayUtils.contains(responseAs, RESPONSE_LIBRARY_RESULT)) {</span>
+<span class="nc" id="L459">            additionalProperties.put(&quot;useResult&quot;, true);</span>
+        }
+<span class="nc bnc" id="L461" title="All 2 branches missed.">        if (ArrayUtils.contains(responseAs, RESPONSE_LIBRARY_COMBINE)) {</span>
+<span class="nc" id="L462">            additionalProperties.put(&quot;useCombine&quot;, true);</span>
+        }
+<span class="nc bnc" id="L464" title="All 2 branches missed.">        if (ArrayUtils.contains(responseAs, RESPONSE_LIBRARY_ASYNC_AWAIT)) {</span>
+<span class="nc" id="L465">            additionalProperties.put(&quot;useAsyncAwait&quot;, true);</span>
+        }
+
+        // Setup readonlyProperties option, which declares properties so they can only
+        // be set at initialization
+<span class="nc bnc" id="L470" title="All 2 branches missed.">        if (additionalProperties.containsKey(READONLY_PROPERTIES)) {</span>
+<span class="nc" id="L471">            setReadonlyProperties(convertPropertyToBooleanAndWriteBack(READONLY_PROPERTIES));</span>
+        }
+<span class="nc" id="L473">        additionalProperties.put(READONLY_PROPERTIES, readonlyProperties);</span>
+
+        // Setup swiftUseApiNamespace option, which makes all the API
+        // classes inner-class of {{projectName}}API
+<span class="nc bnc" id="L477" title="All 2 branches missed.">        if (additionalProperties.containsKey(SWIFT_USE_API_NAMESPACE)) {</span>
+<span class="nc" id="L478">            setSwiftUseApiNamespace(convertPropertyToBooleanAndWriteBack(SWIFT_USE_API_NAMESPACE));</span>
+        }
+
+<span class="nc bnc" id="L481" title="All 2 branches missed.">        if (!additionalProperties.containsKey(POD_AUTHORS)) {</span>
+<span class="nc" id="L482">            additionalProperties.put(POD_AUTHORS, DEFAULT_POD_AUTHORS);</span>
+        }
+
+<span class="nc bnc" id="L485" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_SPM_FILE_STRUCTURE)) {</span>
+<span class="nc" id="L486">            setUseSPMFileStructure(convertPropertyToBooleanAndWriteBack(USE_SPM_FILE_STRUCTURE));</span>
+<span class="nc" id="L487">            sourceFolder = &quot;Sources&quot; + File.separator + projectName;</span>
+        }
+
+<span class="nc bnc" id="L490" title="All 4 branches missed.">        if (additionalProperties.containsKey(SWIFT_PACKAGE_PATH) &amp;&amp; ((String) additionalProperties.get(SWIFT_PACKAGE_PATH)).length() &gt; 0) {</span>
+<span class="nc" id="L491">            setSwiftPackagePath((String) additionalProperties.get(SWIFT_PACKAGE_PATH));</span>
+<span class="nc" id="L492">            sourceFolder = swiftPackagePath;</span>
+        }
+
+<span class="nc bnc" id="L495" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_BACKTICK_ESCAPES)) {</span>
+<span class="nc" id="L496">            setUseBacktickEscapes(convertPropertyToBooleanAndWriteBack(USE_BACKTICK_ESCAPES));</span>
+        }
+
+<span class="nc bnc" id="L499" title="All 2 branches missed.">        if (additionalProperties.containsKey(GENERATE_MODEL_ADDITIONAL_PROPERTIES)) {</span>
+<span class="nc" id="L500">            setGenerateModelAdditionalProperties(convertPropertyToBooleanAndWriteBack(GENERATE_MODEL_ADDITIONAL_PROPERTIES));</span>
+        }
+<span class="nc" id="L502">        additionalProperties.put(GENERATE_MODEL_ADDITIONAL_PROPERTIES, generateModelAdditionalProperties);</span>
+
+<span class="nc bnc" id="L504" title="All 2 branches missed.">        if (additionalProperties.containsKey(HASHABLE_MODELS)) {</span>
+<span class="nc" id="L505">            setHashableModels(convertPropertyToBooleanAndWriteBack(HASHABLE_MODELS));</span>
+        }
+<span class="nc" id="L507">        additionalProperties.put(HASHABLE_MODELS, hashableModels);</span>
+
+<span class="nc bnc" id="L509" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_JSON_ENCODABLE)) {</span>
+<span class="nc" id="L510">            setUseJsonEncodable(convertPropertyToBooleanAndWriteBack(USE_JSON_ENCODABLE));</span>
+        }
+<span class="nc" id="L512">        additionalProperties.put(USE_JSON_ENCODABLE, useJsonEncodable);</span>
+
+<span class="nc bnc" id="L514" title="All 2 branches missed.">        if (additionalProperties.containsKey(MAP_FILE_BINARY_TO_DATA)) {</span>
+<span class="nc" id="L515">            setMapFileBinaryToData(convertPropertyToBooleanAndWriteBack(MAP_FILE_BINARY_TO_DATA));</span>
+        }
+<span class="nc" id="L517">        additionalProperties.put(MAP_FILE_BINARY_TO_DATA, mapFileBinaryToData);</span>
+<span class="nc bnc" id="L518" title="All 2 branches missed.">        if (mapFileBinaryToData) {</span>
+<span class="nc" id="L519">            typeMapping.put(&quot;file&quot;, &quot;Data&quot;);</span>
+<span class="nc" id="L520">            typeMapping.put(&quot;binary&quot;, &quot;Data&quot;);</span>
+        }
+
+<span class="nc bnc" id="L523" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_CUSTOM_DATE_WITHOUT_TIME)) {</span>
+<span class="nc" id="L524">            setUseCustomDateWithoutTime(convertPropertyToBooleanAndWriteBack(USE_CUSTOM_DATE_WITHOUT_TIME));</span>
+        }
+<span class="nc" id="L526">        additionalProperties.put(USE_CUSTOM_DATE_WITHOUT_TIME, useCustomDateWithoutTime);</span>
+<span class="nc bnc" id="L527" title="All 2 branches missed.">        if (useCustomDateWithoutTime) {</span>
+<span class="nc" id="L528">            typeMapping.put(&quot;date&quot;, &quot;OpenAPIDateWithoutTime&quot;);</span>
+        } else {
+<span class="nc" id="L530">            typeMapping.put(&quot;date&quot;, &quot;Date&quot;);</span>
+        }
+
+<span class="nc bnc" id="L533" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_CLASSES)) {</span>
+<span class="nc" id="L534">            setUseClasses(convertPropertyToBooleanAndWriteBack(USE_CLASSES));</span>
+        }
+<span class="nc" id="L536">        additionalProperties.put(USE_CLASSES, useClasses);</span>
+
+<span class="nc bnc" id="L538" title="All 2 branches missed.">        if (additionalProperties.containsKey(VALIDATABLE)) {</span>
+<span class="nc" id="L539">            setValidatable(convertPropertyToBooleanAndWriteBack(VALIDATABLE));</span>
+        }
+<span class="nc" id="L541">        additionalProperties.put(VALIDATABLE, validatable);</span>
+
+<span class="nc" id="L543">        setLenientTypeCast(convertPropertyToBooleanAndWriteBack(LENIENT_TYPE_CAST));</span>
+
+        // make api and model doc path available in mustache template
+<span class="nc" id="L546">        additionalProperties.put(&quot;apiDocPath&quot;, apiDocPath);</span>
+<span class="nc" id="L547">        additionalProperties.put(&quot;modelDocPath&quot;, modelDocPath);</span>
+
+<span class="nc bnc" id="L549" title="All 2 branches missed.">        if (!getLibrary().equals(LIBRARY_VAPOR)) {</span>
+<span class="nc" id="L550">            supportingFiles.add(new SupportingFile(&quot;Podspec.mustache&quot;,</span>
+                    &quot;&quot;,
+                    projectName + &quot;.podspec&quot;));
+<span class="nc" id="L553">            supportingFiles.add(new SupportingFile(&quot;Cartfile.mustache&quot;,</span>
+                    &quot;&quot;,
+                    &quot;Cartfile&quot;));
+<span class="nc" id="L556">            supportingFiles.add(new SupportingFile(&quot;CodableHelper.mustache&quot;,</span>
+                    sourceFolder,
+                    &quot;CodableHelper.swift&quot;));
+<span class="nc" id="L559">            supportingFiles.add(new SupportingFile(&quot;JSONDataEncoding.mustache&quot;,</span>
+                    sourceFolder,
+                    &quot;JSONDataEncoding.swift&quot;));
+<span class="nc" id="L562">            supportingFiles.add(new SupportingFile(&quot;JSONEncodingHelper.mustache&quot;,</span>
+                    sourceFolder,
+                    &quot;JSONEncodingHelper.swift&quot;));
+<span class="nc" id="L565">            supportingFiles.add(new SupportingFile(&quot;git_push.sh.mustache&quot;,</span>
+                    &quot;&quot;,
+                    &quot;git_push.sh&quot;));
+<span class="nc" id="L568">            supportingFiles.add(new SupportingFile(&quot;SynchronizedDictionary.mustache&quot;,</span>
+                    sourceFolder,
+                    &quot;SynchronizedDictionary.swift&quot;));
+<span class="nc" id="L571">            supportingFiles.add(new SupportingFile(&quot;XcodeGen.mustache&quot;,</span>
+                    &quot;&quot;,
+                    &quot;project.yml&quot;));
+<span class="nc" id="L574">            supportingFiles.add(new SupportingFile(&quot;APIHelper.mustache&quot;,</span>
+                    sourceFolder,
+                    &quot;APIHelper.swift&quot;));
+<span class="nc" id="L577">            supportingFiles.add(new SupportingFile(&quot;Models.mustache&quot;,</span>
+                    sourceFolder,
+                    &quot;Models.swift&quot;));
+        }
+<span class="nc" id="L581">        supportingFiles.add(new SupportingFile(&quot;Package.swift.mustache&quot;,</span>
+                &quot;&quot;,
+                &quot;Package.swift&quot;));
+<span class="nc" id="L584">        supportingFiles.add(new SupportingFile(&quot;Configuration.mustache&quot;,</span>
+                sourceFolder,
+                &quot;Configuration.swift&quot;));
+<span class="nc" id="L587">        supportingFiles.add(new SupportingFile(&quot;Extensions.mustache&quot;,</span>
+                sourceFolder,
+                &quot;Extensions.swift&quot;));
+<span class="nc" id="L590">        supportingFiles.add(new SupportingFile(&quot;OpenISO8601DateFormatter.mustache&quot;,</span>
+                sourceFolder,
+                &quot;OpenISO8601DateFormatter.swift&quot;));
+<span class="nc bnc" id="L593" title="All 2 branches missed.">        if (useCustomDateWithoutTime) {</span>
+<span class="nc" id="L594">            supportingFiles.add(new SupportingFile(&quot;OpenAPIDateWithoutTime.mustache&quot;,</span>
+                    sourceFolder,
+                    &quot;OpenAPIDateWithoutTime.swift&quot;));
+        }
+<span class="nc" id="L598">        supportingFiles.add(new SupportingFile(&quot;APIs.mustache&quot;,</span>
+                sourceFolder,
+                &quot;APIs.swift&quot;));
+<span class="nc bnc" id="L601" title="All 2 branches missed.">        if (validatable) {</span>
+<span class="nc" id="L602">            supportingFiles.add(new SupportingFile(&quot;Validation.mustache&quot;,</span>
+                    sourceFolder,
+                    &quot;Validation.swift&quot;));
+        }
+<span class="nc" id="L606">        supportingFiles.add(new SupportingFile(&quot;gitignore.mustache&quot;,</span>
+                &quot;&quot;,
+                &quot;.gitignore&quot;));
+<span class="nc" id="L609">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;,</span>
+                &quot;&quot;,
+                &quot;README.md&quot;));
+<span class="nc" id="L612">        supportingFiles.add(new SupportingFile(&quot;swiftformat.mustache&quot;,</span>
+                &quot;&quot;,
+                &quot;.swiftformat&quot;));
+
+<span class="nc bnc" id="L616" title="All 4 branches missed.">        switch (getLibrary()) {</span>
+            case LIBRARY_ALAMOFIRE:
+<span class="nc" id="L618">                additionalProperties.put(&quot;useAlamofire&quot;, true);</span>
+<span class="nc" id="L619">                supportingFiles.add(new SupportingFile(&quot;AlamofireImplementations.mustache&quot;,</span>
+                        sourceFolder,
+                        &quot;AlamofireImplementations.swift&quot;));
+<span class="nc" id="L622">                break;</span>
+            case LIBRARY_URLSESSION:
+<span class="nc" id="L624">                additionalProperties.put(&quot;useURLSession&quot;, true);</span>
+<span class="nc" id="L625">                supportingFiles.add(new SupportingFile(&quot;URLSessionImplementations.mustache&quot;,</span>
+                        sourceFolder,
+                        &quot;URLSessionImplementations.swift&quot;));
+<span class="nc" id="L628">                break;</span>
+            case LIBRARY_VAPOR:
+<span class="nc" id="L630">                additionalProperties.put(&quot;useVapor&quot;, true);</span>
+<span class="nc" id="L631">                break;</span>
+            default:
+                break;
+        }
+
+<span class="nc" id="L636">    }</span>
+
+    public boolean isMapFileBinaryToData() {
+<span class="nc" id="L639">        return mapFileBinaryToData;</span>
+    }
+
+    public void setMapFileBinaryToData(boolean mapFileBinaryToData) {
+<span class="nc" id="L643">        this.mapFileBinaryToData = mapFileBinaryToData;</span>
+<span class="nc" id="L644">    }</span>
+
+    public void setUseCustomDateWithoutTime(boolean useCustomDateWithoutTime) {
+<span class="nc" id="L647">        this.useCustomDateWithoutTime = useCustomDateWithoutTime;</span>
+<span class="nc" id="L648">    }</span>
+
+    @Override
+    protected boolean isReservedWord(String word) {
+<span class="nc bnc" id="L652" title="All 4 branches missed.">        return word != null &amp;&amp; reservedWords.contains(word); //don't lowercase as super does</span>
+    }
+
+    @Override
+    public String escapeReservedWord(String name) {
+<span class="nc bnc" id="L657" title="All 2 branches missed.">        if (this.reservedWordsMappings().containsKey(name)) {</span>
+<span class="nc" id="L658">            return this.reservedWordsMappings().get(name);</span>
+        }
+<span class="nc bnc" id="L660" title="All 4 branches missed.">        return useBacktickEscapes &amp;&amp; !objcCompatible ? &quot;`&quot; + name + &quot;`&quot; : &quot;_&quot; + name;</span>
+    }
+
+    @Override
+    public String modelFileFolder() {
+<span class="nc" id="L665">        return outputFolder + File.separator + sourceFolder</span>
+<span class="nc" id="L666">                + modelPackage().replace('.', File.separatorChar);</span>
+    }
+
+    @Override
+    public String apiFileFolder() {
+<span class="nc" id="L671">        return outputFolder + File.separator + sourceFolder</span>
+<span class="nc" id="L672">                + apiPackage().replace('.', File.separatorChar);</span>
+    }
+
+    @Override
+    public String getTypeDeclaration(Schema p) {
+<span class="nc bnc" id="L677" title="All 2 branches missed.">        if (ModelUtils.isArraySchema(p)) {</span>
+<span class="nc" id="L678">            Schema inner = ModelUtils.getSchemaItems(p);</span>
+<span class="nc bnc" id="L679" title="All 2 branches missed.">            return ModelUtils.isSet(p) ? &quot;Set&lt;&quot; + getTypeDeclaration(inner) + &quot;&gt;&quot; : &quot;[&quot; + getTypeDeclaration(inner) + &quot;]&quot;;</span>
+<span class="nc bnc" id="L680" title="All 2 branches missed.">        } else if (ModelUtils.isMapSchema(p)) {</span>
+<span class="nc" id="L681">            Schema inner = ModelUtils.getAdditionalProperties(p);</span>
+<span class="nc" id="L682">            return &quot;[String: &quot; + getTypeDeclaration(inner) + &quot;]&quot;;</span>
+        }
+<span class="nc" id="L684">        return super.getTypeDeclaration(p);</span>
+    }
+
+    @Override
+    public String getSchemaType(Schema p) {
+<span class="nc" id="L689">        String openAPIType = super.getSchemaType(p);</span>
+        String type;
+<span class="nc bnc" id="L691" title="All 2 branches missed.">        if (typeMapping.containsKey(openAPIType)) {</span>
+<span class="nc" id="L692">            type = typeMapping.get(openAPIType);</span>
+<span class="nc bnc" id="L693" title="All 4 branches missed.">            if (languageSpecificPrimitives.contains(type) || defaultIncludes.contains(type)) {</span>
+<span class="nc" id="L694">                return type;</span>
+            }
+        } else {
+<span class="nc" id="L697">            type = openAPIType;</span>
+        }
+<span class="nc" id="L699">        return toModelName(type);</span>
+    }
+
+    @Override
+    public boolean isDataTypeFile(String dataType) {
+<span class="nc" id="L704">        return &quot;URL&quot;.equals(dataType);</span>
+    }
+
+    @Override
+    public boolean isDataTypeBinary(final String dataType) {
+<span class="nc" id="L709">        return &quot;Data&quot;.equals(dataType);</span>
+    }
+
+    /**
+     * Output the proper model name (capitalized).
+     *
+     * @param name the name of the model
+     * @return capitalized model name
+     */
+    @Override
+    public String toModelName(String name) {
+        // FIXME parameter should not be assigned. Also declare it as &quot;final&quot;
+<span class="nc" id="L721">        name = sanitizeName(name);</span>
+
+<span class="nc bnc" id="L723" title="All 4 branches missed.">        if (!StringUtils.isEmpty(modelNameSuffix) &amp;&amp; !isLanguageSpecificType(name)) { // set model suffix</span>
+<span class="nc" id="L724">            name = name + &quot;_&quot; + modelNameSuffix;</span>
+        }
+
+<span class="nc bnc" id="L727" title="All 4 branches missed.">        if (!StringUtils.isEmpty(modelNamePrefix) &amp;&amp; !isLanguageSpecificType(name)) { // set model prefix</span>
+<span class="nc" id="L728">            name = modelNamePrefix + &quot;_&quot; + name;</span>
+        }
+
+        // camelize the model name
+        // phone_number =&gt; PhoneNumber
+<span class="nc" id="L733">        name = camelize(name);</span>
+
+        // model name cannot use reserved keyword, e.g. return
+<span class="nc bnc" id="L736" title="All 2 branches missed.">        if (isReservedWord(name)) {</span>
+<span class="nc" id="L737">            String modelName = &quot;Model&quot; + name;</span>
+<span class="nc" id="L738">            LOGGER.warn(&quot;{} (reserved word) cannot be used as model name. Renamed to {}&quot;, name, modelName);</span>
+<span class="nc" id="L739">            return modelName;</span>
+        }
+
+        // model name starts with number
+<span class="nc bnc" id="L743" title="All 2 branches missed.">        if (name.matches(&quot;^\\d.*&quot;)) {</span>
+            // e.g. 200Response =&gt; Model200Response (after camelize)
+<span class="nc" id="L745">            String modelName = &quot;Model&quot; + name;</span>
+<span class="nc" id="L746">            LOGGER.warn(&quot;{} (model name starts with number) cannot be used as model name. Renamed to {}&quot;, name,</span>
+                    modelName);
+<span class="nc" id="L748">            return modelName;</span>
+        }
+
+<span class="nc" id="L751">        return name;</span>
+    }
+
+    /**
+     * Return the capitalized file name of the model.
+     *
+     * @param name the model name
+     * @return the file name of the model
+     */
+    @Override
+    public String toModelFilename(String name) {
+        // should be the same as the model name
+<span class="nc" id="L763">        return toModelName(name);</span>
+    }
+
+    @Override
+    public String toDefaultValue(Schema p) {
+<span class="nc bnc" id="L768" title="All 4 branches missed.">        if (p.getEnum() != null &amp;&amp; !p.getEnum().isEmpty()) {</span>
+<span class="nc bnc" id="L769" title="All 2 branches missed.">            if (p.getDefault() != null) {</span>
+<span class="nc" id="L770">                return &quot;.&quot; + toEnumVarName(escapeText(String.valueOf(p.getDefault())), p.getType());</span>
+            }
+        }
+<span class="nc bnc" id="L773" title="All 2 branches missed.">        if (p.getDefault() != null) {</span>
+<span class="nc bnc" id="L774" title="All 6 branches missed.">            if (ModelUtils.isIntegerSchema(p) || ModelUtils.isNumberSchema(p) || ModelUtils.isBooleanSchema(p)) {</span>
+<span class="nc" id="L775">                return p.getDefault().toString();</span>
+<span class="nc bnc" id="L776" title="All 2 branches missed.">            } else if (ModelUtils.isDateTimeSchema(p)) {</span>
+                // Datetime time stamps in Swift are expressed as Seconds with Microsecond precision.
+                // In Java, we need to be creative to get the Timestamp in Microseconds as a long.
+<span class="nc" id="L779">                Instant instant = ((OffsetDateTime) p.getDefault()).toInstant();</span>
+<span class="nc" id="L780">                long epochMicro = TimeUnit.SECONDS.toMicros(instant.getEpochSecond()) + (instant.get(ChronoField.MICRO_OF_SECOND));</span>
+<span class="nc" id="L781">                return &quot;Date(timeIntervalSince1970: &quot; + epochMicro + &quot;.0 / 1_000_000)&quot;;</span>
+<span class="nc bnc" id="L782" title="All 2 branches missed.">            } else if (ModelUtils.isStringSchema(p)) {</span>
+<span class="nc" id="L783">                return &quot;\&quot;&quot; + escapeText(String.valueOf(p.getDefault())) + &quot;\&quot;&quot;;</span>
+            }
+            // TODO: Handle more cases from `ModelUtils`, such as Date
+        }
+<span class="nc" id="L787">        return null;</span>
+    }
+
+    @Override
+    public String toInstantiationType(Schema p) {
+<span class="nc bnc" id="L792" title="All 2 branches missed.">        if (ModelUtils.isMapSchema(p)) {</span>
+<span class="nc" id="L793">            return getSchemaType(ModelUtils.getAdditionalProperties(p));</span>
+<span class="nc bnc" id="L794" title="All 2 branches missed.">        } else if (ModelUtils.isArraySchema(p)) {</span>
+<span class="nc" id="L795">            String inner = getSchemaType(ModelUtils.getSchemaItems(p));</span>
+<span class="nc bnc" id="L796" title="All 2 branches missed.">            return ModelUtils.isSet(p) ? &quot;Set&lt;&quot; + inner + &quot;&gt;&quot; : &quot;[&quot; + inner + &quot;]&quot;;</span>
+        }
+<span class="nc" id="L798">        return null;</span>
+    }
+
+    @Override
+    public String toApiName(String name) {
+<span class="nc bnc" id="L803" title="All 2 branches missed.">        if (name.length() == 0) {</span>
+<span class="nc" id="L804">            return &quot;DefaultAPI&quot;;</span>
+        }
+<span class="nc" id="L806">        return camelize(apiNamePrefix + &quot;_&quot; + name) + &quot;API&quot;;</span>
+    }
+
+    @Override
+    public String apiDocFileFolder() {
+<span class="nc" id="L811">        return (outputFolder + &quot;/&quot; + apiDocPath).replace(&quot;/&quot;, File.separator);</span>
+    }
+
+    @Override
+    public String modelDocFileFolder() {
+<span class="nc" id="L816">        return (outputFolder + &quot;/&quot; + modelDocPath).replace(&quot;/&quot;, File.separator);</span>
+    }
+
+    @Override
+    public String toModelDocFilename(String name) {
+<span class="nc" id="L821">        return toModelName(name);</span>
+    }
+
+    @Override
+    public String toApiDocFilename(String name) {
+<span class="nc" id="L826">        return toApiName(name);</span>
+    }
+
+    @Override
+    public String toOperationId(String operationId) {
+<span class="nc" id="L831">        operationId = camelize(sanitizeName(operationId), LOWERCASE_FIRST_LETTER);</span>
+
+        // Throw exception if method name is empty.
+        // This should not happen but keep the check just in case
+<span class="nc bnc" id="L835" title="All 2 branches missed.">        if (StringUtils.isEmpty(operationId)) {</span>
+<span class="nc" id="L836">            throw new RuntimeException(&quot;Empty method name (operationId) not allowed&quot;);</span>
+        }
+
+        // method name cannot use reserved keyword, e.g. return
+<span class="nc bnc" id="L840" title="All 2 branches missed.">        if (isReservedWord(operationId)) {</span>
+<span class="nc" id="L841">            String newOperationId = camelize((&quot;call_&quot; + operationId), LOWERCASE_FIRST_LETTER);</span>
+<span class="nc" id="L842">            LOGGER.warn(&quot;{} (reserved word) cannot be used as method name. Renamed to {}&quot;, operationId, newOperationId);</span>
+<span class="nc" id="L843">            return newOperationId;</span>
+        }
+
+        // operationId starts with a number
+<span class="nc bnc" id="L847" title="All 2 branches missed.">        if (operationId.matches(&quot;^\\d.*&quot;)) {</span>
+<span class="nc" id="L848">            LOGGER.warn(&quot;{} (starting with a number) cannot be used as method name. Renamed to {}&quot;, operationId, camelize(sanitizeName(&quot;call_&quot; + operationId), LOWERCASE_FIRST_LETTER));</span>
+<span class="nc" id="L849">            operationId = camelize(sanitizeName(&quot;call_&quot; + operationId), LOWERCASE_FIRST_LETTER);</span>
+        }
+
+
+<span class="nc" id="L853">        return operationId;</span>
+    }
+
+    @Override
+    public String toVarName(String name) {
+        // obtain the name from nameMapping directly if provided
+<span class="nc bnc" id="L859" title="All 2 branches missed.">        if (nameMapping.containsKey(name)) {</span>
+<span class="nc" id="L860">            return nameMapping.get(name);</span>
+        }
+
+        // sanitize name
+<span class="nc" id="L864">        name = sanitizeName(name);</span>
+
+        // if it's all upper case, do nothing
+<span class="nc bnc" id="L867" title="All 2 branches missed.">        if (name.matches(&quot;^[A-Z_]*$&quot;)) {</span>
+<span class="nc" id="L868">            return name;</span>
+        }
+
+        // camelize the variable name
+        // pet_id =&gt; petId
+<span class="nc" id="L873">        name = camelize(name, LOWERCASE_FIRST_LETTER);</span>
+
+        // for reserved words surround with `` or append _
+<span class="nc bnc" id="L876" title="All 2 branches missed.">        if (isReservedWord(name)) {</span>
+<span class="nc" id="L877">            name = escapeReservedWord(name);</span>
+        }
+
+        // for words starting with number, append _
+<span class="nc bnc" id="L881" title="All 2 branches missed.">        if (name.matches(&quot;^\\d.*&quot;)) {</span>
+<span class="nc" id="L882">            name = &quot;_&quot; + name;</span>
+        }
+
+<span class="nc" id="L885">        return name;</span>
+    }
+
+    @Override
+    public String toParamName(String name) {
+        // obtain the name from parameterNameMapping directly if provided
+<span class="nc bnc" id="L891" title="All 2 branches missed.">        if (parameterNameMapping.containsKey(name)) {</span>
+<span class="nc" id="L892">            return parameterNameMapping.get(name);</span>
+        }
+
+        // sanitize name
+<span class="nc" id="L896">        name = sanitizeName(name);</span>
+
+        // replace - with _ e.g. created-at =&gt; created_at
+<span class="nc" id="L899">        name = name.replaceAll(&quot;-&quot;, &quot;_&quot;);</span>
+
+        // if it's all upper case, do nothing
+<span class="nc bnc" id="L902" title="All 2 branches missed.">        if (name.matches(&quot;^[A-Z_]*$&quot;)) {</span>
+<span class="nc" id="L903">            return name;</span>
+        }
+
+        // camelize(lower) the variable name
+        // pet_id =&gt; petId
+<span class="nc" id="L908">        name = camelize(name, LOWERCASE_FIRST_LETTER);</span>
+
+        // for reserved words surround with ``
+<span class="nc bnc" id="L911" title="All 2 branches missed.">        if (isReservedWord(name)) {</span>
+<span class="nc" id="L912">            name = escapeReservedWord(name);</span>
+        }
+
+        // for words starting with number, append _
+<span class="nc bnc" id="L916" title="All 2 branches missed.">        if (name.matches(&quot;^\\d.*&quot;)) {</span>
+<span class="nc" id="L917">            name = &quot;_&quot; + name;</span>
+        }
+
+<span class="nc" id="L920">        return name;</span>
+    }
+
+    @Override
+    public CodegenModel fromModel(String name, Schema model) {
+<span class="nc" id="L925">        Map&lt;String, Schema&gt; allDefinitions = ModelUtils.getSchemas(this.openAPI);</span>
+<span class="nc" id="L926">        CodegenModel codegenModel = super.fromModel(name, model);</span>
+<span class="nc bnc" id="L927" title="All 2 branches missed.">        if (codegenModel.description != null) {</span>
+<span class="nc" id="L928">            codegenModel.imports.add(&quot;ApiModel&quot;);</span>
+        }
+<span class="nc bnc" id="L930" title="All 2 branches missed.">        if (allDefinitions != null) {</span>
+<span class="nc" id="L931">            String parentSchema = codegenModel.parentSchema;</span>
+
+            // multilevel inheritance: reconcile properties of all the parents
+<span class="nc bnc" id="L934" title="All 2 branches missed.">            while (parentSchema != null) {</span>
+<span class="nc" id="L935">                final Schema parentModel = allDefinitions.get(parentSchema);</span>
+<span class="nc" id="L936">                final CodegenModel parentCodegenModel = super.fromModel(codegenModel.parent,</span>
+                        parentModel);
+<span class="nc" id="L938">                codegenModel = Swift5ClientCodegen.reconcileProperties(codegenModel, parentCodegenModel);</span>
+
+                // get the next parent
+<span class="nc" id="L941">                parentSchema = parentCodegenModel.parentSchema;</span>
+<span class="nc" id="L942">            }</span>
+        }
+<span class="nc bnc" id="L944" title="All 2 branches missed.">        if (hashableModels) {</span>
+<span class="nc" id="L945">            codegenModel.vendorExtensions.put(&quot;x-swift-hashable&quot;, true);</span>
+        }
+<span class="nc" id="L947">        return codegenModel;</span>
+    }
+
+    public void setProjectName(String projectName) {
+<span class="nc" id="L951">        this.projectName = projectName;</span>
+<span class="nc" id="L952">    }</span>
+
+    public void setNonPublicApi(boolean nonPublicApi) {
+<span class="nc" id="L955">        this.nonPublicApi = nonPublicApi;</span>
+<span class="nc" id="L956">    }</span>
+
+    public void setObjcCompatible(boolean objcCompatible) {
+<span class="nc" id="L959">        this.objcCompatible = objcCompatible;</span>
+<span class="nc" id="L960">    }</span>
+
+    public void setLenientTypeCast(boolean lenientTypeCast) {
+<span class="nc" id="L963">        this.lenientTypeCast = lenientTypeCast;</span>
+<span class="nc" id="L964">    }</span>
+
+    public void setReadonlyProperties(boolean readonlyProperties) {
+<span class="nc" id="L967">        this.readonlyProperties = readonlyProperties;</span>
+<span class="nc" id="L968">    }</span>
+
+    public void setResponseAs(String[] responseAs) {
+<span class="nc" id="L971">        this.responseAs = responseAs;</span>
+<span class="nc" id="L972">    }</span>
+
+    public void setSwiftUseApiNamespace(boolean swiftUseApiNamespace) {
+<span class="nc" id="L975">        this.swiftUseApiNamespace = swiftUseApiNamespace;</span>
+<span class="nc" id="L976">    }</span>
+
+    public void setUseSPMFileStructure(boolean useSPMFileStructure) {
+<span class="nc" id="L979">        this.useSPMFileStructure = useSPMFileStructure;</span>
+<span class="nc" id="L980">    }</span>
+
+    public void setSwiftPackagePath(String swiftPackagePath) {
+<span class="nc" id="L983">        this.swiftPackagePath = swiftPackagePath;</span>
+<span class="nc" id="L984">    }</span>
+
+    public void setUseClasses(boolean useClasses) {
+<span class="nc" id="L987">        this.useClasses = useClasses;</span>
+<span class="nc" id="L988">    }</span>
+
+    public void setUseBacktickEscapes(boolean useBacktickEscapes) {
+<span class="nc" id="L991">        this.useBacktickEscapes = useBacktickEscapes;</span>
+<span class="nc" id="L992">    }</span>
+
+    public void setGenerateModelAdditionalProperties(boolean generateModelAdditionalProperties) {
+<span class="nc" id="L995">        this.generateModelAdditionalProperties = generateModelAdditionalProperties;</span>
+<span class="nc" id="L996">    }</span>
+
+    public void setHashableModels(boolean hashableModels) {
+<span class="nc" id="L999">        this.hashableModels = hashableModels;</span>
+<span class="nc" id="L1000">    }</span>
+
+    public void setUseJsonEncodable(boolean useJsonEncodable) {
+<span class="nc" id="L1003">        this.useJsonEncodable = useJsonEncodable;</span>
+<span class="nc" id="L1004">    }</span>
+
+    public void setValidatable(boolean validatable) {
+<span class="nc" id="L1007">        this.validatable = validatable;</span>
+<span class="nc" id="L1008">    }</span>
+
+    @Override
+    public String toEnumValue(String value, String datatype) {
+        // for string, array of string
+<span class="nc bnc" id="L1013" title="All 6 branches missed.">        if (&quot;String&quot;.equals(datatype) || &quot;[String]&quot;.equals(datatype) || &quot;[String: String]&quot;.equals(datatype)) {</span>
+<span class="nc" id="L1014">            return &quot;\&quot;&quot; + value + &quot;\&quot;&quot;;</span>
+        } else {
+<span class="nc" id="L1016">            return String.valueOf(value);</span>
+        }
+    }
+
+    @Override
+    public String toEnumDefaultValue(String value, String datatype) {
+<span class="nc" id="L1022">        return datatype + &quot;_&quot; + value;</span>
+    }
+
+    @Override
+    public String toEnumVarName(String name, String datatype) {
+<span class="nc bnc" id="L1027" title="All 2 branches missed.">        if (enumNameMapping.containsKey(name)) {</span>
+<span class="nc" id="L1028">            return enumNameMapping.get(name);</span>
+        }
+
+<span class="nc bnc" id="L1031" title="All 2 branches missed.">        if (name.length() == 0) {</span>
+<span class="nc" id="L1032">            return &quot;empty&quot;;</span>
+        }
+
+<span class="nc bnc" id="L1035" title="All 2 branches missed.">        if (enumUnknownDefaultCase) {</span>
+<span class="nc bnc" id="L1036" title="All 2 branches missed.">            if (name.equals(enumUnknownDefaultCaseName)) {</span>
+<span class="nc" id="L1037">                return camelize(name, LOWERCASE_FIRST_LETTER);</span>
+            }
+        }
+
+        // Reserved Name
+<span class="nc" id="L1042">        String nameLowercase = StringUtils.lowerCase(name);</span>
+<span class="nc bnc" id="L1043" title="All 2 branches missed.">        if (isReservedWord(nameLowercase)) {</span>
+<span class="nc" id="L1044">            return escapeReservedWord(nameLowercase);</span>
+        }
+
+        // Prefix with underscore if name starts with number
+<span class="nc bnc" id="L1048" title="All 2 branches missed.">        if (name.matches(&quot;\\d.*&quot;)) {</span>
+<span class="nc" id="L1049">            return &quot;_&quot; + replaceSpecialCharacters(camelize(name, LOWERCASE_FIRST_LETTER));</span>
+        }
+
+        // for symbol, e.g. $, #
+<span class="nc bnc" id="L1053" title="All 2 branches missed.">        if (getSymbolName(name) != null) {</span>
+<span class="nc" id="L1054">            return camelize(WordUtils.capitalizeFully(getSymbolName(name).toUpperCase(Locale.ROOT)), LOWERCASE_FIRST_LETTER);</span>
+        }
+
+        // Camelize only when we have a structure defined below
+<span class="nc" id="L1058">        boolean camelized = false;</span>
+<span class="nc bnc" id="L1059" title="All 2 branches missed.">        if (name.matches(&quot;[A-Z][a-z0-9]+[a-zA-Z0-9]*&quot;)) {</span>
+<span class="nc" id="L1060">            name = camelize(name, LOWERCASE_FIRST_LETTER);</span>
+<span class="nc" id="L1061">            camelized = true;</span>
+        }
+
+        // Check for numerical conversions
+<span class="nc bnc" id="L1065" title="All 6 branches missed.">        if (&quot;Int&quot;.equals(datatype) || &quot;Int32&quot;.equals(datatype) || &quot;Int64&quot;.equals(datatype)</span>
+<span class="nc bnc" id="L1066" title="All 4 branches missed.">                || &quot;Float&quot;.equals(datatype) || &quot;Double&quot;.equals(datatype)) {</span>
+<span class="nc" id="L1067">            String varName = &quot;number&quot; + camelize(name);</span>
+<span class="nc" id="L1068">            return replaceSpecialCharacters(varName);</span>
+        }
+
+        // If we have already camelized the word, don't progress
+        // any further
+<span class="nc bnc" id="L1073" title="All 2 branches missed.">        if (camelized) {</span>
+<span class="nc" id="L1074">            return replaceSpecialCharacters(name);</span>
+        }
+
+<span class="nc" id="L1077">        char[] separators = {'-', '_', ' ', ':', '(', ')'};</span>
+<span class="nc" id="L1078">        return camelize(replaceSpecialCharacters(WordUtils.capitalizeFully(StringUtils.lowerCase(name), separators)</span>
+<span class="nc" id="L1079">                        .replaceAll(&quot;[-_ :\\(\\)]&quot;, &quot;&quot;)),</span>
+                LOWERCASE_FIRST_LETTER);
+    }
+
+    private Boolean isLanguageSpecificType(String name) {
+<span class="nc" id="L1084">        return languageSpecificPrimitives.contains(name);</span>
+    }
+
+    private String replaceSpecialCharacters(String name) {
+<span class="nc bnc" id="L1088" title="All 2 branches missed.">        for (Map.Entry&lt;String, String&gt; specialCharacters : specialCharReplacements.entrySet()) {</span>
+<span class="nc" id="L1089">            String specialChar = specialCharacters.getKey();</span>
+<span class="nc" id="L1090">            String replacement = specialCharacters.getValue();</span>
+            // Underscore is the only special character we'll allow
+<span class="nc bnc" id="L1092" title="All 4 branches missed.">            if (!specialChar.equals(&quot;_&quot;) &amp;&amp; name.contains(specialChar)) {</span>
+<span class="nc" id="L1093">                name = replaceCharacters(name, specialChar, replacement);</span>
+            }
+<span class="nc" id="L1095">        }</span>
+
+        // Fallback, replace unknowns with underscore.
+<span class="nc" id="L1098">        name = name.replaceAll(&quot;\\W+&quot;, &quot;_&quot;);</span>
+
+<span class="nc" id="L1100">        return name;</span>
+    }
+
+    private String replaceCharacters(String word, String oldValue, String newValue) {
+<span class="nc bnc" id="L1104" title="All 2 branches missed.">        if (!word.contains(oldValue)) {</span>
+<span class="nc" id="L1105">            return word;</span>
+        }
+<span class="nc bnc" id="L1107" title="All 2 branches missed.">        if (word.equals(oldValue)) {</span>
+<span class="nc" id="L1108">            return newValue;</span>
+        }
+<span class="nc" id="L1110">        int i = word.indexOf(oldValue);</span>
+<span class="nc" id="L1111">        String start = word.substring(0, i);</span>
+<span class="nc" id="L1112">        String end = recurseOnEndOfWord(word, oldValue, newValue, i);</span>
+<span class="nc" id="L1113">        return start + newValue + end;</span>
+    }
+
+    private String recurseOnEndOfWord(String word, String oldValue, String newValue, int lastReplacedValue) {
+<span class="nc" id="L1117">        String end = word.substring(lastReplacedValue + 1);</span>
+<span class="nc bnc" id="L1118" title="All 2 branches missed.">        if (!end.isEmpty()) {</span>
+<span class="nc" id="L1119">            end = titleCase(end);</span>
+<span class="nc" id="L1120">            end = replaceCharacters(end, oldValue, newValue);</span>
+        }
+<span class="nc" id="L1122">        return end;</span>
+    }
+
+    private String titleCase(final String input) {
+<span class="nc" id="L1126">        return input.substring(0, 1).toUpperCase(Locale.ROOT) + input.substring(1);</span>
+    }
+
+    @Override
+    public String toEnumName(CodegenProperty property) {
+<span class="nc bnc" id="L1131" title="All 2 branches missed.">        if (enumNameMapping.containsKey(property.name)) {</span>
+<span class="nc" id="L1132">            return enumNameMapping.get(property.name);</span>
+        }
+
+<span class="nc" id="L1135">        String enumName = toModelName(property.name);</span>
+
+        // Ensure that the enum type doesn't match a reserved word or
+        // the variable name doesn't match the generated enum type or the
+        // Swift compiler will generate an error
+<span class="nc bnc" id="L1140" title="All 2 branches missed.">        if (isReservedWord(property.datatypeWithEnum)</span>
+<span class="nc bnc" id="L1141" title="All 2 branches missed.">                || toVarName(property.name).equals(property.datatypeWithEnum)) {</span>
+<span class="nc" id="L1142">            enumName = property.datatypeWithEnum + &quot;Enum&quot;;</span>
+        }
+
+        // TODO: toModelName already does something for names starting with number,
+        // so this code is probably never called
+<span class="nc bnc" id="L1147" title="All 2 branches missed.">        if (enumName.matches(&quot;\\d.*&quot;)) { // starts with number</span>
+<span class="nc" id="L1148">            return &quot;_&quot; + enumName;</span>
+        } else {
+<span class="nc" id="L1150">            return enumName;</span>
+        }
+    }
+
+    @Override
+    public ModelsMap postProcessModels(ModelsMap objs) {
+<span class="nc" id="L1156">        ModelsMap postProcessedModelsEnum = postProcessModelsEnum(objs);</span>
+
+        // We iterate through the list of models, and also iterate through each of the
+        // properties for each model. For each property, if:
+        //
+        // CodegenProperty.name != CodegenProperty.baseName
+        //
+        // then we set
+        //
+        // CodegenProperty.vendorExtensions[&quot;x-codegen-escaped-property-name&quot;] = true
+        //
+        // Also, if any property in the model has x-codegen-escaped-property-name=true, then we mark:
+        //
+        // CodegenModel.vendorExtensions[&quot;x-codegen-has-escaped-property-names&quot;] = true
+        //
+<span class="nc bnc" id="L1171" title="All 2 branches missed.">        for (ModelMap mo : postProcessedModelsEnum.getModels()) {</span>
+<span class="nc" id="L1172">            CodegenModel cm = mo.getModel();</span>
+<span class="nc" id="L1173">            boolean modelHasPropertyWithEscapedName = false;</span>
+<span class="nc bnc" id="L1174" title="All 2 branches missed.">            for (CodegenProperty prop : cm.allVars) {</span>
+<span class="nc bnc" id="L1175" title="All 2 branches missed.">                if (!prop.name.equals(prop.baseName)) {</span>
+<span class="nc" id="L1176">                    prop.vendorExtensions.put(&quot;x-codegen-escaped-property-name&quot;, true);</span>
+<span class="nc" id="L1177">                    modelHasPropertyWithEscapedName = true;</span>
+                }
+
+<span class="nc bnc" id="L1180" title="All 2 branches missed.">                if (prop.vendorExtensions.containsKey(&quot;x-null-encodable&quot;)) {</span>
+<span class="nc bnc" id="L1181" title="All 2 branches missed.">                    if (prop.vendorExtensions.get(&quot;x-null-encodable&quot;).toString().equals(&quot;true&quot;)) {</span>
+<span class="nc bnc" id="L1182" title="All 4 branches missed.">                        if (prop.defaultValue == null || prop.defaultValue.equals(&quot;null&quot;)) {</span>
+<span class="nc" id="L1183">                            prop.vendorExtensions.put(&quot;x-null-encodable-default-value&quot;, &quot;.encodeNull&quot;);</span>
+                        } else {
+<span class="nc" id="L1185">                            prop.vendorExtensions.put(&quot;x-null-encodable-default-value&quot;, &quot;.encodeValue(&quot; + prop.defaultValue + &quot;)&quot;);</span>
+                        }
+                    }
+                }
+<span class="nc" id="L1189">            }</span>
+<span class="nc bnc" id="L1190" title="All 2 branches missed.">            if (modelHasPropertyWithEscapedName) {</span>
+<span class="nc" id="L1191">                cm.vendorExtensions.put(&quot;x-codegen-has-escaped-property-names&quot;, true);</span>
+            }
+<span class="nc" id="L1193">        }</span>
+
+<span class="nc" id="L1195">        return postProcessedModelsEnum;</span>
+    }
+
+    @Override
+    public void postProcessModelProperty(CodegenModel model, CodegenProperty property) {
+<span class="nc" id="L1200">        super.postProcessModelProperty(model, property);</span>
+
+<span class="nc bnc" id="L1202" title="All 10 branches missed.">        boolean isSwiftScalarType = property.isInteger || property.isLong || property.isFloat</span>
+                || property.isDouble || property.isBoolean;
+<span class="nc bnc" id="L1204" title="All 6 branches missed.">        if ((!property.required || property.isNullable) &amp;&amp; isSwiftScalarType) {</span>
+            // Optional scalar types like Int?, Int64?, Float?, Double?, and Bool?
+            // do not translate to Objective-C. So we want to flag those
+            // properties in case we want to put special code in the templates
+            // which provide Objective-C compatibility.
+<span class="nc" id="L1209">            property.vendorExtensions.put(&quot;x-swift-optional-scalar&quot;, true);</span>
+        }
+<span class="nc" id="L1211">    }</span>
+
+    @Override
+    public String escapeQuotationMark(String input) {
+        // remove &quot; to avoid code injection
+<span class="nc" id="L1216">        return input.replace(&quot;\&quot;&quot;, &quot;&quot;);</span>
+    }
+
+    @Override
+    public String escapeUnsafeCharacters(String input) {
+<span class="nc" id="L1221">        return input.replace(&quot;*/&quot;, &quot;*_/&quot;).replace(&quot;/*&quot;, &quot;/_*&quot;);</span>
+    }
+
+    @Override
+    public void postProcessFile(File file, String fileType) {
+<span class="nc bnc" id="L1226" title="All 2 branches missed.">        if (file == null) {</span>
+<span class="nc" id="L1227">            return;</span>
+        }
+<span class="nc" id="L1229">        String swiftPostProcessFile = System.getenv(&quot;SWIFT_POST_PROCESS_FILE&quot;);</span>
+<span class="nc bnc" id="L1230" title="All 2 branches missed.">        if (StringUtils.isEmpty(swiftPostProcessFile)) {</span>
+<span class="nc" id="L1231">            return; // skip if SWIFT_POST_PROCESS_FILE env variable is not defined</span>
+        }
+        // only process files with swift extension
+<span class="nc bnc" id="L1234" title="All 2 branches missed.">        if (&quot;swift&quot;.equals(FilenameUtils.getExtension(file.toString()))) {</span>
+<span class="nc" id="L1235">            String command = swiftPostProcessFile + &quot; &quot; + file;</span>
+            try {
+<span class="nc" id="L1237">                Process p = Runtime.getRuntime().exec(command);</span>
+<span class="nc" id="L1238">                int exitValue = p.waitFor();</span>
+<span class="nc bnc" id="L1239" title="All 2 branches missed.">                if (exitValue != 0) {</span>
+<span class="nc" id="L1240">                    LOGGER.error(&quot;Error running the command ({}). Exit value: {}&quot;, command, exitValue);</span>
+                } else {
+<span class="nc" id="L1242">                    LOGGER.info(&quot;Successfully executed: {}&quot;, command);</span>
+                }
+<span class="nc" id="L1244">            } catch (InterruptedException | IOException e) {</span>
+<span class="nc" id="L1245">                LOGGER.error(&quot;Error running the command ({}). Exception: {}&quot;, command, e.getMessage());</span>
+                // Restore interrupted state
+<span class="nc" id="L1247">                Thread.currentThread().interrupt();</span>
+<span class="nc" id="L1248">            }</span>
+        }
+<span class="nc" id="L1250">    }</span>
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L1254">        OperationMap objectMap = objs.getOperations();</span>
+
+<span class="nc" id="L1256">        HashMap&lt;String, CodegenModel&gt; modelMaps = ModelMap.toCodegenModelMap(allModels);</span>
+
+<span class="nc" id="L1258">        List&lt;CodegenOperation&gt; operations = objectMap.getOperation();</span>
+<span class="nc bnc" id="L1259" title="All 2 branches missed.">        for (CodegenOperation operation : operations) {</span>
+<span class="nc bnc" id="L1260" title="All 2 branches missed.">            for (CodegenParameter cp : operation.allParams) {</span>
+<span class="nc" id="L1261">                cp.vendorExtensions.put(&quot;x-swift-example&quot;, constructExampleCode(cp, modelMaps, new HashSet&lt;&gt;()));</span>
+<span class="nc" id="L1262">            }</span>
+<span class="nc" id="L1263">        }</span>
+<span class="nc" id="L1264">        return objs;</span>
+    }
+
+    public String constructExampleCode(CodegenParameter codegenParameter, HashMap&lt;String, CodegenModel&gt; modelMaps, Set&lt;String&gt; visitedModels) {
+<span class="nc bnc" id="L1268" title="All 2 branches missed.">        if (codegenParameter.isArray) { // array</span>
+<span class="nc" id="L1269">            return &quot;[&quot; + constructExampleCode(codegenParameter.items, modelMaps, visitedModels) + &quot;]&quot;;</span>
+<span class="nc bnc" id="L1270" title="All 2 branches missed.">        } else if (codegenParameter.isMap) { // TODO: map, file type</span>
+<span class="nc" id="L1271">            return &quot;\&quot;TODO\&quot;&quot;;</span>
+<span class="nc bnc" id="L1272" title="All 2 branches missed.">        } else if (languageSpecificPrimitives.contains(codegenParameter.dataType)) { // primitive type</span>
+<span class="nc bnc" id="L1273" title="All 4 branches missed.">            if (&quot;String&quot;.equals(codegenParameter.dataType) || &quot;Character&quot;.equals(codegenParameter.dataType)) {</span>
+<span class="nc bnc" id="L1274" title="All 2 branches missed.">                if (StringUtils.isEmpty(codegenParameter.example)) {</span>
+<span class="nc" id="L1275">                    return &quot;\&quot;&quot; + codegenParameter.example + &quot;\&quot;&quot;;</span>
+                } else {
+<span class="nc" id="L1277">                    return &quot;\&quot;&quot; + codegenParameter.paramName + &quot;_example\&quot;&quot;;</span>
+                }
+<span class="nc bnc" id="L1279" title="All 2 branches missed.">            } else if (&quot;Bool&quot;.equals(codegenParameter.dataType)) { // boolean</span>
+<span class="nc bnc" id="L1280" title="All 2 branches missed.">                if (Boolean.parseBoolean(codegenParameter.example)) {</span>
+<span class="nc" id="L1281">                    return &quot;true&quot;;</span>
+                } else {
+<span class="nc" id="L1283">                    return &quot;false&quot;;</span>
+                }
+<span class="nc bnc" id="L1285" title="All 2 branches missed.">            } else if (&quot;URL&quot;.equals(codegenParameter.dataType)) { // URL</span>
+<span class="nc" id="L1286">                return &quot;URL(string: \&quot;https://example.com\&quot;)!&quot;;</span>
+<span class="nc bnc" id="L1287" title="All 2 branches missed.">            } else if (&quot;Data&quot;.equals(codegenParameter.dataType)) { // URL</span>
+<span class="nc" id="L1288">                return &quot;Data([9, 8, 7])&quot;;</span>
+<span class="nc bnc" id="L1289" title="All 2 branches missed.">            } else if (&quot;Date&quot;.equals(codegenParameter.dataType)) { // date</span>
+<span class="nc" id="L1290">                return &quot;Date()&quot;;</span>
+            } else { // numeric
+<span class="nc bnc" id="L1292" title="All 2 branches missed.">                if (StringUtils.isEmpty(codegenParameter.example)) {</span>
+<span class="nc" id="L1293">                    return codegenParameter.example;</span>
+                } else {
+<span class="nc" id="L1295">                    return &quot;987&quot;;</span>
+                }
+            }
+        } else { // model
+            // look up the model
+<span class="nc bnc" id="L1300" title="All 2 branches missed.">            if (modelMaps.containsKey(codegenParameter.dataType)) {</span>
+<span class="nc bnc" id="L1301" title="All 2 branches missed.">                if (visitedModels.contains(codegenParameter.dataType)) {</span>
+                    // recursive/self-referencing model, simply return nil to avoid stackoverflow
+<span class="nc" id="L1303">                    return &quot;nil&quot;;</span>
+                } else {
+<span class="nc" id="L1305">                    visitedModels.add(codegenParameter.dataType);</span>
+<span class="nc" id="L1306">                    return constructExampleCode(modelMaps.get(codegenParameter.dataType), modelMaps, visitedModels);</span>
+                }
+            } else {
+                //LOGGER.error(&quot;Error in constructing examples. Failed to look up the model &quot; + codegenParameter.dataType);
+<span class="nc" id="L1310">                return &quot;TODO&quot;;</span>
+            }
+        }
+    }
+
+    public String constructExampleCode(CodegenProperty codegenProperty, HashMap&lt;String, CodegenModel&gt; modelMaps, Set&lt;String&gt; visitedModels) {
+<span class="nc bnc" id="L1316" title="All 2 branches missed.">        if (codegenProperty.isArray) { // array</span>
+<span class="nc" id="L1317">            return &quot;[&quot; + constructExampleCode(codegenProperty.items, modelMaps, visitedModels) + &quot;]&quot;;</span>
+<span class="nc bnc" id="L1318" title="All 2 branches missed.">        } else if (codegenProperty.isMap) { // TODO: map, file type</span>
+<span class="nc" id="L1319">            return &quot;\&quot;TODO\&quot;&quot;;</span>
+<span class="nc bnc" id="L1320" title="All 2 branches missed.">        } else if (languageSpecificPrimitives.contains(codegenProperty.dataType)) { // primitive type</span>
+<span class="nc bnc" id="L1321" title="All 4 branches missed.">            if (&quot;String&quot;.equals(codegenProperty.dataType) || &quot;Character&quot;.equals(codegenProperty.dataType)) {</span>
+<span class="nc bnc" id="L1322" title="All 2 branches missed.">                if (StringUtils.isEmpty(codegenProperty.example)) {</span>
+<span class="nc" id="L1323">                    return &quot;\&quot;&quot; + codegenProperty.example + &quot;\&quot;&quot;;</span>
+                } else {
+<span class="nc" id="L1325">                    return &quot;\&quot;&quot; + codegenProperty.name + &quot;_example\&quot;&quot;;</span>
+                }
+<span class="nc bnc" id="L1327" title="All 2 branches missed.">            } else if (&quot;Bool&quot;.equals(codegenProperty.dataType)) { // boolean</span>
+<span class="nc bnc" id="L1328" title="All 2 branches missed.">                if (Boolean.parseBoolean(codegenProperty.example)) {</span>
+<span class="nc" id="L1329">                    return &quot;true&quot;;</span>
+                } else {
+<span class="nc" id="L1331">                    return &quot;false&quot;;</span>
+                }
+<span class="nc bnc" id="L1333" title="All 2 branches missed.">            } else if (&quot;URL&quot;.equals(codegenProperty.dataType)) { // URL</span>
+<span class="nc" id="L1334">                return &quot;URL(string: \&quot;https://example.com\&quot;)!&quot;;</span>
+<span class="nc bnc" id="L1335" title="All 2 branches missed.">            } else if (&quot;Date&quot;.equals(codegenProperty.dataType)) { // date</span>
+<span class="nc" id="L1336">                return &quot;Date()&quot;;</span>
+            } else { // numeric
+<span class="nc bnc" id="L1338" title="All 2 branches missed.">                if (StringUtils.isEmpty(codegenProperty.example)) {</span>
+<span class="nc" id="L1339">                    return codegenProperty.example;</span>
+                } else {
+<span class="nc" id="L1341">                    return &quot;123&quot;;</span>
+                }
+            }
+        } else {
+            // look up the model
+<span class="nc bnc" id="L1346" title="All 2 branches missed.">            if (modelMaps.containsKey(codegenProperty.dataType)) {</span>
+<span class="nc bnc" id="L1347" title="All 2 branches missed.">                if (visitedModels.contains(codegenProperty.dataType)) {</span>
+                    // recursive/self-referencing model, simply return nil to avoid stackoverflow
+<span class="nc" id="L1349">                    return &quot;nil&quot;;</span>
+                } else {
+<span class="nc" id="L1351">                    visitedModels.add(codegenProperty.dataType);</span>
+<span class="nc" id="L1352">                    return constructExampleCode(modelMaps.get(codegenProperty.dataType), modelMaps, visitedModels);</span>
+                }
+            } else {
+                //LOGGER.error(&quot;Error in constructing examples. Failed to look up the model &quot; + codegenProperty.dataType);
+<span class="nc" id="L1356">                return &quot;\&quot;TODO\&quot;&quot;;</span>
+            }
+        }
+    }
+
+    public String constructExampleCode(CodegenModel codegenModel, HashMap&lt;String, CodegenModel&gt; modelMaps, Set&lt;String&gt; visitedModels) {
+        String example;
+<span class="nc" id="L1363">        example = codegenModel.name + &quot;(&quot;;</span>
+<span class="nc" id="L1364">        List&lt;String&gt; propertyExamples = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L1365" title="All 2 branches missed.">        for (CodegenProperty codegenProperty : codegenModel.vars) {</span>
+<span class="nc" id="L1366">            propertyExamples.add(codegenProperty.name + &quot;: &quot; + constructExampleCode(codegenProperty, modelMaps, visitedModels));</span>
+<span class="nc" id="L1367">        }</span>
+<span class="nc" id="L1368">        example += StringUtils.join(propertyExamples, &quot;, &quot;);</span>
+<span class="nc" id="L1369">        example += &quot;)&quot;;</span>
+<span class="nc" id="L1370">        return example;</span>
+    }
+
+    @Override
+    public void postProcess() {
+<span class="nc" id="L1375">        System.out.println(&quot;################################################################################&quot;);</span>
+<span class="nc" id="L1376">        System.out.println(&quot;# Thanks for using OpenAPI Generator.                                          #&quot;);</span>
+<span class="nc" id="L1377">        System.out.println(&quot;# Please consider donation to help us maintain this project \uD83D\uDE4F                 #&quot;);</span>
+<span class="nc" id="L1378">        System.out.println(&quot;# https://opencollective.com/openapi_generator/donate                          #&quot;);</span>
+<span class="nc" id="L1379">        System.out.println(&quot;#                                                                              #&quot;);</span>
+<span class="nc" id="L1380">        System.out.println(&quot;# swift5 generator is contributed by Bruno Coelho (https://github.com/4brunu). #&quot;);</span>
+<span class="nc" id="L1381">        System.out.println(&quot;# Please support his work directly via https://paypal.com/paypalme/4brunu \uD83D\uDE4F   #&quot;);</span>
+<span class="nc" id="L1382">        System.out.println(&quot;################################################################################&quot;);</span>
+<span class="nc" id="L1383">    }</span>
+
+    @Override
+    public GeneratorLanguage generatorLanguage() {
+<span class="nc" id="L1387">        return GeneratorLanguage.SWIFT;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

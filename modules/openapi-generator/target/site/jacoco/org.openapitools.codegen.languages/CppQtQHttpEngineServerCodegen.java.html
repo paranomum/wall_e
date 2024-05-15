@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CppQtQHttpEngineServerCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">CppQtQHttpEngineServerCodegen.java</span></div><h1>CppQtQHttpEngineServerCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import org.openapitools.codegen.CodegenConfig;
+import org.openapitools.codegen.CodegenType;
+import org.openapitools.codegen.SupportingFile;
+import org.openapitools.codegen.meta.features.DocumentationFeature;
+
+import java.io.File;
+
+import static org.openapitools.codegen.utils.StringUtils.camelize;
+
+public class CppQtQHttpEngineServerCodegen extends CppQtAbstractCodegen implements CodegenConfig {
+
+<span class="fc" id="L31">    protected final String SRC_DIR = &quot;/src&quot;;</span>
+<span class="fc" id="L32">    protected final String MODEL_DIR = &quot;/src/models&quot;;</span>
+<span class="fc" id="L33">    protected final String APIHANDLER_DIR = &quot;/src/handlers&quot;;</span>
+<span class="fc" id="L34">    protected final String APIREQUEST_DIR = &quot;/src/requests&quot;;</span>
+
+    // source folder where to write the files
+<span class="fc" id="L37">    protected String sourceFolder = &quot;server&quot;;</span>
+
+    public CppQtQHttpEngineServerCodegen() {
+<span class="fc" id="L40">        super();</span>
+
+<span class="fc" id="L42">        modifyFeatureSet(features -&gt; features.includeDocumentationFeatures(DocumentationFeature.Readme));</span>
+
+        // set the output folder here
+<span class="fc" id="L45">        outputFolder = &quot;generated-code/cpp-qt-qhttpengine-server&quot;;</span>
+
+        /*
+         * Models.  You can write model files using the modelTemplateFiles map.
+         * if you want to create one template for file, you can do so here.
+         * for multiple files for model, just put another entry in the `modelTemplateFiles` with
+         * a different extension
+         */
+<span class="fc" id="L53">        modelTemplateFiles.put(</span>
+                &quot;model-header.mustache&quot;,
+                &quot;.h&quot;);
+
+<span class="fc" id="L57">        modelTemplateFiles.put(</span>
+                &quot;model-body.mustache&quot;,
+                &quot;.cpp&quot;);
+
+        /*
+         * Api classes.  You can write classes for each Api file with the apiTemplateFiles map.
+         * as with models, add multiple entries with different extensions for multiple files per
+         * class
+         */
+<span class="fc" id="L66">        apiTemplateFiles.put(</span>
+                &quot;apihandler.h.mustache&quot;,   // the template to use
+                &quot;.h&quot;);       // the extension for each file to write
+
+<span class="fc" id="L70">        apiTemplateFiles.put(</span>
+                &quot;apihandler.cpp.mustache&quot;,   // the template to use
+                &quot;.cpp&quot;);       // the extension for each file to write
+
+<span class="fc" id="L74">        apiTemplateFiles.put(</span>
+                &quot;apirequest.h.mustache&quot;,   // the template to use
+                &quot;.h&quot;);       // the extension for each file to write
+
+<span class="fc" id="L78">        apiTemplateFiles.put(</span>
+                &quot;apirequest.cpp.mustache&quot;,   // the template to use
+                &quot;.cpp&quot;);       // the extension for each file to write
+
+        /*
+         * Template Location.  This is the location which templates will be read from.  The generator
+         * will use the resource stream to attempt to read the templates.
+         */
+<span class="fc" id="L86">        embeddedTemplateDir = templateDir = &quot;cpp-qt-qhttpengine-server&quot;;</span>
+
+<span class="fc" id="L88">        supportingFiles.add(new SupportingFile(&quot;helpers-header.mustache&quot;, sourceFolder + MODEL_DIR, PREFIX + &quot;Helpers.h&quot;));</span>
+<span class="fc" id="L89">        supportingFiles.add(new SupportingFile(&quot;helpers-body.mustache&quot;, sourceFolder + MODEL_DIR, PREFIX + &quot;Helpers.cpp&quot;));</span>
+<span class="fc" id="L90">        supportingFiles.add(new SupportingFile(&quot;object.mustache&quot;, sourceFolder + MODEL_DIR, PREFIX + &quot;Object.h&quot;));</span>
+<span class="fc" id="L91">        supportingFiles.add(new SupportingFile(&quot;enum.mustache&quot;, sourceFolder + MODEL_DIR, PREFIX + &quot;Enum.h&quot;));</span>
+<span class="fc" id="L92">        supportingFiles.add(new SupportingFile(&quot;HttpFileElement.h.mustache&quot;, sourceFolder + MODEL_DIR, PREFIX + &quot;HttpFileElement.h&quot;));</span>
+<span class="fc" id="L93">        supportingFiles.add(new SupportingFile(&quot;HttpFileElement.cpp.mustache&quot;, sourceFolder + MODEL_DIR, PREFIX + &quot;HttpFileElement.cpp&quot;));</span>
+<span class="fc" id="L94">        supportingFiles.add(new SupportingFile(&quot;apirouter.h.mustache&quot;, sourceFolder + APIHANDLER_DIR, PREFIX + &quot;ApiRouter.h&quot;));</span>
+<span class="fc" id="L95">        supportingFiles.add(new SupportingFile(&quot;apirouter.cpp.mustache&quot;, sourceFolder + APIHANDLER_DIR, PREFIX + &quot;ApiRouter.cpp&quot;));</span>
+
+
+<span class="fc" id="L98">        supportingFiles.add(new SupportingFile(&quot;main.cpp.mustache&quot;, sourceFolder + SRC_DIR, &quot;main.cpp&quot;));</span>
+<span class="fc" id="L99">        supportingFiles.add(new SupportingFile(&quot;src-CMakeLists.txt.mustache&quot;, sourceFolder + SRC_DIR, &quot;CMakeLists.txt&quot;));</span>
+<span class="fc" id="L100">        supportingFiles.add(new SupportingFile(&quot;README.md.mustache&quot;, sourceFolder, &quot;README.MD&quot;));</span>
+<span class="fc" id="L101">        supportingFiles.add(new SupportingFile(&quot;Makefile.mustache&quot;, sourceFolder, &quot;Makefile&quot;));</span>
+<span class="fc" id="L102">        supportingFiles.add(new SupportingFile(&quot;CMakeLists.txt.mustache&quot;, sourceFolder, &quot;CMakeLists.txt&quot;));</span>
+<span class="fc" id="L103">        supportingFiles.add(new SupportingFile(&quot;Dockerfile.mustache&quot;, sourceFolder, &quot;Dockerfile&quot;));</span>
+<span class="fc" id="L104">        supportingFiles.add(new SupportingFile(&quot;LICENSE.txt.mustache&quot;, sourceFolder, &quot;LICENSE.txt&quot;));</span>
+<span class="fc" id="L105">        typeMapping.put(&quot;file&quot;, PREFIX + &quot;HttpFileElement&quot;);</span>
+<span class="fc" id="L106">        importMapping.put(PREFIX + &quot;HttpFileElement&quot;, &quot;#include \&quot;&quot; + PREFIX + &quot;HttpFileElement.h\&quot;&quot;);</span>
+
+<span class="fc" id="L108">    }</span>
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L112">        super.processOpts();</span>
+
+<span class="nc bnc" id="L114" title="All 2 branches missed.">        if (additionalProperties.containsKey(&quot;modelNamePrefix&quot;)) {</span>
+<span class="nc" id="L115">            supportingFiles.clear();</span>
+<span class="nc" id="L116">            supportingFiles.add(new SupportingFile(&quot;helpers-header.mustache&quot;, sourceFolder + MODEL_DIR, modelNamePrefix + &quot;Helpers.h&quot;));</span>
+<span class="nc" id="L117">            supportingFiles.add(new SupportingFile(&quot;helpers-body.mustache&quot;, sourceFolder + MODEL_DIR, modelNamePrefix + &quot;Helpers.cpp&quot;));</span>
+<span class="nc" id="L118">            supportingFiles.add(new SupportingFile(&quot;object.mustache&quot;, sourceFolder + MODEL_DIR, modelNamePrefix + &quot;Object.h&quot;));</span>
+<span class="nc" id="L119">            supportingFiles.add(new SupportingFile(&quot;enum.mustache&quot;, sourceFolder + MODEL_DIR, modelNamePrefix + &quot;Enum.h&quot;));</span>
+<span class="nc" id="L120">            supportingFiles.add(new SupportingFile(&quot;HttpFileElement.h.mustache&quot;, sourceFolder + MODEL_DIR, modelNamePrefix + &quot;HttpFileElement.h&quot;));</span>
+<span class="nc" id="L121">            supportingFiles.add(new SupportingFile(&quot;HttpFileElement.cpp.mustache&quot;, sourceFolder + MODEL_DIR, modelNamePrefix + &quot;HttpFileElement.cpp&quot;));</span>
+<span class="nc" id="L122">            supportingFiles.add(new SupportingFile(&quot;apirouter.h.mustache&quot;, sourceFolder + APIHANDLER_DIR, modelNamePrefix + &quot;ApiRouter.h&quot;));</span>
+<span class="nc" id="L123">            supportingFiles.add(new SupportingFile(&quot;apirouter.cpp.mustache&quot;, sourceFolder + APIHANDLER_DIR, modelNamePrefix + &quot;ApiRouter.cpp&quot;));</span>
+
+
+<span class="nc" id="L126">            supportingFiles.add(new SupportingFile(&quot;main.cpp.mustache&quot;, sourceFolder + SRC_DIR, &quot;main.cpp&quot;));</span>
+<span class="nc" id="L127">            supportingFiles.add(new SupportingFile(&quot;src-CMakeLists.txt.mustache&quot;, sourceFolder + SRC_DIR, &quot;CMakeLists.txt&quot;));</span>
+<span class="nc" id="L128">            supportingFiles.add(new SupportingFile(&quot;README.md.mustache&quot;, sourceFolder, &quot;README.MD&quot;));</span>
+<span class="nc" id="L129">            supportingFiles.add(new SupportingFile(&quot;Makefile.mustache&quot;, sourceFolder, &quot;Makefile&quot;));</span>
+<span class="nc" id="L130">            supportingFiles.add(new SupportingFile(&quot;CMakeLists.txt.mustache&quot;, sourceFolder, &quot;CMakeLists.txt&quot;));</span>
+<span class="nc" id="L131">            supportingFiles.add(new SupportingFile(&quot;Dockerfile.mustache&quot;, sourceFolder, &quot;Dockerfile&quot;));</span>
+<span class="nc" id="L132">            supportingFiles.add(new SupportingFile(&quot;LICENSE.txt.mustache&quot;, sourceFolder, &quot;LICENSE.txt&quot;));</span>
+<span class="nc" id="L133">            typeMapping.put(&quot;file&quot;, modelNamePrefix + &quot;HttpFileElement&quot;);</span>
+<span class="nc" id="L134">            importMapping.put(modelNamePrefix + &quot;HttpFileElement&quot;, &quot;#include \&quot;&quot; + modelNamePrefix + &quot;HttpFileElement.h\&quot;&quot;);</span>
+        }
+<span class="nc" id="L136">    }</span>
+
+    /**
+     * Configures the type of generator.
+     *
+     * @return the CodegenType for this generator
+     * @see org.openapitools.codegen.CodegenType
+     */
+    @Override
+    public CodegenType getTag() {
+<span class="fc" id="L146">        return CodegenType.SERVER;</span>
+    }
+
+    /**
+     * Configures a friendly name for the generator.  This will be used by the generator
+     * to select the library with the -g flag.
+     *
+     * @return the friendly name for the generator
+     */
+    @Override
+    public String getName() {
+<span class="fc" id="L157">        return &quot;cpp-qt-qhttpengine-server&quot;;</span>
+    }
+
+    /**
+     * Returns human-friendly help for the generator. Provide the consumer with help
+     * tips, parameters here
+     *
+     * @return A string value for the help message
+     */
+    @Override
+    public String getHelp() {
+<span class="nc" id="L168">        return &quot;Generates a Qt C++ Server using the QHTTPEngine HTTP Library.&quot;;</span>
+    }
+
+    /**
+     * Location to write model files.  You can use the modelPackage() as defined when the class is
+     * instantiated
+     */
+    @Override
+    public String modelFileFolder() {
+<span class="nc" id="L177">        return outputFolder + &quot;/&quot; + sourceFolder + MODEL_DIR + &quot;/&quot; + modelPackage().replace(&quot;::&quot;, File.separator);</span>
+    }
+
+    /**
+     * Location to write api files.  You can use the apiPackage() as defined when the class is
+     * instantiated
+     */
+    @Override
+    public String apiFileFolder() {
+<span class="nc" id="L186">        return outputFolder + &quot;/&quot; + sourceFolder + APIHANDLER_DIR + &quot;/&quot; + apiPackage().replace(&quot;::&quot;, File.separator);</span>
+    }
+
+    private String requestFileFolder() {
+<span class="nc" id="L190">        return outputFolder + &quot;/&quot; + sourceFolder + APIREQUEST_DIR + &quot;/&quot; + apiPackage().replace(&quot;::&quot;, File.separator);</span>
+    }
+
+    @Override
+    public String apiFilename(String templateName, String tag) {
+<span class="nc" id="L195">        String result = super.apiFilename(templateName, tag);</span>
+
+<span class="nc bnc" id="L197" title="All 2 branches missed.">        if (templateName.contains(&quot;apirequest&quot;)) {</span>
+<span class="nc" id="L198">            result = result.replace(&quot;ApiHandler&quot;, &quot;ApiRequest&quot;);</span>
+<span class="nc" id="L199">            result = result.replace(apiFileFolder(), requestFileFolder());</span>
+        }
+<span class="nc" id="L201">        return result;</span>
+    }
+
+    @Override
+    public String toApiFilename(String name) {
+<span class="nc" id="L206">        return modelNamePrefix + sanitizeName(camelize(name)) + &quot;ApiHandler&quot;;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

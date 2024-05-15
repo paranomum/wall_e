@@ -1,0 +1,536 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ScalaAkkaHttpServerCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">ScalaAkkaHttpServerCodegen.java</span></div><h1>ScalaAkkaHttpServerCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.servers.Server;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.meta.GeneratorMetadata;
+import org.openapitools.codegen.meta.Stability;
+import org.openapitools.codegen.meta.features.*;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class ScalaAkkaHttpServerCodegen extends AbstractScalaCodegen implements CodegenConfig {
+    protected String groupId;
+    protected String artifactId;
+    protected String artifactVersion;
+    protected String invokerPackage;
+
+    protected String akkaHttpVersion;
+    protected boolean generateAsManagedSources;
+    protected boolean useApachePekko;
+
+    public static final String AKKA_HTTP_VERSION = &quot;akkaHttpVersion&quot;;
+    public static final String AKKA_HTTP_VERSION_DESC = &quot;The version of akka-http&quot;;
+    public static final String DEFAULT_AKKA_HTTP_VERSION = &quot;10.1.10&quot;;
+    public static final String DEFAULT_PEKKO_HTTP_VERSION = &quot;1.0.0&quot;;
+
+    public static final String GENERATE_AS_MANAGED_SOURCES = &quot;asManagedSources&quot;;
+    public static final String GENERATE_AS_MANAGED_SOURCES_DESC = &quot;Resulting files cab be used as managed resources. No build files or default controllers will be generated&quot;;
+    public static final boolean DEFAULT_GENERATE_AS_MANAGED_SOURCES = false;
+
+    public static final String USE_APACHE_PEKKO = &quot;useApachePekko&quot;;
+    public static final String USE_APACHE_PEKKO_DESC = &quot;Use apache pekko-http instead of akka-http.&quot;;
+    public static final boolean DEFAULT_USE_APACHE_PEKKO = false;
+
+    // scala-akka-http-server specific properties
+    private static final String IS_10_1_10_PLUS = &quot;akkaHttp10_1_10_plus&quot;;
+    private static final String AKKA_IMPORT_GROUP_ID = &quot;akkaImportGroupId&quot;;
+
+<span class="nc" id="L66">    private static final Pattern akkaVersionPattern = Pattern.compile(&quot;([0-9]+)(\\.([0-9]+))?(\\.([0-9]+))?(.\\+)?&quot;);</span>
+
+<span class="nc" id="L68">    final Logger LOGGER = LoggerFactory.getLogger(ScalaAkkaHttpServerCodegen.class);</span>
+
+    public CodegenType getTag() {
+<span class="nc" id="L71">        return CodegenType.SERVER;</span>
+    }
+
+    public String getName() {
+<span class="nc" id="L75">        return &quot;scala-akka-http-server&quot;;</span>
+    }
+
+    public String getHelp() {
+<span class="nc" id="L79">        return &quot;Generates a scala-akka-http server (beta).&quot;;</span>
+    }
+
+    public ScalaAkkaHttpServerCodegen() {
+<span class="nc" id="L83">        super();</span>
+
+<span class="nc" id="L85">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L86">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="nc" id="L87">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON, WireFormatFeature.XML, WireFormatFeature.Custom))</span>
+<span class="nc" id="L88">                .securityFeatures(EnumSet.of(</span>
+                        SecurityFeature.BasicAuth,
+                        SecurityFeature.ApiKey,
+                        SecurityFeature.BearerToken
+                ))
+<span class="nc" id="L93">                .excludeGlobalFeatures(</span>
+                        GlobalFeature.XMLStructureDefinitions,
+                        GlobalFeature.Callbacks,
+                        GlobalFeature.LinkObjects,
+                        GlobalFeature.ParameterStyling
+                )
+<span class="nc" id="L99">                .excludeSchemaSupportFeatures(</span>
+                        SchemaSupportFeature.Polymorphism
+                )
+<span class="nc" id="L102">                .excludeParameterFeatures(</span>
+                        ParameterFeature.Cookie
+                )
+        );
+<span class="nc" id="L106">        generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
+<span class="nc" id="L107">                .stability(Stability.BETA)</span>
+<span class="nc" id="L108">                .build();</span>
+
+<span class="nc" id="L110">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;scala-akka-http&quot;;</span>
+<span class="nc" id="L111">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.scala&quot;);</span>
+<span class="nc" id="L112">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.scala&quot;);</span>
+<span class="nc" id="L113">        embeddedTemplateDir = templateDir = &quot;scala-akka-http-server&quot;;</span>
+
+<span class="nc" id="L115">        groupId = &quot;org.openapitools&quot;;</span>
+<span class="nc" id="L116">        artifactId = &quot;openapi-scala-akka-http-server&quot;;</span>
+<span class="nc" id="L117">        artifactVersion = &quot;1.0.0&quot;;</span>
+<span class="nc" id="L118">        apiPackage = &quot;org.openapitools.server.api&quot;;</span>
+<span class="nc" id="L119">        modelPackage = &quot;org.openapitools.server.model&quot;;</span>
+<span class="nc" id="L120">        invokerPackage = &quot;org.openapitools.server&quot;;</span>
+<span class="nc" id="L121">        akkaHttpVersion = DEFAULT_AKKA_HTTP_VERSION;</span>
+<span class="nc" id="L122">        generateAsManagedSources = DEFAULT_GENERATE_AS_MANAGED_SOURCES;</span>
+<span class="nc" id="L123">        useApachePekko = DEFAULT_USE_APACHE_PEKKO;</span>
+
+<span class="nc" id="L125">        setReservedWordsLowerCase(</span>
+<span class="nc" id="L126">                Arrays.asList(</span>
+                        &quot;abstract&quot;, &quot;case&quot;, &quot;catch&quot;, &quot;class&quot;, &quot;def&quot;, &quot;do&quot;, &quot;else&quot;, &quot;extends&quot;,
+                        &quot;false&quot;, &quot;final&quot;, &quot;finally&quot;, &quot;for&quot;, &quot;forSome&quot;, &quot;if&quot;, &quot;implicit&quot;,
+                        &quot;import&quot;, &quot;lazy&quot;, &quot;match&quot;, &quot;new&quot;, &quot;null&quot;, &quot;object&quot;, &quot;override&quot;, &quot;package&quot;,
+                        &quot;private&quot;, &quot;protected&quot;, &quot;return&quot;, &quot;sealed&quot;, &quot;super&quot;, &quot;this&quot;, &quot;throw&quot;,
+                        &quot;trait&quot;, &quot;try&quot;, &quot;true&quot;, &quot;type&quot;, &quot;val&quot;, &quot;var&quot;, &quot;while&quot;, &quot;with&quot;, &quot;yield&quot;)
+        );
+
+<span class="nc" id="L134">        cliOptions.add(CliOption.newString(CodegenConstants.INVOKER_PACKAGE, CodegenConstants.INVOKER_PACKAGE_DESC).defaultValue(invokerPackage));</span>
+<span class="nc" id="L135">        cliOptions.add(CliOption.newString(CodegenConstants.GROUP_ID, CodegenConstants.GROUP_ID_DESC).defaultValue(groupId));</span>
+<span class="nc" id="L136">        cliOptions.add(CliOption.newString(CodegenConstants.ARTIFACT_ID, CodegenConstants.ARTIFACT_ID).defaultValue(artifactId));</span>
+<span class="nc" id="L137">        cliOptions.add(CliOption.newString(CodegenConstants.ARTIFACT_VERSION, &quot;artifact version in generated pom.xml. This also becomes part of the generated library's filename&quot;).defaultValue(artifactVersion));</span>
+<span class="nc" id="L138">        cliOptions.add(CliOption.newString(AKKA_HTTP_VERSION, AKKA_HTTP_VERSION_DESC).defaultValue(akkaHttpVersion));</span>
+<span class="nc" id="L139">        cliOptions.add(CliOption.newBoolean(GENERATE_AS_MANAGED_SOURCES, GENERATE_AS_MANAGED_SOURCES_DESC).defaultValue(Boolean.valueOf(DEFAULT_GENERATE_AS_MANAGED_SOURCES).toString()));</span>
+<span class="nc" id="L140">        cliOptions.add(CliOption.newBoolean(USE_APACHE_PEKKO, USE_APACHE_PEKKO_DESC).defaultValue(Boolean.valueOf(DEFAULT_USE_APACHE_PEKKO).toString()));</span>
+
+<span class="nc" id="L142">        importMapping.remove(&quot;Seq&quot;);</span>
+<span class="nc" id="L143">        importMapping.remove(&quot;List&quot;);</span>
+<span class="nc" id="L144">        importMapping.remove(&quot;Set&quot;);</span>
+<span class="nc" id="L145">        importMapping.remove(&quot;Map&quot;);</span>
+
+<span class="nc" id="L147">        typeMapping = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L148">        typeMapping.put(&quot;array&quot;, &quot;Seq&quot;);</span>
+<span class="nc" id="L149">        typeMapping.put(&quot;set&quot;, &quot;Set&quot;);</span>
+<span class="nc" id="L150">        typeMapping.put(&quot;boolean&quot;, &quot;Boolean&quot;);</span>
+<span class="nc" id="L151">        typeMapping.put(&quot;string&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L152">        typeMapping.put(&quot;int&quot;, &quot;Int&quot;);</span>
+<span class="nc" id="L153">        typeMapping.put(&quot;integer&quot;, &quot;Int&quot;);</span>
+<span class="nc" id="L154">        typeMapping.put(&quot;long&quot;, &quot;Long&quot;);</span>
+<span class="nc" id="L155">        typeMapping.put(&quot;float&quot;, &quot;Float&quot;);</span>
+<span class="nc" id="L156">        typeMapping.put(&quot;byte&quot;, &quot;Byte&quot;);</span>
+<span class="nc" id="L157">        typeMapping.put(&quot;short&quot;, &quot;Short&quot;);</span>
+<span class="nc" id="L158">        typeMapping.put(&quot;char&quot;, &quot;Char&quot;);</span>
+<span class="nc" id="L159">        typeMapping.put(&quot;double&quot;, &quot;Double&quot;);</span>
+<span class="nc" id="L160">        typeMapping.put(&quot;object&quot;, &quot;Any&quot;);</span>
+<span class="nc" id="L161">        typeMapping.put(&quot;file&quot;, &quot;File&quot;);</span>
+<span class="nc" id="L162">        typeMapping.put(&quot;binary&quot;, &quot;File&quot;);</span>
+<span class="nc" id="L163">        typeMapping.put(&quot;number&quot;, &quot;Double&quot;);</span>
+<span class="nc" id="L164">        typeMapping.put(&quot;decimal&quot;, &quot;BigDecimal&quot;);</span>
+
+<span class="nc" id="L166">        instantiationTypes.put(&quot;array&quot;, &quot;ListBuffer&quot;);</span>
+<span class="nc" id="L167">        instantiationTypes.put(&quot;map&quot;, &quot;Map&quot;);</span>
+<span class="nc" id="L168">    }</span>
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L172">        super.processOpts();</span>
+
+<span class="nc bnc" id="L174" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.INVOKER_PACKAGE)) {</span>
+<span class="nc" id="L175">            invokerPackage = (String) additionalProperties.get(CodegenConstants.INVOKER_PACKAGE);</span>
+        } else {
+<span class="nc" id="L177">            additionalProperties.put(CodegenConstants.INVOKER_PACKAGE, invokerPackage);</span>
+        }
+
+<span class="nc bnc" id="L180" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.GROUP_ID)) {</span>
+<span class="nc" id="L181">            groupId = (String) additionalProperties.get(CodegenConstants.GROUP_ID);</span>
+        } else {
+<span class="nc" id="L183">            additionalProperties.put(CodegenConstants.GROUP_ID, groupId);</span>
+        }
+
+<span class="nc bnc" id="L186" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.ARTIFACT_ID)) {</span>
+<span class="nc" id="L187">            artifactId = (String) additionalProperties.get(CodegenConstants.ARTIFACT_ID);</span>
+        } else {
+<span class="nc" id="L189">            additionalProperties.put(CodegenConstants.ARTIFACT_ID, artifactId);</span>
+        }
+
+<span class="nc bnc" id="L192" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.ARTIFACT_VERSION)) {</span>
+<span class="nc" id="L193">            artifactVersion = (String) additionalProperties.get(CodegenConstants.ARTIFACT_VERSION);</span>
+        } else {
+<span class="nc" id="L195">            additionalProperties.put(CodegenConstants.ARTIFACT_VERSION, artifactVersion);</span>
+        }
+
+<span class="nc bnc" id="L198" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_APACHE_PEKKO)) {</span>
+<span class="nc" id="L199">            useApachePekko = Boolean.parseBoolean(additionalProperties.get(USE_APACHE_PEKKO).toString());</span>
+        } else {
+<span class="nc" id="L201">            additionalProperties.put(USE_APACHE_PEKKO, useApachePekko);</span>
+        }
+
+<span class="nc bnc" id="L204" title="All 2 branches missed.">        if (additionalProperties.containsKey(AKKA_HTTP_VERSION)) {</span>
+<span class="nc" id="L205">            akkaHttpVersion = (String) additionalProperties.get(AKKA_HTTP_VERSION);</span>
+        } else {
+<span class="nc bnc" id="L207" title="All 2 branches missed.">            String version = useApachePekko ? DEFAULT_PEKKO_HTTP_VERSION : DEFAULT_AKKA_HTTP_VERSION;</span>
+<span class="nc" id="L208">            additionalProperties.put(AKKA_HTTP_VERSION, version);</span>
+        }
+
+<span class="nc bnc" id="L211" title="All 2 branches missed.">        if (useApachePekko) {</span>
+<span class="nc" id="L212">            additionalProperties.put(IS_10_1_10_PLUS, true); // Pekko HTTP is a fork of Akka HTTP 10.2.x</span>
+<span class="nc" id="L213">            additionalProperties.put(USE_APACHE_PEKKO, true);</span>
+<span class="nc" id="L214">            additionalProperties.put(AKKA_IMPORT_GROUP_ID, &quot;org.apache.pekko&quot;);</span>
+        } else {
+<span class="nc" id="L216">            additionalProperties.put(AKKA_IMPORT_GROUP_ID, &quot;akka&quot;);</span>
+<span class="nc" id="L217">            parseAkkaHttpVersion();</span>
+        }
+
+<span class="nc bnc" id="L220" title="All 2 branches missed.">        if (additionalProperties.containsKey(GENERATE_AS_MANAGED_SOURCES)) {</span>
+<span class="nc" id="L221">            generateAsManagedSources = Boolean.parseBoolean(additionalProperties.get(GENERATE_AS_MANAGED_SOURCES).toString());</span>
+        } else {
+<span class="nc" id="L223">            additionalProperties.put(GENERATE_AS_MANAGED_SOURCES, Boolean.valueOf(generateAsManagedSources).toString());</span>
+        }
+
+<span class="nc bnc" id="L226" title="All 2 branches missed.">        if (!generateAsManagedSources) {</span>
+<span class="nc" id="L227">            supportingFiles.add(new SupportingFile(&quot;build.sbt.mustache&quot;, &quot;&quot;, &quot;build.sbt&quot;));</span>
+<span class="nc" id="L228">            supportingFiles.add(new SupportingFile(&quot;controller.mustache&quot;,</span>
+<span class="nc" id="L229">                    (sourceFolder + File.separator + invokerPackage).replace(&quot;.&quot;, java.io.File.separator), &quot;Controller.scala&quot;));</span>
+<span class="nc" id="L230">            supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;));</span>
+        }
+<span class="nc" id="L232">        supportingFiles.add(new SupportingFile(&quot;helper.mustache&quot;,</span>
+<span class="nc" id="L233">                (sourceFolder + File.separator + invokerPackage).replace(&quot;.&quot;, java.io.File.separator), &quot;AkkaHttpHelper.scala&quot;));</span>
+<span class="nc" id="L234">        supportingFiles.add(new SupportingFile(&quot;stringDirectives.mustache&quot;,</span>
+<span class="nc" id="L235">                (sourceFolder + File.separator + invokerPackage).replace(&quot;.&quot;, java.io.File.separator), &quot;StringDirectives.scala&quot;));</span>
+<span class="nc" id="L236">        supportingFiles.add(new SupportingFile(&quot;multipartDirectives.mustache&quot;,</span>
+<span class="nc" id="L237">                (sourceFolder + File.separator + invokerPackage).replace(&quot;.&quot;, java.io.File.separator), &quot;MultipartDirectives.scala&quot;));</span>
+<span class="nc" id="L238">    }</span>
+
+    private void parseAkkaHttpVersion() {
+<span class="nc" id="L241">        boolean is10_1_10AndAbove = false;</span>
+<span class="nc" id="L242">        Matcher matcher = akkaVersionPattern.matcher(akkaHttpVersion);</span>
+<span class="nc bnc" id="L243" title="All 2 branches missed.">        if (matcher.matches()) {</span>
+<span class="nc" id="L244">            String majorS = matcher.group(1);</span>
+<span class="nc" id="L245">            String minorS = matcher.group(3);</span>
+<span class="nc" id="L246">            String patchS = matcher.group(5);</span>
+<span class="nc bnc" id="L247" title="All 2 branches missed.">            boolean andAbove = matcher.group(6) != null;</span>
+<span class="nc" id="L248">            int major = -1, minor = -1, patch = -1;</span>
+            try {
+<span class="nc bnc" id="L250" title="All 2 branches missed.">                if (majorS != null) {</span>
+<span class="nc" id="L251">                    major = Integer.parseInt(majorS);</span>
+<span class="nc bnc" id="L252" title="All 2 branches missed.">                    if (minorS != null) {</span>
+<span class="nc" id="L253">                        minor = Integer.parseInt(minorS);</span>
+<span class="nc bnc" id="L254" title="All 2 branches missed.">                        if (patchS != null) {</span>
+<span class="nc" id="L255">                            patch = Integer.parseInt(patchS);</span>
+                        }
+                    }
+                }
+
+
+<span class="nc bnc" id="L261" title="All 6 branches missed.">                if (major &gt; 10 || major == -1 &amp;&amp; andAbove) {</span>
+<span class="nc" id="L262">                    is10_1_10AndAbove = true;</span>
+<span class="nc bnc" id="L263" title="All 2 branches missed.">                } else if (major == 10) {</span>
+<span class="nc bnc" id="L264" title="All 6 branches missed.">                    if (minor &gt; 1 || minor == -1 &amp;&amp; andAbove) {</span>
+<span class="nc" id="L265">                        is10_1_10AndAbove = true;</span>
+<span class="nc bnc" id="L266" title="All 2 branches missed.">                    } else if (minor == 1) {</span>
+<span class="nc bnc" id="L267" title="All 6 branches missed.">                        if (patch &gt;= 10 || patch == -1 &amp;&amp; andAbove) {</span>
+<span class="nc" id="L268">                            is10_1_10AndAbove = true;</span>
+                        }
+                    }
+                }
+
+<span class="nc" id="L273">            } catch (NumberFormatException e) {</span>
+<span class="nc" id="L274">                LOGGER.warn(&quot;Unable to parse {}: {}, fallback to {}&quot;, AKKA_HTTP_VERSION, akkaHttpVersion, DEFAULT_AKKA_HTTP_VERSION);</span>
+<span class="nc" id="L275">                akkaHttpVersion = DEFAULT_AKKA_HTTP_VERSION;</span>
+<span class="nc" id="L276">                is10_1_10AndAbove = true;</span>
+<span class="nc" id="L277">            }</span>
+        }
+
+<span class="nc" id="L280">        additionalProperties.put(IS_10_1_10_PLUS, is10_1_10AndAbove);</span>
+<span class="nc" id="L281">    }</span>
+
+    @Override
+    public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, List&lt;Server&gt; servers) {
+<span class="nc" id="L285">        CodegenOperation codegenOperation = super.fromOperation(path, httpMethod, operation, servers);</span>
+<span class="nc" id="L286">        addPathMatcher(codegenOperation);</span>
+<span class="nc" id="L287">        return codegenOperation;</span>
+    }
+
+    @Override
+    public CodegenParameter fromParameter(Parameter parameter, Set&lt;String&gt; imports) {
+<span class="nc" id="L292">        CodegenParameter param = super.fromParameter(parameter, imports);</span>
+<span class="nc bnc" id="L293" title="All 2 branches missed.">        if (primitiveParamTypes.contains(param.dataType)) {</span>
+<span class="nc bnc" id="L294" title="All 2 branches missed.">            if (!param.required) {</span>
+<span class="nc bnc" id="L295" title="All 2 branches missed.">                param.vendorExtensions.put(&quot;x-has-default-value&quot;, param.defaultValue != null);</span>
+                // Escaping default string values
+<span class="nc bnc" id="L297" title="All 4 branches missed.">                if (param.defaultValue != null &amp;&amp; &quot;String&quot;.equals(param.dataType)) {</span>
+<span class="nc" id="L298">                    param.defaultValue = String.format(Locale.ROOT, &quot;\&quot;%s\&quot;&quot;, param.defaultValue);</span>
+                }
+            }
+        } else {
+            // Removing unhandled types
+<span class="nc" id="L303">            param.dataType = &quot;String&quot;;</span>
+        }
+<span class="nc" id="L305">        return param;</span>
+    }
+
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L311">        OperationsMap baseObjs = super.postProcessOperationsWithModels(objs, allModels);</span>
+<span class="nc" id="L312">        pathMatcherPatternsPostProcessor(baseObjs);</span>
+<span class="nc" id="L313">        marshallingPostProcessor(baseObjs);</span>
+<span class="nc" id="L314">        return baseObjs;</span>
+    }
+
+<span class="nc" id="L317">    private static final Set&lt;String&gt; primitiveParamTypes = ImmutableSet.of(</span>
+            &quot;Int&quot;,
+            &quot;Long&quot;,
+            &quot;Float&quot;,
+            &quot;Double&quot;,
+            &quot;Boolean&quot;,
+            &quot;String&quot;
+    );
+
+<span class="nc" id="L326">    private static final Map&lt;String, String&gt; pathTypeToMatcher = ImmutableMap.&lt;String,String&gt;builder()</span>
+<span class="nc" id="L327">        .put(&quot;Int&quot;, &quot;IntNumber&quot;)</span>
+<span class="nc" id="L328">        .put(&quot;Long&quot;, &quot;LongNumber&quot;)</span>
+<span class="nc" id="L329">        .put(&quot;Float&quot;, &quot;FloatNumber&quot;)</span>
+<span class="nc" id="L330">        .put(&quot;Double&quot;, &quot;DoubleNumber&quot;)</span>
+<span class="nc" id="L331">        .put(&quot;Boolean&quot;, &quot;Boolean&quot;)</span>
+<span class="nc" id="L332">        .put(&quot;String&quot;, &quot;Segment&quot;)</span>
+<span class="nc" id="L333">    .build();</span>
+
+    protected void addPathMatcher(CodegenOperation codegenOperation) {
+<span class="nc" id="L336">        LinkedList&lt;String&gt; allPaths = new LinkedList&lt;&gt;(Arrays.asList(codegenOperation.path.split(&quot;/&quot;)));</span>
+<span class="nc" id="L337">        allPaths.removeIf(&quot;&quot;::equals);</span>
+
+<span class="nc" id="L339">        LinkedList&lt;TextOrMatcher&gt; pathMatchers = new LinkedList&lt;&gt;();</span>
+<span class="nc bnc" id="L340" title="All 2 branches missed.">        for (String path : allPaths) {</span>
+<span class="nc" id="L341">            TextOrMatcher textOrMatcher = new TextOrMatcher(&quot;&quot;, true);</span>
+<span class="nc bnc" id="L342" title="All 4 branches missed.">            if (path.startsWith(&quot;{&quot;) &amp;&amp; path.endsWith(&quot;}&quot;)) {</span>
+<span class="nc" id="L343">                String parameterName = path.substring(1, path.length() - 1);</span>
+<span class="nc bnc" id="L344" title="All 2 branches missed.">                for (CodegenParameter pathParam : codegenOperation.pathParams) {</span>
+<span class="nc bnc" id="L345" title="All 2 branches missed.">                    if (pathParam.baseName.equals(parameterName)) {</span>
+<span class="nc" id="L346">                        String matcher = pathTypeToMatcher.get(pathParam.dataType);</span>
+<span class="nc bnc" id="L347" title="All 2 branches missed.">                        if (matcher == null) {</span>
+<span class="nc" id="L348">                            LOGGER.warn(</span>
+                                    &quot;The path parameter {} with the datatype {} could not be translated to a corresponding path matcher of akka http and therefore has been translated to string.&quot;,
+                                    pathParam.baseName, pathParam.dataType);
+<span class="nc" id="L351">                            matcher = pathTypeToMatcher.get(&quot;String&quot;);</span>
+                        }
+<span class="nc bnc" id="L353" title="All 4 branches missed.">                        if (pathParam.pattern != null &amp;&amp; !pathParam.pattern.isEmpty()) {</span>
+<span class="nc" id="L354">                            matcher = pathMatcherPatternName(pathParam);</span>
+                        }
+<span class="nc" id="L356">                        textOrMatcher.value = matcher;</span>
+<span class="nc" id="L357">                        textOrMatcher.isText = false;</span>
+<span class="nc" id="L358">                        pathMatchers.add(textOrMatcher);</span>
+                    }
+<span class="nc" id="L360">                }</span>
+<span class="nc" id="L361">            } else {</span>
+<span class="nc" id="L362">                textOrMatcher.value = path;</span>
+<span class="nc" id="L363">                textOrMatcher.isText = true;</span>
+<span class="nc" id="L364">                pathMatchers.add(textOrMatcher);</span>
+            }
+<span class="nc" id="L366">        }</span>
+<span class="nc" id="L367">        codegenOperation.vendorExtensions.put(&quot;x-paths&quot;, pathMatchers);</span>
+<span class="nc" id="L368">    }</span>
+
+<span class="nc" id="L370">    public static String PATH_MATCHER_PATTERNS_KEY = &quot;pathMatcherPatterns&quot;;</span>
+
+    private static void pathMatcherPatternsPostProcessor(OperationsMap objs) {
+<span class="nc bnc" id="L373" title="All 2 branches missed.">        if (objs != null) {</span>
+<span class="nc" id="L374">            HashMap&lt;String, PathMatcherPattern&gt; patternMap = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L375">            OperationMap operations = objs.getOperations();</span>
+<span class="nc bnc" id="L376" title="All 2 branches missed.">            if (operations != null) {</span>
+<span class="nc" id="L377">                List&lt;CodegenOperation&gt; ops = operations.getOperation();</span>
+<span class="nc bnc" id="L378" title="All 2 branches missed.">                for (CodegenOperation operation : ops) {</span>
+<span class="nc bnc" id="L379" title="All 2 branches missed.">                    for (CodegenParameter parameter : operation.pathParams) {</span>
+<span class="nc bnc" id="L380" title="All 4 branches missed.">                        if (parameter.pattern != null &amp;&amp; !parameter.pattern.isEmpty()) {</span>
+<span class="nc" id="L381">                            String name = pathMatcherPatternName(parameter);</span>
+<span class="nc bnc" id="L382" title="All 2 branches missed.">                            if (!patternMap.containsKey(name)) {</span>
+<span class="nc" id="L383">                                patternMap.put(name, new PathMatcherPattern(name, parameter.pattern.substring(1, parameter.pattern.length() - 1)));</span>
+                            }
+                        }
+<span class="nc" id="L386">                    }</span>
+<span class="nc" id="L387">                }</span>
+            }
+<span class="nc" id="L389">            objs.put(PATH_MATCHER_PATTERNS_KEY, new ArrayList&lt;&gt;(patternMap.values()));</span>
+        }
+<span class="nc" id="L391">    }</span>
+
+    private static String pathMatcherPatternName(CodegenParameter parameter) {
+<span class="nc" id="L394">        return parameter.paramName + &quot;Pattern&quot;;</span>
+    }
+
+    // Responsible for setting up Marshallers/Unmarshallers
+    public static void marshallingPostProcessor(OperationsMap objs) {
+
+<span class="nc bnc" id="L400" title="All 2 branches missed.">        if (objs == null) {</span>
+<span class="nc" id="L401">            return;</span>
+        }
+
+<span class="nc" id="L404">        Set&lt;Marshaller&gt; entityUnmarshallerTypes = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L405">        Set&lt;Marshaller&gt; entityMarshallerTypes = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L406">        Set&lt;Marshaller&gt; stringUnmarshallerTypes = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L407">        boolean hasCookieParams = false;</span>
+<span class="nc" id="L408">        boolean hasMultipart = false;</span>
+
+<span class="nc" id="L410">        OperationMap operations = objs.getOperations();</span>
+<span class="nc bnc" id="L411" title="All 2 branches missed.">        if (operations != null) {</span>
+<span class="nc" id="L412">            List&lt;CodegenOperation&gt; operationList = operations.getOperation();</span>
+
+<span class="nc bnc" id="L414" title="All 2 branches missed.">            for (CodegenOperation op : operationList) {</span>
+<span class="nc" id="L415">                boolean isMultipart = op.isMultipart;</span>
+<span class="nc" id="L416">                hasMultipart |= isMultipart;</span>
+<span class="nc" id="L417">                hasCookieParams |= op.getHasCookieParams();</span>
+<span class="nc" id="L418">                ArrayList&lt;CodegenParameter&gt; fileParams = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L419">                ArrayList&lt;CodegenParameter&gt; nonFileParams = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L420" title="All 2 branches missed.">                for (CodegenParameter parameter : op.allParams) {</span>
+<span class="nc bnc" id="L421" title="All 4 branches missed.">                    if (parameter.isBodyParam || parameter.isFormParam) {</span>
+<span class="nc bnc" id="L422" title="All 2 branches missed.">                        if (parameter.isFile) {</span>
+<span class="nc" id="L423">                            fileParams.add(parameter.copy());</span>
+                        } else {
+<span class="nc" id="L425">                            nonFileParams.add(parameter.copy());</span>
+                        }
+<span class="nc bnc" id="L427" title="All 2 branches missed.">                        if (!parameter.isPrimitiveType) {</span>
+<span class="nc bnc" id="L428" title="All 2 branches missed.">                            if (isMultipart) {</span>
+<span class="nc" id="L429">                                stringUnmarshallerTypes.add(new Marshaller(parameter));</span>
+                            } else {
+<span class="nc" id="L431">                                entityUnmarshallerTypes.add(new Marshaller(parameter));</span>
+                            }
+                        }
+                    }
+<span class="nc" id="L435">                }</span>
+<span class="nc" id="L436">                HashSet&lt;Marshaller&gt; operationSpecificMarshallers = new HashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L437" title="All 2 branches missed.">                for (CodegenResponse response : op.responses) {</span>
+<span class="nc bnc" id="L438" title="All 2 branches missed.">                    if (!response.primitiveType) {</span>
+<span class="nc" id="L439">                        Marshaller marshaller = new Marshaller(response);</span>
+<span class="nc" id="L440">                        entityMarshallerTypes.add(marshaller);</span>
+<span class="nc" id="L441">                        operationSpecificMarshallers.add(marshaller);</span>
+                    }
+<span class="nc bnc" id="L443" title="All 4 branches missed.">                    response.vendorExtensions.put(&quot;x-empty-response&quot;, response.baseType == null &amp;&amp; response.message == null);</span>
+<span class="nc" id="L444">                    response.vendorExtensions.put(&quot;x-is-default&quot;, &quot;0&quot;.equals(response.code));</span>
+<span class="nc" id="L445">                }</span>
+<span class="nc" id="L446">                op.vendorExtensions.put(&quot;x-specific-marshallers&quot;, operationSpecificMarshallers);</span>
+<span class="nc" id="L447">                op.vendorExtensions.put(&quot;x-file-params&quot;, fileParams);</span>
+<span class="nc" id="L448">                op.vendorExtensions.put(&quot;x-non-file-params&quot;, nonFileParams);</span>
+<span class="nc" id="L449">            }</span>
+        }
+
+<span class="nc" id="L452">        objs.put(&quot;hasCookieParams&quot;, hasCookieParams);</span>
+<span class="nc" id="L453">        objs.put(&quot;entityMarshallers&quot;, entityMarshallerTypes);</span>
+<span class="nc" id="L454">        objs.put(&quot;entityUnmarshallers&quot;, entityUnmarshallerTypes);</span>
+<span class="nc" id="L455">        objs.put(&quot;stringUnmarshallers&quot;, stringUnmarshallerTypes);</span>
+<span class="nc bnc" id="L456" title="All 6 branches missed.">        objs.put(&quot;hasMarshalling&quot;, !entityMarshallerTypes.isEmpty() || !entityUnmarshallerTypes.isEmpty() || !stringUnmarshallerTypes.isEmpty());</span>
+<span class="nc" id="L457">        objs.put(&quot;hasMultipart&quot;, hasMultipart);</span>
+<span class="nc" id="L458">    }</span>
+
+}
+
+class Marshaller {
+    String varName;
+    String dataType;
+
+<span class="nc" id="L466">    public Marshaller(CodegenResponse response) {</span>
+<span class="nc bnc" id="L467" title="All 2 branches missed.">        if (response.containerType != null) {</span>
+<span class="nc" id="L468">            this.varName = response.baseType + response.containerType;</span>
+        } else {
+<span class="nc" id="L470">            this.varName = response.baseType;</span>
+        }
+<span class="nc" id="L472">        this.dataType = response.dataType;</span>
+<span class="nc" id="L473">    }</span>
+
+<span class="nc" id="L475">    public Marshaller(CodegenParameter parameter) {</span>
+<span class="nc bnc" id="L476" title="All 2 branches missed.">        if (parameter.isArray) {</span>
+<span class="nc" id="L477">            this.varName = parameter.baseType + &quot;List&quot;;</span>
+<span class="nc bnc" id="L478" title="All 2 branches missed.">        } else if (parameter.isMap) {</span>
+<span class="nc" id="L479">            this.varName = parameter.baseType + &quot;Map&quot;;</span>
+<span class="nc bnc" id="L480" title="All 2 branches missed.">        } else if (parameter.isContainer) {</span>
+<span class="nc" id="L481">            this.varName = parameter.baseType + &quot;Container&quot;;</span>
+        } else {
+<span class="nc" id="L483">            this.varName = parameter.baseType;</span>
+        }
+<span class="nc" id="L485">        this.dataType = parameter.dataType;</span>
+<span class="nc" id="L486">    }</span>
+
+    @Override
+    public boolean equals(Object o) {
+<span class="nc bnc" id="L490" title="All 2 branches missed.">        if (this == o) return true;</span>
+<span class="nc bnc" id="L491" title="All 4 branches missed.">        if (o == null || getClass() != o.getClass()) return false;</span>
+<span class="nc" id="L492">        Marshaller that = (Marshaller) o;</span>
+<span class="nc bnc" id="L493" title="All 2 branches missed.">        return varName.equals(that.varName) &amp;&amp;</span>
+<span class="nc bnc" id="L494" title="All 2 branches missed.">                dataType.equals(that.dataType);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="nc" id="L499">        return Objects.hash(varName, dataType);</span>
+    }
+}
+
+class PathMatcherPattern {
+    String pathMatcherVarName;
+    String pattern;
+
+<span class="nc" id="L507">    public PathMatcherPattern(String pathMatcherVarName, String pattern) {</span>
+<span class="nc" id="L508">        this.pathMatcherVarName = pathMatcherVarName;</span>
+<span class="nc" id="L509">        this.pattern = pattern;</span>
+<span class="nc" id="L510">    }</span>
+}
+
+class TextOrMatcher {
+    String value;
+    boolean isText;
+
+<span class="nc" id="L517">    public TextOrMatcher(String value, boolean isText) {</span>
+<span class="nc" id="L518">        this.value = value;</span>
+<span class="nc" id="L519">        this.isText = isText;</span>
+<span class="nc" id="L520">    }</span>
+
+    @Override
+    public boolean equals(Object o) {
+<span class="nc bnc" id="L524" title="All 2 branches missed.">        if (this == o) return true;</span>
+<span class="nc bnc" id="L525" title="All 4 branches missed.">        if (o == null || getClass() != o.getClass()) return false;</span>
+<span class="nc" id="L526">        TextOrMatcher that = (TextOrMatcher) o;</span>
+<span class="nc bnc" id="L527" title="All 2 branches missed.">        return isText == that.isText &amp;&amp;</span>
+<span class="nc bnc" id="L528" title="All 2 branches missed.">                value.equals(that.value);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="nc" id="L533">        return Objects.hash(value, isText);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

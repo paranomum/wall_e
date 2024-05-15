@@ -1,0 +1,760 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>XojoClientCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">XojoClientCodegen.java</span></div><h1>XojoClientCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.meta.GeneratorMetadata;
+import org.openapitools.codegen.meta.Stability;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.utils.ModelUtils;
+
+import java.io.File;
+import java.util.*;
+import java.util.function.Consumer;
+
+import static org.openapitools.codegen.utils.CamelizeOption.LOWERCASE_FIRST_LETTER;
+import static org.openapitools.codegen.utils.StringUtils.camelize;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.WordUtils;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class XojoClientCodegen extends DefaultCodegen implements CodegenConfig {
+    public static final String CODEGEN_MODULE_NAME = &quot;xojo-client&quot;;
+    public static final String LIBRARY_HTTPSOCKET = &quot;httpsocket&quot;;
+
+    public static final String SERIALIZATION_LIBRARY_DESC = &quot;What serialization library to use: 'xoson' (default).&quot;;
+    public static final String PROJECT_NAME_DESC = &quot;Project name in Xojo&quot;;
+
+<span class="nc" id="L50">    public enum SERIALIZATION_LIBRARY_TYPE {xoson}</span>
+
+<span class="nc" id="L52">    protected String projectName = &quot;OpenAPIClient&quot;;</span>
+<span class="nc" id="L53">    protected boolean nonPublicApi = false;</span>
+<span class="nc" id="L54">    protected boolean supportsAsync = true;</span>
+<span class="nc" id="L55">    protected SERIALIZATION_LIBRARY_TYPE serializationLibrary = SERIALIZATION_LIBRARY_TYPE.xoson;</span>
+
+    // Number for each object that appears in the xojo_project file.
+    // We start with a relatively high value, to have space for other static objects.
+<span class="nc" id="L59">    protected int projectObjectNumber = 100042;</span>
+
+<span class="nc" id="L61">    private final Logger LOGGER = LoggerFactory.getLogger(XojoClientCodegen.class);</span>
+
+    public void setProjectName(String projectName) {
+<span class="nc" id="L64">        this.projectName = projectName;</span>
+<span class="nc" id="L65">    }</span>
+
+    public void setNonPublicApi(boolean nonPublicApi) {
+<span class="nc" id="L68">        this.nonPublicApi = nonPublicApi;</span>
+<span class="nc" id="L69">    }</span>
+
+    public void setSupportsAsync(Boolean supportsAsync) {
+<span class="nc" id="L72">        this.supportsAsync = supportsAsync;</span>
+<span class="nc" id="L73">    }</span>
+
+    @Override
+    public String apiFileFolder() {
+<span class="nc" id="L77">        return outputFolder + File.separator + projectName + File.separator + apiPackage().replace('.', File.separatorChar);</span>
+    }
+
+    @Override
+    public String modelFileFolder() {
+<span class="nc" id="L82">        return outputFolder + File.separator + projectName + File.separator + modelPackage().replace('.', File.separatorChar);</span>
+    }
+
+    public XojoClientCodegen() {
+<span class="nc" id="L86">        super();</span>
+<span class="nc" id="L87">        this.useOneOfInterfaces = true;</span>
+
+<span class="nc" id="L89">        generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
+<span class="nc" id="L90">                .stability(Stability.STABLE)</span>
+<span class="nc" id="L91">                .build();</span>
+
+<span class="nc" id="L93">        outputFolder = &quot;generated-code&quot; + File.separator + CODEGEN_MODULE_NAME;</span>
+<span class="nc" id="L94">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.xojo_code&quot;);</span>
+<span class="nc" id="L95">        modelTemplateFiles.put(&quot;modelOptionalEnum.mustache&quot;, &quot;Optional.xojo_code&quot;);</span>
+<span class="nc" id="L96">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.xojo_code&quot;);</span>
+<span class="nc" id="L97">        embeddedTemplateDir = templateDir = CODEGEN_MODULE_NAME;</span>
+<span class="nc" id="L98">        apiPackage = &quot;APIs&quot;;</span>
+<span class="nc" id="L99">        modelPackage = &quot;Models&quot;;</span>
+
+<span class="nc" id="L101">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;));</span>
+
+<span class="nc" id="L103">        supportingFiles.add(new SupportingFile(&quot;App.mustache&quot;,</span>
+            &quot;&quot;,
+            &quot;App.xojo_code&quot;));
+
+<span class="nc" id="L107">        supportingFiles.add(new SupportingFile(&quot;BuildAutomation.mustache&quot;,</span>
+            &quot;&quot;,
+            &quot;Build Automation.xojo_code&quot;));
+
+<span class="nc" id="L111">        supportingFiles.add(new SupportingFile(&quot;api_mock.mustache&quot;,</span>
+            &quot;&quot;,
+            &quot;Mock.xojo_code&quot;));
+
+<span class="nc" id="L115">        languageSpecificPrimitives = new HashSet&lt;&gt;(</span>
+<span class="nc" id="L116">                Arrays.asList(</span>
+                        &quot;Integer&quot;,
+                        &quot;Int8&quot;,
+                        &quot;Int16&quot;,
+                        &quot;Int32&quot;,
+                        &quot;Int64&quot;,
+                        &quot;UInteger&quot;,
+                        &quot;UInt8&quot;,
+                        &quot;UInt16&quot;,
+                        &quot;UInt32&quot;,
+                        &quot;UInt64&quot;,
+                        &quot;Single&quot;,
+                        &quot;Double&quot;,
+                        &quot;Boolean&quot;,
+                        &quot;String&quot;,
+                        &quot;Color&quot;,
+                        &quot;Currency&quot;)
+        );
+
+<span class="nc" id="L135">        setReservedWordsLowerCase(</span>
+<span class="nc" id="L136">            Arrays.asList(</span>
+                    // name used by Xojo client
+                    &quot;Models&quot;, &quot;APIs&quot;,
+
+                    // Xojo keywords. This list is taken from here:
+                    // https://documentation.xojo.com/getting_started/using_the_xojo_language/reserved_words.html
+                    //
+                    &quot;#Bad&quot;, &quot;#Else&quot;, &quot;#Elseif&quot;, &quot;#Endif&quot;, &quot;#If&quot;, &quot;#Pragma&quot;, &quot;#Tag&quot;, &quot;AddHandler&quot;, &quot;AddressOf&quot;, &quot;Aggregates&quot;, &quot;And&quot;, &quot;Array&quot;, &quot;As&quot;, &quot;Assigns&quot;, &quot;Async&quot;, &quot;Attributes&quot;, &quot;Await&quot;, &quot;Break&quot;, &quot;ByRef&quot;, &quot;ByVal&quot;, &quot;Call&quot;, &quot;Case&quot;, &quot;Catch&quot;, &quot;Class&quot;, &quot;Const&quot;, &quot;Continue&quot;, &quot;CType&quot;, &quot;Declare&quot;, &quot;Delegate&quot;, &quot;Dim&quot;, &quot;Do&quot;, &quot;DownTo&quot;, &quot;Each&quot;, &quot;Else&quot;, &quot;ElseIf&quot;, &quot;End&quot;, &quot;Enum&quot;, &quot;Event&quot;, &quot;Exception&quot;, &quot;Exit&quot;, &quot;Extends&quot;, &quot;False&quot;, &quot;Finally&quot;, &quot;For&quot;, &quot;Function&quot;, &quot;Global&quot;, &quot;GoTo&quot;, &quot;Handles&quot;, &quot;If&quot;, &quot;Implements&quot;, &quot;In&quot;, &quot;Inherits&quot;, &quot;Interface&quot;, &quot;Is&quot;, &quot;IsA&quot;, &quot;Lib&quot;, &quot;Loop&quot;, &quot;Me&quot;, &quot;Mod&quot;, &quot;Module&quot;, &quot;Namespace&quot;, &quot;New&quot;, &quot;Next&quot;, &quot;Nil&quot;, &quot;Not&quot;, /*&quot;Object&quot;,*/ &quot;Of&quot;, &quot;Optional&quot;, &quot;Or&quot;, &quot;ParamArray&quot;, &quot;Private&quot;, &quot;Property&quot;, &quot;Protected&quot;, &quot;Public&quot;, &quot;Raise&quot;, &quot;RaiseEvent&quot;, &quot;Redim&quot;, &quot;Rem&quot;, &quot;RemoveHandler&quot;, &quot;Return&quot;, &quot;Select&quot;, &quot;Self&quot;, &quot;Shared&quot;, &quot;Soft&quot;, &quot;Static&quot;, &quot;Step&quot;, &quot;Structure&quot;, &quot;Sub&quot;, &quot;Super&quot;, &quot;Then&quot;, &quot;To&quot;, &quot;True&quot;, &quot;Try&quot;, &quot;Until&quot;, &quot;Using&quot;, &quot;Var&quot;, &quot;WeakAddressOf&quot;, &quot;Wend&quot;, &quot;While&quot;, &quot;With&quot;, &quot;Xor&quot;,
+
+                    // The following are other words we want to reserve
+                    &quot;Void&quot;, &quot;COLUMN&quot;, &quot;FILE&quot;, &quot;FUNCTION&quot;, &quot;LINE&quot;
+            )
+        );
+
+<span class="nc" id="L150">        typeMapping = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L151">        typeMapping.put(&quot;map&quot;, &quot;Dictionary&quot;);</span>
+<span class="nc" id="L152">        typeMapping.put(&quot;set&quot;, &quot;Array&quot;);</span>
+<span class="nc" id="L153">        typeMapping.put(&quot;Date&quot;, &quot;Date&quot;);</span>
+<span class="nc" id="L154">        typeMapping.put(&quot;DateTime&quot;, &quot;Date&quot;);</span>
+<span class="nc" id="L155">        typeMapping.put(&quot;boolean&quot;, &quot;Boolean&quot;);</span>
+<span class="nc" id="L156">        typeMapping.put(&quot;string&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L157">        typeMapping.put(&quot;char&quot;, &quot;Byte&quot;);</span>
+<span class="nc" id="L158">        typeMapping.put(&quot;short&quot;, &quot;Int16&quot;);</span>
+<span class="nc" id="L159">        typeMapping.put(&quot;int&quot;, &quot;Integer&quot;);</span>
+<span class="nc" id="L160">        typeMapping.put(&quot;long&quot;, &quot;Int64&quot;);</span>
+<span class="nc" id="L161">        typeMapping.put(&quot;integer&quot;, &quot;Integer&quot;);</span>
+<span class="nc" id="L162">        typeMapping.put(&quot;Integer&quot;, &quot;Integer&quot;);</span>
+<span class="nc" id="L163">        typeMapping.put(&quot;float&quot;, &quot;Single&quot;);</span>
+<span class="nc" id="L164">        typeMapping.put(&quot;number&quot;, &quot;Double&quot;);</span>
+<span class="nc" id="L165">        typeMapping.put(&quot;double&quot;, &quot;Double&quot;);</span>
+<span class="nc" id="L166">        typeMapping.put(&quot;file&quot;, &quot;FolderItem&quot;);</span>
+<span class="nc" id="L167">        typeMapping.put(&quot;binary&quot;, &quot;FolderItem&quot;);</span>
+<span class="nc" id="L168">        typeMapping.put(&quot;ByteArray&quot;, &quot;MemoryBlock&quot;);</span>
+<span class="nc" id="L169">        typeMapping.put(&quot;UUID&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L170">        typeMapping.put(&quot;URI&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L171">        typeMapping.put(&quot;decimal&quot;, &quot;Currency&quot;);</span>
+<span class="nc" id="L172">        typeMapping.put(&quot;object&quot;, &quot;Object&quot;);</span>
+<span class="nc" id="L173">        typeMapping.put(&quot;AnyType&quot;, &quot;Variant&quot;);</span>
+<span class="nc" id="L174">        typeMapping.put(&quot;null&quot;, &quot;nil&quot;);</span>
+
+        // in the future we should also support URLConnection
+<span class="nc" id="L177">        supportedLibraries.put(LIBRARY_HTTPSOCKET, &quot;[DEFAULT] HTTP client: HTTPSocket&quot;);</span>
+
+<span class="nc" id="L179">        CliOption libraryOption = new CliOption(CodegenConstants.LIBRARY, CodegenConstants.LIBRARY_DESC);</span>
+<span class="nc" id="L180">        libraryOption.setEnum(supportedLibraries);</span>
+<span class="nc" id="L181">        libraryOption.setDefault(LIBRARY_HTTPSOCKET);</span>
+<span class="nc" id="L182">        cliOptions.add(libraryOption);</span>
+<span class="nc" id="L183">        setLibrary(LIBRARY_HTTPSOCKET);</span>
+
+<span class="nc" id="L185">        CliOption serializationLibraryOpt = new CliOption(CodegenConstants.SERIALIZATION_LIBRARY, SERIALIZATION_LIBRARY_DESC);</span>
+<span class="nc" id="L186">        cliOptions.add(serializationLibraryOpt.defaultValue(serializationLibrary.name()));</span>
+
+<span class="nc" id="L188">        cliOptions.add(new CliOption(CodegenConstants.API_NAME_PREFIX, &quot;Prefix that will be appended to all API classes. Default: empty string.&quot;));</span>
+<span class="nc" id="L189">        cliOptions.add(new CliOption(CodegenConstants.PROJECT_NAME, PROJECT_NAME_DESC));</span>
+<span class="nc" id="L190">        cliOptions.add(new CliOption(CodegenConstants.NON_PUBLIC_API, CodegenConstants.NON_PUBLIC_API_DESC));</span>
+<span class="nc" id="L191">        cliOptions.add(new CliOption(CodegenConstants.API_PACKAGE, CodegenConstants.API_PACKAGE_DESC));</span>
+<span class="nc" id="L192">        cliOptions.add(new CliOption(CodegenConstants.SUPPORTS_ASYNC, CodegenConstants.SUPPORTS_ASYNC_DESC));</span>
+<span class="nc" id="L193">        cliOptions.add(new CliOption(CodegenConstants.MODEL_PACKAGE, CodegenConstants.MODEL_PACKAGE_DESC));</span>
+<span class="nc" id="L194">    }</span>
+
+    private static CodegenModel reconcileProperties(CodegenModel codegenModel,
+                                                    CodegenModel parentCodegenModel) {
+        // To support inheritance in this generator, we will analyze
+        // the parent and child models, look for properties that match, and remove
+        // them from the child models and leave them in the parent.
+        // Because the child models extend the parents, the properties
+        // will be available via the parent.
+
+        // Get the properties for the parent and child models
+<span class="nc" id="L205">        final List&lt;CodegenProperty&gt; parentModelCodegenProperties = parentCodegenModel.vars;</span>
+<span class="nc" id="L206">        List&lt;CodegenProperty&gt; codegenProperties = codegenModel.vars;</span>
+<span class="nc" id="L207">        codegenModel.allVars = new ArrayList&lt;CodegenProperty&gt;(codegenProperties);</span>
+<span class="nc" id="L208">        codegenModel.parentVars = parentCodegenModel.allVars;</span>
+
+        // Iterate over all of the parent model properties
+<span class="nc" id="L211">        boolean removedChildProperty = false;</span>
+
+<span class="nc bnc" id="L213" title="All 2 branches missed.">        for (CodegenProperty parentModelCodegenProperty : parentModelCodegenProperties) {</span>
+            // Now that we have found a prop in the parent class,
+            // and search the child class for the same prop.
+<span class="nc" id="L216">            Iterator&lt;CodegenProperty&gt; iterator = codegenProperties.iterator();</span>
+<span class="nc bnc" id="L217" title="All 2 branches missed.">            while (iterator.hasNext()) {</span>
+<span class="nc" id="L218">                CodegenProperty codegenProperty = iterator.next();</span>
+<span class="nc bnc" id="L219" title="All 2 branches missed.">                if (codegenProperty.baseName.equals(parentModelCodegenProperty.baseName)) {</span>
+                    // We found a property in the child class that is
+                    // a duplicate of the one in the parent, so remove it.
+<span class="nc" id="L222">                    iterator.remove();</span>
+<span class="nc" id="L223">                    removedChildProperty = true;</span>
+                }
+<span class="nc" id="L225">            }</span>
+<span class="nc" id="L226">        }</span>
+
+<span class="nc bnc" id="L228" title="All 2 branches missed.">        if (removedChildProperty) {</span>
+<span class="nc" id="L229">            codegenModel.vars = codegenProperties;</span>
+        }
+
+<span class="nc" id="L232">        return codegenModel;</span>
+    }
+
+    @Override
+    public String getTypeDeclaration(Schema p) {
+<span class="nc bnc" id="L237" title="All 2 branches missed.">        if (ModelUtils.isArraySchema(p)) {</span>
+<span class="nc" id="L238">            Schema inner = ModelUtils.getSchemaItems(p);</span>
+<span class="nc" id="L239">            return super.getTypeDeclaration(inner);</span>
+        }
+<span class="nc" id="L241">        return super.getTypeDeclaration(p);</span>
+    }
+
+    @Override
+    public String getSchemaType(Schema p) {
+<span class="nc" id="L246">        String openAPIType = super.getSchemaType(p);</span>
+        String type;
+<span class="nc bnc" id="L248" title="All 2 branches missed.">        if (typeMapping.containsKey(openAPIType)) {</span>
+<span class="nc" id="L249">            type = typeMapping.get(openAPIType);</span>
+<span class="nc bnc" id="L250" title="All 4 branches missed.">            if (languageSpecificPrimitives.contains(type) || defaultIncludes.contains(type)) {</span>
+<span class="nc" id="L251">                return type;</span>
+            }
+        } else {
+<span class="nc" id="L254">            type = openAPIType;</span>
+        }
+<span class="nc" id="L256">        return toModelName(type);</span>
+    }
+
+    @Override
+    public String escapeReservedWord(String name) {
+<span class="nc" id="L261">        LOGGER.warn(&quot;Escaping word '&quot; + name + &quot;' to 'Escaped&quot; + name + &quot;'. This will likely cause issues at runtime!&quot;);</span>
+<span class="nc" id="L262">        return &quot;Escaped&quot; + name;</span>
+    }
+
+    @Override
+    public CodegenType getTag() {
+<span class="nc" id="L267">        return CodegenType.CLIENT;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L272">        return CODEGEN_MODULE_NAME;</span>
+    }
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L277">        return &quot;Generates a Xojo client module.&quot;;</span>
+    }
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L282">        super.processOpts();</span>
+
+        // mandatory settings to ensure compilation
+<span class="nc" id="L285">        setSortParamsByRequiredFlag(true);</span>
+<span class="nc" id="L286">        setEnsureUniqueParams(true);</span>
+<span class="nc" id="L287">        setAllowUnicodeIdentifiers(false);</span>
+
+        // Setup nonPublicApi option, which generates code with reduced access
+        // modifiers; allows embedding elsewhere without exposing non-public API calls
+        // to consumers
+<span class="nc bnc" id="L292" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.NON_PUBLIC_API)) {</span>
+<span class="nc" id="L293">            setNonPublicApi(convertPropertyToBooleanAndWriteBack(CodegenConstants.NON_PUBLIC_API));</span>
+        }
+<span class="nc" id="L295">        additionalProperties.put(CodegenConstants.NON_PUBLIC_API, nonPublicApi);</span>
+
+<span class="nc bnc" id="L297" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.SERIALIZATION_LIBRARY)) {</span>
+<span class="nc" id="L298">            setSerializationLibrary((String) additionalProperties.get(CodegenConstants.SERIALIZATION_LIBRARY));</span>
+<span class="nc" id="L299">            additionalProperties.put(this.serializationLibrary.name(), true);</span>
+        } else {
+<span class="nc" id="L301">            additionalProperties.put(this.serializationLibrary.name(), true);</span>
+        }
+
+<span class="nc" id="L304">        syncBooleanProperty(additionalProperties, CodegenConstants.SUPPORTS_ASYNC, this::setSupportsAsync, this.supportsAsync);</span>
+<span class="nc" id="L305">        syncStringProperty(additionalProperties, CodegenConstants.PROJECT_NAME, this::setProjectName, this.projectName);</span>
+<span class="nc" id="L306">        syncStringProperty(additionalProperties, CodegenConstants.LIBRARY, this::setLibrary, this.library);</span>
+
+<span class="nc bnc" id="L308" title="All 2 branches missed.">        if (supportsAsync) {</span>
+<span class="nc" id="L309">            apiTemplateFiles.put(&quot;CallbackHandler.mustache&quot;, &quot;CallbackHandler.xojo_code&quot;);</span>
+        }
+
+<span class="nc" id="L312">        supportingFiles.add(new SupportingFile(&quot;MainModule.mustache&quot;,</span>
+            &quot;&quot;,
+            projectName + &quot;.xojo_code&quot;));
+
+<span class="nc" id="L316">        supportingFiles.add(new SupportingFile(&quot;APIsModule.mustache&quot;,</span>
+            projectName,
+            &quot;APIs.xojo_code&quot;));
+
+<span class="nc" id="L320">        supportingFiles.add(new SupportingFile(&quot;ModelModule.mustache&quot;,</span>
+            projectName,
+            &quot;Models.xojo_code&quot;));
+
+<span class="nc" id="L324">        supportingFiles.add(new SupportingFile(&quot;Project.mustache&quot;,</span>
+            &quot;&quot;,
+            projectName + &quot;.xojo_project&quot;));
+
+<span class="nc" id="L328">        supportingFiles.add(new SupportingFile(&quot;Exception.mustache&quot;,</span>
+            projectName,
+            projectName + &quot;Exception.xojo_code&quot;));
+
+<span class="nc" id="L332">        supportingFiles.add(new SupportingFile(&quot;Resources.mustache&quot;,</span>
+            &quot;&quot;,
+            projectName + &quot;.xojo_resources&quot;));
+<span class="nc" id="L335">    }</span>
+
+    @Override
+    public CodegenModel fromModel(String name, Schema model) {
+<span class="nc" id="L339">        Map&lt;String, Schema&gt; allDefinitions = ModelUtils.getSchemas(this.openAPI);</span>
+<span class="nc" id="L340">        CodegenModel codegenModel = super.fromModel(name, model);</span>
+
+<span class="nc" id="L342">        codegenModel.vendorExtensions.put(&quot;x-xojo-project-id&quot;, String.format(Locale.ROOT, &quot;%014XFF&quot;, projectObjectNumber));</span>
+<span class="nc" id="L343">        projectObjectNumber = projectObjectNumber + 16;</span>
+
+<span class="nc bnc" id="L345" title="All 2 branches missed.">        if (allDefinitions != null) {</span>
+<span class="nc" id="L346">            String parentSchema = codegenModel.parentSchema;</span>
+
+            // multilevel inheritance: reconcile properties of all the parents
+<span class="nc bnc" id="L349" title="All 2 branches missed.">            while (parentSchema != null) {</span>
+<span class="nc" id="L350">                final Schema parentModel = allDefinitions.get(parentSchema);</span>
+<span class="nc" id="L351">                final CodegenModel parentCodegenModel = super.fromModel(codegenModel.parent,</span>
+                        parentModel);
+<span class="nc" id="L353">                codegenModel = XojoClientCodegen.reconcileProperties(codegenModel, parentCodegenModel);</span>
+
+                // get the next parent
+<span class="nc" id="L356">                parentSchema = parentCodegenModel.parentSchema;</span>
+<span class="nc" id="L357">            }</span>
+        }
+        
+<span class="nc" id="L360">        return codegenModel;</span>
+    }
+
+    @Override
+    public String escapeQuotationMark(String input) {
+        // escape &quot; in strings to avoid code injection
+<span class="nc" id="L366">        return input.replace(&quot;\&quot;&quot;, &quot;\&quot;\&quot;&quot;);</span>
+    }
+
+    @Override
+    public String escapeUnsafeCharacters(String input) {
+        // if a backslash occurs in a property note for instance, Xojo crashes.
+<span class="nc" id="L372">        return input.replace(&quot;*/&quot;, &quot;*_/&quot;).replace(&quot;/*&quot;, &quot;/_*&quot;).replace(&quot;\\&quot;, &quot;&quot;);</span>
+    }
+
+    @Override
+    public ModelsMap postProcessModels(ModelsMap objs) {
+<span class="nc" id="L377">        ModelsMap postProcessedModelsEnum = postProcessModelsEnum(objs);</span>
+<span class="nc" id="L378">        return postProcessedModelsEnum;</span>
+    }
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L383">        objs = super.postProcessOperationsWithModels(objs, allModels);</span>
+
+<span class="nc" id="L385">        Map&lt;String, Object&gt; vendorExtensions = (Map&lt;String, Object&gt;)objs.get(&quot;vendorExtensions&quot;);</span>
+<span class="nc bnc" id="L386" title="All 2 branches missed.">        if (null == vendorExtensions) {</span>
+<span class="nc" id="L387">            vendorExtensions = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L388">            objs.put(&quot;vendorExtensions&quot;, vendorExtensions);</span>
+        }
+
+<span class="nc" id="L391">        vendorExtensions.put(&quot;x-xojo-project-id&quot;, String.format(Locale.ROOT, &quot;%014XFF&quot;, projectObjectNumber));</span>
+<span class="nc" id="L392">        projectObjectNumber = projectObjectNumber + 16;</span>
+
+<span class="nc" id="L394">        return objs;</span>
+    }
+
+    @Override
+    public void postProcess() {
+<span class="nc" id="L399">        System.out.println(&quot;################################################################################&quot;);</span>
+<span class="nc" id="L400">        System.out.println(&quot;# Thanks for using OpenAPI Generator.                                          #&quot;);</span>
+<span class="nc" id="L401">        System.out.println(&quot;# Please consider donation to help us maintain this project \uD83D\uDE4F                 #&quot;);</span>
+<span class="nc" id="L402">        System.out.println(&quot;# https://opencollective.com/openapi_generator/donate                          #&quot;);</span>
+<span class="nc" id="L403">        System.out.println(&quot;#                                                                              #&quot;);</span>
+<span class="nc" id="L404">        System.out.println(&quot;# xojo-client contributed by Christopher Kobusch (https://github.com/Topheee). #&quot;);</span>
+<span class="nc" id="L405">        System.out.println(&quot;################################################################################&quot;);</span>
+<span class="nc" id="L406">    }</span>
+
+    // escape api key name
+    @Override
+    @SuppressWarnings(&quot;static-method&quot;)
+    public List&lt;CodegenSecurity&gt; fromSecurity(Map&lt;String, SecurityScheme&gt; securitySchemeMap) {
+<span class="nc" id="L412">        List&lt;CodegenSecurity&gt; securities = super.fromSecurity(securitySchemeMap);</span>
+
+<span class="nc bnc" id="L414" title="All 2 branches missed.">        for (CodegenSecurity sec : securities) {</span>
+<span class="nc bnc" id="L415" title="All 2 branches missed.">            if (sec.isApiKey) sec.name = toVarName(sec.name);</span>
+<span class="nc" id="L416">        }</span>
+
+<span class="nc" id="L418">        return securities;</span>
+    }
+
+    @Override
+<span class="nc" id="L422">    public GeneratorLanguage generatorLanguage() { return GeneratorLanguage.XOJO; }</span>
+
+    @Override
+    public String toOperationId(String operationId) {
+<span class="nc" id="L426">        operationId = camelize(sanitizeName(operationId));</span>
+
+        // Throw exception if method name is empty.
+        // This should not happen but keep the check just in case
+<span class="nc bnc" id="L430" title="All 2 branches missed.">        if (StringUtils.isEmpty(operationId)) {</span>
+<span class="nc" id="L431">            throw new RuntimeException(&quot;Empty method name (operationId) not allowed&quot;);</span>
+        }
+
+        // method name cannot use reserved keyword, e.g. return
+<span class="nc bnc" id="L435" title="All 2 branches missed.">        if (isReservedWord(operationId)) {</span>
+<span class="nc" id="L436">            String newOperationId = camelize((&quot;Call_&quot; + operationId));</span>
+<span class="nc" id="L437">            LOGGER.warn(&quot;{} (reserved word) cannot be used as method name. Renamed to {}&quot;, operationId, newOperationId);</span>
+<span class="nc" id="L438">            return newOperationId;</span>
+        }
+
+        // operationId starts with a number
+<span class="nc bnc" id="L442" title="All 2 branches missed.">        if (operationId.matches(&quot;^\\d.*&quot;)) {</span>
+<span class="nc" id="L443">            LOGGER.warn(&quot;{} (starting with a number) cannot be used as method name. Renamed to {}&quot;, operationId, camelize(sanitizeName(&quot;call_&quot; + operationId), LOWERCASE_FIRST_LETTER));</span>
+<span class="nc" id="L444">            operationId = camelize(sanitizeName(&quot;Call_&quot; + operationId));</span>
+        }
+
+<span class="nc" id="L447">        return operationId;</span>
+    }
+
+    @Override
+    public String toEnumValue(String value, String datatype) {
+<span class="nc" id="L452">        return &quot;\&quot;&quot; + value + &quot;\&quot;&quot;;</span>
+    }
+
+    @Override
+    public String toEnumVarName(String name, String datatype) {
+<span class="nc bnc" id="L457" title="All 2 branches missed.">        if (name.length() == 0) {</span>
+<span class="nc" id="L458">            return &quot;empty&quot;;</span>
+        }
+
+<span class="nc bnc" id="L461" title="All 2 branches missed.">        if (enumUnknownDefaultCase) {</span>
+<span class="nc bnc" id="L462" title="All 2 branches missed.">            if (name.equals(enumUnknownDefaultCaseName)) {</span>
+<span class="nc" id="L463">                return camelize(name);</span>
+            }
+        }
+
+        // Reserved Name
+<span class="nc" id="L468">        String nameLowercase = StringUtils.lowerCase(name);</span>
+<span class="nc bnc" id="L469" title="All 2 branches missed.">        if (isReservedWord(nameLowercase)) {</span>
+<span class="nc" id="L470">            return escapeReservedWord(nameLowercase);</span>
+        }
+
+        // Prefix with underscore if name starts with number
+<span class="nc bnc" id="L474" title="All 2 branches missed.">        if (name.matches(&quot;[+-]?\\d.*&quot;)) {</span>
+<span class="nc" id="L475">            LOGGER.warn(&quot;Escaping enum var name '&quot; + name + &quot;' to 'Escaped&quot; + replaceSpecialCharacters(camelize(name)) + &quot;'. This will likely cause issues at runtime!&quot;);</span>
+<span class="nc" id="L476">            return &quot;Escaped&quot; + replaceSpecialCharacters(camelize(name));</span>
+        }
+
+        // for symbol, e.g. $, #
+<span class="nc bnc" id="L480" title="All 2 branches missed.">        if (getSymbolName(name) != null) {</span>
+<span class="nc" id="L481">            return camelize(WordUtils.capitalizeFully(getSymbolName(name).toUpperCase(Locale.ROOT)));</span>
+        }
+
+        // Camelize only when we have a structure defined below
+<span class="nc" id="L485">        boolean camelized = false;</span>
+<span class="nc bnc" id="L486" title="All 2 branches missed.">        if (name.matches(&quot;[A-Z][a-z0-9]+[a-zA-Z0-9]*&quot;)) {</span>
+<span class="nc" id="L487">            name = camelize(name);</span>
+<span class="nc" id="L488">            camelized = true;</span>
+        }
+
+        // Check for numerical conversions
+<span class="nc bnc" id="L492" title="All 6 branches missed.">        if (&quot;Int&quot;.equals(datatype) || &quot;Int32&quot;.equals(datatype) || &quot;Int64&quot;.equals(datatype)</span>
+<span class="nc bnc" id="L493" title="All 4 branches missed.">                || &quot;Float&quot;.equals(datatype) || &quot;Double&quot;.equals(datatype)) {</span>
+<span class="nc" id="L494">            String varName = &quot;number&quot; + camelize(name);</span>
+<span class="nc" id="L495">            return replaceSpecialCharacters(varName);</span>
+        }
+
+        // If we have already camelized the word, don't progress
+        // any further
+<span class="nc bnc" id="L500" title="All 2 branches missed.">        if (camelized) {</span>
+<span class="nc" id="L501">            return replaceSpecialCharacters(name);</span>
+        }
+
+<span class="nc" id="L504">        char[] separators = {'-', '_', ' ', ':', '(', ')'};</span>
+<span class="nc" id="L505">        return camelize(replaceSpecialCharacters(WordUtils.capitalizeFully(StringUtils.lowerCase(name), separators)</span>
+<span class="nc" id="L506">                        .replaceAll(&quot;[-_ :\\(\\)]&quot;, &quot;&quot;)));</span>
+    }
+
+    private String replaceSpecialCharacters(String name) {
+<span class="nc bnc" id="L510" title="All 2 branches missed.">        for (Map.Entry&lt;String, String&gt; specialCharacters : specialCharReplacements.entrySet()) {</span>
+<span class="nc" id="L511">            String specialChar = specialCharacters.getKey();</span>
+<span class="nc" id="L512">            String replacement = specialCharacters.getValue();</span>
+            // Underscore is the only special character we'll allow
+<span class="nc bnc" id="L514" title="All 4 branches missed.">            if (!specialChar.equals(&quot;_&quot;) &amp;&amp; name.contains(specialChar)) {</span>
+<span class="nc" id="L515">                name = replaceCharacters(name, specialChar, replacement);</span>
+            }
+<span class="nc" id="L517">        }</span>
+
+        // Fallback, replace unknowns with underscore.
+<span class="nc" id="L520">        name = name.replaceAll(&quot;\\W+&quot;, &quot;_&quot;);</span>
+
+<span class="nc" id="L522">        return name;</span>
+    }
+
+    private String replaceCharacters(String word, String oldValue, String newValue) {
+<span class="nc bnc" id="L526" title="All 2 branches missed.">        if (!word.contains(oldValue)) {</span>
+<span class="nc" id="L527">            return word;</span>
+        }
+<span class="nc bnc" id="L529" title="All 2 branches missed.">        if (word.equals(oldValue)) {</span>
+<span class="nc" id="L530">            return newValue;</span>
+        }
+<span class="nc" id="L532">        int i = word.indexOf(oldValue);</span>
+<span class="nc" id="L533">        String start = word.substring(0, i);</span>
+<span class="nc" id="L534">        String end = recurseOnEndOfWord(word, oldValue, newValue, i);</span>
+<span class="nc" id="L535">        return start + newValue + end;</span>
+    }
+
+    private String recurseOnEndOfWord(String word, String oldValue, String newValue, int lastReplacedValue) {
+<span class="nc" id="L539">        String end = word.substring(lastReplacedValue + 1);</span>
+<span class="nc bnc" id="L540" title="All 2 branches missed.">        if (!end.isEmpty()) {</span>
+<span class="nc" id="L541">            end = titleCase(end);</span>
+<span class="nc" id="L542">            end = replaceCharacters(end, oldValue, newValue);</span>
+        }
+<span class="nc" id="L544">        return end;</span>
+    }
+
+    private String titleCase(final String input) {
+<span class="nc" id="L548">        return input.substring(0, 1).toUpperCase(Locale.ROOT) + input.substring(1);</span>
+    }
+
+    @Override
+    public String toVarName(String name) {
+        // sanitize name
+<span class="nc" id="L554">        name = sanitizeName(name);</span>
+
+        // if it's all upper case, do nothing
+<span class="nc bnc" id="L557" title="All 2 branches missed.">        if (name.matches(&quot;^[A-Z_]*$&quot;)) {</span>
+<span class="nc" id="L558">            return name;</span>
+        }
+
+        // for reserved word or word starting with number, append _
+<span class="nc bnc" id="L562" title="All 4 branches missed.">        if (isReservedWord(name) || name.matches(&quot;^\\d.*&quot;)) {</span>
+<span class="nc" id="L563">            name = escapeReservedWord(name);</span>
+        }
+<span class="nc" id="L565">        return name;</span>
+    }
+
+    @Override
+    public String toParamName(String name) {
+        // sanitize name
+<span class="nc" id="L571">        name = sanitizeName(name);</span>
+
+        // replace - with _ e.g. created-at =&gt; created_at
+<span class="nc" id="L574">        name = name.replaceAll(&quot;-&quot;, &quot;_&quot;);</span>
+
+        // if it's all upper case, do nothing
+<span class="nc bnc" id="L577" title="All 2 branches missed.">        if (name.matches(&quot;^[A-Z_]*$&quot;)) {</span>
+<span class="nc" id="L578">            return name;</span>
+        }
+
+        // camelize(lower) the variable name
+        // pet_id =&gt; petId
+<span class="nc" id="L583">        name = camelize(name, LOWERCASE_FIRST_LETTER);</span>
+
+        // for reserved words prepend with 'Escaped'
+<span class="nc bnc" id="L586" title="All 2 branches missed.">        if (isReservedWord(name)) {</span>
+<span class="nc" id="L587">            name = escapeReservedWord(name);</span>
+        }
+
+        // for words starting with number, prepend _
+<span class="nc bnc" id="L591" title="All 2 branches missed.">        if (name.matches(&quot;^\\d.*&quot;)) {</span>
+<span class="nc" id="L592">            name = &quot;_&quot; + name;</span>
+        }
+
+<span class="nc" id="L595">        return name;</span>
+    }
+
+    @Override
+    public String toModelFilename(String name) {
+<span class="nc" id="L600">        name = super.toModelFilename(name);</span>
+        // sanitize name
+<span class="nc" id="L602">        name = sanitizeName(name);</span>
+
+        // replace - with _ e.g. created-at =&gt; created_at
+<span class="nc" id="L605">        name = name.replaceAll(&quot;-&quot;, &quot;_&quot;);</span>
+
+<span class="nc bnc" id="L607" title="All 2 branches missed.">        if (isReservedWord(name)) {</span>
+<span class="nc" id="L608">            name = escapeReservedWord(name);</span>
+        }
+
+        // for words starting with number, prepend A
+<span class="nc bnc" id="L612" title="All 2 branches missed.">        if (name.matches(&quot;^\\d.*&quot;)) {</span>
+<span class="nc" id="L613">            name = &quot;A&quot; + name;</span>
+        }
+
+<span class="nc bnc" id="L616" title="All 2 branches missed.">        if (!name.equals(toModelName(name))) {</span>
+<span class="nc" id="L617">            LOGGER.error(&quot;Model file name '&quot; + name + &quot;' differs from model name '&quot; + toModelName(name) + &quot;'. This will result in compilation errors.&quot;);</span>
+        }
+
+<span class="nc" id="L620">        return name;</span>
+    }
+
+    @Override
+    public String toModelName(String name) {
+<span class="nc" id="L625">        name = sanitizeName(name);</span>
+
+<span class="nc bnc" id="L627" title="All 4 branches missed.">        if (!StringUtils.isEmpty(modelNameSuffix) &amp;&amp; !isLanguageSpecificType(name)) { // set model suffix</span>
+<span class="nc" id="L628">            name = name + &quot;_&quot; + modelNameSuffix;</span>
+        }
+
+<span class="nc bnc" id="L631" title="All 4 branches missed.">        if (!StringUtils.isEmpty(modelNamePrefix) &amp;&amp; !isLanguageSpecificType(name)) { // set model prefix</span>
+<span class="nc" id="L632">            name = modelNamePrefix + &quot;_&quot; + name;</span>
+        }
+
+        // camelize the model name
+        // phone_number =&gt; PhoneNumber
+<span class="nc" id="L637">        name = camelize(name);</span>
+
+        // model name cannot use reserved keyword, e.g. return
+<span class="nc bnc" id="L640" title="All 2 branches missed.">        if (isReservedWord(name)) {</span>
+<span class="nc" id="L641">            String modelName = &quot;Model&quot; + name;</span>
+<span class="nc" id="L642">            LOGGER.warn(&quot;{} (reserved word) cannot be used as model name. Renamed to {}&quot;, name, modelName);</span>
+<span class="nc" id="L643">            return modelName;</span>
+        }
+
+        // model name starts with number
+<span class="nc bnc" id="L647" title="All 2 branches missed.">        if (name.matches(&quot;^\\d.*&quot;)) {</span>
+            // e.g. 200Response =&gt; Model200Response (after camelize)
+<span class="nc" id="L649">            String modelName = &quot;Model&quot; + name;</span>
+<span class="nc" id="L650">            LOGGER.warn(&quot;{} (model name starts with number) cannot be used as model name. Renamed to {}&quot;, name,</span>
+                    modelName);
+<span class="nc" id="L652">            return modelName;</span>
+        }
+
+<span class="nc" id="L655">        return name;</span>
+    }
+
+    @Override
+    public String toExampleValue(Schema schema) {
+<span class="nc bnc" id="L660" title="All 2 branches missed.">        if (schema.getExample() != null) {</span>
+<span class="nc" id="L661">            return schema.getExample().toString();</span>
+        }
+
+<span class="nc" id="L664">        return getDefaultPropertyValue(schema);</span>
+    }
+
+    @Override
+    public String toDefaultValue(Schema schema) {
+<span class="nc bnc" id="L669" title="All 2 branches missed.">        if (schema.getDefault() != null) {</span>
+<span class="nc" id="L670">            return schema.getDefault().toString();</span>
+        }
+
+<span class="nc" id="L673">        return getDefaultPropertyValue(schema);</span>
+    }
+
+    @Override
+    public void setParameterExampleValue(CodegenParameter codegenParameter) {
+<span class="nc" id="L678">        super.setParameterExampleValue(codegenParameter);</span>
+<span class="nc bnc" id="L679" title="All 2 branches missed.">        if (Boolean.TRUE.equals(codegenParameter.isBinary)) {</span>
+<span class="nc" id="L680">            codegenParameter.example = &quot;GetTemporaryFolderItem&quot;;</span>
+<span class="nc bnc" id="L681" title="All 2 branches missed.">        } else if (Boolean.TRUE.equals(codegenParameter.isByteArray)) {</span>
+<span class="nc" id="L682">            codegenParameter.example = &quot;New MemoryBlock(8)&quot;;</span>
+<span class="nc bnc" id="L683" title="All 2 branches missed.">        } else if (Boolean.TRUE.equals(codegenParameter.isFile)) {</span>
+<span class="nc" id="L684">            codegenParameter.example = &quot;GetTemporaryFolderItem&quot;;</span>
+<span class="nc bnc" id="L685" title="All 2 branches missed.">        } else if (Boolean.TRUE.equals(codegenParameter.isDate)) {</span>
+<span class="nc" id="L686">            codegenParameter.example = &quot;New Date&quot;;</span>
+<span class="nc bnc" id="L687" title="All 2 branches missed.">        } else if (Boolean.TRUE.equals(codegenParameter.isDateTime)) {</span>
+<span class="nc" id="L688">            codegenParameter.example = &quot;New Date&quot;;</span>
+<span class="nc bnc" id="L689" title="All 2 branches missed.">        } else if (Boolean.TRUE.equals(codegenParameter.isString)) {</span>
+<span class="nc" id="L690">            codegenParameter.example = codegenParameter.paramName + &quot;_example&quot;;</span>
+<span class="nc bnc" id="L691" title="All 2 branches missed.">        } else if (Boolean.TRUE.equals(codegenParameter.isFreeFormObject)) {</span>
+<span class="nc" id="L692">            codegenParameter.example = &quot;New Dictionary&quot;;</span>
+        }
+<span class="nc" id="L694">    }</span>
+
+    public SERIALIZATION_LIBRARY_TYPE getSerializationLibrary() {
+<span class="nc" id="L697">        return this.serializationLibrary;</span>
+    }
+
+    /**
+     * Sets the serialization engine for Xojo
+     *
+     * @param enumSerializationLibrary The string representation of the serialization library as defined by
+     *                                 {@link org.openapitools.codegen.languages.XojoClientCodegen.SERIALIZATION_LIBRARY_TYPE}
+     */
+    public void setSerializationLibrary(final String enumSerializationLibrary) {
+        try {
+<span class="nc" id="L708">            this.serializationLibrary = SERIALIZATION_LIBRARY_TYPE.valueOf(enumSerializationLibrary);</span>
+<span class="nc" id="L709">        } catch (IllegalArgumentException ex) {</span>
+<span class="nc" id="L710">            StringBuilder sb = new StringBuilder(enumSerializationLibrary + &quot; is an invalid enum property naming option. Please choose from:&quot;);</span>
+<span class="nc bnc" id="L711" title="All 2 branches missed.">            for (SERIALIZATION_LIBRARY_TYPE t : SERIALIZATION_LIBRARY_TYPE.values()) {</span>
+<span class="nc" id="L712">                sb.append(&quot;\n  &quot;).append(t.name());</span>
+            }
+<span class="nc" id="L714">            throw new RuntimeException(sb.toString());</span>
+<span class="nc" id="L715">        }</span>
+<span class="nc" id="L716">    }</span>
+
+    private String getDefaultPropertyValue(Schema schema) {
+<span class="nc bnc" id="L719" title="All 2 branches missed.">        if (ModelUtils.isBooleanSchema(schema)) {</span>
+<span class="nc" id="L720">            return &quot;False&quot;;</span>
+<span class="nc bnc" id="L721" title="All 2 branches missed.">        } else if (ModelUtils.isDateSchema(schema)) {</span>
+<span class="nc" id="L722">            return &quot;Nil&quot;;</span>
+<span class="nc bnc" id="L723" title="All 2 branches missed.">        } else if (ModelUtils.isDateTimeSchema(schema)) {</span>
+<span class="nc" id="L724">            return &quot;Nil&quot;;</span>
+<span class="nc bnc" id="L725" title="All 2 branches missed.">        } else if (ModelUtils.isNumberSchema(schema)) {</span>
+<span class="nc" id="L726">            return &quot;0&quot;;</span>
+<span class="nc bnc" id="L727" title="All 2 branches missed.">        } else if (ModelUtils.isIntegerSchema(schema)) {</span>
+<span class="nc" id="L728">            return &quot;0&quot;;</span>
+<span class="nc bnc" id="L729" title="All 2 branches missed.">        } else if (ModelUtils.isStringSchema(schema)) {</span>
+<span class="nc" id="L730">            return &quot;Sample&quot;;</span>
+<span class="nc bnc" id="L731" title="All 2 branches missed.">        } else if (ModelUtils.isObjectSchema(schema)) {</span>
+<span class="nc" id="L732">            return &quot;Nil&quot;;</span>
+        } else {
+<span class="nc" id="L734">            return &quot;Nil&quot;;</span>
+        }
+    }
+
+    private void syncBooleanProperty(final Map&lt;String, Object&gt; additionalProperties, final String key, final Consumer&lt;Boolean&gt; setter, final Boolean defaultValue) {
+<span class="nc bnc" id="L739" title="All 2 branches missed.">        if (additionalProperties.containsKey(key)) {</span>
+<span class="nc" id="L740">            setter.accept(convertPropertyToBooleanAndWriteBack(key));</span>
+        } else {
+<span class="nc" id="L742">            additionalProperties.put(key, defaultValue);</span>
+<span class="nc" id="L743">            setter.accept(defaultValue);</span>
+        }
+<span class="nc" id="L745">    }</span>
+
+    private void syncStringProperty(final Map&lt;String, Object&gt; additionalProperties, final String key, final Consumer&lt;String&gt; setter, final String defaultValue) {
+<span class="nc bnc" id="L748" title="All 2 branches missed.">        if (additionalProperties.containsKey(key)) {</span>
+<span class="nc" id="L749">            setter.accept((String) additionalProperties.get(key));</span>
+        } else {
+<span class="nc" id="L751">            additionalProperties.put(key, defaultValue);</span>
+<span class="nc" id="L752">            setter.accept(defaultValue);</span>
+        }
+<span class="nc" id="L754">    }</span>
+
+    private Boolean isLanguageSpecificType(String name) {
+<span class="nc" id="L757">        return languageSpecificPrimitives.contains(name);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

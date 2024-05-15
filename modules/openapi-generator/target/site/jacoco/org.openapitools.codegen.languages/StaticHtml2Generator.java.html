@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StaticHtml2Generator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">StaticHtml2Generator.java</span></div><h1>StaticHtml2Generator.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import io.swagger.v3.core.util.Json;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.servers.Server;
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.meta.features.*;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.utils.Markdown;
+import org.openapitools.codegen.utils.ModelUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+
+import static org.openapitools.codegen.utils.StringUtils.*;
+
+public class StaticHtml2Generator extends DefaultCodegen implements CodegenConfig {
+<span class="nc" id="L44">    private final Logger LOGGER = LoggerFactory.getLogger(StaticHtml2Generator.class);</span>
+
+<span class="nc" id="L46">    protected String invokerPackage = &quot;org.openapitools.client&quot;; // default for Java and Android</span>
+<span class="nc" id="L47">    protected String phpInvokerPackage = &quot;OpenAPITools\\Client&quot;; // default for PHP</span>
+<span class="nc" id="L48">    protected String packageName = &quot;Org.OpenAPITools&quot;; // default for C#</span>
+<span class="nc" id="L49">    protected String groupId = &quot;org.openapitools&quot;;</span>
+<span class="nc" id="L50">    protected String artifactId = &quot;openapi-client&quot;;</span>
+<span class="nc" id="L51">    protected String artifactVersion = &quot;1.0.0&quot;;</span>
+    protected String jsProjectName;
+    protected String jsModuleName;
+<span class="nc" id="L54">    protected String perlModuleName = &quot;WWW::OPenAPIClient&quot;;</span>
+<span class="nc" id="L55">    protected String pythonPackageName = &quot;openapi_client&quot;;</span>
+
+    public StaticHtml2Generator() {
+<span class="nc" id="L58">        super();</span>
+
+<span class="nc" id="L60">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L61">                .documentationFeatures(EnumSet.allOf(DocumentationFeature.class))</span>
+<span class="nc" id="L62">                .dataTypeFeatures(EnumSet.allOf(DataTypeFeature.class))</span>
+<span class="nc" id="L63">                .wireFormatFeatures(EnumSet.allOf(WireFormatFeature.class))</span>
+<span class="nc" id="L64">                .securityFeatures(EnumSet.allOf(SecurityFeature.class))</span>
+<span class="nc" id="L65">                .globalFeatures(EnumSet.allOf(GlobalFeature.class))</span>
+<span class="nc" id="L66">                .parameterFeatures(EnumSet.allOf(ParameterFeature.class))</span>
+<span class="nc" id="L67">                .schemaSupportFeatures(EnumSet.allOf(SchemaSupportFeature.class))</span>
+        );
+
+<span class="nc" id="L70">        outputFolder = &quot;docs&quot;;</span>
+<span class="nc" id="L71">        embeddedTemplateDir = templateDir = &quot;htmlDocs2&quot;;</span>
+
+<span class="nc" id="L73">        defaultIncludes = new HashSet&lt;&gt;();</span>
+
+<span class="nc" id="L75">        cliOptions.add(new CliOption(&quot;appName&quot;, &quot;short name of the application&quot;));</span>
+<span class="nc" id="L76">        cliOptions.add(new CliOption(&quot;appDescription&quot;, &quot;description of the application&quot;));</span>
+<span class="nc" id="L77">        cliOptions.add(new CliOption(&quot;infoUrl&quot;, &quot;a URL where users can get more information about the application&quot;));</span>
+<span class="nc" id="L78">        cliOptions.add(new CliOption(&quot;infoEmail&quot;, &quot;an email address to contact for inquiries about the application&quot;));</span>
+<span class="nc" id="L79">        cliOptions.add(new CliOption(&quot;licenseInfo&quot;, &quot;a short description of the license&quot;));</span>
+<span class="nc" id="L80">        cliOptions.add(new CliOption(&quot;licenseUrl&quot;, &quot;a URL pointing to the full license&quot;));</span>
+<span class="nc" id="L81">        cliOptions.add(new CliOption(CodegenConstants.INVOKER_PACKAGE, CodegenConstants.INVOKER_PACKAGE_DESC));</span>
+<span class="nc" id="L82">        cliOptions.add(new CliOption(CodegenConstants.PHP_INVOKER_PACKAGE, CodegenConstants.PHP_INVOKER_PACKAGE_DESC));</span>
+<span class="nc" id="L83">        cliOptions.add(new CliOption(CodegenConstants.PERL_MODULE_NAME, CodegenConstants.PERL_MODULE_NAME_DESC));</span>
+<span class="nc" id="L84">        cliOptions.add(new CliOption(CodegenConstants.PYTHON_PACKAGE_NAME, CodegenConstants.PYTHON_PACKAGE_NAME_DESC));</span>
+<span class="nc" id="L85">        cliOptions.add(new CliOption(CodegenConstants.PACKAGE_NAME, &quot;C# package name&quot;));</span>
+<span class="nc" id="L86">        cliOptions.add(new CliOption(CodegenConstants.GROUP_ID, CodegenConstants.GROUP_ID_DESC));</span>
+<span class="nc" id="L87">        cliOptions.add(new CliOption(CodegenConstants.ARTIFACT_ID, CodegenConstants.ARTIFACT_ID_DESC));</span>
+<span class="nc" id="L88">        cliOptions.add(new CliOption(CodegenConstants.ARTIFACT_VERSION, CodegenConstants.ARTIFACT_VERSION_DESC));</span>
+
+<span class="nc" id="L90">        additionalProperties.put(&quot;appName&quot;, &quot;OpenAPI Sample&quot;);</span>
+<span class="nc" id="L91">        additionalProperties.put(&quot;appDescription&quot;, &quot;A sample OpenAPI server&quot;);</span>
+<span class="nc" id="L92">        additionalProperties.put(&quot;infoUrl&quot;, &quot;https://openapi-generator.tech&quot;);</span>
+<span class="nc" id="L93">        additionalProperties.put(&quot;infoEmail&quot;, &quot;team@openapitools.org&quot;);</span>
+<span class="nc" id="L94">        additionalProperties.put(&quot;licenseInfo&quot;, &quot;All rights reserved&quot;);</span>
+<span class="nc" id="L95">        additionalProperties.put(&quot;licenseUrl&quot;, &quot;http://apache.org/licenses/LICENSE-2.0.html&quot;);</span>
+<span class="nc" id="L96">        additionalProperties.put(CodegenConstants.INVOKER_PACKAGE, invokerPackage);</span>
+<span class="nc" id="L97">        additionalProperties.put(CodegenConstants.PHP_INVOKER_PACKAGE, phpInvokerPackage);</span>
+<span class="nc" id="L98">        additionalProperties.put(CodegenConstants.PERL_MODULE_NAME, perlModuleName);</span>
+<span class="nc" id="L99">        additionalProperties.put(CodegenConstants.PYTHON_PACKAGE_NAME, pythonPackageName);</span>
+<span class="nc" id="L100">        additionalProperties.put(CodegenConstants.PACKAGE_NAME, packageName);</span>
+<span class="nc" id="L101">        additionalProperties.put(CodegenConstants.GROUP_ID, groupId);</span>
+<span class="nc" id="L102">        additionalProperties.put(CodegenConstants.ARTIFACT_ID, artifactId);</span>
+<span class="nc" id="L103">        additionalProperties.put(CodegenConstants.ARTIFACT_VERSION, artifactVersion);</span>
+
+<span class="nc" id="L105">        supportingFiles.add(new SupportingFile(&quot;index.mustache&quot;, &quot;&quot;, &quot;index.html&quot;));</span>
+<span class="nc" id="L106">        reservedWords = new HashSet&lt;&gt;();</span>
+
+<span class="nc" id="L108">        languageSpecificPrimitives = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L109">        importMapping = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L110">    }</span>
+
+    @Override
+    public CodegenType getTag() {
+<span class="nc" id="L114">        return CodegenType.DOCUMENTATION;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L119">        return &quot;html2&quot;;</span>
+    }
+
+    @Override
+    public String escapeText(String input) {
+        // newline escaping disabled for HTML documentation for markdown to work correctly
+<span class="nc" id="L125">        return input;</span>
+    }
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L130">        return &quot;Generates a static HTML file.&quot;;</span>
+    }
+
+    @Override
+    public String getTypeDeclaration(Schema p) {
+<span class="nc bnc" id="L135" title="All 2 branches missed.">        if (ModelUtils.isArraySchema(p)) {</span>
+<span class="nc" id="L136">            Schema inner = ModelUtils.getSchemaItems(p);</span>
+<span class="nc" id="L137">            return getSchemaType(p) + &quot;[&quot; + getTypeDeclaration(inner) + &quot;]&quot;;</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">        } else if (ModelUtils.isMapSchema(p)) {</span>
+<span class="nc" id="L139">            Schema inner = ModelUtils.getAdditionalProperties(p);</span>
+<span class="nc" id="L140">            return getSchemaType(p) + &quot;[String, &quot; + getTypeDeclaration(inner) + &quot;]&quot;;</span>
+        }
+<span class="nc" id="L142">        return super.getTypeDeclaration(p);</span>
+    }
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L147">        OperationMap operations = objs.getOperations();</span>
+<span class="nc" id="L148">        List&lt;CodegenOperation&gt; operationList = operations.getOperation();</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">        for (CodegenOperation op : operationList) {</span>
+<span class="nc" id="L150">            op.httpMethod = op.httpMethod.toLowerCase(Locale.ROOT);</span>
+<span class="nc bnc" id="L151" title="All 2 branches missed.">            for (CodegenResponse response : op.responses) {</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">                if (&quot;0&quot;.equals(response.code)) {</span>
+<span class="nc" id="L153">                    response.code = &quot;default&quot;;</span>
+                }
+<span class="nc" id="L155">            }</span>
+<span class="nc" id="L156">            op.formParams = postProcessParameterEnum(op.formParams);</span>
+<span class="nc" id="L157">        }</span>
+<span class="nc" id="L158">        return objs;</span>
+    }
+
+    @Override
+    public void preprocessOpenAPI(OpenAPI openAPI) {
+<span class="nc" id="L163">        super.preprocessOpenAPI(openAPI);</span>
+
+<span class="nc bnc" id="L165" title="All 2 branches missed.">        if (openAPI.getInfo() != null) {</span>
+<span class="nc" id="L166">            Info info = openAPI.getInfo();</span>
+<span class="nc bnc" id="L167" title="All 4 branches missed.">            if (StringUtils.isBlank(jsProjectName) &amp;&amp; info.getTitle() != null) {</span>
+                // when jsProjectName is not specified, generate it from info.title
+<span class="nc" id="L169">                jsProjectName = sanitizeName(dashize(info.getTitle()));</span>
+            }
+        }
+
+        // default values
+<span class="nc bnc" id="L174" title="All 2 branches missed.">        if (StringUtils.isBlank(jsProjectName)) {</span>
+<span class="nc" id="L175">            jsProjectName = &quot;openapi-js-client&quot;;</span>
+        }
+<span class="nc bnc" id="L177" title="All 2 branches missed.">        if (StringUtils.isBlank(jsModuleName)) {</span>
+<span class="nc" id="L178">            jsModuleName = camelize(underscore(jsProjectName));</span>
+        }
+
+<span class="nc" id="L181">        additionalProperties.put(&quot;jsProjectName&quot;, jsProjectName);</span>
+<span class="nc" id="L182">        additionalProperties.put(&quot;jsModuleName&quot;, jsModuleName);</span>
+
+<span class="nc" id="L184">        prepareHtmlForGlobalDescription(openAPI);</span>
+
+<span class="nc" id="L186">        Map&lt;String, Object&gt; vendorExtensions = openAPI.getExtensions();</span>
+<span class="nc bnc" id="L187" title="All 2 branches missed.">        if (vendorExtensions != null) {</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">            for (Map.Entry&lt;String, Object&gt; vendorExtension : vendorExtensions.entrySet()) {</span>
+                // Vendor extensions could be Maps (objects). If we wanted to iterate through them in our template files
+                // without knowing the keys beforehand, the default `toString` method renders them unusable. Instead, we
+                // convert them to JSON strings now, which means we can easily use them later.
+<span class="nc bnc" id="L192" title="All 2 branches missed.">                if (vendorExtension.getValue() instanceof Map) {</span>
+<span class="nc" id="L193">                    this.vendorExtensions().put(vendorExtension.getKey(), Json.mapper().convertValue(vendorExtension.getValue(), JsonNode.class));</span>
+                } else {
+<span class="nc" id="L195">                    this.vendorExtensions().put(vendorExtension.getKey(), vendorExtension.getValue());</span>
+                }
+<span class="nc" id="L197">            }</span>
+        }
+<span class="nc" id="L199">        openAPI.setExtensions(this.vendorExtensions);</span>
+
+<span class="nc" id="L201">    }</span>
+
+    @Override
+    public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, List&lt;Server&gt; servers) {
+<span class="nc" id="L205">        CodegenOperation op = super.fromOperation(path, httpMethod, operation, servers);</span>
+<span class="nc bnc" id="L206" title="All 2 branches missed.">        if (op.returnType != null) {</span>
+<span class="nc" id="L207">            op.returnType = normalizeType(op.returnType);</span>
+        }
+
+        //path is an unescaped variable in the mustache template api.mustache line 82 '&lt;&amp;path&gt;'
+<span class="nc" id="L211">        op.path = sanitizePath(op.path);</span>
+
+<span class="nc" id="L213">        String methodUpperCase = httpMethod.toUpperCase(Locale.ROOT);</span>
+<span class="nc" id="L214">        op.vendorExtensions.put(&quot;x-codegen-http-method-upper-case&quot;, methodUpperCase);</span>
+
+<span class="nc" id="L216">        return op;</span>
+    }
+
+    /**
+     * Parse Markdown to HTML for the main &quot;Description&quot; attribute
+     *
+     * @param openAPI The base object containing the global description through &quot;Info&quot; class
+     */
+    private void prepareHtmlForGlobalDescription(OpenAPI openAPI) {
+<span class="nc bnc" id="L225" title="All 2 branches missed.">        if (openAPI.getInfo() == null) {</span>
+<span class="nc" id="L226">            return;</span>
+        }
+
+<span class="nc" id="L229">        String currentDescription = openAPI.getInfo().getDescription();</span>
+<span class="nc bnc" id="L230" title="All 4 branches missed.">        if (currentDescription != null &amp;&amp; !currentDescription.isEmpty()) {</span>
+<span class="nc" id="L231">            Markdown markInstance = new Markdown();</span>
+<span class="nc" id="L232">            openAPI.getInfo().setDescription(markInstance.toHtml(currentDescription));</span>
+<span class="nc" id="L233">        } else {</span>
+<span class="nc" id="L234">            LOGGER.error(&quot;OpenAPI object description is empty [{}]&quot;, openAPI.getInfo().getTitle());</span>
+        }
+<span class="nc" id="L236">    }</span>
+
+    /**
+     * Format to HTML the enums contained in every operations
+     *
+     * @param parameterList The whole parameters contained in one operation
+     * @return String | Html formatted enum
+     */
+    public List&lt;CodegenParameter&gt; postProcessParameterEnum(List&lt;CodegenParameter&gt; parameterList) {
+<span class="nc" id="L245">        String enumFormatted = &quot;&quot;;</span>
+
+<span class="nc bnc" id="L247" title="All 2 branches missed.">        for (CodegenParameter parameter : parameterList) {</span>
+<span class="nc bnc" id="L248" title="All 2 branches missed.">            if (parameter.isEnum) {</span>
+<span class="nc bnc" id="L249" title="All 2 branches missed.">                for (int i = 0; i &lt; parameter._enum.size(); i++) {</span>
+<span class="nc bnc" id="L250" title="All 2 branches missed.">                    String spacer = (i == (parameter._enum.size() - 1)) ? &quot; &quot; : &quot;, &quot;;</span>
+
+<span class="nc bnc" id="L252" title="All 2 branches missed.">                    if (parameter._enum.get(i) != null)</span>
+<span class="nc" id="L253">                        enumFormatted += &quot;`&quot; + parameter._enum.get(i) + &quot;`&quot; + spacer;</span>
+                }
+<span class="nc" id="L255">                Markdown markInstance = new Markdown();</span>
+<span class="nc bnc" id="L256" title="All 2 branches missed.">                if (!enumFormatted.isEmpty()) {</span>
+<span class="nc" id="L257">                    String formattedExtension = markInstance.toHtml(enumFormatted);</span>
+<span class="nc" id="L258">                    parameter.vendorExtensions.put(&quot;x-eum-formatted&quot;, formattedExtension);</span>
+                }
+            }
+<span class="nc" id="L261">        }</span>
+<span class="nc" id="L262">        return parameterList;</span>
+    }
+
+    private String sanitizePath(String p) {
+        //prefer replace a ', instead of a fuLL URL encode for readability
+<span class="nc" id="L267">        return p.replaceAll(&quot;'&quot;, &quot;%27&quot;);</span>
+    }
+
+    /**
+     * Normalize type by wrapping primitive types with single quotes.
+     *
+     * @param type Primitive type
+     * @return Normalized type
+     */
+    public String normalizeType(String type) {
+<span class="nc" id="L277">        return type.replaceAll(&quot;\\b(Boolean|Integer|Number|String|Date)\\b&quot;, &quot;'$1'&quot;);</span>
+    }
+
+    @Override
+    public String escapeQuotationMark(String input) {
+        // just return the original string
+<span class="nc" id="L283">        return input;</span>
+    }
+
+    @Override
+    public String escapeUnsafeCharacters(String input) {
+        // just return the original string
+<span class="nc" id="L289">        return input;</span>
+    }
+
+    @Override
+<span class="nc" id="L293">    public GeneratorLanguage generatorLanguage() { return null; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

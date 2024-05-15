@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JavaWiremockServerCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">JavaWiremockServerCodegen.java</span></div><h1>JavaWiremockServerCodegen.java</h1><pre class="source lang-java linenums">package org.openapitools.codegen.languages;
+
+import com.samskivert.mustache.Mustache;
+import org.openapitools.codegen.*;
+
+import java.io.File;
+import java.util.*;
+import java.util.regex.Matcher;
+
+import org.openapitools.codegen.meta.GeneratorMetadata;
+import org.openapitools.codegen.meta.Stability;
+import org.openapitools.codegen.templating.mustache.SplitStringLambda;
+import org.openapitools.codegen.templating.mustache.TrimWhitespaceLambda;
+
+public class JavaWiremockServerCodegen extends AbstractJavaCodegen implements CodegenConfig {
+
+    public CodegenType getTag() {
+<span class="fc" id="L18">        return CodegenType.SERVER;</span>
+    }
+
+    public String getName() {
+<span class="fc" id="L22">        return &quot;java-wiremock&quot;;</span>
+    }
+
+    public String getHelp() {
+<span class="nc" id="L26">        return &quot;Generates Java Wiremock stubs, requests and responses samples.&quot;;</span>
+    }
+
+    public JavaWiremockServerCodegen() {
+<span class="fc" id="L30">        super();</span>
+
+<span class="fc" id="L32">        generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
+<span class="fc" id="L33">                .stability(Stability.BETA)</span>
+<span class="fc" id="L34">                .build();</span>
+
+<span class="fc" id="L36">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;java&quot;;</span>
+<span class="fc" id="L37">        embeddedTemplateDir = templateDir = &quot;java-wiremock&quot;;</span>
+<span class="fc" id="L38">        invokerPackage = &quot;org.openapitools.mockserver&quot;;</span>
+<span class="fc" id="L39">        artifactId = &quot;openapi-java-mockserver&quot;;</span>
+<span class="fc" id="L40">        apiPackage = &quot;org.openapitools.mockserver.api&quot;;</span>
+
+<span class="fc" id="L42">        apiDocTemplateFiles = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L43">        apiTestTemplateFiles = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L44">        modelDocTemplateFiles = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L45">        modelTemplateFiles = new HashMap&lt;&gt;();</span>
+
+<span class="fc" id="L47">        apiTemplateFiles.clear();</span>
+<span class="fc" id="L48">        apiTemplateFiles.put(&quot;wiremock.mustache&quot;, &quot;MockServer.java&quot;);</span>
+
+<span class="fc" id="L50">        supportingFiles.add(new SupportingFile(&quot;pom.mustache&quot;, &quot;&quot;, &quot;pom.xml&quot;)</span>
+<span class="fc" id="L51">                .doNotOverwrite());</span>
+
+        // Ensure the OAS 3.x discriminator mappings include any descendent schemas that allOf
+        // inherit from self, any oneOf schemas, any anyOf schemas, any x-discriminator-values,
+        // and the discriminator mapping schemas in the OAS document.
+<span class="fc" id="L56">        this.setLegacyDiscriminatorBehavior(false);</span>
+
+        // add lambda for mustache templates
+<span class="pc" id="L59">        additionalProperties.put(&quot;lambdaRemoveDoubleQuote&quot;, (Mustache.Lambda) (fragment, writer) -&gt; writer</span>
+<span class="nc" id="L60">                .write(fragment.execute().replaceAll(&quot;\&quot;&quot;, Matcher.quoteReplacement(&quot;&quot;))));</span>
+<span class="pc" id="L61">        additionalProperties.put(&quot;lambdaEscapeDoubleQuote&quot;, (Mustache.Lambda) (fragment, writer) -&gt; writer</span>
+<span class="nc" id="L62">                .write(fragment.execute().replaceAll(&quot;\&quot;&quot;, Matcher.quoteReplacement(&quot;\\\&quot;&quot;))));</span>
+<span class="fc" id="L63">        additionalProperties.put(&quot;lambdaRemoveLineBreak&quot;,</span>
+<span class="nc" id="L64">                (Mustache.Lambda) (fragment, writer) -&gt; writer.write(fragment.execute().replaceAll(&quot;\\r|\\n&quot;, &quot;&quot;)));</span>
+
+<span class="fc" id="L66">        additionalProperties.put(&quot;lambdaTrimWhitespace&quot;, new TrimWhitespaceLambda());</span>
+
+<span class="fc" id="L68">        additionalProperties.put(&quot;lambdaSplitString&quot;, new SplitStringLambda());</span>
+<span class="fc" id="L69">    }</span>
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

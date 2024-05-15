@@ -1,0 +1,497 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PhpMezzioPathHandlerServerCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">PhpMezzioPathHandlerServerCodegen.java</span></div><h1>PhpMezzioPathHandlerServerCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.PathItem.HttpMethod;
+import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.media.*;
+import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.QueryParameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.meta.features.*;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.utils.ModelUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.*;
+
+public class PhpMezzioPathHandlerServerCodegen extends AbstractPhpCodegen {
+<span class="nc" id="L44">    private final Logger LOGGER = LoggerFactory.getLogger(PhpMezzioPathHandlerServerCodegen.class);</span>
+    // Custom generator option names
+    public static final String OPT_MODERN = &quot;modern&quot;;
+    // Internal vendor extension names for extra template data that should not be set in specification
+    public static final String VEN_FROM_QUERY = &quot;internal.ze-ph.fromQuery&quot;;
+    public static final String VEN_COLLECTION_FORMAT = &quot;internal.ze-ph.collectionFormat&quot;;
+    public static final String VEN_QUERY_DATA_TYPE = &quot;internal.ze-ph.queryDataType&quot;;
+    public static final String VEN_HAS_QUERY_DATA = &quot;internal.ze-ph.hasQueryData&quot;;
+    public static final String VEN_FROM_CONTAINER = &quot;internal.ze-ph.fromContainer&quot;;
+    public static final String VEN_CONTAINER_DATA_TYPE = &quot;internal.ze-ph.containerDataType&quot;;
+
+<span class="nc" id="L55">    private boolean useModernSyntax = false;</span>
+
+    @Override
+    public CodegenType getTag() {
+<span class="nc" id="L59">        return CodegenType.SERVER;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L64">        return &quot;php-mezzio-ph&quot;;</span>
+    }
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L69">        return &quot;Generates PHP server stub using Mezzio ( https://docs.mezzio.dev/mezzio/ ) and Path Handler ( https://github.com/Articus/PathHandler ).&quot;;</span>
+    }
+
+    public PhpMezzioPathHandlerServerCodegen() {
+<span class="nc" id="L73">        super();</span>
+
+<span class="nc" id="L75">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L76">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="nc" id="L77">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON, WireFormatFeature.XML))</span>
+<span class="nc" id="L78">                .securityFeatures(EnumSet.noneOf(SecurityFeature.class))</span>
+<span class="nc" id="L79">                .excludeGlobalFeatures(</span>
+                        GlobalFeature.XMLStructureDefinitions,
+                        GlobalFeature.Callbacks,
+                        GlobalFeature.LinkObjects,
+                        GlobalFeature.ParameterStyling
+                )
+<span class="nc" id="L85">                .excludeSchemaSupportFeatures(</span>
+                        SchemaSupportFeature.Polymorphism
+                )
+        );
+
+        // remove these from primitive types to make the output works
+<span class="nc" id="L91">        languageSpecificPrimitives.remove(&quot;\\DateTime&quot;);</span>
+<span class="nc" id="L92">        languageSpecificPrimitives.remove(&quot;\\SplFileObject&quot;);</span>
+
+<span class="nc" id="L94">        embeddedTemplateDir = templateDir = &quot;php-mezzio-ph&quot;;</span>
+<span class="nc" id="L95">        invokerPackage = &quot;App&quot;;</span>
+<span class="nc" id="L96">        srcBasePath = &quot;src&quot; + File.separator + &quot;App&quot;;</span>
+<span class="nc" id="L97">        apiDirName = &quot;Handler&quot;;</span>
+<span class="nc" id="L98">        modelDirName = &quot;DTO&quot;;</span>
+<span class="nc" id="L99">        apiPackage = invokerPackage + &quot;\\&quot; + apiDirName;</span>
+<span class="nc" id="L100">        modelPackage = invokerPackage + &quot;\\&quot; + modelDirName;</span>
+        //&quot;Api&quot; classes have dedicated namespace so there is no need to add non-empty suffix by default
+<span class="nc" id="L102">        apiNameSuffix = &quot;&quot;;</span>
+
+<span class="nc" id="L104">        apiTestTemplateFiles.clear();</span>
+<span class="nc" id="L105">        modelTestTemplateFiles.clear();</span>
+<span class="nc" id="L106">        apiDocTemplateFiles.clear();</span>
+<span class="nc" id="L107">        modelDocTemplateFiles.clear();</span>
+
+<span class="nc" id="L109">        supportingFiles.add(new SupportingFile(&quot;README.md.mustache&quot;, &quot;&quot;, &quot;README.md&quot;));</span>
+<span class="nc" id="L110">        supportingFiles.add(new SupportingFile(&quot;composer.json.mustache&quot;, &quot;&quot;, &quot;composer.json&quot;));</span>
+<span class="nc" id="L111">        supportingFiles.add(new SupportingFile(&quot;index.php&quot;, &quot;public&quot;, &quot;index.php&quot;));</span>
+<span class="nc" id="L112">        supportingFiles.add(new SupportingFile(&quot;container.php&quot;, &quot;application&quot;, &quot;container.php&quot;));</span>
+<span class="nc" id="L113">        supportingFiles.add(new SupportingFile(&quot;config.yml&quot;, &quot;application&quot;, &quot;config.yml&quot;));</span>
+<span class="nc" id="L114">        supportingFiles.add(new SupportingFile(&quot;app.yml.mustache&quot;, &quot;application&quot; + File.separator + &quot;config&quot;, &quot;app.yml&quot;));</span>
+<span class="nc" id="L115">        supportingFiles.add(new SupportingFile(&quot;path_handler.yml.mustache&quot;, &quot;application&quot; + File.separator + &quot;config&quot;, &quot;path_handler.yml&quot;));</span>
+<span class="nc" id="L116">        supportingFiles.add(new SupportingFile(&quot;data_transfer.yml.mustache&quot;, &quot;application&quot; + File.separator + &quot;config&quot;, &quot;data_transfer.yml&quot;));</span>
+<span class="nc" id="L117">        supportingFiles.add(new SupportingFile(&quot;Factory.php.mustache&quot;, srcBasePath, &quot;Factory.php&quot;));</span>
+<span class="nc" id="L118">        supportingFiles.add(new SupportingFile(&quot;InternalServerError.php.mustache&quot;, srcBasePath + File.separator + &quot;Middleware&quot;, &quot;InternalServerError.php&quot;));</span>
+
+<span class="nc" id="L120">        additionalProperties.put(CodegenConstants.ARTIFACT_VERSION, &quot;1.0.0&quot;);</span>
+        //Register custom CLI options
+<span class="nc" id="L122">        addSwitch(OPT_MODERN, &quot;use modern language features (generated code will require PHP 8.0)&quot;, useModernSyntax);</span>
+<span class="nc" id="L123">    }</span>
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L127">        super.processOpts();</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">        if (additionalProperties.containsKey(OPT_MODERN)) {</span>
+<span class="nc" id="L129">            embeddedTemplateDir = templateDir = &quot;php-mezzio-ph-modern&quot;;</span>
+<span class="nc" id="L130">            useModernSyntax = true;</span>
+        }
+<span class="nc" id="L132">    }</span>
+
+    /**
+     * Add operation to group
+     * Override of default grouping - group by resource path, not tag
+     *
+     * @param tag          name of the tag
+     * @param resourcePath path of the resource
+     * @param operation    Swagger Operation object
+     * @param co           Codegen Operation object
+     * @param operations   map of Codegen operations
+     */
+    @Override
+    public void addOperationToGroup(String tag, String resourcePath, Operation operation, CodegenOperation co, Map&lt;String, List&lt;CodegenOperation&gt;&gt; operations) {
+<span class="nc" id="L146">        List&lt;CodegenOperation&gt; opList = operations.get(resourcePath);</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">        if (opList == null) {</span>
+<span class="nc" id="L148">            opList = new ArrayList&lt;CodegenOperation&gt;();</span>
+<span class="nc" id="L149">            operations.put(resourcePath, opList);</span>
+        }
+        //ignore duplicate operation ids - that means that operation has several tags
+<span class="nc" id="L152">        int counter = 0;</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">        for (CodegenOperation op : opList) {</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">            if (co.operationId.equals(op.operationId)) {</span>
+<span class="nc" id="L155">                counter++;</span>
+            }
+<span class="nc" id="L157">        }</span>
+<span class="nc bnc" id="L158" title="All 2 branches missed.">        if (counter == 0) {</span>
+<span class="nc" id="L159">            co.operationIdLowerCase = co.operationId.toLowerCase(Locale.ROOT);</span>
+<span class="nc" id="L160">            opList.add(co);</span>
+<span class="nc" id="L161">            co.baseName = tag;</span>
+        }
+<span class="nc" id="L163">    }</span>
+
+    @Override
+    public String toApiName(String name) {
+<span class="nc" id="L167">        return super.toApiName(toModelName(name));</span>
+    }
+
+    @Override
+    public String getTypeDeclaration(Schema p) {
+        String result;
+<span class="nc" id="L173">        Map&lt;String, Object&gt; extensions = p.getExtensions();</span>
+<span class="nc bnc" id="L174" title="All 4 branches missed.">        if ((extensions != null) &amp;&amp; extensions.containsKey(VEN_CONTAINER_DATA_TYPE)) {</span>
+<span class="nc" id="L175">            result = (String) extensions.get(VEN_CONTAINER_DATA_TYPE);</span>
+<span class="nc bnc" id="L176" title="All 6 branches missed.">        } else if (useModernSyntax &amp;&amp; (ModelUtils.isArraySchema(p) || ModelUtils.isMapSchema(p))) {</span>
+<span class="nc" id="L177">            result = &quot;array&quot;;</span>
+        } else {
+<span class="nc" id="L179">            result = super.getTypeDeclaration(p);</span>
+        }
+<span class="nc" id="L181">        return result;</span>
+    }
+
+    @Override
+    public void preprocessOpenAPI(OpenAPI openAPI) {
+<span class="nc" id="L186">        super.preprocessOpenAPI(openAPI);</span>
+
+<span class="nc" id="L188">        generateParameterSchemas(openAPI);</span>
+<span class="nc" id="L189">        generateContainerSchemas(openAPI);</span>
+<span class="nc" id="L190">    }</span>
+
+    /**
+     * Generate additional model definitions from query parameters
+     *
+     * @param openAPI OpenAPI object
+     */
+    protected void generateParameterSchemas(OpenAPI openAPI) {
+<span class="nc" id="L198">        Map&lt;String, PathItem&gt; paths = openAPI.getPaths();</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">        if (paths != null) {</span>
+<span class="nc bnc" id="L200" title="All 2 branches missed.">            for (Map.Entry&lt;String, PathItem&gt; pathsEntry : paths.entrySet()) {</span>
+<span class="nc" id="L201">                String pathname = pathsEntry.getKey();</span>
+<span class="nc" id="L202">                PathItem path = pathsEntry.getValue();</span>
+<span class="nc" id="L203">                Map&lt;HttpMethod, Operation&gt; operationMap = path.readOperationsMap();</span>
+<span class="nc bnc" id="L204" title="All 2 branches missed.">                if (operationMap != null) {</span>
+<span class="nc bnc" id="L205" title="All 2 branches missed.">                    for (Map.Entry&lt;HttpMethod, Operation&gt; operationMapEntry : operationMap.entrySet()) {</span>
+<span class="nc" id="L206">                        HttpMethod method = operationMapEntry.getKey();</span>
+<span class="nc" id="L207">                        Operation operation = operationMapEntry.getValue();</span>
+<span class="nc" id="L208">                        Map&lt;String, Schema&gt; propertySchemas = new HashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L209" title="All 4 branches missed.">                        if (operation == null || operation.getParameters() == null) {</span>
+<span class="nc" id="L210">                            continue;</span>
+                        }
+
+<span class="nc" id="L213">                        List&lt;String&gt; requiredProperties = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">                        for (Parameter parameter : operation.getParameters()) {</span>
+<span class="nc" id="L215">                            Parameter referencedParameter = ModelUtils.getReferencedParameter(openAPI, parameter);</span>
+<span class="nc" id="L216">                            Schema propertySchema = convertParameterToSchema(openAPI, referencedParameter);</span>
+<span class="nc bnc" id="L217" title="All 2 branches missed.">                            if (propertySchema != null) {</span>
+<span class="nc" id="L218">                                propertySchemas.put(propertySchema.getName(), propertySchema);</span>
+<span class="nc bnc" id="L219" title="All 2 branches missed.">                                if (Boolean.TRUE.equals(referencedParameter.getRequired())) {</span>
+<span class="nc" id="L220">                                    requiredProperties.add(propertySchema.getName());</span>
+                                }
+                            }
+<span class="nc" id="L223">                        }</span>
+
+<span class="nc bnc" id="L225" title="All 2 branches missed.">                        if (!propertySchemas.isEmpty()) {</span>
+<span class="nc" id="L226">                            ObjectSchema schema = new ObjectSchema();</span>
+<span class="nc" id="L227">                            String operationId = getOrGenerateOperationId(operation, pathname, method.name());</span>
+<span class="nc" id="L228">                            schema.setDescription(&quot;Query parameters for &quot; + operationId);</span>
+<span class="nc" id="L229">                            schema.setProperties(propertySchemas);</span>
+<span class="nc" id="L230">                            schema.setRequired(requiredProperties);</span>
+<span class="nc" id="L231">                            addInternalExtensionToSchema(schema, VEN_FROM_QUERY, Boolean.TRUE);</span>
+<span class="nc" id="L232">                            String schemaName = generateUniqueSchemaName(openAPI, operationId + &quot;QueryData&quot;);</span>
+<span class="nc" id="L233">                            openAPI.getComponents().addSchemas(schemaName, schema);</span>
+<span class="nc" id="L234">                            String schemaDataType = getTypeDeclaration(toModelName(schemaName));</span>
+<span class="nc" id="L235">                            addInternalExtensionToOperation(operation, VEN_QUERY_DATA_TYPE, schemaDataType);</span>
+<span class="nc" id="L236">                            addInternalExtensionToOperation(operation, VEN_HAS_QUERY_DATA, Boolean.TRUE);</span>
+                        }
+<span class="nc" id="L238">                    }</span>
+                }
+<span class="nc" id="L240">            }</span>
+        }
+<span class="nc" id="L242">    }</span>
+
+    protected Schema convertParameterToSchema(OpenAPI openAPI, Parameter parameter) {
+<span class="nc" id="L245">        Schema property = null;</span>
+<span class="nc bnc" id="L246" title="All 2 branches missed.">        if (parameter instanceof QueryParameter) {</span>
+<span class="nc" id="L247">            QueryParameter queryParameter = (QueryParameter) parameter;</span>
+<span class="nc" id="L248">            Schema parameterSchema = ModelUtils.getReferencedSchema(openAPI, queryParameter.getSchema());</span>
+            // array
+<span class="nc bnc" id="L250" title="All 2 branches missed.">            if (ModelUtils.isArraySchema(parameterSchema)) {</span>
+<span class="nc" id="L251">                Schema itemSchema = ModelUtils.getSchemaItems(parameterSchema);</span>
+<span class="nc" id="L252">                ArraySchema arraySchema = new ArraySchema();</span>
+<span class="nc" id="L253">                arraySchema.setMinItems(parameterSchema.getMinItems());</span>
+<span class="nc" id="L254">                arraySchema.setMaxItems(parameterSchema.getMaxItems());</span>
+<span class="nc" id="L255">                arraySchema.setItems(itemSchema);</span>
+<span class="nc" id="L256">                String collectionFormat = getCollectionFormat(queryParameter);</span>
+<span class="nc bnc" id="L257" title="All 2 branches missed.">                if (collectionFormat == null) {</span>
+<span class="nc" id="L258">                    collectionFormat = &quot;csv&quot;;</span>
+                }
+<span class="nc" id="L260">                addInternalExtensionToSchema(arraySchema, VEN_COLLECTION_FORMAT, collectionFormat);</span>
+<span class="nc" id="L261">                property = arraySchema;</span>
+<span class="nc" id="L262">            } else { // non-array e.g. string, integer</span>
+<span class="nc bnc" id="L263" title="All 7 branches missed.">                switch (parameterSchema.getType()) {</span>
+                    case &quot;string&quot;:
+<span class="nc" id="L265">                        StringSchema stringSchema = new StringSchema();</span>
+<span class="nc" id="L266">                        stringSchema.setMinLength(parameterSchema.getMinLength());</span>
+<span class="nc" id="L267">                        stringSchema.setMaxLength(parameterSchema.getMaxLength());</span>
+<span class="nc" id="L268">                        stringSchema.setPattern(parameterSchema.getPattern());</span>
+<span class="nc" id="L269">                        stringSchema.setEnum(parameterSchema.getEnum());</span>
+<span class="nc" id="L270">                        property = stringSchema;</span>
+<span class="nc" id="L271">                        break;</span>
+                    case &quot;integer&quot;:
+<span class="nc" id="L273">                        IntegerSchema integerSchema = new IntegerSchema();</span>
+<span class="nc" id="L274">                        integerSchema.setMinimum(parameterSchema.getMinimum());</span>
+<span class="nc" id="L275">                        integerSchema.setMaximum(parameterSchema.getMaximum());</span>
+<span class="nc" id="L276">                        property = integerSchema;</span>
+<span class="nc" id="L277">                        break;</span>
+                    case &quot;number&quot;:
+<span class="nc" id="L279">                        NumberSchema floatSchema = new NumberSchema();</span>
+<span class="nc" id="L280">                        floatSchema.setMinimum(parameterSchema.getMinimum());</span>
+<span class="nc" id="L281">                        floatSchema.setMaximum(parameterSchema.getMaximum());</span>
+<span class="nc" id="L282">                        property = floatSchema;</span>
+<span class="nc" id="L283">                        break;</span>
+                    case &quot;boolean&quot;:
+<span class="nc" id="L285">                        property = new BooleanSchema();</span>
+<span class="nc" id="L286">                        break;</span>
+                    case &quot;date&quot;:
+<span class="nc" id="L288">                        property = new DateSchema();</span>
+<span class="nc" id="L289">                        break;</span>
+                    case &quot;date-time&quot;:
+<span class="nc" id="L291">                        property = new DateTimeSchema();</span>
+                        break;
+                }
+            }
+
+<span class="nc bnc" id="L296" title="All 2 branches missed.">            if (property != null) {</span>
+<span class="nc" id="L297">                property.setName(queryParameter.getName());</span>
+<span class="nc" id="L298">                property.setDescription(queryParameter.getDescription());</span>
+<span class="nc" id="L299">                addInternalExtensionToSchema(property, VEN_FROM_QUERY, Boolean.TRUE);</span>
+            }
+        }
+<span class="nc" id="L302">        return property;</span>
+    }
+
+    protected void addInternalExtensionToSchema(Schema schema, String name, Object value) {
+        //Add internal extension directly, because addExtension filters extension names
+<span class="nc bnc" id="L307" title="All 2 branches missed.">        if (schema.getExtensions() == null) {</span>
+<span class="nc" id="L308">            schema.setExtensions(new HashMap&lt;&gt;());</span>
+        }
+<span class="nc" id="L310">        schema.getExtensions().put(name, value);</span>
+<span class="nc" id="L311">    }</span>
+
+    protected void addInternalExtensionToOperation(Operation operation, String name, Object value) {
+        //Add internal extension directly, because addExtension filters extension names
+<span class="nc bnc" id="L315" title="All 2 branches missed.">        if (operation.getExtensions() == null) {</span>
+<span class="nc" id="L316">            operation.setExtensions(new HashMap&lt;&gt;());</span>
+        }
+<span class="nc" id="L318">        operation.getExtensions().put(name, value);</span>
+<span class="nc" id="L319">    }</span>
+
+    protected String generateUniqueSchemaName(OpenAPI openAPI, String name) {
+<span class="nc" id="L322">        String result = name;</span>
+<span class="nc bnc" id="L323" title="All 2 branches missed.">        if (openAPI.getComponents().getSchemas() != null) {</span>
+<span class="nc" id="L324">            int count = 1;</span>
+<span class="nc bnc" id="L325" title="All 2 branches missed.">            while (openAPI.getComponents().getSchemas().containsKey(result)) {</span>
+<span class="nc" id="L326">                result = name + &quot;_&quot; + count;</span>
+<span class="nc" id="L327">                count += 1;</span>
+            }
+        }
+<span class="nc" id="L330">        return result;</span>
+    }
+
+    /**
+     * Generate additional model definitions for containers in whole specification
+     *
+     * @param openAPI OpenAPI object
+     */
+    protected void generateContainerSchemas(OpenAPI openAPI) {
+<span class="nc" id="L339">        Set&lt;Schema&gt; visitedSchemas = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L340">        Paths paths = openAPI.getPaths();</span>
+<span class="nc bnc" id="L341" title="All 2 branches missed.">        for (String pathName : paths.keySet()) {</span>
+<span class="nc bnc" id="L342" title="All 2 branches missed.">            for (Operation operation : paths.get(pathName).readOperations()) {</span>
+<span class="nc" id="L343">                List&lt;Parameter&gt; parameters = operation.getParameters();</span>
+<span class="nc bnc" id="L344" title="All 2 branches missed.">                if (parameters != null) {</span>
+<span class="nc bnc" id="L345" title="All 2 branches missed.">                    for (Parameter parameter : parameters) {</span>
+<span class="nc" id="L346">                        generateContainerSchemas(openAPI, visitedSchemas, ModelUtils.getReferencedParameter(openAPI, parameter).getSchema());</span>
+<span class="nc" id="L347">                    }</span>
+                }
+<span class="nc" id="L349">                RequestBody requestBody = ModelUtils.getReferencedRequestBody(openAPI, operation.getRequestBody());</span>
+<span class="nc bnc" id="L350" title="All 2 branches missed.">                if (requestBody != null) {</span>
+<span class="nc" id="L351">                    Content requestBodyContent = requestBody.getContent();</span>
+<span class="nc bnc" id="L352" title="All 2 branches missed.">                    if (requestBodyContent != null) {</span>
+<span class="nc bnc" id="L353" title="All 2 branches missed.">                        for (String mediaTypeName : requestBodyContent.keySet()) {</span>
+<span class="nc" id="L354">                            generateContainerSchemas(openAPI, visitedSchemas, requestBodyContent.get(mediaTypeName).getSchema());</span>
+<span class="nc" id="L355">                        }</span>
+                    }
+                }
+<span class="nc" id="L358">                ApiResponses responses = operation.getResponses();</span>
+<span class="nc bnc" id="L359" title="All 2 branches missed.">                for (String responseCode : responses.keySet()) {</span>
+<span class="nc" id="L360">                    ApiResponse response = ModelUtils.getReferencedApiResponse(openAPI, responses.get(responseCode));</span>
+<span class="nc" id="L361">                    Content responseContent = response.getContent();</span>
+<span class="nc bnc" id="L362" title="All 2 branches missed.">                    if (responseContent != null) {</span>
+<span class="nc bnc" id="L363" title="All 2 branches missed.">                        for (String mediaTypeName : responseContent.keySet()) {</span>
+<span class="nc" id="L364">                            generateContainerSchemas(openAPI, visitedSchemas, responseContent.get(mediaTypeName).getSchema());</span>
+<span class="nc" id="L365">                        }</span>
+                    }
+<span class="nc" id="L367">                }</span>
+<span class="nc" id="L368">            }</span>
+<span class="nc" id="L369">        }</span>
+<span class="nc" id="L370">    }</span>
+
+    /**
+     * Generate additional model definitions for containers in specified schema
+     *
+     * @param openAPI OpenAPI object
+     * @param visitedSchemas Set of Schemas that have been processed already
+     * @param schema  OAS schema to process
+     */
+    protected void generateContainerSchemas(OpenAPI openAPI, Set&lt;Schema&gt; visitedSchemas, Schema schema) {
+<span class="nc bnc" id="L380" title="All 2 branches missed.">        if (visitedSchemas.contains(schema)) {</span>
+<span class="nc" id="L381">            return;</span>
+        }
+<span class="nc" id="L383">        visitedSchemas.add(schema);</span>
+
+<span class="nc bnc" id="L385" title="All 2 branches missed.">        if (schema != null) {</span>
+            //Dereference schema
+<span class="nc" id="L387">            schema = ModelUtils.getReferencedSchema(openAPI, schema);</span>
+<span class="nc" id="L388">            Boolean isContainer = Boolean.FALSE;</span>
+
+<span class="nc bnc" id="L390" title="All 2 branches missed.">            if (ModelUtils.isObjectSchema(schema)) {</span>
+                //Recursively process all schemas of object properties
+<span class="nc" id="L392">                Map&lt;String, Schema&gt; properties = schema.getProperties();</span>
+<span class="nc bnc" id="L393" title="All 2 branches missed.">                if (properties != null) {</span>
+<span class="nc bnc" id="L394" title="All 2 branches missed.">                    for (String propertyName : properties.keySet()) {</span>
+<span class="nc" id="L395">                        generateContainerSchemas(openAPI, visitedSchemas, properties.get(propertyName));</span>
+<span class="nc" id="L396">                    }</span>
+                }
+<span class="nc bnc" id="L398" title="All 2 branches missed.">            } else if (ModelUtils.isArraySchema(schema)) {</span>
+                //Recursively process schema of array items
+<span class="nc" id="L400">                generateContainerSchemas(openAPI, visitedSchemas, ModelUtils.getSchemaItems(schema));</span>
+<span class="nc" id="L401">                isContainer = Boolean.TRUE;</span>
+<span class="nc bnc" id="L402" title="All 2 branches missed.">            } else if (ModelUtils.isMapSchema(schema)) {</span>
+                //Recursively process schema of map items
+<span class="nc" id="L404">                Object itemSchema = schema.getAdditionalProperties();</span>
+<span class="nc bnc" id="L405" title="All 2 branches missed.">                if (itemSchema instanceof Schema) {</span>
+<span class="nc" id="L406">                    generateContainerSchemas(openAPI, visitedSchemas, (Schema) itemSchema);</span>
+                }
+<span class="nc" id="L408">                isContainer = Boolean.TRUE;</span>
+            }
+
+<span class="nc bnc" id="L411" title="All 2 branches missed.">            if (isContainer) {</span>
+                //Generate special component schema for container
+<span class="nc" id="L413">                String containerSchemaName = generateUniqueSchemaName(openAPI, &quot;Collection&quot;);</span>
+<span class="nc" id="L414">                Schema containerSchema = new ObjectSchema();</span>
+<span class="nc" id="L415">                containerSchema.addProperty(&quot;inner&quot;, schema);</span>
+<span class="nc" id="L416">                addInternalExtensionToSchema(containerSchema, VEN_FROM_CONTAINER, Boolean.TRUE);</span>
+<span class="nc" id="L417">                openAPI.getComponents().addSchemas(containerSchemaName, containerSchema);</span>
+<span class="nc" id="L418">                String containerDataType = getTypeDeclaration(toModelName(containerSchemaName));</span>
+<span class="nc" id="L419">                addInternalExtensionToSchema(schema, VEN_CONTAINER_DATA_TYPE, containerDataType);</span>
+            }
+        }
+<span class="nc" id="L422">    }</span>
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L426">        objs = super.postProcessOperationsWithModels(objs, allModels);</span>
+<span class="nc" id="L427">        OperationMap operations = objs.getOperations();</span>
+<span class="nc" id="L428">        List&lt;CodegenOperation&gt; operationList = operations.getOperation();</span>
+        String httpMethodDeclaration;
+<span class="nc" id="L430">        String pathPattern = null;</span>
+<span class="nc bnc" id="L431" title="All 2 branches missed.">        for (CodegenOperation op : operationList) {</span>
+<span class="nc bnc" id="L432" title="All 6 branches missed.">            switch (op.httpMethod) {</span>
+                case &quot;GET&quot;:
+<span class="nc" id="L434">                    httpMethodDeclaration = &quot;Get()&quot;;</span>
+<span class="nc" id="L435">                    break;</span>
+                case &quot;POST&quot;:
+<span class="nc" id="L437">                    httpMethodDeclaration = &quot;Post()&quot;;</span>
+<span class="nc" id="L438">                    break;</span>
+                case &quot;PATCH&quot;:
+<span class="nc" id="L440">                    httpMethodDeclaration = &quot;Patch()&quot;;</span>
+<span class="nc" id="L441">                    break;</span>
+                case &quot;PUT&quot;:
+<span class="nc" id="L443">                    httpMethodDeclaration = &quot;Put()&quot;;</span>
+<span class="nc" id="L444">                    break;</span>
+                case &quot;DELETE&quot;:
+<span class="nc" id="L446">                    httpMethodDeclaration = &quot;Delete()&quot;;</span>
+<span class="nc" id="L447">                    break;</span>
+                default:
+<span class="nc" id="L449">                    httpMethodDeclaration = &quot;HttpMethod(\&quot;&quot; + op.httpMethod + &quot;\&quot;)&quot;;</span>
+            }
+<span class="nc" id="L451">            op.httpMethod = httpMethodDeclaration;</span>
+            //Producing content with media type &quot;*/*&quot; is not supported
+<span class="nc bnc" id="L453" title="All 2 branches missed.">            if (op.produces != null) {</span>
+<span class="nc bnc" id="L454" title="All 2 branches missed.">                for (Map&lt;String, String&gt; p : op.produces) {</span>
+<span class="nc bnc" id="L455" title="All 2 branches missed.">                    if (p.replace(&quot;mediaType&quot;, &quot;*/*&quot;, &quot;n/a&quot;)) {</span>
+<span class="nc" id="L456">                        LOGGER.warn(&quot;Media type range '*/*' is not supported, using 'n/a' for code generation instead&quot;);</span>
+                    }
+<span class="nc" id="L458">                }</span>
+            }
+            //All operations have same path because of custom operation grouping, so path pattern can be calculated only once
+<span class="nc bnc" id="L461" title="All 2 branches missed.">            if (pathPattern == null) {</span>
+<span class="nc" id="L462">                pathPattern = generatePathPattern(op);</span>
+            }
+<span class="nc" id="L464">        }</span>
+<span class="nc" id="L465">        operations.put(&quot;pathPattern&quot;, pathPattern);</span>
+
+<span class="nc" id="L467">        return objs;</span>
+    }
+
+    protected String generatePathPattern(CodegenOperation op) {
+<span class="nc" id="L471">        String result = op.path;</span>
+<span class="nc bnc" id="L472" title="All 2 branches missed.">        for (CodegenParameter pp : op.pathParams) {</span>
+<span class="nc" id="L473">            StringBuilder replacement = new StringBuilder(&quot;{&quot; + pp.paramName);</span>
+<span class="nc bnc" id="L474" title="All 2 branches missed.">            if (pp.isEnum) {</span>
+<span class="nc" id="L475">                StringBuilder enumRegExp = new StringBuilder();</span>
+<span class="nc bnc" id="L476" title="All 2 branches missed.">                for (String enumValue : pp._enum) {</span>
+<span class="nc bnc" id="L477" title="All 2 branches missed.">                    if (enumRegExp.length() &gt; 0) {</span>
+<span class="nc" id="L478">                        enumRegExp.append(&quot;|&quot;);</span>
+                    }
+<span class="nc" id="L480">                    enumRegExp.append(enumValue.replaceAll(&quot;[\\Q&lt;&gt;()[]{}|^$-=!?*+.\\\\E]&quot;, &quot;\\\\$0&quot;));</span>
+<span class="nc" id="L481">                }</span>
+<span class="nc" id="L482">                replacement.append(&quot;:&quot;);</span>
+<span class="nc" id="L483">                replacement.append(enumRegExp);</span>
+<span class="nc bnc" id="L484" title="All 2 branches missed.">            } else if (pp.isInteger) {</span>
+<span class="nc" id="L485">                replacement.append(&quot;:0|(?:-?[1-9][0-9]*)&quot;);</span>
+<span class="nc bnc" id="L486" title="All 6 branches missed.">            } else if (pp.isString &amp;&amp; (pp.pattern != null) &amp;&amp; (!pp.pattern.isEmpty())) {</span>
+<span class="nc" id="L487">                replacement.append(&quot;:&quot;);</span>
+<span class="nc" id="L488">                replacement.append(pp.pattern);</span>
+            }
+            //TODO add regular expressions for other types if they are actually used for path parameters
+<span class="nc" id="L491">            replacement.append(&quot;}&quot;);</span>
+<span class="nc" id="L492">            result = result.replace(&quot;{&quot; + pp.paramName + &quot;}&quot;, replacement);</span>
+<span class="nc" id="L493">        }</span>
+<span class="nc" id="L494">        return result;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

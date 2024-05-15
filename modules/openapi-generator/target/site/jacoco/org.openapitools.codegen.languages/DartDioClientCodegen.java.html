@@ -1,0 +1,802 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DartDioClientCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">DartDioClientCodegen.java</span></div><h1>DartDioClientCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2021 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import com.google.common.collect.Sets;
+import com.samskivert.mustache.Mustache;
+import com.samskivert.mustache.Template;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.Discriminator;
+import io.swagger.v3.oas.models.media.Schema;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.CodegenDiscriminator.MappedModel;
+import org.openapitools.codegen.api.TemplatePathLocator;
+import org.openapitools.codegen.config.GlobalSettings;
+import org.openapitools.codegen.meta.GeneratorMetadata;
+import org.openapitools.codegen.meta.Stability;
+import org.openapitools.codegen.meta.features.ClientModificationFeature;
+import org.openapitools.codegen.meta.features.SchemaSupportFeature;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.templating.CommonTemplateContentLocator;
+import org.openapitools.codegen.templating.GeneratorTemplateContentLocator;
+import org.openapitools.codegen.templating.MustacheEngineAdapter;
+import org.openapitools.codegen.templating.TemplateManagerOptions;
+import org.openapitools.codegen.utils.ModelUtils;
+import org.openapitools.codegen.utils.ProcessUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.openapitools.codegen.utils.StringUtils.underscore;
+
+public class DartDioClientCodegen extends AbstractDartCodegen {
+
+<span class="fc" id="L56">    private final Logger LOGGER = LoggerFactory.getLogger(DartDioClientCodegen.class);</span>
+
+    public static final String DATE_LIBRARY = &quot;dateLibrary&quot;;
+    public static final String DATE_LIBRARY_CORE = &quot;core&quot;;
+    public static final String DATE_LIBRARY_TIME_MACHINE = &quot;timemachine&quot;;
+    public static final String DATE_LIBRARY_DEFAULT = DATE_LIBRARY_CORE;
+
+    public static final String SERIALIZATION_LIBRARY_BUILT_VALUE = &quot;built_value&quot;;
+    public static final String SERIALIZATION_LIBRARY_JSON_SERIALIZABLE = &quot;json_serializable&quot;;
+    public static final String SERIALIZATION_LIBRARY_DEFAULT = SERIALIZATION_LIBRARY_BUILT_VALUE;
+
+    private static final String DIO_IMPORT = &quot;package:dio/dio.dart&quot;;
+    public static final String FINAL_PROPERTIES = &quot;finalProperties&quot;;
+    public static final String FINAL_PROPERTIES_DEFAULT_VALUE = &quot;true&quot;;
+
+    private static final String CLIENT_NAME = &quot;clientName&quot;;
+
+    private String dateLibrary;
+
+    private String clientName;
+
+    private TemplateManager templateManager;
+
+    public DartDioClientCodegen() {
+<span class="fc" id="L80">        super();</span>
+
+<span class="fc" id="L82">        modifyFeatureSet(features -&gt; features</span>
+<span class="fc" id="L83">                .includeClientModificationFeatures(</span>
+                        ClientModificationFeature.Authorizations,
+                        ClientModificationFeature.UserAgent
+<span class="fc" id="L86">                ).includeSchemaSupportFeatures(</span>
+                    SchemaSupportFeature.Polymorphism,
+                    SchemaSupportFeature.Union,
+                    SchemaSupportFeature.Composite,
+                    SchemaSupportFeature.allOf,
+                    SchemaSupportFeature.oneOf,
+                    SchemaSupportFeature.anyOf
+                )
+        );
+<span class="fc" id="L95">        generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
+<span class="fc" id="L96">                .stability(Stability.STABLE)</span>
+<span class="fc" id="L97">                .build();</span>
+
+<span class="fc" id="L99">        outputFolder = &quot;generated-code/dart-dio&quot;;</span>
+<span class="fc" id="L100">        embeddedTemplateDir = &quot;dart/libraries/dio&quot;;</span>
+<span class="fc" id="L101">        this.setTemplateDir(embeddedTemplateDir);</span>
+
+<span class="fc" id="L103">        supportedLibraries.put(SERIALIZATION_LIBRARY_BUILT_VALUE, &quot;[DEFAULT] built_value&quot;);</span>
+<span class="fc" id="L104">        supportedLibraries.put(SERIALIZATION_LIBRARY_JSON_SERIALIZABLE, &quot;[BETA] json_serializable&quot;);</span>
+<span class="fc" id="L105">        final CliOption serializationLibrary = CliOption.newString(CodegenConstants.SERIALIZATION_LIBRARY, &quot;Specify serialization library&quot;);</span>
+<span class="fc" id="L106">        serializationLibrary.setEnum(supportedLibraries);</span>
+<span class="fc" id="L107">        serializationLibrary.setDefault(SERIALIZATION_LIBRARY_DEFAULT);</span>
+<span class="fc" id="L108">        cliOptions.add(serializationLibrary);</span>
+
+        // Date Library Option
+<span class="fc" id="L111">        final CliOption dateOption = CliOption.newString(DATE_LIBRARY, &quot;Specify Date library&quot;);</span>
+<span class="fc" id="L112">        dateOption.setDefault(DATE_LIBRARY_DEFAULT);</span>
+
+<span class="fc" id="L114">        final CliOption finalProperties = CliOption.newBoolean(FINAL_PROPERTIES, &quot;Whether properties are marked as final when using Json Serializable for serialization&quot;);</span>
+<span class="fc" id="L115">        finalProperties.setDefault(&quot;true&quot;);</span>
+<span class="fc" id="L116">        cliOptions.add(finalProperties);</span>
+
+<span class="fc" id="L118">        final Map&lt;String, String&gt; dateOptions = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L119">        dateOptions.put(DATE_LIBRARY_CORE, &quot;[DEFAULT] Dart core library (DateTime)&quot;);</span>
+<span class="fc" id="L120">        dateOptions.put(DATE_LIBRARY_TIME_MACHINE, &quot;Time Machine is date and time library for Flutter, Web, and Server with support for timezones, calendars, cultures, formatting and parsing.&quot;);</span>
+<span class="fc" id="L121">        dateOption.setEnum(dateOptions);</span>
+<span class="fc" id="L122">        cliOptions.add(dateOption);</span>
+<span class="fc" id="L123">    }</span>
+
+    public String getDateLibrary() {
+<span class="nc" id="L126">        return dateLibrary;</span>
+    }
+
+    public void setDateLibrary(String library) {
+<span class="nc" id="L130">        this.dateLibrary = library;</span>
+<span class="nc" id="L131">    }</span>
+
+    public String getClientName() {
+<span class="nc" id="L134">        return clientName;</span>
+    }
+
+    public void setClientName(String clientName) {
+<span class="nc" id="L138">        this.clientName = clientName;</span>
+<span class="nc" id="L139">    }</span>
+
+    @Override
+    public String getName() {
+<span class="fc" id="L143">        return &quot;dart-dio&quot;;</span>
+    }
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L148">        return &quot;Generates a Dart Dio client library.&quot;;</span>
+    }
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L153">        super.processOpts();</span>
+
+<span class="nc bnc" id="L155" title="All 2 branches missed.">        if (StringUtils.isEmpty(System.getenv(&quot;DART_POST_PROCESS_FILE&quot;))) {</span>
+<span class="nc" id="L156">            LOGGER.info(&quot;Environment variable DART_POST_PROCESS_FILE not defined so the Dart code may not be properly formatted. To define it, try `export DART_POST_PROCESS_FILE=\&quot;/usr/local/bin/dartfmt -w\&quot;` (Linux/Mac)&quot;);</span>
+<span class="nc" id="L157">            LOGGER.info(&quot;NOTE: To enable file post-processing, 'enablePostProcessFile' must be set to `true` (--enable-post-process-file for CLI).&quot;);</span>
+        }
+
+<span class="nc bnc" id="L160" title="All 2 branches missed.">        if (!additionalProperties.containsKey(CodegenConstants.SERIALIZATION_LIBRARY)) {</span>
+<span class="nc" id="L161">            additionalProperties.put(CodegenConstants.SERIALIZATION_LIBRARY, SERIALIZATION_LIBRARY_DEFAULT);</span>
+<span class="nc" id="L162">            LOGGER.debug(&quot;Serialization library not set, using default {}&quot;, SERIALIZATION_LIBRARY_DEFAULT);</span>
+        }
+<span class="nc" id="L164">        setLibrary(additionalProperties.get(CodegenConstants.SERIALIZATION_LIBRARY).toString());</span>
+<span class="nc bnc" id="L165" title="All 2 branches missed.">        if (SERIALIZATION_LIBRARY_BUILT_VALUE.equals(library)) {</span>
+<span class="nc" id="L166">            this.setLegacyDiscriminatorBehavior(false);</span>
+        }
+
+<span class="nc bnc" id="L169" title="All 2 branches missed.">        if (!additionalProperties.containsKey(DATE_LIBRARY)) {</span>
+<span class="nc" id="L170">            additionalProperties.put(DATE_LIBRARY, DATE_LIBRARY_DEFAULT);</span>
+<span class="nc" id="L171">            LOGGER.debug(&quot;Date library not set, using default {}&quot;, DATE_LIBRARY_DEFAULT);</span>
+        }
+<span class="nc" id="L173">        setDateLibrary(additionalProperties.get(DATE_LIBRARY).toString());</span>
+
+<span class="nc bnc" id="L175" title="All 2 branches missed.">        if (!additionalProperties.containsKey(FINAL_PROPERTIES)) {</span>
+<span class="nc" id="L176">            additionalProperties.put(FINAL_PROPERTIES, Boolean.parseBoolean(FINAL_PROPERTIES_DEFAULT_VALUE));</span>
+<span class="nc" id="L177">            LOGGER.debug(&quot;finalProperties not set, using default {}&quot;, FINAL_PROPERTIES_DEFAULT_VALUE);</span>
+        }
+        else {
+<span class="nc" id="L180">            additionalProperties.put(FINAL_PROPERTIES, Boolean.parseBoolean(additionalProperties.get(FINAL_PROPERTIES).toString()));</span>
+        }
+
+<span class="nc bnc" id="L183" title="All 2 branches missed.">        if (!additionalProperties.containsKey(CLIENT_NAME)) {</span>
+<span class="nc" id="L184">            final String name = org.openapitools.codegen.utils.StringUtils.camelize(pubName);</span>
+<span class="nc" id="L185">            additionalProperties.put(CLIENT_NAME, name);</span>
+<span class="nc" id="L186">            LOGGER.debug(&quot;Client name not set, using default {}&quot;, DATE_LIBRARY_DEFAULT);</span>
+        }
+<span class="nc" id="L188">        setClientName(additionalProperties.get(CLIENT_NAME).toString());</span>
+
+<span class="nc" id="L190">        supportingFiles.add(new SupportingFile(&quot;pubspec.mustache&quot;, &quot;&quot;, &quot;pubspec.yaml&quot;));</span>
+<span class="nc" id="L191">        supportingFiles.add(new SupportingFile(&quot;analysis_options.mustache&quot;, &quot;&quot;, &quot;analysis_options.yaml&quot;));</span>
+<span class="nc" id="L192">        supportingFiles.add(new SupportingFile(&quot;gitignore.mustache&quot;, &quot;&quot;, &quot;.gitignore&quot;));</span>
+<span class="nc" id="L193">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;));</span>
+
+<span class="nc" id="L195">        supportingFiles.add(new SupportingFile(&quot;lib.mustache&quot;, libPath, pubName + &quot;.dart&quot;));</span>
+
+<span class="nc" id="L197">        final String srcFolder = libPath + sourceFolder;</span>
+<span class="nc" id="L198">        supportingFiles.add(new SupportingFile(&quot;api_client.mustache&quot;, srcFolder, &quot;api.dart&quot;));</span>
+
+<span class="nc" id="L200">        final String authFolder = srcFolder + File.separator + &quot;auth&quot;;</span>
+<span class="nc" id="L201">        supportingFiles.add(new SupportingFile(&quot;auth/api_key_auth.mustache&quot;, authFolder, &quot;api_key_auth.dart&quot;));</span>
+<span class="nc" id="L202">        supportingFiles.add(new SupportingFile(&quot;auth/basic_auth.mustache&quot;, authFolder, &quot;basic_auth.dart&quot;));</span>
+<span class="nc" id="L203">        supportingFiles.add(new SupportingFile(&quot;auth/bearer_auth.mustache&quot;, authFolder, &quot;bearer_auth.dart&quot;));</span>
+<span class="nc" id="L204">        supportingFiles.add(new SupportingFile(&quot;auth/oauth.mustache&quot;, authFolder, &quot;oauth.dart&quot;));</span>
+<span class="nc" id="L205">        supportingFiles.add(new SupportingFile(&quot;auth/auth.mustache&quot;, authFolder, &quot;auth.dart&quot;));</span>
+
+<span class="nc" id="L207">        configureSerializationLibrary(srcFolder);</span>
+<span class="nc" id="L208">        configureDateLibrary(srcFolder);</span>
+<span class="nc" id="L209">    }</span>
+
+    private void configureSerializationLibrary(String srcFolder) {
+<span class="nc bnc" id="L212" title="All 2 branches missed.">        switch (library) {</span>
+            case SERIALIZATION_LIBRARY_JSON_SERIALIZABLE:
+<span class="nc" id="L214">                additionalProperties.put(&quot;useJsonSerializable&quot;, &quot;true&quot;);</span>
+<span class="nc" id="L215">                configureSerializationLibraryJsonSerializable(srcFolder);</span>
+<span class="nc" id="L216">                break;</span>
+            default:
+            case SERIALIZATION_LIBRARY_BUILT_VALUE:
+<span class="nc" id="L219">                additionalProperties.put(&quot;useBuiltValue&quot;, &quot;true&quot;);</span>
+<span class="nc" id="L220">                configureSerializationLibraryBuiltValue(srcFolder);</span>
+                break;
+        }
+
+<span class="nc" id="L224">        TemplateManagerOptions templateManagerOptions = new TemplateManagerOptions(isEnableMinimalUpdate(), isSkipOverwrite());</span>
+<span class="nc" id="L225">        TemplatePathLocator commonTemplateLocator = new CommonTemplateContentLocator();</span>
+<span class="nc" id="L226">        TemplatePathLocator generatorTemplateLocator = new GeneratorTemplateContentLocator(this);</span>
+<span class="nc" id="L227">        templateManager = new TemplateManager(</span>
+                templateManagerOptions,
+<span class="nc" id="L229">                getTemplatingEngine(),</span>
+                new TemplatePathLocator[]{generatorTemplateLocator, commonTemplateLocator}
+        );
+
+        // A lambda which allows for easy includes of serialization library specific
+        // templates without having to change the main template files.
+<span class="nc" id="L235">        additionalProperties.put(&quot;includeLibraryTemplate&quot;, (Mustache.Lambda) (fragment, writer) -&gt; {</span>
+<span class="nc" id="L236">            MustacheEngineAdapter engine = ((MustacheEngineAdapter) getTemplatingEngine());</span>
+<span class="nc" id="L237">            String templateFile = &quot;serialization/&quot; + library + &quot;/&quot; + fragment.execute() + &quot;.mustache&quot;;</span>
+<span class="nc" id="L238">            Template tmpl = engine.getCompiler()</span>
+<span class="nc" id="L239">                    .withLoader(name -&gt; engine.findTemplate(templateManager, name))</span>
+<span class="nc" id="L240">                    .defaultValue(&quot;&quot;)</span>
+<span class="nc" id="L241">                    .compile(templateManager.getFullTemplateContents(templateFile));</span>
+
+<span class="nc" id="L243">            fragment.executeTemplate(tmpl, writer);</span>
+<span class="nc" id="L244">        });</span>
+<span class="nc" id="L245">    }</span>
+
+    private void configureSerializationLibraryBuiltValue(String srcFolder) {
+<span class="nc" id="L248">        supportingFiles.add(new SupportingFile(&quot;serialization/built_value/serializers.mustache&quot;, srcFolder, &quot;serializers.dart&quot;));</span>
+<span class="nc" id="L249">        supportingFiles.add(new SupportingFile(&quot;serialization/built_value/api_util.mustache&quot;, srcFolder, &quot;api_util.dart&quot;));</span>
+
+<span class="nc" id="L251">        typeMapping.put(&quot;Array&quot;, &quot;BuiltList&quot;);</span>
+<span class="nc" id="L252">        typeMapping.put(&quot;array&quot;, &quot;BuiltList&quot;);</span>
+<span class="nc" id="L253">        typeMapping.put(&quot;List&quot;, &quot;BuiltList&quot;);</span>
+<span class="nc" id="L254">        typeMapping.put(&quot;set&quot;, &quot;BuiltSet&quot;);</span>
+<span class="nc" id="L255">        typeMapping.put(&quot;map&quot;, &quot;BuiltMap&quot;);</span>
+<span class="nc" id="L256">        typeMapping.put(&quot;file&quot;, &quot;Uint8List&quot;);</span>
+<span class="nc" id="L257">        typeMapping.put(&quot;binary&quot;, &quot;Uint8List&quot;);</span>
+<span class="nc" id="L258">        typeMapping.put(&quot;object&quot;, &quot;JsonObject&quot;);</span>
+<span class="nc" id="L259">        typeMapping.put(&quot;AnyType&quot;, &quot;JsonObject&quot;);</span>
+
+<span class="nc" id="L261">        imports.put(&quot;BuiltList&quot;, &quot;package:built_collection/built_collection.dart&quot;);</span>
+<span class="nc" id="L262">        imports.put(&quot;BuiltSet&quot;, &quot;package:built_collection/built_collection.dart&quot;);</span>
+<span class="nc" id="L263">        imports.put(&quot;BuiltMap&quot;, &quot;package:built_collection/built_collection.dart&quot;);</span>
+<span class="nc" id="L264">        imports.put(&quot;JsonObject&quot;, &quot;package:built_value/json_object.dart&quot;);</span>
+<span class="nc" id="L265">        imports.put(&quot;Uint8List&quot;, &quot;dart:typed_data&quot;);</span>
+<span class="nc" id="L266">        imports.put(&quot;MultipartFile&quot;, DIO_IMPORT);</span>
+<span class="nc" id="L267">    }</span>
+
+    private void configureSerializationLibraryJsonSerializable(String srcFolder) {
+<span class="nc" id="L270">        supportingFiles.add(new SupportingFile(&quot;serialization/json_serializable/build.yaml.mustache&quot;, &quot;&quot; /* main project dir */, &quot;build.yaml&quot;));</span>
+<span class="nc" id="L271">        supportingFiles.add(new SupportingFile(&quot;serialization/json_serializable/deserialize.mustache&quot;, srcFolder,</span>
+                &quot;deserialize.dart&quot;));
+
+        // most of these are defined in AbstractDartCodegen, we are overriding
+        // just the binary / file handling
+<span class="nc" id="L276">        languageSpecificPrimitives.add(&quot;Object&quot;);</span>
+<span class="nc" id="L277">        imports.put(&quot;Uint8List&quot;, &quot;dart:typed_data&quot;);</span>
+<span class="nc" id="L278">        imports.put(&quot;MultipartFile&quot;, DIO_IMPORT);</span>
+<span class="nc" id="L279">    }</span>
+
+    private void configureDateLibrary(String srcFolder) {
+<span class="nc bnc" id="L282" title="All 2 branches missed.">        switch (dateLibrary) {</span>
+            case DATE_LIBRARY_TIME_MACHINE:
+<span class="nc" id="L284">                additionalProperties.put(&quot;useDateLibTimeMachine&quot;, &quot;true&quot;);</span>
+<span class="nc" id="L285">                typeMapping.put(&quot;date&quot;, &quot;OffsetDate&quot;);</span>
+<span class="nc" id="L286">                typeMapping.put(&quot;Date&quot;, &quot;OffsetDate&quot;);</span>
+<span class="nc" id="L287">                typeMapping.put(&quot;DateTime&quot;, &quot;OffsetDateTime&quot;);</span>
+<span class="nc" id="L288">                typeMapping.put(&quot;datetime&quot;, &quot;OffsetDateTime&quot;);</span>
+<span class="nc" id="L289">                imports.put(&quot;OffsetDate&quot;, &quot;package:time_machine/time_machine.dart&quot;);</span>
+<span class="nc" id="L290">                imports.put(&quot;OffsetDateTime&quot;, &quot;package:time_machine/time_machine.dart&quot;);</span>
+<span class="nc bnc" id="L291" title="All 2 branches missed.">                if (SERIALIZATION_LIBRARY_BUILT_VALUE.equals(library)) {</span>
+<span class="nc" id="L292">                    supportingFiles.add(new SupportingFile(&quot;serialization/built_value/offset_date_serializer.mustache&quot;, srcFolder, &quot;local_date_serializer.dart&quot;));</span>
+                }
+                break;
+            default:
+            case DATE_LIBRARY_CORE:
+<span class="nc" id="L297">                additionalProperties.put(&quot;useDateLibCore&quot;, &quot;true&quot;);</span>
+<span class="nc bnc" id="L298" title="All 2 branches missed.">                if (SERIALIZATION_LIBRARY_BUILT_VALUE.equals(library)) {</span>
+<span class="nc" id="L299">                    typeMapping.put(&quot;date&quot;, &quot;Date&quot;);</span>
+<span class="nc" id="L300">                    typeMapping.put(&quot;Date&quot;, &quot;Date&quot;);</span>
+<span class="nc" id="L301">                    importMapping.put(&quot;Date&quot;, &quot;package:&quot; + pubName + &quot;/&quot; + sourceFolder + &quot;/&quot; + modelPackage() + &quot;/date.dart&quot;);</span>
+<span class="nc" id="L302">                    supportingFiles.add(new SupportingFile(&quot;serialization/built_value/date.mustache&quot;, srcFolder + File.separator + modelPackage(), &quot;date.dart&quot;));</span>
+<span class="nc" id="L303">                    supportingFiles.add(new SupportingFile(&quot;serialization/built_value/date_serializer.mustache&quot;, srcFolder, &quot;date_serializer.dart&quot;));</span>
+                }
+                break;
+        }
+<span class="nc" id="L307">    }</span>
+
+    @Override
+    public String toDefaultValue(Schema schema) {
+<span class="nc bnc" id="L311" title="All 2 branches missed.">        if (schema.getDefault() != null) {</span>
+<span class="nc bnc" id="L312" title="All 2 branches missed.">            if (SERIALIZATION_LIBRARY_BUILT_VALUE.equals(library)) {</span>
+<span class="nc bnc" id="L313" title="All 2 branches missed.">                if (ModelUtils.isArraySchema(schema)) {</span>
+<span class="nc bnc" id="L314" title="All 2 branches missed.">                    if (ModelUtils.isSet(schema)) {</span>
+<span class="nc" id="L315">                        return &quot;SetBuilder()&quot;;</span>
+                    }
+<span class="nc" id="L317">                    return &quot;ListBuilder()&quot;;</span>
+                }
+<span class="nc bnc" id="L319" title="All 2 branches missed.">                if (ModelUtils.isMapSchema(schema)) {</span>
+<span class="nc" id="L320">                    return &quot;MapBuilder()&quot;;</span>
+                }
+            }
+<span class="nc bnc" id="L323" title="All 4 branches missed.">            if (ModelUtils.isDateSchema(schema) || ModelUtils.isDateTimeSchema(schema)) {</span>
+                // this is currently not supported and would create compile errors
+<span class="nc" id="L325">                return null;</span>
+            }
+<span class="nc bnc" id="L327" title="All 2 branches missed.">            if (ModelUtils.isStringSchema(schema)) {</span>
+<span class="nc" id="L328">                return &quot;'&quot; + schema.getDefault().toString().replaceAll(&quot;'&quot;, &quot;\\'&quot;) + &quot;'&quot;;</span>
+            }
+<span class="nc" id="L330">            return schema.getDefault().toString();</span>
+        }
+<span class="nc" id="L332">        return null;</span>
+    }
+
+    @Override
+    public ModelsMap postProcessModels(ModelsMap objs) {
+<span class="nc" id="L337">        objs = super.postProcessModels(objs);</span>
+<span class="nc" id="L338">        List&lt;ModelMap&gt; models = objs.getModels();</span>
+<span class="nc" id="L339">        ProcessUtils.addIndexToProperties(models, 1);</span>
+<span class="nc" id="L340">        return objs;</span>
+    }
+
+    /// Gets all ancestors of a given model, and puts it in accumulator
+    private void getAncestors(CodegenModel cm, Map&lt;String, CodegenModel&gt; allModels, Set&lt;String&gt; accumulator) {
+
+        // get direct parents
+<span class="nc" id="L347">        Set&lt;String&gt; directParentNames = cm.allOf;</span>
+<span class="nc bnc" id="L348" title="All 4 branches missed.">        if (directParentNames != null &amp;&amp; !directParentNames.isEmpty()) {</span>
+<span class="nc bnc" id="L349" title="All 2 branches missed.">            for (String directParentName : directParentNames) {</span>
+<span class="nc bnc" id="L350" title="All 2 branches missed.">                if (accumulator.add(directParentName)) {</span>
+<span class="nc" id="L351">                    CodegenModel parent = allModels.get(directParentName);</span>
+<span class="nc" id="L352">                    getAncestors(parent, allModels, accumulator);</span>
+                }
+<span class="nc" id="L354">            }</span>
+        }
+<span class="nc" id="L356">    }</span>
+
+    private void syncRootTypesWithInnerVars(Map&lt;String, ModelsMap&gt; objs) {
+<span class="nc" id="L359">        Map&lt;String, CodegenModel&gt; allModels = new HashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L360" title="All 2 branches missed.">        for (ModelsMap modelsEntries : objs.values()) {</span>
+<span class="nc bnc" id="L361" title="All 2 branches missed.">            for (ModelMap modelsMap : modelsEntries.getModels()) {</span>
+<span class="nc" id="L362">                CodegenModel model = modelsMap.getModel();</span>
+<span class="nc" id="L363">                allModels.put(model.getClassname(), model);</span>
+<span class="nc" id="L364">            }</span>
+<span class="nc" id="L365">        }</span>
+
+<span class="nc bnc" id="L367" title="All 2 branches missed.">        for (CodegenModel model : allModels.values()) {</span>
+<span class="nc" id="L368">            syncRootTypesWithInnerVars(allModels, model);</span>
+<span class="nc" id="L369">        }</span>
+<span class="nc" id="L370">    }</span>
+    private void syncRootTypesWithInnerVars(Map&lt;String, CodegenModel&gt; objs, CodegenModel model) {
+<span class="nc" id="L372">        List&lt;CodegenProperty&gt; allVars = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L373">        allVars.addAll(((Collection&lt;CodegenProperty&gt;) model.vendorExtensions.get(kSelfAndAncestorOnlyProps)));</span>
+<span class="nc" id="L374">        allVars.addAll(((Collection&lt;CodegenProperty&gt;) model.vendorExtensions.get(kSelfOnlyProps)));</span>
+<span class="nc" id="L375">        allVars.addAll(((Collection&lt;CodegenProperty&gt;) model.vendorExtensions.get(kAncestorOnlyProps)));</span>
+
+<span class="nc bnc" id="L377" title="All 2 branches missed.">        for (CodegenProperty prop : allVars) {</span>
+            //check if type exists in parent map
+<span class="nc" id="L379">            String type = prop.openApiType;</span>
+<span class="nc bnc" id="L380" title="All 2 branches missed.">            if (objs.containsKey(type)) {</span>
+                //get the type
+<span class="nc" id="L382">                CodegenModel relatedModel = objs.get(type);</span>
+                //fill the property's VendorExtensions with the type's VendorExtensions
+<span class="nc" id="L384">                prop.getVendorExtensions().put(kIsParent, relatedModel.getVendorExtensions().get(kIsParent));</span>
+<span class="nc" id="L385">                prop.isEnum = relatedModel.isEnum;</span>
+
+            }
+<span class="nc" id="L388">        }</span>
+<span class="nc" id="L389">    }</span>
+<span class="fc" id="L390">    private final String kIsChild = &quot;x-is-child&quot;;</span>
+<span class="fc" id="L391">    private final String kIsParent = &quot;x-is-parent&quot;;</span>
+<span class="fc" id="L392">    private final String kIsPure = &quot;x-is-pure&quot;;</span>
+<span class="fc" id="L393">    private final String kSelfOnlyProps = &quot;x-self-only-props&quot;;</span>
+<span class="fc" id="L394">    private final String kHasSelfOnlyProps = &quot;x-has-self-only-props&quot;;</span>
+<span class="fc" id="L395">    private final String kAncestorOnlyProps = &quot;x-ancestor-only-props&quot;;</span>
+<span class="fc" id="L396">    private final String kHasAncestorOnlyProps = &quot;x-has-ancestor-only-props&quot;;</span>
+<span class="fc" id="L397">    private final String kSelfAndAncestorOnlyProps = &quot;x-self-and-ancestor-only-props&quot;;</span>
+<span class="fc" id="L398">    private final String kHasSelfAndAncestorOnlyProps = &quot;x-has-self-and-ancestor-only-props&quot;;</span>
+<span class="fc" id="L399">    private final String kParentDiscriminator = &quot;x-parent-discriminator&quot;;</span>
+
+    // adapts codegen models and property to dart rules of inheritance
+    private void adaptToDartInheritance(Map&lt;String, ModelsMap&gt; objs) {
+        // get all models
+<span class="nc" id="L404">        Map&lt;String, CodegenModel&gt; allModels = new HashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L405" title="All 2 branches missed.">        for (ModelsMap modelsEntries : objs.values()) {</span>
+<span class="nc bnc" id="L406" title="All 2 branches missed.">            for (ModelMap modelsMap : modelsEntries.getModels()) {</span>
+<span class="nc" id="L407">                CodegenModel model = modelsMap.getModel();</span>
+<span class="nc" id="L408">                allModels.put(model.getClassname(), model);</span>
+<span class="nc" id="L409">            }</span>
+<span class="nc" id="L410">        }</span>
+
+        // all ancestors
+<span class="nc" id="L413">        Set&lt;String&gt; allAncestorsForAllModelsFlat = new HashSet&lt;&gt;();</span>
+        // maps a model to its ancestors
+<span class="nc" id="L415">        Map&lt;String, Set&lt;String&gt;&gt; allAncestorsForAllModels = new HashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L416" title="All 2 branches missed.">        for (java.util.Map.Entry&lt;String, CodegenModel&gt; cm : allModels.entrySet()) {</span>
+<span class="nc" id="L417">            Set&lt;String&gt; allAncestors = new HashSet&lt;&gt;();</span>
+            // get all ancestors
+            // TODO: optimize this logic ?
+<span class="nc" id="L420">            getAncestors(cm.getValue(), allModels, allAncestors);</span>
+            // just in case, a model can't be its own ancestor
+<span class="nc" id="L422">            allAncestors.remove(cm.getKey());</span>
+
+<span class="nc" id="L424">            allAncestorsForAllModels.put(cm.getKey(), allAncestors);</span>
+<span class="nc" id="L425">            allAncestorsForAllModelsFlat.addAll(allAncestors);</span>
+<span class="nc" id="L426">        }</span>
+
+
+
+<span class="nc" id="L430">        Set&lt;String&gt; allPureClasses = new HashSet&lt;&gt;();</span>
+        // set isChild,isParent,isPure
+<span class="nc bnc" id="L432" title="All 2 branches missed.">        for (java.util.Map.Entry&lt;String, CodegenModel&gt; cmEntry : allModels.entrySet()) {</span>
+<span class="nc" id="L433">            String key = cmEntry.getKey();</span>
+<span class="nc" id="L434">            CodegenModel cm = cmEntry.getValue();</span>
+            // get all ancestors
+<span class="nc" id="L436">            Set&lt;String&gt; allAncestors = allAncestorsForAllModels.get(key);</span>
+
+            // a class is a parent when it's an ancestor to another class
+<span class="nc" id="L439">            boolean isParent = allAncestorsForAllModelsFlat.contains(key);</span>
+            // a class is a child when it has any ancestor
+<span class="nc bnc" id="L441" title="All 2 branches missed.">            boolean isChild = !allAncestors.isEmpty();</span>
+            // a class is pure when it's not a child, and has no oneOf nor anyOf
+<span class="nc bnc" id="L443" title="All 8 branches missed.">            boolean isPure = !isChild &amp;&amp; (cm.oneOf == null || cm.oneOf.isEmpty())</span>
+<span class="nc bnc" id="L444" title="All 2 branches missed.">                    &amp;&amp; (cm.anyOf == null || cm.anyOf.isEmpty());</span>
+
+<span class="nc" id="L446">            cm.vendorExtensions.put(kIsChild, isChild);</span>
+<span class="nc" id="L447">            cm.vendorExtensions.put(kIsParent, isParent);</span>
+<span class="nc" id="L448">            cm.vendorExtensions.put(kIsPure, isPure);</span>
+<span class="nc bnc" id="L449" title="All 6 branches missed.">            if (!isParent &amp;&amp; (cm.oneOf == null || cm.oneOf.isEmpty())) {</span>
+                //discriminator has no meaning here
+<span class="nc bnc" id="L451" title="All 2 branches missed.">                if (cm.discriminator!=null) {</span>
+<span class="nc" id="L452">                    cm.vendorExtensions.put(kParentDiscriminator, cm.discriminator);</span>
+<span class="nc" id="L453">                    cm.discriminator=null;</span>
+                }
+
+            }
+            // when pure:
+            // vars = allVars = selfOnlyProperties = kSelfAndAncestorOnlyProps
+            // ancestorOnlyProps = empty
+<span class="nc bnc" id="L460" title="All 2 branches missed.">            if (isPure) {</span>
+<span class="nc" id="L461">                cm.vendorExtensions.put(kSelfOnlyProps, new ArrayList&lt;&gt;(cm.getVars()));</span>
+<span class="nc bnc" id="L462" title="All 2 branches missed.">                cm.vendorExtensions.put(kHasSelfOnlyProps, !cm.getVars().isEmpty());</span>
+<span class="nc" id="L463">                cm.vendorExtensions.put(kAncestorOnlyProps, new ArrayList&lt;CodegenProperty&gt;());</span>
+<span class="nc" id="L464">                cm.vendorExtensions.put(kHasAncestorOnlyProps, false);</span>
+<span class="nc" id="L465">                cm.vendorExtensions.put(kSelfAndAncestorOnlyProps, new ArrayList&lt;&gt;(cm.getVars()));</span>
+<span class="nc bnc" id="L466" title="All 2 branches missed.">                cm.vendorExtensions.put(kHasSelfAndAncestorOnlyProps, !cm.getVars().isEmpty());</span>
+
+<span class="nc" id="L468">                allPureClasses.add(key);</span>
+            }
+<span class="nc" id="L470">        }</span>
+
+        // handle impure models
+<span class="nc bnc" id="L473" title="All 2 branches missed.">        for (java.util.Map.Entry&lt;String, CodegenModel&gt; cmEntry : allModels.entrySet()) {</span>
+<span class="nc" id="L474">            String key = cmEntry.getKey();</span>
+<span class="nc" id="L475">            CodegenModel cm = cmEntry.getValue();</span>
+<span class="nc bnc" id="L476" title="All 2 branches missed.">            if (allPureClasses.contains(key)) {</span>
+<span class="nc" id="L477">                continue;</span>
+            }
+            // get all ancestors
+<span class="nc" id="L480">            Set&lt;String&gt; allAncestors = allAncestorsForAllModels.get(key);</span>
+
+            // get direct parents
+            // Set&lt;String&gt; directParentNames = cm.allOf == null ? new HashSet&lt;&gt;() :
+            // cm.allOf;
+<span class="nc" id="L485">            Set&lt;String&gt; compositeProperties = new HashSet&lt;&gt;();</span>
+
+<span class="nc" id="L487">            Set&lt;String&gt; compositeModelNames = new HashSet&lt;String&gt;();</span>
+<span class="nc" id="L488">            compositeModelNames.addAll(ObjectUtils.firstNonNull(cm.oneOf, new HashSet&lt;&gt;()));</span>
+<span class="nc" id="L489">            compositeModelNames.addAll(ObjectUtils.firstNonNull(cm.anyOf, new HashSet&lt;&gt;()));</span>
+<span class="nc" id="L490">            compositeModelNames.addAll(allAncestors);</span>
+
+<span class="nc bnc" id="L492" title="All 2 branches missed.">            for (String compositeModelName : compositeModelNames) {</span>
+<span class="nc" id="L493">                CodegenModel model = allModels.get(compositeModelName);</span>
+<span class="nc bnc" id="L494" title="All 2 branches missed.">                if (model == null)</span>
+<span class="nc" id="L495">                    continue;</span>
+<span class="nc" id="L496">                List&lt;CodegenProperty&gt; allVars = ObjectUtils.firstNonNull(model.getAllVars(), new ArrayList&lt;&gt;());</span>
+<span class="nc bnc" id="L497" title="All 2 branches missed.">                for (CodegenProperty prop : allVars) {</span>
+<span class="nc" id="L498">                    compositeProperties.add(prop.getName());</span>
+<span class="nc" id="L499">                }</span>
+<span class="nc" id="L500">            }</span>
+            // dart classes declare selfOnlyProperties as direct members (they exist in
+            // &quot;vars&quot;)
+            // for pure models, this will equal vars
+<span class="nc" id="L504">            Map&lt;String, CodegenProperty&gt; selfOnlyProperties = new HashMap&lt;&gt;();</span>
+
+            // ancestorOnlyProperties are properties defined by all ancestors
+            // NOTE: oneOf,anyOf are NOT considered ancestors
+            // since a child in dart must implement ALL OF the parent (using implements)
+<span class="nc" id="L509">            Map&lt;String, CodegenProperty&gt; ancestorOnlyProperties = new HashMap&lt;&gt;();</span>
+
+            // combines both selfOnlyProperties and ancestorOnlyProperties
+            // this will be used by the custom serializer as &quot;x-handled-vars&quot; and
+            // &quot;x-has-handled-vars&quot;
+<span class="nc" id="L514">            Map&lt;String, CodegenProperty&gt; selfAndAncestorOnlyProperties = new HashMap&lt;&gt;();</span>
+
+            // STEP 1: calculating selfOnlyProperties
+            // get all vars of all ancestors and add them to ancestorPropNames
+            // Set&lt;String&gt; _ancestorPropNames = new HashSet&lt;&gt;();
+<span class="nc bnc" id="L519" title="All 2 branches missed.">            for (String ancestorKey : allAncestors) {</span>
+<span class="nc" id="L520">                CodegenModel ancestorCM = allModels.get(ancestorKey);</span>
+<span class="nc bnc" id="L521" title="All 2 branches missed.">                for (CodegenProperty prop : ancestorCM.getVars()) {</span>
+<span class="nc" id="L522">                    ancestorOnlyProperties.put(prop.getName(), prop);</span>
+<span class="nc" id="L523">                }</span>
+<span class="nc" id="L524">            }</span>
+<span class="nc bnc" id="L525" title="All 2 branches missed.">            for (CodegenProperty p : cm.getVars()) {</span>
+<span class="nc" id="L526">                p.isInherited = ancestorOnlyProperties.containsKey(p.getName());</span>
+<span class="nc bnc" id="L527" title="All 4 branches missed.">                if (!p.isInherited &amp;&amp; !compositeProperties.contains(p.getName())) {</span>
+<span class="nc" id="L528">                    selfOnlyProperties.put(p.getName(), p);</span>
+                }
+<span class="nc" id="L530">            }</span>
+<span class="nc" id="L531">            selfAndAncestorOnlyProperties.putAll(selfOnlyProperties);</span>
+<span class="nc" id="L532">            selfAndAncestorOnlyProperties.putAll(ancestorOnlyProperties);</span>
+
+<span class="nc" id="L534">            cm.vendorExtensions.put(kSelfOnlyProps, new ArrayList&lt;&gt;(selfOnlyProperties.values()));</span>
+<span class="nc bnc" id="L535" title="All 2 branches missed.">            cm.vendorExtensions.put(kHasSelfOnlyProps, !selfOnlyProperties.isEmpty());</span>
+<span class="nc" id="L536">            cm.vendorExtensions.put(kAncestorOnlyProps, new ArrayList&lt;&gt;(ancestorOnlyProperties.values()));</span>
+<span class="nc bnc" id="L537" title="All 2 branches missed.">            cm.vendorExtensions.put(kHasAncestorOnlyProps, !ancestorOnlyProperties.isEmpty());</span>
+<span class="nc" id="L538">            cm.vendorExtensions.put(kSelfAndAncestorOnlyProps, new ArrayList&lt;&gt;(selfAndAncestorOnlyProperties.values()));</span>
+<span class="nc bnc" id="L539" title="All 2 branches missed.">            cm.vendorExtensions.put(kHasSelfAndAncestorOnlyProps, !selfAndAncestorOnlyProperties.isEmpty());</span>
+            // fixes missing imports
+<span class="nc" id="L541">            Set&lt;String&gt; interfaceImports = new HashSet&lt;String&gt;();</span>
+<span class="nc" id="L542">            interfaceImports.addAll(cm.allOf);</span>
+<span class="nc" id="L543">            interfaceImports.addAll(cm.oneOf);</span>
+<span class="nc" id="L544">            interfaceImports.addAll(cm.anyOf);</span>
+<span class="nc" id="L545">            cm.imports.addAll(rewriteImports(interfaceImports, true));</span>
+<span class="nc" id="L546">        }</span>
+<span class="nc" id="L547">    }</span>
+
+    /// override the default behavior of createDiscriminator
+    /// to remove extra mappings added as a side effect of setLegacyDiscriminatorBehavior(false)
+    /// this ensures 1-1 schema mapping instead of 1-many
+    @Override
+    protected CodegenDiscriminator createDiscriminator(String schemaName, Schema schema) {
+<span class="nc" id="L554">        CodegenDiscriminator sub = super.createDiscriminator(schemaName, schema);</span>
+<span class="nc" id="L555">        Discriminator originalDiscriminator = schema.getDiscriminator();</span>
+<span class="nc bnc" id="L556" title="All 2 branches missed.">        if (originalDiscriminator!=null) {</span>
+<span class="nc" id="L557">            Map&lt;String,String&gt; originalMapping = originalDiscriminator.getMapping();</span>
+<span class="nc bnc" id="L558" title="All 4 branches missed.">            if (originalMapping != null &amp;&amp; !originalMapping.isEmpty()) {</span>
+                //we already have a discriminator mapping, remove everything else
+<span class="nc bnc" id="L560" title="All 2 branches missed.">                for (MappedModel currentMappings : new HashSet&lt;&gt;(sub.getMappedModels())) {</span>
+<span class="nc bnc" id="L561" title="All 2 branches missed.">                    if (originalMapping.containsKey(currentMappings.getMappingName())) {</span>
+                        //all good
+                    } else {
+<span class="nc" id="L564">                        sub.getMapping().remove(currentMappings.getMappingName());</span>
+<span class="nc" id="L565">                        sub.getMappedModels().remove(currentMappings);</span>
+                    }
+<span class="nc" id="L567">                }</span>
+            }
+        }
+<span class="nc" id="L570">        return sub;</span>
+    }
+
+    @Override
+    public Map&lt;String, ModelsMap&gt; postProcessAllModels(Map&lt;String, ModelsMap&gt; objs) {
+<span class="nc" id="L575">        objs = super.postProcessAllModels(objs);</span>
+<span class="nc bnc" id="L576" title="All 2 branches missed.">        if (SERIALIZATION_LIBRARY_BUILT_VALUE.equals(library)) {</span>
+<span class="nc" id="L577">            adaptToDartInheritance(objs);</span>
+<span class="nc" id="L578">            syncRootTypesWithInnerVars(objs);</span>
+        }
+
+        // loop through models to update the imports
+<span class="nc bnc" id="L582" title="All 2 branches missed.">        for (ModelsMap entry : objs.values()) {</span>
+<span class="nc bnc" id="L583" title="All 2 branches missed.">            for (ModelMap mo : entry.getModels()) {</span>
+<span class="nc" id="L584">                CodegenModel cm = mo.getModel();</span>
+<span class="nc" id="L585">                cm.imports = rewriteImports(cm.imports, true);</span>
+<span class="nc bnc" id="L586" title="All 2 branches missed.">                cm.vendorExtensions.put(&quot;x-has-vars&quot;, !cm.vars.isEmpty());</span>
+<span class="nc" id="L587">            }</span>
+<span class="nc" id="L588">        }</span>
+
+<span class="nc" id="L590">        return objs;</span>
+    }
+
+    @Override
+    public void postProcessModelProperty(CodegenModel model, CodegenProperty property) {
+<span class="nc" id="L595">        super.postProcessModelProperty(model, property);</span>
+<span class="nc bnc" id="L596" title="All 2 branches missed.">        if (SERIALIZATION_LIBRARY_BUILT_VALUE.equals(library)) {</span>
+<span class="nc bnc" id="L597" title="All 4 branches missed.">            if (property.isEnum &amp;&amp; property.getComposedSchemas() == null) {</span>
+                // enums are generated with built_value and make use of BuiltSet
+<span class="nc" id="L599">                model.imports.add(&quot;BuiltSet&quot;);</span>
+            }
+
+<span class="nc bnc" id="L602" title="All 2 branches missed.">            if (property.isContainer) {</span>
+                // Figure out if there are any container type additionalProperties
+                // that need a custom serializer builder factory added.
+<span class="nc" id="L605">                final CodegenProperty items = property.items;</span>
+<span class="nc bnc" id="L606" title="All 2 branches missed.">                if (items.getAdditionalProperties() != null) {</span>
+<span class="nc" id="L607">                    addBuiltValueSerializer(new BuiltValueSerializer(</span>
+                            items.isArray,
+<span class="nc" id="L609">                            items.getUniqueItems(),</span>
+                            items.isMap,
+                            items.items.isNullable,
+<span class="nc" id="L612">                            items.getAdditionalProperties().dataType</span>
+                    ));
+                }
+            }
+        }
+<span class="nc" id="L617">    }</span>
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L621">        super.postProcessOperationsWithModels(objs, allModels);</span>
+<span class="nc" id="L622">        OperationMap operations = objs.getOperations();</span>
+<span class="nc" id="L623">        List&lt;CodegenOperation&gt; operationList = operations.getOperation();</span>
+
+<span class="nc" id="L625">        Set&lt;String&gt; resultImports = new HashSet&lt;&gt;();</span>
+
+<span class="nc bnc" id="L627" title="All 2 branches missed.">        for (CodegenOperation op : operationList) {</span>
+<span class="nc bnc" id="L628" title="All 2 branches missed.">            for (CodegenParameter param : op.allParams) {</span>
+<span class="nc bnc" id="L629" title="All 10 branches missed.">                if (((op.isMultipart &amp;&amp; param.isFormParam) || param.isBodyParam) &amp;&amp; (param.isBinary || param.isFile)) {</span>
+<span class="nc" id="L630">                    param.dataType = param.dataType.replace(&quot;Uint8List&quot;, &quot;MultipartFile&quot;);</span>
+<span class="nc" id="L631">                    param.baseType = param.baseType.replace(&quot;Uint8List&quot;, &quot;MultipartFile&quot;);</span>
+<span class="nc" id="L632">                    op.imports.add(&quot;MultipartFile&quot;);</span>
+
+<span class="nc bnc" id="L634" title="All 2 branches missed.">                    if (SERIALIZATION_LIBRARY_BUILT_VALUE.equals(library)) {</span>
+<span class="nc" id="L635">                        boolean skipFormModel = Boolean.parseBoolean(GlobalSettings.getProperty(CodegenConstants.SKIP_FORM_MODEL, &quot;true&quot;));</span>
+<span class="nc bnc" id="L636" title="All 6 branches missed.">                        if (param.isFormParam &amp;&amp; param.isContainer &amp;&amp; !skipFormModel) {</span>
+                            // Because of skipFormModel=false, there is a model class generated which has
+                            // &quot;BuiltList&lt;Uint8List&gt;&quot; as property and it requires the correct
+                            // serializer imports to be added in order to compile.
+<span class="nc" id="L640">                            addBuiltValueSerializerImport(&quot;Uint8List&quot;);</span>
+                        }
+                    }
+                }
+<span class="nc" id="L644">            }</span>
+
+            // The MultipartFile handling above changes the type of some parameters from
+            // `UInt8List`, the default for files, to `MultipartFile`.
+            //
+            // The following block removes the required import for Uint8List if it is no
+            // longer in use.
+<span class="nc bnc" id="L651" title="All 2 branches missed.">            if (op.allParams.stream().noneMatch(param -&gt; param.dataType.equals(&quot;Uint8List&quot;))</span>
+<span class="nc bnc" id="L652" title="All 2 branches missed.">                    &amp;&amp; op.responses.stream().filter(response -&gt; response.dataType != null)</span>
+<span class="nc bnc" id="L653" title="All 2 branches missed.">                            .noneMatch(response -&gt; response.dataType.equals(&quot;Uint8List&quot;))) {</span>
+                // Remove unused imports after processing
+<span class="nc" id="L655">                op.imports.remove(&quot;Uint8List&quot;);</span>
+            }
+
+<span class="nc" id="L658">            resultImports.addAll(rewriteImports(op.imports, false));</span>
+
+<span class="nc bnc" id="L660" title="All 2 branches missed.">            if (SERIALIZATION_LIBRARY_BUILT_VALUE.equals(library)) {</span>
+
+<span class="nc bnc" id="L662" title="All 2 branches missed.">                for (CodegenParameter param : op.allParams) {</span>
+                    // Generate serializer factories for all container type parameters.
+                    // But skip binary and file parameters, JSON serializers don't make sense there.
+<span class="nc bnc" id="L665" title="All 6 branches missed.">                    if (param.isContainer &amp;&amp; !(param.isBinary || param.isFile)) {</span>
+<span class="nc" id="L666">                        addBuiltValueSerializer(new BuiltValueSerializer(</span>
+                                param.isArray,
+                                param.uniqueItems,
+                                param.isMap,
+                                param.items.isNullable,
+                                param.baseType
+                        ));
+                    }
+<span class="nc" id="L674">                }</span>
+            }
+
+<span class="nc bnc" id="L677" title="All 8 branches missed.">            if (SERIALIZATION_LIBRARY_BUILT_VALUE.equals(library) &amp;&amp; (op.getHasFormParams() || op.getHasQueryParams() || op.getHasPathParams())) {</span>
+<span class="nc" id="L678">                resultImports.add(&quot;package:&quot; + pubName + &quot;/&quot; + sourceFolder + &quot;/api_util.dart&quot;);</span>
+            }
+
+<span class="nc bnc" id="L681" title="All 6 branches missed.">            if (op.returnContainer != null &amp;&amp; !(op.isResponseBinary || op.isResponseFile)) {</span>
+<span class="nc" id="L682">                addBuiltValueSerializer(new BuiltValueSerializer(</span>
+<span class="nc bnc" id="L683" title="All 4 branches missed.">                        Objects.equals(&quot;array&quot;, op.returnContainer) || Objects.equals(&quot;set&quot;, op.returnContainer),</span>
+                        op.uniqueItems,
+<span class="nc" id="L685">                        Objects.equals(&quot;map&quot;, op.returnContainer),</span>
+                        false,
+                        op.returnBaseType
+                ));
+            }
+<span class="nc" id="L690">        }</span>
+        // for some reason &quot;import&quot; structure is changed ..
+<span class="nc" id="L692">        objs.put(&quot;imports&quot;, resultImports.stream().sorted().collect(Collectors.toList()));</span>
+
+<span class="nc" id="L694">        return objs;</span>
+    }
+
+    private void addBuiltValueSerializerImport(String type) {
+<span class="nc" id="L698">        additionalProperties.compute(&quot;builtValueSerializerImports&quot;, (k, v) -&gt; {</span>
+<span class="nc bnc" id="L699" title="All 2 branches missed.">            Set&lt;String&gt; imports = v == null ? Sets.newHashSet() : ((Set&lt;String&gt;) v);</span>
+<span class="nc" id="L700">            imports.addAll(rewriteImports(Sets.newHashSet(type), true));</span>
+<span class="nc" id="L701">            return imports;</span>
+        });
+<span class="nc" id="L703">    }</span>
+
+    /**
+     * Adds the serializer to the global list of custom built_value serializers.
+     * @param serializer
+     */
+    private void addBuiltValueSerializer(BuiltValueSerializer serializer) {
+<span class="nc" id="L710">        additionalProperties.compute(&quot;builtValueSerializers&quot;, (k, v) -&gt; {</span>
+<span class="nc bnc" id="L711" title="All 2 branches missed.">            Set&lt;BuiltValueSerializer&gt; serializers = v == null ? Sets.newHashSet() : ((Set&lt;BuiltValueSerializer&gt;) v);</span>
+<span class="nc" id="L712">            serializers.add(serializer);</span>
+<span class="nc" id="L713">            return serializers;</span>
+        });
+<span class="nc" id="L715">    }</span>
+
+    private Set&lt;String&gt; rewriteImports(Set&lt;String&gt; originalImports, boolean isModel) {
+<span class="nc" id="L718">        Set&lt;String&gt; resultImports = Sets.newHashSet();</span>
+<span class="nc bnc" id="L719" title="All 2 branches missed.">        for (String modelImport : originalImports) {</span>
+<span class="nc bnc" id="L720" title="All 2 branches missed.">            if (modelImport.startsWith(&quot;BuiltList&quot;, 0)) {</span>
+<span class="nc" id="L721">                modelImport = &quot;BuiltList&quot;;</span>
+<span class="nc bnc" id="L722" title="All 2 branches missed.">            } else if (modelImport.startsWith(&quot;BuiltSet&quot;, 0)) {</span>
+<span class="nc" id="L723">                modelImport = &quot;BuiltSet&quot;;</span>
+<span class="nc bnc" id="L724" title="All 2 branches missed.">            } else if (modelImport.startsWith(&quot;BuiltMap&quot;, 0)) {</span>
+<span class="nc" id="L725">                modelImport = &quot;BuiltMap&quot;;</span>
+            }
+
+<span class="nc bnc" id="L728" title="All 2 branches missed.">            if (imports.containsKey(modelImport)) {</span>
+<span class="nc" id="L729">                String i = imports.get(modelImport);</span>
+<span class="nc bnc" id="L730" title="All 4 branches missed.">                if (Objects.equals(i, DIO_IMPORT) &amp;&amp; !isModel) {</span>
+                    // Don't add imports to operations that are already imported
+<span class="nc" id="L732">                    continue;</span>
+                }
+<span class="nc" id="L734">                resultImports.add(i);</span>
+<span class="nc bnc" id="L735" title="All 2 branches missed.">            } else if (importMapping().containsKey(modelImport)) {</span>
+<span class="nc" id="L736">                resultImports.add(importMapping().get(modelImport));</span>
+<span class="nc bnc" id="L737" title="All 2 branches missed.">            } else if (modelImport.startsWith(&quot;dart:&quot;)) { // import dart:* directly</span>
+<span class="nc" id="L738">                resultImports.add(modelImport);</span>
+<span class="nc bnc" id="L739" title="All 2 branches missed.">            } else if (modelImport.startsWith(&quot;package:&quot;)) { // e.g. package:openapi/src/model/child.dart</span>
+<span class="nc" id="L740">                resultImports.add(modelImport);</span>
+            } else {
+<span class="nc" id="L742">                resultImports.add(&quot;package:&quot; + pubName + &quot;/&quot; + sourceFolder + &quot;/&quot; + modelPackage() + &quot;/&quot; + underscore(modelImport) + &quot;.dart&quot;);</span>
+            }
+<span class="nc" id="L744">        }</span>
+<span class="nc" id="L745">        return resultImports;</span>
+    }
+
+    static class BuiltValueSerializer {
+
+        final boolean isArray;
+
+        final boolean uniqueItems;
+
+        final boolean isMap;
+
+        final boolean isNullable;
+
+        final String dataType;
+
+<span class="nc" id="L760">        private BuiltValueSerializer(boolean isArray, boolean uniqueItems, boolean isMap, boolean isNullable, String dataType) {</span>
+<span class="nc" id="L761">            this.isArray = isArray;</span>
+<span class="nc" id="L762">            this.uniqueItems = uniqueItems;</span>
+<span class="nc" id="L763">            this.isMap = isMap;</span>
+<span class="nc" id="L764">            this.isNullable = isNullable;</span>
+<span class="nc" id="L765">            this.dataType = dataType;</span>
+<span class="nc" id="L766">        }</span>
+
+        public boolean isArray() {
+<span class="nc" id="L769">            return isArray;</span>
+        }
+
+        public boolean isUniqueItems() {
+<span class="nc" id="L773">            return uniqueItems;</span>
+        }
+
+        public boolean isMap() {
+<span class="nc" id="L777">            return isMap;</span>
+        }
+
+        public boolean isNullable() {
+<span class="nc" id="L781">            return isNullable;</span>
+        }
+
+        public String getDataType() {
+<span class="nc" id="L785">            return dataType;</span>
+        }
+
+        @Override
+        public boolean equals(Object o) {
+<span class="nc bnc" id="L790" title="All 2 branches missed.">            if (this == o) return true;</span>
+<span class="nc bnc" id="L791" title="All 4 branches missed.">            if (o == null || getClass() != o.getClass()) return false;</span>
+<span class="nc" id="L792">            BuiltValueSerializer that = (BuiltValueSerializer) o;</span>
+<span class="nc bnc" id="L793" title="All 10 branches missed.">            return isArray == that.isArray &amp;&amp; uniqueItems == that.uniqueItems &amp;&amp; isMap == that.isMap &amp;&amp; isNullable == that.isNullable &amp;&amp; dataType.equals(that.dataType);</span>
+        }
+
+        @Override
+        public int hashCode() {
+<span class="nc" id="L798">            return Objects.hash(isArray, uniqueItems, isMap, isNullable, dataType);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SerializerUtils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.serializer</a> &gt; <span class="el_source">SerializerUtils.java</span></div><h1>SerializerUtils.java</h1><pre class="source lang-java linenums">package org.openapitools.codegen.serializer;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.Yaml;
+import io.swagger.v3.oas.models.OpenAPI;
+import org.openapitools.codegen.config.GlobalSettings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+<span class="nc" id="L16">public class SerializerUtils {</span>
+<span class="nc" id="L17">    private static final Logger LOGGER = LoggerFactory.getLogger(SerializerUtils.class);</span>
+    private static final String YAML_MINIMIZE_QUOTES_PROPERTY = &quot;org.openapitools.codegen.utils.yaml.minimize.quotes&quot;;
+<span class="nc" id="L19">    private static final boolean minimizeYamlQuotes = Boolean.parseBoolean(GlobalSettings.getProperty(YAML_MINIMIZE_QUOTES_PROPERTY, &quot;true&quot;));</span>
+
+    public static String toYamlString(OpenAPI openAPI) {
+<span class="nc bnc" id="L22" title="All 2 branches missed.">        if (openAPI == null) {</span>
+<span class="nc" id="L23">            return null;</span>
+        }
+<span class="nc" id="L25">        SimpleModule module = createModule();</span>
+        try {
+<span class="nc" id="L27">            ObjectMapper yamlMapper = Yaml.mapper().copy();</span>
+            // there is an unfortunate YAML condition where user inputs should be treated as strings (e.g. &quot;1234_1234&quot;), but in yaml this is a valid number and
+            // removing quotes forcibly by default means we are potentially doing a data conversion resulting in an unexpected change to the user's YAML outputs.
+            // We may allow for property-based enable/disable, retaining the default of enabled for backward compatibility.
+<span class="nc bnc" id="L31" title="All 2 branches missed.">            if (minimizeYamlQuotes) {</span>
+<span class="nc" id="L32">                ((YAMLFactory) yamlMapper.getFactory()).enable(YAMLGenerator.Feature.MINIMIZE_QUOTES);</span>
+            } else {
+<span class="nc" id="L34">                ((YAMLFactory) yamlMapper.getFactory()).disable(YAMLGenerator.Feature.MINIMIZE_QUOTES);</span>
+            }
+<span class="nc" id="L36">            return yamlMapper.registerModule(module)</span>
+<span class="nc" id="L37">                    .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)</span>
+<span class="nc" id="L38">                    .writeValueAsString(openAPI)</span>
+<span class="nc" id="L39">                    .replace(&quot;\r\n&quot;, &quot;\n&quot;);</span>
+<span class="nc" id="L40">        } catch (JsonProcessingException e) {</span>
+<span class="nc" id="L41">            LOGGER.warn(&quot;Can not create yaml content&quot;, e);</span>
+        }
+<span class="nc" id="L43">        return null;</span>
+    }
+
+    public static String toJsonString(OpenAPI openAPI) {
+<span class="nc bnc" id="L47" title="All 2 branches missed.">        if (openAPI == null) {</span>
+<span class="nc" id="L48">            return null;</span>
+        }
+
+<span class="nc" id="L51">        SimpleModule module = createModule();</span>
+        try {
+<span class="nc" id="L53">            return Json.mapper()</span>
+<span class="nc" id="L54">                    .copy()</span>
+<span class="nc" id="L55">                    .registerModule(module)</span>
+<span class="nc" id="L56">                    .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)</span>
+<span class="nc" id="L57">                    .writerWithDefaultPrettyPrinter()</span>
+<span class="nc" id="L58">                    .writeValueAsString(openAPI)</span>
+<span class="nc" id="L59">                    .replace(&quot;\r\n&quot;, &quot;\n&quot;);</span>
+<span class="nc" id="L60">        } catch (JsonProcessingException e) {</span>
+<span class="nc" id="L61">            LOGGER.warn(&quot;Can not create json content&quot;, e);</span>
+        }
+<span class="nc" id="L63">        return null;</span>
+    }
+
+    private static SimpleModule createModule() {
+<span class="nc" id="L67">        SimpleModule module = new SimpleModule(&quot;OpenAPIModule&quot;);</span>
+<span class="nc" id="L68">        module.addSerializer(OpenAPI.class, new OpenAPISerializer());</span>
+<span class="nc" id="L69">        return module;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,847 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ScalaHttp4sServerCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">ScalaHttp4sServerCodegen.java</span></div><h1>ScalaHttp4sServerCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Schema;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.meta.features.*;
+import org.openapitools.codegen.model.*;
+import org.openapitools.codegen.utils.ModelUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.*;
+import java.util.stream.Collectors;
+
+public class ScalaHttp4sServerCodegen extends DefaultCodegen implements CodegenConfig {
+<span class="nc" id="L33">    private final Logger LOGGER = LoggerFactory.getLogger(ScalaHttp4sServerCodegen.class);</span>
+<span class="nc" id="L34">    protected String artifactId = &quot;http4s-server&quot;;</span>
+<span class="nc" id="L35">    protected String artifactVersion = &quot;1.0.0&quot;;</span>
+<span class="nc" id="L36">    protected String sourceFolder = &quot;scala&quot;;</span>
+<span class="nc" id="L37">    protected String sourceSubFolder = &quot;main&quot;;</span>
+<span class="nc" id="L38">    private String packageName = &quot;org.openapitools&quot;;</span>
+
+    public static final String EXCLUDE_SBT = &quot;excludeSbt&quot;; // generate as whole project
+    public static final String SOURCE_SUBFOLDER = &quot;sourceSubfolder&quot;; // generate as whole project
+
+    public ScalaHttp4sServerCodegen() {
+<span class="nc" id="L44">        super();</span>
+
+<span class="nc" id="L46">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L47">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON, WireFormatFeature.XML, WireFormatFeature.Custom))</span>
+<span class="nc" id="L48">                .securityFeatures(EnumSet.noneOf(SecurityFeature.class))</span>
+<span class="nc" id="L49">                .excludeGlobalFeatures(</span>
+                        GlobalFeature.XMLStructureDefinitions,
+                        GlobalFeature.Callbacks,
+                        GlobalFeature.LinkObjects,
+                        GlobalFeature.ParameterStyling
+                )
+<span class="nc" id="L55">                .excludeSchemaSupportFeatures(</span>
+                        SchemaSupportFeature.Polymorphism
+                )
+<span class="nc" id="L58">                .excludeParameterFeatures(</span>
+                        ParameterFeature.Cookie
+                )
+        );
+
+<span class="nc" id="L63">        embeddedTemplateDir = templateDir = &quot;scala-http4s-server&quot;;</span>
+
+<span class="nc" id="L65">        apiPackage = packageName + &quot;.apis&quot;;</span>
+<span class="nc" id="L66">        modelPackage = packageName + &quot;.models&quot;;</span>
+<span class="nc" id="L67">        useOneOfInterfaces = true;</span>
+<span class="nc" id="L68">        supportsMultipleInheritance = true;</span>
+<span class="nc" id="L69">        supportsInheritance = true;</span>
+<span class="nc" id="L70">        supportsMixins = true;</span>
+<span class="nc" id="L71">        addOneOfInterfaceImports = true;</span>
+
+
+<span class="nc" id="L74">        setReservedWordsLowerCase(</span>
+<span class="nc" id="L75">                Arrays.asList(</span>
+                        // Scala
+                        &quot;abstract&quot;, &quot;case&quot;, &quot;catch&quot;, &quot;class&quot;, &quot;def&quot;,
+                        &quot;do&quot;, &quot;else&quot;, &quot;extends&quot;, &quot;false&quot;, &quot;final&quot;,
+                        &quot;finally&quot;, &quot;for&quot;, &quot;forSome&quot;, &quot;if&quot;, &quot;implicit&quot;,
+                        &quot;import&quot;, &quot;lazy&quot;, &quot;match&quot;, &quot;new&quot;, &quot;null&quot;,
+                        &quot;object&quot;, &quot;override&quot;, &quot;package&quot;, &quot;private&quot;, &quot;protected&quot;,
+                        &quot;return&quot;, &quot;sealed&quot;, &quot;super&quot;, &quot;this&quot;, &quot;throw&quot;,
+                        &quot;trait&quot;, &quot;try&quot;, &quot;true&quot;, &quot;type&quot;, &quot;val&quot;,
+                        &quot;var&quot;, &quot;while&quot;, &quot;with&quot;, &quot;yield&quot;,
+                        // Scala-interop languages keywords
+                        &quot;abstract&quot;, &quot;continue&quot;, &quot;switch&quot;, &quot;assert&quot;,
+                        &quot;default&quot;, &quot;synchronized&quot;, &quot;goto&quot;,
+                        &quot;break&quot;, &quot;double&quot;, &quot;implements&quot;, &quot;byte&quot;,
+                        &quot;public&quot;, &quot;throws&quot;, &quot;enum&quot;, &quot;instanceof&quot;, &quot;transient&quot;,
+                        &quot;int&quot;, &quot;short&quot;, &quot;char&quot;, &quot;interface&quot;, &quot;static&quot;,
+                        &quot;void&quot;, &quot;finally&quot;, &quot;long&quot;, &quot;strictfp&quot;, &quot;volatile&quot;, &quot;const&quot;, &quot;float&quot;,
+                        &quot;native&quot;)
+        );
+
+<span class="nc" id="L95">        defaultIncludes = new HashSet&lt;&gt;(</span>
+<span class="nc" id="L96">                Arrays.asList(&quot;double&quot;,</span>
+                        &quot;Int&quot;,
+                        &quot;Long&quot;,
+                        &quot;Float&quot;,
+                        &quot;Double&quot;,
+                        &quot;char&quot;,
+                        &quot;float&quot;,
+                        &quot;String&quot;,
+                        &quot;boolean&quot;,
+                        &quot;Boolean&quot;,
+                        &quot;Double&quot;,
+                        &quot;Integer&quot;,
+                        &quot;Long&quot;,
+                        &quot;Float&quot;,
+                        &quot;List&quot;,
+                        &quot;Set&quot;,
+                        &quot;Map&quot;)
+        );
+
+<span class="nc" id="L115">        typeMapping = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L116">        typeMapping.put(&quot;string&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L117">        typeMapping.put(&quot;boolean&quot;, &quot;Boolean&quot;);</span>
+<span class="nc" id="L118">        typeMapping.put(&quot;integer&quot;, &quot;Int&quot;);</span>
+<span class="nc" id="L119">        typeMapping.put(&quot;long&quot;, &quot;Long&quot;);</span>
+<span class="nc" id="L120">        typeMapping.put(&quot;float&quot;, &quot;Float&quot;);</span>
+<span class="nc" id="L121">        typeMapping.put(&quot;double&quot;, &quot;Double&quot;);</span>
+<span class="nc" id="L122">        typeMapping.put(&quot;number&quot;, &quot;BigDecimal&quot;);</span>
+<span class="nc" id="L123">        typeMapping.put(&quot;decimal&quot;, &quot;BigDecimal&quot;);</span>
+<span class="nc" id="L124">        typeMapping.put(&quot;date-time&quot;, &quot;ZonedDateTime&quot;);</span>
+<span class="nc" id="L125">        typeMapping.put(&quot;offset-date-time&quot;, &quot;OffsetDateTime&quot;);</span>
+<span class="nc" id="L126">        typeMapping.put(&quot;date&quot;, &quot;LocalDate&quot;);</span>
+<span class="nc" id="L127">        typeMapping.put(&quot;file&quot;, &quot;File&quot;);</span>
+<span class="nc" id="L128">        typeMapping.put(&quot;array&quot;, &quot;List&quot;);</span>
+<span class="nc" id="L129">        typeMapping.put(&quot;list&quot;, &quot;List&quot;);</span>
+<span class="nc" id="L130">        typeMapping.put(&quot;map&quot;, &quot;Map&quot;);</span>
+<span class="nc" id="L131">        typeMapping.put(&quot;object&quot;, &quot;Object&quot;);</span>
+<span class="nc" id="L132">        typeMapping.put(&quot;binary&quot;, &quot;Array[Byte]&quot;);</span>
+<span class="nc" id="L133">        typeMapping.put(&quot;Date&quot;, &quot;LocalDate&quot;);</span>
+<span class="nc" id="L134">        typeMapping.put(&quot;DateTime&quot;, &quot;ZonedDateTime&quot;);</span>
+<span class="nc" id="L135">        typeMapping.put(&quot;OffsetDateTime&quot;, &quot;OffsetDateTime&quot;);</span>
+<span class="nc" id="L136">        typeMapping.put(&quot;uuid&quot;, &quot;UUID&quot;);</span>
+
+<span class="nc" id="L138">        additionalProperties.put(&quot;modelPackage&quot;, modelPackage());</span>
+<span class="nc" id="L139">        additionalProperties.put(&quot;apiPackage&quot;, apiPackage());</span>
+<span class="nc" id="L140">        additionalProperties.put(&quot;infoUrl&quot;, &quot;http://org.openapitools&quot;);</span>
+<span class="nc" id="L141">        additionalProperties.put(&quot;infoEmail&quot;, &quot;team@openapitools.org&quot;);</span>
+<span class="nc" id="L142">        additionalProperties.put(&quot;licenseInfo&quot;, &quot;Apache 2.0&quot;);</span>
+<span class="nc" id="L143">        additionalProperties.put(&quot;licenseUrl&quot;, &quot;http://apache.org/licenses/LICENSE-2.0.html&quot;);</span>
+
+
+<span class="nc" id="L146">        languageSpecificPrimitives = new HashSet&lt;&gt;(</span>
+<span class="nc" id="L147">                Arrays.asList(</span>
+                        &quot;String&quot;,
+                        &quot;Boolean&quot;,
+                        &quot;Double&quot;,
+                        &quot;Int&quot;,
+                        &quot;Integer&quot;,
+                        &quot;Long&quot;,
+                        &quot;Float&quot;,
+                        &quot;Any&quot;,
+                        &quot;AnyVal&quot;,
+                        &quot;AnyRef&quot;,
+                        &quot;Object&quot;,
+                        &quot;BigDecimal&quot;
+                )
+        );
+<span class="nc" id="L162">        instantiationTypes.put(&quot;array&quot;, &quot;ArrayList&quot;);</span>
+<span class="nc" id="L163">        instantiationTypes.put(&quot;map&quot;, &quot;HashMap&quot;);</span>
+
+<span class="nc" id="L165">        importMapping = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L166">        importMapping.put(&quot;UUID&quot;, &quot;java.util.UUID&quot;);</span>
+<span class="nc" id="L167">        importMapping.put(&quot;URI&quot;, &quot;java.net.URI&quot;);</span>
+<span class="nc" id="L168">        importMapping.put(&quot;File&quot;, &quot;java.io.File&quot;);</span>
+<span class="nc" id="L169">        importMapping.put(&quot;Date&quot;, &quot;java.util.Date&quot;);</span>
+<span class="nc" id="L170">        importMapping.put(&quot;Timestamp&quot;, &quot;java.sql.Timestamp&quot;);</span>
+<span class="nc" id="L171">        importMapping.put(&quot;Map&quot;, &quot;scala.collection.immutable.Map&quot;);</span>
+<span class="nc" id="L172">        importMapping.put(&quot;HashMap&quot;, &quot;scala.collection.immutable.HashMap&quot;);</span>
+<span class="nc" id="L173">        importMapping.put(&quot;Seq&quot;, &quot;scala.collection.immutable.Seq&quot;);</span>
+<span class="nc" id="L174">        importMapping.put(&quot;ArrayBuffer&quot;, &quot;scala.collection.mutable.ArrayBuffer&quot;);</span>
+<span class="nc" id="L175">        importMapping.put(&quot;DateTime&quot;, &quot;java.time.LocalDateTime&quot;);</span>
+<span class="nc" id="L176">        importMapping.put(&quot;LocalDateTime&quot;, &quot;java.time.LocalDateTime&quot;);</span>
+<span class="nc" id="L177">        importMapping.put(&quot;LocalDate&quot;, &quot;java.time.LocalDate&quot;);</span>
+<span class="nc" id="L178">        importMapping.put(&quot;LocalTime&quot;, &quot;java.time.LocalTime&quot;);</span>
+<span class="nc" id="L179">        importMapping.put(&quot;ZonedDateTime&quot;, &quot;java.time.ZonedDateTime&quot;);</span>
+<span class="nc" id="L180">        importMapping.put(&quot;OffsetDateTime&quot;, &quot;java.time.OffsetDateTime&quot;);</span>
+        //refined
+<span class="nc" id="L182">        importMapping.put(&quot;Refined&quot;, &quot;eu.timepit.refined.api.Refined&quot;);</span>
+<span class="nc" id="L183">        importMapping.put(&quot;And&quot;, &quot;eu.timepit.refined.boolean.And&quot;);</span>
+<span class="nc" id="L184">        importMapping.put(&quot;MinSize&quot;, &quot;eu.timepit.refined.collection.MinSize&quot;);</span>
+<span class="nc" id="L185">        importMapping.put(&quot;MaxSize&quot;, &quot;eu.timepit.refined.collection.MaxSize&quot;);</span>
+<span class="nc" id="L186">        importMapping.put(&quot;MatchesRegex&quot;, &quot;eu.timepit.refined.string.MatchesRegex&quot;);</span>
+<span class="nc" id="L187">        importMapping.put(&quot;Greater&quot;, &quot;eu.timepit.refined.numeric.Greater&quot;);</span>
+<span class="nc" id="L188">        importMapping.put(&quot;GreaterEqual&quot;, &quot;eu.timepit.refined.numeric.GreaterEqual&quot;);</span>
+<span class="nc" id="L189">        importMapping.put(&quot;Less&quot;, &quot;eu.timepit.refined.numeric.Less&quot;);</span>
+<span class="nc" id="L190">        importMapping.put(&quot;LessEqual&quot;, &quot;eu.timepit.refined.numeric.LessEqual&quot;);</span>
+
+
+<span class="nc" id="L193">        cliOptions.add(new CliOption(EXCLUDE_SBT, &quot;exclude sbt from generation&quot;));</span>
+<span class="nc" id="L194">        cliOptions.add(new CliOption(SOURCE_SUBFOLDER, &quot;name of subfolder, for example to generate code in src/scala/generated&quot;));</span>
+
+<span class="nc" id="L196">        inlineSchemaOption.put(&quot;SKIP_SCHEMA_REUSE&quot;, &quot;true&quot;);</span>
+<span class="nc" id="L197">        inlineSchemaOption.put(&quot;REFACTOR_ALLOF_INLINE_SCHEMAS&quot;, &quot;true&quot;);</span>
+<span class="nc" id="L198">    }</span>
+
+<span class="nc" id="L200">    private final static Map&lt;String, String&gt; locationStatusToResponse = new HashMap&lt;&gt;();</span>
+
+    static {
+<span class="nc" id="L203">        locationStatusToResponse.put(&quot;300&quot;, &quot;MultipleChoices&quot;);</span>
+<span class="nc" id="L204">        locationStatusToResponse.put(&quot;301&quot;, &quot;MovedPermanently&quot;);</span>
+<span class="nc" id="L205">        locationStatusToResponse.put(&quot;302&quot;, &quot;Found&quot;);</span>
+<span class="nc" id="L206">        locationStatusToResponse.put(&quot;303&quot;, &quot;SeeOther&quot;);</span>
+<span class="nc" id="L207">        locationStatusToResponse.put(&quot;307&quot;, &quot;TemporaryRedirect&quot;);</span>
+<span class="nc" id="L208">        locationStatusToResponse.put(&quot;308&quot;, &quot;PermanentRedirect&quot;);</span>
+    }
+
+<span class="nc" id="L211">    private final static Map&lt;String, String&gt; wwwAuthStatusToResponse = new HashMap&lt;&gt;();</span>
+
+    static {
+<span class="nc" id="L214">        wwwAuthStatusToResponse.put(&quot;401&quot;, &quot;Unauthorized&quot;);</span>
+    }
+
+<span class="nc" id="L217">    private final static Map&lt;String, String&gt; allowStatusToResponse = new HashMap&lt;&gt;();</span>
+
+    static {
+<span class="nc" id="L220">        allowStatusToResponse.put(&quot;405&quot;, &quot;MethodNotAllowed&quot;);</span>
+    }
+
+<span class="nc" id="L223">    private final static Map&lt;String, String&gt; proxyAuthStatusToResponse = new HashMap&lt;&gt;();</span>
+
+    static {
+<span class="nc" id="L226">        proxyAuthStatusToResponse.put(&quot;407&quot;, &quot;ProxyAuthenticationRequired&quot;);</span>
+    }
+
+<span class="nc" id="L229">    private final static Map&lt;String, String&gt; statusToResponse = new HashMap&lt;&gt;();</span>
+
+    static {
+<span class="nc" id="L232">        statusToResponse.put(&quot;100&quot;, &quot;Continue&quot;);</span>
+
+<span class="nc" id="L234">        statusToResponse.put(&quot;101&quot;, &quot;SwitchingProtocols&quot;);</span>
+
+<span class="nc" id="L236">        statusToResponse.put(&quot;102&quot;, &quot;Processing&quot;);</span>
+<span class="nc" id="L237">        statusToResponse.put(&quot;103&quot;, &quot;EarlyHints&quot;);</span>
+
+<span class="nc" id="L239">        statusToResponse.put(&quot;200&quot;, &quot;Ok&quot;);</span>
+<span class="nc" id="L240">        statusToResponse.put(&quot;201&quot;, &quot;Created&quot;);</span>
+<span class="nc" id="L241">        statusToResponse.put(&quot;202&quot;, &quot;Accepted&quot;);</span>
+<span class="nc" id="L242">        statusToResponse.put(&quot;203&quot;, &quot;NonAuthoritativeInformation&quot;);</span>
+<span class="nc" id="L243">        statusToResponse.put(&quot;204&quot;, &quot;NoContent&quot;);</span>
+<span class="nc" id="L244">        statusToResponse.put(&quot;205&quot;, &quot;ResetContent&quot;);</span>
+<span class="nc" id="L245">        statusToResponse.put(&quot;206&quot;, &quot;PartialContent&quot;);</span>
+<span class="nc" id="L246">        statusToResponse.put(&quot;207&quot;, &quot;MultiStatus&quot;);</span>
+<span class="nc" id="L247">        statusToResponse.put(&quot;208&quot;, &quot;AlreadyReported&quot;);</span>
+<span class="nc" id="L248">        statusToResponse.put(&quot;226&quot;, &quot;IMUsed&quot;);</span>
+
+<span class="nc" id="L250">        statusToResponse.put(&quot;304&quot;, &quot;NotModified&quot;);</span>
+<span class="nc" id="L251">        statusToResponse.put(&quot;305&quot;, &quot;UseProxy&quot;);</span>
+
+<span class="nc" id="L253">        statusToResponse.put(&quot;400&quot;, &quot;BadRequest&quot;);</span>
+<span class="nc" id="L254">        statusToResponse.put(&quot;402&quot;, &quot;PaymentRequired&quot;);</span>
+<span class="nc" id="L255">        statusToResponse.put(&quot;403&quot;, &quot;Forbidden&quot;);</span>
+<span class="nc" id="L256">        statusToResponse.put(&quot;404&quot;, &quot;NotFound&quot;);</span>
+<span class="nc" id="L257">        statusToResponse.put(&quot;406&quot;, &quot;NotAcceptable&quot;);</span>
+<span class="nc" id="L258">        statusToResponse.put(&quot;408&quot;, &quot;RequestTimeout&quot;);</span>
+<span class="nc" id="L259">        statusToResponse.put(&quot;409&quot;, &quot;Conflict&quot;);</span>
+<span class="nc" id="L260">        statusToResponse.put(&quot;410&quot;, &quot;Gone&quot;);</span>
+<span class="nc" id="L261">        statusToResponse.put(&quot;411&quot;, &quot;LengthRequired&quot;);</span>
+<span class="nc" id="L262">        statusToResponse.put(&quot;412&quot;, &quot;PreconditionFailed&quot;);</span>
+<span class="nc" id="L263">        statusToResponse.put(&quot;413&quot;, &quot;PayloadTooLarge&quot;);</span>
+<span class="nc" id="L264">        statusToResponse.put(&quot;414&quot;, &quot;UriTooLong&quot;);</span>
+<span class="nc" id="L265">        statusToResponse.put(&quot;415&quot;, &quot;UnsupportedMediaType&quot;);</span>
+<span class="nc" id="L266">        statusToResponse.put(&quot;416&quot;, &quot;RangeNotSatisfiable&quot;);</span>
+<span class="nc" id="L267">        statusToResponse.put(&quot;417&quot;, &quot;ExpectationFailed&quot;);</span>
+<span class="nc" id="L268">        statusToResponse.put(&quot;418&quot;, &quot;ImATeapot&quot;);</span>
+<span class="nc" id="L269">        statusToResponse.put(&quot;421&quot;, &quot;MisdirectedRequest&quot;);</span>
+<span class="nc" id="L270">        statusToResponse.put(&quot;422&quot;, &quot;UnprocessableEntity&quot;);</span>
+<span class="nc" id="L271">        statusToResponse.put(&quot;423&quot;, &quot;Locked&quot;);</span>
+<span class="nc" id="L272">        statusToResponse.put(&quot;424&quot;, &quot;FailedDependency&quot;);</span>
+<span class="nc" id="L273">        statusToResponse.put(&quot;425&quot;, &quot;TooEarly&quot;);</span>
+<span class="nc" id="L274">        statusToResponse.put(&quot;426&quot;, &quot;UpgradeRequired&quot;);</span>
+<span class="nc" id="L275">        statusToResponse.put(&quot;428&quot;, &quot;PreconditionRequired&quot;);</span>
+<span class="nc" id="L276">        statusToResponse.put(&quot;429&quot;, &quot;TooManyRequests&quot;);</span>
+<span class="nc" id="L277">        statusToResponse.put(&quot;431&quot;, &quot;RequestHeaderFieldsTooLarge&quot;);</span>
+<span class="nc" id="L278">        statusToResponse.put(&quot;451&quot;, &quot;UnavailableForLegalReasons&quot;);</span>
+
+<span class="nc" id="L280">        statusToResponse.put(&quot;500&quot;, &quot;InternalServerError&quot;);</span>
+<span class="nc" id="L281">        statusToResponse.put(&quot;501&quot;, &quot;NotImplemented&quot;);</span>
+<span class="nc" id="L282">        statusToResponse.put(&quot;502&quot;, &quot;BadGateway&quot;);</span>
+<span class="nc" id="L283">        statusToResponse.put(&quot;503&quot;, &quot;ServiceUnavailable&quot;);</span>
+<span class="nc" id="L284">        statusToResponse.put(&quot;504&quot;, &quot;GatewayTimeout&quot;);</span>
+<span class="nc" id="L285">        statusToResponse.put(&quot;505&quot;, &quot;HttpVersionNotSupported&quot;);</span>
+<span class="nc" id="L286">        statusToResponse.put(&quot;506&quot;, &quot;VariantAlsoNegotiates&quot;);</span>
+<span class="nc" id="L287">        statusToResponse.put(&quot;507&quot;, &quot;InsufficientStorage&quot;);</span>
+<span class="nc" id="L288">        statusToResponse.put(&quot;508&quot;, &quot;LoopDetected&quot;);</span>
+<span class="nc" id="L289">        statusToResponse.put(&quot;510&quot;, &quot;NotExtended&quot;);</span>
+<span class="nc" id="L290">        statusToResponse.put(&quot;511&quot;, &quot;NetworkAuthenticationRequired&quot;);</span>
+<span class="nc" id="L291">    }</span>
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L295">        super.processOpts();</span>
+<span class="nc bnc" id="L296" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.PACKAGE_NAME)) {</span>
+<span class="nc" id="L297">            packageName = (String) additionalProperties.get(CodegenConstants.PACKAGE_NAME);</span>
+
+<span class="nc" id="L299">            setApiPackage(packageName + &quot;.apis&quot;);</span>
+<span class="nc" id="L300">            additionalProperties.put(CodegenConstants.API_PACKAGE, apiPackage());</span>
+
+<span class="nc" id="L302">            setModelPackage(packageName + &quot;.models&quot;);</span>
+<span class="nc" id="L303">            additionalProperties.put(CodegenConstants.PACKAGE_NAME, modelPackage());</span>
+        } else {
+<span class="nc" id="L305">            additionalProperties.put(CodegenConstants.PACKAGE_NAME, packageName);</span>
+        }
+
+<span class="nc bnc" id="L308" title="All 2 branches missed.">        if (additionalProperties.containsKey(SOURCE_SUBFOLDER)) {</span>
+<span class="nc" id="L309">            sourceSubFolder = (String) additionalProperties.get(SOURCE_SUBFOLDER);</span>
+        }
+
+<span class="nc" id="L312">        sourceFolder = &quot;src&quot; + File.separator + sourceSubFolder + File.separator + sourceFolder;</span>
+
+<span class="nc" id="L314">        supportingFiles.add(new SupportingFile(&quot;types.mustache&quot;, modelFileFolderRelative(), &quot;types.scala&quot;));</span>
+<span class="nc" id="L315">        supportingFiles.add(new SupportingFile(&quot;path.mustache&quot;, apiFileFolderRelative(), &quot;path.scala&quot;));</span>
+<span class="nc" id="L316">        supportingFiles.add(new SupportingFile(&quot;query.mustache&quot;, apiFileFolderRelative(), &quot;query.scala&quot;));</span>
+
+<span class="nc" id="L318">        supportingFiles.add(new SupportingFile(&quot;apis.mustache&quot;, packageFileFolderRelative(), &quot;api.scala&quot;));</span>
+
+<span class="nc" id="L320">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.scala&quot;);</span>
+
+<span class="nc bnc" id="L322" title="All 4 branches missed.">        if (!additionalProperties.containsKey(EXCLUDE_SBT) &amp;&amp; !Boolean.parseBoolean((String) additionalProperties.get(EXCLUDE_SBT))) {</span>
+<span class="nc" id="L323">            supportingFiles.add(new SupportingFile(&quot;build.sbt&quot;, &quot;&quot;, &quot;build.sbt&quot;));</span>
+<span class="nc" id="L324">            supportingFiles.add(new SupportingFile(&quot;build.properties&quot;, &quot;project&quot;, &quot;build.properties&quot;));</span>
+        }
+<span class="nc" id="L326">    }</span>
+
+    @Override
+    public Map&lt;String, String&gt; inlineSchemaOption() {
+<span class="nc" id="L330">        return super.inlineSchemaOption();</span>
+    }
+
+
+    @Override
+    public boolean isEnablePostProcessFile() {
+<span class="nc" id="L336">        return true;</span>
+    }
+
+    @Override
+    public void postProcessFile(File file, String fileType) {
+<span class="nc" id="L341">        LOGGER.debug(&quot;postprocess &quot; + file.toString());</span>
+<span class="nc" id="L342">        super.postProcessFile(file, fileType);</span>
+<span class="nc" id="L343">    }</span>
+
+    @Override
+    public Map&lt;String, ModelsMap&gt; postProcessAllModels(Map&lt;String, ModelsMap&gt; objs) {
+<span class="nc" id="L347">        Map&lt;String, ModelsMap&gt; modelsMap = super.postProcessAllModels(objs);</span>
+
+<span class="nc bnc" id="L349" title="All 2 branches missed.">        for (ModelsMap mm : modelsMap.values()) {</span>
+<span class="nc bnc" id="L350" title="All 2 branches missed.">            for (ModelMap model : mm.getModels()) {</span>
+                // model oneOf as sealed trait
+
+<span class="nc" id="L353">                CodegenModel cModel = model.getModel();</span>
+<span class="nc bnc" id="L354" title="All 2 branches missed.">                cModel.getVendorExtensions().put(&quot;x-isSealedTrait&quot;, !cModel.oneOf.isEmpty());</span>
+
+<span class="nc bnc" id="L356" title="All 2 branches missed.">                if (cModel.discriminator != null) {</span>
+<span class="nc" id="L357">                    cModel.getVendorExtensions().put(&quot;x-use-discr&quot;, true);</span>
+
+<span class="nc bnc" id="L359" title="All 2 branches missed.">                    if (cModel.discriminator.getMapping() != null) {</span>
+<span class="nc" id="L360">                        cModel.getVendorExtensions().put(&quot;x-use-discr-mapping&quot;, true);</span>
+                    }
+                }
+                //
+                try {
+<span class="nc" id="L365">                    List&lt;String&gt; exts = (List&lt;String&gt;) cModel.getVendorExtensions().get(&quot;x-implements&quot;);</span>
+<span class="nc bnc" id="L366" title="All 2 branches missed.">                    if (exts != null) {</span>
+<span class="nc" id="L367">                        cModel.getVendorExtensions().put(&quot;x-extends&quot;, exts.subList(0, 1));</span>
+<span class="nc" id="L368">                        cModel.getVendorExtensions().put(&quot;x-extendsWith&quot;, exts.subList(1, exts.size()));</span>
+                    }
+<span class="nc" id="L370">                } catch (IndexOutOfBoundsException ignored) {</span>
+<span class="nc" id="L371">                }</span>
+
+                // add refined constraints
+
+<span class="nc bnc" id="L375" title="All 2 branches missed.">                for (CodegenProperty prop : cModel.vars) {</span>
+<span class="nc" id="L376">                    Set&lt;String&gt; imports = new TreeSet&lt;&gt;();</span>
+
+<span class="nc" id="L378">                    prop.getVendorExtensions().putAll(refineProp(prop, imports));</span>
+
+<span class="nc" id="L380">                    cModel.imports.addAll(imports);</span>
+<span class="nc" id="L381">                }</span>
+<span class="nc" id="L382">            }</span>
+<span class="nc" id="L383">        }</span>
+<span class="nc" id="L384">        return modelsMap;</span>
+    }
+
+    private Map&lt;String, Object&gt; makeRefiined(Set&lt;String&gt; imports, String dataType, ArrayList&lt;String&gt; refined) {
+<span class="nc" id="L388">        Map&lt;String, Object&gt; vendorExtensions = new HashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L389" title="All 2 branches missed.">        if (!refined.isEmpty()) {</span>
+<span class="nc" id="L390">            imports.add(&quot;And&quot;);</span>
+<span class="nc" id="L391">            imports.add(&quot;Refined&quot;);</span>
+
+<span class="nc" id="L393">            String refinedRgt = String.join(&quot; And &quot;, refined);</span>
+
+<span class="nc" id="L395">            vendorExtensions.put(&quot;x-type&quot;, &quot;Refined[&quot; + dataType + &quot;, &quot; + refinedRgt + &quot;]&quot;);</span>
+<span class="nc" id="L396">            vendorExtensions.put(&quot;x-refined-lft&quot;, dataType);</span>
+<span class="nc" id="L397">            vendorExtensions.put(&quot;x-refined-rgt&quot;, refinedRgt);</span>
+<span class="nc" id="L398">            vendorExtensions.put(&quot;x-refined&quot;, true);</span>
+<span class="nc" id="L399">        } else {</span>
+<span class="nc" id="L400">            vendorExtensions.put(&quot;x-type&quot;, dataType);</span>
+        }
+
+<span class="nc" id="L403">        return vendorExtensions;</span>
+    }
+
+    private Map&lt;String, Object&gt; refineProp(IJsonSchemaValidationProperties prop, Set&lt;String&gt; imports) {
+<span class="nc" id="L407">        Map&lt;String, Object&gt; vendorExtensions = new HashMap&lt;&gt;();</span>
+
+<span class="nc" id="L409">        vendorExtensions.put(&quot;x-type&quot;, prop.getDataType());</span>
+
+<span class="nc bnc" id="L411" title="All 2 branches missed.">        if (prop.getIsString()) {</span>
+<span class="nc" id="L412">            ArrayList&lt;String&gt; refined = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L414" title="All 2 branches missed.">            if (prop.getMinLength() != null) {</span>
+<span class="nc" id="L415">                refined.add(&quot;MinSize[&quot; + prop.getMinLength() + &quot;]&quot;);</span>
+<span class="nc" id="L416">                imports.add(&quot;MinSize&quot;);</span>
+            }
+<span class="nc bnc" id="L418" title="All 2 branches missed.">            if (prop.getMaxLength() != null) {</span>
+<span class="nc" id="L419">                refined.add(&quot;MaxSize[&quot; + prop.getMaxLength() + &quot;]&quot;);</span>
+<span class="nc" id="L420">                imports.add(&quot;MaxSize&quot;);</span>
+            }
+<span class="nc bnc" id="L422" title="All 2 branches missed.">            if (prop.getPattern() != null) {</span>
+                try {
+<span class="nc" id="L424">                    String fixedPattern = prop.getPattern().substring(1, prop.getPattern().length() - 1);</span>
+<span class="nc" id="L425">                    refined.add(&quot;MatchesRegex[\&quot;&quot; + fixedPattern + &quot;\&quot;]&quot;);</span>
+<span class="nc" id="L426">                    imports.add(&quot;MatchesRegex&quot;);</span>
+<span class="nc" id="L427">                } catch (IndexOutOfBoundsException ignored) {</span>
+<span class="nc" id="L428">                }</span>
+            }
+<span class="nc" id="L430">            vendorExtensions.putAll(makeRefiined(imports, prop.getDataType(), refined));</span>
+        }
+
+<span class="nc bnc" id="L433" title="All 2 branches missed.">        if (&quot;Int&quot;.equals(prop.getDataType())</span>
+<span class="nc bnc" id="L434" title="All 2 branches missed.">                || &quot;Long&quot;.equals(prop.getDataType())</span>
+<span class="nc bnc" id="L435" title="All 2 branches missed.">                || &quot;Float&quot;.equals(prop.getDataType())</span>
+<span class="nc bnc" id="L436" title="All 2 branches missed.">                || &quot;Double&quot;.equals(prop.getDataType())</span>
+<span class="nc bnc" id="L437" title="All 2 branches missed.">                || &quot;BigDecimal&quot;.equals(prop.getDataType())</span>
+        ) {
+<span class="nc" id="L439">            ArrayList&lt;String&gt; refined = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L441" title="All 2 branches missed.">            if (prop.getMinimum() != null) {</span>
+<span class="nc bnc" id="L442" title="All 2 branches missed.">                if (prop.getExclusiveMinimum()) {</span>
+<span class="nc" id="L443">                    refined.add(&quot;Greater[&quot; + prop.getMinimum() + &quot;]&quot;);</span>
+<span class="nc" id="L444">                    imports.add(&quot;Greater&quot;);</span>
+                } else {
+<span class="nc" id="L446">                    refined.add(&quot;GreaterEqual[&quot; + prop.getMinimum() + &quot;]&quot;);</span>
+<span class="nc" id="L447">                    imports.add(&quot;GreaterEqual&quot;);</span>
+                }
+            }
+<span class="nc bnc" id="L450" title="All 2 branches missed.">            if (prop.getMaximum() != null) {</span>
+<span class="nc bnc" id="L451" title="All 2 branches missed.">                if (prop.getExclusiveMaximum()) {</span>
+<span class="nc" id="L452">                    refined.add(&quot;Less[&quot; + prop.getMaximum() + &quot;]&quot;);</span>
+<span class="nc" id="L453">                    imports.add(&quot;Less&quot;);</span>
+                } else {
+<span class="nc" id="L455">                    refined.add(&quot;LessEqual[&quot; + prop.getMaximum() + &quot;]&quot;);</span>
+<span class="nc" id="L456">                    imports.add(&quot;LessEqual&quot;);</span>
+                }
+            }
+<span class="nc" id="L459">            vendorExtensions.putAll(makeRefiined(imports, prop.getDataType(), refined));</span>
+        }
+
+<span class="nc bnc" id="L462" title="All 4 branches missed.">        if (prop.getIsUuid() || &quot;Uuid&quot;.equals(prop.getDataType())) {</span>
+<span class="nc" id="L463">            prop.setDataType(&quot;UUID&quot;);</span>
+        }
+
+<span class="nc bnc" id="L466" title="All 4 branches missed.">        if (prop.getIsArray() &amp;&amp; prop.getItems() != null) {</span>
+<span class="nc" id="L467">            Map&lt;String, Object&gt; subVendorExtensions = refineProp(prop.getItems(), imports);</span>
+<span class="nc" id="L468">            prop.getItems().getVendorExtensions().putAll(subVendorExtensions);</span>
+
+<span class="nc" id="L470">            ArrayList&lt;String&gt; refined = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L471" title="All 2 branches missed.">            if (prop.getMinItems() != null) {</span>
+<span class="nc" id="L472">                refined.add(&quot;MinSize[&quot; + prop.getMinItems() + &quot;]&quot;);</span>
+<span class="nc" id="L473">                imports.add(&quot;MinSize&quot;);</span>
+            }
+<span class="nc bnc" id="L475" title="All 2 branches missed.">            if (prop.getMaxItems() != null) {</span>
+<span class="nc" id="L476">                refined.add(&quot;MaxSize[&quot; + prop.getMaxItems() + &quot;]&quot;);</span>
+<span class="nc" id="L477">                imports.add(&quot;MaxSize&quot;);</span>
+            }
+
+<span class="nc" id="L480">            vendorExtensions.putAll(makeRefiined(imports, prop.getDataType(), refined));</span>
+        }
+
+<span class="nc" id="L483">        return vendorExtensions;</span>
+    }
+
+
+    @Override
+    public Map&lt;String, Object&gt; postProcessSupportingFileData(Map&lt;String, Object&gt; objs) {
+<span class="nc" id="L489">        Map&lt;String, Object&gt; bundle = super.postProcessSupportingFileData(objs);</span>
+
+<span class="nc" id="L491">        List&lt;ModelMap&gt; models = (List&lt;ModelMap&gt;) bundle.get(&quot;models&quot;);</span>
+<span class="nc" id="L492">        TreeSet&lt;String&gt; allImports = new TreeSet&lt;&gt;();</span>
+<span class="nc bnc" id="L493" title="All 2 branches missed.">        for (ModelMap mm : models) {</span>
+<span class="nc bnc" id="L494" title="All 2 branches missed.">            for (String nextImport : mm.getModel().imports) {</span>
+<span class="nc" id="L495">                String mapping = importMapping().get(nextImport);</span>
+<span class="nc bnc" id="L496" title="All 4 branches missed.">                if (mapping != null &amp;&amp; !defaultIncludes().contains(mapping)) {</span>
+<span class="nc" id="L497">                    allImports.add(mapping);</span>
+                }
+                // add instantiation types
+<span class="nc" id="L500">                mapping = instantiationTypes().get(nextImport);</span>
+<span class="nc bnc" id="L501" title="All 4 branches missed.">                if (mapping != null &amp;&amp; !defaultIncludes().contains(mapping)) {</span>
+<span class="nc" id="L502">                    allImports.add(mapping);</span>
+                }
+<span class="nc" id="L504">            }</span>
+<span class="nc" id="L505">        }</span>
+<span class="nc" id="L506">        bundle.put(&quot;imports&quot;, allImports);</span>
+<span class="nc" id="L507">        bundle.put(&quot;packageName&quot;, packageName);</span>
+
+
+<span class="nc" id="L510">        ApiInfoMap apiInfoMap = (ApiInfoMap) bundle.get(&quot;apiInfo&quot;);</span>
+<span class="nc" id="L511">        Map&lt;String, List&lt;String&gt;&gt; authToOperationMap = new TreeMap&lt;&gt;();</span>
+<span class="nc bnc" id="L512" title="All 2 branches missed.">        for (OperationsMap op : apiInfoMap.getApis()) {</span>
+<span class="nc" id="L513">            List&lt;HashMap&lt;String, Object&gt;&gt; opsByAuth = (List&lt;HashMap&lt;String, Object&gt;&gt;) op.get(&quot;operationsByAuth&quot;);</span>
+<span class="nc bnc" id="L514" title="All 2 branches missed.">            for (HashMap&lt;String, Object&gt; auth : opsByAuth) {</span>
+<span class="nc" id="L515">                String autName = (String) auth.get(&quot;auth&quot;);</span>
+<span class="nc" id="L516">                String classname = (String) op.get(&quot;classname&quot;);</span>
+<span class="nc" id="L517">                List&lt;String&gt; classnames = authToOperationMap.computeIfAbsent(autName, k -&gt; new ArrayList&lt;&gt;());</span>
+<span class="nc" id="L518">                classnames.add(classname);</span>
+<span class="nc" id="L519">            }</span>
+<span class="nc" id="L520">        }</span>
+
+<span class="nc" id="L522">        bundle.put(&quot;authToOperationMap&quot;,</span>
+<span class="nc" id="L523">                authToOperationMap.entrySet().stream().map(ent -&gt; {</span>
+<span class="nc" id="L524">                    Map&lt;String, Object&gt; tuple = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L525">                    String auth = ent.getKey();</span>
+<span class="nc" id="L526">                    tuple.put(&quot;auth&quot;, auth);</span>
+<span class="nc" id="L527">                    tuple.put(&quot;ops&quot;, ent.getValue());</span>
+<span class="nc bnc" id="L528" title="All 2 branches missed.">                    tuple.put(&quot;addMiddleware&quot;, !&quot;&quot;.equals(auth));</span>
+<span class="nc" id="L529">                    return tuple;</span>
+<span class="nc" id="L530">                }).collect(Collectors.toList())</span>
+        );
+<span class="nc" id="L532">        return bundle;</span>
+    }
+
+    @Override
+    public CodegenType getTag() {
+<span class="nc" id="L537">        return CodegenType.SERVER;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L542">        return &quot;scala-http4s-server&quot;;</span>
+    }
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L547">        return &quot;Generates a Scala http4s server bindings.&quot;;</span>
+    }
+
+    @Override
+    public String escapeReservedWord(String name) {
+<span class="nc" id="L552">        return &quot;_&quot; + name;</span>
+    }
+
+    @Override
+    public String apiFileFolder() {
+<span class="nc" id="L557">        return outputFolder + File.separator + apiFileFolderRelative();</span>
+    }
+
+    private String apiFileFolderRelative() {
+<span class="nc" id="L561">        return sourceFolder + File.separator + apiPackage().replace('.', File.separatorChar);</span>
+    }
+
+    @Override
+    public String modelFileFolder() {
+<span class="nc" id="L566">        return outputFolder + File.separator + modelFileFolderRelative();</span>
+    }
+
+    public String modelFileFolderRelative() {
+<span class="nc" id="L570">        return sourceFolder + File.separator + modelPackage().replace('.', File.separatorChar);</span>
+    }
+
+    public String packageFileFolderRelative() {
+<span class="nc" id="L574">        return sourceFolder + File.separator + packageName.replace('.', File.separatorChar);</span>
+    }
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objsI, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L579">        OperationsMap objs = super.postProcessOperationsWithModels(objsI, allModels);</span>
+<span class="nc" id="L580">        OperationMap operations = objs.getOperations();</span>
+
+<span class="nc" id="L582">        List&lt;CodegenOperation&gt; operationList = operations.getOperation();</span>
+<span class="nc" id="L583">        Set&lt;String&gt; allAuth = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L584">        Map&lt;String, List&lt;String&gt;&gt; opsByAuth = new HashMap&lt;&gt;();</span>
+
+<span class="nc bnc" id="L586" title="All 2 branches missed.">        for (CodegenOperation op : operationList) {</span>
+
+            // Converts GET /foo/bar =&gt; GET / foo / bar =&gt;
+<span class="nc" id="L589">            generateScalaPath(op);</span>
+
+            // :? fooQueryParam
+<span class="nc" id="L592">            generateQueryParameters(op);</span>
+
+            // decide wat methods do we need in delegate:
+<span class="nc bnc" id="L595" title="All 4 branches missed.">            if (op.consumes == null || op.consumes.size() == 0) {</span>
+<span class="nc" id="L596">                op.vendorExtensions.put(&quot;x-generic-body&quot;, true);</span>
+            } else {
+<span class="nc bnc" id="L598" title="All 2 branches missed.">                if (op.consumes.stream().anyMatch(x -&gt; x.containsKey(&quot;isJson&quot;))) {</span>
+<span class="nc" id="L599">                    op.vendorExtensions.put(&quot;x-json-body&quot;, true);</span>
+                }
+<span class="nc bnc" id="L601" title="All 4 branches missed.">                if (op.consumes.stream().anyMatch(x -&gt; !x.containsKey(&quot;isJson&quot;))) {</span>
+<span class="nc" id="L602">                    op.vendorExtensions.put(&quot;x-generic-body&quot;, true);</span>
+                }
+            }
+
+            // decide wat methods do we need in responses:
+<span class="nc bnc" id="L607" title="All 2 branches missed.">            for (CodegenResponse resp : op.responses) {</span>
+<span class="nc bnc" id="L608" title="All 2 branches missed.">                if (resp.code.equals(&quot;0&quot;))</span>
+<span class="nc" id="L609">                    resp.code = &quot;200&quot;; // 200 by default</span>
+
+                String responseName;
+
+<span class="nc" id="L613">                responseName = locationStatusToResponse.get(resp.code);</span>
+<span class="nc bnc" id="L614" title="All 2 branches missed.">                if (responseName != null) {</span>
+<span class="nc" id="L615">                    resp.vendorExtensions.put(&quot;x-response-location&quot;, true);</span>
+                } else {
+<span class="nc" id="L617">                    responseName = wwwAuthStatusToResponse.get(resp.code);</span>
+<span class="nc bnc" id="L618" title="All 2 branches missed.">                    if (responseName != null) {</span>
+<span class="nc" id="L619">                        resp.vendorExtensions.put(&quot;x-response-www-auth&quot;, true);</span>
+                    } else {
+<span class="nc" id="L621">                        responseName = allowStatusToResponse.get(resp.code);</span>
+<span class="nc bnc" id="L622" title="All 2 branches missed.">                        if (responseName != null) {</span>
+<span class="nc" id="L623">                            resp.vendorExtensions.put(&quot;x-response-allow&quot;, true);</span>
+                        } else {
+<span class="nc" id="L625">                            responseName = proxyAuthStatusToResponse.get(resp.code);</span>
+<span class="nc bnc" id="L626" title="All 2 branches missed.">                            if (responseName != null) {</span>
+<span class="nc" id="L627">                                resp.vendorExtensions.put(&quot;x-response-proxy-auth&quot;, true);</span>
+                            } else {
+<span class="nc" id="L629">                                responseName = statusToResponse.get(resp.code);</span>
+<span class="nc bnc" id="L630" title="All 2 branches missed.">                                if (responseName != null) {</span>
+<span class="nc" id="L631">                                    resp.vendorExtensions.put(&quot;x-response-standard&quot;, true);</span>
+                                } else {
+<span class="nc" id="L633">                                    throw new IllegalArgumentException(&quot;unsupported status &quot; + resp.code);</span>
+                                }
+                            }
+                        }
+                    }
+                }
+
+<span class="nc" id="L640">                resp.vendorExtensions.put(&quot;x-response&quot;, responseName);</span>
+
+<span class="nc bnc" id="L642" title="All 2 branches missed.">                if (resp.getContent() == null) {</span>
+<span class="nc" id="L643">                    resp.vendorExtensions.put(&quot;x-generic-response&quot;, true); // non json resp</span>
+                } else {
+<span class="nc bnc" id="L645" title="All 2 branches missed.">                    if (resp.getContent().containsKey(&quot;application/json&quot;)) {</span>
+<span class="nc" id="L646">                        resp.vendorExtensions.put(&quot;x-json-response&quot;, true); // json resp</span>
+                    } else {
+<span class="nc" id="L648">                        resp.vendorExtensions.put(&quot;x-generic-response&quot;, true); // non json resp</span>
+                    }
+<span class="nc bnc" id="L650" title="All 2 branches missed.">                    if (resp.getContent().size() &gt; 1) {</span>
+<span class="nc" id="L651">                        resp.vendorExtensions.put(&quot;x-generic-response&quot;, true); // non json resp</span>
+                    }
+                }
+<span class="nc" id="L654">            }</span>
+
+<span class="nc bnc" id="L656" title="All 2 branches missed.">            if (op.authMethods != null) {</span>
+<span class="nc bnc" id="L657" title="All 2 branches missed.">                for (CodegenSecurity cs : op.authMethods) {</span>
+<span class="nc" id="L658">                    allAuth.add(cs.name);</span>
+<span class="nc" id="L659">                }</span>
+<span class="nc" id="L660">                List&lt;Map&lt;String, Object&gt;&gt; authDup = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L661" title="All 2 branches missed.">                for (CodegenSecurity authMeth : op.authMethods) {</span>
+<span class="nc" id="L662">                    Map&lt;String, Object&gt; vals = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L663">                    vals.put(&quot;authName&quot;, authMeth.name);</span>
+<span class="nc" id="L664">                    vals.put(&quot;operation&quot;, op);</span>
+<span class="nc" id="L665">                    authDup.add(vals);</span>
+
+<span class="nc" id="L667">                    opsByAuth.computeIfAbsent(authMeth.name, k -&gt; new ArrayList&lt;&gt;()).add(op.operationId);</span>
+<span class="nc" id="L668">                }</span>
+<span class="nc" id="L669">                op.vendorExtensions.put(&quot;x-authed&quot;, authDup);</span>
+<span class="nc" id="L670">            } else {</span>
+<span class="nc" id="L671">                opsByAuth.computeIfAbsent(&quot;&quot;, k -&gt; new ArrayList&lt;&gt;()).add(op.operationId);</span>
+            }
+<span class="nc" id="L673">        }</span>
+
+<span class="nc" id="L675">        TreeSet&lt;String&gt; allImports = new TreeSet&lt;&gt;();</span>
+<span class="nc" id="L676">        List&lt;String&gt; currentImports = objs.getImports().stream().flatMap(m -&gt; m.values().stream()).collect(Collectors.toList());</span>
+<span class="nc bnc" id="L677" title="All 2 branches missed.">        for (CodegenOperation op : operationList) {</span>
+<span class="nc bnc" id="L678" title="All 2 branches missed.">            for (String nextImport : op.imports) {</span>
+<span class="nc" id="L679">                String mapping = importMapping().get(nextImport);</span>
+<span class="nc bnc" id="L680" title="All 4 branches missed.">                if (mapping != null &amp;&amp; !defaultIncludes().contains(mapping)) {</span>
+<span class="nc bnc" id="L681" title="All 2 branches missed.">                    if (!currentImports.contains(mapping)) {</span>
+<span class="nc" id="L682">                        allImports.add(mapping);</span>
+                    }
+                }
+                // add instantiation types
+<span class="nc" id="L686">                mapping = instantiationTypes().get(nextImport);</span>
+<span class="nc bnc" id="L687" title="All 4 branches missed.">                if (mapping != null &amp;&amp; !currentImports.contains(mapping)) {</span>
+<span class="nc bnc" id="L688" title="All 2 branches missed.">                    if (!currentImports.contains(mapping)) {</span>
+<span class="nc" id="L689">                        allImports.add(mapping);</span>
+                    }
+                }
+<span class="nc" id="L692">            }</span>
+<span class="nc" id="L693">        }</span>
+
+
+<span class="nc" id="L696">        objs.put(&quot;operationsByAuth&quot;, opsByAuth.entrySet().stream().map(ent -&gt; {</span>
+<span class="nc" id="L697">                    HashMap&lt;String, Object&gt; tuple = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L698">                    tuple.put(&quot;auth&quot;, ent.getKey());</span>
+<span class="nc" id="L699">                    tuple.put(&quot;ops&quot;, ent.getValue());</span>
+<span class="nc" id="L700">                    return tuple;</span>
+                }
+<span class="nc" id="L702">        ).collect(Collectors.toList()));</span>
+<span class="nc" id="L703">        objs.put(&quot;extraImports&quot;, allImports);</span>
+<span class="nc" id="L704">        objs.put(&quot;allAuth&quot;, allAuth);</span>
+
+<span class="nc" id="L706">        return objs;</span>
+    }
+
+
+    @SuppressWarnings(&quot;Duplicates&quot;)
+    @Override
+    public String getTypeDeclaration(Schema p) {
+<span class="nc bnc" id="L713" title="All 2 branches missed.">        if (ModelUtils.isArraySchema(p)) {</span>
+<span class="nc" id="L714">            Schema inner = ModelUtils.getSchemaItems(p);</span>
+<span class="nc" id="L715">            return getSchemaType(p) + &quot;[&quot; + getTypeDeclaration(inner) + &quot;]&quot;;</span>
+<span class="nc bnc" id="L716" title="All 2 branches missed.">        } else if (ModelUtils.isMapSchema(p)) {</span>
+<span class="nc" id="L717">            Schema inner = ModelUtils.getAdditionalProperties(p);</span>
+
+<span class="nc" id="L719">            return getSchemaType(p) + &quot;[String, &quot; + getTypeDeclaration(inner) + &quot;]&quot;;</span>
+        }
+<span class="nc" id="L721">        return super.getTypeDeclaration(p);</span>
+    }
+
+    @Override
+    public String getSchemaType(Schema p) {
+<span class="nc" id="L726">        String schemaType = super.getSchemaType(p);</span>
+        String type;
+<span class="nc bnc" id="L728" title="All 2 branches missed.">        if (typeMapping.containsKey(schemaType)) {</span>
+<span class="nc" id="L729">            type = typeMapping.get(schemaType);</span>
+<span class="nc bnc" id="L730" title="All 2 branches missed.">            if (languageSpecificPrimitives.contains(type)) {</span>
+<span class="nc" id="L731">                return toModelName(type);</span>
+            }
+        } else {
+<span class="nc" id="L734">            type = schemaType;</span>
+        }
+<span class="nc" id="L736">        return toModelName(type);</span>
+    }
+
+    @Override
+    public String escapeQuotationMark(String input) {
+        // remove &quot; to avoid code injection
+<span class="nc" id="L742">        return input.replace(&quot;\&quot;&quot;, &quot;&quot;);</span>
+    }
+
+    @Override
+    public String escapeUnsafeCharacters(String input) {
+<span class="nc" id="L747">        return input.replace(&quot;*/&quot;, &quot;*_/&quot;).replace(&quot;/*&quot;, &quot;/_*&quot;);</span>
+    }
+
+    private void generateScalaPath(CodegenOperation op) {
+<span class="nc" id="L751">        Set&lt;String&gt; imports = new HashSet&lt;&gt;();</span>
+
+<span class="nc" id="L753">        String path = op.path;</span>
+
+        // remove first /
+<span class="nc bnc" id="L756" title="All 2 branches missed.">        if (path.startsWith(&quot;/&quot;)) {</span>
+<span class="nc" id="L757">            path = path.substring(1);</span>
+        }
+
+        // remove last /
+<span class="nc bnc" id="L761" title="All 2 branches missed.">        if (path.endsWith(&quot;/&quot;)) {</span>
+<span class="nc" id="L762">            path = path.substring(0, path.length() - 1);</span>
+        }
+
+<span class="nc" id="L765">        String[] items = path.split(&quot;/&quot;, -1);</span>
+<span class="nc" id="L766">        String scalaPath = &quot;&quot;;</span>
+<span class="nc" id="L767">        int pathParamIndex = 0;</span>
+
+<span class="nc bnc" id="L769" title="All 2 branches missed.">        for (String item : items) {</span>
+
+<span class="nc bnc" id="L771" title="All 2 branches missed.">            if (item.matches(&quot;^\\{(.*)}$&quot;)) { // wrap in {}</span>
+                // find the datatype of the parameter
+<span class="nc" id="L773">                final CodegenParameter cp = op.pathParams.get(pathParamIndex);</span>
+
+                // TODO: Handle non-primitives…
+<span class="nc" id="L776">                scalaPath = scalaPath + &quot; / &quot; + cpToPathParameter(cp, imports, cp.vendorExtensions);</span>
+
+<span class="nc" id="L778">                pathParamIndex++;</span>
+<span class="nc" id="L779">            } else {</span>
+<span class="nc" id="L780">                scalaPath = scalaPath + &quot; / &quot; + &quot;\&quot;&quot; + item + &quot;\&quot;&quot;;</span>
+            }
+        }
+
+<span class="nc" id="L784">        op.vendorExtensions.put(&quot;x-codegen-path&quot;, scalaPath);</span>
+<span class="nc" id="L785">        op.imports.addAll(imports);</span>
+<span class="nc" id="L786">    }</span>
+
+    private String cpToPathParameter(CodegenParameter cp, Set&lt;String&gt; imports, Map&lt;String, Object&gt; vendorExtensions) {
+        // don't support containers and arrays yet, reset to string
+<span class="nc bnc" id="L790" title="All 4 branches missed.">        if (cp.isContainer || cp.isArray) {</span>
+<span class="nc" id="L791">            cp.setDataType(&quot;String&quot;);</span>
+<span class="nc" id="L792">            cp.setIsArray(false);</span>
+<span class="nc" id="L793">            cp.setIsString(true);</span>
+<span class="nc" id="L794">            cp.isContainer = false;</span>
+        }
+
+<span class="nc" id="L797">        Map&lt;String, Object&gt; _vendorExtensions = refineProp(cp, imports);</span>
+<span class="nc" id="L798">        vendorExtensions.putAll(_vendorExtensions);</span>
+
+<span class="nc bnc" id="L800" title="All 2 branches missed.">        if (_vendorExtensions.size() == 1) { // only `x-type`</span>
+<span class="nc bnc" id="L801" title="All 2 branches missed.">            if (&quot;String&quot;.equals(cp.getDataType())) {</span>
+<span class="nc" id="L802">                return cp.baseName;</span>
+            } else {
+<span class="nc" id="L804">                return cp.dataType + &quot;Varr(&quot; + cp.baseName + &quot;)&quot;;</span>
+            }
+        } else {
+<span class="nc" id="L807">            return cp.baseName + &quot;Varr(&quot; + cp.baseName + &quot;)&quot;;</span>
+        }
+    }
+
+    private void generateQueryParameters(CodegenOperation op) {
+<span class="nc" id="L812">        Set&lt;String&gt; imports = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L813">        String queryString = &quot;&quot;;</span>
+
+<span class="nc bnc" id="L815" title="All 2 branches missed.">        for (CodegenParameter cp : op.queryParams) {</span>
+<span class="nc bnc" id="L816" title="All 2 branches missed.">            if (queryString.isEmpty()) {</span>
+<span class="nc" id="L817">                queryString = queryString + &quot; :? &quot;;</span>
+            } else {
+<span class="nc" id="L819">                queryString = queryString + &quot; +&amp; &quot;;</span>
+            }
+
+<span class="nc" id="L822">            queryString = queryString + cpToQueryParameter(cp, imports, cp.vendorExtensions);</span>
+<span class="nc" id="L823">        }</span>
+
+<span class="nc" id="L825">        op.vendorExtensions.put(&quot;x-codegen-query&quot;, queryString);</span>
+<span class="nc" id="L826">        op.imports.addAll(imports);</span>
+<span class="nc" id="L827">    }</span>
+
+    private String cpToQueryParameter(CodegenParameter cp, Set&lt;String&gt; imports, Map&lt;String, Object&gt; vendorExtensions) {
+        // don't support containers and arrays yet, reset to string
+<span class="nc bnc" id="L831" title="All 4 branches missed.">        if (cp.isContainer &amp;&amp; !cp.isArray) {</span>
+<span class="nc" id="L832">            cp.setDataType(&quot;String&quot;);</span>
+<span class="nc" id="L833">            cp.setIsArray(false);</span>
+<span class="nc" id="L834">            cp.setIsString(true);</span>
+<span class="nc" id="L835">            cp.isContainer = false;</span>
+        }
+
+<span class="nc" id="L838">        vendorExtensions.putAll(refineProp(cp, imports));</span>
+<span class="nc" id="L839">        return cp.baseName + &quot;QueryParam(&quot; + cp.baseName + &quot;)&quot;;</span>
+    }
+
+    @Override
+    public GeneratorLanguage generatorLanguage() {
+<span class="nc" id="L844">        return GeneratorLanguage.SCALA;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

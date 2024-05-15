@@ -1,0 +1,527 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CppRestbedServerCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">CppRestbedServerCodegen.java</span></div><h1>CppRestbedServerCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Schema;
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.meta.features.*;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.utils.ModelUtils;
+
+import java.io.File;
+import java.util.*;
+import java.util.Map.Entry;
+
+import static org.openapitools.codegen.utils.StringUtils.camelize;
+
+public class CppRestbedServerCodegen extends AbstractCppCodegen {
+
+    public static final String DECLSPEC = &quot;declspec&quot;;
+    public static final String DEFAULT_INCLUDE = &quot;defaultInclude&quot;;
+    private static final String OPEN_API_PATH_PARAM_PATTERN = &quot;^\\{(.*)\\}$&quot;;
+    private static final String X_CODEGEN_OTHER_METHODS = &quot;x-codegen-other-methods&quot;;
+
+<span class="fc" id="L44">    protected String packageVersion = &quot;1.0.0&quot;;</span>
+<span class="fc" id="L45">    protected String declspec = &quot;&quot;;</span>
+<span class="fc" id="L46">    protected String defaultInclude = &quot;&quot;;</span>
+
+    public CppRestbedServerCodegen() {
+<span class="fc" id="L49">        super();</span>
+
+        // TODO: cpp-restbed-server maintainer review
+<span class="fc" id="L52">        modifyFeatureSet(features -&gt; features</span>
+<span class="fc" id="L53">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="fc" id="L54">                .securityFeatures(EnumSet.noneOf(SecurityFeature.class))</span>
+<span class="fc" id="L55">                .excludeGlobalFeatures(</span>
+                        GlobalFeature.XMLStructureDefinitions,
+                        GlobalFeature.Callbacks,
+                        GlobalFeature.LinkObjects,
+                        GlobalFeature.ParameterStyling,
+                        GlobalFeature.MultiServer
+                )
+<span class="fc" id="L62">                .excludeSchemaSupportFeatures(</span>
+                        SchemaSupportFeature.Polymorphism
+                )
+<span class="fc" id="L65">                .excludeParameterFeatures(</span>
+                        ParameterFeature.Cookie
+                )
+        );
+
+<span class="fc" id="L70">        apiPackage = &quot;org.openapitools.server.api&quot;;</span>
+<span class="fc" id="L71">        modelPackage = &quot;org.openapitools.server.model&quot;;</span>
+
+<span class="fc" id="L73">        modelTemplateFiles.put(&quot;model-header.mustache&quot;, &quot;.h&quot;);</span>
+<span class="fc" id="L74">        modelTemplateFiles.put(&quot;model-source.mustache&quot;, &quot;.cpp&quot;);</span>
+
+<span class="fc" id="L76">        apiTemplateFiles.put(&quot;api-header.mustache&quot;, &quot;.h&quot;);</span>
+<span class="fc" id="L77">        apiTemplateFiles.put(&quot;api-source.mustache&quot;, &quot;.cpp&quot;);</span>
+
+<span class="fc" id="L79">        embeddedTemplateDir = templateDir = &quot;cpp-restbed-server&quot;;</span>
+
+<span class="fc" id="L81">        cliOptions.clear();</span>
+
+        // CLI options
+<span class="fc" id="L84">        addOption(CodegenConstants.MODEL_PACKAGE, &quot;C++ namespace for models (convention: name.space.model).&quot;,</span>
+                this.modelPackage);
+<span class="fc" id="L86">        addOption(CodegenConstants.API_PACKAGE, &quot;C++ namespace for apis (convention: name.space.api).&quot;,</span>
+                this.apiPackage);
+<span class="fc" id="L88">        addOption(CodegenConstants.PACKAGE_VERSION, &quot;C++ package version.&quot;, this.packageVersion);</span>
+<span class="fc" id="L89">        addOption(DECLSPEC, &quot;C++ preprocessor to place before the class name for handling dllexport/dllimport.&quot;,</span>
+                this.declspec);
+<span class="fc" id="L91">        addOption(DEFAULT_INCLUDE,</span>
+                &quot;The default include statement that should be placed in all headers for including things like the declspec (convention: #include \&quot;Commons.h\&quot; &quot;,
+                this.defaultInclude);
+<span class="fc" id="L94">        addOption(RESERVED_WORD_PREFIX_OPTION,</span>
+                RESERVED_WORD_PREFIX_DESC,
+                this.reservedWordPrefix);
+
+<span class="fc" id="L98">        supportingFiles.add(new SupportingFile(&quot;gitignore.mustache&quot;, &quot;&quot;, &quot;.gitignore&quot;));</span>
+<span class="fc" id="L99">        supportingFiles.add(new SupportingFile(&quot;git_push.sh.mustache&quot;, &quot;&quot;, &quot;git_push.sh&quot;));</span>
+<span class="fc" id="L100">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;));</span>
+<span class="fc" id="L101">        supportingFiles.add(new SupportingFile(&quot;model-helpers-header.mustache&quot;, modelFileFolder(), &quot;helpers.h&quot;));</span>
+<span class="fc" id="L102">        supportingFiles.add(new SupportingFile(&quot;CMakeLists.txt.mustache&quot;, &quot;&quot;, &quot;CMakeLists.txt&quot;));</span>
+<span class="fc" id="L103">        supportingFiles.add(new SupportingFile(&quot;FindRestbedAndBoost.cmake&quot;, &quot;&quot;, &quot;FindRestbedAndBoost.cmake&quot;));</span>
+
+<span class="fc" id="L105">        languageSpecificPrimitives = new HashSet&lt;&gt;(</span>
+<span class="fc" id="L106">                Arrays.asList(&quot;int&quot;, &quot;char&quot;, &quot;bool&quot;, &quot;long&quot;, &quot;float&quot;, &quot;double&quot;, &quot;int32_t&quot;, &quot;int64_t&quot;));</span>
+
+<span class="fc" id="L108">        typeMapping = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L109">        typeMapping.put(&quot;date&quot;, &quot;std::string&quot;);</span>
+<span class="fc" id="L110">        typeMapping.put(&quot;DateTime&quot;, &quot;std::string&quot;);</span>
+<span class="fc" id="L111">        typeMapping.put(&quot;string&quot;, &quot;std::string&quot;);</span>
+<span class="fc" id="L112">        typeMapping.put(&quot;integer&quot;, &quot;int32_t&quot;);</span>
+<span class="fc" id="L113">        typeMapping.put(&quot;long&quot;, &quot;int64_t&quot;);</span>
+<span class="fc" id="L114">        typeMapping.put(&quot;boolean&quot;, &quot;bool&quot;);</span>
+<span class="fc" id="L115">        typeMapping.put(&quot;array&quot;, &quot;std::vector&quot;);</span>
+<span class="fc" id="L116">        typeMapping.put(&quot;map&quot;, &quot;std::map&quot;);</span>
+<span class="fc" id="L117">        typeMapping.put(&quot;set&quot;, &quot;std::set&quot;);</span>
+<span class="fc" id="L118">        typeMapping.put(&quot;file&quot;, &quot;std::string&quot;);</span>
+<span class="fc" id="L119">        typeMapping.put(&quot;object&quot;, &quot;std::string&quot;);</span>
+<span class="fc" id="L120">        typeMapping.put(&quot;binary&quot;, &quot;restbed::Bytes&quot;);</span>
+<span class="fc" id="L121">        typeMapping.put(&quot;number&quot;, &quot;double&quot;);</span>
+<span class="fc" id="L122">        typeMapping.put(&quot;decimal&quot;, &quot;std::string&quot;);</span>
+<span class="fc" id="L123">        typeMapping.put(&quot;UUID&quot;, &quot;std::string&quot;);</span>
+<span class="fc" id="L124">        typeMapping.put(&quot;URI&quot;, &quot;std::string&quot;);</span>
+<span class="fc" id="L125">        typeMapping.put(&quot;ByteArray&quot;, &quot;std::string&quot;);</span>
+
+<span class="fc" id="L127">        super.importMapping = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L128">        importMapping.put(&quot;std::vector&quot;, &quot;#include &lt;vector&gt;&quot;);</span>
+<span class="fc" id="L129">        importMapping.put(&quot;std::map&quot;, &quot;#include &lt;map&gt;&quot;);</span>
+<span class="fc" id="L130">        importMapping.put(&quot;std::set&quot;, &quot;#include &lt;set&gt;&quot;);</span>
+<span class="fc" id="L131">        importMapping.put(&quot;file&quot;, &quot;#include &lt;string&gt;&quot;);</span>
+<span class="fc" id="L132">        importMapping.put(&quot;std::string&quot;, &quot;#include &lt;string&gt;&quot;);</span>
+<span class="fc" id="L133">        importMapping.put(&quot;restbed::Bytes&quot;, &quot;#include &lt;corvusoft/restbed/byte.hpp&gt;&quot;);</span>
+<span class="fc" id="L134">    }</span>
+
+    @Override
+    public Map&lt;String, ModelsMap&gt; updateAllModels(Map&lt;String, ModelsMap&gt; objs) {
+        // Index all CodegenModels by model name.
+<span class="nc" id="L139">        Map&lt;String, CodegenModel&gt; allModels = getAllModels(objs);</span>
+
+        // Clean interfaces of ambiguity
+<span class="nc bnc" id="L142" title="All 2 branches missed.">        for (Entry&lt;String, CodegenModel&gt; cm : allModels.entrySet()) {</span>
+<span class="nc bnc" id="L143" title="All 4 branches missed.">            if (cm.getValue().getInterfaces() != null &amp;&amp; !cm.getValue().getInterfaces().isEmpty()) {</span>
+<span class="nc" id="L144">                List&lt;String&gt; newIntf = new ArrayList&lt;&gt;(cm.getValue().getInterfaces());</span>
+
+<span class="nc bnc" id="L146" title="All 2 branches missed.">                for (String intf : allModels.get(cm.getKey()).getInterfaces()) {</span>
+<span class="nc bnc" id="L147" title="All 4 branches missed.">                    if (allModels.get(intf).getInterfaces() != null &amp;&amp; !allModels.get(intf).getInterfaces().isEmpty()) {</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">                        for (String intfInner : allModels.get(intf).getInterfaces()) {</span>
+<span class="nc" id="L149">                            newIntf.remove(intfInner);</span>
+<span class="nc" id="L150">                        }</span>
+                    }
+<span class="nc" id="L152">                }</span>
+<span class="nc" id="L153">                cm.getValue().setInterfaces(newIntf);</span>
+            }
+<span class="nc" id="L155">        }</span>
+
+<span class="nc" id="L157">        objs = super.updateAllModels(objs);</span>
+<span class="nc" id="L158">        return objs;</span>
+    }
+
+    /**
+     * Camelize the method name of the getter and setter, but keep underscores at the front
+     *
+     * @param name string to be camelized
+     * @return Camelized string
+     */
+    @Override
+    public String getterAndSetterCapitalize(String name) {
+<span class="nc bnc" id="L169" title="All 4 branches missed.">        if (name == null || name.length() == 0) {</span>
+<span class="nc" id="L170">            return name;</span>
+        }
+
+<span class="nc" id="L173">        name = toVarName(name);</span>
+
+<span class="nc bnc" id="L175" title="All 2 branches missed.">        if (name.startsWith(&quot;_&quot;)) {</span>
+<span class="nc" id="L176">            return &quot;_&quot; + camelize(name);</span>
+        }
+
+<span class="nc" id="L179">        return camelize(name);</span>
+    }
+
+    /**
+     * Configures the type of generator.
+     *
+     * @return the CodegenType for this generator
+     */
+    @Override
+    public CodegenType getTag() {
+<span class="fc" id="L189">        return CodegenType.SERVER;</span>
+    }
+
+    /**
+     * Configures a friendly name for the generator. This will be used by the
+     * generator to select the library with the -g flag.
+     *
+     * @return the friendly name for the generator
+     */
+    @Override
+    public String getName() {
+<span class="fc" id="L200">        return &quot;cpp-restbed-server&quot;;</span>
+    }
+
+    /**
+     * Returns human-friendly help for the generator. Provide the consumer with
+     * help tips, parameters here
+     *
+     * @return A string value for the help message
+     */
+    @Override
+    public String getHelp() {
+<span class="nc" id="L211">        return &quot;Generates a C++ API Server with Restbed (https://github.com/Corvusoft/restbed).&quot;;</span>
+    }
+
+    @Override
+    public String getTypeDeclaration(String str) {
+<span class="nc" id="L216">        return toModelName(str);</span>
+    }
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L221">        super.processOpts();</span>
+
+<span class="nc bnc" id="L223" title="All 2 branches missed.">        if (additionalProperties.containsKey(DECLSPEC)) {</span>
+<span class="nc" id="L224">            declspec = additionalProperties.get(DECLSPEC).toString();</span>
+        }
+
+<span class="nc bnc" id="L227" title="All 2 branches missed.">        if (additionalProperties.containsKey(DEFAULT_INCLUDE)) {</span>
+<span class="nc" id="L228">            defaultInclude = additionalProperties.get(DEFAULT_INCLUDE).toString();</span>
+        }
+
+<span class="nc bnc" id="L231" title="All 2 branches missed.">        if (additionalProperties.containsKey(RESERVED_WORD_PREFIX_OPTION)) {</span>
+<span class="nc" id="L232">            reservedWordPrefix = additionalProperties.get(RESERVED_WORD_PREFIX_OPTION).toString();</span>
+        }
+
+<span class="nc" id="L235">        additionalProperties.put(&quot;modelNamespaceDeclarations&quot;, modelPackage.split(&quot;\\.&quot;));</span>
+<span class="nc" id="L236">        additionalProperties.put(&quot;modelNamespace&quot;, modelPackage.replaceAll(&quot;\\.&quot;, &quot;::&quot;));</span>
+<span class="nc" id="L237">        additionalProperties.put(&quot;apiNamespaceDeclarations&quot;, apiPackage.split(&quot;\\.&quot;));</span>
+<span class="nc" id="L238">        additionalProperties.put(&quot;apiNamespace&quot;, apiPackage.replaceAll(&quot;\\.&quot;, &quot;::&quot;));</span>
+<span class="nc" id="L239">        additionalProperties.put(&quot;declspec&quot;, declspec);</span>
+<span class="nc" id="L240">        additionalProperties.put(&quot;defaultInclude&quot;, defaultInclude);</span>
+<span class="nc" id="L241">        additionalProperties.put(RESERVED_WORD_PREFIX_OPTION, reservedWordPrefix);</span>
+<span class="nc" id="L242">    }</span>
+
+    /**
+     * Location to write model files. You can use the modelPackage() as defined
+     * when the class is instantiated
+     */
+    @Override
+    public String modelFileFolder() {
+<span class="fc" id="L250">        return (outputFolder + &quot;/model&quot;).replace(&quot;/&quot;, File.separator);</span>
+    }
+
+    /**
+     * Location to write api files. You can use the apiPackage() as defined when
+     * the class is instantiated
+     */
+    @Override
+    public String apiFileFolder() {
+<span class="nc" id="L259">        return (outputFolder + &quot;/api&quot;).replace(&quot;/&quot;, File.separator);</span>
+    }
+
+    @Override
+    public String toModelImport(String name) {
+<span class="nc bnc" id="L264" title="All 2 branches missed.">        if (importMapping.containsKey(name)) {</span>
+<span class="nc" id="L265">            return importMapping.get(name);</span>
+        } else {
+<span class="nc" id="L267">            return &quot;#include \&quot;&quot; + name + &quot;.h\&quot;&quot;;</span>
+        }
+    }
+
+    @Override
+    public CodegenModel fromModel(String name, Schema model) {
+<span class="nc" id="L273">        CodegenModel codegenModel = super.fromModel(name, model);</span>
+
+<span class="nc" id="L275">        Set&lt;String&gt; oldImports = codegenModel.imports;</span>
+<span class="nc" id="L276">        codegenModel.imports = new HashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L277" title="All 2 branches missed.">        for (String imp : oldImports) {</span>
+<span class="nc" id="L278">            String newImp = toModelImport(imp);</span>
+<span class="nc bnc" id="L279" title="All 2 branches missed.">            if (!newImp.isEmpty()) {</span>
+<span class="nc" id="L280">                codegenModel.imports.add(newImp);</span>
+            }
+<span class="nc" id="L282">        }</span>
+<span class="nc" id="L283">        return codegenModel;</span>
+    }
+
+    @Override
+    public String toModelFilename(String name) {
+<span class="nc" id="L288">        return toModelName(name);</span>
+    }
+
+    @Override
+    public String toApiFilename(String name) {
+<span class="nc" id="L293">        return toApiName(name);</span>
+    }
+
+
+    private String capitalizeFirstChar(String str) {
+<span class="nc bnc" id="L298" title="All 2 branches missed.">        if (str.length() &gt; 1) {</span>
+<span class="nc" id="L299">            return Character.toUpperCase(str.charAt(0)) + str.substring(1);</span>
+        } else {
+<span class="nc" id="L301">            return str.toUpperCase(Locale.ENGLISH);</span>
+        }
+    }
+
+    private String convertPathSegmentToResourceNamePart(String pathSegment) {
+<span class="nc" id="L306">        String convertedSegnemt = pathSegment;</span>
+<span class="nc bnc" id="L307" title="All 2 branches missed.">        if (pathSegment.matches(OPEN_API_PATH_PARAM_PATTERN)) {</span>
+<span class="nc" id="L308">            convertedSegnemt = pathSegment.substring(1, pathSegment.length() - 1);</span>
+        }
+<span class="nc" id="L310">        return capitalizeFirstChar(sanitizeName(convertedSegnemt));</span>
+    }
+
+    private String convertPathParamPattern(String pathSegment) {
+<span class="nc bnc" id="L314" title="All 2 branches missed.">        if (pathSegment.matches(OPEN_API_PATH_PARAM_PATTERN)) {</span>
+<span class="nc" id="L315">            String pattern = pathSegment.substring(0, pathSegment.length() - 1);</span>
+<span class="nc" id="L316">            pattern += &quot;: .*}&quot;;</span>
+<span class="nc" id="L317">            return pattern;</span>
+        }
+<span class="nc" id="L319">        return pathSegment;</span>
+    }
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L324">        OperationMap operations = objs.getOperations();</span>
+<span class="nc" id="L325">        List&lt;CodegenOperation&gt; operationList = operations.getOperation();</span>
+<span class="nc" id="L326">        List&lt;CodegenOperation&gt; newOpList = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L328" title="All 2 branches missed.">        for (CodegenOperation op : operationList) {</span>
+<span class="nc" id="L329">            String[] pathSegments = op.path.split(&quot;/&quot;, -1);</span>
+<span class="nc" id="L330">            String resourceNameCamelCase = &quot;&quot;;</span>
+<span class="nc" id="L331">            StringJoiner joiner = new StringJoiner(&quot;/&quot;);</span>
+<span class="nc bnc" id="L332" title="All 2 branches missed.">            for (String pathSegment : pathSegments) {</span>
+<span class="nc" id="L333">                resourceNameCamelCase += convertPathSegmentToResourceNamePart(pathSegment);</span>
+<span class="nc" id="L334">                String convertedPathSegment = convertPathParamPattern(pathSegment);</span>
+<span class="nc" id="L335">                joiner.add(convertedPathSegment);</span>
+                    }
+
+<span class="nc" id="L338">            op.path = joiner.toString();</span>
+<span class="nc" id="L339">            op.vendorExtensions.put(&quot;x-codegen-resource-name&quot;, resourceNameCamelCase);</span>
+
+
+<span class="nc" id="L342">            CodegenOperation op1 = newOpList.stream()</span>
+<span class="nc" id="L343">                    .filter(opInList -&gt; opInList.path.equals(op.path))</span>
+<span class="nc" id="L344">                    .findAny()</span>
+<span class="nc" id="L345">                    .orElse(null);</span>
+
+<span class="nc bnc" id="L347" title="All 2 branches missed.">            if (op1 != null) {</span>
+<span class="nc" id="L348">                List&lt;CodegenOperation&gt; currentOtherMethodList = getCodegenXCodegenOtherMethodsOperations(op1);</span>
+<span class="nc" id="L349">                        op.operationIdCamelCase = op1.operationIdCamelCase;</span>
+<span class="nc" id="L350">                        currentOtherMethodList.add(op);</span>
+<span class="nc" id="L351">                        op1.vendorExtensions.put(X_CODEGEN_OTHER_METHODS, currentOtherMethodList);</span>
+<span class="nc" id="L352">                    }</span>
+            else {
+<span class="nc" id="L354">                newOpList.add(op);</span>
+            }
+<span class="nc" id="L356">        }</span>
+<span class="nc" id="L357">        operations.setOperation(newOpList);</span>
+<span class="nc" id="L358">        return objs;</span>
+    }
+
+    private List&lt;CodegenOperation&gt; getCodegenXCodegenOtherMethodsOperations(CodegenOperation newOperation) {
+<span class="nc" id="L362">        List&lt;CodegenOperation&gt; currentOtherMethodList = (List&lt;CodegenOperation&gt;) newOperation.vendorExtensions.get(X_CODEGEN_OTHER_METHODS);</span>
+<span class="nc bnc" id="L363" title="All 2 branches missed.">        if (currentOtherMethodList == null) {</span>
+<span class="nc" id="L364">            currentOtherMethodList = new ArrayList&lt;&gt;();</span>
+        }
+<span class="nc" id="L366">        return currentOtherMethodList;</span>
+    }
+
+    /**
+     * Optional - type declaration. This is a String which is used by the
+     * templates to instantiate your types. There is typically special handling
+     * for different property types
+     *
+     * @return a string value used as the `dataType` field for model templates,
+     * `returnType` for api templates
+     */
+    @Override
+    public String getTypeDeclaration(Schema p) {
+<span class="nc" id="L379">        String openAPIType = getSchemaType(p);</span>
+
+<span class="nc bnc" id="L381" title="All 2 branches missed.">        if (ModelUtils.isArraySchema(p)) {</span>
+<span class="nc" id="L382">            Schema inner = ModelUtils.getSchemaItems(p);</span>
+<span class="nc" id="L383">            return getSchemaType(p) + &quot;&lt;&quot; + getTypeDeclaration(inner) + &quot;&gt;&quot;;</span>
+<span class="nc bnc" id="L384" title="All 2 branches missed.">        } else if (ModelUtils.isMapSchema(p)) {</span>
+<span class="nc" id="L385">            Schema inner = ModelUtils.getAdditionalProperties(p);</span>
+<span class="nc" id="L386">            return getSchemaType(p) + &quot;&lt;std::string, &quot; + getTypeDeclaration(inner) + &quot;&gt;&quot;;</span>
+<span class="nc bnc" id="L387" title="All 2 branches missed.">        } else if (ModelUtils.isByteArraySchema(p)) {</span>
+<span class="nc" id="L388">            return &quot;std::string&quot;;</span>
+<span class="nc bnc" id="L389" title="All 2 branches missed.">        } else if (ModelUtils.isFileSchema(p)) {</span>
+<span class="nc" id="L390">            return &quot;std::string&quot;;</span>
+<span class="nc bnc" id="L391" title="All 2 branches missed.">        } else if (ModelUtils.isStringSchema(p)</span>
+<span class="nc bnc" id="L392" title="All 2 branches missed.">                || ModelUtils.isDateSchema(p)</span>
+<span class="nc bnc" id="L393" title="All 2 branches missed.">                || ModelUtils.isDateTimeSchema(p)</span>
+<span class="nc bnc" id="L394" title="All 2 branches missed.">                || languageSpecificPrimitives.contains(openAPIType)) {</span>
+<span class="nc" id="L395">            return toModelName(openAPIType);</span>
+        }
+
+<span class="nc" id="L398">        return openAPIType;</span>
+    }
+
+    @Override
+    public String toDefaultValue(Schema p) {
+<span class="nc bnc" id="L403" title="All 2 branches missed.">        if (ModelUtils.isStringSchema(p)) {</span>
+<span class="nc bnc" id="L404" title="All 2 branches missed.">            if (p.getDefault() != null) {</span>
+<span class="nc" id="L405">                return &quot;\&quot;&quot; + p.getDefault().toString() + &quot;\&quot;&quot;;</span>
+            } else {
+<span class="nc" id="L407">                return &quot;\&quot;\&quot;&quot;;</span>
+            }
+<span class="nc bnc" id="L409" title="All 2 branches missed.">        } else if (ModelUtils.isBooleanSchema(p)) {</span>
+<span class="nc bnc" id="L410" title="All 2 branches missed.">            if (p.getDefault() != null) {</span>
+<span class="nc" id="L411">                return p.getDefault().toString();</span>
+            } else {
+<span class="nc" id="L413">                return &quot;false&quot;;</span>
+            }
+<span class="nc bnc" id="L415" title="All 2 branches missed.">        } else if (ModelUtils.isDateSchema(p)) {</span>
+<span class="nc bnc" id="L416" title="All 2 branches missed.">            if (p.getDefault() != null) {</span>
+<span class="nc" id="L417">                return &quot;\&quot;&quot; + p.getDefault().toString() + &quot;\&quot;&quot;;</span>
+            } else {
+<span class="nc" id="L419">                return &quot;\&quot;\&quot;&quot;;</span>
+            }
+<span class="nc bnc" id="L421" title="All 2 branches missed.">        } else if (ModelUtils.isDateTimeSchema(p)) {</span>
+<span class="nc bnc" id="L422" title="All 2 branches missed.">            if (p.getDefault() != null) {</span>
+<span class="nc" id="L423">                return &quot;\&quot;&quot; + p.getDefault().toString() + &quot;\&quot;&quot;;</span>
+            } else {
+<span class="nc" id="L425">                return &quot;\&quot;\&quot;&quot;;</span>
+            }
+<span class="nc bnc" id="L427" title="All 2 branches missed.">        } else if (ModelUtils.isFileSchema(p)) {</span>
+<span class="nc bnc" id="L428" title="All 2 branches missed.">            if (p.getDefault() != null) {</span>
+<span class="nc" id="L429">                return p.getDefault().toString();</span>
+            } else {
+<span class="nc" id="L431">                return &quot;std::string{}&quot;;</span>
+            }
+<span class="nc bnc" id="L433" title="All 2 branches missed.">        } else if (ModelUtils.isNumberSchema(p)) {</span>
+<span class="nc bnc" id="L434" title="All 2 branches missed.">            if (ModelUtils.isFloatSchema(p)) { // float</span>
+<span class="nc bnc" id="L435" title="All 2 branches missed.">                if (p.getDefault() != null) {</span>
+<span class="nc" id="L436">                    return p.getDefault().toString() + &quot;f&quot;;</span>
+                } else {
+<span class="nc" id="L438">                    return &quot;0.0f&quot;;</span>
+                }
+            } else { // double
+<span class="nc bnc" id="L441" title="All 2 branches missed.">                if (p.getDefault() != null) {</span>
+<span class="nc" id="L442">                    return p.getDefault().toString();</span>
+                } else {
+<span class="nc" id="L444">                    return &quot;0.0&quot;;</span>
+                }
+            }
+<span class="nc bnc" id="L447" title="All 2 branches missed.">        } else if (ModelUtils.isIntegerSchema(p)) {</span>
+<span class="nc bnc" id="L448" title="All 2 branches missed.">            if (ModelUtils.isLongSchema(p)) { // long</span>
+<span class="nc bnc" id="L449" title="All 2 branches missed.">                if (p.getDefault() != null) {</span>
+<span class="nc" id="L450">                    return p.getDefault().toString() + &quot;L&quot;;</span>
+                } else {
+<span class="nc" id="L452">                    return &quot;0L&quot;;</span>
+                }
+            } else { // integer
+<span class="nc bnc" id="L455" title="All 2 branches missed.">                if (p.getDefault() != null) {</span>
+<span class="nc" id="L456">                    return p.getDefault().toString();</span>
+                } else {
+<span class="nc" id="L458">                    return &quot;0&quot;;</span>
+                }
+            }
+<span class="nc bnc" id="L461" title="All 2 branches missed.">        } else if (ModelUtils.isByteArraySchema(p)) {</span>
+<span class="nc bnc" id="L462" title="All 2 branches missed.">            if (p.getDefault() != null) {</span>
+<span class="nc" id="L463">                return &quot;\&quot;&quot; + p.getDefault().toString() + &quot;\&quot;&quot;;</span>
+            } else {
+<span class="nc" id="L465">                return &quot;\&quot;\&quot;&quot;;</span>
+            }
+<span class="nc bnc" id="L467" title="All 2 branches missed.">        } else if (ModelUtils.isMapSchema(p)) {</span>
+<span class="nc" id="L468">            String inner = getSchemaType(ModelUtils.getAdditionalProperties(p));</span>
+<span class="nc" id="L469">            return &quot;std::map&lt;std::string, &quot; + inner + &quot;&gt;()&quot;;</span>
+<span class="nc bnc" id="L470" title="All 2 branches missed.">        } else if (ModelUtils.isSet(p)) {</span>
+<span class="nc" id="L471">            String inner = getSchemaType(ModelUtils.getSchemaItems(p));</span>
+<span class="nc" id="L472">            return &quot;std::set&lt;&quot; + inner + &quot;&gt;()&quot;;</span>
+<span class="nc bnc" id="L473" title="All 2 branches missed.">        } else if (ModelUtils.isArraySchema(p)) {</span>
+<span class="nc" id="L474">            String inner = getSchemaType(ModelUtils.getSchemaItems(p));</span>
+<span class="nc" id="L475">            return &quot;std::vector&lt;&quot; + inner + &quot;&gt;()&quot;;</span>
+<span class="nc bnc" id="L476" title="All 2 branches missed.">        } else if (ModelUtils.isModel(p)) {</span>
+<span class="nc" id="L477">            String modelName = getTypeDeclaration(p);</span>
+<span class="nc" id="L478">            return modelName + &quot;{}&quot;;</span>
+<span class="nc bnc" id="L479" title="All 2 branches missed.">        } else if (!StringUtils.isEmpty(p.get$ref())) {</span>
+<span class="nc" id="L480">            return toModelName(ModelUtils.getSimpleRef(p.get$ref())) + &quot;{}&quot;;</span>
+        }
+
+<span class="nc" id="L483">        return &quot;nullptr&quot;;</span>
+    }
+
+    @Override
+    public void postProcessParameter(CodegenParameter parameter) {
+<span class="nc" id="L488">        super.postProcessParameter(parameter);</span>
+
+<span class="nc bnc" id="L490" title="All 2 branches missed.">        boolean isPrimitiveType = parameter.isPrimitiveType == Boolean.TRUE;</span>
+<span class="nc bnc" id="L491" title="All 2 branches missed.">        boolean isArray = parameter.isArray == Boolean.TRUE;</span>
+<span class="nc bnc" id="L492" title="All 2 branches missed.">        boolean isString = parameter.isString == Boolean.TRUE;</span>
+
+<span class="nc bnc" id="L494" title="All 8 branches missed.">        if (!isPrimitiveType &amp;&amp; !isArray &amp;&amp; !isString &amp;&amp; !parameter.dataType.startsWith(&quot;std::shared_ptr&quot;)) {</span>
+<span class="nc" id="L495">            parameter.defaultValue =  parameter.dataType + &quot;{}&quot;;</span>
+        }
+<span class="nc" id="L497">    }</span>
+
+    /**
+     * Optional - OpenAPI type conversion. This is used to map OpenAPI types in
+     * a `Schema` into either language specific types via `typeMapping` or
+     * into complex models if there is not a mapping.
+     *
+     * @return a string value of the type or complex model for this property
+     */
+    @Override
+    public String getSchemaType(Schema p) {
+<span class="nc" id="L508">        String openAPIType = super.getSchemaType(p);</span>
+<span class="nc" id="L509">        String type = null;</span>
+<span class="nc bnc" id="L510" title="All 2 branches missed.">        if (typeMapping.containsKey(openAPIType)) {</span>
+<span class="nc" id="L511">            type = typeMapping.get(openAPIType);</span>
+<span class="nc bnc" id="L512" title="All 2 branches missed.">            if (languageSpecificPrimitives.contains(type))</span>
+<span class="nc" id="L513">                return toModelName(type);</span>
+        } else
+<span class="nc" id="L515">            type = openAPIType;</span>
+<span class="nc" id="L516">        return toModelName(type);</span>
+    }
+
+    @Override
+    public void updateCodegenPropertyEnum(CodegenProperty var) {
+        // Remove prefix added by DefaultCodegen
+<span class="nc" id="L522">        String originalDefaultValue = var.defaultValue;</span>
+<span class="nc" id="L523">        super.updateCodegenPropertyEnum(var);</span>
+<span class="nc" id="L524">        var.defaultValue = originalDefaultValue;</span>
+<span class="nc" id="L525">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

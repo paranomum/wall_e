@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OpenApiEvaluator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.validations.oas</a> &gt; <span class="el_source">OpenApiEvaluator.java</span></div><h1>OpenApiEvaluator.java</h1><pre class="source lang-java linenums">package org.openapitools.codegen.validations.oas;
+
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.tags.Tag;
+import org.openapitools.codegen.utils.ModelUtils;
+import org.openapitools.codegen.validation.*;
+
+import java.util.*;
+
+/**
+ * A validator which evaluates an OpenAPI 3.x specification document
+ */
+public class OpenApiEvaluator implements Validator&lt;OpenAPI&gt; {
+    private RuleConfiguration ruleConfiguration;
+
+    /**
+     * Constructs a new instance of {@link OpenApiEvaluator} with applied rules.
+     *
+     * @param ruleConfiguration The set of rules to be applied to evaluation.
+     */
+<span class="nc" id="L26">    public OpenApiEvaluator(RuleConfiguration ruleConfiguration) {</span>
+<span class="nc" id="L27">        this.ruleConfiguration = ruleConfiguration;</span>
+<span class="nc" id="L28">    }</span>
+
+    /**
+     * Validates input, resulting in a instance of {@link ValidationResult} which provides details on all validations performed (success, error, warning).
+     *
+     * @param specification The {@link OpenAPI} object instance to be validated.
+     * @return A {@link ValidationResult} which details the success, error, and warning validation results.
+     */
+    @Override
+    public ValidationResult validate(OpenAPI specification) {
+<span class="nc" id="L38">        ValidationResult validationResult = new ValidationResult();</span>
+<span class="nc bnc" id="L39" title="All 2 branches missed.">        if (specification == null) return validationResult;</span>
+
+<span class="nc" id="L41">        OpenApiParameterValidations parameterValidations = new OpenApiParameterValidations(ruleConfiguration);</span>
+<span class="nc" id="L42">        OpenApiSecuritySchemeValidations securitySchemeValidations = new OpenApiSecuritySchemeValidations(ruleConfiguration);</span>
+<span class="nc" id="L43">        OpenApiSchemaValidations schemaValidations = new OpenApiSchemaValidations(ruleConfiguration);</span>
+<span class="nc" id="L44">        OpenApiOperationValidations operationValidations = new OpenApiOperationValidations(ruleConfiguration);</span>
+
+<span class="nc bnc" id="L46" title="All 2 branches missed.">        if (ruleConfiguration.isEnableUnusedSchemasRecommendation()) {</span>
+<span class="nc" id="L47">            ValidationRule unusedSchema = ValidationRule.create(Severity.WARNING, &quot;Unused schema&quot;, &quot;A schema was determined to be unused.&quot;, s -&gt; ValidationRule.Pass.empty());</span>
+<span class="nc" id="L48">            ModelUtils.getUnusedSchemas(specification).forEach(schemaName -&gt; validationResult.addResult(Validated.invalid(unusedSchema, &quot;Unused model: &quot; + schemaName)));</span>
+        }
+
+        // Get list of all schemas under /components/schemas, including nested schemas defined inline and composed schema.
+        // The validators must be able to validate every schema defined in the OAS document.
+<span class="nc" id="L53">        List&lt;Schema&gt; schemas = ModelUtils.getAllSchemas(specification);</span>
+<span class="nc" id="L54">        schemas.forEach(schema -&gt; {</span>
+<span class="nc" id="L55">            SchemaWrapper wrapper = new SchemaWrapper(specification, schema);</span>
+<span class="nc" id="L56">            validationResult.consume(schemaValidations.validate(wrapper));</span>
+<span class="nc" id="L57">        });</span>
+
+<span class="nc" id="L59">        List&lt;Parameter&gt; parameters = new ArrayList&lt;&gt;(50);</span>
+
+<span class="nc" id="L61">        Paths paths = specification.getPaths();</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        if (paths != null) {</span>
+<span class="nc" id="L63">            paths.forEach((key, pathItem) -&gt; {</span>
+                // parameters defined &quot;globally&quot;
+<span class="nc" id="L65">                List&lt;Parameter&gt; pathParameters = pathItem.getParameters();</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">                if (pathParameters != null) parameters.addAll(pathItem.getParameters());</span>
+
+<span class="nc" id="L68">                pathItem.readOperationsMap().forEach((httpMethod, op) -&gt; {</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">                    if (op != null) {</span>
+                        // parameters on each operation method
+<span class="nc bnc" id="L71" title="All 2 branches missed.">                        if (op.getParameters() != null) {</span>
+<span class="nc" id="L72">                            parameters.addAll(op.getParameters());</span>
+                        }
+
+<span class="nc" id="L75">                        OperationWrapper wrapper = new OperationWrapper(specification, op, httpMethod);</span>
+<span class="nc" id="L76">                        validationResult.consume(operationValidations.validate(wrapper));</span>
+                    }
+<span class="nc" id="L78">                });</span>
+<span class="nc" id="L79">            });</span>
+        }
+
+<span class="nc" id="L82">        Components components = specification.getComponents();</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        if (components != null) {</span>
+<span class="nc" id="L84">            Map&lt;String, SecurityScheme&gt; securitySchemes = components.getSecuritySchemes();</span>
+<span class="nc bnc" id="L85" title="All 4 branches missed.">            if (securitySchemes != null &amp;&amp; !securitySchemes.isEmpty()) {</span>
+<span class="nc" id="L86">                securitySchemes.values().forEach(securityScheme -&gt; {</span>
+<span class="nc" id="L87">                    SecuritySchemeWrapper wrapper = new SecuritySchemeWrapper(specification, securityScheme);</span>
+<span class="nc" id="L88">                    validationResult.consume(securitySchemeValidations.validate(wrapper));</span>
+<span class="nc" id="L89">                });</span>
+            }
+
+<span class="nc bnc" id="L92" title="All 2 branches missed.">            if (components.getParameters() != null) {</span>
+<span class="nc" id="L93">                parameters.addAll(components.getParameters().values());</span>
+            }
+        }
+
+<span class="nc" id="L97">        parameters.forEach(parameter -&gt; {</span>
+<span class="nc" id="L98">            parameter = ModelUtils.getReferencedParameter(specification, parameter);</span>
+<span class="nc" id="L99">            ParameterWrapper wrapper = new ParameterWrapper(specification, parameter);</span>
+<span class="nc" id="L100">            validationResult.consume(parameterValidations.validate(wrapper));</span>
+<span class="nc" id="L101">        });</span>
+
+<span class="nc" id="L103">        List&lt;Tag&gt; tags = specification.getTags();</span>
+<span class="nc bnc" id="L104" title="All 4 branches missed.">        if (tags != null &amp;&amp; tags.size() &gt; 1) {</span>
+<span class="nc" id="L105">            Set&lt;String&gt; distinct = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L106">            Set&lt;String&gt; duplicated = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L107">            tags.forEach(tag -&gt; {</span>
+                // add returns false if it already exists…
+<span class="nc bnc" id="L109" title="All 2 branches missed.">                if (!distinct.add(tag.getName())) {</span>
+<span class="nc" id="L110">                    duplicated.add(tag.getName());</span>
+                }
+<span class="nc" id="L112">            });</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">            if (duplicated.size() &gt; 0) {</span>
+                // From https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#fixed-fields
+                // A list of tags used by the specification with additional metadata. The order of the tags can be used
+                // to reflect on their order by the parsing tools. Not all tags that are used by the Operation Object
+                // must be declared. The tags that are not declared MAY be organized randomly or based on the tools'
+                // logic. Each tag name in the list MUST be unique.
+<span class="nc" id="L119">                ValidationRule rule = ValidationRule.warn(&quot;Duplicate tags&quot;, &quot;The specification requires that tag names are unique.&quot;, s -&gt; ValidationRule.Fail.empty());</span>
+<span class="nc" id="L120">                validationResult.addResult(Validated.invalid(rule, &quot;Duplicated tag(s): &quot; + String.join(&quot;,&quot;, duplicated)));</span>
+            }
+        }
+
+<span class="nc" id="L124">        return validationResult;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

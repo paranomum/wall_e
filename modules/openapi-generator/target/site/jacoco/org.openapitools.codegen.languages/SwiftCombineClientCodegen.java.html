@@ -1,0 +1,818 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SwiftCombineClientCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">SwiftCombineClientCodegen.java</span></div><h1>SwiftCombineClientCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.StringSchema;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.meta.GeneratorMetadata;
+import org.openapitools.codegen.meta.Stability;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.utils.ModelUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.time.OffsetDateTime;
+import java.time.Instant;
+import java.time.temporal.ChronoField;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.openapitools.codegen.utils.CamelizeOption.LOWERCASE_FIRST_LETTER;
+import static org.openapitools.codegen.utils.StringUtils.camelize;
+
+public class SwiftCombineClientCodegen extends DefaultCodegen implements CodegenConfig {
+<span class="nc" id="L53">    private final Logger LOGGER = LoggerFactory.getLogger(SwiftCombineClientCodegen.class);</span>
+
+    public static final String PROJECT_NAME = &quot;projectName&quot;;
+    public static final String MAP_FILE_BINARY_TO_DATA = &quot;mapFileBinaryToData&quot;;
+<span class="nc" id="L57">    protected String projectName = &quot;OpenAPIClient&quot;;</span>
+<span class="nc" id="L58">    protected String privateFolder = &quot;Sources/Private&quot;;</span>
+<span class="nc" id="L59">    protected String sourceFolder = &quot;Sources&quot;;</span>
+<span class="nc" id="L60">    protected String transportFolder = &quot;OpenAPITransport&quot;;</span>
+<span class="nc" id="L61">    protected List&lt;String&gt; notCodableTypes = Arrays.asList(&quot;Any&quot;, &quot;AnyObject&quot;, &quot;[String: Any]&quot;, &quot;[String: [String: Any]]&quot;, &quot;[Any]&quot;);</span>
+<span class="nc" id="L62">    protected boolean mapFileBinaryToData = true;</span>
+
+<span class="nc" id="L64">    protected boolean anyDecoderWasAdded = false;</span>
+
+    /**
+     * Constructor for the swift language codegen module.
+     */
+    public SwiftCombineClientCodegen() {
+<span class="nc" id="L70">        super();</span>
+<span class="nc" id="L71">        this.supportsMultipleInheritance = true;</span>
+<span class="nc" id="L72">        this.useOneOfInterfaces = true;</span>
+<span class="nc" id="L73">        this.supportsAdditionalPropertiesWithComposedSchema = true;</span>
+
+<span class="nc" id="L75">        generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
+<span class="nc" id="L76">                .stability(Stability.STABLE)</span>
+<span class="nc" id="L77">                .build();</span>
+
+<span class="nc" id="L79">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;swift&quot;;</span>
+<span class="nc" id="L80">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.swift&quot;);</span>
+<span class="nc" id="L81">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.swift&quot;);</span>
+<span class="nc" id="L82">        embeddedTemplateDir = templateDir = &quot;swift-combine&quot;;</span>
+<span class="nc" id="L83">        apiPackage = File.separator + &quot;APIs&quot;;</span>
+<span class="nc" id="L84">        modelPackage = File.separator + &quot;Models&quot;;</span>
+
+<span class="nc" id="L86">        languageSpecificPrimitives = new HashSet&lt;&gt;(</span>
+<span class="nc" id="L87">                Arrays.asList(</span>
+                        &quot;Int&quot;,
+                        &quot;Int32&quot;,
+                        &quot;Int64&quot;,
+                        &quot;Float&quot;,
+                        &quot;Double&quot;,
+                        &quot;Bool&quot;,
+                        &quot;Void&quot;,
+                        &quot;String&quot;,
+                        &quot;Data&quot;,
+                        &quot;Date&quot;,
+                        &quot;Character&quot;,
+                        &quot;UUID&quot;,
+                        &quot;URL&quot;,
+                        &quot;AnyObject&quot;,
+                        &quot;Any&quot;,
+                        &quot;[String: Any]&quot;,
+                        &quot;Decimal&quot;)
+        );
+<span class="nc" id="L106">        defaultIncludes = new HashSet&lt;&gt;(</span>
+<span class="nc" id="L107">                Arrays.asList(</span>
+                        &quot;Data&quot;,
+                        &quot;Date&quot;,
+                        &quot;URL&quot;, // for file
+                        &quot;UUID&quot;,
+                        &quot;Array&quot;,
+                        &quot;Dictionary&quot;,
+                        &quot;Set&quot;,
+                        &quot;Any&quot;,
+                        &quot;Empty&quot;,
+                        &quot;AnyObject&quot;,
+                        &quot;Decimal&quot;)
+        );
+
+<span class="nc" id="L121">        reservedWords = new HashSet&lt;&gt;(</span>
+<span class="nc" id="L122">                Arrays.asList(</span>
+                        // Swift keywords. This list is taken from here:
+                        // https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/LexicalStructure.html#//apple_ref/doc/uid/TP40014097-CH30-ID410
+                        //
+                        // Keywords used in declarations
+                        &quot;associatedtype&quot;, &quot;class&quot;, &quot;deinit&quot;, &quot;enum&quot;, &quot;extension&quot;, &quot;fileprivate&quot;, &quot;func&quot;, &quot;import&quot;, &quot;init&quot;,
+                        &quot;inout&quot;, &quot;internal&quot;, &quot;let&quot;, &quot;open&quot;, &quot;operator&quot;, &quot;private&quot;, &quot;protocol&quot;, &quot;public&quot;, &quot;static&quot;, &quot;struct&quot;,
+                        &quot;subscript&quot;, &quot;typealias&quot;, &quot;var&quot;,
+                        // Keywords uses in statements
+                        &quot;break&quot;, &quot;case&quot;, &quot;continue&quot;, &quot;default&quot;, &quot;defer&quot;, &quot;do&quot;, &quot;else&quot;, &quot;fallthrough&quot;, &quot;for&quot;, &quot;guard&quot;, &quot;if&quot;,
+                        &quot;in&quot;, &quot;repeat&quot;, &quot;return&quot;, &quot;switch&quot;, &quot;where&quot;, &quot;while&quot;,
+                        // Keywords used in expressions and types
+                        &quot;as&quot;, &quot;Any&quot;, &quot;catch&quot;, &quot;false&quot;, &quot;is&quot;, &quot;nil&quot;, &quot;rethrows&quot;, &quot;super&quot;, &quot;self&quot;, &quot;Self&quot;, &quot;throw&quot;, &quot;throws&quot;, &quot;true&quot;, &quot;try&quot;,
+                        // Keywords used in patterns
+                        &quot;_&quot;,
+                        // Keywords that begin with a number sign
+                        &quot;#available&quot;, &quot;#colorLiteral&quot;, &quot;#column&quot;, &quot;#else&quot;, &quot;#elseif&quot;, &quot;#endif&quot;, &quot;#file&quot;, &quot;#fileLiteral&quot;, &quot;#function&quot;, &quot;#if&quot;,
+                        &quot;#imageLiteral&quot;, &quot;#line&quot;, &quot;#selector&quot;, &quot;#sourceLocation&quot;,
+                        // Keywords reserved in particular contexts
+                        &quot;associativity&quot;, &quot;convenience&quot;, &quot;dynamic&quot;, &quot;didSet&quot;, &quot;final&quot;, &quot;get&quot;, &quot;infix&quot;, &quot;indirect&quot;, &quot;lazy&quot;, &quot;left&quot;,
+                        &quot;mutating&quot;, &quot;none&quot;, &quot;nonmutating&quot;, &quot;optional&quot;, &quot;override&quot;, &quot;postfix&quot;, &quot;precedence&quot;, &quot;prefix&quot;, &quot;Protocol&quot;,
+                        &quot;required&quot;, &quot;right&quot;, &quot;set&quot;, &quot;Type&quot;, &quot;unowned&quot;, &quot;weak&quot;, &quot;willSet&quot;,
+
+                        //
+                        // Swift Standard Library types
+                        // https://developer.apple.com/documentation/swift
+                        //
+                        // Numbers and Basic Values
+                        &quot;Bool&quot;, &quot;Int&quot;, &quot;Double&quot;, &quot;Float&quot;, &quot;Range&quot;, &quot;ClosedRange&quot;, &quot;Error&quot;, &quot;Optional&quot;,
+                        // Special-Use Numeric Types
+                        &quot;UInt&quot;, &quot;UInt8&quot;, &quot;UInt16&quot;, &quot;UInt32&quot;, &quot;UInt64&quot;, &quot;Int8&quot;, &quot;Int16&quot;, &quot;Int32&quot;, &quot;Int64&quot;, &quot;Float80&quot;, &quot;Float32&quot;, &quot;Float64&quot;,
+                        // Strings and Text
+                        &quot;String&quot;, &quot;Character&quot;, &quot;Unicode&quot;, &quot;StaticString&quot;,
+                        // Collections
+                        &quot;Array&quot;, &quot;Dictionary&quot;, &quot;Set&quot;, &quot;OptionSet&quot;, &quot;CountableRange&quot;, &quot;CountableClosedRange&quot;,
+
+                        // The following are commonly-used Foundation types
+                        &quot;URL&quot;, &quot;Data&quot;, &quot;Codable&quot;, &quot;Encodable&quot;, &quot;Decodable&quot;, &quot;Result&quot;,
+
+                        // The following are other words we want to reserve
+                        &quot;Void&quot;, &quot;AnyObject&quot;, &quot;Class&quot;, &quot;dynamicType&quot;, &quot;COLUMN&quot;, &quot;FILE&quot;, &quot;FUNCTION&quot;, &quot;LINE&quot;
+                )
+        );
+
+<span class="nc" id="L166">        typeMapping = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L167">        typeMapping.put(&quot;array&quot;, &quot;Array&quot;);</span>
+<span class="nc" id="L168">        typeMapping.put(&quot;map&quot;, &quot;Dictionary&quot;);</span>
+<span class="nc" id="L169">        typeMapping.put(&quot;set&quot;, &quot;Set&quot;);</span>
+<span class="nc" id="L170">        typeMapping.put(&quot;date&quot;, &quot;Date&quot;);</span>
+<span class="nc" id="L171">        typeMapping.put(&quot;Date&quot;, &quot;Date&quot;);</span>
+<span class="nc" id="L172">        typeMapping.put(&quot;DateTime&quot;, &quot;Date&quot;);</span>
+<span class="nc" id="L173">        typeMapping.put(&quot;boolean&quot;, &quot;Bool&quot;);</span>
+<span class="nc" id="L174">        typeMapping.put(&quot;string&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L175">        typeMapping.put(&quot;char&quot;, &quot;Character&quot;);</span>
+<span class="nc" id="L176">        typeMapping.put(&quot;short&quot;, &quot;Int&quot;);</span>
+<span class="nc" id="L177">        typeMapping.put(&quot;int&quot;, &quot;Int&quot;);</span>
+<span class="nc" id="L178">        typeMapping.put(&quot;long&quot;, &quot;Int64&quot;);</span>
+<span class="nc" id="L179">        typeMapping.put(&quot;integer&quot;, &quot;Int&quot;);</span>
+<span class="nc" id="L180">        typeMapping.put(&quot;Integer&quot;, &quot;Int&quot;);</span>
+<span class="nc" id="L181">        typeMapping.put(&quot;float&quot;, &quot;Float&quot;);</span>
+<span class="nc" id="L182">        typeMapping.put(&quot;number&quot;, &quot;Double&quot;);</span>
+<span class="nc" id="L183">        typeMapping.put(&quot;double&quot;, &quot;Double&quot;);</span>
+<span class="nc" id="L184">        typeMapping.put(&quot;ByteArray&quot;, &quot;Data&quot;);</span>
+<span class="nc" id="L185">        typeMapping.put(&quot;UUID&quot;, &quot;UUID&quot;);</span>
+<span class="nc" id="L186">        typeMapping.put(&quot;URI&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L187">        typeMapping.put(&quot;decimal&quot;, &quot;Decimal&quot;);</span>
+<span class="nc" id="L188">        typeMapping.put(&quot;object&quot;, &quot;[String: Any]&quot;);</span>
+<span class="nc" id="L189">        typeMapping.put(&quot;AnyType&quot;, &quot;Any&quot;);</span>
+<span class="nc" id="L190">        typeMapping.put(&quot;file&quot;, &quot;Data&quot;);</span>
+<span class="nc" id="L191">        typeMapping.put(&quot;binary&quot;, &quot;Data&quot;);</span>
+
+<span class="nc" id="L193">        instantiationTypes.put(&quot;array&quot;, &quot;Array&quot;);</span>
+<span class="nc" id="L194">        instantiationTypes.put(&quot;list&quot;, &quot;Array&quot;);</span>
+
+<span class="nc" id="L196">        importMapping = new HashMap&lt;&gt;();</span>
+
+<span class="nc" id="L198">        cliOptions.add(new CliOption(PROJECT_NAME, &quot;Project name in Xcode&quot;));</span>
+<span class="nc" id="L199">        cliOptions.add(new CliOption(CodegenConstants.API_NAME_PREFIX, CodegenConstants.API_NAME_PREFIX_DESC));</span>
+<span class="nc" id="L200">        cliOptions.add(new CliOption(MAP_FILE_BINARY_TO_DATA,</span>
+                &quot;Map File and Binary to Data (default: true)&quot;)
+<span class="nc" id="L202">                .defaultValue(Boolean.TRUE.toString()));</span>
+<span class="nc" id="L203">    }</span>
+
+    @Override
+    public CodegenType getTag() {
+<span class="nc" id="L207">        return CodegenType.CLIENT;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L212">        return &quot;swift-combine&quot;;</span>
+    }
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L217">        return &quot;Generates a Swift Combine client library.&quot;;</span>
+    }
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L222">        super.processOpts();</span>
+
+<span class="nc" id="L224">        anyDecoderWasAdded = false;</span>
+<span class="nc bnc" id="L225" title="All 2 branches missed.">        if (StringUtils.isEmpty(System.getenv(&quot;SWIFT_POST_PROCESS_FILE&quot;))) {</span>
+<span class="nc" id="L226">            LOGGER.info(&quot;Environment variable SWIFT_POST_PROCESS_FILE not defined so the Swift code may not be properly formatted. To define it, try 'export SWIFT_POST_PROCESS_FILE=/usr/local/bin/swiftformat' (Linux/Mac)&quot;);</span>
+<span class="nc" id="L227">            LOGGER.info(&quot;NOTE: To enable file post-processing, 'enablePostProcessFile' must be set to `true` (--enable-post-process-file for CLI).&quot;);</span>
+        }
+
+        // Setup project name
+<span class="nc bnc" id="L231" title="All 2 branches missed.">        if (additionalProperties.containsKey(PROJECT_NAME)) {</span>
+<span class="nc" id="L232">            setProjectName((String) additionalProperties.get(PROJECT_NAME));</span>
+        } else {
+<span class="nc" id="L234">            additionalProperties.put(PROJECT_NAME, projectName);</span>
+        }
+
+<span class="nc" id="L237">        supportingFiles.add(new SupportingFile(&quot;Package.mustache&quot;,</span>
+                projectName,
+                &quot;Package.swift&quot;));
+<span class="nc" id="L240">        supportingFiles.add(new SupportingFile(&quot;OpenAPITransportPackage.mustache&quot;,</span>
+                transportFolder,
+                &quot;Package.swift&quot;));
+<span class="nc" id="L243">        supportingFiles.add(new SupportingFile(&quot;OpenAPITransport.mustache&quot;,</span>
+                transportFolder + File.separator + sourceFolder,
+                &quot;OpenAPITransport.swift&quot;));
+<span class="nc" id="L246">        supportingFiles.add(new SupportingFile(&quot;OpenISO8601DateFormatter.mustache&quot;,</span>
+                projectName + File.separator + privateFolder,
+                &quot;OpenISO8601DateFormatter.swift&quot;));
+<span class="nc bnc" id="L249" title="All 2 branches missed.">        if (additionalProperties.containsKey(MAP_FILE_BINARY_TO_DATA)) {</span>
+<span class="nc" id="L250">            mapFileBinaryToData = convertPropertyToBooleanAndWriteBack(MAP_FILE_BINARY_TO_DATA);</span>
+        }
+<span class="nc" id="L252">        additionalProperties.put(MAP_FILE_BINARY_TO_DATA, mapFileBinaryToData);</span>
+<span class="nc bnc" id="L253" title="All 2 branches missed.">        if (mapFileBinaryToData) {</span>
+<span class="nc" id="L254">            typeMapping.put(&quot;file&quot;, &quot;Data&quot;);</span>
+<span class="nc" id="L255">            typeMapping.put(&quot;binary&quot;, &quot;Data&quot;);</span>
+        } else {
+<span class="nc" id="L257">            typeMapping.put(&quot;file&quot;, &quot;URL&quot;);</span>
+<span class="nc" id="L258">            typeMapping.put(&quot;binary&quot;, &quot;URL&quot;);</span>
+        }
+<span class="nc" id="L260">    }</span>
+
+    @Override
+    protected boolean isReservedWord(String word) {
+<span class="nc bnc" id="L264" title="All 4 branches missed.">        return word != null &amp;&amp; reservedWords.contains(word); //don't lowercase as super does</span>
+    }
+
+    @Override
+    public String escapeReservedWord(String name) {
+<span class="nc bnc" id="L269" title="All 2 branches missed.">        if (this.reservedWordsMappings().containsKey(name)) {</span>
+<span class="nc" id="L270">            return this.reservedWordsMappings().get(name);</span>
+        }
+<span class="nc" id="L272">        return &quot;_&quot; + name;</span>
+    }
+
+    @Override
+    public String modelFileFolder() {
+<span class="nc" id="L277">        return outputFolder + File.separator + projectName + File.separator + sourceFolder</span>
+<span class="nc" id="L278">                + modelPackage().replace('.', File.separatorChar);</span>
+    }
+
+    @Override
+    public String apiFileFolder() {
+<span class="nc" id="L283">        return outputFolder + File.separator + projectName + File.separator + sourceFolder</span>
+<span class="nc" id="L284">                + apiPackage().replace('.', File.separatorChar);</span>
+    }
+
+    @Override
+    public String getTypeDeclaration(Schema p) {
+<span class="nc" id="L289">        Schema&lt;?&gt; schema = ModelUtils.unaliasSchema(this.openAPI, p, importMapping);</span>
+<span class="nc bnc" id="L290" title="All 2 branches missed.">        Schema&lt;?&gt; target = ModelUtils.isGenerateAliasAsModel() ? p : schema;</span>
+<span class="nc bnc" id="L291" title="All 2 branches missed.">        if (ModelUtils.isArraySchema(target)) {</span>
+<span class="nc" id="L292">            Schema&lt;?&gt; items = ModelUtils.getSchemaItems(schema);</span>
+<span class="nc bnc" id="L293" title="All 4 branches missed.">            return ModelUtils.isSet(target) &amp;&amp; ModelUtils.isObjectSchema(items) ? &quot;Set&lt;&quot; + getTypeDeclaration(items) + &quot;&gt;&quot; : &quot;[&quot; + getTypeDeclaration(items) + &quot;]&quot;;</span>
+<span class="nc bnc" id="L294" title="All 2 branches missed.">        } else if (ModelUtils.isMapSchema(target)) {</span>
+            // Note: ModelUtils.isMapSchema(p) returns true when p is a composed schema that also defines
+            // additionalproperties: true
+<span class="nc" id="L297">            Schema&lt;?&gt; inner = ModelUtils.getAdditionalProperties(target);</span>
+<span class="nc bnc" id="L298" title="All 2 branches missed.">            if (inner == null) {</span>
+<span class="nc" id="L299">                LOGGER.error(&quot;`{}` (map property) does not have a proper inner type defined. Default to type:string&quot;, p.getName());</span>
+<span class="nc" id="L300">                inner = new StringSchema().description(&quot;TODO default missing map inner type to string&quot;);</span>
+<span class="nc" id="L301">                p.setAdditionalProperties(inner);</span>
+            }
+<span class="nc" id="L303">            return &quot;[String: &quot; + getTypeDeclaration(inner) + &quot;]&quot;;</span>
+<span class="nc bnc" id="L304" title="All 2 branches missed.">        } else if (ModelUtils.isComposedSchema(target)) {</span>
+<span class="nc" id="L305">            List&lt;Schema&gt; schemas = ModelUtils.getInterfaces((ComposedSchema) target);</span>
+<span class="nc bnc" id="L306" title="All 2 branches missed.">            if (schemas.size() == 1) {</span>
+<span class="nc" id="L307">                return getTypeDeclaration(schemas.get(0));</span>
+            } else {
+<span class="nc" id="L309">                super.getTypeDeclaration(target);</span>
+            }
+        }
+<span class="nc" id="L312">        return super.getTypeDeclaration(target);</span>
+    }
+
+    @Override
+    public String getSchemaType(Schema p) {
+<span class="nc" id="L317">        String openAPIType = super.getSchemaType(p);</span>
+        String type;
+<span class="nc bnc" id="L319" title="All 2 branches missed.">        if (typeMapping.containsKey(openAPIType)) {</span>
+<span class="nc" id="L320">            type = typeMapping.get(openAPIType);</span>
+<span class="nc bnc" id="L321" title="All 4 branches missed.">            if (languageSpecificPrimitives.contains(type) || defaultIncludes.contains(type)) {</span>
+<span class="nc" id="L322">                return type;</span>
+            }
+        } else {
+<span class="nc" id="L325">            type = openAPIType;</span>
+        }
+<span class="nc" id="L327">        return toModelName(type);</span>
+    }
+
+    @Override
+    public boolean isDataTypeFile(String dataType) {
+<span class="nc" id="L332">        return &quot;URL&quot;.equals(dataType);</span>
+    }
+
+    @Override
+    public boolean isDataTypeBinary(final String dataType) {
+<span class="nc" id="L337">        return &quot;Data&quot;.equals(dataType);</span>
+    }
+
+    /**
+     * Output the proper model name (capitalized).
+     *
+     * @param name the name of the model
+     * @return capitalized model name
+     */
+    @Override
+    public String toModelName(String name) {
+        // FIXME parameter should not be assigned. Also declare it as &quot;final&quot;
+<span class="nc" id="L349">        name = sanitizeName(name);</span>
+
+<span class="nc bnc" id="L351" title="All 2 branches missed.">        if (!StringUtils.isEmpty(modelNameSuffix)) { // set model suffix</span>
+<span class="nc" id="L352">            name = name + &quot;_&quot; + modelNameSuffix;</span>
+        }
+
+<span class="nc bnc" id="L355" title="All 2 branches missed.">        if (!StringUtils.isEmpty(modelNamePrefix)) { // set model prefix</span>
+<span class="nc" id="L356">            name = modelNamePrefix + &quot;_&quot; + name;</span>
+        }
+
+        // camelize the model name
+        // phone_number =&gt; PhoneNumber
+<span class="nc" id="L361">        name = camelize(name);</span>
+
+        // model name cannot use reserved keyword, e.g. return
+<span class="nc bnc" id="L364" title="All 2 branches missed.">        if (isReservedWord(name)) {</span>
+<span class="nc" id="L365">            String modelName = &quot;Model&quot; + name;</span>
+<span class="nc" id="L366">            LOGGER.warn(&quot;{} (reserved word) cannot be used as model name. Renamed to {}&quot;, name, modelName);</span>
+<span class="nc" id="L367">            return modelName;</span>
+        }
+
+        // model name starts with number
+<span class="nc bnc" id="L371" title="All 2 branches missed.">        if (name.matches(&quot;^\\d.*&quot;)) {</span>
+            // e.g. 200Response =&gt; Model200Response (after camelize)
+<span class="nc" id="L373">            String modelName = &quot;Model&quot; + name;</span>
+<span class="nc" id="L374">            LOGGER.warn(&quot;{} (model name starts with number) cannot be used as model name. Renamed to {}&quot;, name,</span>
+                    modelName);
+<span class="nc" id="L376">            return modelName;</span>
+        }
+
+<span class="nc" id="L379">        return name;</span>
+    }
+
+    /**
+     * Return the capitalized file name of the model.
+     *
+     * @param name the model name
+     * @return the file name of the model
+     */
+    @Override
+    public String toModelFilename(String name) {
+        // should be the same as the model name
+<span class="nc" id="L391">        return toModelName(name);</span>
+    }
+
+    @Override
+    public String toDefaultValue(Schema p) {
+<span class="nc bnc" id="L396" title="All 4 branches missed.">        if (p.getEnum() != null &amp;&amp; !p.getEnum().isEmpty()) {</span>
+<span class="nc bnc" id="L397" title="All 2 branches missed.">            if (p.getDefault() != null) {</span>
+<span class="nc" id="L398">                return &quot;.&quot; + toEnumVarName(escapeText(String.valueOf(p.getDefault())), p.getType());</span>
+            }
+        }
+<span class="nc bnc" id="L401" title="All 2 branches missed.">        if (p.getDefault() != null) {</span>
+<span class="nc bnc" id="L402" title="All 6 branches missed.">            if (ModelUtils.isIntegerSchema(p) || ModelUtils.isNumberSchema(p) || ModelUtils.isBooleanSchema(p)) {</span>
+<span class="nc" id="L403">                return p.getDefault().toString();</span>
+<span class="nc bnc" id="L404" title="All 2 branches missed.">            } else if (ModelUtils.isDateTimeSchema(p)) {</span>
+                // Datetime time stamps in Swift are expressed as Seconds with Microsecond precision.
+                // In Java, we need to be creative to get the Timestamp in Microseconds as a long.
+<span class="nc" id="L407">                Instant instant = ((OffsetDateTime) p.getDefault()).toInstant();</span>
+<span class="nc" id="L408">                long epochMicro = TimeUnit.SECONDS.toMicros(instant.getEpochSecond()) + (instant.get(ChronoField.MICRO_OF_SECOND));</span>
+<span class="nc" id="L409">                return &quot;Date(timeIntervalSince1970: &quot; + String.valueOf(epochMicro) + &quot;.0 / 1_000_000)&quot;;</span>
+<span class="nc bnc" id="L410" title="All 2 branches missed.">            } else if (ModelUtils.isUUIDSchema(p)) {</span>
+<span class="nc" id="L411">                return &quot;\&quot;&quot; + escapeText(String.valueOf(p.getDefault())) + &quot;\&quot;&quot;;</span>
+<span class="nc bnc" id="L412" title="All 2 branches missed.">            } else if (ModelUtils.isStringSchema(p)) {</span>
+<span class="nc" id="L413">                return &quot;\&quot;&quot; + escapeText(String.valueOf(p.getDefault())) + &quot;\&quot;&quot;;</span>
+            }
+            // TODO: Handle more cases from `ModelUtils`, such as Date
+        }
+<span class="nc" id="L417">        return null;</span>
+    }
+
+    @Override
+    public String toInstantiationType(Schema p) {
+<span class="nc bnc" id="L422" title="All 2 branches missed.">        if (ModelUtils.isMapSchema(p)) {</span>
+<span class="nc" id="L423">            return getSchemaType(ModelUtils.getAdditionalProperties(p));</span>
+<span class="nc bnc" id="L424" title="All 2 branches missed.">        } else if (ModelUtils.isArraySchema(p)) {</span>
+<span class="nc" id="L425">            String inner = getSchemaType(ModelUtils.getSchemaItems(p));</span>
+<span class="nc bnc" id="L426" title="All 2 branches missed.">            return ModelUtils.isSet(p) ? &quot;Set&lt;&quot; + inner + &quot;&gt;&quot; : &quot;[&quot; + inner + &quot;]&quot;;</span>
+        }
+<span class="nc" id="L428">        return null;</span>
+    }
+
+    @Override
+    public String toApiName(String name) {
+<span class="nc bnc" id="L433" title="All 2 branches missed.">        if (name.length() == 0) {</span>
+<span class="nc" id="L434">            return &quot;DefaultAPI&quot;;</span>
+        }
+<span class="nc" id="L436">        return camelize(apiNamePrefix + &quot;_&quot; + name) + &quot;API&quot;;</span>
+    }
+
+    @Override
+    public String toModelDocFilename(String name) {
+<span class="nc" id="L441">        return toModelName(name);</span>
+    }
+
+    @Override
+    public String toApiDocFilename(String name) {
+<span class="nc" id="L446">        return toApiName(name);</span>
+    }
+
+    @Override
+    public String toOperationId(String operationId) {
+<span class="nc" id="L451">        operationId = camelize(sanitizeName(operationId), LOWERCASE_FIRST_LETTER);</span>
+
+        // Throw exception if method name is empty.
+        // This should not happen but keep the check just in case
+<span class="nc bnc" id="L455" title="All 2 branches missed.">        if (StringUtils.isEmpty(operationId)) {</span>
+<span class="nc" id="L456">            throw new RuntimeException(&quot;Empty method name (operationId) not allowed&quot;);</span>
+        }
+
+        // method name cannot use reserved keyword, e.g. return
+<span class="nc bnc" id="L460" title="All 2 branches missed.">        if (isReservedWord(operationId)) {</span>
+<span class="nc" id="L461">            String newOperationId = camelize((&quot;call_&quot; + operationId), LOWERCASE_FIRST_LETTER);</span>
+<span class="nc" id="L462">            LOGGER.warn(&quot;{} (reserved word) cannot be used as method name. Renamed to {}&quot;, operationId, newOperationId);</span>
+<span class="nc" id="L463">            return newOperationId;</span>
+        }
+
+        // operationId starts with a number
+<span class="nc bnc" id="L467" title="All 2 branches missed.">        if (operationId.matches(&quot;^\\d.*&quot;)) {</span>
+<span class="nc" id="L468">            LOGGER.warn(&quot;{} (starting with a number) cannot be used as method name. Renamed to {}&quot;, operationId, camelize(sanitizeName(&quot;call_&quot; + operationId), LOWERCASE_FIRST_LETTER));</span>
+<span class="nc" id="L469">            operationId = camelize(sanitizeName(&quot;call_&quot; + operationId), LOWERCASE_FIRST_LETTER);</span>
+        }
+
+
+<span class="nc" id="L473">        return operationId;</span>
+    }
+
+    @Override
+    public String toVarName(String name) {
+        // sanitize name
+<span class="nc" id="L479">        name = sanitizeName(name);</span>
+
+        // if it's all upper case, do nothing
+<span class="nc bnc" id="L482" title="All 2 branches missed.">        if (name.matches(&quot;^[A-Z_]*$&quot;)) {</span>
+<span class="nc" id="L483">            return name;</span>
+        }
+
+        // camelize the variable name
+        // pet_id =&gt; petId
+<span class="nc" id="L488">        name = camelize(name, LOWERCASE_FIRST_LETTER);</span>
+
+        // for reserved words surround with `` or append _
+<span class="nc bnc" id="L491" title="All 2 branches missed.">        if (isReservedWord(name)) {</span>
+<span class="nc" id="L492">            name = escapeReservedWord(name);</span>
+        }
+
+        // for words starting with number, append _
+<span class="nc bnc" id="L496" title="All 2 branches missed.">        if (name.matches(&quot;^\\d.*&quot;)) {</span>
+<span class="nc" id="L497">            name = &quot;_&quot; + name;</span>
+        }
+
+<span class="nc" id="L500">        return name;</span>
+    }
+
+    @Override
+    public String toParamName(String name) {
+        // sanitize name
+<span class="nc" id="L506">        name = sanitizeName(name);</span>
+
+        // replace - with _ e.g. created-at =&gt; created_at
+<span class="nc" id="L509">        name = name.replaceAll(&quot;-&quot;, &quot;_&quot;);</span>
+
+        // if it's all upper case, do nothing
+<span class="nc bnc" id="L512" title="All 2 branches missed.">        if (name.matches(&quot;^[A-Z_]*$&quot;)) {</span>
+<span class="nc" id="L513">            return name;</span>
+        }
+
+        // camelize(lower) the variable name
+        // pet_id =&gt; petId
+<span class="nc" id="L518">        name = camelize(name, LOWERCASE_FIRST_LETTER);</span>
+
+        // for reserved words surround with ``
+<span class="nc bnc" id="L521" title="All 2 branches missed.">        if (isReservedWord(name)) {</span>
+<span class="nc" id="L522">            name = escapeReservedWord(name);</span>
+        }
+
+        // for words starting with number, append _
+<span class="nc bnc" id="L526" title="All 2 branches missed.">        if (name.matches(&quot;^\\d.*&quot;)) {</span>
+<span class="nc" id="L527">            name = &quot;_&quot; + name;</span>
+        }
+
+<span class="nc" id="L530">        return name;</span>
+    }
+
+    @Override
+    public CodegenModel fromModel(String name, Schema schema) {
+<span class="nc" id="L535">        CodegenModel m = super.fromModel(name, schema);</span>
+<span class="nc" id="L536">        m.optionalVars = m.optionalVars.stream().distinct().collect(Collectors.toList());</span>
+        // Update allVars/requiredVars/optionalVars with isInherited
+        // Each of these lists contains elements that are similar, but they are all cloned
+        // via CodegenModel.removeAllDuplicatedProperty and therefore need to be updated
+        // separately.
+        // First find only the parent vars via baseName matching
+<span class="nc" id="L542">        Map&lt;String, CodegenProperty&gt; allVarsMap = m.allVars.stream()</span>
+<span class="nc" id="L543">                .collect(Collectors.toMap(CodegenProperty::getBaseName, Function.identity()));</span>
+<span class="nc" id="L544">        allVarsMap.keySet()</span>
+<span class="nc" id="L545">                .removeAll(m.vars.stream().map(CodegenProperty::getBaseName).collect(Collectors.toSet()));</span>
+        // Update the allVars
+<span class="nc" id="L547">        allVarsMap.values().forEach(p -&gt; p.isInherited = true);</span>
+        // Update any other vars (requiredVars, optionalVars)
+<span class="nc" id="L549">        Stream.of(m.requiredVars, m.optionalVars)</span>
+<span class="nc" id="L550">                .flatMap(List::stream)</span>
+<span class="nc" id="L551">                .filter(p -&gt; allVarsMap.containsKey(p.baseName))</span>
+<span class="nc" id="L552">                .forEach(p -&gt; p.isInherited = true);</span>
+<span class="nc" id="L553">        return m;</span>
+    }
+
+    public void setProjectName(String projectName) {
+<span class="nc" id="L557">        this.projectName = projectName;</span>
+<span class="nc" id="L558">    }</span>
+
+    @Override
+    public String toEnumValue(String value, String datatype) {
+        // for string, array of string
+<span class="nc bnc" id="L563" title="All 6 branches missed.">        if (&quot;String&quot;.equals(datatype) || &quot;[String]&quot;.equals(datatype) || &quot;[String: String]&quot;.equals(datatype)) {</span>
+<span class="nc" id="L564">            return &quot;\&quot;&quot; + String.valueOf(value) + &quot;\&quot;&quot;;</span>
+        } else {
+<span class="nc" id="L566">            return String.valueOf(value);</span>
+        }
+    }
+
+    @Override
+    public String toEnumDefaultValue(String value, String datatype) {
+<span class="nc" id="L572">        return datatype + &quot;_&quot; + value;</span>
+    }
+
+    @Override
+    public String toEnumVarName(String name, String datatype) {
+<span class="nc bnc" id="L577" title="All 2 branches missed.">        if (enumNameMapping.containsKey(name)) {</span>
+<span class="nc" id="L578">            return enumNameMapping.get(name);</span>
+        }
+
+<span class="nc bnc" id="L581" title="All 2 branches missed.">        if (name.length() == 0) {</span>
+<span class="nc" id="L582">            return &quot;empty&quot;;</span>
+        }
+
+<span class="nc" id="L585">        Pattern startWithNumberPattern = Pattern.compile(&quot;^\\d+&quot;);</span>
+<span class="nc" id="L586">        Matcher startWithNumberMatcher = startWithNumberPattern.matcher(name);</span>
+<span class="nc bnc" id="L587" title="All 2 branches missed.">        if (startWithNumberMatcher.find()) {</span>
+<span class="nc" id="L588">            String startingNumbers = startWithNumberMatcher.group(0);</span>
+<span class="nc" id="L589">            String nameWithoutStartingNumbers = name.substring(startingNumbers.length());</span>
+
+<span class="nc" id="L591">            return &quot;_&quot; + startingNumbers + camelize(nameWithoutStartingNumbers, LOWERCASE_FIRST_LETTER);</span>
+        }
+
+        // for symbol, e.g. $, #
+<span class="nc bnc" id="L595" title="All 2 branches missed.">        if (getSymbolName(name) != null) {</span>
+<span class="nc" id="L596">            return camelize(WordUtils.capitalizeFully(getSymbolName(name).toUpperCase(Locale.ROOT)), LOWERCASE_FIRST_LETTER);</span>
+        }
+
+        // Camelize only when we have a structure defined below
+<span class="nc" id="L600">        Boolean camelized = false;</span>
+<span class="nc bnc" id="L601" title="All 2 branches missed.">        if (name.matches(&quot;[A-Z][a-z0-9]+[a-zA-Z0-9]*&quot;)) {</span>
+<span class="nc" id="L602">            name = camelize(name, LOWERCASE_FIRST_LETTER);</span>
+<span class="nc" id="L603">            camelized = true;</span>
+        }
+
+        // Reserved Name
+<span class="nc" id="L607">        String nameLowercase = StringUtils.lowerCase(name);</span>
+<span class="nc bnc" id="L608" title="All 2 branches missed.">        if (isReservedWord(nameLowercase)) {</span>
+<span class="nc" id="L609">            return escapeReservedWord(nameLowercase);</span>
+        }
+
+        // Check for numerical conversions
+<span class="nc bnc" id="L613" title="All 6 branches missed.">        if (&quot;Int&quot;.equals(datatype) || &quot;Int32&quot;.equals(datatype) || &quot;Int64&quot;.equals(datatype)</span>
+<span class="nc bnc" id="L614" title="All 4 branches missed.">                || &quot;Float&quot;.equals(datatype) || &quot;Double&quot;.equals(datatype)) {</span>
+<span class="nc" id="L615">            String varName = &quot;number&quot; + camelize(name);</span>
+<span class="nc" id="L616">            varName = varName.replaceAll(&quot;-&quot;, &quot;minus&quot;);</span>
+<span class="nc" id="L617">            varName = varName.replaceAll(&quot;\\+&quot;, &quot;plus&quot;);</span>
+<span class="nc" id="L618">            varName = varName.replaceAll(&quot;\\.&quot;, &quot;dot&quot;);</span>
+<span class="nc" id="L619">            return varName;</span>
+        }
+
+        // If we have already camelized the word, don't progress
+        // any further
+<span class="nc bnc" id="L624" title="All 2 branches missed.">        if (camelized) {</span>
+<span class="nc" id="L625">            return name;</span>
+        }
+
+<span class="nc" id="L628">        char[] separators = {'-', '_', ' ', ':', '(', ')'};</span>
+<span class="nc" id="L629">        return camelize(WordUtils.capitalizeFully(StringUtils.lowerCase(name), separators)</span>
+<span class="nc" id="L630">                        .replaceAll(&quot;[-_ :\\(\\)]&quot;, &quot;&quot;),</span>
+                LOWERCASE_FIRST_LETTER);
+    }
+
+    @Override
+    public String toEnumName(CodegenProperty property) {
+<span class="nc bnc" id="L636" title="All 2 branches missed.">        if (enumNameMapping.containsKey(property.name)) {</span>
+<span class="nc" id="L637">            return enumNameMapping.get(property.name);</span>
+        }
+
+<span class="nc" id="L640">        String enumName = toModelName(property.name);</span>
+
+        // Ensure that the enum type doesn't match a reserved word or
+        // the variable name doesn't match the generated enum type or the
+        // Swift compiler will generate an error
+<span class="nc bnc" id="L645" title="All 2 branches missed.">        if (isReservedWord(property.datatypeWithEnum)</span>
+<span class="nc bnc" id="L646" title="All 2 branches missed.">                || toVarName(property.name).equals(property.datatypeWithEnum)) {</span>
+<span class="nc" id="L647">            enumName = property.datatypeWithEnum + &quot;Enum&quot;;</span>
+        }
+
+        // TODO: toModelName already does something for names starting with number,
+        // so this code is probably never called
+<span class="nc bnc" id="L652" title="All 2 branches missed.">        if (enumName.matches(&quot;\\d.*&quot;)) { // starts with number</span>
+<span class="nc" id="L653">            return &quot;_&quot; + enumName;</span>
+        } else {
+<span class="nc" id="L655">            return enumName;</span>
+        }
+    }
+
+    @Override
+    public ModelsMap postProcessModels(ModelsMap objs) {
+<span class="nc" id="L661">        ModelsMap postProcessedModelsEnum = postProcessModelsEnum(objs);</span>
+<span class="nc" id="L662">        List&lt;Object&gt; models = (List&lt;Object&gt;) postProcessedModelsEnum.get(&quot;models&quot;);</span>
+<span class="nc bnc" id="L663" title="All 2 branches missed.">        for (Object _mo : models) {</span>
+<span class="nc" id="L664">            Map&lt;String, Object&gt; mo = (Map&lt;String, Object&gt;) _mo;</span>
+<span class="nc" id="L665">            CodegenModel cm = (CodegenModel) mo.get(&quot;model&quot;);</span>
+<span class="nc" id="L666">            boolean modelHasPropertyWithEscapedName = false;</span>
+<span class="nc bnc" id="L667" title="All 2 branches missed.">            for (CodegenProperty prop : cm.allVars) {</span>
+<span class="nc bnc" id="L668" title="All 2 branches missed.">                if (!prop.name.equals(prop.baseName)) {</span>
+<span class="nc" id="L669">                    prop.vendorExtensions.put(&quot;x-codegen-escaped-property-name&quot;, true);</span>
+<span class="nc" id="L670">                    modelHasPropertyWithEscapedName = true;</span>
+                }
+<span class="nc bnc" id="L672" title="All 4 branches missed.">                if (notCodableTypes.contains(prop.dataType) || notCodableTypes.contains(prop.baseType)) {</span>
+<span class="nc" id="L673">                    prop.vendorExtensions.put(&quot;x-swift-is-not-codable&quot;, true);</span>
+                }
+<span class="nc bnc" id="L675" title="All 6 branches missed.">                if (modelHasPropertyWithEscapedName || notCodableTypes.contains(prop.dataType) || notCodableTypes.contains(prop.baseType)) {</span>
+<span class="nc" id="L676">                    cm.vendorExtensions.put(&quot;x-swift-contains-not-codable&quot;, true);</span>
+<span class="nc" id="L677">                    addAnyDecoderIfNeeded();</span>
+                }
+<span class="nc" id="L679">            }</span>
+<span class="nc bnc" id="L680" title="All 2 branches missed.">            if (modelHasPropertyWithEscapedName) {</span>
+<span class="nc" id="L681">                cm.vendorExtensions.put(&quot;x-codegen-has-escaped-property-names&quot;, true);</span>
+            }
+<span class="nc" id="L683">        }</span>
+
+<span class="nc" id="L685">        return postProcessedModelsEnum;</span>
+    }
+
+    @Override
+    public String escapeQuotationMark(String input) {
+        // remove &quot; to avoid code injection
+<span class="nc" id="L691">        return input.replace(&quot;\&quot;&quot;, &quot;&quot;);</span>
+    }
+
+    @Override
+    public String escapeUnsafeCharacters(String input) {
+<span class="nc" id="L696">        return input.replace(&quot;*/&quot;, &quot;*_/&quot;).replace(&quot;/*&quot;, &quot;/_*&quot;);</span>
+    }
+
+    @Override
+    public void postProcessFile(File file, String fileType) {
+<span class="nc bnc" id="L701" title="All 2 branches missed.">        if (file == null) {</span>
+<span class="nc" id="L702">            return;</span>
+        }
+<span class="nc" id="L704">        String swiftPostProcessFile = System.getenv(&quot;SWIFT_POST_PROCESS_FILE&quot;);</span>
+<span class="nc bnc" id="L705" title="All 2 branches missed.">        if (StringUtils.isEmpty(swiftPostProcessFile)) {</span>
+<span class="nc" id="L706">            return; // skip if SWIFT_POST_PROCESS_FILE env variable is not defined</span>
+        }
+        // only process files with swift extension
+<span class="nc bnc" id="L709" title="All 2 branches missed.">        if (&quot;swift&quot;.equals(FilenameUtils.getExtension(file.toString()))) {</span>
+<span class="nc" id="L710">            String command = swiftPostProcessFile + &quot; &quot; + file.toString();</span>
+            try {
+<span class="nc" id="L712">                Process p = Runtime.getRuntime().exec(command);</span>
+<span class="nc" id="L713">                int exitValue = p.waitFor();</span>
+<span class="nc bnc" id="L714" title="All 2 branches missed.">                if (exitValue != 0) {</span>
+<span class="nc" id="L715">                    LOGGER.error(&quot;Error running the command ({}). Exit value: {}&quot;, command, exitValue);</span>
+                } else {
+<span class="nc" id="L717">                    LOGGER.info(&quot;Successfully executed: {}&quot;, command);</span>
+                }
+<span class="nc" id="L719">            } catch (InterruptedException | IOException e) {</span>
+<span class="nc" id="L720">                LOGGER.error(&quot;Error running the command ({}). Exception: {}&quot;, command, e.getMessage());</span>
+                // Restore interrupted state
+<span class="nc" id="L722">                Thread.currentThread().interrupt();</span>
+<span class="nc" id="L723">            }</span>
+        }
+<span class="nc" id="L725">    }</span>
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L729">        Map&lt;String, Object&gt; objectMap = (Map&lt;String, Object&gt;) objs.get(&quot;operations&quot;);</span>
+
+<span class="nc" id="L731">        HashMap&lt;String, CodegenModel&gt; modelMaps = ModelMap.toCodegenModelMap(allModels);</span>
+
+<span class="nc" id="L733">        List&lt;CodegenOperation&gt; operations = (List&lt;CodegenOperation&gt;) objectMap.get(&quot;operation&quot;);</span>
+<span class="nc bnc" id="L734" title="All 2 branches missed.">        for (CodegenOperation operation : operations) {</span>
+<span class="nc" id="L735">            operation.allParams.forEach(cp -&gt; addVendorExtensions(cp, operation, modelMaps));</span>
+<span class="nc" id="L736">            operation.queryParams.forEach(cp -&gt; addVendorExtensions(cp, operation, modelMaps));</span>
+<span class="nc" id="L737">            operation.headerParams.forEach(cp -&gt; addVendorExtensions(cp, operation, modelMaps));</span>
+<span class="nc" id="L738">            operation.bodyParams.forEach(cp -&gt; addVendorExtensions(cp, operation, modelMaps));</span>
+<span class="nc" id="L739">            operation.formParams.forEach(cp -&gt; addFormVendorExtensions(cp, operation, modelMaps));</span>
+<span class="nc bnc" id="L740" title="All 4 branches missed.">            if (notCodableTypes.contains(operation.returnType) || notCodableTypes.contains(operation.returnBaseType)) {</span>
+<span class="nc" id="L741">                operation.vendorExtensions.put(&quot;x-swift-is-not-codable&quot;, true);</span>
+<span class="nc" id="L742">                addAnyDecoderIfNeeded();</span>
+            }
+<span class="nc" id="L744">            List&lt;CodegenResponse&gt; responses = operation.responses;</span>
+<span class="nc bnc" id="L745" title="All 2 branches missed.">            for (CodegenResponse response : responses) {</span>
+<span class="nc bnc" id="L746" title="All 4 branches missed.">                if (response.is4xx || response.is5xx) {</span>
+<span class="nc" id="L747">                    response.vendorExtensions.put(&quot;x-swift-has-custom-error-type&quot;, true);</span>
+<span class="nc" id="L748">                    response.vendorExtensions.put(&quot;x-swift-custom-error-type&quot;, WordUtils.capitalize(operation.operationId) + &quot;Error&quot;);</span>
+<span class="nc" id="L749">                    operation.vendorExtensions.put(&quot;x-swift-custom-error-type&quot;, WordUtils.capitalize(operation.operationId) + &quot;Error&quot;);</span>
+                }
+<span class="nc bnc" id="L751" title="All 2 branches missed.">                response.vendorExtensions.put(&quot;x-swift-is-response-code-explicit&quot;, !response.code.contains(&quot;x&quot;));</span>
+<span class="nc" id="L752">            }</span>
+<span class="nc" id="L753">        }</span>
+<span class="nc" id="L754">        return objs;</span>
+    }
+
+    protected void addVendorExtensions(CodegenParameter cp, CodegenOperation operation, HashMap&lt;String, CodegenModel&gt; modelMaps) {
+<span class="nc" id="L758">        CodegenModel model = modelMaps.get(cp.dataType);</span>
+<span class="nc" id="L759">        cp.vendorExtensions.put(&quot;x-swift-use-encoder&quot;, cp.isModel);</span>
+<span class="nc bnc" id="L760" title="All 4 branches missed.">        if (cp.isArray &amp;&amp; cp.items != null) {</span>
+<span class="nc" id="L761">            CodegenModel baseModel = modelMaps.get(cp.items.dataType);</span>
+<span class="nc bnc" id="L762" title="All 8 branches missed.">            boolean isBaseTypeEnum = cp.items.isEnum || cp.isEnum || (baseModel != null &amp;&amp; baseModel.isEnum);</span>
+<span class="nc" id="L763">            cp.vendorExtensions.put(&quot;x-swift-is-base-type-enum&quot;, isBaseTypeEnum);</span>
+<span class="nc bnc" id="L764" title="All 4 branches missed.">            boolean isBaseTypeUdid = cp.items.isUuid || cp.isUuid;</span>
+<span class="nc" id="L765">            cp.vendorExtensions.put(&quot;x-swift-is-base-type-udid&quot;, isBaseTypeUdid);</span>
+
+<span class="nc bnc" id="L767" title="All 8 branches missed.">            boolean useEncoder = !isBaseTypeEnum &amp;&amp; !cp.items.isString || (baseModel != null &amp;&amp; !baseModel.isString);</span>
+<span class="nc" id="L768">            cp.vendorExtensions.put(&quot;x-swift-use-encoder&quot;, useEncoder);</span>
+        }
+<span class="nc bnc" id="L770" title="All 6 branches missed.">        if (cp.isEnum || (model != null &amp;&amp; model.isEnum)) {</span>
+<span class="nc" id="L771">            cp.vendorExtensions.put(&quot;x-swift-is-enum-type&quot;, true);</span>
+        }
+<span class="nc bnc" id="L773" title="All 2 branches missed.">        if (cp.isEnum) {</span>
+<span class="nc" id="L774">            String newDataType = WordUtils.capitalize(operation.operationId) + WordUtils.capitalize(cp.enumName);</span>
+<span class="nc" id="L775">            cp.vendorExtensions.put(&quot;x-swift-nested-enum-type&quot;, newDataType);</span>
+<span class="nc bnc" id="L776" title="All 2 branches missed.">            if (cp.isArray) {</span>
+<span class="nc bnc" id="L777" title="All 2 branches missed.">                if (cp.uniqueItems) {</span>
+<span class="nc" id="L778">                    cp.dataType = &quot;Set&lt;&quot; + newDataType + &quot;&gt;&quot;;</span>
+                } else {
+<span class="nc" id="L780">                    cp.dataType = &quot;[&quot; + newDataType + &quot;]&quot;;</span>
+                }
+            } else {
+<span class="nc" id="L783">                cp.baseType = cp.dataType;</span>
+<span class="nc" id="L784">                cp.dataType = newDataType;</span>
+            }
+        }
+<span class="nc" id="L787">    }</span>
+
+    protected void addFormVendorExtensions(CodegenParameter cp, CodegenOperation operation, HashMap&lt;String, CodegenModel&gt; modelMaps) {
+<span class="nc" id="L790">        addVendorExtensions(cp, operation, modelMaps);</span>
+<span class="nc bnc" id="L791" title="All 6 branches missed.">        if (operation.isMultipart &amp;&amp; cp.isArray &amp;&amp; cp.items.isFile) {</span>
+<span class="nc" id="L792">            cp.vendorExtensions.put(&quot;x-swift-enumerate-multipart&quot;, true);</span>
+        }
+<span class="nc" id="L794">    }</span>
+
+    @Override
+    public void postProcess() {
+<span class="nc" id="L798">        System.out.println(&quot;################################################################################&quot;);</span>
+<span class="nc" id="L799">        System.out.println(&quot;# Thanks for using OpenAPI Generator.                                          #&quot;);</span>
+<span class="nc" id="L800">        System.out.println(&quot;# swift combine generator is contributed by @dydus0x14 and @ptiz.          #&quot;);</span>
+<span class="nc" id="L801">        System.out.println(&quot;################################################################################&quot;);</span>
+<span class="nc" id="L802">    }</span>
+
+    @Override
+    public GeneratorLanguage generatorLanguage() {
+<span class="nc" id="L806">        return GeneratorLanguage.SWIFT;</span>
+    }
+
+    protected void addAnyDecoderIfNeeded() {
+<span class="nc bnc" id="L810" title="All 2 branches missed.">        if (!anyDecoderWasAdded) {</span>
+<span class="nc" id="L811">            supportingFiles.add(new SupportingFile(&quot;AnyDecodable.mustache&quot;,</span>
+                    projectName + File.separator + privateFolder,
+                    &quot;AnyDecodable.swift&quot;));
+<span class="nc" id="L814">            anyDecoderWasAdded = true;</span>
+        }
+<span class="nc" id="L816">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

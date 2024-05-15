@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JavaJerseyServerCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">JavaJerseyServerCodegen.java</span></div><h1>JavaJerseyServerCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.meta.features.DocumentationFeature;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.OperationsMap;
+
+import java.util.*;
+
+public class JavaJerseyServerCodegen extends AbstractJavaJAXRSServerCodegen {
+
+    protected static final String LIBRARY_JERSEY2 = &quot;jersey2&quot;;
+    protected static final String LIBRARY_JERSEY3 = &quot;jersey3&quot;;
+    
+    /**
+     * Default library template to use. (Default: jersey2)
+     */
+    public static final String DEFAULT_JERSEY_LIBRARY = LIBRARY_JERSEY2;
+
+    public JavaJerseyServerCodegen() {
+<span class="fc" id="L41">        super();</span>
+
+<span class="fc" id="L43">        modifyFeatureSet(features -&gt; features.includeDocumentationFeatures(DocumentationFeature.Readme));</span>
+
+<span class="fc" id="L45">        outputFolder = &quot;generated-code/JavaJaxRS-Jersey&quot;;</span>
+
+<span class="fc" id="L47">        apiTemplateFiles.put(&quot;apiService.mustache&quot;, &quot;.java&quot;);</span>
+<span class="fc" id="L48">        apiTemplateFiles.put(&quot;apiServiceImpl.mustache&quot;, &quot;.java&quot;);</span>
+<span class="fc" id="L49">        apiTemplateFiles.put(&quot;apiServiceFactory.mustache&quot;, &quot;.java&quot;);</span>
+<span class="fc" id="L50">        apiTestTemplateFiles.clear(); // TODO: add test template</span>
+
+        // clear model and api doc template as this codegen
+        // does not support auto-generated markdown doc at the moment
+        //TODO: add doc templates
+<span class="fc" id="L55">        modelDocTemplateFiles.remove(&quot;model_doc.mustache&quot;);</span>
+<span class="fc" id="L56">        apiDocTemplateFiles.remove(&quot;api_doc.mustache&quot;);</span>
+
+<span class="fc" id="L58">        embeddedTemplateDir = templateDir = JAXRS_TEMPLATE_DIRECTORY_NAME;</span>
+
+<span class="fc" id="L60">        CliOption library = new CliOption(CodegenConstants.LIBRARY, CodegenConstants.LIBRARY_DESC).defaultValue(DEFAULT_JERSEY_LIBRARY);</span>
+<span class="fc" id="L61">        supportedLibraries.put(LIBRARY_JERSEY2, &quot;Jersey core 2.x&quot;);</span>
+<span class="fc" id="L62">        supportedLibraries.put(LIBRARY_JERSEY3, &quot;Jersey core 3.x&quot;);</span>
+<span class="fc" id="L63">        library.setEnum(supportedLibraries);</span>
+<span class="fc" id="L64">        cliOptions.add(library);</span>
+<span class="fc" id="L65">    }</span>
+
+    @Override
+    public String getName() {
+<span class="fc" id="L69">        return &quot;jaxrs-jersey&quot;;</span>
+    }
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L74">        return &quot;Generates a Java JAXRS Server application based on Jersey framework.&quot;;</span>
+    }
+
+    @Override
+    public void postProcessModelProperty(CodegenModel model, CodegenProperty property) {
+<span class="nc" id="L79">        super.postProcessModelProperty(model, property);</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">        if (&quot;null&quot;.equals(property.example)) {</span>
+<span class="nc" id="L81">            property.example = null;</span>
+        }
+
+        // --- Add imports for Jackson ----------
+<span class="nc bnc" id="L85" title="All 2 branches missed.">        if (!BooleanUtils.toBoolean(model.isEnum)) {</span>
+<span class="nc" id="L86">            model.imports.add(&quot;JsonProperty&quot;);</span>
+
+<span class="nc bnc" id="L88" title="All 2 branches missed.">            if (BooleanUtils.toBoolean(model.hasEnums)) {</span>
+<span class="nc" id="L89">                model.imports.add(&quot;JsonValue&quot;);</span>
+            }
+        }
+        
+        // --- Imports for Swagger2 ------------- 
+<span class="nc bnc" id="L94" title="All 2 branches missed.">        if (this.isLibrary(LIBRARY_JERSEY3)) {</span>
+<span class="nc" id="L95">            model.imports.add(&quot;Schema&quot;);</span>
+        }
+        
+<span class="nc" id="L98">    }</span>
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L102">        super.processOpts();</span>
+
+        // use default library if unset
+<span class="nc bnc" id="L105" title="All 2 branches missed.">        if (StringUtils.isEmpty(library)) {</span>
+<span class="nc" id="L106">            this.setLibrary(DEFAULT_JERSEY_LIBRARY);</span>
+            
+<span class="nc bnc" id="L108" title="All 2 branches missed.">        } else if (this.isLibrary(LIBRARY_JERSEY3)) {</span>
+            // --- Ensure to use Jakarta for jersey3 ----
+<span class="nc" id="L110">            this.setUseJakartaEe(true);</span>
+<span class="nc" id="L111">            additionalProperties.put(USE_JAKARTA_EE, true);</span>
+<span class="nc" id="L112">            this.applyJakartaPackage();</span>
+            // --- Set Swagger2 annotations ---------------   
+<span class="nc" id="L114">            annotationLibrary = AnnotationLibrary.SWAGGER2;</span>
+            
+        }
+        
+<span class="nc bnc" id="L118" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.IMPL_FOLDER)) {</span>
+<span class="nc" id="L119">            implFolder = (String) additionalProperties.get(CodegenConstants.IMPL_FOLDER);</span>
+        }
+
+<span class="nc bnc" id="L122" title="All 2 branches missed.">        if (&quot;joda&quot;.equals(dateLibrary)) {</span>
+<span class="nc" id="L123">            supportingFiles.add(new SupportingFile(&quot;JodaDateTimeProvider.mustache&quot;, (sourceFolder + '/' + apiPackage).replace(&quot;.&quot;, &quot;/&quot;), &quot;JodaDateTimeProvider.java&quot;));</span>
+<span class="nc" id="L124">            supportingFiles.add(new SupportingFile(&quot;JodaLocalDateProvider.mustache&quot;, (sourceFolder + '/' + apiPackage).replace(&quot;.&quot;, &quot;/&quot;), &quot;JodaLocalDateProvider.java&quot;));</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">        } else if (dateLibrary.startsWith(&quot;java8&quot;)) {</span>
+<span class="nc" id="L126">            supportingFiles.add(new SupportingFile(&quot;OffsetDateTimeProvider.mustache&quot;, (sourceFolder + '/' + apiPackage).replace(&quot;.&quot;, &quot;/&quot;), &quot;OffsetDateTimeProvider.java&quot;));</span>
+<span class="nc" id="L127">            supportingFiles.add(new SupportingFile(&quot;LocalDateProvider.mustache&quot;, (sourceFolder + '/' + apiPackage).replace(&quot;.&quot;, &quot;/&quot;), &quot;LocalDateProvider.java&quot;));</span>
+        }
+
+<span class="nc" id="L130">        supportingFiles.add(new SupportingFile(&quot;pom.mustache&quot;, &quot;&quot;, &quot;pom.xml&quot;)</span>
+<span class="nc" id="L131">                .doNotOverwrite());</span>
+<span class="nc" id="L132">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;)</span>
+<span class="nc" id="L133">                .doNotOverwrite());</span>
+<span class="nc" id="L134">        supportingFiles.add(new SupportingFile(&quot;ApiException.mustache&quot;, (sourceFolder + '/' + apiPackage).replace(&quot;.&quot;, &quot;/&quot;), &quot;ApiException.java&quot;));</span>
+<span class="nc" id="L135">        supportingFiles.add(new SupportingFile(&quot;ApiOriginFilter.mustache&quot;, (sourceFolder + '/' + apiPackage).replace(&quot;.&quot;, &quot;/&quot;), &quot;ApiOriginFilter.java&quot;));</span>
+<span class="nc" id="L136">        supportingFiles.add(new SupportingFile(&quot;ApiResponseMessage.mustache&quot;, (sourceFolder + '/' + apiPackage).replace(&quot;.&quot;, &quot;/&quot;), &quot;ApiResponseMessage.java&quot;));</span>
+<span class="nc" id="L137">        supportingFiles.add(new SupportingFile(&quot;NotFoundException.mustache&quot;, (sourceFolder + '/' + apiPackage).replace(&quot;.&quot;, &quot;/&quot;), &quot;NotFoundException.java&quot;));</span>
+<span class="nc" id="L138">        supportingFiles.add(new SupportingFile(&quot;jacksonJsonProvider.mustache&quot;, (sourceFolder + '/' + apiPackage).replace(&quot;.&quot;, &quot;/&quot;), &quot;JacksonJsonProvider.java&quot;));</span>
+<span class="nc" id="L139">        supportingFiles.add(new SupportingFile(&quot;RFC3339DateFormat.mustache&quot;, (sourceFolder + '/' + apiPackage).replace(&quot;.&quot;, &quot;/&quot;), &quot;RFC3339DateFormat.java&quot;));</span>
+<span class="nc" id="L140">        supportingFiles.add(new SupportingFile(&quot;bootstrap.mustache&quot;, (implFolder + '/' + apiPackage).replace(&quot;.&quot;, &quot;/&quot;), &quot;Bootstrap.java&quot;)</span>
+<span class="nc" id="L141">                .doNotOverwrite());</span>
+<span class="nc" id="L142">        supportingFiles.add(new SupportingFile(&quot;web.mustache&quot;, (&quot;src/main/webapp/WEB-INF&quot;), &quot;web.xml&quot;)</span>
+<span class="nc" id="L143">                .doNotOverwrite());</span>
+<span class="nc" id="L144">        supportingFiles.add(new SupportingFile(&quot;StringUtil.mustache&quot;, (sourceFolder + '/' + apiPackage).replace(&quot;.&quot;, &quot;/&quot;), &quot;StringUtil.java&quot;));</span>
+
+        // JsonNullable is not implemented for this generator
+<span class="nc" id="L147">        openApiNullable = false;</span>
+<span class="nc" id="L148">    }</span>
+
+
+    @Override
+    public ModelsMap postProcessModelsEnum(ModelsMap objs) {
+<span class="nc" id="L153">        objs = super.postProcessModelsEnum(objs);</span>
+
+        //Add imports for Jackson
+<span class="nc" id="L156">        List&lt;Map&lt;String, String&gt;&gt; imports = objs.getImports();</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">        for (ModelMap mo : objs.getModels()) {</span>
+<span class="nc" id="L158">            CodegenModel cm = mo.getModel();</span>
+            // for enum model
+<span class="nc bnc" id="L160" title="All 4 branches missed.">            if (Boolean.TRUE.equals(cm.isEnum) &amp;&amp; cm.allowableValues != null) {</span>
+<span class="nc" id="L161">                cm.imports.add(importMapping.get(&quot;JsonValue&quot;));</span>
+<span class="nc" id="L162">                Map&lt;String, String&gt; item = new HashMap&lt;String, String&gt;();</span>
+<span class="nc" id="L163">                item.put(&quot;import&quot;, importMapping.get(&quot;JsonValue&quot;));</span>
+<span class="nc" id="L164">                imports.add(item);</span>
+            }
+<span class="nc" id="L166">        }</span>
+
+<span class="nc" id="L168">        return objs;</span>
+    }
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L173">        objs = super.postProcessOperationsWithModels(objs, allModels);</span>
+<span class="nc" id="L174">        removeImport(objs, &quot;java.util.List&quot;);</span>
+<span class="nc" id="L175">        return objs;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

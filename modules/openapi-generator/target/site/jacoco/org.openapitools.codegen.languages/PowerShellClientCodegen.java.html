@@ -1,0 +1,1602 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PowerShellClientCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">PowerShellClientCodegen.java</span></div><h1>PowerShellClientCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Schema;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.meta.GeneratorMetadata;
+import org.openapitools.codegen.meta.Stability;
+import org.openapitools.codegen.meta.features.*;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.utils.ModelUtils;
+import org.openapitools.codegen.utils.ProcessUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+
+import static java.util.UUID.randomUUID;
+import static org.openapitools.codegen.utils.StringUtils.camelize;
+
+public class PowerShellClientCodegen extends DefaultCodegen implements CodegenConfig {
+<span class="nc" id="L45">    private final Logger LOGGER = LoggerFactory.getLogger(PowerShellClientCodegen.class);</span>
+<span class="nc" id="L46">    private String packageGuid = &quot;{&quot; + randomUUID().toString().toUpperCase(Locale.ROOT) + &quot;}&quot;;</span>
+
+
+<span class="nc" id="L49">    protected String sourceFolder = &quot;src&quot;;</span>
+<span class="nc" id="L50">    protected String packageName = &quot;PSOpenAPITools&quot;;</span>
+<span class="nc" id="L51">    protected String packageVersion = &quot;0.1.2&quot;;</span>
+<span class="nc" id="L52">    protected String apiDocPath = &quot;docs/&quot;;</span>
+<span class="nc" id="L53">    protected String modelDocPath = &quot;docs/&quot;;</span>
+<span class="nc" id="L54">    protected String apiTestPath = &quot;tests/Api&quot;;</span>
+<span class="nc" id="L55">    protected String modelTestPath = &quot;tests/Model&quot;;</span>
+    protected HashSet nullablePrimitives;
+    protected String powershellGalleryUrl;
+    protected HashSet powershellVerbs;
+    protected Map&lt;String, String&gt; commonVerbs; // verbs not in the official ps verb list but can be mapped to one of the verbs
+    protected HashSet methodNames; // store a list of method names to detect duplicates
+<span class="nc" id="L61">    protected boolean useOneOfDiscriminatorLookup = false; // use oneOf discriminator's mapping for model lookup</span>
+<span class="nc" id="L62">    protected boolean discardReadOnly = false; // Discard the readonly property in initialize cmdlet</span>
+<span class="nc" id="L63">    protected boolean skipVerbParsing = false; // Attempt to parse cmdlets from operation names</span>
+    protected String projectUri;
+    protected String licenseUri;
+    protected String releaseNotes;
+    protected String tags;
+    protected String iconUri;
+    protected Set&lt;String&gt; paramNameReservedWords;
+<span class="nc" id="L70">    protected String modelsCmdletVerb = &quot;Initialize&quot;;</span>
+<span class="nc" id="L71">    protected boolean useClassNameInModelsExamples = true;</span>
+
+<span class="nc" id="L73">    private Map&lt;String, String&gt; schemaKeyToModelNameCache = new HashMap&lt;&gt;();</span>
+
+    /**
+     * Constructs an instance of `PowerShellClientCodegen`.
+     */
+    public PowerShellClientCodegen() {
+<span class="nc" id="L79">        super();</span>
+<span class="nc" id="L80">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L81">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="nc" id="L82">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON, WireFormatFeature.XML))</span>
+<span class="nc" id="L83">                .securityFeatures(EnumSet.of(</span>
+                        SecurityFeature.BasicAuth,
+                        SecurityFeature.BearerToken,
+                        SecurityFeature.ApiKey,
+                        SecurityFeature.SignatureAuth
+                ))
+<span class="nc" id="L89">                .excludeGlobalFeatures(</span>
+                        GlobalFeature.XMLStructureDefinitions,
+                        GlobalFeature.Callbacks,
+                        GlobalFeature.LinkObjects,
+                        GlobalFeature.ParameterStyling
+                )
+<span class="nc" id="L95">                .excludeSchemaSupportFeatures(</span>
+                        SchemaSupportFeature.Polymorphism
+                )
+<span class="nc" id="L98">                .excludeParameterFeatures(</span>
+                        ParameterFeature.Cookie
+                )
+        );
+
+<span class="nc" id="L103">        generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
+<span class="nc" id="L104">                .stability(Stability.BETA)</span>
+<span class="nc" id="L105">                .build();</span>
+
+<span class="nc" id="L107">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;powershell-experimental&quot;;</span>
+<span class="nc" id="L108">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.ps1&quot;);</span>
+<span class="nc" id="L109">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.ps1&quot;);</span>
+<span class="nc" id="L110">        modelTestTemplateFiles.put(&quot;model_test.mustache&quot;, &quot;.ps1&quot;);</span>
+<span class="nc" id="L111">        apiTestTemplateFiles.put(&quot;api_test.mustache&quot;, &quot;.ps1&quot;);</span>
+<span class="nc" id="L112">        modelDocTemplateFiles.put(&quot;model_doc.mustache&quot;, &quot;.md&quot;);</span>
+<span class="nc" id="L113">        apiDocTemplateFiles.put(&quot;api_doc.mustache&quot;, &quot;.md&quot;);</span>
+<span class="nc" id="L114">        embeddedTemplateDir = templateDir = &quot;powershell&quot;;</span>
+<span class="nc" id="L115">        apiPackage = packageName + File.separator + &quot;Api&quot;;</span>
+<span class="nc" id="L116">        modelPackage = packageName + File.separator + &quot;Model&quot;;</span>
+
+        // https://blogs.msdn.microsoft.com/powershell/2010/01/07/how-objects-are-sent-to-and-from-remote-sessions/
+<span class="nc" id="L119">        languageSpecificPrimitives = new HashSet&lt;&gt;(Arrays.asList(</span>
+                &quot;Byte&quot;,
+                &quot;SByte&quot;,
+                &quot;Byte[]&quot;,
+                &quot;Int16&quot;,
+                &quot;Int32&quot;,
+                &quot;Int64&quot;,
+                &quot;UInt16&quot;,
+                &quot;UInt32&quot;,
+                &quot;UInt64&quot;,
+                &quot;Decimal&quot;,
+                &quot;Single&quot;,
+                &quot;Double&quot;,
+                &quot;TimeSpan&quot;,
+                &quot;System.DateTime&quot;,
+                &quot;ProgressRecord&quot;,
+                &quot;Char&quot;,
+                &quot;String&quot;,
+                &quot;XmlDocument&quot;,
+                &quot;SecureString&quot;,
+                &quot;Boolean&quot;,
+                &quot;Guid&quot;,
+                &quot;Uri&quot;,
+                &quot;System.IO.FileInfo&quot;,
+                &quot;Version&quot;
+        ));
+
+<span class="nc" id="L146">        commonVerbs = new HashMap&lt;&gt;();</span>
+
+<span class="nc" id="L148">        Map&lt;String, List&lt;String&gt;&gt; verbMappings = new HashMap&lt;&gt;();</span>
+
+        // common
+<span class="nc" id="L151">        verbMappings.put(&quot;Add&quot;, Arrays.asList(&quot;Append&quot;, &quot;Attach&quot;, &quot;Concatenate&quot;, &quot;Insert&quot;));</span>
+<span class="nc" id="L152">        verbMappings.put(&quot;Clear&quot;, Arrays.asList(&quot;Flush&quot;, &quot;Erase&quot;, &quot;Release&quot;, &quot;Unmark&quot;, &quot;Unset&quot;, &quot;Nullify&quot;));</span>
+<span class="nc" id="L153">        verbMappings.put(&quot;Close&quot;, Arrays.asList());</span>
+<span class="nc" id="L154">        verbMappings.put(&quot;Copy&quot;, Arrays.asList(&quot;Duplicate&quot;, &quot;Clone&quot;, &quot;Replicate&quot;, &quot;Sync&quot;));</span>
+<span class="nc" id="L155">        verbMappings.put(&quot;Enter&quot;, Arrays.asList(&quot;PushInto&quot;));</span>
+<span class="nc" id="L156">        verbMappings.put(&quot;Exit&quot;, Arrays.asList(&quot;PopOut&quot;));</span>
+<span class="nc" id="L157">        verbMappings.put(&quot;Find&quot;, Arrays.asList());</span>
+<span class="nc" id="L158">        verbMappings.put(&quot;Format&quot;, Arrays.asList());</span>
+<span class="nc" id="L159">        verbMappings.put(&quot;Get&quot;, Arrays.asList(&quot;Read&quot;, &quot;Open&quot;, &quot;Cat&quot;, &quot;Type&quot;, &quot;Dir&quot;, &quot;Obtain&quot;, &quot;Dump&quot;, &quot;Acquire&quot;, &quot;Examine&quot;, &quot;Find&quot;, &quot;Search&quot;));</span>
+<span class="nc" id="L160">        verbMappings.put(&quot;Hide&quot;, Arrays.asList(&quot;Block&quot;));</span>
+<span class="nc" id="L161">        verbMappings.put(&quot;Join&quot;, Arrays.asList(&quot;Combine&quot;, &quot;Unite&quot;, &quot;Connect&quot;, &quot;Associate&quot;));</span>
+<span class="nc" id="L162">        verbMappings.put(&quot;Lock&quot;, Arrays.asList(&quot;RestrictSecure&quot;));</span>
+<span class="nc" id="L163">        verbMappings.put(&quot;Move&quot;, Arrays.asList(&quot;Transfer&quot;, &quot;Name&quot;, &quot;Migrate&quot;));</span>
+<span class="nc" id="L164">        verbMappings.put(&quot;New&quot;, Arrays.asList(&quot;Create&quot;, &quot;Generate&quot;, &quot;Build&quot;, &quot;Make&quot;, &quot;Allocate&quot;));</span>
+<span class="nc" id="L165">        verbMappings.put(&quot;Open&quot;, Arrays.asList());</span>
+<span class="nc" id="L166">        verbMappings.put(&quot;Optimize&quot;, Arrays.asList());</span>
+<span class="nc" id="L167">        verbMappings.put(&quot;Pop&quot;, Arrays.asList());</span>
+<span class="nc" id="L168">        verbMappings.put(&quot;Push&quot;, Arrays.asList());</span>
+<span class="nc" id="L169">        verbMappings.put(&quot;Redo&quot;, Arrays.asList());</span>
+<span class="nc" id="L170">        verbMappings.put(&quot;Remove&quot;, Arrays.asList(&quot;Clear&quot;, &quot;Cut&quot;, &quot;Dispose&quot;, &quot;Discard&quot;, &quot;Erase&quot;));</span>
+<span class="nc" id="L171">        verbMappings.put(&quot;Rename&quot;, Arrays.asList(&quot;Change&quot;));</span>
+<span class="nc" id="L172">        verbMappings.put(&quot;Reset&quot;, Arrays.asList());</span>
+<span class="nc" id="L173">        verbMappings.put(&quot;Search&quot;, Arrays.asList(&quot;FindLocate&quot;));</span>
+<span class="nc" id="L174">        verbMappings.put(&quot;Select&quot;, Arrays.asList(&quot;FindLocate&quot;));</span>
+<span class="nc" id="L175">        verbMappings.put(&quot;Set&quot;, Arrays.asList(&quot;Write&quot;, &quot;Reset&quot;, &quot;Assign&quot;, &quot;Configure&quot;));</span>
+<span class="nc" id="L176">        verbMappings.put(&quot;Show&quot;, Arrays.asList(&quot;DisplayProduce&quot;));</span>
+<span class="nc" id="L177">        verbMappings.put(&quot;Skip&quot;, Arrays.asList(&quot;BypassJump&quot;));</span>
+<span class="nc" id="L178">        verbMappings.put(&quot;Split&quot;, Arrays.asList(&quot;parate&quot;));</span>
+<span class="nc" id="L179">        verbMappings.put(&quot;Step&quot;, Arrays.asList());</span>
+<span class="nc" id="L180">        verbMappings.put(&quot;Switch&quot;, Arrays.asList());</span>
+<span class="nc" id="L181">        verbMappings.put(&quot;Undo&quot;, Arrays.asList());</span>
+<span class="nc" id="L182">        verbMappings.put(&quot;Unlock&quot;, Arrays.asList(&quot;Release&quot;, &quot;Unrestrict&quot;, &quot;Unsecure&quot;));</span>
+<span class="nc" id="L183">        verbMappings.put(&quot;Watch&quot;, Arrays.asList());</span>
+
+        // communication
+<span class="nc" id="L186">        verbMappings.put(&quot;Connect&quot;, Arrays.asList(&quot;JoinTelnet&quot;));</span>
+<span class="nc" id="L187">        verbMappings.put(&quot;Disconnect&quot;, Arrays.asList(&quot;BreakLogoff&quot;));</span>
+<span class="nc" id="L188">        verbMappings.put(&quot;Read&quot;, Arrays.asList(&quot;Acquire&quot;, &quot;Prompt&quot;, &quot;Get&quot;));</span>
+<span class="nc" id="L189">        verbMappings.put(&quot;Receive&quot;, Arrays.asList(&quot;Read&quot;, &quot;Accept&quot;, &quot;Peek&quot;));</span>
+<span class="nc" id="L190">        verbMappings.put(&quot;Send&quot;, Arrays.asList(&quot;Put&quot;, &quot;Broadcast&quot;, &quot;Mail&quot;, &quot;Fax&quot;));</span>
+<span class="nc" id="L191">        verbMappings.put(&quot;Write&quot;, Arrays.asList(&quot;PutPrint&quot;));</span>
+
+        // data
+<span class="nc" id="L194">        verbMappings.put(&quot;Backup&quot;, Arrays.asList(&quot; Save&quot;, &quot; Burn&quot;, &quot; Replicate&quot;, &quot;Sync&quot;));</span>
+<span class="nc" id="L195">        verbMappings.put(&quot;Checkpoint&quot;, Arrays.asList(&quot;  Diff&quot;));</span>
+<span class="nc" id="L196">        verbMappings.put(&quot;Compare&quot;, Arrays.asList(&quot;  Diff&quot;));</span>
+<span class="nc" id="L197">        verbMappings.put(&quot;Compress&quot;, Arrays.asList(&quot;  Compact&quot;));</span>
+<span class="nc" id="L198">        verbMappings.put(&quot;Convert&quot;, Arrays.asList(&quot; Change&quot;, &quot; Resize&quot;, &quot;Resample&quot;));</span>
+<span class="nc" id="L199">        verbMappings.put(&quot;ConvertFrom&quot;, Arrays.asList(&quot; Export&quot;, &quot; Output&quot;, &quot;Out&quot;));</span>
+<span class="nc" id="L200">        verbMappings.put(&quot;ConvertTo&quot;, Arrays.asList(&quot; Import&quot;, &quot; Input&quot;, &quot;In&quot;));</span>
+<span class="nc" id="L201">        verbMappings.put(&quot;Dismount&quot;, Arrays.asList(&quot; UnmountUnlink&quot;));</span>
+<span class="nc" id="L202">        verbMappings.put(&quot;Edit&quot;, Arrays.asList(&quot; Change&quot;, &quot; Update&quot;, &quot;Modify&quot;));</span>
+<span class="nc" id="L203">        verbMappings.put(&quot;Expand&quot;, Arrays.asList(&quot; ExplodeUncompress&quot;));</span>
+<span class="nc" id="L204">        verbMappings.put(&quot;Export&quot;, Arrays.asList(&quot; ExtractBackup&quot;));</span>
+<span class="nc" id="L205">        verbMappings.put(&quot;Group&quot;, Arrays.asList(&quot; Aggregate&quot;, &quot; Arrange&quot;, &quot; Associate&quot;, &quot;Correlate&quot;));</span>
+<span class="nc" id="L206">        verbMappings.put(&quot;Import&quot;, Arrays.asList(&quot; BulkLoadLoad&quot;));</span>
+<span class="nc" id="L207">        verbMappings.put(&quot;Initialize&quot;, Arrays.asList(&quot; Erase&quot;, &quot; Init&quot;, &quot; Renew&quot;, &quot; Rebuild&quot;, &quot; Reinitialize&quot;, &quot;Setup&quot;));</span>
+<span class="nc" id="L208">        verbMappings.put(&quot;Limit&quot;, Arrays.asList(&quot;  Quota&quot;));</span>
+<span class="nc" id="L209">        verbMappings.put(&quot;Merge&quot;, Arrays.asList(&quot; CombineJoin&quot;));</span>
+<span class="nc" id="L210">        verbMappings.put(&quot;Mount&quot;, Arrays.asList(&quot; Connect&quot;));</span>
+<span class="nc" id="L211">        verbMappings.put(&quot;Out&quot;, Arrays.asList());</span>
+<span class="nc" id="L212">        verbMappings.put(&quot;Publish&quot;, Arrays.asList(&quot; Deploy&quot;, &quot; Release&quot;, &quot;Install&quot;));</span>
+<span class="nc" id="L213">        verbMappings.put(&quot;Restore&quot;, Arrays.asList(&quot; Repair&quot;, &quot; Return&quot;, &quot; Undo&quot;, &quot;Fix&quot;));</span>
+<span class="nc" id="L214">        verbMappings.put(&quot;Save&quot;, Arrays.asList());</span>
+<span class="nc" id="L215">        verbMappings.put(&quot;Sync&quot;, Arrays.asList(&quot; Replicate&quot;, &quot; Coerce&quot;, &quot;Match&quot;));</span>
+<span class="nc" id="L216">        verbMappings.put(&quot;Unpublish&quot;, Arrays.asList(&quot; Uninstall&quot;, &quot; Revert&quot;, &quot;Hide&quot;));</span>
+<span class="nc" id="L217">        verbMappings.put(&quot;Update&quot;, Arrays.asList(&quot; Refresh&quot;, &quot; Renew&quot;, &quot; Recalculate&quot;, &quot;Re-index&quot;));</span>
+
+        // diagnostic
+<span class="nc" id="L220">        verbMappings.put(&quot;Debug&quot;, Arrays.asList(&quot;Diagnose&quot;));</span>
+<span class="nc" id="L221">        verbMappings.put(&quot;Measure&quot;, Arrays.asList(&quot;Calculate&quot;, &quot;Determine&quot;, &quot;Analyze&quot;));</span>
+<span class="nc" id="L222">        verbMappings.put(&quot;Ping&quot;, Arrays.asList());</span>
+<span class="nc" id="L223">        verbMappings.put(&quot;Repair&quot;, Arrays.asList(&quot;FixRestore&quot;));</span>
+<span class="nc" id="L224">        verbMappings.put(&quot;Resolve&quot;, Arrays.asList(&quot;ExpandDetermine&quot;));</span>
+<span class="nc" id="L225">        verbMappings.put(&quot;Test&quot;, Arrays.asList(&quot;Diagnose&quot;, &quot;Analyze&quot;, &quot;Salvage&quot;, &quot;Verify&quot;));</span>
+<span class="nc" id="L226">        verbMappings.put(&quot;Trace&quot;, Arrays.asList(&quot;Track&quot;, &quot;Follow&quot;, &quot;Inspect&quot;, &quot;Dig&quot;));</span>
+
+        // lifecycle
+<span class="nc" id="L229">        verbMappings.put(&quot;Approve&quot;, Arrays.asList());</span>
+<span class="nc" id="L230">        verbMappings.put(&quot;Assert&quot;, Arrays.asList(&quot;Certify&quot;));</span>
+<span class="nc" id="L231">        verbMappings.put(&quot;Build&quot;, Arrays.asList());</span>
+<span class="nc" id="L232">        verbMappings.put(&quot;Complete&quot;, Arrays.asList());</span>
+<span class="nc" id="L233">        verbMappings.put(&quot;Confirm&quot;, Arrays.asList(&quot;Acknowledge&quot;, &quot;Agree&quot;, &quot;Certify&quot;, &quot;Validate&quot;, &quot;Verify&quot;));</span>
+<span class="nc" id="L234">        verbMappings.put(&quot;Deny&quot;, Arrays.asList(&quot;Block&quot;, &quot;Object&quot;, &quot;Refuse&quot;, &quot;Reject&quot;));</span>
+<span class="nc" id="L235">        verbMappings.put(&quot;Deploy&quot;, Arrays.asList());</span>
+<span class="nc" id="L236">        verbMappings.put(&quot;Disable&quot;, Arrays.asList(&quot;HaltHide&quot;));</span>
+<span class="nc" id="L237">        verbMappings.put(&quot;Enable&quot;, Arrays.asList(&quot;StartBegin&quot;));</span>
+<span class="nc" id="L238">        verbMappings.put(&quot;Install&quot;, Arrays.asList(&quot;Setup&quot;));</span>
+<span class="nc" id="L239">        verbMappings.put(&quot;Invoke&quot;, Arrays.asList(&quot;RunStart&quot;));</span>
+<span class="nc" id="L240">        verbMappings.put(&quot;Register&quot;, Arrays.asList());</span>
+<span class="nc" id="L241">        verbMappings.put(&quot;Request&quot;, Arrays.asList());</span>
+<span class="nc" id="L242">        verbMappings.put(&quot;Restart&quot;, Arrays.asList(&quot;Recycle&quot;));</span>
+<span class="nc" id="L243">        verbMappings.put(&quot;Resume&quot;, Arrays.asList());</span>
+<span class="nc" id="L244">        verbMappings.put(&quot;Start&quot;, Arrays.asList(&quot;Launch&quot;, &quot;Initiate&quot;, &quot;Boot&quot;));</span>
+<span class="nc" id="L245">        verbMappings.put(&quot;Stop&quot;, Arrays.asList(&quot;End&quot;, &quot;Kill&quot;, &quot;Terminate&quot;, &quot;Cancel&quot;));</span>
+<span class="nc" id="L246">        verbMappings.put(&quot;Submit&quot;, Arrays.asList(&quot;Post&quot;));</span>
+<span class="nc" id="L247">        verbMappings.put(&quot;Suspend&quot;, Arrays.asList(&quot;Pause&quot;));</span>
+<span class="nc" id="L248">        verbMappings.put(&quot;Uninstall&quot;, Arrays.asList());</span>
+<span class="nc" id="L249">        verbMappings.put(&quot;Unregister&quot;, Arrays.asList(&quot;Remove&quot;));</span>
+<span class="nc" id="L250">        verbMappings.put(&quot;Wait&quot;, Arrays.asList(&quot;SleepPause&quot;));</span>
+
+        // security
+<span class="nc" id="L253">        verbMappings.put(&quot;Block&quot;, Arrays.asList(&quot;Prevent&quot;, &quot;Limit&quot;, &quot;Deny&quot;));</span>
+<span class="nc" id="L254">        verbMappings.put(&quot;Grant&quot;, Arrays.asList(&quot;AllowEnable&quot;));</span>
+<span class="nc" id="L255">        verbMappings.put(&quot;Protect&quot;, Arrays.asList(&quot;Encrypt&quot;, &quot;Safeguard&quot;, &quot;Seal&quot;));</span>
+<span class="nc" id="L256">        verbMappings.put(&quot;Revoke&quot;, Arrays.asList(&quot;RemoveDisable&quot;));</span>
+<span class="nc" id="L257">        verbMappings.put(&quot;Unblock&quot;, Arrays.asList(&quot;ClearAllow&quot;));</span>
+<span class="nc" id="L258">        verbMappings.put(&quot;Unprotect&quot;, Arrays.asList(&quot;DecryptUnseal&quot;));</span>
+
+        // other
+<span class="nc" id="L261">        verbMappings.put(&quot;Use&quot;, Arrays.asList());</span>
+
+<span class="nc bnc" id="L263" title="All 2 branches missed.">        for (Map.Entry&lt;String, List&lt;String&gt;&gt; entry : verbMappings.entrySet()) {</span>
+            // loop through each verb in the list
+<span class="nc bnc" id="L265" title="All 2 branches missed.">            for (String verb : entry.getValue()) {</span>
+<span class="nc bnc" id="L266" title="All 2 branches missed.">                if (verbMappings.containsKey(verb)) {</span>
+                    // the verb to be mapped is also a common verb, do nothing
+<span class="nc" id="L268">                    LOGGER.debug(&quot;verbmapping: skipped {}&quot;, verb);</span>
+                } else {
+<span class="nc" id="L270">                    commonVerbs.put(verb, entry.getKey());</span>
+<span class="nc" id="L271">                    LOGGER.debug(&quot;verbmapping: adding {} =&gt; {}&quot;, verb, entry.getKey());</span>
+                }
+<span class="nc" id="L273">            }</span>
+<span class="nc" id="L274">        }</span>
+
+<span class="nc" id="L276">        powershellVerbs = new HashSet&lt;&gt;(Arrays.asList(</span>
+                &quot;Add&quot;,
+                &quot;Clear&quot;,
+                &quot;Close&quot;,
+                &quot;Copy&quot;,
+                &quot;Enter&quot;,
+                &quot;Exit&quot;,
+                &quot;Find&quot;,
+                &quot;Format&quot;,
+                &quot;Get&quot;,
+                &quot;Hide&quot;,
+                &quot;Join&quot;,
+                &quot;Lock&quot;,
+                &quot;Move&quot;,
+                &quot;New&quot;,
+                &quot;Open&quot;,
+                &quot;Optimize&quot;,
+                &quot;Pop&quot;,
+                &quot;Push&quot;,
+                &quot;Redo&quot;,
+                &quot;Remove&quot;,
+                &quot;Rename&quot;,
+                &quot;Reset&quot;,
+                &quot;Search&quot;,
+                &quot;Select&quot;,
+                &quot;Set&quot;,
+                &quot;Show&quot;,
+                &quot;Skip&quot;,
+                &quot;Split&quot;,
+                &quot;Step&quot;,
+                &quot;Switch&quot;,
+                &quot;Undo&quot;,
+                &quot;Unlock&quot;,
+                &quot;Watch&quot;,
+                &quot;Connect&quot;,
+                &quot;Disconnect&quot;,
+                &quot;Read&quot;,
+                &quot;Receive&quot;,
+                &quot;Send&quot;,
+                &quot;Write&quot;,
+                &quot;Backup&quot;,
+                &quot;Checkpoint&quot;,
+                &quot;Compare&quot;,
+                &quot;Compress&quot;,
+                &quot;Convert&quot;,
+                &quot;ConvertFrom&quot;,
+                &quot;ConvertTo&quot;,
+                &quot;Dismount&quot;,
+                &quot;Edit&quot;,
+                &quot;Expand&quot;,
+                &quot;Export&quot;,
+                &quot;Group&quot;,
+                &quot;Import&quot;,
+                &quot;Initialize&quot;,
+                &quot;Limit&quot;,
+                &quot;Merge&quot;,
+                &quot;Mount&quot;,
+                &quot;Out&quot;,
+                &quot;Publish&quot;,
+                &quot;Restore&quot;,
+                &quot;Save&quot;,
+                &quot;Sync&quot;,
+                &quot;Unpublish&quot;,
+                &quot;Update&quot;,
+                &quot;Debug&quot;,
+                &quot;Measure&quot;,
+                &quot;Ping&quot;,
+                &quot;Repair&quot;,
+                &quot;Resolve&quot;,
+                &quot;Test&quot;,
+                &quot;Trace&quot;,
+                &quot;Approve&quot;,
+                &quot;Assert&quot;,
+                &quot;Build&quot;,
+                &quot;Complete&quot;,
+                &quot;Confirm&quot;,
+                &quot;Deny&quot;,
+                &quot;Deploy&quot;,
+                &quot;Disable&quot;,
+                &quot;Enable&quot;,
+                &quot;Install&quot;,
+                &quot;Invoke&quot;,
+                &quot;Register&quot;,
+                &quot;Request&quot;,
+                &quot;Restart&quot;,
+                &quot;Resume&quot;,
+                &quot;Start&quot;,
+                &quot;Stop&quot;,
+                &quot;Submit&quot;,
+                &quot;Suspend&quot;,
+                &quot;Uninstall&quot;,
+                &quot;Unregister&quot;,
+                &quot;Wait&quot;,
+                &quot;Block&quot;,
+                &quot;Grant&quot;,
+                &quot;Protect&quot;,
+                &quot;Revoke&quot;,
+                &quot;Unblock&quot;,
+                &quot;Unprotect&quot;,
+                &quot;Use&quot;
+        ));
+
+<span class="nc" id="L378">        methodNames = new HashSet&lt;&gt;();</span>
+
+<span class="nc" id="L380">        nullablePrimitives = new HashSet&lt;&gt;(Arrays.asList(</span>
+                &quot;System.Nullable[Byte]&quot;,
+                &quot;System.Nullable[SByte]&quot;,
+                &quot;System.Nullable[Int16]&quot;,
+                &quot;System.Nullable[Int32]&quot;,
+                &quot;System.Nullable[Int64]&quot;,
+                &quot;System.Nullable[UInt16]&quot;,
+                &quot;System.Nullable[UInt32]&quot;,
+                &quot;System.Nullable[UInt64]&quot;,
+                &quot;System.Nullable[Decimal]&quot;,
+                &quot;System.Nullable[Single]&quot;,
+                &quot;System.Nullable[Double]&quot;,
+                &quot;System.Nullable[Boolean]&quot;
+        ));
+
+        // list of reserved words - must be in lower case
+<span class="nc" id="L396">        reservedWords = new HashSet&lt;&gt;(Arrays.asList(</span>
+                // https://richardspowershellblog.wordpress.com/2009/05/02/powershell-reserved-words/
+                &quot;begin&quot;,
+                &quot;break&quot;,
+                &quot;catch&quot;,
+                &quot;continue&quot;,
+                &quot;data&quot;,
+                &quot;do&quot;,
+                &quot;dynamicparam&quot;,
+                &quot;else&quot;,
+                &quot;elseif&quot;,
+                &quot;end&quot;,
+                &quot;exit&quot;,
+                &quot;filter&quot;,
+                &quot;finally&quot;,
+                &quot;for&quot;,
+                &quot;foreach&quot;,
+                &quot;from&quot;,
+                &quot;function&quot;,
+                &quot;if&quot;,
+                &quot;in&quot;,
+                &quot;param&quot;,
+                &quot;process&quot;,
+                &quot;return&quot;,
+                &quot;switch&quot;,
+                &quot;throw&quot;,
+                &quot;trap&quot;,
+                &quot;try&quot;,
+                &quot;until&quot;,
+                &quot;while&quot;,
+                &quot;local&quot;,
+                &quot;private&quot;,
+                &quot;where&quot;,
+                // special variables
+                &quot;args&quot;,
+                &quot;consolefilename&quot;,
+                &quot;error&quot;,
+                &quot;event&quot;,
+                &quot;eventargs&quot;,
+                &quot;eventsubscriber&quot;,
+                &quot;executioncontext&quot;,
+                &quot;false&quot;,
+                &quot;foreach&quot;,
+                &quot;home&quot;,
+                &quot;host&quot;,
+                &quot;input&quot;,
+                &quot;lastexitcode&quot;,
+                &quot;matches&quot;,
+                &quot;myinvocation&quot;,
+                &quot;nestedpromptlevel&quot;,
+                &quot;null&quot;,
+                &quot;pid&quot;,
+                &quot;profile&quot;,
+                &quot;pscmdlet&quot;,
+                &quot;pscommandpath&quot;,
+                &quot;psculture&quot;,
+                &quot;psdebugcontext&quot;,
+                &quot;pshome&quot;,
+                &quot;psitem&quot;,
+                &quot;psscriptroot&quot;,
+                &quot;pssenderinfo&quot;,
+                &quot;psuiculture&quot;,
+                &quot;psversiontable&quot;,
+                &quot;sender&quot;,
+                &quot;shellid&quot;,
+                &quot;stacktrace&quot;,
+                &quot;this&quot;,
+                &quot;true&quot;
+        ));
+
+<span class="nc" id="L466">        paramNameReservedWords = new HashSet&lt;&gt;(Arrays.asList(</span>
+                &quot;args&quot;,
+                &quot;error&quot;,
+                &quot;executioncontext&quot;,
+                &quot;false&quot;,
+                &quot;home&quot;,
+                &quot;host&quot;,
+                &quot;input&quot;,
+                &quot;myinvocation&quot;,
+                &quot;nestedpromptlevel&quot;,
+                &quot;null&quot;,
+                &quot;pid&quot;,
+                &quot;profile&quot;,
+                &quot;pscommandpath&quot;,
+                &quot;psculture&quot;,
+                &quot;pshome&quot;,
+                &quot;psscriptroot&quot;,
+                &quot;psuiculture&quot;,
+                &quot;psversiontable&quot;,
+                &quot;shellid&quot;,
+                &quot;stacktrace&quot;,
+                &quot;true&quot;
+        ));
+
+<span class="nc" id="L490">        defaultIncludes = new HashSet&lt;&gt;(Arrays.asList(</span>
+                &quot;Byte&quot;,
+                &quot;SByte&quot;,
+                &quot;Byte[]&quot;,
+                &quot;Int16&quot;,
+                &quot;Int32&quot;,
+                &quot;Int64&quot;,
+                &quot;UInt16&quot;,
+                &quot;UInt32&quot;,
+                &quot;UInt64&quot;,
+                &quot;Decimal&quot;,
+                &quot;Single&quot;,
+                &quot;Double&quot;,
+                &quot;TimeSpan&quot;,
+                &quot;System.DateTime&quot;,
+                &quot;ProgressRecord&quot;,
+                &quot;Char&quot;,
+                &quot;String&quot;,
+                &quot;XmlDocument&quot;,
+                &quot;SecureString&quot;,
+                &quot;Boolean&quot;,
+                &quot;Guid&quot;,
+                &quot;Uri&quot;,
+                &quot;System.IO.FileInfo&quot;,
+                &quot;Version&quot;
+        ));
+
+<span class="nc" id="L517">        typeMapping = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L518">        typeMapping.put(&quot;string&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L519">        typeMapping.put(&quot;boolean&quot;, &quot;Boolean&quot;);</span>
+<span class="nc" id="L520">        typeMapping.put(&quot;integer&quot;, &quot;Int32&quot;);</span>
+<span class="nc" id="L521">        typeMapping.put(&quot;float&quot;, &quot;Double&quot;);</span>
+<span class="nc" id="L522">        typeMapping.put(&quot;long&quot;, &quot;Int64&quot;);</span>
+<span class="nc" id="L523">        typeMapping.put(&quot;double&quot;, &quot;Double&quot;);</span>
+<span class="nc" id="L524">        typeMapping.put(&quot;number&quot;, &quot;Decimal&quot;);</span>
+<span class="nc" id="L525">        typeMapping.put(&quot;decimal&quot;, &quot;Decimal&quot;);</span>
+<span class="nc" id="L526">        typeMapping.put(&quot;object&quot;, &quot;System.Collections.Hashtable&quot;);</span>
+<span class="nc" id="L527">        typeMapping.put(&quot;file&quot;, &quot;System.IO.FileInfo&quot;);</span>
+<span class="nc" id="L528">        typeMapping.put(&quot;ByteArray&quot;, &quot;System.Byte[]&quot;);</span>
+<span class="nc" id="L529">        typeMapping.put(&quot;binary&quot;, &quot;System.IO.FileInfo&quot;);</span>
+<span class="nc" id="L530">        typeMapping.put(&quot;date&quot;, &quot;System.DateTime&quot;);</span>
+<span class="nc" id="L531">        typeMapping.put(&quot;date-time&quot;, &quot;System.DateTime&quot;);</span>
+<span class="nc" id="L532">        typeMapping.put(&quot;Date&quot;, &quot;System.DateTime&quot;);</span>
+<span class="nc" id="L533">        typeMapping.put(&quot;DateTime&quot;, &quot;System.DateTime&quot;);</span>
+<span class="nc" id="L534">        typeMapping.put(&quot;UUID&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L535">        typeMapping.put(&quot;URI&quot;, &quot;String&quot;);</span>
+
+<span class="nc" id="L537">        cliOptions.clear();</span>
+<span class="nc" id="L538">        cliOptions.add(new CliOption(&quot;powershellGalleryUrl&quot;, &quot;URL to the module in PowerShell Gallery (e.g. https://www.powershellgallery.com/packages/PSTwitter/).&quot;));</span>
+<span class="nc" id="L539">        cliOptions.add(new CliOption(CodegenConstants.PACKAGE_NAME, &quot;Client package name (e.g. PSTwitter).&quot;).defaultValue(this.packageName));</span>
+<span class="nc" id="L540">        cliOptions.add(new CliOption(CodegenConstants.PACKAGE_VERSION, &quot;Package version (e.g. 0.1.2).&quot;).defaultValue(this.packageVersion));</span>
+<span class="nc" id="L541">        cliOptions.add(new CliOption(CodegenConstants.OPTIONAL_PROJECT_GUID, &quot;GUID for PowerShell module (e.g. a27b908d-2a20-467f-bc32-af6f3a654ac5). A random GUID will be generated by default.&quot;));</span>
+<span class="nc" id="L542">        cliOptions.add(new CliOption(CodegenConstants.API_NAME_PREFIX, &quot;Prefix that will be appended to all PS objects. Default: empty string. e.g. Pet =&gt; PSPet.&quot;));</span>
+<span class="nc" id="L543">        cliOptions.add(new CliOption(&quot;commonVerbs&quot;, &quot;PS common verb mappings. e.g. Delete=Remove:Patch=Update to map Delete with Remove and Patch with Update accordingly.&quot;));</span>
+<span class="nc" id="L544">        cliOptions.add(new CliOption(CodegenConstants.USE_ONEOF_DISCRIMINATOR_LOOKUP, CodegenConstants.USE_ONEOF_DISCRIMINATOR_LOOKUP_DESC));</span>
+<span class="nc" id="L545">        cliOptions.add(new CliOption(&quot;discardReadOnly&quot;, &quot;Set discardReadonly to true to generate the Initialize cmdlet without readonly parameters&quot;));</span>
+<span class="nc" id="L546">        cliOptions.add(new CliOption(&quot;tags&quot;,&quot;Tags applied to the generated PowerShell module. These help with module discovery in online galleries&quot;));</span>
+<span class="nc" id="L547">        cliOptions.add(new CliOption(&quot;projectUri&quot;,&quot;A URL to the main website for this project&quot;));</span>
+<span class="nc" id="L548">        cliOptions.add(new CliOption(&quot;licenseUri&quot;,&quot;A URL to the license for the generated PowerShell module&quot;));</span>
+<span class="nc" id="L549">        cliOptions.add(new CliOption(&quot;iconUri&quot;,&quot;A URL to an icon representing the generated PowerShell module&quot;));</span>
+<span class="nc" id="L550">        cliOptions.add(new CliOption(&quot;releaseNotes&quot;,&quot;Release notes of the generated PowerShell module&quot;));</span>
+<span class="nc" id="L551">        cliOptions.add(new CliOption(&quot;skipVerbParsing&quot;, &quot;Set skipVerbParsing to not try get powershell verbs of operation names&quot;));</span>
+<span class="nc" id="L552">        cliOptions.add(new CliOption(&quot;modelsCmdletVerb&quot;, &quot;Verb to be used when generating the Models cmdlets in the examples.&quot;).defaultValue(this.modelsCmdletVerb));</span>
+
+<span class="nc" id="L554">        CliOption useClassNameInModelsExamplesOpt = CliOption.newBoolean(</span>
+            &quot;useClassNameInModelsExamples&quot;,
+            &quot;Use classname instead of name when generating the Models cmdlets in the examples.&quot;
+<span class="nc bnc" id="L557" title="All 2 branches missed.">        ).defaultValue(this.useClassNameInModelsExamples ? Boolean.TRUE.toString() : Boolean.FALSE.toString());</span>
+<span class="nc" id="L558">        cliOptions.add(useClassNameInModelsExamplesOpt);</span>
+
+        // option to change how we process + set the data in the 'additionalProperties' keyword.
+<span class="nc" id="L561">        CliOption disallowAdditionalPropertiesIfNotPresentOpt = CliOption.newBoolean(</span>
+                CodegenConstants.DISALLOW_ADDITIONAL_PROPERTIES_IF_NOT_PRESENT,
+<span class="nc" id="L563">                CodegenConstants.DISALLOW_ADDITIONAL_PROPERTIES_IF_NOT_PRESENT_DESC).defaultValue(Boolean.TRUE.toString());</span>
+<span class="nc" id="L564">        Map&lt;String, String&gt; disallowAdditionalPropertiesIfNotPresentOpts = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L565">        disallowAdditionalPropertiesIfNotPresentOpts.put(&quot;false&quot;,</span>
+                &quot;The 'additionalProperties' implementation is compliant with the OAS and JSON schema specifications.&quot;);
+<span class="nc" id="L567">        disallowAdditionalPropertiesIfNotPresentOpts.put(&quot;true&quot;,</span>
+                &quot;Keep the old (incorrect) behaviour that 'additionalProperties' is set to false by default.&quot;);
+<span class="nc" id="L569">        disallowAdditionalPropertiesIfNotPresentOpt.setEnum(disallowAdditionalPropertiesIfNotPresentOpts);</span>
+<span class="nc" id="L570">        cliOptions.add(disallowAdditionalPropertiesIfNotPresentOpt);</span>
+<span class="nc" id="L571">        this.setDisallowAdditionalPropertiesIfNotPresent(true);</span>
+
+        // default value in the template
+<span class="nc" id="L574">        additionalProperties.put(&quot;powershellVersion&quot;, &quot;6.2&quot;); // minimal PS version</span>
+<span class="nc" id="L575">        additionalProperties.put(&quot;author&quot;, &quot;OpenAPI Generator Team&quot;);</span>
+<span class="nc" id="L576">        additionalProperties.put(&quot;companyName&quot;, &quot;openapitools.org&quot;);</span>
+<span class="nc" id="L577">        additionalProperties.put(&quot;psData&quot;, null);</span>
+<span class="nc" id="L578">    }</span>
+
+    public CodegenType getTag() {
+<span class="nc" id="L581">        return CodegenType.CLIENT;</span>
+    }
+
+    public String getName() {
+<span class="nc" id="L585">        return &quot;powershell&quot;;</span>
+    }
+
+    public String getHelp() {
+<span class="nc" id="L589">        return &quot;Generates a PowerShell API client (beta)&quot;;</span>
+    }
+
+    public void setPackageName(String packageName) {
+<span class="nc" id="L593">        this.packageName = packageName;</span>
+<span class="nc" id="L594">        this.apiPackage = packageName + File.separator + &quot;Api&quot;;</span>
+<span class="nc" id="L595">        this.modelPackage = packageName + File.separator + &quot;Model&quot;;</span>
+<span class="nc" id="L596">    }</span>
+
+    public void setPackageVersion(String packageVersion) {
+<span class="nc" id="L599">        this.packageVersion = packageVersion;</span>
+<span class="nc" id="L600">    }</span>
+
+    public void setSourceFolder(String sourceFolder) {
+<span class="nc" id="L603">        this.sourceFolder = sourceFolder;</span>
+<span class="nc" id="L604">    }</span>
+
+    public void setPackageGuid(String packageGuid) {
+<span class="nc" id="L607">        this.packageGuid = packageGuid;</span>
+<span class="nc" id="L608">    }</span>
+
+    public void setPowershellGalleryUrl(String powershellGalleryUrl) {
+<span class="nc" id="L611">        this.powershellGalleryUrl = powershellGalleryUrl;</span>
+<span class="nc" id="L612">    }</span>
+
+    public void setUseOneOfDiscriminatorLookup(boolean useOneOfDiscriminatorLookup) {
+<span class="nc" id="L615">        this.useOneOfDiscriminatorLookup = useOneOfDiscriminatorLookup;</span>
+<span class="nc" id="L616">    }</span>
+
+    public boolean getUseOneOfDiscriminatorLookup() {
+<span class="nc" id="L619">        return this.useOneOfDiscriminatorLookup;</span>
+    }
+
+    public void setDiscardReadOnly(boolean discardReadOnly) {
+<span class="nc" id="L623">        this.discardReadOnly = discardReadOnly;</span>
+<span class="nc" id="L624">    }</span>
+
+    public boolean getDiscardReadOnly() {
+<span class="nc" id="L627">        return this.discardReadOnly;</span>
+    }
+
+    public void setTags(String tags){
+<span class="nc" id="L631">         this.tags = tags;</span>
+<span class="nc" id="L632">    }</span>
+
+    public void setLicenseUri(String licenseUri){
+<span class="nc" id="L635">        this.licenseUri = licenseUri;</span>
+<span class="nc" id="L636">   }</span>
+
+   public void setProjectUri(String projectUri){
+<span class="nc" id="L639">    this.projectUri = projectUri;</span>
+<span class="nc" id="L640">   }</span>
+
+   public void setReleaseNotes(String releaseNotes){
+<span class="nc" id="L643">       this.releaseNotes = releaseNotes;</span>
+<span class="nc" id="L644">   }</span>
+
+   public void setIconUri(String iconUri){
+<span class="nc" id="L647">       this.iconUri = iconUri;</span>
+<span class="nc" id="L648">   }</span>
+
+<span class="nc" id="L650">   public void setSkipVerbParsing(boolean skipVerbParsing) { this.skipVerbParsing = skipVerbParsing; }</span>
+
+<span class="nc" id="L652">   public void SetModelsCmdletVerb(String modelsCmdletVerb) { this.modelsCmdletVerb = modelsCmdletVerb; }</span>
+
+<span class="nc" id="L654">   public void SetUseClassNameInModelsExamples(boolean useClassNameInModelsExamples) { this.useClassNameInModelsExamples = useClassNameInModelsExamples; }</span>
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L658">        this.setLegacyDiscriminatorBehavior(false);</span>
+<span class="nc" id="L659">        super.processOpts();</span>
+
+<span class="nc bnc" id="L661" title="All 2 branches missed.">        if (StringUtils.isEmpty(System.getenv(&quot;POWERSHELL_POST_PROCESS_FILE&quot;))) {</span>
+<span class="nc" id="L662">            LOGGER.info(&quot;Environment variable POWERSHELL_POST_PROCESS_FILE not defined so the PowerShell code may not be properly formatted. To define it, try 'export POWERSHELL_POST_PROCESS_FILE=\&quot;Edit-DTWBeautifyScript\&quot;'&quot;);</span>
+<span class="nc" id="L663">            LOGGER.info(&quot;NOTE: To enable file post-processing, 'enablePostProcessFile' must be set to `true` (--enable-post-process-file for CLI).&quot;);</span>
+        }
+
+<span class="nc bnc" id="L666" title="All 2 branches missed.">        if (additionalProperties.containsKey(&quot;powershellGalleryUrl&quot;)) {</span>
+<span class="nc" id="L667">            setPowershellGalleryUrl((String) additionalProperties.get(&quot;powershellGalleryUrl&quot;));</span>
+        } else {
+<span class="nc" id="L669">            additionalProperties.put(&quot;powershellGalleryUrl&quot;, powershellGalleryUrl);</span>
+        }
+
+<span class="nc bnc" id="L672" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.USE_ONEOF_DISCRIMINATOR_LOOKUP)) {</span>
+<span class="nc" id="L673">            setUseOneOfDiscriminatorLookup(convertPropertyToBooleanAndWriteBack(CodegenConstants.USE_ONEOF_DISCRIMINATOR_LOOKUP));</span>
+        } else {
+<span class="nc" id="L675">            additionalProperties.put(CodegenConstants.USE_ONEOF_DISCRIMINATOR_LOOKUP, useOneOfDiscriminatorLookup);</span>
+        }
+
+<span class="nc bnc" id="L678" title="All 2 branches missed.">        if (additionalProperties.containsKey(&quot;discardReadOnly&quot;)) {</span>
+<span class="nc" id="L679">            setDiscardReadOnly(convertPropertyToBooleanAndWriteBack(&quot;discardReadOnly&quot;));</span>
+        } else {
+<span class="nc" id="L681">            additionalProperties.put(&quot;discardReadOnly&quot;, discardReadOnly);</span>
+        }
+
+<span class="nc bnc" id="L684" title="All 2 branches missed.">        if (additionalProperties.containsKey(&quot;skipVerbParsing&quot;)) {</span>
+<span class="nc" id="L685">            setSkipVerbParsing(convertPropertyToBoolean(&quot;skipVerbParsing&quot;));</span>
+        } else {
+<span class="nc" id="L687">            additionalProperties.put(&quot;skipVerbParsing&quot;, skipVerbParsing);</span>
+        }
+
+<span class="nc bnc" id="L690" title="All 2 branches missed.">        if (additionalProperties.containsKey(&quot;tags&quot;)) {</span>
+<span class="nc" id="L691">            String[] entries = ((String) additionalProperties.get(&quot;tags&quot;)).split(&quot;,&quot;);</span>
+<span class="nc" id="L692">            String prefix = &quot;&quot;;</span>
+<span class="nc" id="L693">            StringBuilder tagStr =  new StringBuilder(&quot;@(&quot;);</span>
+<span class="nc bnc" id="L694" title="All 2 branches missed.">            for (String entry : entries) {</span>
+<span class="nc" id="L695">                tagStr.append(prefix);</span>
+<span class="nc" id="L696">                prefix = &quot;,&quot;;</span>
+<span class="nc" id="L697">                tagStr.append(String.format(Locale.ROOT, &quot;'%s' &quot;,entry));</span>
+            }
+<span class="nc" id="L699">            tagStr.append(&quot;)&quot;);</span>
+<span class="nc" id="L700">            setTags(tagStr.toString());</span>
+<span class="nc" id="L701">            additionalProperties.put(&quot;tags&quot;,tagStr.toString());</span>
+        }
+
+<span class="nc bnc" id="L704" title="All 2 branches missed.">        if (additionalProperties.containsKey(&quot;releaseNotes&quot;)) {</span>
+<span class="nc" id="L705">            setReleaseNotes((String) additionalProperties.get(&quot;releaseNotes&quot;));</span>
+        } else {
+<span class="nc" id="L707">            additionalProperties.put(&quot;releaseNotes&quot;, releaseNote);</span>
+        }
+
+<span class="nc bnc" id="L710" title="All 2 branches missed.">        if (additionalProperties.containsKey(&quot;licenseUri&quot;)) {</span>
+<span class="nc" id="L711">            setLicenseUri((String) additionalProperties.get(&quot;licenseUri&quot;));</span>
+        } else {
+<span class="nc" id="L713">            additionalProperties.put(&quot;licenseUri&quot;, licenseUri);</span>
+        }
+
+<span class="nc bnc" id="L716" title="All 2 branches missed.">        if (additionalProperties.containsKey(&quot;projectUri&quot;)) {</span>
+<span class="nc" id="L717">            setProjectUri((String) additionalProperties.get(&quot;projectUri&quot;));</span>
+        } else {
+<span class="nc" id="L719">            additionalProperties.put(&quot;projectUri&quot;, tags);</span>
+        }
+
+<span class="nc bnc" id="L722" title="All 2 branches missed.">        if (additionalProperties.containsKey(&quot;iconUri&quot;)) {</span>
+<span class="nc" id="L723">            setIconUri((String) additionalProperties.get(&quot;iconUri&quot;));</span>
+        } else {
+<span class="nc" id="L725">            additionalProperties.put(&quot;iconUri&quot;, iconUri);</span>
+        }
+
+<span class="nc bnc" id="L728" title="All 2 branches missed.">        if (additionalProperties.containsKey(&quot;modelsCmdletVerb&quot;)) {</span>
+<span class="nc" id="L729">            this.SetModelsCmdletVerb((String) additionalProperties.get(&quot;modelsCmdletVerb&quot;));</span>
+        } else {
+<span class="nc" id="L731">            additionalProperties.put(&quot;modelsCmdletVerb&quot;, this.modelsCmdletVerb);</span>
+        }
+
+<span class="nc bnc" id="L734" title="All 2 branches missed.">        if (additionalProperties.containsKey(&quot;useClassNameInModelsExamples&quot;)) {</span>
+<span class="nc" id="L735">            this.SetUseClassNameInModelsExamples(convertPropertyToBoolean(&quot;useClassNameInModelsExamples&quot;));</span>
+        } else {
+<span class="nc" id="L737">            additionalProperties.put(&quot;useClassNameInModelsExamples&quot;, this.useClassNameInModelsExamples);</span>
+        }
+
+<span class="nc bnc" id="L740" title="All 2 branches missed.">        if (StringUtils.isNotBlank(powershellGalleryUrl)) {</span>
+            // get the last segment of the URL
+            // e.g. https://www.powershellgallery.com/packages/PSTwitter =&gt; PSTwitter
+<span class="nc" id="L743">            additionalProperties.put(&quot;powershellGalleryId&quot;, powershellGalleryUrl.replaceFirst(&quot;.*/([^/?]+).*&quot;, &quot;$1&quot;));</span>
+        }
+
+<span class="nc bnc" id="L746" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.OPTIONAL_PROJECT_GUID)) {</span>
+<span class="nc" id="L747">            setPackageGuid((String) additionalProperties.get(CodegenConstants.OPTIONAL_PROJECT_GUID));</span>
+        } else {
+<span class="nc" id="L749">            additionalProperties.put(&quot;packageGuid&quot;, packageGuid);</span>
+        }
+
+<span class="nc bnc" id="L752" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.PACKAGE_NAME)) {</span>
+<span class="nc" id="L753">            this.setPackageName((String) additionalProperties.get(CodegenConstants.PACKAGE_NAME));</span>
+        } else {
+<span class="nc" id="L755">            additionalProperties.put(CodegenConstants.PACKAGE_NAME, packageName);</span>
+        }
+
+<span class="nc bnc" id="L758" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.PACKAGE_VERSION)) {</span>
+<span class="nc" id="L759">            this.setPackageVersion((String) additionalProperties.get(CodegenConstants.PACKAGE_VERSION));</span>
+        } else {
+<span class="nc" id="L761">            additionalProperties.put(CodegenConstants.PACKAGE_VERSION, packageVersion);</span>
+        }
+
+<span class="nc bnc" id="L764" title="All 2 branches missed.">        if (additionalProperties.containsKey(&quot;commonVerbs&quot;)) {</span>
+<span class="nc" id="L765">            String[] entries = ((String) additionalProperties.get(&quot;commonVerbs&quot;)).split(&quot;:&quot;);</span>
+<span class="nc bnc" id="L766" title="All 2 branches missed.">            for (String entry : entries) {</span>
+<span class="nc" id="L767">                String[] pair = entry.split(&quot;=&quot;);</span>
+<span class="nc bnc" id="L768" title="All 2 branches missed.">                if (pair.length == 2) {</span>
+<span class="nc" id="L769">                    commonVerbs.put(pair[0], pair[1]);</span>
+<span class="nc" id="L770">                    LOGGER.debug(&quot;Add commonVerbs: {} =&gt; {}&quot;, pair[0], pair[1]);</span>
+                } else {
+<span class="nc" id="L772">                    LOGGER.error(&quot;Failed to parse commonVerbs: {}&quot;, entry);</span>
+                }
+            }
+        }
+
+<span class="nc bnc" id="L777" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.MODEL_PACKAGE)) {</span>
+<span class="nc" id="L778">            LOGGER.warn(</span>
+                    &quot;{} with {} generator is ignored. Setting this value independently of {} is not currently supported.&quot;,
+<span class="nc" id="L780">                    CodegenConstants.MODEL_PACKAGE, this.getName(), CodegenConstants.PACKAGE_NAME);</span>
+        }
+
+<span class="nc bnc" id="L783" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.API_PACKAGE)) {</span>
+<span class="nc" id="L784">            LOGGER.warn(</span>
+                    &quot;{} with {} generator is ignored. Setting this value independently of {} is not currently supported.&quot;,
+<span class="nc" id="L786">                    CodegenConstants.API_PACKAGE, this.getName(), CodegenConstants.PACKAGE_NAME);</span>
+        }
+
+<span class="nc bnc" id="L789" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.DISALLOW_ADDITIONAL_PROPERTIES_IF_NOT_PRESENT)) {</span>
+<span class="nc" id="L790">            this.setDisallowAdditionalPropertiesIfNotPresent(Boolean.parseBoolean(additionalProperties</span>
+<span class="nc" id="L791">                    .get(CodegenConstants.DISALLOW_ADDITIONAL_PROPERTIES_IF_NOT_PRESENT).toString()));</span>
+        }
+
+<span class="nc" id="L794">        additionalProperties.put(CodegenConstants.API_PACKAGE, apiPackage());</span>
+<span class="nc" id="L795">        additionalProperties.put(CodegenConstants.MODEL_PACKAGE, modelPackage());</span>
+
+<span class="nc" id="L797">        additionalProperties.put(&quot;apiDocPath&quot;, apiDocPath);</span>
+<span class="nc" id="L798">        additionalProperties.put(&quot;modelDocPath&quot;, modelDocPath);</span>
+
+<span class="nc" id="L800">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;));</span>
+<span class="nc" id="L801">        supportingFiles.add(new SupportingFile(&quot;Build.ps1.mustache&quot;, &quot;&quot;, &quot;Build.ps1&quot;));</span>
+
+<span class="nc" id="L803">        final String infrastructureFolder = (sourceFolder + File.separator + packageName + File.separator);</span>
+
+<span class="nc" id="L805">        supportingFiles.add(new SupportingFile(&quot;Org.OpenAPITools.psm1.mustache&quot;, infrastructureFolder, packageName + &quot;.psm1&quot;));</span>
+
+        // client/configuration
+<span class="nc" id="L808">        supportingFiles.add(new SupportingFile(&quot;configuration.mustache&quot;, infrastructureFolder + &quot;Client&quot;, apiNamePrefix + &quot;Configuration.ps1&quot;));</span>
+
+        // private
+<span class="nc" id="L811">        supportingFiles.add(new SupportingFile(&quot;api_client.mustache&quot;, infrastructureFolder + &quot;Private&quot;, apiNamePrefix + &quot;ApiClient.ps1&quot;));</span>
+<span class="nc" id="L812">        supportingFiles.add(new SupportingFile(&quot;Get-CommonParameters.mustache&quot;, infrastructureFolder + File.separator + &quot;Private&quot; + File.separator, &quot;Get-CommonParameters.ps1&quot;));</span>
+<span class="nc" id="L813">        supportingFiles.add(new SupportingFile(&quot;Out-DebugParameter.mustache&quot;, infrastructureFolder + File.separator + &quot;Private&quot; + File.separator, &quot;Out-DebugParameter.ps1&quot;));</span>
+<span class="nc" id="L814">        supportingFiles.add(new SupportingFile(&quot;http_signature_auth.mustache&quot;, infrastructureFolder + &quot;Private&quot;, apiNamePrefix + &quot;HttpSignatureAuth.ps1&quot;));</span>
+<span class="nc" id="L815">        supportingFiles.add(new SupportingFile(&quot;rsa_provider.mustache&quot;, infrastructureFolder + &quot;Private&quot;, apiNamePrefix + &quot;RSAEncryptionProvider.cs&quot;));</span>
+
+
+        // en-US
+<span class="nc" id="L819">        supportingFiles.add(new SupportingFile(&quot;about_Org.OpenAPITools.help.txt.mustache&quot;, infrastructureFolder + File.separator + &quot;en-US&quot; + File.separator + &quot;about_&quot; + packageName + &quot;.help.txt&quot;));</span>
+
+        // appveyor
+<span class="nc" id="L822">        supportingFiles.add(new SupportingFile(&quot;appveyor.mustache&quot;, &quot;&quot;, &quot;appveyor.yml&quot;));</span>
+<span class="nc" id="L823">    }</span>
+
+    @SuppressWarnings(&quot;static-method&quot;)
+    @Override
+    public String escapeText(String input) {
+
+<span class="nc bnc" id="L829" title="All 2 branches missed.">        if (input == null) {</span>
+<span class="nc" id="L830">            return input;</span>
+        }
+
+        // remove \t, \n, \r
+        // replace \ with \\
+        // replace &quot; with \&quot;
+        // outer unescape to retain the original multi-byte characters
+        // finally escalate characters avoiding code injection
+<span class="nc" id="L838">        return escapeUnsafeCharacters(</span>
+<span class="nc" id="L839">                StringEscapeUtils.unescapeJava(</span>
+<span class="nc" id="L840">                        StringEscapeUtils.escapeJava(input)</span>
+<span class="nc" id="L841">                                .replace(&quot;\\/&quot;, &quot;/&quot;))</span>
+<span class="nc" id="L842">                        .replaceAll(&quot;[\\t\\n\\r]&quot;, &quot; &quot;)</span>
+<span class="nc" id="L843">                        .replace(&quot;\&quot;&quot;, &quot;\&quot;\&quot;&quot;));</span>
+
+    }
+
+    @Override
+    public String escapeUnsafeCharacters(String input) {
+<span class="nc" id="L849">        return input.replace(&quot;#&gt;&quot;, &quot;#_&gt;&quot;).replace(&quot;&lt;#&quot;, &quot;&lt;_#&quot;);</span>
+    }
+
+    @Override
+    public String escapeQuotationMark(String input) {
+        // remove &quot; to avoid code injection
+<span class="nc" id="L855">        return input.replace(&quot;\&quot;&quot;, &quot;&quot;);</span>
+    }
+
+    @Override
+    public String toApiTestFilename(String name) {
+<span class="nc" id="L860">        return toApiFilename(name) + &quot;.Tests&quot;;</span>
+    }
+
+    @Override
+    public String toModelTestFilename(String name) {
+<span class="nc" id="L865">        return toModelFilename(name) + &quot;.Tests&quot;;</span>
+    }
+
+    @Override
+    public String apiTestFileFolder() {
+<span class="nc" id="L870">        return (outputFolder + &quot;/&quot; + apiTestPath).replace('/', File.separatorChar);</span>
+    }
+
+    @Override
+    public String apiDocFileFolder() {
+<span class="nc" id="L875">        return (outputFolder + &quot;/&quot; + apiDocPath).replace('/', File.separatorChar);</span>
+    }
+
+    @Override
+    public String apiFileFolder() {
+<span class="nc" id="L880">        return outputFolder + File.separator + sourceFolder + File.separator + apiPackage();</span>
+    }
+
+    @Override
+    public String modelTestFileFolder() {
+<span class="nc" id="L885">        return (outputFolder + &quot;/&quot; + modelTestPath).replace('/', File.separatorChar);</span>
+    }
+
+    @Override
+    public String modelDocFileFolder() {
+<span class="nc" id="L890">        return (outputFolder + &quot;/&quot; + modelDocPath).replace('/', File.separatorChar);</span>
+    }
+
+
+    @Override
+    public String modelFileFolder() {
+<span class="nc" id="L896">        return outputFolder + File.separator + sourceFolder + File.separator + modelPackage();</span>
+    }
+
+    @Override
+    public String escapeReservedWord(String name) {
+<span class="nc" id="L901">        return &quot;Var&quot; + name;</span>
+    }
+
+    /**
+     * Output the proper model name (capitalized).
+     * In case the name belongs to the TypeSystem it won't be renamed.
+     *
+     * @param name the name of the model
+     * @return capitalized model name
+     */
+    @Override
+    public String toModelName(String name) {
+        // obtain the name from modelNameMapping directly if provided
+<span class="nc bnc" id="L914" title="All 2 branches missed.">        if (modelNameMapping.containsKey(name)) {</span>
+<span class="nc" id="L915">            return modelNameMapping.get(name);</span>
+        }
+
+        // check if schema-mapping has a different model for this class, so we can use it
+        // instead of the auto-generated one.
+<span class="nc bnc" id="L920" title="All 2 branches missed.">        if (schemaMapping.containsKey(name)) {</span>
+<span class="nc" id="L921">            return schemaMapping.get(name);</span>
+        }
+
+        // memoization
+<span class="nc" id="L925">        String origName = name;</span>
+<span class="nc bnc" id="L926" title="All 2 branches missed.">        if (schemaKeyToModelNameCache.containsKey(origName)) {</span>
+<span class="nc" id="L927">            return schemaKeyToModelNameCache.get(origName);</span>
+        }
+
+<span class="nc bnc" id="L930" title="All 2 branches missed.">        if (!StringUtils.isEmpty(modelNamePrefix)) {</span>
+<span class="nc" id="L931">            name = modelNamePrefix + &quot;_&quot; + name;</span>
+        }
+
+<span class="nc bnc" id="L934" title="All 2 branches missed.">        if (!StringUtils.isEmpty(modelNameSuffix)) {</span>
+<span class="nc" id="L935">            name = name + &quot;_&quot; + modelNameSuffix;</span>
+        }
+
+        // camelize the model name
+        // phone_number =&gt; PhoneNumber
+<span class="nc" id="L940">        name = camelize(sanitizeName(name));</span>
+
+        // model name cannot use reserved keyword, e.g. return
+<span class="nc bnc" id="L943" title="All 2 branches missed.">        if (isReservedWord(name)) {</span>
+<span class="nc" id="L944">            LOGGER.warn(&quot;{} (reserved word or special variable name) cannot be used as model name. Renamed to {}&quot;,</span>
+<span class="nc" id="L945">                    name, camelize(&quot;model_&quot; + name));</span>
+<span class="nc" id="L946">            name = camelize(&quot;model_&quot; + name); // e.g. return =&gt; ModelReturn (after camelize)</span>
+        }
+
+        // model name starts with number
+<span class="nc bnc" id="L950" title="All 2 branches missed.">        if (name.matches(&quot;^\\d.*&quot;)) {</span>
+<span class="nc" id="L951">            LOGGER.warn(&quot;{} (model name starts with number) cannot be used as model name. Renamed to {}&quot;, name,</span>
+<span class="nc" id="L952">                    camelize(&quot;model_&quot; + name));</span>
+<span class="nc" id="L953">            name = camelize(&quot;model_&quot; + name); // e.g. 200Response =&gt; Model200Response (after camelize)</span>
+        }
+
+<span class="nc" id="L956">        schemaKeyToModelNameCache.put(origName, name);</span>
+
+<span class="nc" id="L958">        return name;</span>
+    }
+
+    @Override
+    public String toModelFilename(String name) {
+        // should be the same as the model name
+<span class="nc" id="L964">        return toModelName(name);</span>
+    }
+
+    /**
+     * returns the OpenAPI type for the property
+     *
+     * @param p OpenAPI property object
+     * @return string presentation of the type
+     **/
+    @Override
+    public String getSchemaType(Schema p) {
+<span class="nc" id="L975">        String openAPIType = super.getSchemaType(p);</span>
+        String type;
+
+        // This maps, for example, long -&gt; Long based on hashes in this type's constructor
+<span class="nc bnc" id="L979" title="All 2 branches missed.">        if (typeMapping.containsKey(openAPIType)) {</span>
+<span class="nc" id="L980">            type = typeMapping.get(openAPIType);</span>
+<span class="nc bnc" id="L981" title="All 2 branches missed.">            if (languageSpecificPrimitives.contains(type)) {</span>
+<span class="nc" id="L982">                return type;</span>
+            }
+        } else {
+<span class="nc" id="L985">            type = openAPIType;</span>
+        }
+
+        // model/object
+<span class="nc" id="L989">        return toModelName(type);</span>
+    }
+
+    /**
+     * Output the type declaration of the property
+     *
+     * @param p OpenAPI Schema object
+     * @return a string presentation of the property type
+     */
+    @Override
+    public String getTypeDeclaration(Schema p) {
+<span class="nc bnc" id="L1000" title="All 2 branches missed.">        if (ModelUtils.isArraySchema(p)) {</span>
+<span class="nc" id="L1001">            Schema inner = ModelUtils.getSchemaItems(p);</span>
+<span class="nc" id="L1002">            return getTypeDeclaration(inner) + &quot;[]&quot;;</span>
+<span class="nc bnc" id="L1003" title="All 2 branches missed.">        } else if (ModelUtils.isMapSchema(p)) {</span>
+<span class="nc" id="L1004">            return &quot;System.Collections.Hashtable&quot;;</span>
+<span class="nc bnc" id="L1005" title="All 2 branches missed.">        } else if (!languageSpecificPrimitives.contains(getSchemaType(p))) {</span>
+<span class="nc" id="L1006">            return super.getTypeDeclaration(p);</span>
+        }
+<span class="nc" id="L1008">        return super.getTypeDeclaration(p);</span>
+    }
+
+    @Override
+    public String toOperationId(String operationId) {
+        // throw exception if method name is empty (should not occur as an auto-generated method name will be used)
+<span class="nc bnc" id="L1014" title="All 2 branches missed.">        if (StringUtils.isEmpty(operationId)) {</span>
+<span class="nc" id="L1015">            throw new RuntimeException(&quot;Empty method name (operationId) not allowed&quot;);</span>
+        }
+
+<span class="nc" id="L1018">        return sanitizeName(operationId);</span>
+    }
+
+    @Override
+    public String toParamName(String name) {
+        // obtain the name from parameterNameMapping directly if provided
+<span class="nc bnc" id="L1024" title="All 2 branches missed.">        if (parameterNameMapping.containsKey(name)) {</span>
+<span class="nc" id="L1025">            return parameterNameMapping.get(name);</span>
+        }
+
+        // sanitize and camelize parameter name
+        // pet_id =&gt; PetId
+<span class="nc" id="L1030">        name = camelize(sanitizeName(name));</span>
+
+        // for param name reserved word or word starting with number, append _
+<span class="nc bnc" id="L1033" title="All 4 branches missed.">        if (paramNameReservedWords.contains(name) || name.matches(&quot;^\\d.*&quot;)) {</span>
+<span class="nc" id="L1034">            LOGGER.warn(&quot;{} (reserved word or special variable name) cannot be used in naming. Renamed to {}&quot;, name,</span>
+<span class="nc" id="L1035">                    escapeReservedWord(name));</span>
+<span class="nc" id="L1036">            name = escapeReservedWord(name);</span>
+        }
+
+<span class="nc" id="L1039">        return name;</span>
+    }
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L1044">        OperationMap operations = objs.getOperations();</span>
+<span class="nc" id="L1045">        HashMap&lt;String, CodegenModel&gt; modelMaps = ModelMap.toCodegenModelMap(allModels);</span>
+<span class="nc" id="L1046">        HashMap&lt;String, Integer&gt; processedModelMaps = new HashMap&lt;&gt;();</span>
+
+<span class="nc" id="L1048">        List&lt;CodegenOperation&gt; operationList = operations.getOperation();</span>
+<span class="nc bnc" id="L1049" title="All 2 branches missed.">        for (CodegenOperation op : operationList) {</span>
+<span class="nc" id="L1050">            int index = 0;</span>
+<span class="nc bnc" id="L1051" title="All 2 branches missed.">            for (CodegenParameter p : op.allParams) {</span>
+<span class="nc" id="L1052">                p.vendorExtensions.put(&quot;x-powershell-data-type&quot;, getPSDataType(p));</span>
+<span class="nc" id="L1053">                p.vendorExtensions.put(&quot;x-powershell-example&quot;, constructExampleCode(p, modelMaps, processedModelMaps, false));</span>
+
+<span class="nc bnc" id="L1055" title="All 2 branches missed.">                if (p.required) {</span>
+                    // clear processed Models after each constructed API Operation full example.
+<span class="nc" id="L1057">                    processedModelMaps.clear();</span>
+
+<span class="nc" id="L1059">                    p.vendorExtensions.put(&quot;x-powershell-example-required&quot;, constructExampleCode(p, modelMaps, processedModelMaps, true));</span>
+                }
+
+<span class="nc" id="L1062">                p.vendorExtensions.put(&quot;x-index&quot;, index);</span>
+<span class="nc" id="L1063">                index++;</span>
+<span class="nc" id="L1064">            }</span>
+
+            // clear processed Models after each constructed API Operation examples.
+<span class="nc" id="L1067">            processedModelMaps.clear();</span>
+
+<span class="nc bnc" id="L1069" title="All 2 branches missed.">            if (!op.vendorExtensions.containsKey(&quot;x-powershell-method-name&quot;)) { // x-powershell-method-name not set</span>
+<span class="nc" id="L1070">                String methodName = toMethodName(op.operationId);</span>
+<span class="nc" id="L1071">                op.vendorExtensions.put(&quot;x-powershell-method-name&quot;, methodName);</span>
+<span class="nc" id="L1072">                op.vendorExtensions.put(&quot;x-powershell-method-name-lowercase&quot;, methodName);</span>
+<span class="nc" id="L1073">            } else {</span>
+<span class="nc" id="L1074">                op.vendorExtensions.put(&quot;x-powershell-method-name-lowercase&quot;, ((String) op.vendorExtensions.get(&quot;x-powershell-method-name&quot;)).toLowerCase(Locale.ROOT));</span>
+            }
+
+            // detect duplicated method name
+<span class="nc bnc" id="L1078" title="All 2 branches missed.">            if (methodNames.contains(op.vendorExtensions.get(&quot;x-powershell-method-name&quot;))) {</span>
+<span class="nc" id="L1079">                LOGGER.error(&quot;Duplicated method name found: {}&quot;, op.vendorExtensions.get(&quot;x-powershell-method-name&quot;));</span>
+            } else {
+<span class="nc" id="L1081">                methodNames.add(op.vendorExtensions.get(&quot;x-powershell-method-name&quot;));</span>
+            }
+
+<span class="nc bnc" id="L1084" title="All 4 branches missed.">            if (op.produces != null &amp;&amp; op.produces.size() &gt; 1) {</span>
+<span class="nc" id="L1085">                op.vendorExtensions.put(&quot;x-powershell-select-accept&quot;, true);</span>
+            }
+<span class="nc" id="L1087">        }</span>
+
+        // check if return type is oneOf/anyOf model
+<span class="nc bnc" id="L1090" title="All 2 branches missed.">        for (CodegenOperation op : operationList) {</span>
+<span class="nc bnc" id="L1091" title="All 2 branches missed.">            if (op.returnType != null) {</span>
+                // look up the model to see if it's anyOf/oneOf
+<span class="nc bnc" id="L1093" title="All 4 branches missed.">                if (modelMaps.containsKey(op.returnType) &amp;&amp; modelMaps.get(op.returnType) != null) {</span>
+<span class="nc" id="L1094">                    CodegenModel cm = modelMaps.get(op.returnType);</span>
+
+<span class="nc bnc" id="L1096" title="All 4 branches missed.">                    if (cm.oneOf != null &amp;&amp; !cm.oneOf.isEmpty()) {</span>
+<span class="nc" id="L1097">                        op.vendorExtensions.put(&quot;x-ps-return-type-one-of&quot;, true);</span>
+                    }
+
+<span class="nc bnc" id="L1100" title="All 4 branches missed.">                    if (cm.anyOf != null &amp;&amp; !cm.anyOf.isEmpty()) {</span>
+<span class="nc" id="L1101">                        op.vendorExtensions.put(&quot;x-ps-return-type-any-of&quot;, true);</span>
+                    }
+                } else {
+                    //LOGGER.error(&quot;cannot lookup model &quot; + op.returnType);
+                }
+            }
+<span class="nc" id="L1107">        }</span>
+
+<span class="nc" id="L1109">        return objs;</span>
+    }
+
+    @Override
+    public ModelsMap postProcessModels(ModelsMap objs) {
+<span class="nc" id="L1114">        List&lt;ModelMap&gt; models = objs.getModels();</span>
+        // add x-index to properties
+<span class="nc" id="L1116">        ProcessUtils.addIndexToProperties(models);</span>
+
+        // add x-data-type to store powershell type
+<span class="nc bnc" id="L1119" title="All 2 branches missed.">        for (ModelMap _model : models) {</span>
+<span class="nc" id="L1120">            CodegenModel model = _model.getModel();</span>
+<span class="nc" id="L1121">            CodegenProperty lastWritableProperty = null;</span>
+
+<span class="nc bnc" id="L1123" title="All 2 branches missed.">            for (CodegenProperty cp : model.allVars) {</span>
+<span class="nc" id="L1124">                cp.vendorExtensions.put(&quot;x-powershell-data-type&quot;, getPSDataType(cp));</span>
+<span class="nc bnc" id="L1125" title="All 4 branches missed.">                if (this.discardReadOnly &amp;&amp; !cp.isReadOnly) {</span>
+<span class="nc" id="L1126">                    lastWritableProperty = cp;</span>
+                }
+<span class="nc" id="L1128">            }</span>
+
+            // Mark the last readonly false property
+<span class="nc bnc" id="L1131" title="All 4 branches missed.">            if (this.discardReadOnly &amp;&amp; lastWritableProperty != null) {</span>
+<span class="nc" id="L1132">                lastWritableProperty.vendorExtensions.put(&quot;x-powershell-last-writable&quot;, true);</span>
+<span class="nc" id="L1133">                model.allVars.set(model.allVars.indexOf(lastWritableProperty), lastWritableProperty);</span>
+            }
+
+            // if oneOf contains &quot;null&quot; type
+<span class="nc bnc" id="L1137" title="All 6 branches missed.">            if (model.oneOf != null &amp;&amp; !model.oneOf.isEmpty() &amp;&amp; model.oneOf.contains(&quot;ModelNull&quot;)) {</span>
+<span class="nc" id="L1138">                model.isNullable = true;</span>
+<span class="nc" id="L1139">                model.oneOf.remove(&quot;ModelNull&quot;);</span>
+            }
+
+            // if anyOf contains &quot;null&quot; type
+<span class="nc bnc" id="L1143" title="All 6 branches missed.">            if (model.anyOf != null &amp;&amp; !model.anyOf.isEmpty() &amp;&amp; model.anyOf.contains(&quot;ModelNull&quot;)) {</span>
+<span class="nc" id="L1144">                model.isNullable = true;</span>
+<span class="nc" id="L1145">                model.anyOf.remove(&quot;ModelNull&quot;);</span>
+            }
+<span class="nc" id="L1147">        }</span>
+
+        // process enum in models
+<span class="nc" id="L1150">        return postProcessModelsEnum(objs);</span>
+    }
+
+    @Override
+    public String toVarName(String name) {
+        // obtain the name from nameMapping directly if provided
+<span class="nc bnc" id="L1156" title="All 2 branches missed.">        if (nameMapping.containsKey(name)) {</span>
+<span class="nc" id="L1157">            return nameMapping.get(name);</span>
+        }
+
+        // sanitize name
+<span class="nc" id="L1161">        name = sanitizeName(name);</span>
+
+        // camelize the variable name
+        // pet_id =&gt; PetId
+<span class="nc" id="L1165">        name = camelize(name);</span>
+
+        // for reserved word or word starting with number, append _
+<span class="nc bnc" id="L1168" title="All 4 branches missed.">        if (isReservedWord(name) || name.matches(&quot;^\\d.*&quot;)) {</span>
+<span class="nc" id="L1169">            LOGGER.warn(&quot;{} (reserved word or special variable name) cannot be used in naming. Renamed to {}&quot;, name,</span>
+<span class="nc" id="L1170">                    escapeReservedWord(name));</span>
+<span class="nc" id="L1171">            name = escapeReservedWord(name);</span>
+        }
+
+<span class="nc" id="L1174">        return name;</span>
+    }
+
+    private String constructExampleCode(CodegenParameter codegenParameter, HashMap&lt;String, CodegenModel&gt; modelMaps, HashMap&lt;String, Integer&gt; processedModelMap, boolean requiredOnly) {
+<span class="nc" id="L1178">        StringBuilder example = new StringBuilder();</span>
+
+<span class="nc bnc" id="L1180" title="All 2 branches missed.">        if (codegenParameter.isString) {</span>
+<span class="nc bnc" id="L1181" title="All 6 branches missed.">            if (codegenParameter.isEnum || (codegenParameter.allowableValues != null &amp;&amp; !codegenParameter.allowableValues.isEmpty())) {</span>
+<span class="nc" id="L1182">                example.append(constructEnumExample(codegenParameter.allowableValues));</span>
+            } else {
+<span class="nc" id="L1184">                String genericStringExample = codegenParameter.paramName + &quot;_example&quot;;</span>
+<span class="nc" id="L1185">                example.append(constructStringExample(codegenParameter.paramName, codegenParameter.example, genericStringExample));</span>
+<span class="nc" id="L1186">            }</span>
+<span class="nc bnc" id="L1187" title="All 2 branches missed.">        } else if (codegenParameter.isBoolean) {</span>
+<span class="nc" id="L1188">            example.append(constructBooleanExample(codegenParameter.example));</span>
+<span class="nc bnc" id="L1189" title="All 4 branches missed.">        } else if (codegenParameter.isDate || codegenParameter.isDateTime) {</span>
+<span class="nc" id="L1190">            example.append(&quot;(Get-Date)&quot;);</span>
+<span class="nc bnc" id="L1191" title="All 2 branches missed.">        } else if (codegenParameter.isArray) {</span>
+<span class="nc bnc" id="L1192" title="All 6 branches missed.">            if (codegenParameter.items.isModel || (modelMaps.containsKey(codegenParameter.items.dataType) &amp;&amp; codegenParameter.items.allowableValues == null)) {</span>
+                String modelExample;
+<span class="nc bnc" id="L1194" title="All 2 branches missed.">                if (codegenParameter.items.isModel) {</span>
+<span class="nc" id="L1195">                    modelExample = constructExampleCode(codegenParameter.items, modelMaps, processedModelMap, requiredOnly);</span>
+                } else {
+<span class="nc" id="L1197">                    modelExample = constructExampleCode(modelMaps.get(codegenParameter.items.dataType), modelMaps, processedModelMap, requiredOnly);</span>
+                }
+
+<span class="nc bnc" id="L1200" title="All 2 branches missed.">                if (!StringUtils.isEmpty(modelExample)) {</span>
+<span class="nc" id="L1201">                    example.append(modelExample);</span>
+                }
+<span class="nc bnc" id="L1203" title="All 2 branches missed.">            } else if (codegenParameter.items.isString) {</span>
+<span class="nc bnc" id="L1204" title="All 6 branches missed.">                if (codegenParameter.items.isEnum || (codegenParameter.items.allowableValues != null &amp;&amp; !codegenParameter.items.allowableValues.isEmpty())) {</span>
+<span class="nc" id="L1205">                    example.append(constructEnumExample(codegenParameter.items.allowableValues));</span>
+                } else {
+<span class="nc" id="L1207">                    String genericStringExample = codegenParameter.items.name + &quot;_example&quot;;</span>
+<span class="nc" id="L1208">                    example.append(constructStringExample(codegenParameter.paramName, codegenParameter.items.example, genericStringExample));</span>
+<span class="nc" id="L1209">                }</span>
+            } else {
+<span class="nc" id="L1211">                example.append(constructExampleCode(codegenParameter.items, modelMaps, processedModelMap, requiredOnly));</span>
+            }
+<span class="nc bnc" id="L1213" title="All 2 branches missed.">        } else if (codegenParameter.isMap) {</span>
+<span class="nc bnc" id="L1214" title="All 2 branches missed.">            if (codegenParameter.items == null) {</span>
+<span class="nc" id="L1215">                example.append(&quot;@{ key_example = ... }&quot;);</span>
+<span class="nc bnc" id="L1216" title="All 2 branches missed.">            } else if (codegenParameter.items.isModel) {</span>
+<span class="nc" id="L1217">                String modelExample = constructExampleCode(codegenParameter.items, modelMaps, processedModelMap, requiredOnly);</span>
+<span class="nc bnc" id="L1218" title="All 2 branches missed.">                if (!StringUtils.isEmpty(modelExample)) {</span>
+<span class="nc" id="L1219">                    example.append(modelExample).append(&quot;\n&quot;);</span>
+                }
+
+<span class="nc" id="L1222">                example.append(&quot;$&quot;).append(codegenParameter.paramName).append(&quot; = @{ key_example = $&quot;).append(codegenParameter.items.dataType).append(&quot; }&quot;);</span>
+<span class="nc" id="L1223">            } else {</span>
+<span class="nc" id="L1224">                example.append(&quot;@{ key_example = &quot;);</span>
+<span class="nc" id="L1225">                example.append(constructExampleCode(codegenParameter.items, modelMaps, processedModelMap, requiredOnly));</span>
+<span class="nc" id="L1226">                example.append(&quot; }&quot;);</span>
+            }
+<span class="nc bnc" id="L1228" title="All 6 branches missed.">        } else if (codegenParameter.isEnum || (codegenParameter.allowableValues != null &amp;&amp; !codegenParameter.allowableValues.isEmpty())) {</span>
+<span class="nc" id="L1229">            example.append(constructEnumExample(codegenParameter.allowableValues));</span>
+<span class="nc bnc" id="L1230" title="All 2 branches missed.">        } else if (codegenParameter.isModel) {</span>
+<span class="nc bnc" id="L1231" title="All 2 branches missed.">            if (modelMaps.containsKey(codegenParameter.dataType)) {</span>
+<span class="nc" id="L1232">                String modelExample = constructExampleCode(modelMaps.get(codegenParameter.dataType), modelMaps, processedModelMap, requiredOnly);</span>
+<span class="nc bnc" id="L1233" title="All 2 branches missed.">                if (!StringUtils.isEmpty(modelExample)) {</span>
+<span class="nc" id="L1234">                    example.append(modelExample);</span>
+                }
+<span class="nc" id="L1236">            }</span>
+<span class="nc bnc" id="L1237" title="All 6 branches missed.">        } else if ((languageSpecificPrimitives.contains(codegenParameter.dataType) || nullablePrimitives.contains(codegenParameter.dataType)) &amp;&amp; !codegenParameter.isFile) {</span>
+            // If the data type is primitive and it is not a String, Enum, Boolean, File, Date or DateTime, then it's a number.
+<span class="nc" id="L1239">            example.append(constructNumericExample(codegenParameter.example));</span>
+        }
+
+        // Replace multiple new lines with a single new line and trim leading and trailing spaces.
+<span class="nc" id="L1243">        return example.toString().replaceAll(&quot;[\n]{2,}&quot;, &quot;\n\n&quot;).trim();</span>
+    }
+
+    private String constructExampleCode(CodegenProperty codegenProperty, HashMap&lt;String, CodegenModel&gt; modelMaps, HashMap&lt;String, Integer&gt; processedModelMap, boolean requiredOnly) {
+<span class="nc" id="L1247">        StringBuilder example = new StringBuilder();</span>
+
+<span class="nc bnc" id="L1249" title="All 2 branches missed.">        if (codegenProperty.isString) {</span>
+<span class="nc bnc" id="L1250" title="All 6 branches missed.">            if (codegenProperty.isEnum || (codegenProperty.allowableValues != null &amp;&amp; !codegenProperty.allowableValues.isEmpty())) {</span>
+<span class="nc" id="L1251">                example.append(constructEnumExample(codegenProperty.allowableValues));</span>
+            } else {
+<span class="nc" id="L1253">                String genericStringExample = codegenProperty.name + &quot;_example&quot;;</span>
+<span class="nc" id="L1254">                example.append(constructStringExample(codegenProperty.name, codegenProperty.example, genericStringExample));</span>
+<span class="nc" id="L1255">            }</span>
+<span class="nc bnc" id="L1256" title="All 2 branches missed.">        } else if (codegenProperty.isBoolean) {</span>
+<span class="nc" id="L1257">            example.append(constructBooleanExample(codegenProperty.example));</span>
+<span class="nc bnc" id="L1258" title="All 4 branches missed.">        } else if (codegenProperty.isDate || codegenProperty.isDateTime) {</span>
+<span class="nc" id="L1259">            example.append(&quot;(Get-Date)&quot;);</span>
+<span class="nc bnc" id="L1260" title="All 2 branches missed.">        } else if (codegenProperty.isArray) {</span>
+<span class="nc" id="L1261">            example.append(constructExampleCode(codegenProperty.items, modelMaps, processedModelMap, requiredOnly));</span>
+<span class="nc bnc" id="L1262" title="All 2 branches missed.">        } else if (codegenProperty.isMap) {</span>
+<span class="nc" id="L1263">            example.append(&quot;@{ key_example = &quot;);</span>
+<span class="nc bnc" id="L1264" title="All 2 branches missed.">            if (codegenProperty.items != null) {</span>
+<span class="nc" id="L1265">                example.append(constructExampleCode(codegenProperty.items, modelMaps, processedModelMap, requiredOnly));</span>
+            } else {
+<span class="nc" id="L1267">                example.append(&quot; ... &quot;);</span>
+            }
+<span class="nc" id="L1269">            example.append(&quot; }&quot;);</span>
+<span class="nc bnc" id="L1270" title="All 6 branches missed.">        } else if (codegenProperty.isEnum || (codegenProperty.allowableValues != null &amp;&amp; !codegenProperty.allowableValues.isEmpty())) {</span>
+<span class="nc" id="L1271">            example.append(constructEnumExample(codegenProperty.allowableValues));</span>
+<span class="nc bnc" id="L1272" title="All 2 branches missed.">        } else if (codegenProperty.isModel) {</span>
+<span class="nc bnc" id="L1273" title="All 2 branches missed.">            if (modelMaps.containsKey(codegenProperty.dataType)) {</span>
+<span class="nc" id="L1274">                String modelExample = constructExampleCode(modelMaps.get(codegenProperty.dataType), modelMaps, processedModelMap, requiredOnly);</span>
+<span class="nc bnc" id="L1275" title="All 2 branches missed.">                if (!StringUtils.isEmpty(modelExample)) {</span>
+<span class="nc" id="L1276">                    example.append(modelExample);</span>
+                }
+<span class="nc" id="L1278">            }</span>
+<span class="nc bnc" id="L1279" title="All 6 branches missed.">        } else if ((languageSpecificPrimitives.contains(codegenProperty.dataType) || nullablePrimitives.contains(codegenProperty.dataType)) &amp;&amp; !codegenProperty.isFile) {</span>
+            // If the data type is primitive and it is not a String, Enum, Boolean, File, Date or DateTime, then it's a number.
+<span class="nc" id="L1281">            example.append(constructNumericExample(codegenProperty.example));</span>
+        }
+
+<span class="nc" id="L1284">        return example.toString();</span>
+    }
+
+    private String constructExampleCode(CodegenModel codegenModel, HashMap&lt;String, CodegenModel&gt; modelMaps, HashMap&lt;String, Integer&gt; processedModelMap, boolean requiredOnly) {
+<span class="nc" id="L1288">        StringBuilder example = new StringBuilder();</span>
+<span class="nc" id="L1289">        Boolean hasModelProperty = false;</span>
+
+        // This behaviour is needed to break infinite recursion. Return, in case a model is already processed in the current context.
+<span class="nc" id="L1292">        String model = codegenModel.name;</span>
+<span class="nc bnc" id="L1293" title="All 2 branches missed.">        if (processedModelMap.containsKey(model)) {</span>
+<span class="nc" id="L1294">            return &quot;&quot;;</span>
+        } else {
+<span class="nc" id="L1296">            processedModelMap.put(model, 1);</span>
+        }
+
+<span class="nc" id="L1299">        List&lt;String&gt; propertyExamples = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L1300" title="All 2 branches missed.">        for (CodegenProperty codegenProperty : codegenModel.allVars) {</span>
+<span class="nc" id="L1301">            if (</span>
+<span class="nc bnc" id="L1302" title="All 8 branches missed.">                !hasModelProperty &amp;&amp; (</span>
+                codegenProperty.isModel ||
+<span class="nc bnc" id="L1304" title="All 8 branches missed.">                (codegenProperty.isArray &amp;&amp; (codegenProperty.items.isModel || (modelMaps.containsKey(codegenProperty.items.dataType) &amp;&amp; codegenProperty.items.allowableValues == null))) ||</span>
+                (codegenProperty.isMap &amp;&amp; codegenProperty.items.isModel))
+            ) {
+<span class="nc" id="L1307">                example.append(&quot;\n&quot;);</span>
+<span class="nc" id="L1308">                hasModelProperty = true;</span>
+            }
+
+<span class="nc bnc" id="L1311" title="All 4 branches missed.">            if (requiredOnly &amp;&amp; !codegenProperty.required) {</span>
+<span class="nc" id="L1312">                continue;</span>
+            }
+
+<span class="nc bnc" id="L1315" title="All 2 branches missed.">            if (codegenProperty.isModel) {</span>
+<span class="nc" id="L1316">                String modelExample = constructExampleCode(codegenProperty, modelMaps, processedModelMap, requiredOnly);</span>
+<span class="nc bnc" id="L1317" title="All 2 branches missed.">                if (!StringUtils.isEmpty(modelExample)) {</span>
+<span class="nc" id="L1318">                    example.append(modelExample).append(&quot;\n&quot;);</span>
+                }
+
+<span class="nc" id="L1321">                propertyExamples.add(&quot;-&quot; + codegenProperty.name + &quot; &quot; + &quot;$&quot; + codegenProperty.dataType);</span>
+<span class="nc bnc" id="L1322" title="All 8 branches missed.">            } else if (codegenProperty.isArray &amp;&amp; (codegenProperty.items.isModel || (modelMaps.containsKey(codegenProperty.items.dataType) &amp;&amp; codegenProperty.items.allowableValues == null))) {</span>
+                String modelExample;
+<span class="nc bnc" id="L1324" title="All 2 branches missed.">                if (codegenProperty.items.isModel) {</span>
+<span class="nc" id="L1325">                    modelExample = constructExampleCode(codegenProperty.items, modelMaps, processedModelMap, requiredOnly);</span>
+                } else {
+<span class="nc" id="L1327">                    modelExample = constructExampleCode(modelMaps.get(codegenProperty.items.dataType), modelMaps, processedModelMap, requiredOnly);</span>
+                }
+
+<span class="nc bnc" id="L1330" title="All 2 branches missed.">                if (!StringUtils.isEmpty(modelExample)) {</span>
+<span class="nc" id="L1331">                    example.append(modelExample).append(&quot;\n&quot;);</span>
+                }
+
+<span class="nc" id="L1334">                propertyExamples.add(&quot;-&quot; + codegenProperty.name + &quot; &quot; + &quot;$&quot; + codegenProperty.complexType);</span>
+<span class="nc bnc" id="L1335" title="All 4 branches missed.">            } else if (codegenProperty.isArray &amp;&amp; codegenProperty.items.isString) {</span>
+<span class="nc bnc" id="L1336" title="All 6 branches missed.">                if (codegenProperty.items.isEnum || (codegenProperty.items.allowableValues != null &amp;&amp; !codegenProperty.items.allowableValues.isEmpty())) {</span>
+<span class="nc" id="L1337">                    example.append(constructEnumExample(codegenProperty.items.allowableValues));</span>
+<span class="nc" id="L1338">                    propertyExamples.add(&quot;-&quot; + codegenProperty.name + &quot; &quot; + example);</span>
+                } else {
+<span class="nc" id="L1340">                    StringBuilder stringArrayPropertyValue = new StringBuilder();</span>
+<span class="nc" id="L1341">                    String genericStringExample = codegenProperty.items.name + &quot;_example&quot;;</span>
+
+<span class="nc" id="L1343">                    stringArrayPropertyValue.append(constructStringExample(codegenProperty.name, codegenProperty.items.example, genericStringExample));</span>
+
+<span class="nc" id="L1345">                    propertyExamples.add(&quot;-&quot; + codegenProperty.name + &quot; &quot; + stringArrayPropertyValue);</span>
+<span class="nc" id="L1346">                }</span>
+<span class="nc bnc" id="L1347" title="All 4 branches missed.">            } else if (codegenProperty.isMap &amp;&amp; codegenProperty.items.isModel) {</span>
+<span class="nc" id="L1348">                String modelExample = constructExampleCode(codegenProperty.items, modelMaps, processedModelMap, requiredOnly);</span>
+<span class="nc bnc" id="L1349" title="All 2 branches missed.">                if (!StringUtils.isEmpty(modelExample)) {</span>
+<span class="nc" id="L1350">                    example.append(modelExample).append(&quot;\n&quot;);</span>
+                }
+
+<span class="nc" id="L1353">                propertyExamples.add(&quot;-&quot; + codegenProperty.name + &quot; &quot; + &quot;@{ key_example = &quot; + &quot;$&quot; + codegenProperty.complexType + &quot; }&quot;);</span>
+<span class="nc" id="L1354">            } else {</span>
+<span class="nc" id="L1355">                propertyExamples.add(&quot;-&quot; + codegenProperty.name + &quot; &quot; + constructExampleCode(codegenProperty, modelMaps, processedModelMap, requiredOnly));</span>
+            }
+<span class="nc" id="L1357">        }</span>
+
+<span class="nc" id="L1359">        example.append(&quot;$&quot;);</span>
+<span class="nc bnc" id="L1360" title="All 2 branches missed.">        if (this.useClassNameInModelsExamples) {</span>
+<span class="nc" id="L1361">            example.append(codegenModel.classname);</span>
+        } else {
+<span class="nc" id="L1363">            example.append(codegenModel.name);</span>
+        }
+<span class="nc" id="L1365">        example.append(&quot; = &quot;).append(this.modelsCmdletVerb).append(&quot;-&quot;);</span>
+<span class="nc bnc" id="L1366" title="All 2 branches missed.">        if (this.useClassNameInModelsExamples) {</span>
+<span class="nc" id="L1367">            example.append(codegenModel.classname);</span>
+        } else {
+<span class="nc" id="L1369">            example.append(codegenModel.name);</span>
+        }
+<span class="nc" id="L1371">        example.append(&quot; &quot;);</span>
+
+<span class="nc" id="L1373">        example.append(StringUtils.join(propertyExamples, &quot; &quot;));</span>
+
+<span class="nc bnc" id="L1375" title="All 2 branches missed.">        if (hasModelProperty) {</span>
+<span class="nc" id="L1376">            example.append(&quot;\n&quot;);</span>
+        }
+
+<span class="nc" id="L1379">        return example.toString();</span>
+    }
+
+    private String constructStringExample(String codegenName, String codegenExample, String genericStringExample) {
+<span class="nc" id="L1383">        StringBuilder example = new StringBuilder();</span>
+<span class="nc" id="L1384">        example.append(&quot;\&quot;&quot;);</span>
+
+<span class="nc" id="L1386">        if (</span>
+<span class="nc bnc" id="L1387" title="All 2 branches missed.">            StringUtils.isEmpty(codegenExample) ||</span>
+<span class="nc bnc" id="L1388" title="All 2 branches missed.">            codegenExample.equals(&quot;null&quot;) ||</span>
+<span class="nc bnc" id="L1389" title="All 2 branches missed.">            codegenExample.equals(genericStringExample)</span>
+        ) {
+<span class="nc" id="L1391">            example.append(&quot;My&quot;).append(codegenName);</span>
+        } else {
+<span class="nc" id="L1393">            example.append(codegenExample);</span>
+        }
+
+<span class="nc" id="L1396">        example.append(&quot;\&quot;&quot;);</span>
+
+<span class="nc" id="L1398">        return example.toString();</span>
+    }
+
+    private String constructEnumExample(Map&lt;String, Object&gt; allowableValues) {
+<span class="nc" id="L1402">        StringBuilder example = new StringBuilder();</span>
+
+<span class="nc" id="L1404">        example.append(&quot;\&quot;&quot;);</span>
+
+<span class="nc" id="L1406">        List&lt;Object&gt; enumValues = (List&lt;Object&gt;) allowableValues.get(&quot;values&quot;);</span>
+<span class="nc" id="L1407">        example.append(enumValues.get(0));</span>
+
+<span class="nc" id="L1409">        example.append(&quot;\&quot;&quot;);</span>
+
+<span class="nc" id="L1411">        return example.toString();</span>
+    }
+
+    private String constructNumericExample(String codegenExample) {
+<span class="nc" id="L1415">        StringBuilder example = new StringBuilder();</span>
+
+<span class="nc bnc" id="L1417" title="All 4 branches missed.">        if (StringUtils.isEmpty(codegenExample) || codegenExample.equals(&quot;null&quot;)) {</span>
+<span class="nc" id="L1418">            example.append(&quot;0&quot;);</span>
+        } else {
+<span class="nc" id="L1420">            example.append(codegenExample);</span>
+        }
+
+<span class="nc" id="L1423">        return example.toString();</span>
+    }
+
+    private String constructBooleanExample(String codegenExample) {
+<span class="nc" id="L1427">        StringBuilder example = new StringBuilder();</span>
+
+<span class="nc bnc" id="L1429" title="All 2 branches missed.">        if (Boolean.parseBoolean(codegenExample)) {</span>
+<span class="nc" id="L1430">            example.append(&quot;$true&quot;);</span>
+        } else {
+<span class="nc" id="L1432">            example.append(&quot;$false&quot;);</span>
+        }
+
+<span class="nc" id="L1435">        return example.toString();</span>
+    }
+
+    private String getPSDataType(CodegenProperty cp) {
+        String dataType;
+<span class="nc bnc" id="L1440" title="All 2 branches missed.">        if (cp.isPrimitiveType) {</span>
+<span class="nc" id="L1441">            dataType = cp.dataType;</span>
+<span class="nc bnc" id="L1442" title="All 10 branches missed.">            if (!(cp.isString || cp.isFile || cp.isContainer)</span>
+                    &amp;&amp; (cp.isNullable || !cp.required)) {
+<span class="nc" id="L1444">                dataType = &quot;System.Nullable[&quot; + dataType + &quot;]&quot;;</span>
+            }
+<span class="nc" id="L1446">            return dataType;</span>
+<span class="nc bnc" id="L1447" title="All 2 branches missed.">        } else if (cp.isArray) { // array</span>
+<span class="nc" id="L1448">            return getPSDataType(cp.items) + &quot;[]&quot;;</span>
+<span class="nc bnc" id="L1449" title="All 2 branches missed.">        } else if (cp.isMap) { // map</span>
+<span class="nc" id="L1450">            return &quot;System.Collections.Hashtable&quot;;</span>
+        } else { // model
+<span class="nc" id="L1452">            return &quot;PSCustomObject&quot;;</span>
+        }
+    }
+
+    private String getPSDataType(CodegenParameter cp) {
+        String dataType;
+<span class="nc bnc" id="L1458" title="All 2 branches missed.">        if (cp.isPrimitiveType) {</span>
+<span class="nc" id="L1459">            dataType = cp.dataType;</span>
+<span class="nc bnc" id="L1460" title="All 10 branches missed.">            if (!(cp.isString || cp.isFile || cp.isContainer)</span>
+                    &amp;&amp; (cp.isNullable || !cp.required)) {
+<span class="nc" id="L1462">                dataType = &quot;System.Nullable[&quot; + dataType + &quot;]&quot;;</span>
+            }
+<span class="nc" id="L1464">            return dataType;</span>
+<span class="nc bnc" id="L1465" title="All 2 branches missed.">        } else if (cp.isArray) { // array</span>
+<span class="nc" id="L1466">            return getPSDataType(cp.items) + &quot;[]&quot;;</span>
+<span class="nc bnc" id="L1467" title="All 2 branches missed.">        } else if (cp.isMap) { // map</span>
+<span class="nc" id="L1468">            return &quot;System.Collections.Hashtable&quot;;</span>
+        } else { // model
+<span class="nc" id="L1470">            return &quot;PSCustomObject&quot;;</span>
+        }
+    }
+
+    private String toMethodName(String operationId) {
+<span class="nc" id="L1475">        String methodName = camelize(operationId);</span>
+
+<span class="nc bnc" id="L1477" title="All 2 branches missed.">        if (!skipVerbParsing) {</span>
+            // check if method name starts with powershell verbs
+<span class="nc bnc" id="L1479" title="All 2 branches missed.">            for (String verb : (HashSet&lt;String&gt;) powershellVerbs) {</span>
+<span class="nc bnc" id="L1480" title="All 2 branches missed.">                if (methodName.startsWith(verb)) {</span>
+<span class="nc" id="L1481">                    methodName = verb + &quot;-&quot; + apiNamePrefix + methodName.substring(verb.length());</span>
+<span class="nc" id="L1482">                    LOGGER.info(&quot;Naming the method using the PowerShell verb: {} =&gt; {}&quot;, operationId, methodName);</span>
+<span class="nc" id="L1483">                    return methodName;</span>
+                }
+<span class="nc" id="L1485">            }</span>
+
+<span class="nc bnc" id="L1487" title="All 2 branches missed.">            for (Map.Entry&lt;String, String&gt; entry : commonVerbs.entrySet()) {</span>
+<span class="nc bnc" id="L1488" title="All 2 branches missed.">                if (methodName.startsWith(entry.getKey())) {</span>
+<span class="nc" id="L1489">                    methodName = entry.getValue() + &quot;-&quot; + apiNamePrefix + methodName.substring(entry.getKey().length());</span>
+<span class="nc" id="L1490">                    LOGGER.info(&quot;Naming the method by mapping the common verbs (e.g. Create, Change) to PS verbs: {} =&gt; {}&quot;, operationId, methodName);</span>
+<span class="nc" id="L1491">                    return methodName;</span>
+                }
+<span class="nc" id="L1493">            }</span>
+        }
+
+        // not using powershell verb
+<span class="nc" id="L1497">        return &quot;Invoke-&quot; + apiNamePrefix + methodName;</span>
+    }
+
+    @Override
+    public void postProcessFile(File file, String fileType) {
+<span class="nc bnc" id="L1502" title="All 2 branches missed.">        if (file == null) {</span>
+<span class="nc" id="L1503">            return;</span>
+        }
+<span class="nc" id="L1505">        String powershellPostProcessFile = System.getenv(&quot;POWERSHELL_POST_PROCESS_FILE&quot;);</span>
+<span class="nc bnc" id="L1506" title="All 2 branches missed.">        if (StringUtils.isEmpty(powershellPostProcessFile)) {</span>
+<span class="nc" id="L1507">            return; // skip if POWERSHELL_POST_PROCESS_FILE env variable is not defined</span>
+        }
+
+        // only process files with ps extension
+<span class="nc bnc" id="L1511" title="All 2 branches missed.">        if (&quot;ps&quot;.equals(FilenameUtils.getExtension(file.toString()))) {</span>
+<span class="nc" id="L1512">            String command = powershellPostProcessFile + &quot; &quot; + file;</span>
+            try {
+<span class="nc" id="L1514">                Process p = Runtime.getRuntime().exec(command);</span>
+<span class="nc" id="L1515">                int exitValue = p.waitFor();</span>
+<span class="nc bnc" id="L1516" title="All 2 branches missed.">                if (exitValue != 0) {</span>
+<span class="nc" id="L1517">                    LOGGER.error(&quot;Error running the command ({}). Exit value: {}&quot;, command, exitValue);</span>
+                } else {
+<span class="nc" id="L1519">                    LOGGER.info(&quot;Successfully executed: {}&quot;, command);</span>
+                }
+<span class="nc" id="L1521">            } catch (InterruptedException | IOException e) {</span>
+<span class="nc" id="L1522">                LOGGER.error(&quot;Error running the command ({}). Exception: {}&quot;, command, e.getMessage());</span>
+                // Restore interrupted state
+<span class="nc" id="L1524">                Thread.currentThread().interrupt();</span>
+<span class="nc" id="L1525">            }</span>
+        }
+
+<span class="nc" id="L1528">    }</span>
+
+    @Override
+    public String toRegularExpression(String pattern) {
+<span class="nc" id="L1532">        return escapeText(pattern);</span>
+    }
+
+    @Override
+    public String toDefaultValue(Schema p) {
+<span class="nc bnc" id="L1537" title="All 2 branches missed.">        if (p.getDefault() != null) {</span>
+<span class="nc bnc" id="L1538" title="All 2 branches missed.">            if (ModelUtils.isBooleanSchema(p)) {</span>
+<span class="nc bnc" id="L1539" title="All 2 branches missed.">                if (Boolean.parseBoolean(p.getDefault().toString())) {</span>
+<span class="nc" id="L1540">                    return &quot;$true&quot;;</span>
+                } else {
+<span class="nc" id="L1542">                    return &quot;$false&quot;;</span>
+                }
+<span class="nc bnc" id="L1544" title="All 2 branches missed.">            } else if (ModelUtils.isDateSchema(p)) {</span>
+<span class="nc" id="L1545">                LOGGER.warn(&quot;Default value for `date` not yet supported. Please open an issue with https://github.com/openapitools/openapi-generator&quot;);</span>
+<span class="nc bnc" id="L1546" title="All 2 branches missed.">            } else if (ModelUtils.isDateTimeSchema(p)) {</span>
+<span class="nc" id="L1547">                LOGGER.warn(&quot;Default value for `datetime` not yet supported. Please open an issue with https://github.com/openapitools/openapi-generator&quot;);</span>
+<span class="nc bnc" id="L1548" title="All 2 branches missed.">            } else if (ModelUtils.isNumberSchema(p)) {</span>
+<span class="nc" id="L1549">                return p.getDefault().toString();</span>
+<span class="nc bnc" id="L1550" title="All 2 branches missed.">            } else if (ModelUtils.isIntegerSchema(p)) {</span>
+<span class="nc" id="L1551">                return p.getDefault().toString();</span>
+<span class="nc bnc" id="L1552" title="All 2 branches missed.">            } else if (ModelUtils.isStringSchema(p)) {</span>
+<span class="nc" id="L1553">                return &quot;\&quot;&quot; + p.getDefault() + &quot;\&quot;&quot;;</span>
+            }
+        }
+
+<span class="nc" id="L1557">        return null;</span>
+    }
+
+    @Override
+    public void postProcess() {
+<span class="nc" id="L1562">        System.out.println(&quot;################################################################################&quot;);</span>
+<span class="nc" id="L1563">        System.out.println(&quot;# Thanks for using OpenAPI Generator.                                          #&quot;);</span>
+<span class="nc" id="L1564">        System.out.println(&quot;# Please consider donation to help us maintain this project \uD83D\uDE4F                 #&quot;);</span>
+<span class="nc" id="L1565">        System.out.println(&quot;# https://opencollective.com/openapi_generator/donate                          #&quot;);</span>
+<span class="nc" id="L1566">        System.out.println(&quot;#                                                                              #&quot;);</span>
+<span class="nc" id="L1567">        System.out.println(&quot;# This generator has been refactored by wing328 (https://github.com/wing328)   #&quot;);</span>
+<span class="nc" id="L1568">        System.out.println(&quot;# Please support his work directly by purchasing a copy of the eBook \ud83d\udcd8        #&quot;);</span>
+<span class="nc" id="L1569">        System.out.println(&quot;# - OpenAPI Generator for PowerShell Developers      https://bit.ly/3qBWfRJ    #&quot;);</span>
+<span class="nc" id="L1570">        System.out.println(&quot;################################################################################&quot;);</span>
+<span class="nc" id="L1571">    }</span>
+
+    @Override
+<span class="nc" id="L1574">    public GeneratorLanguage generatorLanguage() { return GeneratorLanguage.POWERSHELL; }</span>
+
+    @Override
+    public String toEnumVarName(String name, String datatype) {
+<span class="nc bnc" id="L1578" title="All 2 branches missed.">        if (name.length() == 0) {</span>
+<span class="nc" id="L1579">            return &quot;EMPTY&quot;;</span>
+        }
+
+        // for symbol, e.g. $, #
+<span class="nc bnc" id="L1583" title="All 2 branches missed.">        if (getSymbolName(name) != null) {</span>
+<span class="nc" id="L1584">            return (getSymbolName(name)).toUpperCase(Locale.ROOT);</span>
+        }
+
+        // number
+<span class="nc bnc" id="L1588" title="All 6 branches missed.">        if (&quot;Int16&quot;.equals(datatype) ||  &quot;Int32&quot;.equals(datatype)  || &quot;Int64&quot;.equals(datatype) ||</span>
+<span class="nc bnc" id="L1589" title="All 6 branches missed.">            &quot;UInt16&quot;.equals(datatype) ||  &quot;UInt32&quot;.equals(datatype)  || &quot;UInt64&quot;.equals(datatype) ||</span>
+<span class="nc bnc" id="L1590" title="All 6 branches missed.">            &quot;Double&quot;.equals(datatype) || &quot;Single&quot;.equals(datatype) || &quot;Decimal&quot;.equals(datatype)) {</span>
+<span class="nc" id="L1591">            String varName = name;</span>
+<span class="nc" id="L1592">            varName = varName.replaceAll(&quot;-&quot;, &quot;MINUS_&quot;);</span>
+<span class="nc" id="L1593">            varName = varName.replaceAll(&quot;\\+&quot;, &quot;PLUS_&quot;);</span>
+<span class="nc" id="L1594">            varName = varName.replaceAll(&quot;\\.&quot;, &quot;_DOT_&quot;);</span>
+<span class="nc" id="L1595">            return &quot;NUMBER_&quot; + varName;</span>
+        }
+
+        // remove special character
+<span class="nc" id="L1599">        return sanitizeName(name);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

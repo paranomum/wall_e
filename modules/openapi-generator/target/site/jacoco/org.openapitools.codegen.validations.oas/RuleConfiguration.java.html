@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RuleConfiguration.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.validations.oas</a> &gt; <span class="el_source">RuleConfiguration.java</span></div><h1>RuleConfiguration.java</h1><pre class="source lang-java linenums">package org.openapitools.codegen.validations.oas;
+
+/**
+ * Allows for configuration of validation rules which will be applied to a specification.
+ */
+@SuppressWarnings({&quot;WeakerAccess&quot;, &quot;unused&quot;})
+<span class="nc" id="L7">public class RuleConfiguration {</span>
+<span class="nc" id="L8">    private static String propertyPrefix = &quot;openapi.generator.rule&quot;;</span>
+<span class="nc" id="L9">    private boolean enableRecommendations = defaultedBoolean(propertyPrefix + &quot;.recommendations&quot;, true);</span>
+<span class="nc" id="L10">    private boolean enableApacheNginxUnderscoreRecommendation = defaultedBoolean(propertyPrefix + &quot;.apache-nginx-underscore&quot;, true);</span>
+<span class="nc" id="L11">    private boolean enableOneOfWithPropertiesRecommendation = defaultedBoolean(propertyPrefix + &quot;.oneof-properties-ambiguity&quot;, true);</span>
+<span class="nc" id="L12">    private boolean enableUnusedSchemasRecommendation = defaultedBoolean(propertyPrefix + &quot;.unused-schemas&quot;, true);</span>
+<span class="nc" id="L13">    private boolean enableSchemaTypeRecommendation = defaultedBoolean(propertyPrefix + &quot;.schema-type&quot;, true);</span>
+<span class="nc" id="L14">    private boolean enableNullableAttributeRecommendation = defaultedBoolean(propertyPrefix + &quot;.nullable-deprecated&quot;, true);</span>
+<span class="nc" id="L15">    private boolean enableInvalidTypeRecommendation = defaultedBoolean(propertyPrefix + &quot;.invalid-type&quot;, true);</span>
+
+<span class="nc" id="L17">    private boolean enableApiRequestUriWithBodyRecommendation = defaultedBoolean(propertyPrefix + &quot;.anti-patterns.uri-unexpected-body&quot;, true);</span>
+
+    @SuppressWarnings(&quot;SameParameterValue&quot;)
+    private static boolean defaultedBoolean(String key, boolean defaultValue) {
+<span class="nc" id="L21">        String property = System.getProperty(key);</span>
+<span class="nc bnc" id="L22" title="All 2 branches missed.">        if (property == null) return defaultValue;</span>
+<span class="nc" id="L23">        return Boolean.parseBoolean(property);</span>
+    }
+
+    /**
+     * Gets whether we will raise awareness that header parameters with underscore may be ignored in Apache or Nginx by default.
+     * For more details, see https://stackoverflow.com/a/22856867/151445.
+     *
+     * @return &lt;code&gt;true&lt;/code&gt; if enabled, &lt;code&gt;false&lt;/code&gt; if disabled
+     */
+    public boolean isEnableApacheNginxUnderscoreRecommendation() {
+<span class="nc" id="L33">        return enableApacheNginxUnderscoreRecommendation;</span>
+    }
+
+    /**
+     * Enable or Disable the recommendation check for Apache/Nginx potentially ignoring header with underscore by default.
+     * &lt;p&gt;
+     * For more details, see {@link RuleConfiguration#isEnableApacheNginxUnderscoreRecommendation()}
+     *
+     * @param enableApacheNginxUnderscoreRecommendation &lt;code&gt;true&lt;/code&gt; to enable, &lt;code&gt;false&lt;/code&gt; to disable
+     */
+    public void setEnableApacheNginxUnderscoreRecommendation(boolean enableApacheNginxUnderscoreRecommendation) {
+<span class="nc" id="L44">        this.enableApacheNginxUnderscoreRecommendation = enableApacheNginxUnderscoreRecommendation;</span>
+<span class="nc" id="L45">    }</span>
+
+    /**
+     * Gets whether we will raise awareness a GET or HEAD operation is defined with body.
+     *
+     * @return &lt;code&gt;true&lt;/code&gt; if enabled, &lt;code&gt;false&lt;/code&gt; if disabled
+     */
+    public boolean isEnableApiRequestUriWithBodyRecommendation() {
+<span class="nc" id="L53">        return enableApiRequestUriWithBodyRecommendation;</span>
+    }
+
+    /**
+     * Enable or Disable the recommendation check for GET or HEAD operations with bodies.
+     * &lt;p&gt;
+     * For more details, see {@link RuleConfiguration#isEnableApiRequestUriWithBodyRecommendation()}
+     *
+     * @param enableApiRequestUriWithBodyRecommendation &lt;code&gt;true&lt;/code&gt; to enable, &lt;code&gt;false&lt;/code&gt; to disable
+     */
+    public void setEnableApiRequestUriWithBodyRecommendation(boolean enableApiRequestUriWithBodyRecommendation) {
+<span class="nc" id="L64">        this.enableApiRequestUriWithBodyRecommendation = enableApiRequestUriWithBodyRecommendation;</span>
+<span class="nc" id="L65">    }</span>
+
+    /**
+     * Gets whether the recommendation check for oneOf with sibling properties exists.
+     * &lt;p&gt;
+     * JSON Schema defines oneOf as a validation property which can be applied to any schema.
+     * &lt;p&gt;
+     * OpenAPI Specification is a variant of JSON Schema for which oneOf is defined as:
+     * &quot;Inline or referenced schema MUST be of a Schema Object and not a standard JSON Schema.&quot;
+     * &lt;p&gt;
+     * Where the only examples of oneOf in OpenAPI Specification are used to define either/or type structures rather than validations.
+     * Because of this ambiguity in the spec about what is non-standard about oneOf support, we'll warn as a recommendation that
+     * properties on the schema defining oneOf relationships may not be intentional in the OpenAPI Specification.
+     *
+     * @return &lt;code&gt;true&lt;/code&gt; if enabled, &lt;code&gt;false&lt;/code&gt; if disabled
+     */
+    public boolean isEnableOneOfWithPropertiesRecommendation() {
+<span class="nc" id="L82">        return enableOneOfWithPropertiesRecommendation;</span>
+    }
+
+    /**
+     * Enable or Disable the recommendation check for schemas containing properties and oneOf definitions.
+     * &lt;p&gt;
+     * For more details, see {@link RuleConfiguration#isEnableOneOfWithPropertiesRecommendation()}
+     *
+     * @param enableOneOfWithPropertiesRecommendation &lt;code&gt;true&lt;/code&gt; to enable, &lt;code&gt;false&lt;/code&gt; to disable
+     */
+    public void setEnableOneOfWithPropertiesRecommendation(boolean enableOneOfWithPropertiesRecommendation) {
+<span class="nc" id="L93">        this.enableOneOfWithPropertiesRecommendation = enableOneOfWithPropertiesRecommendation;</span>
+<span class="nc" id="L94">    }</span>
+
+    /**
+     * Enable or Disable the recommendation check for schemas containing type definitions, specifically
+     * for changes between OpenAPI 3.0.x and 3.1.
+     *
+     * &lt;p&gt;
+     * For more details, see {@link RuleConfiguration#isEnableSchemaTypeRecommendation()}
+     *
+     * @param enableSchemaTypeRecommendation &lt;code&gt;true&lt;/code&gt; to enable, &lt;code&gt;false&lt;/code&gt; to disable
+     */
+    public void setEnableSchemaTypeRecommendation(boolean enableSchemaTypeRecommendation) {
+<span class="nc" id="L106">        this.enableSchemaTypeRecommendation = enableSchemaTypeRecommendation;</span>
+<span class="nc" id="L107">    }</span>
+
+    /**
+     * Gets whether the recommendation check for schemas containing type definitions.
+     * &lt;p&gt;
+     * In OpenAPI 3.0.x, the &quot;type&quot; attribute must be a string value.
+     * In OpenAPI 3.1, the type attribute may be:
+     *   A string value
+     *   The 'null' value
+     *   An array containing primitive types and the 'null' value.
+     *
+     * @return &lt;code&gt;true&lt;/code&gt; if enabled, &lt;code&gt;false&lt;/code&gt; if disabled
+     */
+    public boolean isEnableSchemaTypeRecommendation() {
+<span class="nc" id="L121">        return enableSchemaTypeRecommendation;</span>
+    }
+
+    /**
+     * Enable or Disable the recommendation check for the 'nullable' attribute.
+     *
+     * &lt;p&gt;
+     * For more details, see {@link RuleConfiguration#isEnableNullableAttributeRecommendation()}
+     *
+     * @param enableNullableAttributeRecommendation &lt;code&gt;true&lt;/code&gt; to enable, &lt;code&gt;false&lt;/code&gt; to disable
+     */
+    public void setEnableNullableAttributeRecommendation(boolean enableNullableAttributeRecommendation) {
+<span class="nc" id="L133">        this.enableNullableAttributeRecommendation = enableNullableAttributeRecommendation;</span>
+<span class="nc" id="L134">    }</span>
+
+    /**
+     * Gets whether the recommendation check for schemas containing the 'nullable' attribute.
+     * &lt;p&gt;
+     * In OpenAPI 3.0.x, the &quot;nullable&quot; attribute is supported. However, because it is deprecated in 3.1
+     * and above, a warning is logged to prepare for OpenAPI 3.1 recommendations.
+     * In OpenAPI 3.1, the 'nullable' attribute is deprecated. Instead the OpenAPI specification should
+     * use the 'null' type.
+     *
+     * @return &lt;code&gt;true&lt;/code&gt; if enabled, &lt;code&gt;false&lt;/code&gt; if disabled
+     */
+    public boolean isEnableNullableAttributeRecommendation() {
+<span class="nc" id="L147">        return enableNullableAttributeRecommendation;</span>
+    }
+
+    /**
+     * Enable or Disable the recommendation check for the 'type' attribute.
+     *
+     * &lt;p&gt;
+     * For more details, see {@link RuleConfiguration#isEnableInvalidTypeRecommendation()}
+     *
+     * @param enableInvalidTypeRecommendation &lt;code&gt;true&lt;/code&gt; to enable, &lt;code&gt;false&lt;/code&gt; to disable
+     */
+    public void setEnableInvalidTypeRecommendation(boolean enableInvalidTypeRecommendation) {
+<span class="nc" id="L159">        this.enableInvalidTypeRecommendation = enableInvalidTypeRecommendation;</span>
+<span class="nc" id="L160">    }</span>
+
+    /**
+     * Gets whether the recommendation check for schemas containing invalid values for the 'type' attribute.
+     * &lt;p&gt;
+     *
+     * @return &lt;code&gt;true&lt;/code&gt; if enabled, &lt;code&gt;false&lt;/code&gt; if disabled
+     */
+    public boolean isEnableInvalidTypeRecommendation() {
+<span class="nc" id="L169">        return enableInvalidTypeRecommendation;</span>
+    }
+
+    /**
+     * Get whether recommendations are enabled.
+     * &lt;p&gt;
+     * The 'type' attribute must be one of 'null', 'boolean', 'object', 'array', 'number', 'string', or 'integer'
+     *
+     * @return &lt;code&gt;true&lt;/code&gt; if enabled, &lt;code&gt;false&lt;/code&gt; if disabled
+     */
+    public boolean isEnableRecommendations() {
+<span class="nc" id="L180">        return enableRecommendations;</span>
+    }
+
+    /**
+     * Enable or Disable recommendations. Recommendations are either informational or warning level type validations
+     * which are raised to communicate issues to the user which they may not be aware of, or for which support in the
+     * tooling/spec may not be clearly defined.
+     *
+     * @param enableRecommendations &lt;code&gt;true&lt;/code&gt; to enable, &lt;code&gt;false&lt;/code&gt; to disable
+     */
+    public void setEnableRecommendations(boolean enableRecommendations) {
+<span class="nc" id="L191">        this.enableRecommendations = enableRecommendations;</span>
+<span class="nc" id="L192">    }</span>
+
+    /**
+     * Gets whether the recommendation to check for unused schemas is enabled.
+     * &lt;p&gt;
+     * While the tooling may or may not support generation of models representing unused schemas, we take the stance that
+     * a schema which is defined but not referenced in an operation or by some schema bound to an operation may be a good
+     * indicator of a programming error. We surface this information to the user in case the orphaned schema(s) are not
+     * intentional.
+     *
+     * @return &lt;code&gt;true&lt;/code&gt; if enabled, &lt;code&gt;false&lt;/code&gt; if disabled
+     */
+    public boolean isEnableUnusedSchemasRecommendation() {
+<span class="nc" id="L205">        return enableUnusedSchemasRecommendation;</span>
+    }
+
+    /**
+     * Enable or Disable the recommendation check for unused schemas.
+     * &lt;p&gt;
+     * For more details, see {@link RuleConfiguration#isEnableUnusedSchemasRecommendation()}
+     *
+     * @param enableUnusedSchemasRecommendation &lt;code&gt;true&lt;/code&gt; to enable, &lt;code&gt;false&lt;/code&gt; to disable
+     */
+    public void setEnableUnusedSchemasRecommendation(boolean enableUnusedSchemasRecommendation) {
+<span class="nc" id="L216">        this.enableUnusedSchemasRecommendation = enableUnusedSchemasRecommendation;</span>
+<span class="nc" id="L217">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

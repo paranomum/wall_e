@@ -1,0 +1,505 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CppRestSdkClientCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">CppRestSdkClientCodegen.java</span></div><h1>CppRestSdkClientCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.servers.Server;
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.meta.features.*;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.utils.ModelUtils;
+
+import java.util.*;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
+
+public class CppRestSdkClientCodegen extends AbstractCppCodegen {
+
+    public static final String DECLSPEC = &quot;declspec&quot;;
+    public static final String DEFAULT_INCLUDE = &quot;defaultInclude&quot;;
+    public static final String GENERATE_GMOCKS_FOR_APIS = &quot;generateGMocksForApis&quot;;
+    public static final String DEFAULT_PACKAGE_NAME = &quot;CppRestOpenAPIClient&quot;;
+
+<span class="fc" id="L47">    protected String packageName = &quot;&quot;;</span>
+<span class="fc" id="L48">    protected String packageVersion = &quot;1.0.0&quot;;</span>
+<span class="fc" id="L49">    protected String declspec = &quot;&quot;;</span>
+<span class="fc" id="L50">    protected String defaultInclude = &quot;&quot;;</span>
+<span class="fc" id="L51">    protected String apiDirName = &quot;api&quot;;</span>
+<span class="fc" id="L52">    protected String modelDirName = &quot;model&quot;;</span>
+
+<span class="fc" id="L54">    private final Set&lt;String&gt; parentModels = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L55">    private final Multimap&lt;String, CodegenModel&gt; childrenByParent = ArrayListMultimap.create();</span>
+
+    /**
+     * Configures the type of generator.
+     *
+     * @return the CodegenType for this generator
+     * @see org.openapitools.codegen.CodegenType
+     */
+    @Override
+    public CodegenType getTag() {
+<span class="fc" id="L65">        return CodegenType.CLIENT;</span>
+    }
+
+    /**
+     * Configures a friendly name for the generator. This will be used by the
+     * generator to select the library with the -g flag.
+     *
+     * @return the friendly name for the generator
+     */
+    @Override
+    public String getName() {
+<span class="fc" id="L76">        return &quot;cpp-restsdk&quot;;</span>
+    }
+
+    /**
+     * Returns human-friendly help for the generator. Provide the consumer with
+     * help tips, parameters here
+     *
+     * @return A string value for the help message
+     */
+    @Override
+    public String getHelp() {
+<span class="nc" id="L87">        return &quot;Generates a C++ API client with C++ REST SDK (https://github.com/Microsoft/cpprestsdk).&quot;;</span>
+    }
+
+    public CppRestSdkClientCodegen() {
+<span class="fc" id="L91">        super();</span>
+
+        // TODO: cpp-restsdk maintainer review
+<span class="fc" id="L94">        modifyFeatureSet(features -&gt; features</span>
+<span class="fc" id="L95">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="fc" id="L96">                .securityFeatures(EnumSet.of(</span>
+                        SecurityFeature.BasicAuth,
+                        SecurityFeature.OAuth2_Implicit,
+                        SecurityFeature.ApiKey
+                ))
+<span class="fc" id="L101">                .excludeGlobalFeatures(</span>
+                        GlobalFeature.XMLStructureDefinitions,
+                        GlobalFeature.Callbacks,
+                        GlobalFeature.LinkObjects,
+                        GlobalFeature.ParameterStyling,
+                        GlobalFeature.MultiServer
+                )
+<span class="fc" id="L108">                .includeSchemaSupportFeatures(</span>
+                        SchemaSupportFeature.Polymorphism
+                )
+<span class="fc" id="L111">                .excludeParameterFeatures(</span>
+                        ParameterFeature.Cookie
+                )
+<span class="fc" id="L114">                .includeDataTypeFeatures(</span>
+                        DataTypeFeature.AnyType)
+        );
+
+<span class="fc" id="L118">        apiPackage = &quot;org.openapitools.client.api&quot;;</span>
+<span class="fc" id="L119">        modelPackage = &quot;org.openapitools.client.model&quot;;</span>
+
+<span class="fc" id="L121">        modelTemplateFiles.put(&quot;model-header.mustache&quot;, &quot;.h&quot;);</span>
+<span class="fc" id="L122">        modelTemplateFiles.put(&quot;model-source.mustache&quot;, &quot;.cpp&quot;);</span>
+
+<span class="fc" id="L124">        apiTemplateFiles.put(&quot;api-header.mustache&quot;, &quot;.h&quot;);</span>
+<span class="fc" id="L125">        apiTemplateFiles.put(&quot;api-source.mustache&quot;, &quot;.cpp&quot;);</span>
+
+<span class="fc" id="L127">        embeddedTemplateDir = templateDir = &quot;cpp-rest-sdk-client&quot;;</span>
+
+<span class="fc" id="L129">        cliOptions.clear();</span>
+
+        // CLI options
+<span class="fc" id="L132">        addOption(CodegenConstants.PACKAGE_NAME, &quot;C++ package (library) name.&quot;, DEFAULT_PACKAGE_NAME);</span>
+<span class="fc" id="L133">        addOption(CodegenConstants.MODEL_PACKAGE, &quot;C++ namespace for models (convention: name.space.model).&quot;,</span>
+                this.modelPackage);
+<span class="fc" id="L135">        addOption(CodegenConstants.API_PACKAGE, &quot;C++ namespace for apis (convention: name.space.api).&quot;,</span>
+                this.apiPackage);
+<span class="fc" id="L137">        addOption(CodegenConstants.PACKAGE_VERSION, &quot;C++ package version.&quot;, this.packageVersion);</span>
+<span class="fc" id="L138">        addOption(DECLSPEC, &quot;C++ preprocessor to place before the class name for handling dllexport/dllimport.&quot;,</span>
+                this.declspec);
+<span class="fc" id="L140">        addOption(DEFAULT_INCLUDE,</span>
+                &quot;The default include statement that should be placed in all headers for including things like the declspec (convention: #include \&quot;Commons.h\&quot; &quot;,
+                this.defaultInclude);
+<span class="fc" id="L143">        addOption(GENERATE_GMOCKS_FOR_APIS,</span>
+                &quot;Generate Google Mock classes for APIs.&quot;,
+                null);
+<span class="fc" id="L146">        addOption(RESERVED_WORD_PREFIX_OPTION,</span>
+                RESERVED_WORD_PREFIX_DESC,
+                this.reservedWordPrefix);
+<span class="fc" id="L149">        addOption(VARIABLE_NAME_FIRST_CHARACTER_UPPERCASE_OPTION,</span>
+                VARIABLE_NAME_FIRST_CHARACTER_UPPERCASE_DESC,
+<span class="fc" id="L151">                Boolean.toString(this.variableNameFirstCharacterUppercase));</span>
+
+<span class="fc" id="L153">        languageSpecificPrimitives = new HashSet&lt;&gt;(</span>
+<span class="fc" id="L154">                Arrays.asList(&quot;int&quot;, &quot;char&quot;, &quot;bool&quot;, &quot;long&quot;, &quot;float&quot;, &quot;double&quot;, &quot;int32_t&quot;, &quot;int64_t&quot;));</span>
+
+<span class="fc" id="L156">        typeMapping = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L157">        typeMapping.put(&quot;date&quot;, &quot;utility::datetime&quot;);</span>
+<span class="fc" id="L158">        typeMapping.put(&quot;DateTime&quot;, &quot;utility::datetime&quot;);</span>
+<span class="fc" id="L159">        typeMapping.put(&quot;string&quot;, &quot;utility::string_t&quot;);</span>
+<span class="fc" id="L160">        typeMapping.put(&quot;integer&quot;, &quot;int32_t&quot;);</span>
+<span class="fc" id="L161">        typeMapping.put(&quot;long&quot;, &quot;int64_t&quot;);</span>
+<span class="fc" id="L162">        typeMapping.put(&quot;boolean&quot;, &quot;bool&quot;);</span>
+<span class="fc" id="L163">        typeMapping.put(&quot;array&quot;, &quot;std::vector&quot;);</span>
+<span class="fc" id="L164">        typeMapping.put(&quot;map&quot;, &quot;std::map&quot;);</span>
+<span class="fc" id="L165">        typeMapping.put(&quot;file&quot;, &quot;HttpContent&quot;);</span>
+<span class="fc" id="L166">        typeMapping.put(&quot;object&quot;, &quot;Object&quot;);</span>
+<span class="fc" id="L167">        typeMapping.put(&quot;binary&quot;, &quot;HttpContent&quot;);</span>
+<span class="fc" id="L168">        typeMapping.put(&quot;number&quot;, &quot;double&quot;);</span>
+<span class="fc" id="L169">        typeMapping.put(&quot;UUID&quot;, &quot;utility::string_t&quot;);</span>
+<span class="fc" id="L170">        typeMapping.put(&quot;URI&quot;, &quot;utility::string_t&quot;);</span>
+<span class="fc" id="L171">        typeMapping.put(&quot;ByteArray&quot;, &quot;utility::string_t&quot;);</span>
+
+<span class="fc" id="L173">        super.importMapping = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L174">        importMapping.put(&quot;std::vector&quot;, &quot;#include &lt;vector&gt;&quot;);</span>
+<span class="fc" id="L175">        importMapping.put(&quot;std::map&quot;, &quot;#include &lt;map&gt;&quot;);</span>
+<span class="fc" id="L176">        importMapping.put(&quot;std::string&quot;, &quot;#include &lt;string&gt;&quot;);</span>
+<span class="fc" id="L177">        importMapping.put(&quot;HttpContent&quot;, &quot;#include \&quot;HttpContent.h\&quot;&quot;);</span>
+<span class="fc" id="L178">        importMapping.put(&quot;Object&quot;, &quot;#include \&quot;Object.h\&quot;&quot;);</span>
+<span class="fc" id="L179">        importMapping.put(&quot;AnyType&quot;, &quot;#include \&quot;AnyType.h\&quot;&quot;);</span>
+<span class="fc" id="L180">        importMapping.put(&quot;utility::string_t&quot;, &quot;#include &lt;cpprest/details/basic_types.h&gt;&quot;);</span>
+<span class="fc" id="L181">        importMapping.put(&quot;utility::datetime&quot;, &quot;#include &lt;cpprest/details/basic_types.h&gt;&quot;);</span>
+<span class="fc" id="L182">    }</span>
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L186">        super.processOpts();</span>
+
+<span class="nc" id="L188">        packageName = (String) additionalProperties.getOrDefault(CodegenConstants.PACKAGE_NAME, DEFAULT_PACKAGE_NAME);</span>
+
+<span class="nc bnc" id="L190" title="All 2 branches missed.">        if (additionalProperties.containsKey(DECLSPEC)) {</span>
+<span class="nc" id="L191">            declspec = additionalProperties.get(DECLSPEC).toString();</span>
+        }
+
+<span class="nc bnc" id="L194" title="All 2 branches missed.">        if (additionalProperties.containsKey(DEFAULT_INCLUDE)) {</span>
+<span class="nc" id="L195">            defaultInclude = additionalProperties.get(DEFAULT_INCLUDE).toString();</span>
+        }
+
+<span class="nc bnc" id="L198" title="All 2 branches missed.">        if (additionalProperties.containsKey(RESERVED_WORD_PREFIX_OPTION)) {</span>
+<span class="nc" id="L199">            reservedWordPrefix = (String) additionalProperties.get(RESERVED_WORD_PREFIX_OPTION);</span>
+        }
+
+<span class="nc bnc" id="L202" title="All 2 branches missed.">        if (convertPropertyToBoolean(GENERATE_GMOCKS_FOR_APIS)) {</span>
+<span class="nc" id="L203">            apiTemplateFiles.put(&quot;api-gmock.mustache&quot;, &quot;GMock.h&quot;);</span>
+<span class="nc" id="L204">            additionalProperties.put(&quot;gmockApis&quot;, &quot;true&quot;);</span>
+        }
+
+<span class="nc" id="L207">        additionalProperties.put(CodegenConstants.PACKAGE_NAME, packageName);</span>
+<span class="nc" id="L208">        additionalProperties.put(&quot;modelNamespaceDeclarations&quot;, modelPackage.split(&quot;\\.&quot;));</span>
+<span class="nc" id="L209">        additionalProperties.put(&quot;modelNamespace&quot;, modelPackage.replaceAll(&quot;\\.&quot;, &quot;::&quot;));</span>
+<span class="nc" id="L210">        additionalProperties.put(&quot;modelHeaderGuardPrefix&quot;, modelPackage.replaceAll(&quot;\\.&quot;, &quot;_&quot;).toUpperCase(Locale.ROOT));</span>
+<span class="nc" id="L211">        additionalProperties.put(&quot;apiNamespaceDeclarations&quot;, apiPackage.split(&quot;\\.&quot;));</span>
+<span class="nc" id="L212">        additionalProperties.put(&quot;apiNamespace&quot;, apiPackage.replaceAll(&quot;\\.&quot;, &quot;::&quot;));</span>
+<span class="nc" id="L213">        additionalProperties.put(&quot;apiHeaderGuardPrefix&quot;, apiPackage.replaceAll(&quot;\\.&quot;, &quot;_&quot;).toUpperCase(Locale.ROOT));</span>
+<span class="nc" id="L214">        additionalProperties.put(&quot;declspec&quot;, declspec);</span>
+<span class="nc" id="L215">        additionalProperties.put(&quot;defaultInclude&quot;, defaultInclude);</span>
+<span class="nc" id="L216">        additionalProperties.put(RESERVED_WORD_PREFIX_OPTION, reservedWordPrefix);</span>
+
+<span class="nc" id="L218">        importMapping.put(&quot;HttpContent&quot;, &quot;#include \&quot;&quot; + packageName + &quot;/&quot; + &quot;HttpContent.h\&quot;&quot;);</span>
+<span class="nc" id="L219">        importMapping.put(&quot;Object&quot;, &quot;#include \&quot;&quot; + packageName + &quot;/&quot; + &quot;Object.h\&quot;&quot;);</span>
+<span class="nc" id="L220">        importMapping.put(&quot;AnyType&quot;, &quot;#include \&quot;&quot; + packageName + &quot;/&quot; + &quot;AnyType.h\&quot;&quot;);</span>
+
+<span class="nc" id="L222">        supportingFiles.add(new SupportingFile(&quot;modelbase-header.mustache&quot;, getHeaderFolder(), &quot;ModelBase.h&quot;));</span>
+<span class="nc" id="L223">        supportingFiles.add(new SupportingFile(&quot;modelbase-source.mustache&quot;, getSourceFolder(), &quot;ModelBase.cpp&quot;));</span>
+<span class="nc" id="L224">        supportingFiles.add(new SupportingFile(&quot;object-header.mustache&quot;, getHeaderFolder(), &quot;Object.h&quot;));</span>
+<span class="nc" id="L225">        supportingFiles.add(new SupportingFile(&quot;object-source.mustache&quot;, getSourceFolder(), &quot;Object.cpp&quot;));</span>
+<span class="nc" id="L226">        supportingFiles.add(new SupportingFile(&quot;anytype-header.mustache&quot;, getHeaderFolder(), &quot;AnyType.h&quot;));</span>
+<span class="nc" id="L227">        supportingFiles.add(new SupportingFile(&quot;anytype-source.mustache&quot;, getSourceFolder(), &quot;AnyType.cpp&quot;));</span>
+<span class="nc" id="L228">        supportingFiles.add(new SupportingFile(&quot;apiclient-header.mustache&quot;, getHeaderFolder(), &quot;ApiClient.h&quot;));</span>
+<span class="nc" id="L229">        supportingFiles.add(new SupportingFile(&quot;apiclient-source.mustache&quot;, getSourceFolder(), &quot;ApiClient.cpp&quot;));</span>
+<span class="nc" id="L230">        supportingFiles.add(new SupportingFile(&quot;apiconfiguration-header.mustache&quot;, getHeaderFolder(), &quot;ApiConfiguration.h&quot;));</span>
+<span class="nc" id="L231">        supportingFiles.add(new SupportingFile(&quot;apiconfiguration-source.mustache&quot;, getSourceFolder(), &quot;ApiConfiguration.cpp&quot;));</span>
+<span class="nc" id="L232">        supportingFiles.add(new SupportingFile(&quot;apiexception-header.mustache&quot;, getHeaderFolder(), &quot;ApiException.h&quot;));</span>
+<span class="nc" id="L233">        supportingFiles.add(new SupportingFile(&quot;apiexception-source.mustache&quot;, getSourceFolder(), &quot;ApiException.cpp&quot;));</span>
+<span class="nc" id="L234">        supportingFiles.add(new SupportingFile(&quot;ihttpbody-header.mustache&quot;, getHeaderFolder(), &quot;IHttpBody.h&quot;));</span>
+<span class="nc" id="L235">        supportingFiles.add(new SupportingFile(&quot;jsonbody-header.mustache&quot;, getHeaderFolder(), &quot;JsonBody.h&quot;));</span>
+<span class="nc" id="L236">        supportingFiles.add(new SupportingFile(&quot;jsonbody-source.mustache&quot;, getSourceFolder(), &quot;JsonBody.cpp&quot;));</span>
+<span class="nc" id="L237">        supportingFiles.add(new SupportingFile(&quot;httpcontent-header.mustache&quot;, getHeaderFolder(), &quot;HttpContent.h&quot;));</span>
+<span class="nc" id="L238">        supportingFiles.add(new SupportingFile(&quot;httpcontent-source.mustache&quot;, getSourceFolder(), &quot;HttpContent.cpp&quot;));</span>
+<span class="nc" id="L239">        supportingFiles.add(new SupportingFile(&quot;multipart-header.mustache&quot;, getHeaderFolder(), &quot;MultipartFormData.h&quot;));</span>
+<span class="nc" id="L240">        supportingFiles.add(new SupportingFile(&quot;multipart-source.mustache&quot;, getSourceFolder(), &quot;MultipartFormData.cpp&quot;));</span>
+<span class="nc" id="L241">        supportingFiles.add(new SupportingFile(&quot;gitignore.mustache&quot;, &quot;&quot;, &quot;.gitignore&quot;));</span>
+<span class="nc" id="L242">        supportingFiles.add(new SupportingFile(&quot;git_push.sh.mustache&quot;, &quot;&quot;, &quot;git_push.sh&quot;));</span>
+<span class="nc" id="L243">        supportingFiles.add(new SupportingFile(&quot;cmake-lists.mustache&quot;, &quot;&quot;, &quot;CMakeLists.txt&quot;));</span>
+<span class="nc" id="L244">        supportingFiles.add(new SupportingFile(&quot;cmake-config.mustache&quot;, &quot;&quot;, &quot;Config.cmake.in&quot;));</span>
+<span class="nc" id="L245">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;));</span>
+<span class="nc" id="L246">    }</span>
+
+    protected String getHeaderFolder() {
+<span class="nc" id="L249">        return &quot;include/&quot; + packageName;</span>
+    }
+
+    protected String getSourceFolder() {
+<span class="nc" id="L253">        return &quot;src&quot;;</span>
+    }
+
+    @Override
+    public String apiFilename(String templateName, String tag) {
+<span class="nc" id="L258">        String suffix = apiTemplateFiles().get(templateName);</span>
+<span class="nc bnc" id="L259" title="All 2 branches missed.">        String targetOutDir = suffix.equals(&quot;.h&quot;) ? getHeaderFolder() : getSourceFolder();</span>
+<span class="nc" id="L260">        return outputFolder + &quot;/&quot; + targetOutDir + &quot;/&quot; + apiDirName + &quot;/&quot; + toApiFilename(tag) + suffix;</span>
+    }
+
+    @Override
+    public String modelFilename(String templateName, String modelName) {
+<span class="nc" id="L265">        String suffix = modelTemplateFiles().get(templateName);</span>
+<span class="nc bnc" id="L266" title="All 2 branches missed.">        String targetOutDir = suffix.equals(&quot;.h&quot;) ? getHeaderFolder() : getSourceFolder();</span>
+<span class="nc" id="L267">        return outputFolder + &quot;/&quot; + targetOutDir + &quot;/&quot; + modelDirName + &quot;/&quot; + toModelFilename(modelName) + suffix;</span>
+    }
+
+    @Override
+    public String toModelImport(String name) {
+<span class="nc bnc" id="L272" title="All 2 branches missed.">        if (importMapping.containsKey(name)) {</span>
+<span class="nc" id="L273">            return importMapping.get(name);</span>
+        } else {
+<span class="nc" id="L275">            return &quot;#include \&quot;&quot; + packageName + &quot;/&quot; + modelDirName + &quot;/&quot; + toModelFilename(name) + &quot;.h\&quot;&quot;;</span>
+        }
+    }
+
+    @Override
+    public CodegenModel fromModel(String name, Schema model) {
+<span class="nc" id="L281">        CodegenModel codegenModel = super.fromModel(name, model);</span>
+
+<span class="nc" id="L283">        Set&lt;String&gt; oldImports = codegenModel.imports;</span>
+<span class="nc" id="L284">        codegenModel.imports = new HashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L285" title="All 2 branches missed.">        for (String imp : oldImports) {</span>
+<span class="nc" id="L286">            String newImp = toModelImport(imp);</span>
+<span class="nc bnc" id="L287" title="All 2 branches missed.">            if (!newImp.isEmpty()) {</span>
+<span class="nc" id="L288">                codegenModel.imports.add(newImp);</span>
+            }
+<span class="nc" id="L290">        }</span>
+
+<span class="nc" id="L292">        return codegenModel;</span>
+    }
+
+    @Override
+    public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, List&lt;Server&gt; servers) {
+<span class="nc" id="L297">        CodegenOperation op = super.fromOperation(path, httpMethod, operation, servers);</span>
+
+<span class="nc bnc" id="L299" title="All 4 branches missed.">        if (operation.getResponses() != null &amp;&amp; !operation.getResponses().isEmpty()) {</span>
+<span class="nc" id="L300">            ApiResponse methodResponse = findMethodResponse(operation.getResponses());</span>
+
+<span class="nc bnc" id="L302" title="All 2 branches missed.">            if (methodResponse != null) {</span>
+<span class="nc" id="L303">                Schema response = ModelUtils.getSchemaFromResponse(openAPI, methodResponse);</span>
+<span class="nc" id="L304">                response = unaliasSchema(response);</span>
+<span class="nc bnc" id="L305" title="All 2 branches missed.">                if (response != null) {</span>
+<span class="nc" id="L306">                    CodegenProperty cm = fromProperty(&quot;response&quot;, response, false);</span>
+<span class="nc" id="L307">                    op.vendorExtensions.put(&quot;x-codegen-response&quot;, cm);</span>
+<span class="nc bnc" id="L308" title="All 2 branches missed.">                    if (&quot;std::shared_ptr&lt;HttpContent&gt;&quot;.equals(cm.dataType)) {</span>
+<span class="nc" id="L309">                        op.vendorExtensions.put(&quot;x-codegen-response-ishttpcontent&quot;, true);</span>
+                    }
+                }
+            }
+        }
+
+<span class="nc" id="L315">        return op;</span>
+    }
+
+    @Override
+    public void postProcessModelProperty(CodegenModel model, CodegenProperty property) {
+<span class="nc bnc" id="L320" title="All 2 branches missed.">        if (isFileSchema(property)) {</span>
+<span class="nc" id="L321">            property.vendorExtensions.put(&quot;x-codegen-file&quot;, true);</span>
+        }
+
+<span class="nc bnc" id="L324" title="All 2 branches missed.">        if (!isNullOrEmpty(model.parent)) {</span>
+<span class="nc" id="L325">            parentModels.add(model.parent);</span>
+<span class="nc bnc" id="L326" title="All 2 branches missed.">            if (!childrenByParent.containsEntry(model.parent, model)) {</span>
+<span class="nc" id="L327">                childrenByParent.put(model.parent, model);</span>
+            }
+        }
+<span class="nc" id="L330">    }</span>
+
+    // override with any special post-processing
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L335">        OperationMap operations = objs.getOperations();</span>
+<span class="nc" id="L336">        List&lt;CodegenOperation&gt; operationList = operations.getOperation();</span>
+<span class="nc bnc" id="L337" title="All 2 branches missed.">        for (CodegenOperation op : operationList) {</span>
+<span class="nc bnc" id="L338" title="All 2 branches missed.">            for (String hdr : op.imports) {</span>
+<span class="nc bnc" id="L339" title="All 2 branches missed.">                if (importMapping.containsKey(hdr)) {</span>
+<span class="nc" id="L340">                    continue;</span>
+                }
+<span class="nc" id="L342">                operations.put(&quot;hasModelImport&quot;, true);</span>
+<span class="nc" id="L343">                break;</span>
+            }
+<span class="nc" id="L345">        }</span>
+<span class="nc" id="L346">        return objs;</span>
+    }
+
+    protected boolean isFileSchema(CodegenProperty property) {
+<span class="nc" id="L350">        return property.baseType.equals(&quot;HttpContent&quot;);</span>
+    }
+
+    @Override
+    public String toModelFilename(String name) {
+<span class="nc" id="L355">        return toModelName(name);</span>
+    }
+
+    @Override
+    public String toApiFilename(String name) {
+<span class="nc" id="L360">        return toApiName(name);</span>
+    }
+
+    /**
+     * Optional - type declaration. This is a String which is used by the
+     * templates to instantiate your types. There is typically special handling
+     * for different property types
+     *
+     * @return a string value used as the `dataType` field for model templates,
+     * `returnType` for api templates
+     */
+    @Override
+    public String getTypeDeclaration(Schema p) {
+<span class="nc" id="L373">        String openAPIType = getSchemaType(p);</span>
+
+<span class="nc bnc" id="L375" title="All 2 branches missed.">        if (ModelUtils.isArraySchema(p)) {</span>
+<span class="nc" id="L376">            Schema inner = ModelUtils.getSchemaItems(p);</span>
+<span class="nc" id="L377">            return getSchemaType(p) + &quot;&lt;&quot; + getTypeDeclaration(inner) + &quot;&gt;&quot;;</span>
+<span class="nc bnc" id="L378" title="All 2 branches missed.">        } else if (ModelUtils.isMapSchema(p)) {</span>
+<span class="nc" id="L379">            Schema inner = ModelUtils.getAdditionalProperties(p);</span>
+<span class="nc" id="L380">            return getSchemaType(p) + &quot;&lt;utility::string_t, &quot; + getTypeDeclaration(inner) + &quot;&gt;&quot;;</span>
+<span class="nc bnc" id="L381" title="All 4 branches missed.">        } else if (ModelUtils.isFileSchema(p) || ModelUtils.isBinarySchema(p)) {</span>
+<span class="nc" id="L382">            return &quot;std::shared_ptr&lt;&quot; + openAPIType + &quot;&gt;&quot;;</span>
+<span class="nc bnc" id="L383" title="All 2 branches missed.">        } else if (ModelUtils.isStringSchema(p)</span>
+<span class="nc bnc" id="L384" title="All 4 branches missed.">                || ModelUtils.isDateSchema(p) || ModelUtils.isDateTimeSchema(p)</span>
+<span class="nc bnc" id="L385" title="All 4 branches missed.">                || ModelUtils.isFileSchema(p) || ModelUtils.isUUIDSchema(p)</span>
+<span class="nc bnc" id="L386" title="All 2 branches missed.">                || languageSpecificPrimitives.contains(openAPIType)) {</span>
+<span class="nc" id="L387">            return toModelName(openAPIType);</span>
+        }
+
+<span class="nc" id="L390">        return &quot;std::shared_ptr&lt;&quot; + openAPIType + &quot;&gt;&quot;;</span>
+    }
+
+    @Override
+    public String toDefaultValue(Schema p) {
+<span class="nc bnc" id="L395" title="All 2 branches missed.">        if (ModelUtils.isBooleanSchema(p)) {</span>
+<span class="nc" id="L396">            return &quot;false&quot;;</span>
+<span class="nc bnc" id="L397" title="All 2 branches missed.">        } else if (ModelUtils.isDateSchema(p)) {</span>
+<span class="nc" id="L398">            return &quot;utility::datetime()&quot;;</span>
+<span class="nc bnc" id="L399" title="All 2 branches missed.">        } else if (ModelUtils.isDateTimeSchema(p)) {</span>
+<span class="nc" id="L400">            return &quot;utility::datetime()&quot;;</span>
+<span class="nc bnc" id="L401" title="All 2 branches missed.">        } else if (ModelUtils.isNumberSchema(p)) {</span>
+<span class="nc bnc" id="L402" title="All 2 branches missed.">            if (ModelUtils.isFloatSchema(p)) {</span>
+<span class="nc" id="L403">                return &quot;0.0f&quot;;</span>
+            }
+<span class="nc" id="L405">            return &quot;0.0&quot;;</span>
+<span class="nc bnc" id="L406" title="All 2 branches missed.">        } else if (ModelUtils.isIntegerSchema(p)) {</span>
+<span class="nc bnc" id="L407" title="All 2 branches missed.">            if (ModelUtils.isLongSchema(p)) {</span>
+<span class="nc" id="L408">                return &quot;0L&quot;;</span>
+            }
+<span class="nc" id="L410">            return &quot;0&quot;;</span>
+<span class="nc bnc" id="L411" title="All 2 branches missed.">        } else if (ModelUtils.isMapSchema(p)) {</span>
+<span class="nc" id="L412">            String inner = getSchemaType(ModelUtils.getAdditionalProperties(p));</span>
+<span class="nc" id="L413">            return &quot;std::map&lt;utility::string_t, &quot; + inner + &quot;&gt;()&quot;;</span>
+<span class="nc bnc" id="L414" title="All 2 branches missed.">        } else if (ModelUtils.isArraySchema(p)) {</span>
+<span class="nc" id="L415">            String inner = getSchemaType(ModelUtils.getSchemaItems(p));</span>
+<span class="nc bnc" id="L416" title="All 2 branches missed.">            if (!languageSpecificPrimitives.contains(inner)) {</span>
+<span class="nc" id="L417">                inner = &quot;std::shared_ptr&lt;&quot; + inner + &quot;&gt;&quot;;</span>
+            }
+<span class="nc" id="L419">            return &quot;std::vector&lt;&quot; + inner + &quot;&gt;()&quot;;</span>
+<span class="nc bnc" id="L420" title="All 2 branches missed.">        } else if (!StringUtils.isEmpty(p.get$ref())) {</span>
+<span class="nc" id="L421">            return &quot;new &quot; + toModelName(ModelUtils.getSimpleRef(p.get$ref())) + &quot;()&quot;;</span>
+<span class="nc bnc" id="L422" title="All 2 branches missed.">        } else if (ModelUtils.isStringSchema(p)) {</span>
+<span class="nc" id="L423">            return &quot;utility::conversions::to_string_t(\&quot;\&quot;)&quot;;</span>
+<span class="nc bnc" id="L424" title="All 2 branches missed.">        } else if (ModelUtils.isFreeFormObject(p)) {</span>
+<span class="nc" id="L425">            return &quot;new Object()&quot;;</span>
+        }
+
+<span class="nc" id="L428">        return &quot;nullptr&quot;;</span>
+    }
+
+    @Override
+    public void postProcessParameter(CodegenParameter parameter) {
+<span class="nc" id="L433">        super.postProcessParameter(parameter);</span>
+
+<span class="nc bnc" id="L435" title="All 2 branches missed.">        boolean isPrimitiveType = parameter.isPrimitiveType == Boolean.TRUE;</span>
+<span class="nc bnc" id="L436" title="All 2 branches missed.">        boolean isArray = parameter.isArray == Boolean.TRUE;</span>
+<span class="nc bnc" id="L437" title="All 2 branches missed.">        boolean isMap = parameter.isMap == Boolean.TRUE;</span>
+<span class="nc bnc" id="L438" title="All 2 branches missed.">        boolean isString = parameter.isString == Boolean.TRUE;</span>
+
+<span class="nc bnc" id="L440" title="All 10 branches missed.">        if (!isPrimitiveType &amp;&amp; !isArray &amp;&amp; !isMap &amp;&amp; !isString &amp;&amp; !parameter.dataType.startsWith(&quot;std::shared_ptr&quot;)) {</span>
+<span class="nc" id="L441">            parameter.dataType = &quot;std::shared_ptr&lt;&quot; + parameter.dataType + &quot;&gt;&quot;;</span>
+        }
+<span class="nc" id="L443">    }</span>
+
+    /**
+     * Optional - OpenAPI type conversion. This is used to map OpenAPI types in
+     * a `Schema` into either language specific types via `typeMapping` or
+     * into complex models if there is not a mapping.
+     *
+     * @return a string value of the type or complex model for this property
+     * @see io.swagger.v3.oas.models.media.Schema
+     */
+    @Override
+    public String getSchemaType(Schema p) {
+<span class="nc" id="L455">        String openAPIType = super.getSchemaType(p);</span>
+<span class="nc" id="L456">        String type = null;</span>
+<span class="nc bnc" id="L457" title="All 2 branches missed.">        if (typeMapping.containsKey(openAPIType)) {</span>
+<span class="nc" id="L458">            type = typeMapping.get(openAPIType);</span>
+<span class="nc bnc" id="L459" title="All 2 branches missed.">            if (languageSpecificPrimitives.contains(type))</span>
+<span class="nc" id="L460">                return toModelName(type);</span>
+        } else
+<span class="nc" id="L462">            type = openAPIType;</span>
+<span class="nc" id="L463">        return toModelName(type);</span>
+    }
+
+    @Override
+    public Map&lt;String, ModelsMap&gt; postProcessAllModels(final Map&lt;String, ModelsMap&gt; models) {
+<span class="nc" id="L468">        final Map&lt;String, ModelsMap&gt; processed = super.postProcessAllModels(models);</span>
+<span class="nc" id="L469">        postProcessParentModels(models);</span>
+<span class="nc" id="L470">        return processed;</span>
+    }
+
+    private void postProcessParentModels(final Map&lt;String, ModelsMap&gt; models) {
+<span class="nc bnc" id="L474" title="All 2 branches missed.">        for (final String parent : parentModels) {</span>
+<span class="nc" id="L475">            final CodegenModel parentModel = ModelUtils.getModelByName(parent, models);</span>
+<span class="nc" id="L476">            final Collection&lt;CodegenModel&gt; childrenModels = childrenByParent.get(parent);</span>
+<span class="nc bnc" id="L477" title="All 2 branches missed.">            for (final CodegenModel child : childrenModels) {</span>
+<span class="nc" id="L478">                processParentPropertiesInChildModel(parentModel, child);</span>
+<span class="nc" id="L479">            }</span>
+<span class="nc" id="L480">        }</span>
+<span class="nc" id="L481">    }</span>
+
+    /**
+     * Sets the child property's isInherited flag to true if it is an inherited property
+     */
+    private void processParentPropertiesInChildModel(final CodegenModel parent, final CodegenModel child) {
+<span class="nc" id="L487">        final Map&lt;String, CodegenProperty&gt; childPropertiesByName = new HashMap&lt;&gt;(child.vars.size());</span>
+<span class="nc bnc" id="L488" title="All 6 branches missed.">        if (child != null &amp;&amp; child.vars != null &amp;&amp; !child.vars.isEmpty()) {</span>
+<span class="nc bnc" id="L489" title="All 2 branches missed.">            for (final CodegenProperty childSchema : child.vars) {</span>
+<span class="nc" id="L490">                childPropertiesByName.put(childSchema.name, childSchema);</span>
+<span class="nc" id="L491">            }</span>
+        }
+
+<span class="nc bnc" id="L494" title="All 6 branches missed.">        if (parent != null &amp;&amp; parent.vars != null &amp;&amp; !parent.vars.isEmpty()) {</span>
+<span class="nc bnc" id="L495" title="All 2 branches missed.">            for (final CodegenProperty parentSchema : parent.vars) {</span>
+<span class="nc" id="L496">                final CodegenProperty duplicatedByParent = childPropertiesByName.get(parentSchema.name);</span>
+<span class="nc bnc" id="L497" title="All 2 branches missed.">                if (duplicatedByParent != null) {</span>
+<span class="nc" id="L498">                    duplicatedByParent.isInherited = true;</span>
+                }
+<span class="nc" id="L500">            }</span>
+        }
+<span class="nc" id="L502">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>XmlExampleGenerator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.examples</a> &gt; <span class="el_source">XmlExampleGenerator.java</span></div><h1>XmlExampleGenerator.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.examples;
+
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.XML;
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.utils.ModelUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+
+public class XmlExampleGenerator {
+<span class="fc" id="L31">    protected final Logger LOGGER = LoggerFactory.getLogger(XmlExampleGenerator.class);</span>
+<span class="fc" id="L32">    public static String NEWLINE = &quot;\n&quot;;</span>
+<span class="fc" id="L33">    public static String TAG_START = &quot;&lt;&quot;;</span>
+<span class="fc" id="L34">    public static String CLOSE_TAG = &quot;&gt;&quot;;</span>
+<span class="fc" id="L35">    public static String TAG_END = &quot;&lt;/&quot;;</span>
+<span class="fc" id="L36">    private static String EMPTY = &quot;&quot;;</span>
+    protected Map&lt;String, Schema&gt; examples;
+
+<span class="fc" id="L39">    public XmlExampleGenerator(Map&lt;String, Schema&gt; examples) {</span>
+<span class="fc" id="L40">        this.examples = examples;</span>
+<span class="pc bpc" id="L41" title="1 of 2 branches missed.">        if (examples == null) {</span>
+<span class="nc" id="L42">            this.examples = new HashMap&lt;String, Schema&gt;();</span>
+        }
+<span class="fc" id="L44">    }</span>
+
+    public String toXml(Schema schema) {
+<span class="nc" id="L47">        return toXml(null, schema, 0, Collections.emptySet());</span>
+    }
+
+    protected String toXml(Schema schema, int indent, Collection&lt;String&gt; path) {
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">        if (schema == null) return &quot;&quot;;</span>
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">        if (StringUtils.isNotEmpty(schema.get$ref())) {</span>
+<span class="nc" id="L53">            Schema actualSchema = examples.get(schema.get$ref());</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">            if (actualSchema != null) {</span>
+<span class="nc" id="L55">                return modelImplToXml(actualSchema, indent, path);</span>
+            }
+        }
+<span class="fc" id="L58">        return modelImplToXml(schema, indent, path);</span>
+    }
+
+    protected String modelImplToXml(Schema schema, int indent, Collection&lt;String&gt; path) {
+<span class="fc" id="L62">        final String modelName = schema.getName();</span>
+<span class="pc bpc" id="L63" title="1 of 2 branches missed.">        if (path.contains(modelName)) {</span>
+<span class="nc" id="L64">            return EMPTY;</span>
+        }
+<span class="fc" id="L66">        final Set&lt;String&gt; selfPath = new HashSet&lt;String&gt;(path);</span>
+<span class="fc" id="L67">        selfPath.add(modelName);</span>
+
+<span class="fc" id="L69">        StringBuilder sb = new StringBuilder();</span>
+        // attributes
+<span class="fc" id="L71">        Map&lt;String, Schema&gt; attributes = new LinkedHashMap&lt;String, Schema&gt;();</span>
+<span class="fc" id="L72">        Map&lt;String, Schema&gt; elements = new LinkedHashMap&lt;String, Schema&gt;();</span>
+
+<span class="fc" id="L74">        String name = modelName;</span>
+<span class="fc" id="L75">        XML xml = schema.getXml();</span>
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">        if (xml != null) {</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">            if (xml.getName() != null) {</span>
+<span class="nc" id="L78">                name = xml.getName();</span>
+            }
+        }
+        // TODO: map objects will not enter this block
+<span class="fc" id="L82">        Map&lt;String, Schema&gt; properties = schema.getProperties();</span>
+<span class="pc bpc" id="L83" title="2 of 4 branches missed.">        if (properties != null &amp;&amp; !properties.isEmpty()) {</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">            for (Map.Entry&lt;String, Schema&gt; propertiesEntry : properties.entrySet()) {</span>
+<span class="fc" id="L85">                String pName = propertiesEntry.getKey();</span>
+<span class="fc" id="L86">                Schema property = propertiesEntry.getValue();</span>
+<span class="pc bpc" id="L87" title="6 of 8 branches missed.">                if (property != null &amp;&amp; property.getXml() != null &amp;&amp; property.getXml().getAttribute() != null &amp;&amp; property.getXml().getAttribute()) {</span>
+<span class="nc" id="L88">                    attributes.put(pName, property);</span>
+                } else {
+<span class="fc" id="L90">                    elements.put(pName, property);</span>
+                }
+<span class="fc" id="L92">            }</span>
+        }
+
+<span class="fc" id="L95">        sb.append(indent(indent)).append(TAG_START);</span>
+<span class="fc" id="L96">        sb.append(name);</span>
+<span class="pc bpc" id="L97" title="1 of 2 branches missed.">        for (Map.Entry&lt;String, Schema&gt; attributesEntry : attributes.entrySet()) {</span>
+<span class="nc" id="L98">            String pName = attributesEntry.getKey();</span>
+<span class="nc" id="L99">            Schema s = attributesEntry.getValue();</span>
+<span class="nc" id="L100">            sb.append(&quot; &quot;).append(pName).append(&quot;=&quot;).append(quote(toXml(null, s, 0, selfPath)));</span>
+<span class="nc" id="L101">        }</span>
+<span class="fc" id="L102">        sb.append(CLOSE_TAG);</span>
+<span class="fc" id="L103">        sb.append(NEWLINE);</span>
+<span class="fc bfc" id="L104" title="All 2 branches covered.">        for (Map.Entry&lt;String, Schema&gt; elementsEntry : elements.entrySet()) {</span>
+<span class="fc" id="L105">            String pName = elementsEntry.getKey();</span>
+<span class="fc" id="L106">            Schema s = elementsEntry.getValue();</span>
+<span class="fc" id="L107">            final String asXml = toXml(pName, s, indent + 1, selfPath);</span>
+<span class="pc bpc" id="L108" title="1 of 2 branches missed.">            if (StringUtils.isEmpty(asXml)) {</span>
+<span class="nc" id="L109">                continue;</span>
+            }
+<span class="fc" id="L111">            sb.append(asXml);</span>
+<span class="fc" id="L112">            sb.append(NEWLINE);</span>
+<span class="fc" id="L113">        }</span>
+<span class="fc" id="L114">        sb.append(indent(indent)).append(TAG_END).append(name).append(CLOSE_TAG);</span>
+
+<span class="fc" id="L116">        return sb.toString();</span>
+    }
+
+    @SuppressWarnings(&quot;static-method&quot;)
+    protected String quote(String string) {
+<span class="nc" id="L121">        return &quot;\&quot;&quot; + string + &quot;\&quot;&quot;;</span>
+    }
+
+    protected String toXml(String name, Schema schema, int indent, Collection&lt;String&gt; path) {
+<span class="pc bpc" id="L125" title="1 of 2 branches missed.">        if (schema == null) {</span>
+<span class="nc" id="L126">            return &quot;&quot;;</span>
+        }
+<span class="fc" id="L128">        StringBuilder sb = new StringBuilder();</span>
+
+<span class="pc bpc" id="L130" title="1 of 2 branches missed.">        if (ModelUtils.isArraySchema(schema)) {</span>
+<span class="nc" id="L131">            Schema inner = ModelUtils.getSchemaItems(schema);</span>
+<span class="nc" id="L132">            boolean wrapped = false;</span>
+<span class="nc bnc" id="L133" title="All 6 branches missed.">            if (schema.getXml() != null &amp;&amp; schema.getXml().getWrapped() != null &amp;&amp; schema.getXml().getWrapped()) {</span>
+<span class="nc" id="L134">                wrapped = true;</span>
+            }
+<span class="nc bnc" id="L136" title="All 2 branches missed.">            if (wrapped) {</span>
+<span class="nc" id="L137">                String prefix = EMPTY;</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">                if (name != null) {</span>
+<span class="nc" id="L139">                    sb.append(indent(indent));</span>
+<span class="nc" id="L140">                    sb.append(openTag(name));</span>
+<span class="nc" id="L141">                    prefix = NEWLINE;</span>
+                }
+<span class="nc" id="L143">                final String asXml = toXml(name, inner, indent + 1, path);</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">                if (StringUtils.isNotEmpty(asXml)) {</span>
+<span class="nc" id="L145">                    sb.append(prefix).append(asXml);</span>
+                }
+<span class="nc bnc" id="L147" title="All 2 branches missed.">                if (name != null) {</span>
+<span class="nc" id="L148">                    sb.append(NEWLINE);</span>
+<span class="nc" id="L149">                    sb.append(indent(indent));</span>
+<span class="nc" id="L150">                    sb.append(closeTag(name));</span>
+                }
+<span class="nc" id="L152">            } else {</span>
+<span class="nc" id="L153">                sb.append(toXml(name, inner, indent, path));</span>
+            }
+<span class="pc bpc" id="L155" title="1 of 2 branches missed.">        } else if (StringUtils.isNotEmpty(schema.get$ref())) {</span>
+<span class="nc" id="L156">            Schema actualSchema = examples.get(schema.get$ref());</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">            if (actualSchema == null) {</span>
+<span class="nc" id="L158">                actualSchema = examples.get(ModelUtils.getSimpleRef(schema.get$ref()));</span>
+            }
+<span class="nc" id="L160">            sb.append(toXml(actualSchema, indent, path));</span>
+<span class="nc" id="L161">        } else {</span>
+<span class="pc bpc" id="L162" title="1 of 2 branches missed.">            if (name != null) {</span>
+<span class="fc" id="L163">                sb.append(indent(indent));</span>
+<span class="fc" id="L164">                sb.append(openTag(name));</span>
+            }
+<span class="fc" id="L166">            sb.append(getExample(schema));</span>
+<span class="pc bpc" id="L167" title="1 of 2 branches missed.">            if (name != null) {</span>
+<span class="fc" id="L168">                sb.append(closeTag(name));</span>
+            }
+        }
+<span class="fc" id="L171">        return sb.toString();</span>
+    }
+
+    /**
+     * Get the example string value for the given schema.
+     *
+     * If an example value was not provided in the specification, a default will be generated.
+     *
+     * @param schema Schema to get example string for
+     * @return Example String
+     */
+    protected String getExample(Schema schema) {
+<span class="fc bfc" id="L183" title="All 2 branches covered.">        if (schema.getExample() != null) {</span>
+<span class="fc" id="L184">            return schema.getExample().toString();</span>
+<span class="pc bpc" id="L185" title="1 of 2 branches missed.">        } else if (ModelUtils.isDateTimeSchema(schema)) {</span>
+<span class="nc" id="L186">            return &quot;2000-01-23T04:56:07.000Z&quot;;</span>
+<span class="fc bfc" id="L187" title="All 2 branches covered.">        } else if (ModelUtils.isDateSchema(schema)) {</span>
+<span class="fc" id="L188">            return &quot;2000-01-23&quot;;</span>
+<span class="fc bfc" id="L189" title="All 2 branches covered.">        } else if (ModelUtils.isBooleanSchema(schema)) {</span>
+<span class="fc" id="L190">            return &quot;true&quot;;</span>
+<span class="pc bpc" id="L191" title="1 of 2 branches missed.">        } else if (ModelUtils.isNumberSchema(schema)) {</span>
+<span class="nc bnc" id="L192" title="All 2 branches missed.">            if (ModelUtils.isFloatSchema(schema)) { // float</span>
+<span class="nc" id="L193">                return &quot;1.3579&quot;;</span>
+            } else { // double
+<span class="nc" id="L195">                return &quot;3.149&quot;;</span>
+            }
+<span class="pc bpc" id="L197" title="1 of 2 branches missed.">        } else if (ModelUtils.isPasswordSchema(schema)) {</span>
+<span class="nc" id="L198">            return &quot;********&quot;;</span>
+<span class="pc bpc" id="L199" title="1 of 2 branches missed.">        } else if (ModelUtils.isUUIDSchema(schema)) {</span>
+<span class="nc" id="L200">            return &quot;046b6c7f-0b8a-43b9-b35d-6489e6daee91&quot;;</span>
+<span class="pc bpc" id="L201" title="1 of 2 branches missed.">        } else if (ModelUtils.isURISchema(schema)) {</span>
+<span class="nc" id="L202">            return &quot;https://openapi-generator.tech&quot;;</span>
+            // do these last in case the specific types above are derived from these classes
+<span class="fc bfc" id="L204" title="All 2 branches covered.">        } else if (ModelUtils.isStringSchema(schema)) {</span>
+<span class="fc" id="L205">            return &quot;aeiou&quot;;</span>
+<span class="pc bpc" id="L206" title="1 of 2 branches missed.">        } else if (ModelUtils.isIntegerSchema(schema)) {</span>
+<span class="pc bpc" id="L207" title="1 of 2 branches missed.">            if (ModelUtils.isLongSchema(schema)) { // long</span>
+<span class="nc" id="L208">                return &quot;123456789&quot;;</span>
+            } else { //integer
+<span class="fc" id="L210">                return &quot;123&quot;;</span>
+            }
+        } else {
+<span class="nc" id="L213">            LOGGER.debug(&quot;default example value not implemented for {}. Default to UNDEFINED_EXAMPLE_VALUE&quot;, schema);</span>
+<span class="nc" id="L214">            return &quot;UNDEFINED_EXAMPLE_VALUE&quot;;</span>
+        }
+    }
+
+    @SuppressWarnings(&quot;static-method&quot;)
+    protected String openTag(String name) {
+<span class="fc" id="L220">        return &quot;&lt;&quot; + name + &quot;&gt;&quot;;</span>
+    }
+
+    @SuppressWarnings(&quot;static-method&quot;)
+    protected String closeTag(String name) {
+<span class="fc" id="L225">        return &quot;&lt;/&quot; + name + &quot;&gt;&quot;;</span>
+    }
+
+    @SuppressWarnings(&quot;static-method&quot;)
+    protected String indent(int indent) {
+<span class="fc" id="L230">        StringBuffer sb = new StringBuffer();</span>
+<span class="fc bfc" id="L231" title="All 2 branches covered.">        for (int i = 0; i &lt; indent; i++) {</span>
+<span class="fc" id="L232">            sb.append(&quot;  &quot;);</span>
+        }
+<span class="fc" id="L234">        return sb.toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

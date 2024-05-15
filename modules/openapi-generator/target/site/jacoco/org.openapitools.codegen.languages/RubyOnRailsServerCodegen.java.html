@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RubyOnRailsServerCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">RubyOnRailsServerCodegen.java</span></div><h1>RubyOnRailsServerCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import io.swagger.v3.oas.models.media.Schema;
+import org.openapitools.codegen.CliOption;
+import org.openapitools.codegen.CodegenConstants;
+import org.openapitools.codegen.CodegenType;
+import org.openapitools.codegen.SupportingFile;
+import org.openapitools.codegen.meta.features.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.EnumSet;
+import java.util.Map;
+
+import static org.openapitools.codegen.utils.StringUtils.camelize;
+import static org.openapitools.codegen.utils.StringUtils.underscore;
+
+public class RubyOnRailsServerCodegen extends AbstractRubyCodegen {
+
+<span class="nc" id="L38">    private final Logger LOGGER = LoggerFactory.getLogger(RubyOnRailsServerCodegen.class);</span>
+
+    protected String gemName;
+    protected String moduleName;
+<span class="nc" id="L42">    protected String gemVersion = &quot;1.0.0&quot;;</span>
+<span class="nc" id="L43">    protected String appFolder = &quot;app&quot;;</span>
+<span class="nc" id="L44">    protected String channelsFolder = appFolder + File.separator + &quot;channels&quot;;</span>
+<span class="nc" id="L45">    protected String applicationCableFolder = channelsFolder + File.separator + &quot;application_cable&quot;;</span>
+<span class="nc" id="L46">    protected String controllersFolder = appFolder + File.separator + &quot;controllers&quot;;</span>
+<span class="nc" id="L47">    protected String jobsFolder = appFolder + File.separator + &quot;jobs&quot;;</span>
+<span class="nc" id="L48">    protected String mailersFolder = appFolder + File.separator + &quot;mailers&quot;;</span>
+<span class="nc" id="L49">    protected String modelsFolder = appFolder + File.separator + &quot;models&quot;;</span>
+<span class="nc" id="L50">    protected String viewsFolder = appFolder + File.separator + &quot;views&quot;;</span>
+<span class="nc" id="L51">    protected String layoutsFolder = viewsFolder + File.separator + &quot;layouts&quot;;</span>
+<span class="nc" id="L52">    protected String binFolder = &quot;bin&quot;;</span>
+<span class="nc" id="L53">    protected String configFolder = &quot;config&quot;;</span>
+<span class="nc" id="L54">    protected String environmentsFolder = configFolder + File.separator + &quot;environments&quot;;</span>
+<span class="nc" id="L55">    protected String initializersFolder = configFolder + File.separator + &quot;initializers&quot;;</span>
+<span class="nc" id="L56">    protected String localesFolder = configFolder + File.separator + &quot;locales&quot;;</span>
+<span class="nc" id="L57">    protected String dbFolder = &quot;db&quot;;</span>
+<span class="nc" id="L58">    protected String migrateFolder = dbFolder + File.separator + &quot;migrate&quot;;</span>
+<span class="nc" id="L59">    protected String libFolder = &quot;lib&quot;;</span>
+<span class="nc" id="L60">    protected String tasksFolder = libFolder + File.separator + &quot;tasks&quot;;</span>
+<span class="nc" id="L61">    protected String logFolder = &quot;log&quot;;</span>
+<span class="nc" id="L62">    protected String publicFolder = &quot;public&quot;;</span>
+<span class="nc" id="L63">    protected String testFolder = &quot;test&quot;;</span>
+<span class="nc" id="L64">    protected String tmpFolder = &quot;tmp&quot;;</span>
+<span class="nc" id="L65">    protected String cacheFolder = tmpFolder + File.separator + &quot;cache&quot;;</span>
+<span class="nc" id="L66">    protected String pidFolder = tmpFolder + File.separator + &quot;pids&quot;;</span>
+<span class="nc" id="L67">    protected String socketsFolder = tmpFolder + File.separator + &quot;sockets&quot;;</span>
+<span class="nc" id="L68">    protected String vendorFolder = &quot;vendor&quot;;</span>
+<span class="nc" id="L69">    protected String databaseAdapter = &quot;sqlite&quot;;</span>
+
+
+    public RubyOnRailsServerCodegen() {
+<span class="nc" id="L73">        super();</span>
+
+<span class="nc" id="L75">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L76">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="nc" id="L77">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON, WireFormatFeature.XML, WireFormatFeature.Custom))</span>
+<span class="nc" id="L78">                .securityFeatures(EnumSet.noneOf(SecurityFeature.class))</span>
+<span class="nc" id="L79">                .excludeGlobalFeatures(</span>
+                        GlobalFeature.XMLStructureDefinitions,
+                        GlobalFeature.Callbacks,
+                        GlobalFeature.LinkObjects,
+                        GlobalFeature.ParameterStyling
+                )
+<span class="nc" id="L85">                .excludeSchemaSupportFeatures(</span>
+                        SchemaSupportFeature.Polymorphism
+                )
+<span class="nc" id="L88">                .excludeParameterFeatures(</span>
+                        ParameterFeature.Cookie
+                )
+        );
+
+<span class="nc" id="L93">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;rails5&quot;;</span>
+<span class="nc" id="L94">        apiPackage = &quot;app/controllers&quot;;</span>
+<span class="nc" id="L95">        apiTemplateFiles.put(&quot;controller.mustache&quot;, &quot;.rb&quot;);</span>
+
+<span class="nc" id="L97">        modelPackage = &quot;app/models&quot;;</span>
+<span class="nc" id="L98">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.rb&quot;);</span>
+
+<span class="nc" id="L100">        embeddedTemplateDir = templateDir = &quot;ruby-on-rails-server&quot;;</span>
+
+        // In order to adapt to DB migrate script, overwrite typeMapping
+<span class="nc" id="L103">        typeMapping.put(&quot;string&quot;, &quot;string&quot;);</span>
+<span class="nc" id="L104">        typeMapping.put(&quot;int&quot;, &quot;integer&quot;);</span>
+<span class="nc" id="L105">        typeMapping.put(&quot;integer&quot;, &quot;integer&quot;);</span>
+<span class="nc" id="L106">        typeMapping.put(&quot;long&quot;, &quot;integer&quot;);</span>
+<span class="nc" id="L107">        typeMapping.put(&quot;short&quot;, &quot;integer&quot;);</span>
+<span class="nc" id="L108">        typeMapping.put(&quot;DateTime&quot;, &quot;datetime&quot;);</span>
+<span class="nc" id="L109">        typeMapping.put(&quot;boolean&quot;, &quot;boolean&quot;);</span>
+
+        // remove modelPackage and apiPackage added by default
+<span class="nc" id="L112">        cliOptions.clear();</span>
+
+<span class="nc" id="L114">        cliOptions.add(new CliOption(CodegenConstants.DATABASE_ADAPTER, CodegenConstants.DATABASE_ADAPTER_DESC).</span>
+<span class="nc" id="L115">                defaultValue(&quot;sqlite&quot;));</span>
+<span class="nc" id="L116">    }</span>
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L120">        super.processOpts();</span>
+
+        // use constant model/api package (folder path)
+        //setModelPackage(&quot;models&quot;);
+<span class="nc" id="L124">        setApiPackage(&quot;app/controllers&quot;);</span>
+
+        // determine which db adapter to use
+<span class="nc bnc" id="L127" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.DATABASE_ADAPTER)) {</span>
+<span class="nc" id="L128">            setDatabaseAdapter((String) additionalProperties.get(CodegenConstants.DATABASE_ADAPTER));</span>
+        } else {
+            // not set, pass the default value to template
+<span class="nc" id="L131">            additionalProperties.put(CodegenConstants.DATABASE_ADAPTER, databaseAdapter);</span>
+        }
+
+<span class="nc bnc" id="L134" title="All 2 branches missed.">        if (&quot;sqlite&quot;.equals(databaseAdapter)) {</span>
+<span class="nc" id="L135">            additionalProperties.put(&quot;isDBSQLite&quot;, Boolean.TRUE);</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">        } else if (&quot;mysql&quot;.equals(databaseAdapter)) {</span>
+<span class="nc" id="L137">            additionalProperties.put(&quot;isDBMySQL&quot;, Boolean.TRUE);</span>
+        } else {
+<span class="nc" id="L139">            LOGGER.warn(&quot;Unknown database {}. Default to 'sqlite'.&quot;, databaseAdapter);</span>
+<span class="nc" id="L140">            additionalProperties.put(&quot;isDBSQLite&quot;, Boolean.TRUE);</span>
+        }
+
+<span class="nc" id="L143">        supportingFiles.add(new SupportingFile(&quot;Gemfile.mustache&quot;, &quot;&quot;, &quot;Gemfile&quot;));</span>
+<span class="nc" id="L144">        supportingFiles.add(new SupportingFile(&quot;README.md&quot;, &quot;&quot;, &quot;README.md&quot;));</span>
+<span class="nc" id="L145">        supportingFiles.add(new SupportingFile(&quot;Rakefile&quot;, &quot;&quot;, &quot;Rakefile&quot;));</span>
+<span class="nc" id="L146">        supportingFiles.add(new SupportingFile(&quot;config.ru&quot;, &quot;&quot;, &quot;config.ru&quot;));</span>
+<span class="nc" id="L147">        supportingFiles.add(new SupportingFile(&quot;channel.rb&quot;, applicationCableFolder, &quot;channel.rb&quot;));</span>
+<span class="nc" id="L148">        supportingFiles.add(new SupportingFile(&quot;connection.rb&quot;, applicationCableFolder, &quot;connection.rb&quot;));</span>
+<span class="nc" id="L149">        supportingFiles.add(new SupportingFile(&quot;application_controller.rb&quot;, controllersFolder, &quot;application_controller.rb&quot;));</span>
+<span class="nc" id="L150">        supportingFiles.add(new SupportingFile(&quot;application_job.rb&quot;, jobsFolder, &quot;application_job.rb&quot;));</span>
+<span class="nc" id="L151">        supportingFiles.add(new SupportingFile(&quot;application_mailer.rb&quot;, mailersFolder, &quot;application_mailer.rb&quot;));</span>
+<span class="nc" id="L152">        supportingFiles.add(new SupportingFile(&quot;application_record.rb&quot;, modelsFolder, &quot;application_record.rb&quot;));</span>
+<span class="nc" id="L153">        supportingFiles.add(new SupportingFile(&quot;mailer.html.erb&quot;, layoutsFolder, &quot;mailer.html.erb&quot;));</span>
+<span class="nc" id="L154">        supportingFiles.add(new SupportingFile(&quot;mailer.text.erb&quot;, layoutsFolder, &quot;mailer.text.erb&quot;));</span>
+<span class="nc" id="L155">        supportingFiles.add(new SupportingFile(&quot;bundle&quot;, binFolder, &quot;bundle&quot;));</span>
+<span class="nc" id="L156">        supportingFiles.add(new SupportingFile(&quot;rails&quot;, binFolder, &quot;rails&quot;));</span>
+<span class="nc" id="L157">        supportingFiles.add(new SupportingFile(&quot;rake&quot;, binFolder, &quot;rake&quot;));</span>
+<span class="nc" id="L158">        supportingFiles.add(new SupportingFile(&quot;setup&quot;, binFolder, &quot;setup&quot;));</span>
+<span class="nc" id="L159">        supportingFiles.add(new SupportingFile(&quot;update&quot;, binFolder, &quot;update&quot;));</span>
+<span class="nc" id="L160">        supportingFiles.add(new SupportingFile(&quot;development.rb&quot;, environmentsFolder, &quot;development.rb&quot;));</span>
+<span class="nc" id="L161">        supportingFiles.add(new SupportingFile(&quot;production.rb&quot;, environmentsFolder, &quot;production.rb&quot;));</span>
+<span class="nc" id="L162">        supportingFiles.add(new SupportingFile(&quot;active_record_belongs_to_required_by_default.rb&quot;, initializersFolder, &quot;active_record_belongs_to_required_by_default.rb&quot;));</span>
+<span class="nc" id="L163">        supportingFiles.add(new SupportingFile(&quot;application_controller_renderer.rb&quot;, initializersFolder, &quot;application_controller_renderer.rb&quot;));</span>
+<span class="nc" id="L164">        supportingFiles.add(new SupportingFile(&quot;backtrace_silencers.rb&quot;, initializersFolder, &quot;backtrace_silencers.rb&quot;));</span>
+<span class="nc" id="L165">        supportingFiles.add(new SupportingFile(&quot;callback_terminator.rb&quot;, initializersFolder, &quot;callback_terminator.rb&quot;));</span>
+<span class="nc" id="L166">        supportingFiles.add(new SupportingFile(&quot;cors.rb&quot;, initializersFolder, &quot;cors.rb&quot;));</span>
+<span class="nc" id="L167">        supportingFiles.add(new SupportingFile(&quot;filter_parameter_logging.rb&quot;, initializersFolder, &quot;filter_parameter_logging.rb&quot;));</span>
+<span class="nc" id="L168">        supportingFiles.add(new SupportingFile(&quot;inflections.rb&quot;, initializersFolder, &quot;inflections.rb&quot;));</span>
+<span class="nc" id="L169">        supportingFiles.add(new SupportingFile(&quot;mime_types.rb&quot;, initializersFolder, &quot;mime_types.rb&quot;));</span>
+<span class="nc" id="L170">        supportingFiles.add(new SupportingFile(&quot;ssl_options.rb&quot;, initializersFolder, &quot;ssl_options.rb&quot;));</span>
+<span class="nc" id="L171">        supportingFiles.add(new SupportingFile(&quot;to_time_preserves_timezone.rb&quot;, initializersFolder, &quot;to_time_preserves_timezone.rb&quot;));</span>
+<span class="nc" id="L172">        supportingFiles.add(new SupportingFile(&quot;en.yml&quot;, localesFolder, &quot;en.yml&quot;));</span>
+<span class="nc" id="L173">        supportingFiles.add(new SupportingFile(&quot;application.rb&quot;, configFolder, &quot;application.rb&quot;));</span>
+<span class="nc" id="L174">        supportingFiles.add(new SupportingFile(&quot;boot.rb&quot;, configFolder, &quot;boot.rb&quot;));</span>
+<span class="nc" id="L175">        supportingFiles.add(new SupportingFile(&quot;cable.yml&quot;, configFolder, &quot;cable.yml&quot;));</span>
+<span class="nc" id="L176">        supportingFiles.add(new SupportingFile(&quot;database.mustache&quot;, configFolder, &quot;database.yml&quot;));</span>
+<span class="nc" id="L177">        supportingFiles.add(new SupportingFile(&quot;environment.rb&quot;, configFolder, &quot;environment.rb&quot;));</span>
+<span class="nc" id="L178">        supportingFiles.add(new SupportingFile(&quot;puma.rb&quot;, configFolder, &quot;puma.rb&quot;));</span>
+<span class="nc" id="L179">        supportingFiles.add(new SupportingFile(&quot;routes.mustache&quot;, configFolder, &quot;routes.rb&quot;));</span>
+<span class="nc" id="L180">        supportingFiles.add(new SupportingFile(&quot;secrets.yml&quot;, configFolder, &quot;secrets.yml&quot;));</span>
+<span class="nc" id="L181">        supportingFiles.add(new SupportingFile(&quot;spring.rb&quot;, configFolder, &quot;spring.rb&quot;));</span>
+<span class="nc" id="L182">        supportingFiles.add(new SupportingFile(&quot;.keep&quot;, migrateFolder, &quot;.keep&quot;));</span>
+<span class="nc" id="L183">        supportingFiles.add(new SupportingFile(&quot;migrate.mustache&quot;, migrateFolder, &quot;0_init_tables.rb&quot;));</span>
+<span class="nc" id="L184">        supportingFiles.add(new SupportingFile(&quot;schema.rb&quot;, dbFolder, &quot;schema.rb&quot;));</span>
+<span class="nc" id="L185">        supportingFiles.add(new SupportingFile(&quot;seeds.rb&quot;, dbFolder, &quot;seeds.rb&quot;));</span>
+<span class="nc" id="L186">        supportingFiles.add(new SupportingFile(&quot;.keep&quot;, tasksFolder, &quot;.keep&quot;));</span>
+<span class="nc" id="L187">        supportingFiles.add(new SupportingFile(&quot;.keep&quot;, logFolder, &quot;.keep&quot;));</span>
+<span class="nc" id="L188">        supportingFiles.add(new SupportingFile(&quot;404.html&quot;, publicFolder, &quot;404.html&quot;));</span>
+<span class="nc" id="L189">        supportingFiles.add(new SupportingFile(&quot;422.html&quot;, publicFolder, &quot;422.html&quot;));</span>
+<span class="nc" id="L190">        supportingFiles.add(new SupportingFile(&quot;500.html&quot;, publicFolder, &quot;500.html&quot;));</span>
+<span class="nc" id="L191">        supportingFiles.add(new SupportingFile(&quot;apple-touch-icon-precomposed.png&quot;, publicFolder, &quot;apple-touch-icon-precomposed.png&quot;));</span>
+<span class="nc" id="L192">        supportingFiles.add(new SupportingFile(&quot;apple-touch-icon.png&quot;, publicFolder, &quot;apple-touch-icon.png&quot;));</span>
+<span class="nc" id="L193">        supportingFiles.add(new SupportingFile(&quot;favicon.ico&quot;, publicFolder, &quot;favicon.ico&quot;));</span>
+<span class="nc" id="L194">        supportingFiles.add(new SupportingFile(&quot;robots.txt&quot;, publicFolder, &quot;robots.txt&quot;));</span>
+<span class="nc" id="L195">        supportingFiles.add(new SupportingFile(&quot;robots.txt&quot;, publicFolder, &quot;robots.txt&quot;));</span>
+<span class="nc" id="L196">        supportingFiles.add(new SupportingFile(&quot;test_helper.rb&quot;, testFolder, &quot;test_helper.rb&quot;));</span>
+<span class="nc" id="L197">        supportingFiles.add(new SupportingFile(&quot;.keep&quot;, cacheFolder, &quot;.keep&quot;));</span>
+<span class="nc" id="L198">        supportingFiles.add(new SupportingFile(&quot;.keep&quot;, pidFolder, &quot;.keep&quot;));</span>
+<span class="nc" id="L199">        supportingFiles.add(new SupportingFile(&quot;.keep&quot;, socketsFolder, &quot;.keep&quot;));</span>
+<span class="nc" id="L200">        supportingFiles.add(new SupportingFile(&quot;restart.txt&quot;, tmpFolder, &quot;restart.txt&quot;));</span>
+<span class="nc" id="L201">        supportingFiles.add(new SupportingFile(&quot;.keep&quot;, vendorFolder, &quot;.keep&quot;));</span>
+<span class="nc" id="L202">        supportingFiles.add(new SupportingFile(&quot;Dockerfile&quot;, &quot;&quot;, &quot;Dockerfile&quot;));</span>
+<span class="nc" id="L203">        supportingFiles.add(new SupportingFile(&quot;docker-entrypoint.sh&quot;, &quot;&quot;, &quot;docker-entrypoint.sh&quot;));</span>
+<span class="nc" id="L204">    }</span>
+
+    @Override
+    public CodegenType getTag() {
+<span class="nc" id="L208">        return CodegenType.SERVER;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L213">        return &quot;ruby-on-rails&quot;;</span>
+    }
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L218">        return &quot;Generates a Ruby on Rails (v5) server library.&quot;;</span>
+    }
+
+    @Override
+    public String apiFileFolder() {
+<span class="nc" id="L223">        return outputFolder + File.separator + apiPackage.replace(&quot;/&quot;, File.separator);</span>
+    }
+
+    @Override
+    public String getSchemaType(Schema p) {
+<span class="nc" id="L228">        String openAPIType = super.getSchemaType(p);</span>
+<span class="nc" id="L229">        String type = null;</span>
+<span class="nc bnc" id="L230" title="All 2 branches missed.">        if (typeMapping.containsKey(openAPIType)) {</span>
+<span class="nc" id="L231">            return typeMapping.get(openAPIType);</span>
+        }
+<span class="nc" id="L233">        return &quot;string&quot;;</span>
+    }
+
+    @Override
+    public String toModelName(String name) {
+        // model name cannot use reserved keyword, e.g. return
+<span class="nc bnc" id="L239" title="All 2 branches missed.">        if (isReservedWord(name)) {</span>
+<span class="nc" id="L240">            String modelName = camelize(&quot;Model&quot; + name);</span>
+<span class="nc" id="L241">            LOGGER.warn(&quot;{} (reserved word) cannot be used as model name. Renamed to {}&quot;, name, modelName);</span>
+<span class="nc" id="L242">            return modelName;</span>
+        }
+
+        // camelize the model name
+        // phone_number =&gt; PhoneNumber
+<span class="nc" id="L247">        return camelize(name);</span>
+    }
+
+    @Override
+    public String toModelFilename(String name) {
+        // model name cannot use reserved keyword, e.g. return
+<span class="nc bnc" id="L253" title="All 2 branches missed.">        if (isReservedWord(name)) {</span>
+<span class="nc" id="L254">            String filename = underscore(&quot;model_&quot; + name);</span>
+<span class="nc" id="L255">            LOGGER.warn(&quot;{} (reserved word) cannot be used as model filename. Renamed to {}&quot;, name, filename);</span>
+<span class="nc" id="L256">            return filename;</span>
+        }
+
+        // underscore the model file name
+        // PhoneNumber.rb =&gt; phone_number.rb
+<span class="nc" id="L261">        return underscore(name);</span>
+    }
+
+    @Override
+    public String toApiFilename(String name) {
+        // replace - with _ e.g. created-at =&gt; created_at
+<span class="nc" id="L267">        name = name.replaceAll(&quot;-&quot;, &quot;_&quot;); // FIXME: a parameter should not be assigned. Also declare the methods parameters as 'final'.</span>
+
+        // e.g. DefaultController =&gt; defaults_controller.rb
+<span class="nc" id="L270">        return underscore(name) + &quot;_controller&quot;;</span>
+    }
+
+    @Override
+    public String toApiVarName(String name) {
+<span class="nc bnc" id="L275" title="All 2 branches missed.">        if (name.length() == 0) {</span>
+<span class="nc" id="L276">            return &quot;api&quot;;</span>
+        }
+
+        // e.g. PhoneNumber =&gt; phone_number
+<span class="nc" id="L280">        return underscore(sanitizeName(name));</span>
+    }
+
+    @Override
+    public String toApiName(String name) {
+<span class="nc bnc" id="L285" title="All 2 branches missed.">        if (name.length() == 0) {</span>
+<span class="nc" id="L286">            return &quot;ApiController&quot;;</span>
+        }
+        // e.g. phone_number_controller =&gt; PhoneNumberController
+<span class="nc" id="L289">        return camelize(name) + &quot;Controller&quot;;</span>
+    }
+
+    @Override
+    public Map&lt;String, Object&gt; postProcessSupportingFileData(Map&lt;String, Object&gt; objs) {
+<span class="nc" id="L294">        generateYAMLSpecFile(objs);</span>
+<span class="nc" id="L295">        return super.postProcessSupportingFileData(objs);</span>
+    }
+
+    public void setDatabaseAdapter(String databaseAdapter) {
+<span class="nc" id="L299">        this.databaseAdapter = databaseAdapter;</span>
+<span class="nc" id="L300">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

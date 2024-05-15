@@ -1,0 +1,408 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JetbrainsHttpClientClientCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">JetbrainsHttpClientClientCodegen.java</span></div><h1>JetbrainsHttpClientClientCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.ImmutableMap;
+import com.samskivert.mustache.Mustache;
+import com.samskivert.mustache.Template;
+import io.swagger.v3.core.util.Json;
+import io.swagger.v3.oas.models.examples.Example;
+import org.openapitools.codegen.*;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.*;
+
+import org.openapitools.codegen.meta.GeneratorMetadata;
+import org.openapitools.codegen.meta.Stability;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/*
+Note : This code has been MASSIVELY inspired by PostmanCollectionCodegen from @gcatanese.
+
+Hopefully one day we can merge the similar code, as both generators stabilize
+ */
+public class JetbrainsHttpClientClientCodegen extends DefaultCodegen implements CodegenConfig {
+
+<span class="fc" id="L50">    private final Logger LOGGER = LoggerFactory.getLogger(JetbrainsHttpClientClientCodegen.class);</span>
+
+    public static final String JSON_ESCAPE_NEW_LINE = &quot;\n&quot;;
+    public static final String JSON_ESCAPE_DOUBLE_QUOTE = &quot;\&quot;&quot;;
+
+    public static final String REQUEST_PARAMETER_GENERATION_DEFAULT_VALUE = &quot;Example&quot;;
+<span class="fc" id="L56">    protected String requestParameterGeneration = REQUEST_PARAMETER_GENERATION_DEFAULT_VALUE; // values: Example, Schema</span>
+
+
+    public static final String PROJECT_NAME = &quot;Jetbrains HTTP Client&quot;;
+
+    public static final String BODY_VARIABLES = &quot;bodyVariables&quot;;
+
+<span class="fc" id="L63">    public List&lt;String&gt; bodyVariables = new ArrayList&lt;&gt;();</span>
+
+    public static final String CUSTOM_HEADERS = &quot;customHeaders&quot;;
+
+<span class="fc" id="L67">    public List&lt;String&gt; customHeaders = new ArrayList&lt;&gt;();</span>
+
+
+    public CodegenType getTag() {
+<span class="fc" id="L71">        return CodegenType.CLIENT;</span>
+    }
+
+    public String getName() {
+<span class="fc" id="L75">        return &quot;jetbrains-http-client&quot;;</span>
+    }
+
+    public String getHelp() {
+<span class="nc" id="L79">        return &quot;Generates a jetbrains-http client. See https://www.jetbrains.com/help/idea/http-client-in-product-code-editor.html&quot;;</span>
+    }
+
+    @Override
+    public GeneratorLanguage generatorLanguage() {
+<span class="nc" id="L84">        return GeneratorLanguage.HTTP;</span>
+    }
+
+    public JetbrainsHttpClientClientCodegen() {
+<span class="fc" id="L88">        super();</span>
+
+<span class="fc" id="L90">        generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
+<span class="fc" id="L91">                .stability(Stability.EXPERIMENTAL)</span>
+<span class="fc" id="L92">                .build();</span>
+
+<span class="fc" id="L94">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;jetbrains-http-client&quot;;</span>
+<span class="fc" id="L95">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.http&quot;);</span>
+<span class="fc" id="L96">        embeddedTemplateDir = templateDir = &quot;jetbrains-http-client&quot;;</span>
+<span class="fc" id="L97">        apiPackage = &quot;Apis&quot;;</span>
+<span class="fc" id="L98">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;));</span>
+
+
+<span class="fc" id="L101">        cliOptions.clear();</span>
+<span class="fc" id="L102">        cliOptions.add(CliOption.newString(BODY_VARIABLES, &quot;whether to convert body placeholders (i.e. VAR_1) into variables (i.e. {{VAR_1}})&quot;));</span>
+<span class="fc" id="L103">        cliOptions.add(CliOption.newString(CUSTOM_HEADERS, &quot;custom headers that can be set for each request. Can be used for unsupported features, for example auth methods like oauth.&quot;));</span>
+<span class="fc" id="L104">    }</span>
+
+    @Override
+    public void processOpts() {
+<span class="fc" id="L108">        super.processOpts();</span>
+
+<span class="fc" id="L110">        var additionalProperties = additionalProperties();</span>
+
+<span class="fc bfc" id="L112" title="All 2 branches covered.">        if (additionalProperties.containsKey(BODY_VARIABLES)) {</span>
+<span class="fc" id="L113">            bodyVariables = Arrays.asList(additionalProperties.get(BODY_VARIABLES).toString().split(&quot;-&quot;));</span>
+        }
+
+<span class="fc bfc" id="L116" title="All 2 branches covered.">        if (additionalProperties.containsKey(CUSTOM_HEADERS)) {</span>
+<span class="fc" id="L117">            customHeaders = Arrays.asList(additionalProperties.get(CUSTOM_HEADERS).toString().split(&quot;&amp;&quot;));</span>
+        }
+<span class="fc" id="L119">    }</span>
+
+    @Override
+    protected ImmutableMap.Builder&lt;String, Mustache.Lambda&gt; addMustacheLambdas() {
+
+<span class="fc" id="L124">        return super.addMustacheLambdas()</span>
+<span class="fc" id="L125">                .put(&quot;doubleMustache&quot;, new DoubleMustacheLambda());</span>
+    }
+
+<span class="fc" id="L128">    public static class DoubleMustacheLambda implements Mustache.Lambda {</span>
+        @Override
+        public void execute(Template.Fragment fragment, Writer writer) throws IOException {
+<span class="fc" id="L131">            String text = fragment.execute();</span>
+<span class="fc" id="L132">            writer.write(text</span>
+<span class="fc" id="L133">                    .replaceAll(&quot;\\{&quot;, &quot;{{&quot;)</span>
+<span class="fc" id="L134">                    .replaceAll(&quot;}&quot;, &quot;}}&quot;)</span>
+            );
+<span class="fc" id="L136">        }</span>
+    }
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="fc" id="L141">        OperationsMap results = super.postProcessOperationsWithModels(objs, allModels);</span>
+
+<span class="fc" id="L143">        OperationMap ops = results.getOperations();</span>
+<span class="fc" id="L144">        List&lt;CodegenOperation&gt; opList = ops.getOperation();</span>
+
+<span class="fc bfc" id="L146" title="All 2 branches covered.">        for (CodegenOperation codegenOperation : opList) {</span>
+<span class="fc" id="L147">            List&lt;RequestItem&gt; requests = getRequests(codegenOperation);</span>
+
+<span class="pc bpc" id="L149" title="1 of 2 branches missed.">            if (requests != null) {</span>
+<span class="fc" id="L150">                codegenOperation.vendorExtensions.put(&quot;requests&quot;, requests);</span>
+                //Adding to each operation for now, we may be smarter later on
+<span class="fc" id="L152">                codegenOperation.vendorExtensions.put(&quot;customHeaders&quot;, customHeaders);</span>
+            }
+<span class="fc" id="L154">        }</span>
+<span class="fc" id="L155">        return results;</span>
+    }
+
+    List&lt;RequestItem&gt; getRequests(CodegenOperation codegenOperation) {
+<span class="fc" id="L159">        List&lt;RequestItem&gt; items = new ArrayList&lt;&gt;();</span>
+
+<span class="fc bfc" id="L161" title="All 2 branches covered.">        if (codegenOperation.getHasBodyParam()) {</span>
+            // operation with bodyParam
+<span class="pc bpc" id="L163" title="1 of 2 branches missed.">            if (requestParameterGeneration.equalsIgnoreCase(&quot;Schema&quot;)) {</span>
+                // get from schema
+<span class="nc" id="L165">                items.add(new RequestItem(codegenOperation.summary, getJsonFromSchema(codegenOperation.bodyParam)));</span>
+            } else {
+                // get from examples
+<span class="pc bpc" id="L168" title="1 of 2 branches missed.">                if (codegenOperation.bodyParam.example != null) {</span>
+                    // find in bodyParam example
+<span class="nc" id="L170">                    items.add(new RequestItem(codegenOperation.summary, formatJson(codegenOperation.bodyParam.example)));</span>
+<span class="pc bpc" id="L171" title="1 of 2 branches missed.">                } else if (codegenOperation.bodyParam.getContent().get(&quot;application/json&quot;) != null &amp;&amp;</span>
+<span class="pc bpc" id="L172" title="1 of 2 branches missed.">                        codegenOperation.bodyParam.getContent().get(&quot;application/json&quot;).getExamples() != null) {</span>
+                    // find in components/examples
+<span class="fc bfc" id="L174" title="All 2 branches covered.">                    for (Map.Entry&lt;String, Example&gt; entry : codegenOperation.bodyParam.getContent().get(&quot;application/json&quot;).getExamples().entrySet()) {</span>
+<span class="fc" id="L175">                        String exampleRef = entry.getValue().get$ref();</span>
+<span class="pc bpc" id="L176" title="1 of 2 branches missed.">                        if (exampleRef != null) {</span>
+<span class="fc" id="L177">                            Example example = this.openAPI.getComponents().getExamples().get(extractExampleByName(exampleRef));</span>
+<span class="fc" id="L178">                            String exampleAsString = getJsonFromExample(example);</span>
+<span class="fc" id="L179">                            items.add(new RequestItem(example.getSummary(), exampleAsString));</span>
+                        }
+<span class="fc" id="L181">                    }</span>
+<span class="nc bnc" id="L182" title="All 2 branches missed.">                } else if (codegenOperation.bodyParam.getSchema() != null) {</span>
+                    // find in schema example
+<span class="nc" id="L184">                    String exampleAsString = (codegenOperation.bodyParam.getSchema().getExample());</span>
+<span class="nc" id="L185">                    items.add(new RequestItem(codegenOperation.summary, exampleAsString));</span>
+<span class="nc" id="L186">                } else {</span>
+                    // example not found
+                    // get from schema
+<span class="nc" id="L189">                    items.add(new RequestItem(codegenOperation.summary, getJsonFromSchema(codegenOperation.bodyParam)));</span>
+
+                }
+            }
+        } else {
+            // operation without bodyParam
+<span class="fc" id="L195">            items.add(new RequestItem(codegenOperation.summary, null));</span>
+        }
+
+        // Handling custom variables now
+<span class="fc" id="L199">        return handleCustomVariablesInRequests(items);</span>
+    }
+
+    private List&lt;RequestItem&gt; handleCustomVariablesInRequests(List&lt;RequestItem&gt; items) {
+<span class="fc bfc" id="L203" title="All 2 branches covered.">        if (!bodyVariables.isEmpty()) {</span>
+<span class="fc bfc" id="L204" title="All 2 branches covered.">            for (var item : items) {</span>
+<span class="fc bfc" id="L205" title="All 2 branches covered.">                for (var customVariable : bodyVariables) {</span>
+<span class="fc" id="L206">                    var body = item.getBody();</span>
+<span class="pc bpc" id="L207" title="1 of 2 branches missed.">                    if (body != null) {</span>
+<span class="fc" id="L208">                        body = body.replace(customVariable, &quot;{{&quot; + customVariable + &quot;}}&quot;);</span>
+<span class="fc" id="L209">                        item.setBody(body);</span>
+                    }
+<span class="fc" id="L211">                }</span>
+<span class="fc" id="L212">            }</span>
+        }
+
+<span class="fc" id="L215">        return items;</span>
+    }
+
+
+    @Override
+    public void postProcess() {
+<span class="fc" id="L221">        System.out.println(&quot;##########################################################################################&quot;);</span>
+<span class="fc" id="L222">        System.out.println(&quot;# Thanks for using OpenAPI Generator.                                                    #&quot;);</span>
+<span class="fc" id="L223">        System.out.println(&quot;# Please consider donation to help us maintain this project \uD83D\uDE4F                           #&quot;);</span>
+<span class="fc" id="L224">        System.out.println(&quot;# https://opencollective.com/openapi_generator/donate                                    #&quot;);</span>
+<span class="fc" id="L225">        System.out.println(&quot;#                                                                                        #&quot;);</span>
+<span class="fc" id="L226">        System.out.println(&quot;# This generator was written by Julien Lengrand-Lambert (https://github.com/jlengrand)   #&quot;);</span>
+<span class="fc" id="L227">        System.out.println(&quot;##########################################################################################&quot;);</span>
+<span class="fc" id="L228">    }</span>
+
+    public class RequestItem {
+
+        private String name;
+        private String body;
+
+<span class="fc" id="L235">        public RequestItem(String name, String body) {</span>
+<span class="fc" id="L236">            this.name = name;</span>
+<span class="fc" id="L237">            this.body = body;</span>
+<span class="fc" id="L238">        }</span>
+
+        public String getName() {
+<span class="fc" id="L241">            return name;</span>
+        }
+
+        public void setName(String name) {
+<span class="nc" id="L245">            this.name = name;</span>
+<span class="nc" id="L246">        }</span>
+
+        public String getBody() {
+<span class="fc" id="L249">            return body;</span>
+        }
+
+        public void setBody(String body) {
+<span class="fc" id="L253">            this.body = body;</span>
+<span class="fc" id="L254">        }</span>
+    }
+
+    /*
+    Helpers
+     */
+
+    public String getJsonFromSchema(CodegenParameter codegenParameter) {
+
+<span class="nc" id="L263">        String ret = &quot;{&quot; + JSON_ESCAPE_NEW_LINE + &quot; &quot;;</span>
+
+<span class="nc" id="L265">        int numVars = codegenParameter.vars.size();</span>
+<span class="nc" id="L266">        int counter = 1;</span>
+
+<span class="nc bnc" id="L268" title="All 2 branches missed.">        for (CodegenProperty codegenProperty : codegenParameter.vars) {</span>
+<span class="nc" id="L269">            ret = ret + JSON_ESCAPE_DOUBLE_QUOTE + codegenProperty.baseName + JSON_ESCAPE_DOUBLE_QUOTE + &quot;: &quot; +</span>
+<span class="nc" id="L270">                    JSON_ESCAPE_DOUBLE_QUOTE + &quot;&lt;&quot; + getType(codegenProperty) + &quot;&gt;&quot; + JSON_ESCAPE_DOUBLE_QUOTE;</span>
+
+<span class="nc bnc" id="L272" title="All 2 branches missed.">            if (counter &lt; numVars) {</span>
+                // add comma unless last attribute
+<span class="nc" id="L274">                ret = ret + &quot;,&quot; + JSON_ESCAPE_NEW_LINE + &quot; &quot;;</span>
+            }
+<span class="nc" id="L276">            counter++;</span>
+
+<span class="nc" id="L278">        }</span>
+
+<span class="nc" id="L280">        ret = ret + JSON_ESCAPE_NEW_LINE + &quot;}&quot;;</span>
+
+<span class="nc" id="L282">        return ret;</span>
+    }
+
+    public String getType(CodegenProperty codegenProperty) {
+<span class="nc bnc" id="L286" title="All 2 branches missed.">        if (codegenProperty.isNumeric) {</span>
+<span class="nc" id="L287">            return &quot;number&quot;;</span>
+<span class="nc bnc" id="L288" title="All 2 branches missed.">        } else if (codegenProperty.isDate) {</span>
+<span class="nc" id="L289">            return &quot;date&quot;;</span>
+        } else {
+<span class="nc" id="L291">            return &quot;string&quot;;</span>
+        }
+    }
+
+    public String formatJson(String json) {
+
+<span class="fc" id="L297">        ObjectMapper objectMapper = new ObjectMapper();</span>
+
+        try {
+            // convert to JSON object and prettify
+<span class="fc" id="L301">            JsonNode actualObj = objectMapper.readTree(json);</span>
+<span class="fc" id="L302">            json = Json.pretty(actualObj);</span>
+
+<span class="nc" id="L304">        } catch (JsonProcessingException e) {</span>
+<span class="nc" id="L305">            LOGGER.warn(&quot;Error formatting JSON&quot;, e);</span>
+<span class="nc" id="L306">            json = &quot;&quot;;</span>
+<span class="fc" id="L307">        }</span>
+
+<span class="fc" id="L309">        return json;</span>
+    }
+
+    public String extractExampleByName(String ref) {
+<span class="fc" id="L313">        return ref.substring(ref.lastIndexOf(&quot;/&quot;) + 1);</span>
+    }
+
+    public String getJsonFromExample(Example example) {
+<span class="fc" id="L317">        String ret = &quot;&quot;;</span>
+
+<span class="pc bpc" id="L319" title="1 of 2 branches missed.">        if (example == null) {</span>
+<span class="nc" id="L320">            return ret;</span>
+        }
+
+<span class="fc bfc" id="L323" title="All 2 branches covered.">        if (example.getValue() instanceof ObjectNode) {</span>
+<span class="fc" id="L324">            ret = convertToJson((ObjectNode) example.getValue());</span>
+<span class="pc bpc" id="L325" title="1 of 2 branches missed.">        } else if (example.getValue() instanceof LinkedHashMap) {</span>
+<span class="fc" id="L326">            ret = convertToJson((LinkedHashMap) example.getValue());</span>
+        }
+
+<span class="fc" id="L329">        return ret;</span>
+    }
+
+    public String convertToJson(ObjectNode objectNode) {
+<span class="fc" id="L333">        return formatJson(objectNode.toString());</span>
+    }
+
+    public String convertToJson(LinkedHashMap&lt;String, Object&gt; linkedHashMap) {
+<span class="fc" id="L337">        String ret = &quot;&quot;;</span>
+
+<span class="fc" id="L339">        return traverseMap(linkedHashMap, ret);</span>
+    }
+
+    private String traverseMap(LinkedHashMap&lt;String, Object&gt; linkedHashMap, String ret) {
+
+<span class="fc" id="L344">        ret = ret + &quot;{&quot; + JSON_ESCAPE_NEW_LINE + &quot; &quot;;</span>
+
+<span class="fc" id="L346">        int numVars = linkedHashMap.entrySet().size();</span>
+<span class="fc" id="L347">        int counter = 1;</span>
+
+<span class="fc bfc" id="L349" title="All 2 branches covered.">        for (Map.Entry&lt;String, Object&gt; mapElement : linkedHashMap.entrySet()) {</span>
+<span class="fc" id="L350">            String key = mapElement.getKey();</span>
+<span class="fc" id="L351">            Object value = mapElement.getValue();</span>
+
+<span class="fc bfc" id="L353" title="All 2 branches covered.">            if (value instanceof String) {</span>
+                // unescape double quotes already escaped
+<span class="fc" id="L355">                value = ((String) value).replace(&quot;\\\&quot;&quot;, &quot;\&quot;&quot;);</span>
+
+<span class="fc" id="L357">                ret = ret + JSON_ESCAPE_DOUBLE_QUOTE + key + JSON_ESCAPE_DOUBLE_QUOTE + &quot;: &quot; +</span>
+                        JSON_ESCAPE_DOUBLE_QUOTE + value + JSON_ESCAPE_DOUBLE_QUOTE;
+<span class="pc bpc" id="L359" title="1 of 4 branches missed.">            } else if (value instanceof Integer || value instanceof Boolean) {</span>
+<span class="fc" id="L360">                ret = ret + JSON_ESCAPE_DOUBLE_QUOTE + key + JSON_ESCAPE_DOUBLE_QUOTE + &quot;: &quot; +</span>
+                        value;
+<span class="nc bnc" id="L362" title="All 2 branches missed.">            } else if (value instanceof HashMap) {</span>
+<span class="nc" id="L363">                String in = ret + JSON_ESCAPE_DOUBLE_QUOTE + key + JSON_ESCAPE_DOUBLE_QUOTE + &quot;: &quot;;</span>
+<span class="nc" id="L364">                ret = traverseMap(((LinkedHashMap&lt;String, Object&gt;) value), in);</span>
+<span class="nc bnc" id="L365" title="All 2 branches missed.">            } else if (value instanceof List) {</span>
+                // TODO : What if it's a list of objects? _urgh_
+<span class="nc" id="L367">                var items = ((List&lt;?&gt;) value);</span>
+<span class="nc" id="L368">                StringBuilder jsonBuilder = new StringBuilder(&quot;[&quot;);</span>
+
+<span class="nc bnc" id="L370" title="All 2 branches missed.">                for (int i = 0; i &lt; items.size(); i++) {</span>
+<span class="nc" id="L371">                    jsonBuilder.append(JSON_ESCAPE_DOUBLE_QUOTE).append(items.get(i)).append(JSON_ESCAPE_DOUBLE_QUOTE);</span>
+<span class="nc bnc" id="L372" title="All 2 branches missed.">                    if (i &lt; items.size() - 1) {</span>
+<span class="nc" id="L373">                        jsonBuilder.append(&quot;,&quot;);</span>
+                    }
+                }
+<span class="nc" id="L376">                jsonBuilder.append(&quot;]&quot;);</span>
+
+<span class="nc" id="L378">                ret = ret + JSON_ESCAPE_DOUBLE_QUOTE + key + JSON_ESCAPE_DOUBLE_QUOTE + &quot;: &quot; + jsonBuilder;</span>
+<span class="nc" id="L379">            } else {</span>
+<span class="nc" id="L380">                LOGGER.warn(&quot;Value type unrecognised: &quot; + value.getClass());</span>
+                //WARNING: here we are undoing what is done in &quot;add comma unless last attribute&quot;
+                // This is meant to avoid dangling commas if we encounter an unknown type
+<span class="nc" id="L383">                ret = ret.substring(0, ret.length() - 3);</span>
+            }
+
+<span class="fc bfc" id="L386" title="All 2 branches covered.">            if (counter &lt; numVars) {</span>
+                // add comma unless last attribute
+<span class="fc" id="L388">                ret = ret + &quot;,&quot; + JSON_ESCAPE_NEW_LINE + &quot; &quot;;</span>
+            }
+<span class="fc" id="L390">            counter++;</span>
+<span class="fc" id="L391">        }</span>
+
+<span class="fc" id="L393">        ret = ret + JSON_ESCAPE_NEW_LINE + &quot;}&quot;;</span>
+
+<span class="fc" id="L395">        return ret;</span>
+    }
+
+    @Override
+    public String escapeUnsafeCharacters(String input) {
+<span class="fc" id="L400">        return input;</span>
+    }
+
+    @Override
+    public String escapeQuotationMark(String input) {
+<span class="fc" id="L405">        return input;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

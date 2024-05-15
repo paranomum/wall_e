@@ -1,0 +1,1438 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JavaCXFExtServerCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">JavaCXFExtServerCodegen.java</span></div><h1>JavaCXFExtServerCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2019 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2019 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.CliOption;
+import org.openapitools.codegen.CodegenModel;
+import org.openapitools.codegen.CodegenOperation;
+import org.openapitools.codegen.CodegenParameter;
+import org.openapitools.codegen.CodegenProperty;
+import org.openapitools.codegen.SupportingFile;
+import org.openapitools.codegen.languages.features.CXFExtServerFeatures;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.utils.JsonCache;
+import org.openapitools.codegen.utils.ModelUtils;
+import org.openapitools.codegen.utils.JsonCache.CacheException;
+import org.openapitools.codegen.utils.JsonCache.Root.MergePolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonPointer;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.mifmif.common.regex.Generex;
+
+import io.swagger.v3.oas.models.media.Schema;
+
+/**
+ * An Apache CXF-based JAX-RS server with extended capabilities.
+ *
+ * @author Adrian Price, TIBCO Software Inc.
+ */
+public class JavaCXFExtServerCodegen extends JavaCXFServerCodegen implements CXFExtServerFeatures {
+    class CodegenVariable {
+        CodegenVariable parent;
+        String name;
+        String dataFormat;
+        String dataType;
+        String enumName;
+        Map&lt;String, Object&gt; allowableValues;
+        boolean isArray;
+        boolean isContainer;
+        boolean isListContainer;
+        boolean isMap;
+        boolean isPrimitiveType;
+        CodegenVariable items;
+        Integer minItems;
+<span class="nc" id="L76">        int itemCount = 1;</span>
+        String minimum;
+        String maximum;
+        boolean exclusiveMinimum;
+        boolean exclusiveMaximum;
+        Integer minLength;
+        Integer maxLength;
+        String pattern;
+        String setter;
+        String testDataPath;
+        int index;
+        Map&lt;String, Object&gt; varVendorExtensions;
+
+<span class="nc" id="L89">        private CodegenVariable() {</span>
+<span class="nc" id="L90">            varVendorExtensions = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L91">        }</span>
+
+        private CodegenVariable(CodegenVariable parent, CodegenOperation op, String testDataPath,
+<span class="nc" id="L94">                                Map&lt;String, CodegenModel&gt; models) {</span>
+
+<span class="nc" id="L96">            name = &quot;response&quot;;</span>
+<span class="nc" id="L97">            dataFormat = null;// op.dataFormat;</span>
+<span class="nc" id="L98">            dataType = op.returnType;</span>
+<span class="nc" id="L99">            enumName = null;// op.enumName;</span>
+<span class="nc" id="L100">            allowableValues = null;// op.allowableValues;</span>
+<span class="nc bnc" id="L101" title="All 4 branches missed.">            isContainer = op.isArray || op.isMap;</span>
+<span class="nc" id="L102">            isListContainer = op.isArray;</span>
+<span class="nc" id="L103">            isMap = op.isMap;</span>
+<span class="nc" id="L104">            isPrimitiveType = op.returnTypeIsPrimitive;</span>
+<span class="nc" id="L105">            minItems = null;// op.minItems;</span>
+<span class="nc" id="L106">            minimum = null;// op.minimum;</span>
+<span class="nc" id="L107">            maximum = null;// op.maximum;</span>
+<span class="nc" id="L108">            exclusiveMinimum = false;// op.exclusiveMinimum;</span>
+<span class="nc" id="L109">            exclusiveMaximum = false;// op.exclusiveMaximum;</span>
+<span class="nc" id="L110">            minLength = null;// op.minLength;</span>
+<span class="nc" id="L111">            maxLength = null;// op.maxLength;</span>
+<span class="nc" id="L112">            pattern = null;// op.pattern;</span>
+<span class="nc" id="L113">            setter = null;// op.getSetter();</span>
+<span class="nc" id="L114">            varVendorExtensions = op.vendorExtensions;</span>
+<span class="nc" id="L115">            init(parent, testDataPath, models);</span>
+
+<span class="nc bnc" id="L117" title="All 4 branches missed.">            if (op.isArray || op.isMap) {</span>
+<span class="nc" id="L118">                items = new CodegenVariable();</span>
+<span class="nc" id="L119">                items.dataType = op.returnBaseType;</span>
+<span class="nc" id="L120">                items.isPrimitiveType = op.returnTypeIsPrimitive;</span>
+<span class="nc" id="L121">                items.name = &quot;item&quot;;</span>
+                // TODO: populate other fields?
+
+<span class="nc" id="L124">                items.init(this, testDataPath, models);</span>
+            }
+<span class="nc" id="L126">        }</span>
+
+        private CodegenVariable(CodegenVariable parent, CodegenParameter param, String testDataPath,
+<span class="nc" id="L129">                                Map&lt;String, CodegenModel&gt; models) {</span>
+
+<span class="nc" id="L131">            name = param.paramName;</span>
+<span class="nc" id="L132">            dataFormat = param.dataFormat;</span>
+<span class="nc" id="L133">            dataType = param.dataType;</span>
+<span class="nc" id="L134">            enumName = param.enumName;</span>
+<span class="nc" id="L135">            allowableValues = param.allowableValues;</span>
+<span class="nc" id="L136">            isContainer = param.isContainer;</span>
+<span class="nc" id="L137">            isListContainer = param.isArray;</span>
+<span class="nc" id="L138">            isMap = param.isMap;</span>
+<span class="nc" id="L139">            isPrimitiveType = param.isPrimitiveType;</span>
+<span class="nc" id="L140">            minItems = param.minItems;</span>
+<span class="nc" id="L141">            minimum = param.minimum;</span>
+<span class="nc" id="L142">            maximum = param.maximum;</span>
+<span class="nc" id="L143">            exclusiveMinimum = param.exclusiveMinimum;</span>
+<span class="nc" id="L144">            exclusiveMaximum = param.exclusiveMaximum;</span>
+<span class="nc" id="L145">            minLength = param.minLength;</span>
+<span class="nc" id="L146">            maxLength = param.maxLength;</span>
+<span class="nc" id="L147">            pattern = param.pattern;</span>
+<span class="nc" id="L148">            setter = null;</span>
+<span class="nc" id="L149">            varVendorExtensions = param.vendorExtensions;</span>
+<span class="nc" id="L150">            init(parent, testDataPath, models);</span>
+
+<span class="nc bnc" id="L152" title="All 2 branches missed.">            items = param.items == null ? null : new CodegenVariable(this, param.items, null, models);</span>
+<span class="nc" id="L153">        }</span>
+
+        private CodegenVariable(CodegenVariable parent, CodegenProperty prop, String testDataPath,
+<span class="nc" id="L156">                                Map&lt;String, CodegenModel&gt; models) {</span>
+
+<span class="nc" id="L158">            name = prop.name;</span>
+<span class="nc" id="L159">            dataFormat = prop.dataFormat;</span>
+<span class="nc" id="L160">            dataType = prop.dataType;</span>
+<span class="nc" id="L161">            enumName = prop.enumName;</span>
+<span class="nc" id="L162">            allowableValues = prop.allowableValues;</span>
+<span class="nc" id="L163">            isContainer = prop.isContainer;</span>
+<span class="nc" id="L164">            isListContainer = prop.isArray;</span>
+<span class="nc" id="L165">            isMap = prop.isMap;</span>
+<span class="nc" id="L166">            isPrimitiveType = prop.isPrimitiveType;</span>
+<span class="nc" id="L167">            minItems = prop.minItems;</span>
+<span class="nc" id="L168">            minimum = prop.minimum;</span>
+<span class="nc" id="L169">            maximum = prop.maximum;</span>
+<span class="nc" id="L170">            exclusiveMinimum = prop.exclusiveMinimum;</span>
+<span class="nc" id="L171">            exclusiveMaximum = prop.exclusiveMaximum;</span>
+<span class="nc" id="L172">            minLength = prop.minLength;</span>
+<span class="nc" id="L173">            maxLength = prop.maxLength;</span>
+<span class="nc" id="L174">            pattern = prop.pattern;</span>
+<span class="nc" id="L175">            setter = prop.getSetter();</span>
+<span class="nc" id="L176">            varVendorExtensions = prop.vendorExtensions;</span>
+<span class="nc" id="L177">            init(parent, testDataPath, models);</span>
+
+<span class="nc bnc" id="L179" title="All 2 branches missed.">            items = prop.items == null ? null : new CodegenVariable(this, prop.items, null, models);</span>
+<span class="nc" id="L180">        }</span>
+
+        void addTestData(Object value) {
+<span class="nc" id="L183">            JsonPointer ptr = getPointer(null, true, true);</span>
+<span class="nc bnc" id="L184" title="All 2 branches missed.">            if (!testDataCache.exists(ptr)) {</span>
+                try {
+<span class="nc" id="L186">                    testDataCache.set(ptr, value);</span>
+<span class="nc" id="L187">                } catch (CacheException e) {</span>
+<span class="nc" id="L188">                    LOGGER.error(&quot;Unable to update test data cache for &quot; + ptr, e);</span>
+<span class="nc" id="L189">                }</span>
+            }
+<span class="nc" id="L191">        }</span>
+
+        private void appendPath(StringBuilder path, boolean includeIndexes) {
+<span class="nc bnc" id="L194" title="All 2 branches missed.">            if (parent == null)</span>
+<span class="nc" id="L195">                path.append(testDataPath);</span>
+            else
+<span class="nc" id="L197">                parent.appendPath(path, includeIndexes);</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">            if (!isListItem())</span>
+<span class="nc" id="L199">                path.append('/').append(name);</span>
+<span class="nc bnc" id="L200" title="All 4 branches missed.">            if (includeIndexes &amp;&amp; isIndexed())</span>
+<span class="nc" id="L201">                path.append('/').append(index);</span>
+<span class="nc" id="L202">        }</span>
+
+        String getComponentType() {
+<span class="nc bnc" id="L205" title="All 4 branches missed.">            return isArray ? dataType.substring(0, dataType.length() - 2) : (isContainer ? items : this).dataType;</span>
+        }
+
+        private JsonPointer getPointer(String suffix, boolean includeIndexes, boolean includeLastIndex) {
+<span class="nc" id="L209">            StringBuilder path = new StringBuilder();</span>
+<span class="nc" id="L210">            appendPath(path, includeIndexes);</span>
+<span class="nc bnc" id="L211" title="All 6 branches missed.">            if (includeIndexes &amp;&amp; !includeLastIndex &amp;&amp; isIndexed())</span>
+<span class="nc" id="L212">                path.setLength(path.lastIndexOf(&quot;/&quot;));</span>
+<span class="nc bnc" id="L213" title="All 2 branches missed.">            if (suffix != null)</span>
+<span class="nc" id="L214">                path.append('/').append(suffix);</span>
+<span class="nc" id="L215">            return JsonPointer.compile(path.toString());</span>
+        }
+
+        private void init(CodegenVariable parent, String testDataPath, Map&lt;String, CodegenModel&gt; models) {
+<span class="nc" id="L219">            this.parent = parent;</span>
+<span class="nc" id="L220">            this.isArray = dataType.endsWith(&quot;[]&quot;);</span>
+<span class="nc" id="L221">            this.testDataPath = testDataPath;</span>
+<span class="nc" id="L222">            CodegenModel cm = models.get(dataType);</span>
+<span class="nc bnc" id="L223" title="All 6 branches missed.">            if (cm != null &amp;&amp; (cm.isArray || cm.isMap)) {</span>
+<span class="nc" id="L224">                this.isContainer = true;</span>
+<span class="nc" id="L225">                this.isListContainer = cm.isArray;</span>
+<span class="nc" id="L226">                this.isMap = cm.isMap;</span>
+<span class="nc" id="L227">                this.items = new CodegenVariable();</span>
+<span class="nc" id="L228">                this.items.name = &quot;item&quot;;</span>
+<span class="nc" id="L229">                this.items.dataType = cm.additionalPropertiesType;</span>
+<span class="nc" id="L230">                this.items.init(this, testDataPath, models);</span>
+            }
+            try {
+<span class="nc bnc" id="L233" title="All 6 branches missed.">                if ((isArray || isContainer) &amp;&amp; testDataControlCache != null)</span>
+<span class="nc" id="L234">                    this.itemCount = testDataControlCache.getInt(getPointer(&quot;testItemCount&quot;, false, false), 1);</span>
+<span class="nc" id="L235">            } catch (CacheException e) {</span>
+<span class="nc" id="L236">                LOGGER.error(&quot;Error accessing test data control cache&quot;, e);</span>
+<span class="nc" id="L237">            }</span>
+<span class="nc" id="L238">        }</span>
+
+        private boolean isIndexed() {
+<span class="nc bnc" id="L241" title="All 6 branches missed.">            return isListContainer || isArray &amp;&amp; !dataType.equals(&quot;byte[]&quot;);</span>
+        }
+
+        private boolean isListItem() {
+<span class="nc bnc" id="L245" title="All 4 branches missed.">            return parent != null &amp;&amp; parent.isListContainer;</span>
+        }
+
+        int size() {
+<span class="nc bnc" id="L249" title="All 2 branches missed.">            return loadTestDataFromFile ? testDataCache.size(getPointer(null, true, false)) : 0;</span>
+        }
+
+        @Override
+        public String toString() {
+<span class="nc" id="L254">            return &quot;CodegenVariable [name=&quot; + name + &quot;, dataType=&quot; + dataType + &quot;, dataFormat=&quot; + dataFormat</span>
+                    + &quot;, isArray=&quot; + isArray + &quot;, isContainer=&quot; + isContainer + &quot;, isListContainer=&quot; + isListContainer
+                    + &quot;, isMap=&quot; + isMap + &quot;, isPrimitiveType=&quot; + isPrimitiveType + &quot;, testDataPath=&quot;
+                    + testDataPath + &quot;, enumName=&quot; + enumName + &quot;, allowableValues=&quot; + allowableValues + &quot;, minItems=&quot;
+                    + minItems + &quot;, itemCount=&quot; + itemCount + &quot;, minimum=&quot; + minimum + &quot;, maximum=&quot; + maximum
+                    + &quot;, exclusiveMinimum=&quot; + exclusiveMinimum + &quot;, exclusiveMaximum=&quot; + exclusiveMaximum
+                    + &quot;, minLength=&quot; + minLength + &quot;, maxLength=&quot; + maxLength + &quot;, pattern=&quot; + pattern + &quot;, setter=&quot;
+                    + setter + &quot;, vendorExtensions=&quot; + varVendorExtensions + &quot;]&quot;;
+        }
+    }
+
+<span class="fc" id="L265">    private final Logger LOGGER = LoggerFactory.getLogger(JavaCXFExtServerCodegen.class);</span>
+
+    private static final String INDENT = &quot;        &quot;;
+
+    // SimpleDateFormat is not thread-safe, and may not be stored in a static field unless stored by ThreadLocal.
+    // It's not enough to add a ThreadLocal at the usage site.
+    @SuppressWarnings(&quot;squid:S5164&quot;)
+<span class="fc" id="L272">    private static final ThreadLocal&lt;SimpleDateFormat&gt; ISO8601_DATE_FORMAT = ThreadLocal.withInitial(() -&gt;</span>
+    {
+<span class="nc" id="L274">        SimpleDateFormat f = new SimpleDateFormat(&quot;yyyy-MM-dd&quot;, Locale.getDefault());</span>
+<span class="nc" id="L275">        f.setTimeZone(TimeZone.getTimeZone(&quot;UTC&quot;));</span>
+<span class="nc" id="L276">        return f;</span>
+    });
+
+    // SimpleDateFormat is not thread-safe, and may not be stored in a static field unless stored by ThreadLocal.
+    // It's not enough to add a ThreadLocal at the usage site.
+    @SuppressWarnings(&quot;squid:S5164&quot;)
+<span class="fc" id="L282">    private static final ThreadLocal&lt;SimpleDateFormat&gt; ISO8601_DATETIME_FORMAT = ThreadLocal.withInitial(() -&gt;</span>
+    {
+<span class="fc" id="L284">        SimpleDateFormat f = new SimpleDateFormat(&quot;yyyy-MM-dd'T'HH:mm:ss.SSSX&quot;, Locale.getDefault());</span>
+<span class="fc" id="L285">        f.setTimeZone(TimeZone.getTimeZone(&quot;UTC&quot;));</span>
+<span class="fc" id="L286">        return f;</span>
+    });
+
+    private static final long MILLIS_PER_DAY = 24 * 60 * 60 * 1000L;
+
+    private static final long MIN_DATE;
+
+    private static final long MAX_DATE;
+
+<span class="fc" id="L295">    private static final String NL = System.lineSeparator();</span>
+
+<span class="fc" id="L297">    private static final Collection&lt;String&gt; DATE_TYPES = Arrays.asList(&quot;Date&quot;, &quot;DateTime&quot;, &quot;OffsetDateTime&quot;,</span>
+            &quot;LocalDateTime&quot;, &quot;LocalDate&quot;);
+
+    static {
+<span class="fc" id="L301">        long minDate = 0;</span>
+<span class="fc" id="L302">        long maxDate = 0;</span>
+        try {
+<span class="nc" id="L304">            minDate = ISO8601_DATETIME_FORMAT.get().parse(&quot;1970-01-01T00:00:00Z&quot;).getTime();</span>
+<span class="nc" id="L305">            maxDate = ISO8601_DATETIME_FORMAT.get().parse(&quot;2099-12-31T23:59:59Z&quot;).getTime();</span>
+<span class="fc" id="L306">        } catch (ParseException e) {</span>
+            // Won't happen with the values provided.
+<span class="nc" id="L308">        }</span>
+<span class="fc" id="L309">        MIN_DATE = minDate;</span>
+<span class="fc" id="L310">        MAX_DATE = maxDate;</span>
+<span class="fc" id="L311">    }</span>
+
+<span class="fc" id="L313">    private final Map&lt;String, Generex&gt; REGEX_GENERATORS = new HashMap&lt;&gt;();</span>
+
+<span class="fc" id="L315">    protected boolean generateOperationBody = false;</span>
+
+<span class="fc" id="L317">    protected boolean loadTestDataFromFile = false;</span>
+
+<span class="fc" id="L319">    protected boolean supportMultipleSpringServices = false;</span>
+
+<span class="fc" id="L321">    protected JsonCache testDataCache = null;</span>
+
+<span class="fc" id="L323">    protected JsonCache testDataControlCache = null;</span>
+
+<span class="fc" id="L325">    protected File testDataFile = null;</span>
+
+<span class="fc" id="L327">    protected File testDataControlFile = null;</span>
+
+    public JavaCXFExtServerCodegen() {
+<span class="fc" id="L330">        super();</span>
+
+<span class="fc" id="L332">        embeddedTemplateDir = templateDir = JAXRS_TEMPLATE_DIRECTORY_NAME + File.separator + &quot;cxf-ext&quot;;</span>
+<span class="fc" id="L333">        cliOptions.add(CliOption.newBoolean(SUPPORT_MULTIPLE_SPRING_SERVICES,</span>
+                &quot;Support generation of Spring services from multiple specifications&quot;));
+<span class="fc" id="L335">        cliOptions.add(CliOption.newBoolean(GENERATE_OPERATION_BODY, &quot;Generate fully functional operation bodies&quot;));</span>
+<span class="fc" id="L336">        cliOptions.add(CliOption.newBoolean(LOAD_TEST_DATA_FROM_FILE, &quot;Load test data from a generated JSON file&quot;));</span>
+<span class="fc" id="L337">        cliOptions.add(CliOption.newString(TEST_DATA_FILE, &quot;JSON file to contain generated test data&quot;));</span>
+<span class="fc" id="L338">        cliOptions.add(CliOption.newString(TEST_DATA_CONTROL_FILE, &quot;JSON file to control test data generation&quot;));</span>
+<span class="fc" id="L339">    }</span>
+
+    private void appendArrayValue(StringBuilder buffer, String indent, CodegenOperation op, CodegenVariable var,
+                                  String localVar, Collection&lt;String&gt; localVars, Map&lt;String, CodegenModel&gt; models) {
+
+<span class="nc bnc" id="L344" title="All 2 branches missed.">        if (var.dataType.equals(&quot;byte[]&quot;)) {</span>
+            // Byte arrays are represented as Base64-encoded strings.
+<span class="nc" id="L346">            appendByteArrayValue(buffer, indent, op, var, localVar, localVars, models);</span>
+        } else {
+<span class="nc bnc" id="L348" title="All 4 branches missed.">            boolean isPrimitiveType = var.isPrimitiveType &amp;&amp; !&quot;Object&quot;.equals(var.items.dataType);</span>
+<span class="nc bnc" id="L349" title="All 2 branches missed.">            int itemCount = Math.max(var.itemCount, var.minItems == null ? 1 : Math.max(1, var.minItems));</span>
+<span class="nc bnc" id="L350" title="All 2 branches missed.">            if (!loadTestDataFromFile) {</span>
+<span class="nc" id="L351">                buffer.append(&quot;new &quot;).append(var.getComponentType());</span>
+<span class="nc bnc" id="L352" title="All 2 branches missed.">                if (isPrimitiveType)</span>
+<span class="nc" id="L353">                    buffer.append(&quot;[] {&quot;);</span>
+                else
+<span class="nc" id="L355">                    buffer.append('[').append(itemCount).append(&quot;];&quot;);</span>
+            }
+<span class="nc" id="L357">            var.index = var.size();</span>
+<span class="nc bnc" id="L358" title="All 2 branches missed.">            for (int i = var.index; i &lt; itemCount; i++) {</span>
+<span class="nc bnc" id="L359" title="All 2 branches missed.">                if (isPrimitiveType) {</span>
+                    // We don't need a local variable for a primitive value
+<span class="nc" id="L361">                    appendValue(buffer, indent, op, var.items, localVar, localVars, models);</span>
+<span class="nc bnc" id="L362" title="All 4 branches missed.">                    if (i &lt; itemCount - 1 &amp;&amp; !loadTestDataFromFile)</span>
+<span class="nc" id="L363">                        buffer.append(&quot;, &quot;);</span>
+                } else {
+<span class="nc" id="L365">                    String itemVar = appendLocalVariable(buffer, indent, op, var.items, localVars, models);</span>
+<span class="nc bnc" id="L366" title="All 2 branches missed.">                    if (!loadTestDataFromFile) {</span>
+<span class="nc" id="L367">                        buffer.append(NL).append(indent).append(localVar).append('[').append(i).append(&quot;] = &quot;)</span>
+<span class="nc" id="L368">                                .append(itemVar).append(';');</span>
+                    }
+                }
+<span class="nc" id="L371">                var.index++;</span>
+            }
+<span class="nc" id="L373">            var.index = 0;</span>
+<span class="nc bnc" id="L374" title="All 4 branches missed.">            if (isPrimitiveType &amp;&amp; !loadTestDataFromFile)</span>
+<span class="nc" id="L375">                buffer.append(&quot;};&quot;);</span>
+        }
+<span class="nc" id="L377">    }</span>
+
+    private void appendByteArrayValue(StringBuilder buffer, String indent, CodegenOperation op, CodegenVariable var,
+                                      String localVar, Collection&lt;String&gt; localVars, Map&lt;String, CodegenModel&gt; models) {
+
+<span class="nc bnc" id="L382" title="All 2 branches missed.">        if (!loadTestDataFromFile)</span>
+<span class="nc" id="L383">            buffer.append('&quot;');</span>
+<span class="nc bnc" id="L384" title="All 4 branches missed.">        short min = var == null || var.minimum == null ? Byte.MIN_VALUE : Byte.parseByte(var.minimum);</span>
+<span class="nc bnc" id="L385" title="All 4 branches missed.">        short max = var == null || var.maximum == null ? Byte.MAX_VALUE : Byte.parseByte(var.maximum);</span>
+<span class="nc bnc" id="L386" title="All 4 branches missed.">        short exclusiveMin = (short) (var != null &amp;&amp; var.exclusiveMinimum ? 1 : 0);</span>
+<span class="nc bnc" id="L387" title="All 4 branches missed.">        short inclusiveMax = (short) (var == null || !var.exclusiveMaximum ? 1 : 0);</span>
+<span class="nc" id="L388">        int itemCount = 0;</span>
+<span class="nc bnc" id="L389" title="All 2 branches missed.">        if (var != null) {</span>
+<span class="nc bnc" id="L390" title="All 2 branches missed.">            itemCount = Math.max(var.itemCount, var.minItems == null ? 1 : Math.max(1, var.minItems));</span>
+        }
+<span class="nc" id="L392">        byte[] randomBytes = new byte[itemCount];</span>
+<span class="nc bnc" id="L393" title="All 2 branches missed.">        for (int i = 0; i &lt; itemCount; i++)</span>
+<span class="nc" id="L394">            randomBytes[i] = (byte) (min + exclusiveMin + ((max + inclusiveMax - min - exclusiveMin) * Math.random()));</span>
+<span class="nc" id="L395">        String randomBytesBase64 = Base64.getEncoder().encodeToString(randomBytes);</span>
+<span class="nc bnc" id="L396" title="All 4 branches missed.">        if (loadTestDataFromFile &amp;&amp; var != null)</span>
+<span class="nc" id="L397">            var.addTestData(randomBytesBase64);</span>
+        else
+<span class="nc" id="L399">            buffer.append('&quot;');</span>
+<span class="nc" id="L400">    }</span>
+
+    private void appendListValue(StringBuilder buffer, String indent, CodegenOperation op, CodegenVariable var,
+                                 String localVar, Collection&lt;String&gt; localVars, Map&lt;String, CodegenModel&gt; models) {
+
+<span class="nc" id="L405">        op.imports.add(&quot;List&quot;);</span>
+<span class="nc bnc" id="L406" title="All 2 branches missed.">        if (!loadTestDataFromFile) {</span>
+<span class="nc" id="L407">            op.imports.add(&quot;ArrayList&quot;);</span>
+<span class="nc" id="L408">            buffer.append(&quot;new ArrayList&lt;&quot;);</span>
+<span class="nc" id="L409">            buffer.append(&quot;&gt;();&quot;);</span>
+        }
+<span class="nc" id="L411">        var.index = var.size();</span>
+<span class="nc bnc" id="L412" title="All 2 branches missed.">        int itemCount = Math.max(var.itemCount, var.minItems == null ? 1 : Math.max(1, var.minItems));</span>
+<span class="nc bnc" id="L413" title="All 2 branches missed.">        for (int i = var.index; i &lt; itemCount; i++) {</span>
+<span class="nc bnc" id="L414" title="All 4 branches missed.">            if (var.isPrimitiveType &amp;&amp; !&quot;Object&quot;.equals(var.items.dataType)) {</span>
+                // We don't need a local variable for a primitive value
+<span class="nc bnc" id="L416" title="All 2 branches missed.">                if (!loadTestDataFromFile)</span>
+<span class="nc" id="L417">                    buffer.append(NL).append(indent).append(localVar).append(&quot;.add(&quot;);</span>
+<span class="nc" id="L418">                appendValue(buffer, indent, op, var.items, localVar, localVars, models);</span>
+            } else {
+<span class="nc" id="L420">                String itemVar = appendLocalVariable(buffer, indent, op, var.items, localVars, models);</span>
+<span class="nc bnc" id="L421" title="All 2 branches missed.">                if (!loadTestDataFromFile)</span>
+<span class="nc" id="L422">                    buffer.append(NL).append(indent).append(localVar).append(&quot;.add(&quot;).append(itemVar);</span>
+            }
+<span class="nc bnc" id="L424" title="All 2 branches missed.">            if (!loadTestDataFromFile)</span>
+<span class="nc" id="L425">                buffer.append(&quot;);&quot;);</span>
+<span class="nc" id="L426">            var.index++;</span>
+        }
+<span class="nc" id="L428">        var.index = 0;</span>
+<span class="nc" id="L429">    }</span>
+
+    /**
+     * Declares and initialises a local variable of the specified type.
+     *
+     * @param buffer
+     * @param indent
+     * @param op
+     * @param var
+     * @param localVars
+     * @param models
+     *
+     * @return &lt;code&gt;localVar&lt;/code&gt; with a numeric suffix if necessary to ensure uniqueness.
+     */
+    private String appendLocalVariable(StringBuilder buffer, String indent, CodegenOperation op, CodegenVariable var,
+                                       Collection&lt;String&gt; localVars, Map&lt;String, CodegenModel&gt; models) {
+
+        // Ensure that we're using a unique local variable name (to avoid typing and overwriting conflicts).
+<span class="nc" id="L447">        String localVar = var.name;</span>
+<span class="nc bnc" id="L448" title="All 2 branches missed.">        for (int i = 2; localVars.contains(localVar); i++)</span>
+<span class="nc" id="L449">            localVar = var.name + i;</span>
+<span class="nc" id="L450">        localVars.add(localVar);</span>
+
+<span class="nc bnc" id="L452" title="All 2 branches missed.">        if (!loadTestDataFromFile)</span>
+<span class="nc" id="L453">            buffer.append(NL).append(indent).append(var.dataType).append(' ').append(localVar).append(&quot; = &quot;);</span>
+<span class="nc" id="L454">        appendValue(buffer, indent, op, var, localVar, localVars, models);</span>
+<span class="nc bnc" id="L455" title="All 2 branches missed.">        if (!loadTestDataFromFile)</span>
+<span class="nc" id="L456">            appendSemicolon(buffer);</span>
+
+<span class="nc" id="L458">        return localVar;</span>
+    }
+
+    private void appendMapValue(StringBuilder buffer, String indent, CodegenOperation op, CodegenVariable var,
+                                String localVar, Collection&lt;String&gt; localVars, Map&lt;String, CodegenModel&gt; models) {
+
+<span class="nc" id="L464">        op.imports.add(&quot;Map&quot;);</span>
+<span class="nc bnc" id="L465" title="All 2 branches missed.">        if (!loadTestDataFromFile) {</span>
+<span class="nc" id="L466">            op.imports.add(&quot;HashMap&quot;);</span>
+<span class="nc" id="L467">            buffer.append(&quot;new HashMap&lt;&quot;);</span>
+<span class="nc" id="L468">            buffer.append(&quot;&gt;();&quot;);</span>
+        }
+<span class="nc" id="L470">        var.index = var.size();</span>
+<span class="nc bnc" id="L471" title="All 2 branches missed.">        int itemCount = Math.max(var.itemCount, var.minItems == null ? 1 : Math.max(1, var.minItems));</span>
+<span class="nc bnc" id="L472" title="All 2 branches missed.">        for (int i = var.index; i &lt; itemCount; i++) {</span>
+            // Map entries need a random key (the default value for var.items.name is &quot;items&quot;).
+<span class="nc" id="L474">            var.items.name = generateRandomString(null);</span>
+<span class="nc bnc" id="L475" title="All 2 branches missed.">            if (var.isPrimitiveType) {</span>
+                // We don't need a local variable for a primitive value
+<span class="nc bnc" id="L477" title="All 2 branches missed.">                if (!loadTestDataFromFile) {</span>
+<span class="nc" id="L478">                    buffer.append(NL).append(indent).append(localVar).append(&quot;.put(&quot;).append(var.items.name)</span>
+<span class="nc" id="L479">                            .append(&quot;, &quot;);</span>
+                }
+<span class="nc" id="L481">                appendValue(buffer, indent, op, var.items, localVar, localVars, models);</span>
+            } else {
+<span class="nc" id="L483">                String itemVar = appendLocalVariable(buffer, indent, op, var.items, localVars, models);</span>
+<span class="nc bnc" id="L484" title="All 2 branches missed.">                if (!loadTestDataFromFile)</span>
+<span class="nc" id="L485">                    buffer.append(localVar).append(&quot;.put(\&quot;&quot;).append(var.items.name).append(&quot;\&quot;, &quot;).append(itemVar);</span>
+            }
+<span class="nc bnc" id="L487" title="All 2 branches missed.">            if (!loadTestDataFromFile)</span>
+<span class="nc" id="L488">                buffer.append(&quot;);&quot;);</span>
+<span class="nc" id="L489">            var.index++;</span>
+        }
+<span class="nc" id="L491">    }</span>
+
+    private void appendObjectValue(StringBuilder buffer, String indent, CodegenOperation op, CodegenVariable var,
+                                   String localVar, Collection&lt;String&gt; localVars, Map&lt;String, CodegenModel&gt; models) {
+
+<span class="nc bnc" id="L496" title="All 2 branches missed.">        if (&quot;Object&quot;.equals(var.dataType)) {</span>
+            // Jackson can't serialize java.lang.Object, so we'll provide an empty JSON ObjectNode instead.
+<span class="nc bnc" id="L498" title="All 2 branches missed.">            if (loadTestDataFromFile)</span>
+<span class="nc" id="L499">                var.addTestData(JsonNodeFactory.instance.objectNode());</span>
+            else
+<span class="nc" id="L501">                buffer.append(&quot;JsonNodeFactory.instance.objectNode();&quot;);</span>
+        } else {
+<span class="nc bnc" id="L503" title="All 2 branches missed.">            if (needToImport(var.dataType))</span>
+<span class="nc" id="L504">                op.imports.add(var.dataType);</span>
+<span class="nc bnc" id="L505" title="All 2 branches missed.">            if (!loadTestDataFromFile)</span>
+<span class="nc" id="L506">                buffer.append(&quot;new &quot;).append(var.dataType).append(&quot;();&quot;);</span>
+<span class="nc" id="L507">            appendPropertyAssignments(buffer, indent, op, var, localVar, localVars, models);</span>
+        }
+<span class="nc" id="L509">    }</span>
+
+    private void appendPropertyAssignments(StringBuilder buffer, String indent, CodegenOperation op,
+                                           CodegenVariable parent, String localVar, Collection&lt;String&gt; localVars, Map&lt;String, CodegenModel&gt; models) {
+
+<span class="nc" id="L514">        CodegenModel cm = models.get(parent.dataType);</span>
+<span class="nc bnc" id="L515" title="All 2 branches missed.">        if (cm != null) { // TODO: handle isArrayModel and isMap</span>
+<span class="nc bnc" id="L516" title="All 2 branches missed.">            for (CodegenProperty cp : cm.allVars) {</span>
+<span class="nc" id="L517">                CodegenVariable var = new CodegenVariable(parent, cp, null, models);</span>
+<span class="nc bnc" id="L518" title="All 4 branches missed.">                if (var.isContainer || !var.isPrimitiveType) {</span>
+<span class="nc" id="L519">                    String containerVar = appendLocalVariable(buffer, indent, op, var, localVars, models);</span>
+<span class="nc bnc" id="L520" title="All 2 branches missed.">                    if (!loadTestDataFromFile) {</span>
+<span class="nc" id="L521">                        buffer.append(NL).append(indent).append(localVar).append('.').append(var.setter).append('(')</span>
+<span class="nc" id="L522">                                .append(containerVar);</span>
+                    }
+<span class="nc" id="L524">                } else {</span>
+                    // No need to use a local variable for types which can be initialised with a single expression.
+<span class="nc bnc" id="L526" title="All 2 branches missed.">                    if (!loadTestDataFromFile)</span>
+<span class="nc" id="L527">                        buffer.append(NL).append(indent).append(localVar).append('.').append(var.setter).append('(');</span>
+<span class="nc" id="L528">                    appendValue(buffer, indent, op, var, localVar, localVars, models);</span>
+                }
+<span class="nc bnc" id="L530" title="All 2 branches missed.">                if (!loadTestDataFromFile)</span>
+<span class="nc" id="L531">                    buffer.append(&quot;);&quot;);</span>
+<span class="nc" id="L532">            }</span>
+        }
+<span class="nc" id="L534">    }</span>
+
+    private void appendRandomBoolean(StringBuilder buffer, CodegenOperation op, CodegenVariable var) {
+<span class="nc bnc" id="L537" title="All 2 branches missed.">        boolean randomBoolean = Math.random() &gt; 0.5;</span>
+
+<span class="nc bnc" id="L539" title="All 2 branches missed.">        if (loadTestDataFromFile)</span>
+<span class="nc" id="L540">            var.addTestData(randomBoolean);</span>
+        else
+<span class="nc" id="L542">            buffer.append(randomBoolean);</span>
+<span class="nc" id="L543">    }</span>
+
+    private void appendRandomByte(StringBuilder buffer, CodegenOperation op, CodegenVariable var) {
+<span class="nc bnc" id="L546" title="All 2 branches missed.">        if (!appendRandomEnum(buffer, op, var)) {</span>
+            // NOTE: use short to hold byte values, to avoid numeric overflow.
+<span class="nc bnc" id="L548" title="All 4 branches missed.">            short min = var == null || var.minimum == null ? Byte.MIN_VALUE : Byte.parseByte(var.minimum);</span>
+<span class="nc bnc" id="L549" title="All 4 branches missed.">            short max = var == null || var.maximum == null ? Byte.MAX_VALUE : Byte.parseByte(var.maximum);</span>
+<span class="nc bnc" id="L550" title="All 4 branches missed.">            short exclusiveMin = (short) (var != null &amp;&amp; var.exclusiveMinimum ? 1 : 0);</span>
+<span class="nc bnc" id="L551" title="All 4 branches missed.">            short inclusiveMax = (short) (var == null || !var.exclusiveMaximum ? 1 : 0);</span>
+<span class="nc" id="L552">            byte randomByte = (byte) (min + exclusiveMin + ((max + inclusiveMax - min - exclusiveMin) * Math.random()));</span>
+
+<span class="nc bnc" id="L554" title="All 2 branches missed.">            if (loadTestDataFromFile) {</span>
+<span class="nc bnc" id="L555" title="All 2 branches missed.">                if (var != null) {</span>
+<span class="nc" id="L556">                    var.addTestData(randomByte);</span>
+                }
+            } else {
+<span class="nc" id="L559">                buffer.append(String.format(Locale.getDefault(), &quot;(byte)%0#2x&quot;, randomByte));</span>
+            }
+        }
+<span class="nc" id="L562">    }</span>
+
+    private void appendRandomChar(StringBuilder buffer, CodegenOperation op, CodegenVariable var) {
+<span class="nc bnc" id="L565" title="All 2 branches missed.">        if (!appendRandomEnum(buffer, op, var)) {</span>
+            // TODO: consider whether to broaden the default range.
+            // NOTE: char is unsigned, so there's no overflow issue in computing (max - min).
+<span class="nc bnc" id="L568" title="All 4 branches missed.">            char min = var == null || var.minimum == null ? 'a' : var.minimum.charAt(0);</span>
+<span class="nc bnc" id="L569" title="All 4 branches missed.">            char max = var == null || var.maximum == null ? 'z' : var.maximum.charAt(0);</span>
+<span class="nc bnc" id="L570" title="All 4 branches missed.">            char exclusiveMin = (char) (var != null &amp;&amp; var.exclusiveMinimum ? 1 : 0);</span>
+<span class="nc bnc" id="L571" title="All 4 branches missed.">            char inclusiveMax = (char) (var == null || !var.exclusiveMaximum ? 1 : 0);</span>
+<span class="nc" id="L572">            char randomChar = (char) (min + exclusiveMin + ((max + inclusiveMax - min - exclusiveMin) * Math.random()));</span>
+
+<span class="nc bnc" id="L574" title="All 2 branches missed.">            if (loadTestDataFromFile) {</span>
+<span class="nc bnc" id="L575" title="All 2 branches missed.">                if (var != null) {</span>
+<span class="nc" id="L576">                    var.addTestData(randomChar);</span>
+                }
+            } else {
+<span class="nc" id="L579">                buffer.append(String.format(Locale.getDefault(), &quot;'%c'&quot;, randomChar));</span>
+            }
+        }
+<span class="nc" id="L582">    }</span>
+
+    private void appendRandomDate(StringBuilder buffer, CodegenOperation op, CodegenVariable var) {
+<span class="nc bnc" id="L585" title="All 2 branches missed.">        if (!appendRandomEnum(buffer, op, var)) {</span>
+<span class="nc" id="L586">            long minDate = MIN_DATE;</span>
+<span class="nc" id="L587">            long maxDate = MAX_DATE;</span>
+<span class="nc bnc" id="L588" title="All 2 branches missed.">            if (var != null) {</span>
+<span class="nc bnc" id="L589" title="All 2 branches missed.">                DateFormat df = var.dataFormat.equals(&quot;date-time&quot;) ? ISO8601_DATETIME_FORMAT.get() : ISO8601_DATE_FORMAT.get();</span>
+<span class="nc bnc" id="L590" title="All 2 branches missed.">                String isoFormat = var.dataFormat.equals(&quot;date-time&quot;) ? &quot;date-time&quot; : &quot;full-date&quot;;</span>
+<span class="nc bnc" id="L591" title="All 2 branches missed.">                if (var.minimum != null) {</span>
+                    try {
+<span class="nc" id="L593">                        minDate = df.parse(var.minimum).getTime();</span>
+<span class="nc" id="L594">                    } catch (ParseException e) {</span>
+                        // Ignore, use MIN_DATE.
+<span class="nc" id="L596">                        LOGGER.warn(&quot;Could not parse minimum {} value for '{}/{}' as an ISO-8601 {}: {}&quot;,</span>
+                                var.dataFormat, op.operationId, var.name, isoFormat, var.minimum);
+<span class="nc" id="L598">                    }</span>
+                }
+<span class="nc bnc" id="L600" title="All 2 branches missed.">                if (var.maximum != null) {</span>
+                    try {
+<span class="nc" id="L602">                        maxDate = df.parse(var.maximum).getTime();</span>
+<span class="nc" id="L603">                    } catch (ParseException e) {</span>
+                        // Ignore, use MAX_DATE.
+<span class="nc" id="L605">                        LOGGER.warn(&quot;Could not parse maximum {} value for '{}/{}' as an ISO-8601 {}: {}&quot;,</span>
+                                var.dataFormat, op.operationId, var.name, isoFormat, var.minimum);
+<span class="nc" id="L607">                    }</span>
+                }
+            }
+            // NOTE: use BigDecimal to hold long values, to avoid numeric overflow.
+<span class="nc" id="L611">            BigDecimal minLong = new BigDecimal(minDate);</span>
+<span class="nc" id="L612">            BigDecimal maxLong = new BigDecimal(maxDate);</span>
+<span class="nc bnc" id="L613" title="All 4 branches missed.">            BigDecimal exclusiveMinLong = new BigDecimal(var != null &amp;&amp; var.exclusiveMinimum ? 1 : 0);</span>
+<span class="nc bnc" id="L614" title="All 4 branches missed.">            BigDecimal inclusiveMaxLong = new BigDecimal(var == null || !var.exclusiveMaximum ? 1 : 0);</span>
+<span class="nc" id="L615">            long randomDateLong = minLong.add(exclusiveMinLong).add(maxLong.add(inclusiveMaxLong).subtract(minLong)</span>
+<span class="nc" id="L616">                    .subtract(exclusiveMinLong).multiply(BigDecimal.valueOf(Math.random()))).longValue();</span>
+
+            // If it's just a date without a time, round downwards to the nearest day.
+<span class="nc bnc" id="L619" title="All 4 branches missed.">            if (var != null &amp;&amp; &quot;date&quot;.equals(var.dataFormat))</span>
+<span class="nc" id="L620">                randomDateLong = (randomDateLong % MILLIS_PER_DAY) * MILLIS_PER_DAY;</span>
+
+            // NOTE: By default Jackson serializes Date as long milliseconds since epoch date, but that conflicts with
+            // the OpenAPI 2.0/3.0 specs, which mandates the ISO-8601 full-date or date-time formats. Accordingly, date
+            // and date-time fields are annotated with @JsonFormat to specify the appropriate ISO format.
+<span class="nc bnc" id="L625" title="All 2 branches missed.">            if (loadTestDataFromFile) {</span>
+<span class="nc bnc" id="L626" title="All 2 branches missed.">                if (var != null) {</span>
+<span class="nc" id="L627">                    Date randomDate = new Date(randomDateLong);</span>
+<span class="nc bnc" id="L628" title="All 3 branches missed.">                    switch (var.dataFormat) {</span>
+                        case &quot;date&quot;:
+<span class="nc" id="L630">                            var.addTestData(ISO8601_DATE_FORMAT.get().format(randomDate));</span>
+<span class="nc" id="L631">                            break;</span>
+                        case &quot;date-time&quot;:
+<span class="nc" id="L633">                            var.addTestData(ISO8601_DATETIME_FORMAT.get().format(randomDate));</span>
+                            break;
+                    }
+<span class="nc" id="L636">                }</span>
+            } else {
+<span class="nc" id="L638">                buffer.append(&quot;new Date(&quot;).append(randomDateLong).append(')');</span>
+            }
+        }
+<span class="nc" id="L641">    }</span>
+
+    private void appendRandomDouble(StringBuilder buffer, CodegenOperation op, CodegenVariable var) {
+<span class="nc bnc" id="L644" title="All 2 branches missed.">        if (!appendRandomEnum(buffer, op, var)) {</span>
+            // NOTE: use BigDecimal to hold double values, to avoid numeric overflow.
+<span class="nc bnc" id="L646" title="All 4 branches missed.">            BigDecimal min = BigDecimal.valueOf(var == null || var.minimum == null ? Long.MIN_VALUE : Double.parseDouble(var.minimum));</span>
+<span class="nc bnc" id="L647" title="All 4 branches missed.">            BigDecimal max = BigDecimal.valueOf(var == null || var.maximum == null ? Long.MAX_VALUE : Double.parseDouble(var.maximum));</span>
+<span class="nc bnc" id="L648" title="All 4 branches missed.">            BigDecimal exclusiveMin = new BigDecimal(var != null &amp;&amp; var.exclusiveMinimum ? 1 : 0);</span>
+<span class="nc bnc" id="L649" title="All 4 branches missed.">            BigDecimal inclusiveMax = new BigDecimal(var == null || !var.exclusiveMaximum ? 1 : 0);</span>
+<span class="nc" id="L650">            BigDecimal randomBigDecimal = min.add(exclusiveMin).add(max.add(inclusiveMax).subtract(min)</span>
+<span class="nc" id="L651">                    .subtract(exclusiveMin).multiply(new BigDecimal(String.valueOf(Math.random()))));</span>
+
+<span class="nc bnc" id="L653" title="All 2 branches missed.">            if (loadTestDataFromFile) {</span>
+<span class="nc bnc" id="L654" title="All 2 branches missed.">                if (var != null) {</span>
+<span class="nc" id="L655">                    var.addTestData(randomBigDecimal);</span>
+                }
+            } else {
+<span class="nc" id="L658">                buffer.append(randomBigDecimal).append('D');</span>
+            }
+        }
+<span class="nc" id="L661">    }</span>
+
+    private boolean appendRandomEnum(StringBuilder buffer, CodegenOperation op, CodegenVariable var) {
+<span class="nc bnc" id="L664" title="All 4 branches missed.">        if (var != null &amp;&amp; var.allowableValues != null) {</span>
+<span class="nc" id="L665">            List&lt;?&gt; values = (List&lt;?&gt;) var.allowableValues.get(&quot;values&quot;);</span>
+<span class="nc" id="L666">            int i = (int) (values.size() * Math.random());</span>
+<span class="nc" id="L667">            Object randomEnum = values.get(i);</span>
+<span class="nc" id="L668">            boolean usingEnumLiteral = false;</span>
+<span class="nc" id="L669">            String definingClass = (String) var.varVendorExtensions.get(&quot;x-defining-class&quot;);</span>
+<span class="nc bnc" id="L670" title="All 2 branches missed.">            if (definingClass != null) {</span>
+                @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L672">                List&lt;Map&lt;String, Object&gt;&gt; enumVars = (List&lt;Map&lt;String, Object&gt;&gt;) var.allowableValues.get(&quot;enumVars&quot;);</span>
+<span class="nc bnc" id="L673" title="All 2 branches missed.">                if (enumVars != null) {</span>
+<span class="nc bnc" id="L674" title="All 2 branches missed.">                    if (!loadTestDataFromFile) {</span>
+<span class="nc" id="L675">                        Map&lt;String, Object&gt; randomEnumVar = enumVars.get(i);</span>
+                        // NOTE: to disambiguate identically named inner enums, qualify enum name with defining class.
+<span class="nc" id="L677">                        buffer.append(definingClass).append('.').append(var.enumName).append('.')</span>
+<span class="nc" id="L678">                                .append(randomEnumVar.get(&quot;name&quot;));</span>
+<span class="nc" id="L679">                        op.imports.add(definingClass);</span>
+                    }
+<span class="nc" id="L681">                    usingEnumLiteral = true;</span>
+                }
+            }
+<span class="nc bnc" id="L684" title="All 2 branches missed.">            if (loadTestDataFromFile) {</span>
+<span class="nc" id="L685">                var.addTestData(randomEnum);</span>
+<span class="nc bnc" id="L686" title="All 2 branches missed.">            } else if (!usingEnumLiteral) {</span>
+<span class="nc bnc" id="L687" title="All 2 branches missed.">                String quoteString = randomEnum instanceof String ? &quot;\&quot;&quot; : &quot;&quot;;</span>
+<span class="nc" id="L688">                buffer.append(quoteString).append(randomEnum).append(quoteString);</span>
+            }
+<span class="nc" id="L690">            return true;</span>
+        }
+<span class="nc" id="L692">        return false;</span>
+    }
+
+    private void appendRandomFile(StringBuilder buffer, CodegenOperation op, CodegenVariable var) {
+        // For code generation purposes we'll just supply a random string as the contents of a text 'file'.
+<span class="nc" id="L697">        String randomString = generateRandomString(var);</span>
+
+<span class="nc bnc" id="L699" title="All 2 branches missed.">        if (loadTestDataFromFile) {</span>
+<span class="nc" id="L700">            var.addTestData(randomString);</span>
+        } else {
+<span class="nc" id="L702">            buffer.append('&quot;').append(randomString).append('&quot;');</span>
+        }
+<span class="nc" id="L704">    }</span>
+
+    private void appendRandomFloat(StringBuilder buffer, CodegenOperation op, CodegenVariable var) {
+<span class="nc bnc" id="L707" title="All 2 branches missed.">        if (!appendRandomEnum(buffer, op, var)) {</span>
+            // NOTE: use double to hold float values, to avoid numeric overflow.
+<span class="nc bnc" id="L709" title="All 4 branches missed.">            double min = var == null || var.minimum == null ? -Float.MAX_VALUE : Float.parseFloat(var.minimum);</span>
+<span class="nc bnc" id="L710" title="All 4 branches missed.">            double max = var == null || var.maximum == null ? Float.MAX_VALUE : Float.parseFloat(var.maximum);</span>
+<span class="nc bnc" id="L711" title="All 4 branches missed.">            double exclusiveMin = var != null &amp;&amp; var.exclusiveMinimum ? 1 : 0;</span>
+<span class="nc bnc" id="L712" title="All 4 branches missed.">            double inclusiveMax = var == null || !var.exclusiveMaximum ? 1 : 0;</span>
+<span class="nc" id="L713">            float randomFloat = (float) (min + exclusiveMin</span>
+<span class="nc" id="L714">                    + ((max + inclusiveMax - min - exclusiveMin) * Math.random()));</span>
+
+<span class="nc bnc" id="L716" title="All 2 branches missed.">            if (loadTestDataFromFile) {</span>
+<span class="nc bnc" id="L717" title="All 2 branches missed.">                if (var != null) {</span>
+<span class="nc" id="L718">                    var.addTestData(randomFloat);</span>
+                }
+            } else {
+<span class="nc" id="L721">                buffer.append(String.format(Locale.getDefault(), &quot;%g&quot;, randomFloat)).append('F');</span>
+            }
+        }
+<span class="nc" id="L724">    }</span>
+
+    private void appendRandomInt(StringBuilder buffer, CodegenOperation op, CodegenVariable var) {
+<span class="nc bnc" id="L727" title="All 2 branches missed.">        if (!appendRandomEnum(buffer, op, var)) {</span>
+            // NOTE: use double to hold int values, to avoid numeric overflow.
+<span class="nc bnc" id="L729" title="All 4 branches missed.">            long min = var == null || var.minimum == null ? Integer.MIN_VALUE : Integer.parseInt(var.minimum);</span>
+<span class="nc bnc" id="L730" title="All 4 branches missed.">            long max = var == null || var.maximum == null ? Integer.MAX_VALUE : Integer.parseInt(var.maximum);</span>
+<span class="nc bnc" id="L731" title="All 4 branches missed.">            long exclusiveMin = var != null &amp;&amp; var.exclusiveMinimum ? 1 : 0;</span>
+<span class="nc bnc" id="L732" title="All 4 branches missed.">            long inclusiveMax = var == null || !var.exclusiveMaximum ? 1 : 0;</span>
+<span class="nc" id="L733">            int randomInt = (int) (min + exclusiveMin + ((max + inclusiveMax - min - exclusiveMin) * Math.random()));</span>
+
+<span class="nc bnc" id="L735" title="All 2 branches missed.">            if (loadTestDataFromFile) {</span>
+<span class="nc bnc" id="L736" title="All 2 branches missed.">                if (var != null) {</span>
+<span class="nc" id="L737">                    var.addTestData(randomInt);</span>
+                }
+            } else {
+<span class="nc" id="L740">                buffer.append(randomInt);</span>
+            }
+        }
+<span class="nc" id="L743">    }</span>
+
+    private void appendRandomLong(StringBuilder buffer, CodegenOperation op, CodegenVariable var) {
+<span class="nc bnc" id="L746" title="All 2 branches missed.">        if (!appendRandomEnum(buffer, op, var)) {</span>
+            // NOTE: use BigDecimal to hold long values, to avoid numeric overflow.
+<span class="nc" id="L748">            BigDecimal min = new BigDecimal(</span>
+<span class="nc bnc" id="L749" title="All 4 branches missed.">                    var == null || var.minimum == null ? Long.MIN_VALUE : Long.parseLong(var.minimum));</span>
+<span class="nc" id="L750">            BigDecimal max = new BigDecimal(</span>
+<span class="nc bnc" id="L751" title="All 4 branches missed.">                    var == null || var.maximum == null ? Long.MAX_VALUE : Long.parseLong(var.maximum));</span>
+<span class="nc bnc" id="L752" title="All 4 branches missed.">            BigDecimal exclusiveMin = new BigDecimal(var != null &amp;&amp; var.exclusiveMinimum ? 1 : 0);</span>
+<span class="nc bnc" id="L753" title="All 4 branches missed.">            BigDecimal inclusiveMax = new BigDecimal(var == null || !var.exclusiveMaximum ? 1 : 0);</span>
+<span class="nc" id="L754">            long randomLong = min.add(exclusiveMin).add(</span>
+<span class="nc" id="L755">                    max.add(inclusiveMax).subtract(min).subtract(exclusiveMin).multiply(BigDecimal.valueOf(Math.random())))</span>
+<span class="nc" id="L756">                    .longValue();</span>
+
+<span class="nc bnc" id="L758" title="All 2 branches missed.">            if (loadTestDataFromFile) {</span>
+<span class="nc bnc" id="L759" title="All 2 branches missed.">                if (var != null) {</span>
+<span class="nc" id="L760">                    var.addTestData(randomLong);</span>
+                }
+            } else {
+<span class="nc" id="L763">                buffer.append(randomLong).append('L');</span>
+            }
+        }
+<span class="nc" id="L766">    }</span>
+
+    private void appendRandomShort(StringBuilder buffer, CodegenOperation op, CodegenVariable var) {
+<span class="nc bnc" id="L769" title="All 2 branches missed.">        if (!appendRandomEnum(buffer, op, var)) {</span>
+            // NOTE: use int to hold short values, to avoid numeric overflow.
+<span class="nc bnc" id="L771" title="All 4 branches missed.">            int min = var == null || var.minimum == null ? Short.MIN_VALUE : Short.parseShort(var.minimum);</span>
+<span class="nc bnc" id="L772" title="All 4 branches missed.">            int max = var == null || var.maximum == null ? Short.MAX_VALUE : Short.parseShort(var.maximum);</span>
+<span class="nc bnc" id="L773" title="All 4 branches missed.">            int exclusiveMin = var != null &amp;&amp; var.exclusiveMinimum ? 1 : 0;</span>
+<span class="nc bnc" id="L774" title="All 4 branches missed.">            int inclusiveMax = var == null || !var.exclusiveMaximum ? 1 : 0;</span>
+<span class="nc" id="L775">            short randomShort = (short) (min + exclusiveMin</span>
+<span class="nc" id="L776">                    + ((max + inclusiveMax - min - exclusiveMin) * Math.random()));</span>
+
+<span class="nc bnc" id="L778" title="All 2 branches missed.">            if (loadTestDataFromFile) {</span>
+<span class="nc bnc" id="L779" title="All 2 branches missed.">                if (var != null) {</span>
+<span class="nc" id="L780">                    var.addTestData(randomShort);</span>
+                }
+            } else {
+<span class="nc" id="L783">                buffer.append(String.format(Locale.getDefault(), &quot;(short)%d&quot;, randomShort));</span>
+            }
+        }
+<span class="nc" id="L786">    }</span>
+
+    private void appendRandomString(StringBuilder buffer, CodegenOperation op, CodegenVariable var) {
+<span class="nc bnc" id="L789" title="All 2 branches missed.">        if (!appendRandomEnum(buffer, op, var)) {</span>
+<span class="nc" id="L790">            String randomString = generateRandomString(var);</span>
+
+<span class="nc bnc" id="L792" title="All 2 branches missed.">            if (loadTestDataFromFile) {</span>
+<span class="nc bnc" id="L793" title="All 2 branches missed.">                if (var != null) {</span>
+<span class="nc" id="L794">                    var.addTestData(randomString);</span>
+                }
+            } else {
+<span class="nc" id="L797">                buffer.append('&quot;').append(randomString).append('&quot;');</span>
+            }
+        }
+<span class="nc" id="L800">    }</span>
+
+    /**
+     * Appends a sample value for a scalar type - that is, one which is neither a list nor a map container.
+     *
+     * @param buffer    The operation body to which the value expression is to be appended.
+     * @param indent    Indentation to apply.
+     * @param op
+     * @param localVar  The variable whose value is to be set.
+     * @param localVars Tracks local variables which have been allocated.
+     * @param models    A map of models, keyed on class name.
+     */
+    private void appendScalarValue(StringBuilder buffer, String indent, CodegenOperation op, CodegenVariable var,
+                                   String localVar, Collection&lt;String&gt; localVars, Map&lt;String, CodegenModel&gt; models) {
+
+<span class="nc bnc" id="L815" title="All 6 branches missed.">        if (!var.isPrimitiveType &amp;&amp; !DATE_TYPES.contains(var.dataType) || var.dataType.equals(&quot;Object&quot;)) {</span>
+            // All other non-container types: allocate a new object on the heap.
+<span class="nc" id="L817">            appendObjectValue(buffer, indent, op, var, localVar, localVars, models);</span>
+        } else {
+<span class="nc" id="L819">            openValueBuffer(buffer, var);</span>
+            // NOTE: this loop is only iterated once unless var.isArray is true and var.type is not byte[].
+<span class="nc bnc" id="L821" title="All 2 branches missed.">            int itemCount = Math.max(var.itemCount, var.minItems == null ? 1 : Math.max(1, var.minItems));</span>
+<span class="nc bnc" id="L822" title="All 2 branches missed.">            for (int i = 0; i &lt; itemCount; i++) {</span>
+<span class="nc bnc" id="L823" title="All 12 branches missed.">                switch (var.getComponentType()) {</span>
+                    case &quot;byte&quot;:
+                    case &quot;Byte&quot;:
+<span class="nc" id="L826">                        appendRandomByte(buffer, op, var);</span>
+<span class="nc" id="L827">                        break;</span>
+                    case &quot;boolean&quot;:
+                    case &quot;Boolean&quot;:
+<span class="nc" id="L830">                        appendRandomBoolean(buffer, op, var);</span>
+<span class="nc" id="L831">                        break;</span>
+                    case &quot;char&quot;:
+                    case &quot;Char&quot;:
+<span class="nc" id="L834">                        appendRandomChar(buffer, op, var);</span>
+<span class="nc" id="L835">                        break;</span>
+                    case &quot;double&quot;:
+                    case &quot;Double&quot;:
+<span class="nc" id="L838">                        appendRandomDouble(buffer, op, var);</span>
+<span class="nc" id="L839">                        break;</span>
+                    case &quot;float&quot;:
+                    case &quot;Float&quot;:
+<span class="nc" id="L842">                        appendRandomFloat(buffer, op, var);</span>
+<span class="nc" id="L843">                        break;</span>
+                    case &quot;short&quot;:
+                    case &quot;Short&quot;:
+<span class="nc" id="L846">                        appendRandomShort(buffer, op, var);</span>
+<span class="nc" id="L847">                        break;</span>
+                    case &quot;int&quot;:
+                    case &quot;Integer&quot;:
+<span class="nc" id="L850">                        appendRandomInt(buffer, op, var);</span>
+<span class="nc" id="L851">                        break;</span>
+                    case &quot;long&quot;:
+                    case &quot;Long&quot;:
+<span class="nc" id="L854">                        appendRandomLong(buffer, op, var);</span>
+<span class="nc" id="L855">                        break;</span>
+                    case &quot;String&quot;:
+<span class="nc" id="L857">                        appendRandomString(buffer, op, var);</span>
+<span class="nc" id="L858">                        break;</span>
+                    case &quot;Date&quot;:
+<span class="nc" id="L860">                        appendRandomDate(buffer, op, var);</span>
+<span class="nc" id="L861">                        break;</span>
+                    case &quot;File&quot;:
+<span class="nc" id="L863">                        appendRandomFile(buffer, op, var);</span>
+<span class="nc" id="L864">                        break;</span>
+                    default:
+<span class="nc" id="L866">                        LOGGER.warn(&quot;Unrecognized component type '{}&quot; + &quot;' in '{}' property for '{}'operation&quot;,</span>
+<span class="nc" id="L867">                                var.getComponentType(), var.name, op.operationId);</span>
+                }
+<span class="nc bnc" id="L869" title="All 4 branches missed.">                if (!loadTestDataFromFile &amp;&amp; i &lt; itemCount - 1)</span>
+<span class="nc" id="L870">                    buffer.append(&quot;, &quot;);</span>
+            }
+<span class="nc" id="L872">            closeValueBuffer(buffer, var);</span>
+        }
+<span class="nc" id="L874">    }</span>
+
+    private void appendSemicolon(StringBuilder buffer) {
+<span class="nc bnc" id="L877" title="All 2 branches missed.">        if (buffer.charAt(buffer.length() - 1) != ';')</span>
+<span class="nc" id="L878">            buffer.append(';');</span>
+<span class="nc" id="L879">    }</span>
+
+    private StringBuilder appendValue(StringBuilder buffer, String indent, CodegenOperation op, CodegenVariable var,
+                                      String localVar, Collection&lt;String&gt; localVars, Map&lt;String, CodegenModel&gt; models) {
+
+<span class="nc bnc" id="L884" title="All 2 branches missed.">        if (var.isListContainer)</span>
+<span class="nc" id="L885">            appendListValue(buffer, indent, op, var, localVar, localVars, models);</span>
+<span class="nc bnc" id="L886" title="All 2 branches missed.">        else if (var.isMap)</span>
+<span class="nc" id="L887">            appendMapValue(buffer, indent, op, var, localVar, localVars, models);</span>
+<span class="nc bnc" id="L888" title="All 2 branches missed.">        else if (var.isArray)</span>
+<span class="nc" id="L889">            appendArrayValue(buffer, indent, op, var, localVar, localVars, models);</span>
+        else
+<span class="nc" id="L891">            appendScalarValue(buffer, indent, op, var, localVar, localVars, models);</span>
+
+<span class="nc" id="L893">        return buffer;</span>
+    }
+
+    /**
+     * Applies appropriate default consumes and/or produces content type(s). Affects operations which do not specify a
+     * content type for consumes and/or produces and respectively have a body parameter and/or a return value. This is
+     * necessary since none of the configured CXF or Jackson JAX-RS providers support the inferred default content type
+     * of &lt;code&gt;&amp;ast;/*&lt;/code&gt;.
+     *
+     * @param op
+     */
+    private void applyDefaultContentTypes(CodegenOperation op) {
+<span class="nc bnc" id="L905" title="All 4 branches missed.">        if (op.bodyParam != null &amp;&amp; !op.hasConsumes) {</span>
+<span class="nc" id="L906">            CodegenParameter bodyParam = op.bodyParam;</span>
+            String mediaType;
+<span class="nc bnc" id="L908" title="All 6 branches missed.">            if (bodyParam.isContainer || bodyParam.isModel || bodyParam.isFreeFormObject)</span>
+<span class="nc" id="L909">                mediaType = &quot;application/json&quot;;</span>
+<span class="nc bnc" id="L910" title="All 4 branches missed.">            else if (bodyParam.isBinary || bodyParam.isFile)</span>
+<span class="nc" id="L911">                mediaType = &quot;application/octet-stream&quot;;</span>
+            else
+<span class="nc" id="L913">                mediaType = &quot;text/plain&quot;;</span>
+<span class="nc" id="L914">            Map&lt;String, String&gt; contentType = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L915">            contentType.put(&quot;mediaType&quot;, mediaType);</span>
+<span class="nc bnc" id="L916" title="All 2 branches missed.">            if (op.consumes == null)</span>
+<span class="nc" id="L917">                op.consumes = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L918">            op.consumes.add(contentType);</span>
+<span class="nc" id="L919">            op.hasConsumes = true;</span>
+        }
+<span class="nc bnc" id="L921" title="All 4 branches missed.">        if (!&quot;void&quot;.equals(op.returnType) &amp;&amp; !op.hasProduces) {</span>
+            String mediaType;
+<span class="nc bnc" id="L923" title="All 4 branches missed.">            if (op.returnContainer != null || !op.returnTypeIsPrimitive)</span>
+<span class="nc" id="L924">                mediaType = &quot;application/json&quot;;</span>
+            else
+<span class="nc" id="L926">                mediaType = &quot;text/plain&quot;;</span>
+<span class="nc" id="L927">            Map&lt;String, String&gt; contentType = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L928">            contentType.put(&quot;mediaType&quot;, mediaType);</span>
+<span class="nc bnc" id="L929" title="All 2 branches missed.">            if (op.produces == null)</span>
+<span class="nc" id="L930">                op.produces = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L931">            op.produces.add(contentType);</span>
+<span class="nc" id="L932">            op.hasProduces = true;</span>
+        }
+<span class="nc" id="L934">    }</span>
+
+    private void closeValueBuffer(StringBuilder buffer, CodegenVariable var) {
+<span class="nc bnc" id="L937" title="All 4 branches missed.">        if (var.isArray &amp;&amp; !loadTestDataFromFile)</span>
+<span class="nc" id="L938">            buffer.append('}');</span>
+<span class="nc" id="L939">    }</span>
+
+    private String generateRandomString(CodegenVariable var) {
+<span class="nc" id="L942">        String pattern = patternFor(var);</span>
+<span class="nc" id="L943">        Generex generex = REGEX_GENERATORS.get(pattern);</span>
+<span class="nc bnc" id="L944" title="All 2 branches missed.">        if (generex == null) {</span>
+<span class="nc" id="L945">            generex = new Generex(pattern);</span>
+<span class="nc" id="L946">            REGEX_GENERATORS.put(pattern, generex);</span>
+        }
+<span class="nc" id="L948">        return generex.random();</span>
+    }
+
+    private String getCacheMethod(CodegenVariable var) {
+        String method;
+<span class="nc bnc" id="L953" title="All 10 branches missed.">        switch (var.dataType) {</span>
+            case &quot;boolean&quot;:
+            case &quot;Boolean&quot;:
+<span class="nc" id="L956">                method = &quot;getBoolean&quot;;</span>
+<span class="nc" id="L957">                break;</span>
+            case &quot;BigDecimal&quot;:
+<span class="nc" id="L959">                method = &quot;getBigDecimal&quot;;</span>
+<span class="nc" id="L960">                break;</span>
+            case &quot;BigInteger&quot;:
+<span class="nc" id="L962">                method = &quot;getBigInteger&quot;;</span>
+<span class="nc" id="L963">                break;</span>
+            case &quot;byte[]&quot;:
+<span class="nc" id="L965">                method = &quot;getBinary&quot;;</span>
+<span class="nc" id="L966">                break;</span>
+            case &quot;double&quot;:
+            case &quot;Double&quot;:
+<span class="nc" id="L969">                method = &quot;getDouble&quot;;</span>
+<span class="nc" id="L970">                break;</span>
+            case &quot;float&quot;:
+            case &quot;Float&quot;:
+<span class="nc" id="L973">                method = &quot;getFloat&quot;;</span>
+<span class="nc" id="L974">                break;</span>
+            case &quot;long&quot;:
+            case &quot;Long&quot;:
+<span class="nc" id="L977">                method = &quot;getLong&quot;;</span>
+<span class="nc" id="L978">                break;</span>
+            case &quot;int&quot;:
+            case &quot;Integer&quot;:
+<span class="nc" id="L981">                method = &quot;getInt&quot;;</span>
+<span class="nc" id="L982">                break;</span>
+            case &quot;String&quot;:
+<span class="nc" id="L984">                method = &quot;getString&quot;;</span>
+<span class="nc" id="L985">                break;</span>
+            default:
+<span class="nc bnc" id="L987" title="All 2 branches missed.">                method = var.isListContainer ? &quot;getObjects&quot; : &quot;getObject&quot;;</span>
+                break;
+        }
+<span class="nc" id="L990">        return method;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="fc" id="L995">        return &quot;jaxrs-cxf-extended&quot;;</span>
+    }
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L1000">        return &quot;Extends jaxrs-cxf with options to generate a functional mock server.&quot;;</span>
+    }
+
+    private boolean hasCacheMethod(CodegenVariable var) {
+        boolean hasCacheMethod;
+<span class="nc bnc" id="L1005" title="All 2 branches missed.">        switch (var.dataType) {</span>
+            case &quot;boolean&quot;:
+            case &quot;Boolean&quot;:
+            case &quot;BigDecimal&quot;:
+            case &quot;BigInteger&quot;:
+            case &quot;byte[]&quot;:
+            case &quot;double&quot;:
+            case &quot;Double&quot;:
+            case &quot;float&quot;:
+            case &quot;Float&quot;:
+            case &quot;long&quot;:
+            case &quot;Long&quot;:
+            case &quot;int&quot;:
+            case &quot;Integer&quot;:
+            case &quot;String&quot;:
+<span class="nc" id="L1020">                hasCacheMethod = true;</span>
+<span class="nc" id="L1021">                break;</span>
+            default:
+<span class="nc" id="L1023">                hasCacheMethod = false;</span>
+                break;
+        }
+<span class="nc" id="L1026">        return hasCacheMethod;</span>
+    }
+
+    private void openValueBuffer(StringBuilder buffer, CodegenVariable var) {
+<span class="nc bnc" id="L1030" title="All 4 branches missed.">        if (var.isArray &amp;&amp; !loadTestDataFromFile)</span>
+<span class="nc" id="L1031">            buffer.append(&quot;new &quot;).append(var.dataType).append(&quot; {&quot;);</span>
+<span class="nc" id="L1032">    }</span>
+
+    private String patternFor(CodegenVariable var) {
+<span class="nc" id="L1035">        String pattern = null;</span>
+<span class="nc bnc" id="L1036" title="All 2 branches missed.">        if (var != null) {</span>
+<span class="nc bnc" id="L1037" title="All 2 branches missed.">            if (var.pattern != null) {</span>
+<span class="nc" id="L1038">                pattern = StringEscapeUtils.unescapeJava(var.pattern);</span>
+<span class="nc bnc" id="L1039" title="All 2 branches missed.">            } else if (var.dataFormat != null) {</span>
+                // According to JSON Schema (https://tools.ietf.org/html/draft-fge-json-schema-validation-00),
+                // string-type values can be constrained by a format, one of: {date-time, email, hostname, ipv4, ipv6,
+                // uri}. Custom formats are allowed. The OpenAPI Specification also mentions binary, byte, date,
+                // password, uuid.
+<span class="nc bnc" id="L1044" title="All 11 branches missed.">                switch (var.dataFormat) {</span>
+                    case &quot;binary&quot;:
+                        // Any sequence of octets.
+<span class="nc" id="L1047">                        pattern = &quot;[0-9A-F]{2}{4,24}&quot;;</span>
+<span class="nc" id="L1048">                        break;</span>
+                    case &quot;byte&quot;:
+                        // Base64 encoded bytes: 4 characters represent 3 bytes.
+<span class="nc" id="L1051">                        pattern = &quot;[A-Za-z0-9+/]{4}{4,24}&quot;;</span>
+<span class="nc" id="L1052">                        break;</span>
+                    case &quot;date&quot;:
+                        // ISO-8601: YYYY-MM-DD
+<span class="nc" id="L1055">                        pattern = &quot;20\\d{2}-(?:&quot; // YY- (20yy)</span>
+                                + &quot;(?:01|03|05|07|08|10|12)-(?:0[1-9]|[1-2][0-9]|3[0-1])|&quot; // MM-DD (31 days)
+                                + &quot;(?:04|06|09|11)-(?:0[1-9]|[1-2][0-9]|30)|&quot; // MM-DD (30 days)
+                                + &quot;02-(?:0[1-9]|1[0-9]|2[0-8]))&quot;; // MM-DD (28 days)
+<span class="nc" id="L1059">                        break;</span>
+                    case &quot;date-time&quot;:
+                        // ISO-8601: YYYY-MM-DDTHH:mm:ss(Z|+-HH:mm) NOTE: the time zone offset is mandatory.
+<span class="nc" id="L1062">                        pattern = &quot;20\\d{2}-(?:&quot; // YYYY-</span>
+                                + &quot;(?:01|03|05|07|08|10|12)-(?:0[1-9]|[1-2][0-9]|3[0-1])|&quot; // MM-DD (31 days)
+                                + &quot;(?:04|06|09|11)-(?:0[1-9]|[1-2][0-9]|30)|&quot; // MM-DD (30 days)
+                                + &quot;02-(?:0[1-9]|1[0-9]|2[0-8]))&quot; // MM-DD (28 days)
+                                + &quot;T(?:[0-1][0-9]|2[0-3])&quot; // THH
+                                + &quot;:[0-5][0-9]&quot; // :mm
+                                + &quot;:[0-5][0-9]&quot; // :ss
+                                + &quot;(?:Z|(?:-0[1-9]|-1[0-2]|\\+0[0-9]|\\+1[0-4]):(?:00|30|45))&quot;; // timezone
+<span class="nc" id="L1070">                        break;</span>
+                    case &quot;email&quot;:
+<span class="nc" id="L1072">                        pattern = &quot;[a-z][a-z0-9_.-]{1,8}@[a-z][a-z0-9-.]{2,12}\\.[a-z]{2,4}&quot;; // (simplistic but</span>
+                        // sufficient)
+<span class="nc" id="L1074">                        break;</span>
+                    case &quot;hostname&quot;:
+<span class="nc" id="L1076">                        pattern = &quot;[a-z][a-z0-9-.]{2,12}\\.[a-z]{2,4}&quot;; // (simplistic but sufficient)</span>
+<span class="nc" id="L1077">                        break;</span>
+                    case &quot;ipv4&quot;:
+<span class="nc" id="L1079">                        pattern = &quot;(?:(?:25[0-5]|2[0-4][0-9]|[1-9][0-9]|[0-9])\\.){3}&quot;</span>
+                                + &quot;(?:25[0-5]|2[0-4][0-9]|[1-9][0-9]|[0-9])&quot;;
+<span class="nc" id="L1081">                        break;</span>
+                    case &quot;ipv6&quot;:
+                        // Simplified (!) from
+                        // https://community.helpsystems.com/forums/intermapper/miscellaneous-topics/5acc4fcf-fa83-e511-80cf-0050568460e4
+<span class="nc" id="L1085">                        pattern = &quot;(?:(?:[0-9A-F]{1,4}:){7}(?:[0-9A-F]{1,4}|:))|&quot;</span>
+                                + &quot;(?:(?:[0-9A-F]{1,4}:){6}(?::[0-9A-F]{1,4}|(?:(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3})|:))|&quot;
+                                + &quot;(?:(?:[0-9A-F]{1,4}:){5}(?:(?:(?::[0-9A-F]{1,4}){1,2})|:(?:(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3})|:))|&quot;
+                                + &quot;(?:(?:[0-9A-F]{1,4}:){4}(?:(?:(?::[0-9A-F]{1,4}){1,3})|(?:(?::[0-9A-F]{1,4})?:(?:(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3}))|:))|&quot;
+                                + &quot;(?:(?:[0-9A-F]{1,4}:){3}(?:(?:(?::[0-9A-F]{1,4}){1,4})|(?:(?::[0-9A-F]{1,4}){0,2}:(?:(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3}))|:))|&quot;
+                                + &quot;(?:(?:[0-9A-F]{1,4}:){2}(?:(?:(?::[0-9A-F]{1,4}){1,5})|(?:(?::[0-9A-F]{1,4}){0,3}:(?:(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3}))|:))|&quot;
+                                + &quot;(?:(?:[0-9A-F]{1,4}:){1}(?:(?:(?::[0-9A-F]{1,4}){1,6})|(?:(?::[0-9A-F]{1,4}){0,4}:(?:(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3}))|:))|&quot;
+                                + &quot;(?::(?:(?:(?::[0-9A-F]{1,4}){1,7})|(?:(?::[0-9A-F]{1,4}){0,5}:(?:(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3}))|:))&quot;;
+<span class="nc" id="L1093">                        break;</span>
+                    case &quot;uri&quot;:
+                        // SCHEME://AUTHORITY/PATH/PATH?PARAM=VALUE,PARAM=VALUE#ANCHOR
+<span class="nc" id="L1096">                        pattern = &quot;(?:(?:http[s]?|ftp):)?&quot; // scheme</span>
+                                + &quot;(?://[a-z][a-z.]{4,12})?&quot; // authority
+                                + &quot;(?:/[a-z]{1,8}){0,4}&quot; // path
+                                + &quot;(?:\\?[a-z]{1,8}=[a-z0-9]{1,8}(?:&amp;[a-z]{1,8}=[a-z0-9]{1,8}){0,3})?&quot; // query
+                                + &quot;(?:#[a-z0-9_]{1,16})?&quot;; // fragment
+<span class="nc" id="L1101">                        break;</span>
+                    case &quot;uuid&quot;:
+<span class="nc" id="L1103">                        pattern = &quot;[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}&quot;; // 8-4-4-4-12</span>
+<span class="nc" id="L1104">                        break;</span>
+                    case &quot;password&quot;:
+                        // Fall through.
+                    default:
+                        break;
+                }
+            }
+        }
+<span class="nc bnc" id="L1112" title="All 2 branches missed.">        if (pattern == null) {</span>
+<span class="nc bnc" id="L1113" title="All 4 branches missed.">            int minLength = var == null || var.minLength == null ? 4 : var.minLength;</span>
+<span class="nc bnc" id="L1114" title="All 4 branches missed.">            int maxLength = var == null || var.maxLength == null ? 16 : var.maxLength;</span>
+<span class="nc" id="L1115">            pattern = &quot;[a-zA-Z][a-zA-Z0-9]{&quot; + minLength + ',' + maxLength + '}';</span>
+        }
+<span class="nc" id="L1117">        return pattern;</span>
+    }
+
+    @Override
+    public Map&lt;String, ModelsMap&gt; postProcessAllModels(Map&lt;String, ModelsMap&gt; objs) {
+<span class="nc" id="L1122">        objs = super.postProcessAllModels(objs);</span>
+
+        // When populating operation bodies we need to import enum types, which requires the class that defines them.
+<span class="nc bnc" id="L1125" title="All 2 branches missed.">        if (generateOperationBody) {</span>
+<span class="nc bnc" id="L1126" title="All 2 branches missed.">            for (ModelsMap value : objs.values()) {</span>
+<span class="nc bnc" id="L1127" title="All 2 branches missed.">                for (ModelMap mo : value.getModels())</span>
+<span class="nc" id="L1128">                    postProcessModel(mo.getModel());</span>
+<span class="nc" id="L1129">            }</span>
+        }
+
+<span class="nc" id="L1132">        return objs;</span>
+    }
+
+    private void postProcessModel(CodegenModel cm) {
+        // NOTE: if supportsInheritance is false, cm.vars == cm.allVars so we only have to update one list.
+<span class="nc bnc" id="L1137" title="All 2 branches missed.">        for (CodegenProperty var : cm.vars) {</span>
+<span class="nc" id="L1138">            var.vendorExtensions.put(&quot;x-defining-class&quot;, cm.classname);</span>
+<span class="nc" id="L1139">        }</span>
+<span class="nc bnc" id="L1140" title="All 2 branches missed.">        if (supportsInheritance) {</span>
+<span class="nc bnc" id="L1141" title="All 2 branches missed.">            if (cm.allVars != cm.vars) {</span>
+<span class="nc bnc" id="L1142" title="All 2 branches missed.">                for (CodegenProperty var : cm.allVars) {</span>
+<span class="nc" id="L1143">                    String definingClass = cm.classname;</span>
+<span class="nc bnc" id="L1144" title="All 2 branches missed.">                    if (cm.vars.stream().noneMatch(v -&gt; v.name.equals(var.name))) {</span>
+<span class="nc" id="L1145">                        CodegenModel ancestor = cm;</span>
+<span class="nc bnc" id="L1146" title="All 2 branches missed.">                        while ((ancestor = ancestor.parentModel) != null) {</span>
+<span class="nc bnc" id="L1147" title="All 2 branches missed.">                            if (ancestor.vars.stream().anyMatch(v -&gt; v.name.equals(var.name))) {</span>
+<span class="nc" id="L1148">                                definingClass = ancestor.classname;</span>
+<span class="nc" id="L1149">                                break;</span>
+                            }
+                        }
+                    }
+<span class="nc" id="L1153">                    var.vendorExtensions.put(&quot;x-defining-class&quot;, definingClass);</span>
+<span class="nc" id="L1154">                }</span>
+            }
+<span class="nc bnc" id="L1156" title="All 2 branches missed.">            if (cm.parentModel != null)</span>
+<span class="nc" id="L1157">                postProcessModel(cm.parentModel);</span>
+        }
+<span class="nc" id="L1159">    }</span>
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L1163">        OperationsMap result = super.postProcessOperationsWithModels(objs, allModels);</span>
+
+<span class="nc bnc" id="L1165" title="All 2 branches missed.">        if (generateOperationBody) {</span>
+            // We generate the operation body in code because the logic to do so is far too complicated to be expressed
+            // in the logic-less Mustache templating system.
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L1170">            OperationMap operations = result.getOperations();</span>
+<span class="nc bnc" id="L1171" title="All 2 branches missed.">            if (operations != null) {</span>
+<span class="nc" id="L1172">                String classname = operations.getClassname();</span>
+
+                // Map the models so we can look them up by name.
+<span class="nc" id="L1175">                Map&lt;String, CodegenModel&gt; models = new HashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L1176" title="All 2 branches missed.">                for (ModelMap model : allModels) {</span>
+<span class="nc" id="L1177">                    CodegenModel cgModel = model.getModel();</span>
+<span class="nc" id="L1178">                    models.put(cgModel.classname, cgModel);</span>
+<span class="nc" id="L1179">                }</span>
+
+<span class="nc" id="L1181">                StringBuilder buffer = new StringBuilder();</span>
+<span class="nc" id="L1182">                List&lt;CodegenOperation&gt; ops = operations.getOperation();</span>
+<span class="nc bnc" id="L1183" title="All 2 branches missed.">                for (CodegenOperation op : ops) {</span>
+<span class="nc" id="L1184">                    applyDefaultContentTypes(op);</span>
+<span class="nc" id="L1185">                    String testDataPath = '/' + classname + '/' + op.operationId;</span>
+
+                    // Test client: provide local variable declarations for all parameters.
+<span class="nc" id="L1188">                    boolean first = true;</span>
+<span class="nc bnc" id="L1189" title="All 2 branches missed.">                    for (CodegenParameter cp : op.allParams) {</span>
+<span class="nc" id="L1190">                        buffer.setLength(0);</span>
+<span class="nc" id="L1191">                        CodegenVariable var = new CodegenVariable(null, cp, testDataPath, models);</span>
+<span class="nc" id="L1192">                        String localVar = appendLocalVariable(buffer, INDENT, op, var, new ArrayList&lt;&gt;(), models);</span>
+<span class="nc bnc" id="L1193" title="All 2 branches missed.">                        if (loadTestDataFromFile) {</span>
+<span class="nc" id="L1194">                            buffer.append(NL).append(INDENT).append(var.dataType).append(' ').append(localVar)</span>
+<span class="nc" id="L1195">                                    .append(&quot; = cache.&quot;).append(getCacheMethod(var)).append(&quot;(\&quot;/&quot;)</span>
+<span class="nc" id="L1196">                                    .append(op.operationId).append('/').append(var.name).append('&quot;');</span>
+<span class="nc bnc" id="L1197" title="All 2 branches missed.">                            if (var.isListContainer)</span>
+<span class="nc" id="L1198">                                buffer.append(&quot;, &quot;).append(var.getComponentType()).append(&quot;.class&quot;);</span>
+<span class="nc bnc" id="L1199" title="All 2 branches missed.">                            else if (var.isMap)</span>
+<span class="nc" id="L1200">                                buffer.append(&quot;, Map.class&quot;);</span>
+<span class="nc bnc" id="L1201" title="All 2 branches missed.">                            else if (!hasCacheMethod(var))</span>
+<span class="nc" id="L1202">                                buffer.append(&quot;, &quot;).append(var.dataType).append(&quot;.class&quot;);</span>
+<span class="nc" id="L1203">                            buffer.append(&quot;);&quot;);</span>
+                        }
+<span class="nc bnc" id="L1205" title="All 4 branches missed.">                        if (first &amp;&amp; buffer.indexOf(NL) == 0) {</span>
+<span class="nc" id="L1206">                            buffer.delete(0, NL.length());</span>
+<span class="nc" id="L1207">                            first = false;</span>
+                        }
+<span class="nc" id="L1209">                        cp.vendorExtensions.put(&quot;x-java-param-decl&quot;, buffer.toString());</span>
+<span class="nc" id="L1210">                    }</span>
+
+                    // Test server: generate operation body where it returns a non-void result.
+<span class="nc bnc" id="L1213" title="All 2 branches missed.">                    if (!(Boolean) op.vendorExtensions.getOrDefault(&quot;x-java-is-response-void&quot;, false)) {</span>
+<span class="nc" id="L1214">                        CodegenVariable var = new CodegenVariable(null, op, testDataPath, models);</span>
+<span class="nc" id="L1215">                        buffer.setLength(0);</span>
+<span class="nc" id="L1216">                        String localVar = appendLocalVariable(buffer, INDENT, op, var, new ArrayList&lt;&gt;(), models);</span>
+<span class="nc bnc" id="L1217" title="All 2 branches missed.">                        if (loadTestDataFromFile) {</span>
+<span class="nc" id="L1218">                            buffer.append(NL).append(INDENT).append(&quot;try {&quot;) // split</span>
+<span class="nc" id="L1219">                                    .append(NL).append(INDENT).append(&quot;    &quot;).append(var.dataType).append(' ')</span>
+<span class="nc" id="L1220">                                    .append(localVar).append(&quot; = cache.&quot;).append(getCacheMethod(var)).append(&quot;(\&quot;/&quot;)</span>
+<span class="nc" id="L1221">                                    .append(op.operationId).append('/').append(var.name).append('&quot;');</span>
+<span class="nc bnc" id="L1222" title="All 2 branches missed.">                            if (var.isListContainer)</span>
+<span class="nc" id="L1223">                                buffer.append(&quot;, &quot;).append(var.getComponentType()).append(&quot;.class&quot;);</span>
+<span class="nc bnc" id="L1224" title="All 2 branches missed.">                            else if (var.isMap)</span>
+<span class="nc" id="L1225">                                buffer.append(&quot;, Map.class&quot;);</span>
+<span class="nc bnc" id="L1226" title="All 2 branches missed.">                            else if (!hasCacheMethod(var))</span>
+<span class="nc" id="L1227">                                buffer.append(&quot;, &quot;).append(var.dataType).append(&quot;.class&quot;);</span>
+<span class="nc" id="L1228">                            buffer.append(&quot;);&quot;) // split</span>
+<span class="nc" id="L1229">                                    .append(NL).append(INDENT).append(&quot;    return &quot;).append(localVar).append(';')</span>
+<span class="nc" id="L1230">                                    .append(NL).append(INDENT).append(&quot;} catch (CacheException e) {&quot;) // split</span>
+<span class="nc" id="L1231">                                    .append(NL).append(INDENT).append(&quot;    throw new RuntimeException(e);&quot;) // split</span>
+<span class="nc" id="L1232">                                    .append(NL).append(INDENT).append(&quot;}&quot;);</span>
+                        } else {
+<span class="nc" id="L1234">                            buffer.append(NL).append(INDENT).append(&quot;return &quot;).append(localVar).append(';');</span>
+                        }
+<span class="nc bnc" id="L1236" title="All 2 branches missed.">                        if (buffer.indexOf(NL) == 0)</span>
+<span class="nc" id="L1237">                            buffer.delete(0, NL.length());</span>
+<span class="nc" id="L1238">                        op.vendorExtensions.put(&quot;x-java-operation-body&quot;, buffer.toString());</span>
+                    }
+<span class="nc" id="L1240">                }</span>
+
+                // DefaultGenerator already processed all the imports from the generated operations, but these imports
+                // did not include the ones we've just added to support the code in the operation bodies. Therefore it
+                // is necessary to recompute the imports and overwrite the existing ones. The code below was copied from
+                // the private DefaultGenerator.processOperations() method to achieve this end.
+<span class="nc" id="L1246">                Set&lt;String&gt; allImports = new TreeSet&lt;&gt;();</span>
+<span class="nc bnc" id="L1247" title="All 2 branches missed.">                for (CodegenOperation op : ops) {</span>
+<span class="nc" id="L1248">                    allImports.addAll(op.imports);</span>
+<span class="nc" id="L1249">                }</span>
+<span class="nc" id="L1250">                allImports.add(&quot;List&quot;);</span>
+<span class="nc" id="L1251">                allImports.add(&quot;Map&quot;);</span>
+
+<span class="nc" id="L1253">                List&lt;Map&lt;String, String&gt;&gt; imports = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L1254" title="All 2 branches missed.">                for (String nextImport : allImports) {</span>
+<span class="nc" id="L1255">                    Map&lt;String, String&gt; im = new LinkedHashMap&lt;&gt;();</span>
+<span class="nc" id="L1256">                    String mapping = importMapping().get(nextImport);</span>
+<span class="nc bnc" id="L1257" title="All 2 branches missed.">                    if (mapping == null) {</span>
+<span class="nc" id="L1258">                        mapping = toModelImport(nextImport);</span>
+                    }
+<span class="nc bnc" id="L1260" title="All 2 branches missed.">                    if (mapping != null) {</span>
+<span class="nc" id="L1261">                        im.put(&quot;import&quot;, mapping);</span>
+<span class="nc bnc" id="L1262" title="All 2 branches missed.">                        if (!imports.contains(im)) { // avoid duplicates</span>
+<span class="nc" id="L1263">                            imports.add(im);</span>
+                        }
+                    }
+<span class="nc" id="L1266">                }</span>
+
+<span class="nc" id="L1268">                objs.put(&quot;imports&quot;, imports);</span>
+
+                // add a flag to indicate whether there's any {{import}}
+<span class="nc bnc" id="L1271" title="All 2 branches missed.">                if (imports.size() &gt; 0) {</span>
+<span class="nc" id="L1272">                    objs.put(&quot;hasImport&quot;, true);</span>
+                }
+            }
+        }
+
+<span class="nc" id="L1277">        return result;</span>
+    }
+
+    @Override
+    public Map&lt;String, Object&gt; postProcessSupportingFileData(Map&lt;String, Object&gt; objs) {
+<span class="nc" id="L1282">        objs = super.postProcessSupportingFileData(objs);</span>
+
+<span class="nc bnc" id="L1284" title="All 2 branches missed.">        if (loadTestDataFromFile) {</span>
+            // DefaultGenerator doesn't provide any mechanism for emitting supporting files other than by a Mustache
+            // template, so we're obliged to serialize the caches to JSON strings and use templates to write them.
+            try {
+<span class="nc bnc" id="L1288" title="All 2 branches missed.">                if (testDataCache.root().isDirty()) {</span>
+<span class="nc" id="L1289">                    ByteArrayOutputStream out = new ByteArrayOutputStream();</span>
+<span class="nc" id="L1290">                    testDataCache.root().flush(out);</span>
+<span class="nc" id="L1291">                    String testDataJson = out.toString(&quot;UTF-8&quot;);</span>
+<span class="nc" id="L1292">                    objs.put(&quot;test-data.json&quot;, testDataJson);</span>
+<span class="nc" id="L1293">                    supportingFiles.add(new SupportingFile(&quot;testData.mustache&quot;, testDataFile.getAbsolutePath()));</span>
+                }
+<span class="nc" id="L1295">            } catch (CacheException | UnsupportedEncodingException e) {</span>
+<span class="nc" id="L1296">                LOGGER.error(&quot;Error writing JSON test data file &quot; + testDataFile, e);</span>
+<span class="nc" id="L1297">            }</span>
+
+            try {
+<span class="nc bnc" id="L1300" title="All 2 branches missed.">                if (testDataControlCache.root().isDirty()) {</span>
+<span class="nc" id="L1301">                    ByteArrayOutputStream out = new ByteArrayOutputStream();</span>
+<span class="nc" id="L1302">                    testDataControlCache.root().flush(out);</span>
+<span class="nc" id="L1303">                    String testDataControlJson = out.toString(&quot;UTF-8&quot;);</span>
+<span class="nc" id="L1304">                    objs.put(&quot;test-data-control.json&quot;, testDataControlJson);</span>
+<span class="nc" id="L1305">                    supportingFiles</span>
+<span class="nc" id="L1306">                            .add(new SupportingFile(&quot;testDataControl.mustache&quot;, testDataControlFile.getAbsolutePath()));</span>
+                }
+<span class="nc" id="L1308">            } catch (CacheException | UnsupportedEncodingException e) {</span>
+<span class="nc" id="L1309">                LOGGER.error(&quot;Error writing JSON test data control file &quot; + testDataControlFile, e);</span>
+<span class="nc" id="L1310">            }</span>
+        }
+
+<span class="nc" id="L1313">        return objs;</span>
+    }
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L1318">        super.processOpts();</span>
+
+<span class="nc bnc" id="L1320" title="All 2 branches missed.">        if (additionalProperties.containsKey(GENERATE_SPRING_APPLICATION)) {</span>
+<span class="nc" id="L1321">            this.setSupportMultipleSpringServices(</span>
+<span class="nc" id="L1322">                    convertPropertyToBooleanAndWriteBack(SUPPORT_MULTIPLE_SPRING_SERVICES));</span>
+        }
+<span class="nc bnc" id="L1324" title="All 2 branches missed.">        if (additionalProperties.containsKey(GENERATE_OPERATION_BODY)) {</span>
+<span class="nc" id="L1325">            boolean generateOperationBody = convertPropertyToBooleanAndWriteBack(GENERATE_OPERATION_BODY);</span>
+<span class="nc" id="L1326">            this.setGenerateOperationBody(generateOperationBody);</span>
+
+<span class="nc" id="L1328">            boolean loadTestDataFromFile = convertPropertyToBooleanAndWriteBack(LOAD_TEST_DATA_FROM_FILE);</span>
+<span class="nc" id="L1329">            this.setLoadTestDataFromFile(loadTestDataFromFile);</span>
+
+<span class="nc bnc" id="L1331" title="All 2 branches missed.">            if (loadTestDataFromFile) {</span>
+                String testDataFileStr;
+<span class="nc bnc" id="L1333" title="All 2 branches missed.">                if (additionalProperties.containsKey(TEST_DATA_FILE))</span>
+<span class="nc" id="L1334">                    testDataFileStr = (String) additionalProperties.get(TEST_DATA_FILE);</span>
+                else
+<span class="nc" id="L1336">                    testDataFileStr = outputFolder() + &quot;/src/main/resources/test-data.json&quot;;</span>
+<span class="nc" id="L1337">                testDataFileStr = testDataFileStr.replace('/', File.separatorChar);</span>
+                try {
+<span class="nc" id="L1339">                    File testDataFile = new File(testDataFileStr).getCanonicalFile();</span>
+<span class="nc" id="L1340">                    testDataFileStr = testDataFile.getPath();</span>
+<span class="nc" id="L1341">                    additionalProperties.put(TEST_DATA_FILE, testDataFileStr.replaceAll(&quot;\\\\&quot;, &quot;\\\\\\\\&quot;));</span>
+<span class="nc" id="L1342">                    setTestDataFile(testDataFile);</span>
+<span class="nc" id="L1343">                } catch (IOException e) {</span>
+<span class="nc" id="L1344">                    throw new RuntimeException(&quot;Failed to canonicalize file &quot; + testDataFileStr, e);</span>
+<span class="nc" id="L1345">                }</span>
+
+<span class="nc" id="L1347">                testDataCache = JsonCache.Factory.instance.get(&quot;test-data&quot;).mergePolicy(MergePolicy.KEEP_EXISTING)</span>
+<span class="nc" id="L1348">                        .child('/' + invokerPackage);</span>
+<span class="nc bnc" id="L1349" title="All 2 branches missed.">                if (this.testDataFile.exists()) {</span>
+                    try {
+<span class="nc" id="L1351">                        testDataCache.root().load(this.testDataFile);</span>
+<span class="nc" id="L1352">                    } catch (CacheException e) {</span>
+<span class="nc" id="L1353">                        LOGGER.error(&quot;Unable to load test data file &quot; + testDataFileStr, e);</span>
+<span class="nc" id="L1354">                    }</span>
+                }
+
+                String testDataControlFileStr;
+<span class="nc bnc" id="L1358" title="All 2 branches missed.">                if (additionalProperties.containsKey(TEST_DATA_CONTROL_FILE))</span>
+<span class="nc" id="L1359">                    testDataControlFileStr = (String) additionalProperties.get(TEST_DATA_CONTROL_FILE);</span>
+                else
+<span class="nc" id="L1361">                    testDataControlFileStr = outputFolder() + &quot;/test-data-control.json&quot;;</span>
+<span class="nc" id="L1362">                testDataControlFileStr = testDataControlFileStr.replace('/', File.separatorChar);</span>
+                try {
+<span class="nc" id="L1364">                    File testDataControlFile = new File(testDataControlFileStr).getCanonicalFile();</span>
+<span class="nc" id="L1365">                    testDataControlFileStr = testDataControlFile.getPath();</span>
+<span class="nc" id="L1366">                    additionalProperties.put(TEST_DATA_CONTROL_FILE,</span>
+<span class="nc" id="L1367">                            testDataControlFileStr.replaceAll(&quot;\\\\&quot;, &quot;\\\\\\\\&quot;));</span>
+<span class="nc" id="L1368">                    setTestDataControlFile(testDataControlFile);</span>
+<span class="nc" id="L1369">                } catch (IOException e) {</span>
+<span class="nc" id="L1370">                    throw new RuntimeException(&quot;Failed to canonicalize file &quot; + testDataControlFileStr, e);</span>
+<span class="nc" id="L1371">                }</span>
+
+<span class="nc" id="L1373">                testDataControlCache = JsonCache.Factory.instance.get(&quot;test-data-control&quot;)</span>
+<span class="nc" id="L1374">                        .mergePolicy(MergePolicy.KEEP_EXISTING).child('/' + invokerPackage);</span>
+<span class="nc bnc" id="L1375" title="All 2 branches missed.">                if (this.testDataControlFile.exists()) {</span>
+                    try {
+<span class="nc" id="L1377">                        testDataControlCache.root().load(this.testDataControlFile);</span>
+<span class="nc" id="L1378">                    } catch (CacheException e) {</span>
+<span class="nc" id="L1379">                        LOGGER.error(&quot;Unable to load test data control file &quot; + testDataControlFileStr, e);</span>
+<span class="nc" id="L1380">                    }</span>
+                }
+            }
+        }
+<span class="nc bnc" id="L1384" title="All 2 branches missed.">        if (this.generateSpringApplication) {</span>
+<span class="nc bnc" id="L1385" title="All 2 branches missed.">            if (supportMultipleSpringServices) {</span>
+<span class="nc" id="L1386">                SupportingFile supportingFile = null;</span>
+<span class="nc bnc" id="L1387" title="All 2 branches missed.">                for (SupportingFile sf : supportingFiles) {</span>
+<span class="nc bnc" id="L1388" title="All 2 branches missed.">                    if (&quot;server/ApplicationContext.xml.mustache&quot;.equals(sf.getTemplateFile())) {</span>
+<span class="nc" id="L1389">                        supportingFile = sf;</span>
+<span class="nc" id="L1390">                        break;</span>
+                    }
+<span class="nc" id="L1392">                }</span>
+<span class="nc bnc" id="L1393" title="All 2 branches missed.">                if (supportingFile != null) {</span>
+<span class="nc" id="L1394">                    supportingFiles.remove(supportingFile);</span>
+<span class="nc" id="L1395">                    SupportingFile updated = new SupportingFile(</span>
+<span class="nc" id="L1396">                            supportingFile.getTemplateFile(),</span>
+<span class="nc" id="L1397">                            supportingFile.getFolder(),</span>
+                            &quot;ApplicationContext-&quot; + invokerPackage + &quot;.xml&quot;
+                    );
+<span class="nc" id="L1400">                    supportingFiles.add(updated);</span>
+                }
+            }
+        }
+<span class="nc" id="L1404">    }</span>
+
+    public void setGenerateOperationBody(boolean generateOperationBody) {
+<span class="nc" id="L1407">        this.generateOperationBody = generateOperationBody;</span>
+<span class="nc" id="L1408">    }</span>
+
+    public void setLoadTestDataFromFile(boolean loadTestDataFromFile) {
+<span class="nc" id="L1411">        this.loadTestDataFromFile = loadTestDataFromFile;</span>
+<span class="nc" id="L1412">    }</span>
+
+    public void setSupportMultipleSpringServices(boolean supportMultipleSpringServices) {
+<span class="nc" id="L1415">        this.supportMultipleSpringServices = supportMultipleSpringServices;</span>
+<span class="nc" id="L1416">    }</span>
+
+    public void setTestDataControlFile(File testDataControlFile) {
+<span class="nc" id="L1419">        this.testDataControlFile = testDataControlFile;</span>
+<span class="nc" id="L1420">    }</span>
+
+    public void setTestDataFile(File testDataFile) {
+<span class="nc" id="L1423">        this.testDataFile = testDataFile;</span>
+<span class="nc" id="L1424">    }</span>
+
+    @Override
+    public String toDefaultValue(Schema p) {
+<span class="nc bnc" id="L1428" title="All 4 branches missed.">        if (ModelUtils.isGenerateAliasAsModel(p) &amp;&amp; StringUtils.isNotEmpty(p.get$ref())) {</span>
+<span class="nc" id="L1429">            Schema&lt;?&gt; ref = ModelUtils.getReferencedSchema(this.openAPI, p);</span>
+<span class="nc bnc" id="L1430" title="All 4 branches missed.">            if (ModelUtils.isArraySchema(ref) || ModelUtils.isMapSchema(ref)) {</span>
+<span class="nc" id="L1431">                String typeDeclaration = getTypeDeclaration(p);</span>
+<span class="nc" id="L1432">                return String.format(Locale.ROOT, &quot;new %s()&quot;, typeDeclaration);</span>
+            }
+        }
+<span class="nc" id="L1435">        return super.toDefaultValue(p);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

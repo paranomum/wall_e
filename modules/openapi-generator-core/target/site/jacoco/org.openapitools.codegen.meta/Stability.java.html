@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Stability.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator-core</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.meta</a> &gt; <span class="el_source">Stability.java</span></div><h1>Stability.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2019 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.meta;
+
+/**
+ * Represents the &quot;stability index&quot; of a generator or feature, based on the stability indexes defined in the node.js ecosystem.
+ */
+<span class="nc" id="L22">public enum Stability {</span>
+    /**
+     * The feature or features are considered complete and &quot;production-ready&quot;.
+     */
+<span class="nc" id="L26">    STABLE(&quot;stable&quot;),</span>
+    /**
+     * The feature may be partially incomplete, but breaking changes will be avoided between major releases.
+     */
+<span class="nc" id="L30">    BETA(&quot;beta&quot;),</span>
+    /**
+     * The feature is still under active development and subject to non-backward compatible changes or removal in any
+     * future version. Use of the feature is not recommended in production environments.
+     */
+<span class="nc" id="L35">    EXPERIMENTAL(&quot;experimental&quot;),</span>
+    /**
+     * The feature may emit warnings. Backward compatibility is not guaranteed. Removal is likely to occur in a subsequent major release.
+     */
+<span class="nc" id="L39">    DEPRECATED(&quot;deprecated&quot;);</span>
+
+    private String description;
+
+<span class="nc" id="L43">    Stability(String description) {</span>
+<span class="nc" id="L44">        this.description = description;</span>
+<span class="nc" id="L45">    }</span>
+
+    /**
+     * Returns a value for this stability index.
+     *
+     * @return The descriptive value of this enum.
+     */
+<span class="nc" id="L52">    public String value() { return description; }</span>
+
+    public static Stability forDescription(String description) {
+<span class="nc bnc" id="L55" title="All 2 branches missed.">        for (Stability value: values()) {</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">            if (value.description.equals(description)) {</span>
+<span class="nc" id="L57">                return value;</span>
+            }
+        }
+
+<span class="nc" id="L61">        throw new IllegalArgumentException(&quot;description not found in the available values.&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

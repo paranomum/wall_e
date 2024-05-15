@@ -1,0 +1,874 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AspNetServerCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">AspNetServerCodegen.java</span></div><h1>AspNetServerCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import com.samskivert.mustache.Mustache;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.parser.util.SchemaTypeUtil;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.meta.features.*;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.utils.ModelUtils;
+import org.openapitools.codegen.utils.URLPathUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.net.URL;
+import java.util.*;
+
+import static java.util.UUID.randomUUID;
+
+public class AspNetServerCodegen extends AbstractCSharpCodegen {
+
+    public static final String USE_SWASHBUCKLE = &quot;useSwashbuckle&quot;;
+    public static final String MODEL_POCOMODE = &quot;pocoModels&quot;;
+    public static final String USE_MODEL_SEPERATEPROJECT = &quot;useSeparateModelProject&quot;;
+    public static final String ASPNET_CORE_VERSION = &quot;aspnetCoreVersion&quot;;
+    public static final String SWASHBUCKLE_VERSION = &quot;swashbuckleVersion&quot;;
+    public static final String CLASS_MODIFIER = &quot;classModifier&quot;;
+    public static final String OPERATION_MODIFIER = &quot;operationModifier&quot;;
+    public static final String OPERATION_IS_ASYNC = &quot;operationIsAsync&quot;;
+    public static final String OPERATION_RESULT_TASK = &quot;operationResultTask&quot;;
+    public static final String GENERATE_BODY = &quot;generateBody&quot;;
+    public static final String BUILD_TARGET = &quot;buildTarget&quot;;
+    public static final String MODEL_CLASS_MODIFIER = &quot;modelClassModifier&quot;;
+    public static final String TARGET_FRAMEWORK = &quot;targetFramework&quot;;
+    public static final String NET_60_OR_LATER = &quot;net60OrLater&quot;;
+
+    public static final String PROJECT_SDK = &quot;projectSdk&quot;;
+    public static final String SDK_WEB = &quot;Microsoft.NET.Sdk.Web&quot;;
+    public static final String SDK_LIB = &quot;Microsoft.NET.Sdk&quot;;
+    public static final String COMPATIBILITY_VERSION = &quot;compatibilityVersion&quot;;
+    public static final String IS_LIBRARY = &quot;isLibrary&quot;;
+    public static final String USE_FRAMEWORK_REFERENCE = &quot;useFrameworkReference&quot;;
+    public static final String USE_NEWTONSOFT = &quot;useNewtonsoft&quot;;
+    public static final String USE_DEFAULT_ROUTING = &quot;useDefaultRouting&quot;;
+    public static final String NEWTONSOFT_VERSION = &quot;newtonsoftVersion&quot;;
+
+<span class="fc" id="L67">    private String packageGuid = &quot;{&quot; + randomUUID().toString().toUpperCase(Locale.ROOT) + &quot;}&quot;;</span>
+<span class="fc" id="L68">    private String userSecretsGuid = randomUUID().toString();</span>
+
+<span class="fc" id="L70">    protected final Logger LOGGER = LoggerFactory.getLogger(AspNetServerCodegen.class);</span>
+
+<span class="fc" id="L72">    private boolean useSwashbuckle = true;</span>
+<span class="fc" id="L73">    private boolean pocoModels = false;</span>
+<span class="fc" id="L74">    private boolean useSeparateModelProject = false;</span>
+<span class="fc" id="L75">    protected int serverPort = 8080;</span>
+<span class="fc" id="L76">    protected String serverHost = &quot;0.0.0.0&quot;;</span>
+<span class="fc" id="L77">    protected CliOption swashbuckleVersion = new CliOption(SWASHBUCKLE_VERSION, &quot;Swashbuckle version: 3.0.0 (deprecated), 4.0.0 (deprecated), 5.0.0 (deprecated), 6.4.0&quot;);</span>
+<span class="fc" id="L78">    protected CliOption aspnetCoreVersion = new CliOption(ASPNET_CORE_VERSION, &quot;ASP.NET Core version: 6.0, 5.0, 3.1, 3.0, 2.2, 2.1, 2.0 (deprecated)&quot;);</span>
+<span class="fc" id="L79">    private CliOption classModifier = new CliOption(CLASS_MODIFIER, &quot;Class Modifier for controller classes: Empty string or abstract.&quot;);</span>
+<span class="fc" id="L80">    private CliOption operationModifier = new CliOption(OPERATION_MODIFIER, &quot;Operation Modifier can be virtual or abstract&quot;);</span>
+<span class="fc" id="L81">    private CliOption modelClassModifier = new CliOption(MODEL_CLASS_MODIFIER, &quot;Model Class Modifier can be nothing or partial&quot;);</span>
+<span class="fc" id="L82">    private boolean generateBody = true;</span>
+<span class="fc" id="L83">    private CliOption buildTarget = new CliOption(&quot;buildTarget&quot;, &quot;Target to build an application or library&quot;);</span>
+<span class="fc" id="L84">    private String projectSdk = SDK_WEB;</span>
+<span class="fc" id="L85">    private String compatibilityVersion = &quot;Version_2_2&quot;;</span>
+<span class="fc" id="L86">    private boolean operationIsAsync = false;</span>
+<span class="fc" id="L87">    private boolean operationResultTask = false;</span>
+<span class="fc" id="L88">    private boolean isLibrary = false;</span>
+<span class="fc" id="L89">    private boolean useFrameworkReference = false;</span>
+<span class="fc" id="L90">    private boolean useNewtonsoft = true;</span>
+<span class="fc" id="L91">    private boolean useDefaultRouting = true;</span>
+<span class="fc" id="L92">    private String newtonsoftVersion = &quot;3.0.0&quot;;</span>
+
+    public AspNetServerCodegen() {
+<span class="fc" id="L95">        super();</span>
+
+        // TODO: AspnetCore community review
+<span class="fc" id="L98">        modifyFeatureSet(features -&gt; features</span>
+<span class="fc" id="L99">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="fc" id="L100">                .excludeWireFormatFeatures(WireFormatFeature.PROTOBUF)</span>
+<span class="fc" id="L101">                .securityFeatures(EnumSet.of(</span>
+                        SecurityFeature.ApiKey,
+                        SecurityFeature.BasicAuth,
+                        SecurityFeature.BearerToken
+                ))
+<span class="fc" id="L106">                .excludeGlobalFeatures(</span>
+                        GlobalFeature.XMLStructureDefinitions,
+                        GlobalFeature.Callbacks,
+                        GlobalFeature.LinkObjects,
+                        GlobalFeature.ParameterStyling,
+                        GlobalFeature.MultiServer
+                )
+<span class="fc" id="L113">                .includeSchemaSupportFeatures(</span>
+                        SchemaSupportFeature.Polymorphism
+                )
+<span class="fc" id="L116">                .includeParameterFeatures(</span>
+                        ParameterFeature.Cookie
+                )
+        );
+
+<span class="fc" id="L121">        outputFolder = &quot;generated-code&quot; + File.separator + getName();</span>
+
+<span class="fc" id="L123">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.cs&quot;);</span>
+<span class="fc" id="L124">        apiTemplateFiles.put(&quot;controller.mustache&quot;, &quot;.cs&quot;);</span>
+
+<span class="fc" id="L126">        embeddedTemplateDir = templateDir = &quot;aspnetcore/3.0&quot;;</span>
+
+        // contextually reserved words
+        // NOTE: C# uses camel cased reserved words, while models are title cased. We don't want lowercase comparisons.
+<span class="fc" id="L130">        reservedWords.addAll(</span>
+<span class="fc" id="L131">                Arrays.asList(&quot;var&quot;, &quot;async&quot;, &quot;await&quot;, &quot;dynamic&quot;, &quot;yield&quot;)</span>
+        );
+
+<span class="fc" id="L134">        cliOptions.clear();</span>
+
+<span class="fc" id="L136">        setSupportNullable(Boolean.TRUE);</span>
+
+        // CLI options
+<span class="fc" id="L139">        addOption(CodegenConstants.PACKAGE_DESCRIPTION,</span>
+                CodegenConstants.PACKAGE_DESCRIPTION_DESC,
+                packageDescription);
+
+<span class="fc" id="L143">        addOption(CodegenConstants.LICENSE_URL,</span>
+                CodegenConstants.LICENSE_URL_DESC,
+                licenseUrl);
+
+<span class="fc" id="L147">        addOption(CodegenConstants.LICENSE_NAME,</span>
+                CodegenConstants.LICENSE_NAME_DESC,
+                licenseName);
+
+<span class="fc" id="L151">        addOption(CodegenConstants.PACKAGE_COPYRIGHT,</span>
+                CodegenConstants.PACKAGE_COPYRIGHT_DESC,
+                packageCopyright);
+
+<span class="fc" id="L155">        addOption(CodegenConstants.PACKAGE_AUTHORS,</span>
+                CodegenConstants.PACKAGE_AUTHORS_DESC,
+                packageAuthors);
+
+<span class="fc" id="L159">        addOption(CodegenConstants.PACKAGE_TITLE,</span>
+                CodegenConstants.PACKAGE_TITLE_DESC,
+                packageTitle);
+
+<span class="fc" id="L163">        addOption(CodegenConstants.PACKAGE_NAME,</span>
+                &quot;C# package name (convention: Title.Case).&quot;,
+                packageName);
+
+<span class="fc" id="L167">        addOption(CodegenConstants.PACKAGE_VERSION,</span>
+                &quot;C# package version.&quot;,
+                packageVersion);
+
+<span class="fc" id="L171">        addOption(CodegenConstants.OPTIONAL_PROJECT_GUID,</span>
+                CodegenConstants.OPTIONAL_PROJECT_GUID_DESC,
+                null);
+
+<span class="fc" id="L175">        addOption(CodegenConstants.SOURCE_FOLDER,</span>
+                CodegenConstants.SOURCE_FOLDER_DESC,
+                sourceFolder);
+
+<span class="fc" id="L179">        addOption(COMPATIBILITY_VERSION, &quot;ASP.Net Core CompatibilityVersion&quot;, compatibilityVersion);</span>
+
+<span class="fc" id="L181">        aspnetCoreVersion.addEnum(&quot;2.0&quot;, &quot;ASP.NET Core 2.0&quot;);</span>
+<span class="fc" id="L182">        aspnetCoreVersion.addEnum(&quot;2.1&quot;, &quot;ASP.NET Core 2.1&quot;);</span>
+<span class="fc" id="L183">        aspnetCoreVersion.addEnum(&quot;2.2&quot;, &quot;ASP.NET Core 2.2&quot;);</span>
+<span class="fc" id="L184">        aspnetCoreVersion.addEnum(&quot;3.0&quot;, &quot;ASP.NET Core 3.0&quot;);</span>
+<span class="fc" id="L185">        aspnetCoreVersion.addEnum(&quot;3.1&quot;, &quot;ASP.NET Core 3.1&quot;);</span>
+<span class="fc" id="L186">        aspnetCoreVersion.addEnum(&quot;5.0&quot;, &quot;ASP.NET Core 5.0&quot;);</span>
+<span class="fc" id="L187">        aspnetCoreVersion.addEnum(&quot;6.0&quot;, &quot;ASP.NET Core 6.0&quot;);</span>
+<span class="fc" id="L188">        aspnetCoreVersion.setDefault(&quot;3.1&quot;);</span>
+<span class="fc" id="L189">        aspnetCoreVersion.setOptValue(aspnetCoreVersion.getDefault());</span>
+<span class="fc" id="L190">        cliOptions.add(aspnetCoreVersion);</span>
+
+<span class="fc" id="L192">        swashbuckleVersion.addEnum(&quot;3.0.0&quot;, &quot;Swashbuckle 3.0.0&quot;);</span>
+<span class="fc" id="L193">        swashbuckleVersion.addEnum(&quot;4.0.0&quot;, &quot;Swashbuckle 4.0.0&quot;);</span>
+<span class="fc" id="L194">        swashbuckleVersion.addEnum(&quot;5.0.0&quot;, &quot;Swashbuckle 5.0.0&quot;);</span>
+<span class="fc" id="L195">        swashbuckleVersion.addEnum(&quot;6.4.0&quot;, &quot;Swashbuckle 6.4.0&quot;);</span>
+<span class="fc" id="L196">        swashbuckleVersion.setDefault(&quot;3.0.0&quot;);</span>
+<span class="fc" id="L197">        swashbuckleVersion.setOptValue(swashbuckleVersion.getDefault());</span>
+<span class="fc" id="L198">        cliOptions.add(swashbuckleVersion);</span>
+
+        // CLI Switches
+<span class="fc" id="L201">        addSwitch(CodegenConstants.NULLABLE_REFERENCE_TYPES,</span>
+                CodegenConstants.NULLABLE_REFERENCE_TYPES_DESC,
+<span class="fc" id="L203">                this.nullReferenceTypesFlag);</span>
+
+<span class="fc" id="L205">        addSwitch(CodegenConstants.SORT_PARAMS_BY_REQUIRED_FLAG,</span>
+                CodegenConstants.SORT_PARAMS_BY_REQUIRED_FLAG_DESC,
+                sortParamsByRequiredFlag);
+
+<span class="fc" id="L209">        addSwitch(CodegenConstants.USE_DATETIME_OFFSET,</span>
+                CodegenConstants.USE_DATETIME_OFFSET_DESC,
+<span class="fc" id="L211">                useDateTimeOffsetFlag);</span>
+
+<span class="fc" id="L213">        addSwitch(CodegenConstants.USE_DATETIME_FOR_DATE,</span>
+                CodegenConstants.USE_DATETIME_FOR_DATE_DESC,
+<span class="fc" id="L215">                useDateTimeForDateFlag);</span>
+
+<span class="fc" id="L217">        addSwitch(CodegenConstants.USE_COLLECTION,</span>
+                CodegenConstants.USE_COLLECTION_DESC,
+<span class="fc" id="L219">                useCollection);</span>
+
+<span class="fc" id="L221">        addSwitch(CodegenConstants.RETURN_ICOLLECTION,</span>
+                CodegenConstants.RETURN_ICOLLECTION_DESC,
+<span class="fc" id="L223">                returnICollection);</span>
+
+<span class="fc" id="L225">        addSwitch(USE_SWASHBUCKLE,</span>
+                &quot;Uses the Swashbuckle.AspNetCore NuGet package for documentation.&quot;,
+<span class="fc" id="L227">                useSwashbuckle);</span>
+
+<span class="fc" id="L229">        addSwitch(MODEL_POCOMODE,</span>
+                &quot;Build POCO Models&quot;,
+<span class="fc" id="L231">                pocoModels);</span>
+
+<span class="fc" id="L233">        addSwitch(USE_MODEL_SEPERATEPROJECT,</span>
+                &quot;Create a separate project for models&quot;,
+<span class="fc" id="L235">                useSeparateModelProject);</span>
+
+<span class="fc" id="L237">        addSwitch(IS_LIBRARY,</span>
+                &quot;Is the build a library&quot;,
+<span class="fc" id="L239">                isLibrary);</span>
+
+<span class="fc" id="L241">        addSwitch(USE_FRAMEWORK_REFERENCE,</span>
+                &quot;Use frameworkReference for ASP.NET Core 3.0+ and PackageReference ASP.NET Core 2.2 or earlier.&quot;,
+<span class="fc" id="L243">                useFrameworkReference);</span>
+
+<span class="fc" id="L245">        addSwitch(USE_NEWTONSOFT,</span>
+                &quot;Uses the Newtonsoft JSON library.&quot;,
+<span class="fc" id="L247">                useNewtonsoft);</span>
+
+<span class="fc" id="L249">        addOption(NEWTONSOFT_VERSION,</span>
+                &quot;Version for Microsoft.AspNetCore.Mvc.NewtonsoftJson for ASP.NET Core 3.0+&quot;,
+                newtonsoftVersion);
+
+<span class="fc" id="L253">        addSwitch(USE_DEFAULT_ROUTING,</span>
+                &quot;Use default routing for the ASP.NET Core version.&quot;,
+<span class="fc" id="L255">                useDefaultRouting);</span>
+
+<span class="fc" id="L257">        addOption(CodegenConstants.ENUM_NAME_SUFFIX,</span>
+                CodegenConstants.ENUM_NAME_SUFFIX_DESC,
+                enumNameSuffix);
+
+<span class="fc" id="L261">        addOption(CodegenConstants.ENUM_VALUE_SUFFIX,</span>
+                &quot;Suffix that will be appended to all enum values.&quot;,
+                enumValueSuffix);
+
+<span class="fc" id="L265">        classModifier.addEnum(&quot;&quot;, &quot;Keep class default with no modifier&quot;);</span>
+<span class="fc" id="L266">        classModifier.addEnum(&quot;abstract&quot;, &quot;Make class abstract&quot;);</span>
+<span class="fc" id="L267">        classModifier.setDefault(&quot;&quot;);</span>
+<span class="fc" id="L268">        classModifier.setOptValue(classModifier.getDefault());</span>
+<span class="fc" id="L269">        addOption(classModifier.getOpt(), classModifier.getDescription(), classModifier.getOptValue());</span>
+
+<span class="fc" id="L271">        operationModifier.addEnum(&quot;virtual&quot;, &quot;Keep method virtual&quot;);</span>
+<span class="fc" id="L272">        operationModifier.addEnum(&quot;abstract&quot;, &quot;Make method abstract&quot;);</span>
+<span class="fc" id="L273">        operationModifier.setDefault(&quot;virtual&quot;);</span>
+<span class="fc" id="L274">        operationModifier.setOptValue(operationModifier.getDefault());</span>
+<span class="fc" id="L275">        cliOptions.add(operationModifier);</span>
+
+<span class="fc" id="L277">        buildTarget.addEnum(&quot;program&quot;, &quot;Generate code for a standalone server&quot;);</span>
+<span class="fc" id="L278">        buildTarget.addEnum(&quot;library&quot;, &quot;Generate code for a server abstract class library&quot;);</span>
+<span class="fc" id="L279">        buildTarget.setDefault(&quot;program&quot;);</span>
+<span class="fc" id="L280">        buildTarget.setOptValue(buildTarget.getDefault());</span>
+<span class="fc" id="L281">        cliOptions.add(buildTarget);</span>
+
+<span class="fc" id="L283">        addSwitch(GENERATE_BODY,</span>
+                &quot;Generates method body.&quot;,
+<span class="fc" id="L285">                generateBody);</span>
+
+<span class="fc" id="L287">        addSwitch(OPERATION_IS_ASYNC,</span>
+                &quot;Set methods to async or sync (default).&quot;,
+<span class="fc" id="L289">                operationIsAsync);</span>
+
+<span class="fc" id="L291">        addSwitch(OPERATION_RESULT_TASK,</span>
+                &quot;Set methods result to Task&lt;&gt;.&quot;,
+<span class="fc" id="L293">                operationResultTask);</span>
+
+<span class="fc" id="L295">        modelClassModifier.setType(&quot;String&quot;);</span>
+<span class="fc" id="L296">        modelClassModifier.addEnum(&quot;&quot;, &quot;Keep model class default with no modifier&quot;);</span>
+<span class="fc" id="L297">        modelClassModifier.addEnum(&quot;partial&quot;, &quot;Make model class partial&quot;);</span>
+<span class="fc" id="L298">        modelClassModifier.setDefault(&quot;partial&quot;);</span>
+<span class="fc" id="L299">        modelClassModifier.setOptValue(modelClassModifier.getDefault());</span>
+<span class="fc" id="L300">        addOption(modelClassModifier.getOpt(), modelClassModifier.getDescription(), modelClassModifier.getOptValue());</span>
+<span class="fc" id="L301">    }</span>
+
+    @Deprecated
+    @Override
+    protected Set&lt;String&gt; getNullableTypes() {
+<span class="nc" id="L306">        return new HashSet&lt;&gt;(Arrays.asList(&quot;decimal&quot;, &quot;bool&quot;, &quot;int&quot;, &quot;uint&quot;, &quot;long&quot;, &quot;ulong&quot;, &quot;float&quot;, &quot;double&quot;,</span>
+            &quot;DateTime&quot;, &quot;DateOnly&quot;, &quot;DateTimeOffset&quot;, &quot;Guid&quot;));
+    }
+
+    @Override
+    protected Set&lt;String&gt; getValueTypes() {
+<span class="nc" id="L312">        return new HashSet&lt;&gt;(Arrays.asList(&quot;decimal&quot;, &quot;bool&quot;, &quot;int&quot;, &quot;uint&quot;, &quot;long&quot;, &quot;ulong&quot;, &quot;float&quot;, &quot;double&quot;));</span>
+    }
+
+    @Override
+    public CodegenType getTag() {
+<span class="fc" id="L317">        return CodegenType.SERVER;</span>
+    }
+
+    @Override
+    public void postProcessParameter(CodegenParameter parameter) {
+<span class="nc" id="L322">        super.postProcessParameter(parameter);</span>
+
+<span class="nc bnc" id="L324" title="All 8 branches missed.">        if (!parameter.dataType.endsWith(&quot;?&quot;) &amp;&amp; !parameter.required &amp;&amp; (nullReferenceTypesFlag || this.getNullableTypes().contains(parameter.dataType))) {</span>
+<span class="nc" id="L325">            parameter.dataType = parameter.dataType + &quot;?&quot;;</span>
+        }
+<span class="nc" id="L327">    }</span>
+
+    @Override
+    protected void updateCodegenParameterEnum(CodegenParameter parameter, CodegenModel model) {
+<span class="nc" id="L331">        super.updateCodegenParameterEnumLegacy(parameter, model);</span>
+
+<span class="nc bnc" id="L333" title="All 4 branches missed.">        if (!parameter.required &amp;&amp; parameter.vendorExtensions.get(&quot;x-csharp-value-type&quot;) != null) { //optional</span>
+<span class="nc" id="L334">            parameter.dataType = parameter.dataType + &quot;?&quot;;</span>
+        }
+<span class="nc" id="L336">    }</span>
+
+    @Override
+    public String getName() {
+<span class="fc" id="L340">        return &quot;aspnetcore&quot;;</span>
+    }
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L345">        return &quot;Generates an ASP.NET Core Web API server.&quot;;</span>
+    }
+
+    @Override
+    public void preprocessOpenAPI(OpenAPI openAPI) {
+<span class="nc" id="L350">        super.preprocessOpenAPI(openAPI);</span>
+<span class="nc" id="L351">        URL url = URLPathUtils.getServerURL(openAPI, serverVariableOverrides());</span>
+<span class="nc" id="L352">        additionalProperties.put(&quot;serverHost&quot;, url.getHost());</span>
+<span class="nc" id="L353">        additionalProperties.put(&quot;serverPort&quot;, URLPathUtils.getPort(url, 8080));</span>
+<span class="nc" id="L354">    }</span>
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L358">        super.processOpts();</span>
+
+<span class="nc bnc" id="L360" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.OPTIONAL_PROJECT_GUID)) {</span>
+<span class="nc" id="L361">            setPackageGuid((String) additionalProperties.get(CodegenConstants.OPTIONAL_PROJECT_GUID));</span>
+        }
+<span class="nc" id="L363">        additionalProperties.put(&quot;packageGuid&quot;, packageGuid);</span>
+
+<span class="nc bnc" id="L365" title="All 2 branches missed.">        if (!additionalProperties.containsKey(&quot;packageGuid&quot;)) {</span>
+<span class="nc" id="L366">            additionalProperties.put(&quot;packageGuid&quot;, packageGuid);</span>
+        } else {
+<span class="nc" id="L368">            packageGuid = (String) additionalProperties.get(&quot;packageGuid&quot;);</span>
+        }
+
+<span class="nc bnc" id="L371" title="All 2 branches missed.">        if (!additionalProperties.containsKey(&quot;userSecretsGuid&quot;)) {</span>
+<span class="nc" id="L372">            additionalProperties.put(&quot;userSecretsGuid&quot;, userSecretsGuid);</span>
+        } else {
+<span class="nc" id="L374">            userSecretsGuid = (String) additionalProperties.get(&quot;userSecretsGuid&quot;);</span>
+        }
+
+<span class="nc bnc" id="L377" title="All 2 branches missed.">        if (!additionalProperties.containsKey(NEWTONSOFT_VERSION)) {</span>
+<span class="nc" id="L378">            additionalProperties.put(NEWTONSOFT_VERSION, newtonsoftVersion);</span>
+        } else {
+<span class="nc" id="L380">            newtonsoftVersion = (String) additionalProperties.get(NEWTONSOFT_VERSION);</span>
+        }
+
+        // Check for the modifiers etc.
+        // The order of the checks is important.
+<span class="nc" id="L385">        setBuildTarget();</span>
+<span class="nc" id="L386">        setClassModifier();</span>
+<span class="nc" id="L387">        setOperationModifier();</span>
+<span class="nc" id="L388">        setModelClassModifier();</span>
+<span class="nc" id="L389">        setPocoModels();</span>
+<span class="nc" id="L390">        setUseSeparateModelProject();</span>
+<span class="nc" id="L391">        setUseSwashbuckle();</span>
+<span class="nc" id="L392">        setOperationIsAsync();</span>
+
+        // Check for class modifier if not present set the default value.
+<span class="nc" id="L395">        additionalProperties.put(PROJECT_SDK, projectSdk);</span>
+
+<span class="nc" id="L397">        additionalProperties.put(&quot;dockerTag&quot;, packageName.toLowerCase(Locale.ROOT));</span>
+
+<span class="nc bnc" id="L399" title="All 2 branches missed.">        if (!additionalProperties.containsKey(CodegenConstants.API_PACKAGE)) {</span>
+<span class="nc" id="L400">            apiPackage = packageName + &quot;.Controllers&quot;;</span>
+<span class="nc" id="L401">            additionalProperties.put(CodegenConstants.API_PACKAGE, apiPackage);</span>
+        }
+
+<span class="nc bnc" id="L404" title="All 2 branches missed.">        if (!additionalProperties.containsKey(CodegenConstants.MODEL_PACKAGE)) {</span>
+<span class="nc" id="L405">            modelPackage = packageName + &quot;.Models&quot;;</span>
+<span class="nc" id="L406">            additionalProperties.put(CodegenConstants.MODEL_PACKAGE, modelPackage);</span>
+        }
+
+<span class="nc" id="L409">        String packageFolder = sourceFolder + File.separator + packageName;</span>
+
+        // determine the ASP.NET core version setting
+<span class="nc" id="L412">        setAspnetCoreVersion(packageFolder);</span>
+<span class="nc" id="L413">        setSwashbuckleVersion();</span>
+<span class="nc" id="L414">        setIsFramework();</span>
+<span class="nc" id="L415">        setUseNewtonsoft();</span>
+<span class="nc" id="L416">        setUseEndpointRouting();</span>
+
+<span class="nc" id="L418">        supportingFiles.add(new SupportingFile(&quot;build.sh.mustache&quot;, &quot;&quot;, &quot;build.sh&quot;));</span>
+<span class="nc" id="L419">        supportingFiles.add(new SupportingFile(&quot;build.bat.mustache&quot;, &quot;&quot;, &quot;build.bat&quot;));</span>
+<span class="nc" id="L420">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;));</span>
+<span class="nc" id="L421">        supportingFiles.add(new SupportingFile(&quot;Solution.mustache&quot;, &quot;&quot;, packageName + &quot;.sln&quot;));</span>
+<span class="nc" id="L422">        supportingFiles.add(new SupportingFile(&quot;gitignore&quot;, packageFolder, &quot;.gitignore&quot;));</span>
+<span class="nc" id="L423">        supportingFiles.add(new SupportingFile(&quot;validateModel.mustache&quot;, packageFolder + File.separator + &quot;Attributes&quot;, &quot;ValidateModelStateAttribute.cs&quot;));</span>
+
+<span class="nc bnc" id="L425" title="All 2 branches missed.">        if (useSeparateModelProject) {</span>
+<span class="nc" id="L426">            String separateModelSeparator = sourceFolder + File.separator + modelPackage;</span>
+<span class="nc" id="L427">            supportingFiles.add(new SupportingFile(&quot;gitignore&quot;, separateModelSeparator, &quot;.gitignore&quot;));</span>
+<span class="nc" id="L428">            supportingFiles.add(new SupportingFile(&quot;typeConverter.mustache&quot;, separateModelSeparator + File.separator + &quot;Converters&quot;, &quot;CustomEnumConverter.cs&quot;));</span>
+<span class="nc" id="L429">            supportingFiles.add(new SupportingFile(&quot;ModelsProject.csproj.mustache&quot;, separateModelSeparator, modelPackage + &quot;.csproj&quot;));</span>
+<span class="nc" id="L430">        } else {</span>
+<span class="nc" id="L431">            supportingFiles.add(new SupportingFile(&quot;typeConverter.mustache&quot;, packageFolder + File.separator + &quot;Converters&quot;, &quot;CustomEnumConverter.cs&quot;));</span>
+        }
+
+<span class="nc bnc" id="L434" title="All 6 branches missed.">        if (aspnetCoreVersion.getOptValue().startsWith(&quot;3.&quot;) || aspnetCoreVersion.getOptValue().startsWith(&quot;5.0&quot;) || aspnetCoreVersion.getOptValue().startsWith(&quot;6.&quot;)) {</span>
+<span class="nc" id="L435">            supportingFiles.add(new SupportingFile(&quot;OpenApi&quot; + File.separator + &quot;TypeExtensions.mustache&quot;, packageFolder + File.separator + &quot;OpenApi&quot;, &quot;TypeExtensions.cs&quot;));</span>
+        }
+
+<span class="nc" id="L438">        supportingFiles.add(new SupportingFile(&quot;Project.csproj.mustache&quot;, packageFolder, packageName + &quot;.csproj&quot;));</span>
+<span class="nc bnc" id="L439" title="All 2 branches missed.">        if (!isLibrary) {</span>
+<span class="nc" id="L440">            supportingFiles.add(new SupportingFile(&quot;Dockerfile.mustache&quot;, packageFolder, &quot;Dockerfile&quot;));</span>
+<span class="nc" id="L441">            supportingFiles.add(new SupportingFile(&quot;appsettings.json&quot;, packageFolder, &quot;appsettings.json&quot;));</span>
+<span class="nc" id="L442">            supportingFiles.add(new SupportingFile(&quot;appsettings.Development.json&quot;, packageFolder, &quot;appsettings.Development.json&quot;));</span>
+
+<span class="nc" id="L444">            supportingFiles.add(new SupportingFile(&quot;Startup.mustache&quot;, packageFolder, &quot;Startup.cs&quot;));</span>
+<span class="nc" id="L445">            supportingFiles.add(new SupportingFile(&quot;Program.mustache&quot;, packageFolder, &quot;Program.cs&quot;));</span>
+<span class="nc" id="L446">            supportingFiles.add(new SupportingFile(&quot;Properties&quot; + File.separator + &quot;launchSettings.json&quot;,</span>
+                    packageFolder + File.separator + &quot;Properties&quot;, &quot;launchSettings.json&quot;));
+            // wwwroot files.
+<span class="nc" id="L449">            supportingFiles.add(new SupportingFile(&quot;wwwroot&quot; + File.separator + &quot;README.md&quot;, packageFolder + File.separator + &quot;wwwroot&quot;, &quot;README.md&quot;));</span>
+<span class="nc" id="L450">            supportingFiles.add(new SupportingFile(&quot;wwwroot&quot; + File.separator + &quot;index.html&quot;, packageFolder + File.separator + &quot;wwwroot&quot;, &quot;index.html&quot;));</span>
+<span class="nc" id="L451">            supportingFiles.add(new SupportingFile(&quot;wwwroot&quot; + File.separator + &quot;openapi-original.mustache&quot;,</span>
+                    packageFolder + File.separator + &quot;wwwroot&quot;, &quot;openapi-original.json&quot;));
+        } else {
+<span class="nc" id="L454">            supportingFiles.add(new SupportingFile(&quot;Project.nuspec.mustache&quot;, packageFolder, packageName + &quot;.nuspec&quot;));</span>
+        }
+
+<span class="nc bnc" id="L457" title="All 2 branches missed.">        if (useSwashbuckle) {</span>
+<span class="nc" id="L458">            supportingFiles.add(new SupportingFile(&quot;Filters&quot; + File.separator + &quot;BasePathFilter.mustache&quot;,</span>
+                    packageFolder + File.separator + &quot;Filters&quot;, &quot;BasePathFilter.cs&quot;));
+<span class="nc" id="L460">            supportingFiles.add(new SupportingFile(&quot;Filters&quot; + File.separator + &quot;GeneratePathParamsValidationFilter.mustache&quot;,</span>
+                    packageFolder + File.separator + &quot;Filters&quot;, &quot;GeneratePathParamsValidationFilter.cs&quot;));
+        }
+
+<span class="nc" id="L464">        supportingFiles.add(new SupportingFile(&quot;Authentication&quot; + File.separator + &quot;ApiAuthentication.mustache&quot;, packageFolder + File.separator + &quot;Authentication&quot;, &quot;ApiAuthentication.cs&quot;));</span>
+<span class="nc" id="L465">        supportingFiles.add(new SupportingFile(&quot;Formatters&quot; + File.separator + &quot;InputFormatterStream.mustache&quot;, packageFolder + File.separator + &quot;Formatters&quot;, &quot;InputFormatterStream.cs&quot;));</span>
+
+<span class="nc" id="L467">        this.setTypeMapping();</span>
+<span class="nc" id="L468">    }</span>
+
+    @Override
+    protected boolean useNet60OrLater() {
+<span class="nc" id="L472">        return additionalProperties.containsKey(NET_60_OR_LATER);</span>
+    }
+
+    public void setPackageGuid(String packageGuid) {
+<span class="nc" id="L476">        this.packageGuid = packageGuid;</span>
+<span class="nc" id="L477">    }</span>
+
+    @Override
+    public String apiFileFolder() {
+<span class="nc" id="L481">        return outputFolder + File.separator + sourceFolder + File.separator + packageName + File.separator + &quot;Controllers&quot;;</span>
+    }
+
+    @Override
+    public String modelFileFolder() {
+<span class="nc bnc" id="L486" title="All 2 branches missed.">        if (!useSeparateModelProject) {</span>
+<span class="nc" id="L487">            return outputFolder + File.separator + sourceFolder + File.separator + packageName + File.separator + &quot;Models&quot;;</span>
+        } else {
+<span class="nc" id="L489">            return outputFolder + File.separator + sourceFolder + File.separator + modelPackage;</span>
+        }
+    }
+
+    @Override
+    public Map&lt;String, Object&gt; postProcessSupportingFileData(Map&lt;String, Object&gt; objs) {
+<span class="nc" id="L495">        generateJSONSpecFile(objs);</span>
+<span class="nc" id="L496">        return super.postProcessSupportingFileData(objs);</span>
+    }
+
+    @Override
+    protected void processOperation(CodegenOperation operation) {
+<span class="nc" id="L501">        super.processOperation(operation);</span>
+
+        // HACK: Unlikely in the wild, but we need to clean operation paths for MVC Routing
+<span class="nc bnc" id="L504" title="All 2 branches missed.">        if (operation.path != null) {</span>
+<span class="nc" id="L505">            String original = operation.path;</span>
+<span class="nc" id="L506">            operation.path = operation.path.replace(&quot;?&quot;, &quot;/&quot;);</span>
+<span class="nc bnc" id="L507" title="All 2 branches missed.">            if (!original.equals(operation.path)) {</span>
+<span class="nc" id="L508">                LOGGER.warn(&quot;Normalized {} to {}. Please verify generated source.&quot;, original, operation.path);</span>
+            }
+        }
+
+        // Converts, for example, PUT to HttpPut for controller attributes
+<span class="nc" id="L513">        operation.httpMethod = &quot;Http&quot; + operation.httpMethod.charAt(0) + operation.httpMethod.substring(1).toLowerCase(Locale.ROOT);</span>
+<span class="nc" id="L514">    }</span>
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L518">        super.postProcessOperationsWithModels(objs, allModels);</span>
+        // We need to postprocess the operations to add proper consumes tags and fix form file handling
+<span class="nc bnc" id="L520" title="All 2 branches missed.">        if (objs != null) {</span>
+<span class="nc" id="L521">            OperationMap operations = objs.getOperations();</span>
+<span class="nc bnc" id="L522" title="All 2 branches missed.">            if (operations != null) {</span>
+<span class="nc" id="L523">                List&lt;CodegenOperation&gt; ops = operations.getOperation();</span>
+<span class="nc bnc" id="L524" title="All 2 branches missed.">                for (CodegenOperation operation : ops) {</span>
+<span class="nc bnc" id="L525" title="All 2 branches missed.">                    if (operation.consumes == null) {</span>
+<span class="nc" id="L526">                        continue;</span>
+                    }
+<span class="nc bnc" id="L528" title="All 2 branches missed.">                    if (operation.consumes.size() == 0) {</span>
+<span class="nc" id="L529">                        continue;</span>
+                    }
+
+                    // Build a consumes string for the operation we cannot iterate in the template as we need a ','
+                    // after each entry but the last
+
+<span class="nc" id="L535">                    StringBuilder consumesString = new StringBuilder();</span>
+<span class="nc bnc" id="L536" title="All 2 branches missed.">                    for (Map&lt;String, String&gt; consume : operation.consumes) {</span>
+<span class="nc bnc" id="L537" title="All 2 branches missed.">                        if (!consume.containsKey(&quot;mediaType&quot;)) {</span>
+<span class="nc" id="L538">                            continue;</span>
+                        }
+
+<span class="nc bnc" id="L541" title="All 2 branches missed.">                        if (consumesString.toString().isEmpty()) {</span>
+<span class="nc" id="L542">                            consumesString = new StringBuilder(&quot;\&quot;&quot; + consume.get(&quot;mediaType&quot;) + &quot;\&quot;&quot;);</span>
+                        } else {
+<span class="nc" id="L544">                            consumesString.append(&quot;, \&quot;&quot;).append(consume.get(&quot;mediaType&quot;)).append(&quot;\&quot;&quot;);</span>
+                        }
+
+                        // In a multipart/form-data consuming context binary data is best handled by an IFormFile
+<span class="nc bnc" id="L548" title="All 2 branches missed.">                        if (!consume.get(&quot;mediaType&quot;).equals(&quot;multipart/form-data&quot;)) {</span>
+<span class="nc" id="L549">                            continue;</span>
+                        }
+
+                        // Change dataType of binary parameters to IFormFile for formParams in multipart/form-data
+<span class="nc bnc" id="L553" title="All 2 branches missed.">                        for (CodegenParameter param : operation.formParams) {</span>
+<span class="nc bnc" id="L554" title="All 2 branches missed.">                            if (param.isBinary) {</span>
+<span class="nc" id="L555">                                param.dataType = &quot;IFormFile&quot;;</span>
+<span class="nc" id="L556">                                param.baseType = &quot;IFormFile&quot;;</span>
+                            }
+<span class="nc" id="L558">                        }</span>
+
+<span class="nc bnc" id="L560" title="All 2 branches missed.">                        for (CodegenParameter param : operation.allParams) {</span>
+<span class="nc bnc" id="L561" title="All 4 branches missed.">                            if (param.isBinary &amp;&amp; param.isFormParam) {</span>
+<span class="nc" id="L562">                                param.dataType = &quot;IFormFile&quot;;</span>
+<span class="nc" id="L563">                                param.baseType = &quot;IFormFile&quot;;</span>
+                            }
+<span class="nc" id="L565">                        }</span>
+<span class="nc" id="L566">                    }</span>
+
+<span class="nc bnc" id="L568" title="All 2 branches missed.">                    if (!consumesString.toString().isEmpty()) {</span>
+<span class="nc" id="L569">                        operation.vendorExtensions.put(&quot;x-aspnetcore-consumes&quot;, consumesString.toString());</span>
+                    }
+<span class="nc" id="L571">                }</span>
+            }
+        }
+<span class="nc" id="L574">        return objs;</span>
+    }
+
+    @Override
+    public Mustache.Compiler processCompiler(Mustache.Compiler compiler) {
+        // To avoid unexpected behaviors when options are passed programmatically such as { &quot;useCollection&quot;: &quot;&quot; }
+<span class="nc" id="L580">        return super.processCompiler(compiler).emptyStringIsFalse(true);</span>
+    }
+
+    @Override
+    public String toRegularExpression(String pattern) {
+<span class="nc" id="L585">        return escapeText(pattern);</span>
+    }
+
+    @Override
+    protected void patchProperty(Map&lt;String, CodegenModel&gt; enumRefs, CodegenModel model, CodegenProperty property) {
+<span class="nc" id="L590">        super.patchProperty(enumRefs, model, property);</span>
+
+<span class="nc bnc" id="L592" title="All 6 branches missed.">        if (!property.isContainer &amp;&amp; (this.getNullableTypes().contains(property.dataType) || property.isEnum)) {</span>
+<span class="nc" id="L593">            property.vendorExtensions.put(&quot;x-csharp-value-type&quot;, true);</span>
+        }
+<span class="nc" id="L595">    }</span>
+
+    @SuppressWarnings(&quot;rawtypes&quot;)
+    @Override
+    public String getNullableType(Schema p, String type) {
+<span class="nc bnc" id="L600" title="All 2 branches missed.">        if (languageSpecificPrimitives.contains(type)) {</span>
+<span class="nc bnc" id="L601" title="All 8 branches missed.">            if (isSupportNullable() &amp;&amp; ModelUtils.isNullable(p) &amp;&amp; (this.getNullableTypes().contains(type) || nullReferenceTypesFlag)) {</span>
+<span class="nc" id="L602">                return type + &quot;?&quot;;</span>
+            } else {
+<span class="nc" id="L604">                return type;</span>
+            }
+        } else {
+<span class="nc" id="L607">            return null;</span>
+        }
+    }
+
+    @Override
+    protected void patchVendorExtensionNullableValueType(CodegenParameter parameter) {
+<span class="nc" id="L613">        super.patchVendorExtensionNullableValueTypeLegacy(parameter);</span>
+<span class="nc" id="L614">    }</span>
+
+    private void setCliOption(CliOption cliOption) throws IllegalArgumentException {
+<span class="nc bnc" id="L617" title="All 2 branches missed.">        if (additionalProperties.containsKey(cliOption.getOpt())) {</span>
+            // TODO Hack - not sure why the empty strings become boolean.
+<span class="nc" id="L619">            Object obj = additionalProperties.get(cliOption.getOpt());</span>
+<span class="nc bnc" id="L620" title="All 2 branches missed.">            if (!SchemaTypeUtil.BOOLEAN_TYPE.equals(cliOption.getType())) {</span>
+<span class="nc bnc" id="L621" title="All 2 branches missed.">                if (obj instanceof Boolean) {</span>
+<span class="nc" id="L622">                    obj = &quot;&quot;;</span>
+<span class="nc" id="L623">                    additionalProperties.put(cliOption.getOpt(), obj);</span>
+                }
+            }
+<span class="nc" id="L626">            cliOption.setOptValue(obj.toString());</span>
+<span class="nc" id="L627">        } else {</span>
+<span class="nc" id="L628">            additionalProperties.put(cliOption.getOpt(), cliOption.getOptValue());</span>
+        }
+<span class="nc bnc" id="L630" title="All 2 branches missed.">        if (cliOption.getOptValue() == null) {</span>
+<span class="nc" id="L631">            cliOption.setOptValue(cliOption.getDefault());</span>
+<span class="nc" id="L632">            throw new IllegalArgumentException(cliOption.getOpt() + &quot;: Invalid value '&quot; + additionalProperties.get(cliOption.getOpt()).toString() + &quot;'&quot; +</span>
+<span class="nc" id="L633">                    &quot;. &quot; + cliOption.getDescription());</span>
+        }
+<span class="nc" id="L635">    }</span>
+
+    private void setClassModifier() {
+        // CHeck for class modifier if not present set the default value.
+<span class="nc" id="L639">        setCliOption(classModifier);</span>
+
+        // If class modifier is abstract then the methods need to be abstract too.
+<span class="nc bnc" id="L642" title="All 2 branches missed.">        if (&quot;abstract&quot;.equals(classModifier.getOptValue())) {</span>
+<span class="nc" id="L643">            operationModifier.setOptValue(classModifier.getOptValue());</span>
+<span class="nc" id="L644">            additionalProperties.put(OPERATION_MODIFIER, operationModifier.getOptValue());</span>
+<span class="nc" id="L645">            LOGGER.warn(&quot;classModifier is {} so forcing operationModifier to {}&quot;, classModifier.getOptValue(), operationModifier.getOptValue());</span>
+        }
+<span class="nc" id="L647">    }</span>
+
+    private void setOperationModifier() {
+<span class="nc" id="L650">        setCliOption(operationModifier);</span>
+
+        // If operation modifier is abstract then dont generate any body
+<span class="nc bnc" id="L653" title="All 2 branches missed.">        if (&quot;abstract&quot;.equals(operationModifier.getOptValue())) {</span>
+<span class="nc" id="L654">            generateBody = false;</span>
+<span class="nc" id="L655">            additionalProperties.put(GENERATE_BODY, generateBody);</span>
+<span class="nc" id="L656">            LOGGER.warn(&quot;operationModifier is {} so forcing generateBody to {}&quot;, operationModifier.getOptValue(), generateBody);</span>
+<span class="nc bnc" id="L657" title="All 2 branches missed.">        } else if (additionalProperties.containsKey(GENERATE_BODY)) {</span>
+<span class="nc" id="L658">            generateBody = convertPropertyToBooleanAndWriteBack(GENERATE_BODY);</span>
+        } else {
+<span class="nc" id="L660">            additionalProperties.put(GENERATE_BODY, generateBody);</span>
+        }
+<span class="nc" id="L662">    }</span>
+
+    private void setModelClassModifier() {
+<span class="nc" id="L665">        setCliOption(modelClassModifier);</span>
+
+        // If operation modifier is abstract then dont generate any body
+<span class="nc bnc" id="L668" title="All 2 branches missed.">        if (isLibrary) {</span>
+<span class="nc" id="L669">            modelClassModifier.setOptValue(&quot;&quot;);</span>
+<span class="nc" id="L670">            additionalProperties.put(MODEL_CLASS_MODIFIER, modelClassModifier.getOptValue());</span>
+<span class="nc" id="L671">            LOGGER.warn(&quot;buildTarget is {} so removing any modelClassModifier &quot;, buildTarget.getOptValue());</span>
+        }
+<span class="nc" id="L673">    }</span>
+
+    private void setBuildTarget() {
+<span class="nc" id="L676">        setCliOption(buildTarget);</span>
+<span class="nc bnc" id="L677" title="All 2 branches missed.">        if (&quot;library&quot;.equals(buildTarget.getOptValue())) {</span>
+<span class="nc" id="L678">            LOGGER.warn(&quot;buildTarget is {} so changing default isLibrary to true&quot;, buildTarget.getOptValue());</span>
+<span class="nc" id="L679">            isLibrary = true;</span>
+<span class="nc" id="L680">            projectSdk = SDK_LIB;</span>
+<span class="nc" id="L681">            additionalProperties.put(CLASS_MODIFIER, &quot;abstract&quot;);</span>
+        } else {
+<span class="nc" id="L683">            isLibrary = false;</span>
+<span class="nc" id="L684">            projectSdk = SDK_WEB;</span>
+        }
+<span class="nc" id="L686">        additionalProperties.put(IS_LIBRARY, isLibrary);</span>
+<span class="nc" id="L687">    }</span>
+
+    private void setAspnetCoreVersion(String packageFolder) {
+<span class="nc" id="L690">        setCliOption(aspnetCoreVersion);</span>
+
+<span class="nc bnc" id="L692" title="All 6 branches missed.">        if (aspnetCoreVersion.getOptValue().startsWith(&quot;3.&quot;) || aspnetCoreVersion.getOptValue().startsWith(&quot;5.0&quot;) || aspnetCoreVersion.getOptValue().startsWith(&quot;6.&quot;)) {</span>
+<span class="nc" id="L693">            compatibilityVersion = null;</span>
+<span class="nc bnc" id="L694" title="All 2 branches missed.">        } else if (&quot;2.0&quot;.equals(aspnetCoreVersion.getOptValue())) {</span>
+<span class="nc" id="L695">            compatibilityVersion = null;</span>
+        } else {
+            // default, do nothing
+<span class="nc" id="L698">            compatibilityVersion = &quot;Version_&quot; + aspnetCoreVersion.getOptValue().replace(&quot;.&quot;, &quot;_&quot;);</span>
+        }
+<span class="nc" id="L700">        LOGGER.info(&quot;ASP.NET core version: {}&quot;, aspnetCoreVersion.getOptValue());</span>
+<span class="nc bnc" id="L701" title="All 2 branches missed.">        if (!additionalProperties.containsKey(CodegenConstants.TEMPLATE_DIR)) {</span>
+<span class="nc" id="L702">            templateDir = embeddedTemplateDir = &quot;aspnetcore&quot; + File.separator + determineTemplateVersion(aspnetCoreVersion.getOptValue());</span>
+        }
+<span class="nc" id="L704">        additionalProperties.put(COMPATIBILITY_VERSION, compatibilityVersion);</span>
+<span class="nc" id="L705">    }</span>
+
+    private String determineTemplateVersion(String frameworkVersion) {
+<span class="nc bnc" id="L708" title="All 3 branches missed.">        switch (frameworkVersion) {</span>
+            case &quot;6.0&quot;:
+            case &quot;5.0&quot;:
+            case &quot;3.1&quot;:
+<span class="nc" id="L712">                return &quot;3.0&quot;;</span>
+
+            case &quot;2.2&quot;:
+<span class="nc" id="L715">                return &quot;2.1&quot;;</span>
+
+            default:
+<span class="nc" id="L718">                return frameworkVersion;</span>
+        }
+    }
+
+    private void setPocoModels() {
+<span class="nc bnc" id="L723" title="All 2 branches missed.">        if (additionalProperties.containsKey(MODEL_POCOMODE)) {</span>
+<span class="nc" id="L724">            pocoModels = convertPropertyToBooleanAndWriteBack(MODEL_POCOMODE);</span>
+        } else {
+<span class="nc" id="L726">            additionalProperties.put(MODEL_POCOMODE, pocoModels);</span>
+        }
+<span class="nc" id="L728">    }</span>
+
+    private void setUseSeparateModelProject() {
+<span class="nc bnc" id="L731" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_MODEL_SEPERATEPROJECT)) {</span>
+<span class="nc" id="L732">            useSeparateModelProject = convertPropertyToBooleanAndWriteBack(USE_MODEL_SEPERATEPROJECT);</span>
+<span class="nc bnc" id="L733" title="All 2 branches missed.">            if (useSeparateModelProject) {</span>
+<span class="nc" id="L734">                LOGGER.info(&quot;Using separate model project&quot;);</span>
+            }
+        } else {
+<span class="nc" id="L737">            additionalProperties.put(USE_MODEL_SEPERATEPROJECT, useSeparateModelProject);</span>
+        }
+<span class="nc" id="L739">    }</span>
+
+    private void setUseSwashbuckle() {
+<span class="nc bnc" id="L742" title="All 2 branches missed.">        if (isLibrary) {</span>
+<span class="nc" id="L743">            LOGGER.warn(&quot;isLibrary is true so changing default useSwashbuckle to false&quot;);</span>
+<span class="nc" id="L744">            useSwashbuckle = false;</span>
+        } else {
+<span class="nc" id="L746">            useSwashbuckle = true;</span>
+        }
+<span class="nc bnc" id="L748" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_SWASHBUCKLE)) {</span>
+<span class="nc" id="L749">            useSwashbuckle = convertPropertyToBooleanAndWriteBack(USE_SWASHBUCKLE);</span>
+        } else {
+<span class="nc" id="L751">            additionalProperties.put(USE_SWASHBUCKLE, useSwashbuckle);</span>
+        }
+<span class="nc" id="L753">    }</span>
+
+    private void setOperationIsAsync() {
+<span class="nc bnc" id="L756" title="All 2 branches missed.">        if (isLibrary) {</span>
+<span class="nc" id="L757">            operationIsAsync = false;</span>
+<span class="nc" id="L758">            additionalProperties.put(OPERATION_IS_ASYNC, operationIsAsync);</span>
+<span class="nc bnc" id="L759" title="All 2 branches missed.">        } else if (additionalProperties.containsKey(OPERATION_IS_ASYNC)) {</span>
+<span class="nc" id="L760">            operationIsAsync = convertPropertyToBooleanAndWriteBack(OPERATION_IS_ASYNC);</span>
+        } else {
+<span class="nc" id="L762">            additionalProperties.put(OPERATION_IS_ASYNC, operationIsAsync);</span>
+        }
+<span class="nc" id="L764">    }</span>
+
+    private void setIsFramework() {
+<span class="nc bnc" id="L767" title="All 2 branches missed.">        if (aspnetCoreVersion.getOptValue().startsWith(&quot;3.&quot;)) {// default, do nothing</span>
+<span class="nc" id="L768">            LOGGER.warn(</span>
+                    &quot;ASP.NET core version is {} so changing to use frameworkReference instead of packageReference &quot;,
+<span class="nc" id="L770">                    aspnetCoreVersion.getOptValue());</span>
+<span class="nc" id="L771">            useFrameworkReference = true;</span>
+<span class="nc" id="L772">            additionalProperties.put(USE_FRAMEWORK_REFERENCE, useFrameworkReference);</span>
+<span class="nc" id="L773">            additionalProperties.put(TARGET_FRAMEWORK, &quot;netcoreapp&quot; + aspnetCoreVersion.getOptValue());</span>
+<span class="nc bnc" id="L774" title="All 2 branches missed.">        } else if (aspnetCoreVersion.getOptValue().startsWith(&quot;5.&quot;)) {// default, do nothing</span>
+<span class="nc" id="L775">            LOGGER.warn(</span>
+                    &quot;ASP.NET core version is {} so changing to use frameworkReference instead of packageReference &quot;,
+<span class="nc" id="L777">                    aspnetCoreVersion.getOptValue());</span>
+<span class="nc" id="L778">            useFrameworkReference = true;</span>
+<span class="nc" id="L779">            additionalProperties.put(USE_FRAMEWORK_REFERENCE, useFrameworkReference);</span>
+<span class="nc" id="L780">            additionalProperties.put(TARGET_FRAMEWORK, &quot;net5.0&quot;);</span>
+<span class="nc bnc" id="L781" title="All 2 branches missed.">        } else if (aspnetCoreVersion.getOptValue().startsWith(&quot;6.&quot;)) {</span>
+<span class="nc" id="L782">            LOGGER.warn(</span>
+                    &quot;ASP.NET core version is {} so changing to use frameworkReference instead of packageReference &quot;,
+<span class="nc" id="L784">                    aspnetCoreVersion.getOptValue());</span>
+<span class="nc" id="L785">            useFrameworkReference = true;</span>
+<span class="nc" id="L786">            additionalProperties.put(USE_FRAMEWORK_REFERENCE, useFrameworkReference);</span>
+<span class="nc" id="L787">            additionalProperties.put(TARGET_FRAMEWORK, &quot;net6.0&quot;);</span>
+<span class="nc bnc" id="L788" title="All 2 branches missed.">        } else if (aspnetCoreVersion.getOptValue().startsWith(&quot;7.&quot;)) {</span>
+<span class="nc" id="L789">            LOGGER.warn(</span>
+                    &quot;ASP.NET core version is {} so changing to use frameworkReference instead of packageReference &quot;,
+<span class="nc" id="L791">                    aspnetCoreVersion.getOptValue());</span>
+<span class="nc" id="L792">            useFrameworkReference = true;</span>
+<span class="nc" id="L793">            additionalProperties.put(USE_FRAMEWORK_REFERENCE, useFrameworkReference);</span>
+<span class="nc" id="L794">            additionalProperties.put(TARGET_FRAMEWORK, &quot;net7.0&quot;);</span>
+<span class="nc bnc" id="L795" title="All 2 branches missed.">        } else if (aspnetCoreVersion.getOptValue().startsWith(&quot;8.&quot;)) {</span>
+<span class="nc" id="L796">            LOGGER.warn(</span>
+                    &quot;ASP.NET core version is {} so changing to use frameworkReference instead of packageReference &quot;,
+<span class="nc" id="L798">                    aspnetCoreVersion.getOptValue());</span>
+<span class="nc" id="L799">            useFrameworkReference = true;</span>
+<span class="nc" id="L800">            additionalProperties.put(USE_FRAMEWORK_REFERENCE, useFrameworkReference);</span>
+<span class="nc" id="L801">            additionalProperties.put(TARGET_FRAMEWORK, &quot;net8.0&quot;);</span>
+        } else {
+<span class="nc bnc" id="L803" title="All 2 branches missed.">            if (additionalProperties.containsKey(USE_FRAMEWORK_REFERENCE)) {</span>
+<span class="nc" id="L804">                useFrameworkReference = convertPropertyToBooleanAndWriteBack(USE_FRAMEWORK_REFERENCE);</span>
+            } else {
+<span class="nc" id="L806">                additionalProperties.put(USE_FRAMEWORK_REFERENCE, useFrameworkReference);</span>
+            }
+<span class="nc" id="L808">            additionalProperties.put(TARGET_FRAMEWORK, &quot;netcoreapp&quot; + aspnetCoreVersion);</span>
+        }
+
+<span class="nc" id="L811">        setAddititonalPropertyForFramework();</span>
+<span class="nc" id="L812">    }</span>
+
+    private void setAddititonalPropertyForFramework() {
+<span class="nc" id="L815">        String targetFramework = ((String)additionalProperties.get(TARGET_FRAMEWORK));</span>
+<span class="nc bnc" id="L816" title="All 2 branches missed.">        if (targetFramework.startsWith(&quot;net6.0&quot;) ||</span>
+<span class="nc bnc" id="L817" title="All 2 branches missed.">            targetFramework.startsWith(&quot;net7.0&quot;) || </span>
+<span class="nc bnc" id="L818" title="All 2 branches missed.">            targetFramework.startsWith(&quot;net8.0&quot;)) {</span>
+<span class="nc" id="L819">            additionalProperties.put(NET_60_OR_LATER, true);</span>
+        }
+<span class="nc" id="L821">    }</span>
+
+    private void setUseNewtonsoft() {
+<span class="nc bnc" id="L824" title="All 2 branches missed.">        if (aspnetCoreVersion.getOptValue().startsWith(&quot;2.&quot;)) {</span>
+<span class="nc" id="L825">            LOGGER.warn(&quot;ASP.NET core version 2.X support has been deprecated. Please use ASP.NET core version 3.1 instead&quot;);</span>
+<span class="nc" id="L826">            LOGGER.warn(&quot;ASP.NET core version is {} so staying on default json library.&quot;, aspnetCoreVersion.getOptValue());</span>
+<span class="nc" id="L827">            useNewtonsoft = false;</span>
+<span class="nc" id="L828">            additionalProperties.put(USE_NEWTONSOFT, useNewtonsoft);</span>
+        } else {
+<span class="nc bnc" id="L830" title="All 2 branches missed.">            if (additionalProperties.containsKey(USE_NEWTONSOFT)) {</span>
+<span class="nc" id="L831">                useNewtonsoft = convertPropertyToBooleanAndWriteBack(USE_NEWTONSOFT);</span>
+            } else {
+<span class="nc" id="L833">                additionalProperties.put(USE_NEWTONSOFT, useNewtonsoft);</span>
+            }
+        }
+<span class="nc" id="L836">    }</span>
+
+    private void setUseEndpointRouting() {
+<span class="nc bnc" id="L839" title="All 6 branches missed.">        if (aspnetCoreVersion.getOptValue().startsWith(&quot;3.&quot;) || aspnetCoreVersion.getOptValue().startsWith(&quot;5.&quot;) || aspnetCoreVersion.getOptValue().startsWith(&quot;6.&quot;)) {</span>
+<span class="nc" id="L840">            LOGGER.warn(&quot;ASP.NET core version is {} so switching to old style endpoint routing.&quot;, aspnetCoreVersion.getOptValue());</span>
+<span class="nc" id="L841">            useDefaultRouting = false;</span>
+<span class="nc" id="L842">            additionalProperties.put(USE_DEFAULT_ROUTING, useDefaultRouting);</span>
+        } else {
+<span class="nc bnc" id="L844" title="All 2 branches missed.">            if (additionalProperties.containsKey(USE_DEFAULT_ROUTING)) {</span>
+<span class="nc" id="L845">                useDefaultRouting = convertPropertyToBooleanAndWriteBack(USE_DEFAULT_ROUTING);</span>
+            } else {
+<span class="nc" id="L847">                additionalProperties.put(USE_DEFAULT_ROUTING, useDefaultRouting);</span>
+            }
+        }
+<span class="nc" id="L850">    }</span>
+
+    private void setSwashbuckleVersion() {
+<span class="nc" id="L853">        setCliOption(swashbuckleVersion);</span>
+
+<span class="nc bnc" id="L855" title="All 2 branches missed.">        if (aspnetCoreVersion.getOptValue().startsWith(&quot;3.&quot;)) {</span>
+<span class="nc" id="L856">            LOGGER.warn(&quot;ASP.NET core version is {} so changing default Swashbuckle version to 6.4.0.&quot;, aspnetCoreVersion.getOptValue());</span>
+<span class="nc" id="L857">            swashbuckleVersion.setOptValue(&quot;6.4.0&quot;);</span>
+<span class="nc" id="L858">            additionalProperties.put(SWASHBUCKLE_VERSION, swashbuckleVersion.getOptValue());</span>
+<span class="nc bnc" id="L859" title="All 2 branches missed.">        } else if (aspnetCoreVersion.getOptValue().startsWith(&quot;5.&quot;)) {</span>
+            // for aspnet core 5.x, use Swashbuckle 6.4 instead
+<span class="nc" id="L861">            LOGGER.warn(&quot;ASP.NET core version is {} so changing default Swashbuckle version to 6.4.0.&quot;, aspnetCoreVersion.getOptValue());</span>
+<span class="nc" id="L862">            swashbuckleVersion.setOptValue(&quot;6.4.0&quot;);</span>
+<span class="nc" id="L863">            additionalProperties.put(SWASHBUCKLE_VERSION, swashbuckleVersion.getOptValue());</span>
+<span class="nc bnc" id="L864" title="All 2 branches missed.">        } else if (aspnetCoreVersion.getOptValue().startsWith(&quot;6.&quot;)) {</span>
+<span class="nc" id="L865">            LOGGER.warn(&quot;ASP.NET core version is {} so changing default Swashbuckle version to 6.4.0.&quot;, aspnetCoreVersion.getOptValue());</span>
+<span class="nc" id="L866">            swashbuckleVersion.setOptValue(&quot;6.4.0&quot;);</span>
+<span class="nc" id="L867">            additionalProperties.put(SWASHBUCKLE_VERSION, swashbuckleVersion.getOptValue());</span>
+        } else {
+            // default, do nothing
+<span class="nc" id="L870">            LOGGER.info(&quot;Swashbuckle version: {}&quot;, swashbuckleVersion.getOptValue());</span>
+        }
+<span class="nc" id="L872">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

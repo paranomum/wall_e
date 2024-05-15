@@ -1,0 +1,6 @@
+org.openapitools.codegen.api
+org.openapitools.codegen.config
+org.openapitools.codegen.meta
+org.openapitools.codegen.meta.features
+org.openapitools.codegen.meta.features.annotations
+org.openapitools.codegen.validation

@@ -1,0 +1,563 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractJuliaCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">AbstractJuliaCodegen.java</span></div><h1>AbstractJuliaCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.meta.features.ClientModificationFeature;
+import org.openapitools.codegen.meta.features.DocumentationFeature;
+import org.openapitools.codegen.meta.features.GlobalFeature;
+import org.openapitools.codegen.meta.features.ParameterFeature;
+import org.openapitools.codegen.meta.features.SchemaSupportFeature;
+import org.openapitools.codegen.meta.features.SecurityFeature;
+import org.openapitools.codegen.meta.features.WireFormatFeature;
+
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.servers.Server;
+
+import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
+
+import static org.openapitools.codegen.utils.StringUtils.camelize;
+
+import org.openapitools.codegen.utils.CamelizeOption;
+import org.openapitools.codegen.utils.ModelUtils;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.CaseFormat;
+import com.google.common.collect.ImmutableMap;
+import com.samskivert.mustache.Mustache.Lambda;
+import org.openapitools.codegen.templating.mustache.EscapeChar;
+
+public abstract class AbstractJuliaCodegen extends DefaultCodegen {
+<span class="nc" id="L57">    protected final Logger LOGGER = LoggerFactory.getLogger(AbstractJuliaCodegen.class);</span>
+
+<span class="nc" id="L59">    protected String srcPath = &quot;src&quot;;</span>
+<span class="nc" id="L60">    protected String apiSrcPath = srcPath + &quot;/apis/&quot;;</span>
+<span class="nc" id="L61">    protected String modelSrcPath = srcPath + &quot;/models/&quot;;</span>
+
+<span class="nc" id="L63">    protected String apiDocPath = &quot;docs/&quot;;</span>
+<span class="nc" id="L64">    protected String modelDocPath = &quot;docs/&quot;;</span>
+
+    protected String packageName;
+    protected Boolean exportModels;
+    protected Boolean exportOperations;
+
+<span class="nc" id="L70">    protected final DateTimeFormatter OFFSET_DATE_TIME_FORMAT = DateTimeFormatter.ISO_OFFSET_DATE_TIME;</span>
+<span class="nc" id="L71">    protected final SimpleDateFormat DATE_TIME_FORMAT = new SimpleDateFormat(&quot;yyyy-MM-dd'T'HH:mm:ss.SSSXXX&quot;, Locale.ROOT);</span>
+<span class="nc" id="L72">    protected final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(&quot;yyyy-MM-dd&quot;, Locale.ROOT);</span>
+
+    public AbstractJuliaCodegen() {
+<span class="nc" id="L75">        super();</span>
+
+<span class="nc" id="L77">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L78">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="nc" id="L79">                .includeSchemaSupportFeatures(</span>
+                        SchemaSupportFeature.Union, SchemaSupportFeature.allOf,
+                        SchemaSupportFeature.anyOf, SchemaSupportFeature.oneOf
+                )
+<span class="nc" id="L83">                .excludeWireFormatFeatures(</span>
+                        WireFormatFeature.XML
+                )
+<span class="nc" id="L86">                .securityFeatures(EnumSet.of(</span>
+                        SecurityFeature.BasicAuth,
+                        SecurityFeature.ApiKey,
+                        SecurityFeature.BearerToken))
+<span class="nc" id="L90">                .excludeParameterFeatures(</span>
+                        ParameterFeature.Cookie
+                )
+<span class="nc" id="L93">                .excludeGlobalFeatures(</span>
+                        GlobalFeature.Callbacks, GlobalFeature.Examples,
+                        GlobalFeature.Produces, GlobalFeature.Consumes
+                )
+<span class="nc" id="L97">                .includeClientModificationFeatures(</span>
+                        ClientModificationFeature.BasePath, ClientModificationFeature.UserAgent
+                )
+        );
+
+<span class="nc" id="L102">        reservedWords = new HashSet&lt;String&gt;(</span>
+<span class="nc" id="L103">                Arrays.asList(</span>
+                        &quot;if&quot;, &quot;else&quot;, &quot;elseif&quot;, &quot;while&quot;, &quot;for&quot;, &quot;begin&quot;, &quot;end&quot;, &quot;quote&quot;,
+                        &quot;try&quot;, &quot;catch&quot;, &quot;return&quot;, &quot;local&quot;, &quot;function&quot;, &quot;macro&quot;, &quot;ccall&quot;, &quot;finally&quot;, &quot;break&quot;, &quot;continue&quot;,
+                        &quot;global&quot;, &quot;module&quot;, &quot;using&quot;, &quot;import&quot;, &quot;export&quot;, &quot;const&quot;, &quot;let&quot;, &quot;do&quot;, &quot;baremodule&quot;,
+                        &quot;Type&quot;, &quot;Enum&quot;, &quot;Any&quot;, &quot;DataType&quot;, &quot;Base&quot;
+                )
+        );
+
+        // Language Specific Primitives.  These types will not trigger imports by the client generator
+<span class="nc" id="L112">        languageSpecificPrimitives = new HashSet&lt;String&gt;(</span>
+<span class="nc" id="L113">                Arrays.asList(&quot;Integer&quot;, &quot;Int128&quot;, &quot;Int64&quot;, &quot;Int32&quot;, &quot;Int16&quot;, &quot;Int8&quot;, &quot;UInt128&quot;, &quot;UInt64&quot;, &quot;UInt32&quot;, &quot;UInt16&quot;, &quot;UInt8&quot;, &quot;Float64&quot;, &quot;Float32&quot;, &quot;Float16&quot;, &quot;Char&quot;, &quot;Vector&quot;, &quot;Dict&quot;, &quot;Vector{UInt8}&quot;, &quot;Bool&quot;, &quot;String&quot;, &quot;Date&quot;, &quot;DateTime&quot;, &quot;ZonedDateTime&quot;, &quot;Nothing&quot;, &quot;Any&quot;)</span>
+        );
+
+<span class="nc" id="L116">        typeMapping.clear();</span>
+<span class="nc" id="L117">        typeMapping.put(&quot;int&quot;, &quot;Int64&quot;);</span>
+<span class="nc" id="L118">        typeMapping.put(&quot;integer&quot;, &quot;Int64&quot;);</span>
+<span class="nc" id="L119">        typeMapping.put(&quot;long&quot;, &quot;Int64&quot;);</span>
+<span class="nc" id="L120">        typeMapping.put(&quot;short&quot;, &quot;Int32&quot;);</span>
+<span class="nc" id="L121">        typeMapping.put(&quot;byte&quot;, &quot;UInt8&quot;);</span>
+<span class="nc" id="L122">        typeMapping.put(&quot;float&quot;, &quot;Float32&quot;);</span>
+<span class="nc" id="L123">        typeMapping.put(&quot;double&quot;, &quot;Float64&quot;);</span>
+<span class="nc" id="L124">        typeMapping.put(&quot;string&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L125">        typeMapping.put(&quot;char&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L126">        typeMapping.put(&quot;binary&quot;, &quot;Vector{UInt8}&quot;);</span>
+<span class="nc" id="L127">        typeMapping.put(&quot;boolean&quot;, &quot;Bool&quot;);</span>
+<span class="nc" id="L128">        typeMapping.put(&quot;number&quot;, &quot;Float64&quot;);</span>
+<span class="nc" id="L129">        typeMapping.put(&quot;decimal&quot;, &quot;Float64&quot;);</span>
+<span class="nc" id="L130">        typeMapping.put(&quot;array&quot;, &quot;Vector&quot;);</span>
+<span class="nc" id="L131">        typeMapping.put(&quot;set&quot;, &quot;Vector&quot;);</span>
+<span class="nc" id="L132">        typeMapping.put(&quot;map&quot;, &quot;Dict&quot;);</span>
+<span class="nc" id="L133">        typeMapping.put(&quot;date&quot;, &quot;Date&quot;);</span>
+<span class="nc" id="L134">        typeMapping.put(&quot;DateTime&quot;, &quot;ZonedDateTime&quot;);</span>
+<span class="nc" id="L135">        typeMapping.put(&quot;File&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L136">        typeMapping.put(&quot;file&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L137">        typeMapping.put(&quot;UUID&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L138">        typeMapping.put(&quot;URI&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L139">        typeMapping.put(&quot;ByteArray&quot;, &quot;Vector{UInt8}&quot;);</span>
+<span class="nc" id="L140">        typeMapping.put(&quot;object&quot;, &quot;Any&quot;);</span>
+<span class="nc" id="L141">        typeMapping.put(&quot;Object&quot;, &quot;Any&quot;);</span>
+<span class="nc" id="L142">        typeMapping.put(&quot;AnyType&quot;, &quot;Any&quot;);</span>
+<span class="nc" id="L143">    }</span>
+
+    @Override
+    public GeneratorLanguage generatorLanguage() {
+<span class="nc" id="L147">        return GeneratorLanguage.JULIA;</span>
+    }
+
+    public void setPackageName(String packageName) {
+<span class="nc" id="L151">        this.packageName = packageName;</span>
+<span class="nc" id="L152">    }</span>
+
+    public void setExportModels(Boolean exportModels) {
+<span class="nc" id="L155">        this.exportModels = exportModels;</span>
+<span class="nc" id="L156">    }</span>
+
+    public void setExportOperations(Boolean exportOperations) {
+<span class="nc" id="L159">        this.exportOperations = exportOperations;</span>
+<span class="nc" id="L160">    }</span>
+
+    protected static String dropDots(String str) {
+<span class="nc" id="L163">        return str.replaceAll(&quot;\\.&quot;, &quot;_&quot;);</span>
+    }
+
+    /**
+     * Escapes a reserved word as defined in the `reservedWords` array. Handle escaping
+     * those terms here.  This logic is only called if a variable matches the reseved words
+     *
+     * @return the escaped term
+     */
+    @Override
+    public String escapeReservedWord(String name) {
+<span class="nc bnc" id="L174" title="All 2 branches missed.">        if (reservedWords.contains(name)) {</span>
+<span class="nc" id="L175">            return &quot;__&quot; + name + &quot;__&quot;;  // add underscores to reserved words, and also to obscure it to lessen chances of clashing with any other names</span>
+        } else {
+<span class="nc" id="L177">            return name;</span>
+        }
+    }
+
+    /**
+     * Location to write model files.
+     */
+    @Override
+    public String modelFileFolder() {
+<span class="nc" id="L186">        return (outputFolder + &quot;/&quot; + modelSrcPath).replace('/', File.separatorChar);</span>
+    }
+
+    /**
+     * Location to write api files.
+     */
+    @Override
+    public String apiFileFolder() {
+<span class="nc" id="L194">        return (outputFolder + &quot;/&quot; + apiSrcPath).replace('/', File.separatorChar);</span>
+    }
+
+    @Override
+    public String apiDocFileFolder() {
+<span class="nc" id="L199">        return (outputFolder + &quot;/&quot; + apiDocPath).replace('/', File.separatorChar);</span>
+    }
+
+    @Override
+    public String modelDocFileFolder() {
+<span class="nc" id="L204">        return (outputFolder + &quot;/&quot; + modelDocPath).replace('/', File.separatorChar);</span>
+    }
+
+    @Override
+    public String toModelFilename(String name) {
+<span class="nc" id="L209">        return &quot;model_&quot; + toModelName(name);</span>
+    }
+
+    @Override
+    public String toModelDocFilename(String name) {
+<span class="nc" id="L214">        return toModelName(name);</span>
+    }
+
+    @Override
+    public String toApiFilename(String name) {
+<span class="nc" id="L219">        name = name.replaceAll(&quot;-&quot;, &quot;_&quot;);</span>
+<span class="nc" id="L220">        return &quot;api_&quot; + camelize(name) + &quot;Api&quot;;</span>
+    }
+
+    @Override
+    public String toApiName(String name) {
+<span class="nc bnc" id="L225" title="All 2 branches missed.">        if (name.length() == 0) {</span>
+<span class="nc" id="L226">            return &quot;DefaultApi&quot;;</span>
+        }
+        // e.g. phone_number_api =&gt; PhoneNumberApi
+<span class="nc" id="L229">        return camelize(name) + &quot;Api&quot;;</span>
+    }
+
+    @Override
+    public String toParamName(String name) {
+        // obtain the name from parameterNameMapping directly if provided
+<span class="nc bnc" id="L235" title="All 2 branches missed.">        if (parameterNameMapping.containsKey(name)) {</span>
+<span class="nc" id="L236">            return parameterNameMapping.get(name);</span>
+        }
+
+<span class="nc" id="L239">        name = toVarName(name);</span>
+<span class="nc" id="L240">        CamelizeOption camelizeOption = CamelizeOption.UPPERCASE_FIRST_CHAR;</span>
+<span class="nc" id="L241">        name = camelize(sanitizeName(name), camelizeOption);</span>
+<span class="nc" id="L242">        name = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name);</span>
+<span class="nc" id="L243">        return escapeReservedWord(name);</span>
+    }
+
+    @Override
+    public String toApiVarName(String name) {
+<span class="nc" id="L248">        CamelizeOption camelizeOption = CamelizeOption.UPPERCASE_FIRST_CHAR;</span>
+<span class="nc" id="L249">        name = camelize(sanitizeName(name), camelizeOption);</span>
+<span class="nc" id="L250">        name = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name);</span>
+<span class="nc" id="L251">        return escapeReservedWord(name);</span>
+    }
+
+    @Override
+    public String toVarName(String name) {
+        // obtain the name from nameMapping directly if provided
+<span class="nc bnc" id="L257" title="All 2 branches missed.">        if (nameMapping.containsKey(name)) {</span>
+<span class="nc" id="L258">            return nameMapping.get(name);</span>
+        }
+
+<span class="nc" id="L261">        return name;</span>
+
+    }
+
+    /**
+     * Sanitize name (parameter, property, method, etc)
+     *
+     * @param name string to be sanitize
+     * @return sanitized string
+     */
+    @Override
+    @SuppressWarnings(&quot;static-method&quot;)
+    public String sanitizeName(String name) {
+<span class="nc bnc" id="L274" title="All 2 branches missed.">        if (name == null) {</span>
+<span class="nc" id="L275">            LOGGER.error(&quot;String to be sanitized is null. Default to ERROR_UNKNOWN&quot;);</span>
+<span class="nc" id="L276">            return &quot;ERROR_UNKNOWN&quot;;</span>
+        }
+
+        // if the name is just '$', map it to 'value', as that's sometimes used in the spec
+<span class="nc bnc" id="L280" title="All 2 branches missed.">        if (&quot;$&quot;.equals(name)) {</span>
+<span class="nc" id="L281">            return &quot;value&quot;;</span>
+        }
+
+<span class="nc" id="L284">        name = name.replaceAll(&quot;\\[\\]&quot;, &quot;&quot;);</span>
+<span class="nc" id="L285">        name = name.replaceAll(&quot;\\[&quot;, &quot;_&quot;);</span>
+<span class="nc" id="L286">        name = name.replaceAll(&quot;\\]&quot;, &quot;&quot;);</span>
+<span class="nc" id="L287">        name = name.replaceAll(&quot;\\(&quot;, &quot;_&quot;);</span>
+<span class="nc" id="L288">        name = name.replaceAll(&quot;\\)&quot;, &quot;&quot;);</span>
+<span class="nc" id="L289">        name = name.replaceAll(&quot;\\.&quot;, &quot;_&quot;);</span>
+<span class="nc" id="L290">        name = name.replaceAll(&quot;-&quot;, &quot;_&quot;);</span>
+<span class="nc" id="L291">        name = name.replaceAll(&quot; &quot;, &quot;_&quot;);</span>
+<span class="nc" id="L292">        name = name.replaceAll(&quot;/&quot;, &quot;_&quot;);</span>
+<span class="nc" id="L293">        return name.replaceAll(&quot;[^a-zA-Z0-9_{}]&quot;, &quot;&quot;);</span>
+    }
+
+    protected boolean needsVarEscape(String name) {
+<span class="nc bnc" id="L297" title="All 6 branches missed.">        return (!name.matches(&quot;[a-zA-Z0-9_]*&quot;) &amp;&amp; !name.matches(&quot;var\&quot;.*\&quot;&quot;)) || reservedWords.contains(name);</span>
+    }
+
+    /**
+     * Output the proper Julia model name.
+     *
+     * @param name the name of the model
+     * @return Julia model name
+     */
+    @Override
+    public String toModelName(final String name) {
+        // obtain the name from modelNameMapping directly if provided
+<span class="nc bnc" id="L309" title="All 2 branches missed.">        if (modelNameMapping.containsKey(name)) {</span>
+<span class="nc" id="L310">            return modelNameMapping.get(name);</span>
+        }
+
+<span class="nc" id="L313">        String result = sanitizeName(name);</span>
+
+        // remove dollar sign
+<span class="nc" id="L316">        result = result.replaceAll(&quot;$&quot;, &quot;&quot;);</span>
+
+        // model name cannot use reserved keyword, e.g. return
+<span class="nc bnc" id="L319" title="All 2 branches missed.">        if (isReservedWord(result)) {</span>
+<span class="nc" id="L320">            LOGGER.warn(result + &quot; (reserved word) cannot be used as model name. Renamed to &quot; + camelize(&quot;model_&quot; + result));</span>
+<span class="nc" id="L321">            result = &quot;model_&quot; + result; // e.g. return =&gt; ModelReturn (after camelize)</span>
+        }
+
+        // model name starts with number
+<span class="nc bnc" id="L325" title="All 2 branches missed.">        if (result.matches(&quot;^\\d.*&quot;)) {</span>
+<span class="nc" id="L326">            LOGGER.warn(result + &quot; (model name starts with number) cannot be used as model name. Renamed to &quot; + camelize(&quot;model_&quot; + result));</span>
+<span class="nc" id="L327">            result = &quot;model_&quot; + result; // e.g. 200Response =&gt; Model200Response (after camelize)</span>
+        }
+
+<span class="nc bnc" id="L330" title="All 2 branches missed.">        if (!StringUtils.isEmpty(modelNamePrefix)) {</span>
+<span class="nc" id="L331">            result = modelNamePrefix + &quot;_&quot; + result;</span>
+        }
+
+<span class="nc bnc" id="L334" title="All 2 branches missed.">        if (!StringUtils.isEmpty(modelNameSuffix)) {</span>
+<span class="nc" id="L335">            result = result + &quot;_&quot; + modelNameSuffix;</span>
+        }
+
+<span class="nc" id="L338">        result = dropDots(result);</span>
+        // camelize the model name
+        // phone_number =&gt; PhoneNumber
+<span class="nc" id="L341">        result = camelize(result);</span>
+
+<span class="nc" id="L343">        return result;</span>
+    }
+
+    @Override
+    public String getTypeDeclaration(Schema schema) {
+<span class="nc bnc" id="L348" title="All 2 branches missed.">        if (ModelUtils.isArraySchema(schema)) {</span>
+<span class="nc" id="L349">            Schema inner = ModelUtils.getSchemaItems(schema);</span>
+<span class="nc" id="L350">            return getSchemaType(schema) + &quot;{&quot; + getTypeDeclaration(inner) + &quot;}&quot;;</span>
+<span class="nc bnc" id="L351" title="All 2 branches missed.">        } else if (ModelUtils.isSet(schema)) {</span>
+<span class="nc" id="L352">            Schema inner = ModelUtils.getAdditionalProperties(schema);</span>
+<span class="nc" id="L353">            return getSchemaType(schema) + &quot;{&quot; + getTypeDeclaration(inner) + &quot;}&quot;;</span>
+<span class="nc bnc" id="L354" title="All 2 branches missed.">        } else if (ModelUtils.isMapSchema(schema)) {</span>
+<span class="nc" id="L355">            Schema inner = ModelUtils.getAdditionalProperties(schema);</span>
+<span class="nc" id="L356">            return getSchemaType(schema) + &quot;{String, &quot; + getTypeDeclaration(inner) + &quot;}&quot;;</span>
+        }
+<span class="nc" id="L358">        return super.getTypeDeclaration(schema);</span>
+    }
+
+
+    /**
+     * Return the type declaration for a given schema
+     *
+     * @param schema the schema
+     * @return the type declaration
+     */
+    @Override
+    public String getSchemaType(Schema schema) {
+<span class="nc" id="L370">        String openAPIType = super.getSchemaType(schema);</span>
+<span class="nc" id="L371">        String type = null;</span>
+
+<span class="nc bnc" id="L373" title="All 2 branches missed.">        if (openAPIType == null) {</span>
+<span class="nc" id="L374">            LOGGER.error(&quot;OpenAPI Type for {} is null. Default to Object instead.&quot;, schema.getName());</span>
+<span class="nc" id="L375">            openAPIType = &quot;Object&quot;;</span>
+        }
+
+<span class="nc bnc" id="L378" title="All 2 branches missed.">        if (typeMapping.containsKey(openAPIType)) {</span>
+<span class="nc" id="L379">            type = typeMapping.get(openAPIType);</span>
+<span class="nc bnc" id="L380" title="All 2 branches missed.">            if (languageSpecificPrimitives.contains(type)) {</span>
+<span class="nc" id="L381">                return type;</span>
+            }
+        } else {
+<span class="nc" id="L384">            type = openAPIType;</span>
+        }
+
+<span class="nc" id="L387">        return toModelName(type);</span>
+    }
+
+    /**
+     * Return the default value of the property
+     *
+     * @param schema OpenAPI property object
+     * @return string presentation of the default value of the property
+     */
+    @Override
+    public String toDefaultValue(Schema schema) {
+<span class="nc bnc" id="L398" title="All 2 branches missed.">        if (schema.getDefault() != null) {</span>
+<span class="nc bnc" id="L399" title="All 2 branches missed.">            if (ModelUtils.isBooleanSchema(schema)) {</span>
+<span class="nc" id="L400">                return schema.getDefault().toString();</span>
+<span class="nc bnc" id="L401" title="All 2 branches missed.">            } else if (ModelUtils.isDateSchema(schema)) {</span>
+<span class="nc" id="L402">                Object _default_obj = schema.getDefault();</span>
+                String _default;
+<span class="nc bnc" id="L404" title="All 2 branches missed.">                if (_default_obj instanceof Date) {</span>
+<span class="nc" id="L405">                    _default = DATE_FORMAT.format(_default_obj);</span>
+                } else {
+<span class="nc" id="L407">                    _default = _default_obj.toString();</span>
+                }
+<span class="nc" id="L409">                return &quot;OpenAPI.str2date(\&quot;&quot; + _default + &quot;\&quot;)&quot;;</span>
+<span class="nc bnc" id="L410" title="All 2 branches missed.">            } else if (ModelUtils.isDateTimeSchema(schema)) {</span>
+<span class="nc" id="L411">                Object _default_obj = schema.getDefault();</span>
+                String _default;
+<span class="nc bnc" id="L413" title="All 2 branches missed.">                if (_default_obj instanceof DateTime) {</span>
+<span class="nc" id="L414">                    _default = DATE_TIME_FORMAT.format((DateTime)_default_obj);</span>
+<span class="nc bnc" id="L415" title="All 2 branches missed.">                } else if (_default_obj instanceof OffsetDateTime) {</span>
+<span class="nc" id="L416">                    _default = OFFSET_DATE_TIME_FORMAT.format((OffsetDateTime)_default_obj);</span>
+                } else {
+<span class="nc" id="L418">                    _default = _default_obj.toString();</span>
+                }
+<span class="nc" id="L420">                return &quot;OpenAPI.str2zoneddatetime(\&quot;&quot; + _default + &quot;\&quot;)&quot;;</span>
+<span class="nc bnc" id="L421" title="All 6 branches missed.">            } else if (ModelUtils.isIntegerSchema(schema) || ModelUtils.isLongSchema(schema) || ModelUtils.isNumberSchema(schema)) {</span>
+<span class="nc" id="L422">                return schema.getDefault().toString();</span>
+<span class="nc bnc" id="L423" title="All 2 branches missed.">            } else if (ModelUtils.isStringSchema(schema)) {</span>
+<span class="nc" id="L424">                String _default = String.valueOf(schema.getDefault());</span>
+<span class="nc" id="L425">                return &quot;\&quot;&quot; + _default + &quot;\&quot;&quot;;</span>
+            }
+        }
+
+<span class="nc" id="L429">        return &quot;nothing&quot;;</span>
+    }
+
+    @Override
+    public String escapeUnsafeCharacters(String input) {
+<span class="nc" id="L434">        return input.replace(&quot;#=&quot;, &quot;#_=&quot;).replace(&quot;=#&quot;, &quot;=_#&quot;);</span>
+    }
+
+    /**
+     * Escape single and/or double quote to avoid code injection
+     *
+     * @param input String to be cleaned up
+     * @return string with quotation mark removed or escaped
+     */
+    public String escapeQuotationMark(String input) {
+<span class="nc" id="L444">        return input.replace(&quot;\&quot;&quot;, &quot;\\\&quot;&quot;);</span>
+    }
+
+    protected String escapeRegex(String pattern) {
+<span class="nc" id="L448">        pattern = pattern.replaceAll(&quot;\\\\\\\\&quot;, &quot;\\\\&quot;);</span>
+<span class="nc" id="L449">        pattern = pattern.replaceAll(&quot;^/&quot;, &quot;&quot;);</span>
+<span class="nc" id="L450">        pattern = pattern.replaceAll(&quot;/$&quot;, &quot;&quot;);</span>
+<span class="nc" id="L451">        return pattern;</span>
+    }
+
+    /**
+     * Convert OpenAPI Parameter object to Codegen Parameter object
+     *
+     * @param imports set of imports for library/package/module
+     * @param param   OpenAPI parameter object
+     * @return Codegen Parameter object
+     */
+    @Override
+    public CodegenParameter fromParameter(Parameter param, Set&lt;String&gt; imports) {
+<span class="nc" id="L463">        CodegenParameter parameter = super.fromParameter(param, imports);</span>
+<span class="nc bnc" id="L464" title="All 2 branches missed.">        if (parameter.pattern != null) {</span>
+<span class="nc" id="L465">            parameter.pattern = escapeRegex(parameter.pattern);</span>
+        }
+<span class="nc" id="L467">        return parameter;</span>
+    }
+
+    /**
+     * Convert OAS Property schema to Codegen Property object.
+     * &lt;p&gt;
+     * The return value is cached. An internal cache is looked up to determine
+     * if the CodegenProperty return value has already been instantiated for
+     * the (String name, Schema schema) arguments.
+     * Any subsequent processing of the CodegenModel return value must be idempotent
+     * for a given (String name, Schema schema).
+     *
+     * @param name     name of the property
+     * @param schema   OAS property schema
+     * @param required true if the property is required in the next higher object schema, false otherwise
+     * @return Codegen Property object
+     */
+    @Override
+    public CodegenProperty fromProperty(String name, Schema schema, boolean required) {
+<span class="nc" id="L486">        CodegenProperty property = super.fromProperty(name, schema, required);</span>
+        // if the name needs any escaping, we set it to var&quot;name&quot;
+<span class="nc bnc" id="L488" title="All 2 branches missed.">        if (needsVarEscape(property.name)) {</span>
+<span class="nc" id="L489">            property.name = &quot;var\&quot;&quot; + property.name + &quot;\&quot;&quot;;</span>
+        }
+<span class="nc bnc" id="L491" title="All 2 branches missed.">        if (property.pattern != null) {</span>
+<span class="nc" id="L492">            property.pattern = escapeRegex(property.pattern);</span>
+        }
+<span class="nc" id="L494">        return property;</span>
+    }
+
+    /**
+     * Return the operation ID (method name)
+     *
+     * @param operationId operation ID
+     * @return the sanitized method name
+     */
+    @SuppressWarnings(&quot;static-method&quot;)
+    public String toOperationId(String operationId) {
+<span class="nc" id="L505">        CamelizeOption camelizeOption = CamelizeOption.UPPERCASE_FIRST_CHAR;</span>
+<span class="nc" id="L506">        operationId = camelize(super.toOperationId(operationId), camelizeOption);</span>
+<span class="nc" id="L507">        operationId = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, operationId);</span>
+<span class="nc" id="L508">        return sanitizeName(operationId);</span>
+    }
+
+    private void changeParamNames(List&lt;CodegenParameter&gt; paramsList, HashSet&lt;String&gt; reservedNames) {
+        // check if any param name clashes with type name and rename it
+<span class="nc bnc" id="L513" title="All 2 branches missed.">        for (CodegenParameter param : paramsList) {</span>
+<span class="nc bnc" id="L514" title="All 2 branches missed.">            if (reservedNames.contains(param.paramName)) {</span>
+                do {
+<span class="nc" id="L516">                    param.paramName = param.paramName + &quot;_&quot;;</span>
+<span class="nc bnc" id="L517" title="All 2 branches missed.">                } while (reservedNames.contains(param.paramName + &quot;param&quot;));</span>
+<span class="nc" id="L518">                param.paramName = param.paramName + &quot;param&quot;;</span>
+            }
+<span class="nc" id="L520">        }</span>
+<span class="nc" id="L521">    }</span>
+
+    /**
+     * Convert OAS Operation object to Codegen Operation object
+     *
+     * @param httpMethod HTTP method
+     * @param operation  OAS operation object
+     * @param path       the path of the operation
+     * @param servers    list of servers
+     * @return Codegen Operation object
+     */
+    @Override
+    public CodegenOperation fromOperation(String path,
+                                          String httpMethod,
+                                          Operation operation,
+                                          List&lt;Server&gt; servers) {
+<span class="nc" id="L537">        CodegenOperation op = super.fromOperation(path, httpMethod, operation, servers);</span>
+
+        // collect all reserved names
+<span class="nc" id="L540">        HashSet&lt;String&gt; reservedNames = new HashSet&lt;String&gt;();</span>
+<span class="nc" id="L541">        reservedNames.add(op.returnType);</span>
+<span class="nc" id="L542">        reservedNames.add(op.operationId);</span>
+<span class="nc bnc" id="L543" title="All 2 branches missed.">        for (CodegenParameter param : op.allParams) {</span>
+<span class="nc" id="L544">            reservedNames.add(param.dataType);</span>
+<span class="nc" id="L545">        }</span>
+
+<span class="nc" id="L547">        changeParamNames(op.allParams, reservedNames);</span>
+<span class="nc" id="L548">        changeParamNames(op.bodyParams, reservedNames);</span>
+<span class="nc" id="L549">        changeParamNames(op.headerParams, reservedNames);</span>
+<span class="nc" id="L550">        changeParamNames(op.pathParams, reservedNames);</span>
+<span class="nc" id="L551">        changeParamNames(op.queryParams, reservedNames);</span>
+<span class="nc" id="L552">        changeParamNames(op.formParams, reservedNames);</span>
+
+<span class="nc" id="L554">        return op;</span>
+    }
+
+    @Override
+    protected ImmutableMap.Builder&lt;String, Lambda&gt; addMustacheLambdas() {
+<span class="nc" id="L559">        return super.addMustacheLambdas()</span>
+<span class="nc" id="L560">                .put(&quot;escapeDollar&quot;, new EscapeChar(&quot;(?&lt;!\\\\)\\$&quot;, &quot;\\\\\\$&quot;));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

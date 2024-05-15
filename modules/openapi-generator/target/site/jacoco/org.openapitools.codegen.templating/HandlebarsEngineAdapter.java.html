@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HandlebarsEngineAdapter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.templating</a> &gt; <span class="el_source">HandlebarsEngineAdapter.java</span></div><h1>HandlebarsEngineAdapter.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2019 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.templating;
+
+import com.github.jknack.handlebars.Context;
+import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.Jackson2Helper;
+import com.github.jknack.handlebars.Template;
+import com.github.jknack.handlebars.context.FieldValueResolver;
+import com.github.jknack.handlebars.context.JavaBeanValueResolver;
+import com.github.jknack.handlebars.context.MapValueResolver;
+import com.github.jknack.handlebars.context.MethodValueResolver;
+import com.github.jknack.handlebars.helper.ConditionalHelpers;
+import com.github.jknack.handlebars.helper.StringHelpers;
+import com.github.jknack.handlebars.io.AbstractTemplateLoader;
+import com.github.jknack.handlebars.io.StringTemplateSource;
+import com.github.jknack.handlebars.io.TemplateLoader;
+import com.github.jknack.handlebars.io.TemplateSource;
+import org.openapitools.codegen.api.AbstractTemplatingEngineAdapter;
+import org.openapitools.codegen.api.TemplatingExecutor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.lang.reflect.AccessibleObject;
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+<span class="nc" id="L46">public class HandlebarsEngineAdapter extends AbstractTemplatingEngineAdapter {</span>
+<span class="nc" id="L47">     final Logger LOGGER = LoggerFactory.getLogger(HandlebarsEngineAdapter.class);</span>
+<span class="nc" id="L48">    private final String[] extensions = {&quot;handlebars&quot;, &quot;hbs&quot;};</span>
+
+    // We use this as a simple lookup for valid file name extensions. This adapter will inspect .mustache (built-in) and infer the relevant handlebars filename
+<span class="nc" id="L51">    private final String[] canCompileFromExtensions = {&quot;.handlebars&quot;,&quot;.hbs&quot;,&quot;.mustache&quot;};</span>
+<span class="nc" id="L52">    private boolean infiniteLoops = false;</span>
+<span class="nc" id="L53">    private boolean prettyPrint = false;</span>
+
+    /**
+     * Provides an identifier used to load the adapter. This could be a name, uuid, or any other string.
+     *
+     * @return A string identifier.
+     */
+    @Override
+    public String getIdentifier() {
+<span class="nc" id="L62">        return &quot;handlebars&quot;;</span>
+    }
+
+    public String compileTemplate(TemplatingExecutor executor,
+                                  Map&lt;String, Object&gt; bundle, String templateFile) throws IOException {
+<span class="nc" id="L67">        TemplateLoader loader = new AbstractTemplateLoader() {</span>
+            @Override
+            public TemplateSource sourceAt(String location) {
+<span class="nc" id="L70">                return findTemplate(executor, location);</span>
+            }
+        };
+
+        // $ref: https://github.com/jknack/handlebars.java/issues/917
+<span class="nc" id="L75">        var MY_FIELD_VALUE_RESOLVER = new FieldValueResolver() {</span>
+            @Override
+            protected Set&lt;FieldWrapper&gt; members(
+                    Class&lt;?&gt; clazz) {
+<span class="nc" id="L79">                var members = super.members(clazz);</span>
+<span class="nc" id="L80">                return members.stream()</span>
+<span class="nc" id="L81">                    .filter(fw -&gt; isValidField(fw))</span>
+<span class="nc" id="L82">                    .collect(Collectors.toSet());</span>
+            }
+
+            boolean isValidField(
+                    FieldWrapper fw) {
+<span class="nc bnc" id="L87" title="All 2 branches missed.">                if (fw instanceof AccessibleObject) {</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">                    if (isUseSetAccessible(fw)) {</span>
+<span class="nc" id="L89">                        return true;</span>
+                    }
+<span class="nc" id="L91">                    return false;</span>
+                }
+<span class="nc" id="L93">                return true;</span>
+            }
+        };
+
+<span class="nc" id="L97">        Context context = Context</span>
+<span class="nc" id="L98">                .newBuilder(bundle)</span>
+<span class="nc" id="L99">                .resolver(</span>
+                        MapValueResolver.INSTANCE,
+                        JavaBeanValueResolver.INSTANCE,
+                        MY_FIELD_VALUE_RESOLVER.INSTANCE,
+                        MethodValueResolver.INSTANCE)
+<span class="nc" id="L104">                .build();</span>
+
+<span class="nc" id="L106">        Handlebars handlebars = new Handlebars(loader);</span>
+<span class="nc" id="L107">        handlebars.registerHelperMissing((obj, options) -&gt; {</span>
+<span class="nc" id="L108">            LOGGER.warn(String.format(Locale.ROOT, &quot;Unregistered helper name '%s', processing template:%n%s&quot;, options.helperName, options.fn.text()));</span>
+<span class="nc" id="L109">            return &quot;&quot;;</span>
+        });
+<span class="nc" id="L111">        handlebars.registerHelper(&quot;json&quot;, Jackson2Helper.INSTANCE);</span>
+<span class="nc" id="L112">        StringHelpers.register(handlebars);</span>
+<span class="nc" id="L113">        handlebars.registerHelpers(ConditionalHelpers.class);</span>
+<span class="nc" id="L114">        handlebars.registerHelpers(org.openapitools.codegen.templating.handlebars.StringHelpers.class);</span>
+<span class="nc" id="L115">        handlebars.setInfiniteLoops(infiniteLoops);</span>
+<span class="nc" id="L116">        handlebars.setPrettyPrint(prettyPrint);</span>
+<span class="nc" id="L117">        Template tmpl = handlebars.compile(templateFile);</span>
+<span class="nc" id="L118">        return tmpl.apply(context);</span>
+    }
+
+    @SuppressWarnings(&quot;java:S108&quot;)
+    public TemplateSource findTemplate(TemplatingExecutor generator, String templateFile) {
+<span class="nc" id="L123">        String[] possibilities = getModifiedFileLocation(templateFile);</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">        for (String file : possibilities) {</span>
+            try {
+<span class="nc" id="L126">                return new StringTemplateSource(file, generator.getFullTemplateContents(file));</span>
+<span class="nc" id="L127">            } catch (Exception ignored) {</span>
+            }
+        }
+
+        // allow lookup of files without extension modification (such as .openapi-generator-ignore, README.md, etc)
+        try {
+<span class="nc" id="L133">            return new StringTemplateSource(templateFile, generator.getFullTemplateContents(templateFile));</span>
+<span class="nc" id="L134">        } catch (Exception ignored) {</span>
+        }
+
+<span class="nc" id="L137">        throw new TemplateNotFoundException(String.join(&quot;, &quot;, possibilities));</span>
+    }
+
+    @Override
+    public String[] getFileExtensions() {
+<span class="nc" id="L142">        return extensions;</span>
+    }
+
+    /**
+     * Determine if the adapter handles compilation of the file
+     *
+     * @param filename The template filename
+     * @return True if the file should be compiled by this adapter, else false.
+     */
+    @Override
+    public boolean handlesFile(String filename) {
+        // disallow any extension-only files like &quot;.hbs&quot; or &quot;.mustache&quot;, and only consider a file compilable if it's handlebars or mustache (from which we later infer the handlebars filename)
+<span class="nc bnc" id="L154" title="All 4 branches missed.">        return Arrays.stream(canCompileFromExtensions).anyMatch(suffix -&gt; !suffix.equalsIgnoreCase(filename) &amp;&amp; filename.endsWith(suffix));</span>
+    }
+
+    /**
+     * Enable/disable infiniteLoops setting for the Handlebars engine. Enabling this allows for recursive partial inclusion.
+     *
+     * @param infiniteLoops Whether to enable (true) or disable (false)
+     * @return this object
+     */
+    public HandlebarsEngineAdapter infiniteLoops(boolean infiniteLoops) {
+<span class="nc" id="L164">        this.infiniteLoops = infiniteLoops;</span>
+<span class="nc" id="L165">        return this;</span>
+    }
+
+    public void setPrettyPrint(boolean prettyPrint) {
+<span class="nc" id="L169">        this.prettyPrint = prettyPrint;</span>
+<span class="nc" id="L170">    }</span>
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DataTypeFeature.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator-core</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.meta.features</a> &gt; <span class="el_source">DataTypeFeature.java</span></div><h1>DataTypeFeature.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2019 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.meta.features;
+
+import org.openapitools.codegen.meta.features.annotations.OAS2;
+import org.openapitools.codegen.meta.features.annotations.OAS3;
+import org.openapitools.codegen.meta.features.annotations.ToolingExtension;
+
+/**
+ * Defines common data types supported by a generator.
+ * Some of these features are defined in specs, and some are specific to the tool.
+ *
+ * Where data types are listed as tool-specific, this either indicates that the data type is common enough that it is an officially
+ * supported custom data type by the toolset (see {@link DataTypeFeature#Decimal}), or that the consideration of a special type isn't
+ * explicitly mentioned by the specification(s) but differs enough across languages that it warrants a special callout (see {@link DataTypeFeature#ArrayOfModel}).
+ */
+<span class="fc" id="L31">public enum DataTypeFeature {</span>
+    /**
+     * Supports a generator-specific support usually via type=string's format property (e.g. email, uuid, etc), should be documented in generator README.
+     *
+     * &lt;p&gt;Loosely described in OpenAPI Specification(s). Generally means a custom &quot;format&quot; option applied to a string-typed property.&lt;/p&gt;
+     */
+<span class="fc" id="L37">    @OAS2 @OAS3</span>
+    Custom,
+
+    /**
+     * Supports integer/int32
+     */
+<span class="fc" id="L43">    @OAS2 @OAS3</span>
+    Int32,
+
+    /**
+     * Supports integer/int64
+     */
+<span class="fc" id="L49">    @OAS2 @OAS3</span>
+    Int64,
+
+    /**
+     * Supports number/float
+     */
+<span class="fc" id="L55">    @OAS2 @OAS3</span>
+    Float,
+
+    /**
+     * Supports number/double
+     */
+<span class="fc" id="L61">    @OAS2 @OAS3</span>
+    Double,
+
+    /**
+     * Supports number/decimal (a special case for some languages)
+     *
+     * &lt;p&gt;Decimal is not a type defined by OAS 2.0 specification&lt;/p&gt;
+     */
+<span class="fc" id="L69">    @ToolingExtension</span>
+    Decimal,
+
+    /**
+     * Supports string
+     */
+<span class="fc" id="L75">    @OAS2 @OAS3</span>
+    String,
+
+    /**
+     * Supports string/byte: base64 encoded
+     */
+<span class="fc" id="L81">    @OAS2 @OAS3</span>
+    Byte,
+
+    /**
+     * Supports string/binary: any collection of octets
+     */
+<span class="fc" id="L87">    @OAS2 @OAS3</span>
+    Binary,
+
+    /**
+     * Supports boolean
+     */
+<span class="fc" id="L93">    @OAS2 @OAS3</span>
+    Boolean,
+
+    /**
+     * Supports string/date: full-date RFC3339
+     *
+     * @see &lt;a href=&quot;https://tools.ietf.org/html/rfc3339&quot;&gt;RFC3339&lt;/a&gt;
+     */
+<span class="fc" id="L101">    @OAS2 @OAS3</span>
+    Date,
+
+    /**
+     * Supports string/date-time: date-time RFC3339
+     *
+     * @see &lt;a href=&quot;https://tools.ietf.org/html/rfc3339&quot;&gt;RFC3339&lt;/a&gt;
+     */
+<span class="fc" id="L109">    @OAS2 @OAS3</span>
+    DateTime,
+
+    /**
+     * Supports string/password: A hint to UIs to obscure input.
+     *
+     *
+     * &lt;p&gt;
+     *     This should be used as an indicator for password best practices, such as assigning a variable to
+     *     a character array rather than string, avoiding logging the variable in clear text, and masking the value
+     *     in any user inputs. See OWASP for best practices.
+     * &lt;/p&gt;
+     */
+<span class="fc" id="L122">    @OAS2 @OAS3</span>
+    Password,
+
+    /**
+     * Supports file inputs (e.g. multipart support).
+     *
+     * &lt;p&gt;OAS 3.x defines files differently.&lt;/p&gt;
+     * &lt;p&gt;
+     * OAS 3.x does not have an explicit &quot;file&quot; type and instead relies on ContentType or response types.
+     * That's not to say a generator doesn't support files, only that there's no direct
+     * &quot;file&quot; type defined in the spec document.
+     * &lt;/p&gt;
+     * &lt;p&gt;
+     * NOTE: The default workflow may provide an &quot;isFile&quot; helper or synthesize the assumptions around files in the case of OAS 3.x.
+     * &lt;/p&gt;
+     */
+<span class="fc" id="L138">    @OAS2</span>
+    File,
+
+    /**
+     * String uuid data
+     */
+<span class="fc" id="L144">    Uuid,</span>
+
+    /**
+     * Supports arrays of data
+     */
+<span class="fc" id="L149">    @OAS2 @OAS3</span>
+    Array,
+
+    /**
+     * A JSON &quot;null&quot; value added in openapi v3.1.0
+     */
+<span class="fc" id="L155">    @OAS3</span>
+    Null,
+
+    /**
+     * When no type is defined, any data type is accepted
+     */
+<span class="fc" id="L161">    @OAS2 @OAS3</span>
+    AnyType,
+
+    /**
+     * An unordered set of properties mapping a string to an instance
+     */
+<span class="fc" id="L167">    @OAS2 @OAS3</span>
+    Object,
+
+    /**
+     * Supports map of data
+     */
+<span class="fc" id="L173">    @ToolingExtension</span>
+    Maps,
+
+    /**
+     * Supports specifying the format of the array if type array is used (one of: csv, ssv, tsv, pipes).
+     *
+     * &lt;p&gt;
+     * For multi support, check {@link DataTypeFeature#CollectionFormatMulti}. OAS 3.x removes collectionFormat in favor of Style properties.
+     * &lt;/p&gt;
+     */
+<span class="fc" id="L183">    @OAS2</span>
+    CollectionFormat,
+
+    /**
+     * Supports collection format=multi.
+     *
+     * &lt;p&gt;
+     * This is special cased because it is not as easily implemented as a delimiter as with CollectionFormat.
+     * OAS 3.x removes collectionFormat for style properties.
+     * &lt;/p&gt;
+     */
+<span class="fc" id="L194">    @OAS2</span>
+    CollectionFormatMulti,
+
+    /**
+     * Supports enum properties
+     */
+<span class="fc" id="L200">    @OAS2 @OAS3</span>
+    Enum,
+
+    /**
+     * Supports an array of enum
+     */
+<span class="fc" id="L206">    @ToolingExtension</span>
+    ArrayOfEnum,
+
+    /**
+     * Supports an array of models
+     */
+<span class="fc" id="L212">    @ToolingExtension</span>
+    ArrayOfModel,
+
+    /**
+     * Supports an array of arrays (primitives)
+     */
+<span class="fc" id="L218">    @ToolingExtension</span>
+    ArrayOfCollectionOfPrimitives,
+
+    /**
+     * Supports an array of arrays (models)
+     */
+<span class="fc" id="L224">    @ToolingExtension</span>
+    ArrayOfCollectionOfModel,
+
+    /**
+     * Supports an array of arrays (enums)
+     */
+<span class="fc" id="L230">    @ToolingExtension</span>
+    ArrayOfCollectionOfEnum,
+
+    /**
+     * Supports a map of enums
+     */
+<span class="fc" id="L236">    @ToolingExtension</span>
+    MapOfEnum,
+
+    /**
+     * Supports a map of models
+     */
+<span class="fc" id="L242">    @ToolingExtension</span>
+    MapOfModel,
+
+    /**
+     * Supports a map of arrays (primitives)
+     */
+<span class="fc" id="L248">    @ToolingExtension</span>
+    MapOfCollectionOfPrimitives,
+
+    /**
+     * Supports a map of arrays (models)
+     */
+<span class="fc" id="L254">    @ToolingExtension</span>
+    MapOfCollectionOfModel,
+
+    /**
+     * Supports a map of arrays (enums)
+     */
+<span class="fc" id="L260">    @ToolingExtension</span>
+    MapOfCollectionOfEnum,
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

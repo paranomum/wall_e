@@ -1,0 +1,1285 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractAdaCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">AbstractAdaCodegen.java</span></div><h1>AbstractAdaCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import com.samskivert.mustache.Escapers;
+import com.samskivert.mustache.Mustache;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.meta.features.ClientModificationFeature;
+import org.openapitools.codegen.meta.features.DocumentationFeature;
+import org.openapitools.codegen.meta.features.GlobalFeature;
+import org.openapitools.codegen.meta.features.SchemaSupportFeature;
+import org.openapitools.codegen.meta.features.SecurityFeature;
+import org.openapitools.codegen.meta.features.WireFormatFeature;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.utils.ModelUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+
+import static org.openapitools.codegen.utils.CamelizeOption.LOWERCASE_FIRST_LETTER;
+import static org.openapitools.codegen.utils.StringUtils.camelize;
+
+abstract public class AbstractAdaCodegen extends DefaultCodegen implements CodegenConfig {
+<span class="fc" id="L53">    private final Logger LOGGER = LoggerFactory.getLogger(AbstractAdaCodegen.class);</span>
+
+    public static final String HTTP_SUPPORT_OPTION = &quot;httpSupport&quot;;
+    public static final String OPENAPI_PACKAGE_NAME_OPTION = &quot;openApiName&quot;;
+
+    // Common media types.
+    private static final String APPLICATION_XML = &quot;application/xml&quot;;
+    private static final String TEXT_XML = &quot;text/xml&quot;;
+    private static final String APPLICATION_OCTET_STREAM = &quot;application/octet-stream&quot;;
+    private static final String TEXT_PLAIN = &quot;text/plain&quot;;
+    private static final String APPLICATION_JSON = &quot;application/json&quot;;
+    private static final String APPLICATION_X_WWW_FORM_URLENCODED = &quot;application/x-www-form-urlencoded&quot;;
+
+    // RFC 7807 Support
+    private static final String APPLICATION_PROBLEM_JSON = &quot;application/problem+json&quot;;
+    private static final String APPLICATION_PROBLEM_XML = &quot;application/problem+xml&quot;;
+
+    // RFC 7386 support
+    private static final String APPLICATION_MERGE_PATCH_JSON = &quot;application/merge-patch+json&quot;;
+
+    // Extension attributes used by the Ada code generator
+    // &quot;x-ada-type-name&quot; allows to override the name generated for a type/object.
+    // It can be a full qualified Ada type name and the type can be defined in an external package.
+    // In that case, we don't generate the Ada type but use its external definition.  Only the
+    // Serialize/Deserialize are generated in the model.  If there is an inconsistency, this will
+    // be detected at compilation time.
+    // &quot;x-ada-no-vector&quot; instructs to not instantiate the Vectors package for the given model type.
+    // &quot;x-ada-serialize-op&quot; allows to control the name of the serialize operation for the field.
+    private static final String X_ADA_TYPE_NAME = &quot;x-ada-type-name&quot;;
+    private static final String X_ADA_VECTOR_TYPE_NAME = &quot;x-ada-vector-type-name&quot;;
+    private static final String X_ADA_NO_VECTOR = &quot;x-ada-no-vector&quot;;
+    private static final String X_ADA_SERIALIZE_OP = &quot;x-ada-serialize-op&quot;;
+
+<span class="fc" id="L86">    protected String packageName = &quot;defaultPackage&quot;;</span>
+<span class="fc" id="L87">    protected String projectName = &quot;defaultProject&quot;;</span>
+    protected List&lt;ModelMap&gt; orderedModels;
+    protected final Map&lt;String, List&lt;String&gt;&gt; modelDepends;
+    protected final Map&lt;String, String&gt; nullableTypeMapping;
+    protected final Map&lt;String, String&gt; operationsScopes;
+    protected final List&lt;List&lt;String&gt;&gt; mediaGroups;
+    protected final List&lt;List&lt;NameBinding&gt;&gt; mediaLists;
+    protected final Map&lt;String, String&gt; mediaToVariableName;
+    protected final List&lt;NameBinding&gt; mediaVariables;
+    protected final List&lt;NameBinding&gt; adaImports;
+<span class="fc" id="L97">    protected final Set&lt;String&gt; adaImportSet = new TreeSet&lt;&gt;();</span>
+<span class="fc" id="L98">    protected int scopeIndex = 0;</span>
+<span class="fc" id="L99">    protected String httpClientPackageName = &quot;Curl&quot;;</span>
+<span class="fc" id="L100">    protected String openApiPackageName = &quot;Swagger&quot;;</span>
+
+    private static final String bytesType = &quot;swagger::ByteArray&quot;;
+
+    static class NameBinding {
+        public int position;
+        public String name;
+        public String value;
+
+<span class="nc" id="L109">        NameBinding(int pos, String name, String value) {</span>
+<span class="nc" id="L110">            this.position = pos;</span>
+<span class="nc" id="L111">            this.name = name;</span>
+<span class="nc" id="L112">            this.value = value;</span>
+<span class="nc" id="L113">        }</span>
+    }
+
+    public AbstractAdaCodegen() {
+<span class="fc" id="L117">        super();</span>
+
+<span class="fc" id="L119">        modifyFeatureSet(features -&gt; features</span>
+<span class="fc" id="L120">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="fc" id="L121">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON, WireFormatFeature.XML))</span>
+<span class="fc" id="L122">                .securityFeatures(EnumSet.noneOf(</span>
+                        SecurityFeature.class
+                ))
+<span class="fc" id="L125">                .excludeGlobalFeatures(</span>
+                        GlobalFeature.XMLStructureDefinitions,
+                        GlobalFeature.Callbacks,
+                        GlobalFeature.LinkObjects,
+                        GlobalFeature.ParameterStyling
+                )
+<span class="fc" id="L131">                .excludeSchemaSupportFeatures(</span>
+                        SchemaSupportFeature.Polymorphism
+                )
+<span class="fc" id="L134">                .includeClientModificationFeatures(</span>
+                        ClientModificationFeature.BasePath
+                )
+        );
+
+        /*
+         * Reserved words.  Override this with reserved words specific to your language
+         */
+<span class="fc" id="L142">        setReservedWordsLowerCase(</span>
+<span class="fc" id="L143">                Arrays.asList(</span>
+                        &quot;abort&quot;,
+                        &quot;abs&quot;,
+                        &quot;abstract&quot;,
+                        &quot;accept&quot;,
+                        &quot;access&quot;,
+                        &quot;aliased&quot;,
+                        &quot;all&quot;,
+                        &quot;and&quot;,
+                        &quot;array&quot;,
+                        &quot;at&quot;,
+                        &quot;begin&quot;,
+                        &quot;body&quot;,
+                        &quot;case&quot;,
+                        &quot;constant&quot;,
+                        &quot;declare&quot;,
+                        &quot;delay&quot;,
+                        &quot;digits&quot;,
+                        &quot;do&quot;,
+                        &quot;else&quot;,
+                        &quot;elsif&quot;,
+                        &quot;end&quot;,
+                        &quot;entry&quot;,
+                        &quot;exception&quot;,
+                        &quot;exit&quot;,
+                        &quot;for&quot;,
+                        &quot;function&quot;,
+                        &quot;generic&quot;,
+                        &quot;goto&quot;,
+                        &quot;if&quot;,
+                        &quot;in&quot;,
+                        &quot;interface&quot;,
+                        &quot;is&quot;,
+                        &quot;limited&quot;,
+                        &quot;loop&quot;,
+                        &quot;mod&quot;,
+                        &quot;new&quot;,
+                        &quot;not&quot;,
+                        &quot;null&quot;,
+                        &quot;of&quot;,
+                        &quot;or&quot;,
+                        &quot;others&quot;,
+                        &quot;out&quot;,
+                        &quot;overriding&quot;,
+                        &quot;package&quot;,
+                        &quot;pragma&quot;,
+                        &quot;private&quot;,
+                        &quot;procedure&quot;,
+                        &quot;protected&quot;,
+                        &quot;raise&quot;,
+                        &quot;range&quot;,
+                        &quot;record&quot;,
+                        &quot;rem&quot;,
+                        &quot;renames&quot;,
+                        &quot;requeue&quot;,
+                        &quot;return&quot;,
+                        &quot;reverse&quot;,
+                        &quot;select&quot;,
+                        &quot;separate&quot;,
+                        &quot;some&quot;,
+                        &quot;subtype&quot;,
+                        &quot;synchronized&quot;,
+                        &quot;tagged&quot;,
+                        &quot;task&quot;,
+                        &quot;terminate&quot;,
+                        &quot;then&quot;,
+                        &quot;type&quot;,
+                        &quot;until&quot;,
+                        &quot;use&quot;,
+                        &quot;when&quot;,
+                        &quot;while&quot;,
+                        &quot;with&quot;,
+                        &quot;xor&quot;)
+        );
+
+<span class="fc" id="L218">        typeMapping = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L219">        typeMapping.put(&quot;integer&quot;, &quot;Integer&quot;);</span>
+<span class="fc" id="L220">        typeMapping.put(&quot;boolean&quot;, &quot;Boolean&quot;);</span>
+
+<span class="fc" id="L222">        typeMapping.put(&quot;binary&quot;, bytesType);</span>
+<span class="fc" id="L223">        typeMapping.put(&quot;ByteArray&quot;, bytesType);</span>
+
+        // Mapping to convert an Ada required type to an optional type (nullable).
+<span class="fc" id="L226">        nullableTypeMapping = new HashMap&lt;&gt;();</span>
+
+<span class="fc" id="L228">        modelDepends = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L229">        orderedModels = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L230">        operationsScopes = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L231">        mediaGroups = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L232">        mediaLists = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L233">        mediaToVariableName = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L234">        mediaVariables = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L235">        adaImports = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L236">        super.importMapping = new HashMap&lt;&gt;();</span>
+
+        // CLI options
+<span class="fc" id="L239">        addOption(CodegenConstants.PROJECT_NAME, &quot;GNAT project name&quot;,</span>
+                this.projectName);
+
+<span class="fc" id="L242">        cliOptions.add(CliOption.newString(HTTP_SUPPORT_OPTION, &quot;The name of the HTTP support library.  Possible values include 'curl' or 'aws'.&quot;));</span>
+<span class="fc" id="L243">        cliOptions.add(CliOption.newString(OPENAPI_PACKAGE_NAME_OPTION, &quot;The name of the Ada package which provides support for OpenAPI for the generated client and server code.  The default is 'Swagger'.&quot;));</span>
+
+<span class="fc" id="L245">        modelNameSuffix = &quot;Type&quot;;</span>
+<span class="fc" id="L246">        embeddedTemplateDir = templateDir = &quot;Ada&quot;;</span>
+
+<span class="fc" id="L248">        languageSpecificPrimitives = new HashSet&lt;&gt;(</span>
+<span class="fc" id="L249">                Arrays.asList(&quot;integer&quot;, &quot;boolean&quot;, &quot;number&quot;, &quot;long&quot;, &quot;float&quot;,</span>
+                        &quot;double&quot;, &quot;object&quot;, &quot;string&quot;, &quot;date&quot;, &quot;DateTime&quot;, &quot;binary&quot;));
+<span class="fc" id="L251">    }</span>
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L255">        super.processOpts();</span>
+
+<span class="nc bnc" id="L257" title="All 2 branches missed.">        if (additionalProperties.containsKey(HTTP_SUPPORT_OPTION)) {</span>
+<span class="nc" id="L258">            String httpSupport = additionalProperties.get(HTTP_SUPPORT_OPTION).toString().toLowerCase(Locale.ROOT);</span>
+
+<span class="nc bnc" id="L260" title="All 2 branches missed.">            if (&quot;aws&quot;.equals(httpSupport)) {</span>
+<span class="nc" id="L261">                this.httpClientPackageName = &quot;Aws&quot;;</span>
+<span class="nc bnc" id="L262" title="All 2 branches missed.">            } else if (&quot;curl&quot;.equals(httpSupport)) {</span>
+<span class="nc" id="L263">                this.httpClientPackageName = &quot;Curl&quot;;</span>
+            } else {
+<span class="nc" id="L265">                LOGGER.error(&quot;invalid http support option `{}`&quot;, httpSupport);</span>
+            }
+        }
+<span class="nc bnc" id="L268" title="All 2 branches missed.">        if (additionalProperties.containsKey(OPENAPI_PACKAGE_NAME_OPTION)) {</span>
+<span class="nc" id="L269">            this.openApiPackageName = additionalProperties.get(OPENAPI_PACKAGE_NAME_OPTION).toString();</span>
+        }
+
+<span class="nc" id="L272">        typeMapping.put(&quot;date&quot;, openApiPackageName + &quot;.Date&quot;);</span>
+<span class="nc" id="L273">        typeMapping.put(&quot;DateTime&quot;, openApiPackageName + &quot;.Datetime&quot;);</span>
+<span class="nc" id="L274">        typeMapping.put(&quot;string&quot;, openApiPackageName + &quot;.UString&quot;);</span>
+<span class="nc" id="L275">        typeMapping.put(&quot;long&quot;, openApiPackageName + &quot;.Long&quot;);</span>
+<span class="nc" id="L276">        typeMapping.put(&quot;array&quot;, openApiPackageName + &quot;.Vector&quot;);</span>
+<span class="nc" id="L277">        typeMapping.put(&quot;map&quot;, openApiPackageName + &quot;.Map&quot;);</span>
+<span class="nc" id="L278">        typeMapping.put(&quot;object&quot;, openApiPackageName + &quot;.Object&quot;);</span>
+<span class="nc" id="L279">        typeMapping.put(&quot;number&quot;, openApiPackageName + &quot;.Number&quot;);</span>
+<span class="nc" id="L280">        typeMapping.put(&quot;UUID&quot;, openApiPackageName + &quot;.UString&quot;);</span>
+<span class="nc" id="L281">        typeMapping.put(&quot;URI&quot;, openApiPackageName + &quot;.UString&quot;);</span>
+<span class="nc" id="L282">        typeMapping.put(&quot;file&quot;, openApiPackageName + &quot;.Blob_Ref&quot;);</span>
+<span class="nc" id="L283">        typeMapping.put(&quot;binary&quot;, openApiPackageName + &quot;.Blob_Ref&quot;);</span>
+<span class="nc" id="L284">        typeMapping.put(&quot;float&quot;, openApiPackageName + &quot;.Number&quot;);</span>
+<span class="nc" id="L285">        typeMapping.put(&quot;double&quot;, openApiPackageName + &quot;.Number&quot;);</span>
+<span class="nc" id="L286">        importMapping.put(&quot;File&quot;, openApiPackageName + &quot;.File&quot;);</span>
+
+        // Mapping to convert an Ada required type to an optional type (nullable).
+<span class="nc" id="L289">        nullableTypeMapping.put(openApiPackageName + &quot;.Date&quot;, openApiPackageName + &quot;.Nullable_Date&quot;);</span>
+<span class="nc" id="L290">        nullableTypeMapping.put(openApiPackageName + &quot;.Datetime&quot;, openApiPackageName + &quot;.Nullable_Date&quot;);</span>
+<span class="nc" id="L291">        nullableTypeMapping.put(openApiPackageName + &quot;.UString&quot;, openApiPackageName + &quot;.Nullable_UString&quot;);</span>
+<span class="nc" id="L292">        nullableTypeMapping.put(&quot;Integer&quot;, openApiPackageName + &quot;.Nullable_Integer&quot;);</span>
+<span class="nc" id="L293">        nullableTypeMapping.put(openApiPackageName + &quot;.Long&quot;, openApiPackageName + &quot;.Nullable_Long&quot;);</span>
+<span class="nc" id="L294">        nullableTypeMapping.put(&quot;Boolean&quot;, openApiPackageName + &quot;.Nullable_Boolean&quot;);</span>
+<span class="nc" id="L295">        nullableTypeMapping.put(openApiPackageName + &quot;.Object&quot;, openApiPackageName + &quot;.Object&quot;);</span>
+
+<span class="nc" id="L297">        mediaToVariableName.put(TEXT_PLAIN, openApiPackageName + &quot;.Mime_Text&quot;);</span>
+<span class="nc" id="L298">        mediaToVariableName.put(APPLICATION_JSON, openApiPackageName + &quot;.Mime_Json&quot;);</span>
+<span class="nc" id="L299">        mediaToVariableName.put(APPLICATION_XML, openApiPackageName + &quot;.Mime_Xml&quot;);</span>
+<span class="nc" id="L300">        mediaToVariableName.put(APPLICATION_X_WWW_FORM_URLENCODED, openApiPackageName + &quot;.Mime_Form&quot;);</span>
+<span class="nc" id="L301">    }</span>
+
+    public String toFilename(String name) {
+<span class="nc" id="L304">        return name.replace(&quot;.&quot;, &quot;-&quot;).toLowerCase(Locale.ROOT);</span>
+    }
+
+    /**
+     * Turn a parameter name, operation name into an Ada identifier.
+     * &lt;p&gt;
+     * Ada programming standard avoid the camelcase syntax and prefer the underscore
+     * notation.  We also have to make sure the identifier is not a reserved keyword.
+     * When this happens, we add the configurable prefix.  The function translates:
+     * &lt;p&gt;
+     * body              - P_Body
+     * petId             - Pet_Id
+     * updatePetWithForm - Update_Pet_With_Form
+     *
+     * @param name   the parameter name.
+     * @param prefix the optional prefix in case the parameter name is a reserved keyword.
+     * @return the Ada identifier to be used.
+     */
+    protected String toAdaIdentifier(String name, String prefix) {
+        // We cannot use reserved keywords for identifiers
+<span class="nc bnc" id="L324" title="All 2 branches missed.">        if (isReservedWord(name)) {</span>
+<span class="nc" id="L325">            LOGGER.warn(&quot;Identifier '{}' is a reserved word, renamed to {}{}&quot;, name, prefix, name);</span>
+<span class="nc" id="L326">            name = prefix + name;</span>
+        }
+<span class="nc" id="L328">        StringBuilder result = new StringBuilder();</span>
+<span class="nc" id="L329">        boolean needUpperCase = true;</span>
+<span class="nc" id="L330">        boolean prevUpperCase = false;</span>
+<span class="nc bnc" id="L331" title="All 6 branches missed.">        if (name.isEmpty() || Character.isDigit(name.charAt(0)) || name.charAt(0) == '_') {</span>
+<span class="nc" id="L332">            result.append(prefix);</span>
+        }
+<span class="nc bnc" id="L334" title="All 2 branches missed.">        for (int i = 0; i &lt; name.length(); i++) {</span>
+<span class="nc" id="L335">            char c = name.charAt(i);</span>
+<span class="nc bnc" id="L336" title="All 4 branches missed.">            boolean isUpperOrDigit = Character.isUpperCase(c) || Character.isDigit(c);</span>
+<span class="nc bnc" id="L337" title="All 2 branches missed.">            if (needUpperCase) {</span>
+<span class="nc" id="L338">                needUpperCase = false;</span>
+<span class="nc" id="L339">                prevUpperCase = isUpperOrDigit;</span>
+<span class="nc" id="L340">                result.append(Character.toUpperCase(c));</span>
+
+<span class="nc bnc" id="L342" title="All 2 branches missed.">            } else if (isUpperOrDigit) {</span>
+<span class="nc bnc" id="L343" title="All 2 branches missed.">                if (!prevUpperCase) {</span>
+<span class="nc" id="L344">                    result.append('_');</span>
+                }
+<span class="nc" id="L346">                result.append(c);</span>
+<span class="nc" id="L347">                needUpperCase = false;</span>
+<span class="nc" id="L348">                prevUpperCase = true;</span>
+            } else {
+<span class="nc" id="L350">                result.append(c);</span>
+<span class="nc" id="L351">                prevUpperCase = isUpperOrDigit;</span>
+<span class="nc bnc" id="L352" title="All 2 branches missed.">                if (c == '_') {</span>
+<span class="nc" id="L353">                    needUpperCase = true;</span>
+                }
+            }
+        }
+<span class="nc" id="L357">        return result.toString();</span>
+    }
+
+    @Override
+    public String toOperationId(String operationId) {
+<span class="nc" id="L362">        return toAdaIdentifier(sanitizeName(operationId), &quot;Call_&quot;);</span>
+    }
+
+    @Override
+    public String toVarName(String name) {
+        // obtain the name from nameMapping directly if provided
+<span class="nc bnc" id="L368" title="All 2 branches missed.">        if (nameMapping.containsKey(name)) {</span>
+<span class="nc" id="L369">            return nameMapping.get(name);</span>
+        }
+
+<span class="nc" id="L372">        return toAdaIdentifier(sanitizeName(name), &quot;P_&quot;);</span>
+    }
+
+    @Override
+    public String toParamName(String name) {
+        // obtain the name from parameterNameMapping directly if provided
+<span class="nc bnc" id="L378" title="All 2 branches missed.">        if (parameterNameMapping.containsKey(name)) {</span>
+<span class="nc" id="L379">            return parameterNameMapping.get(name);</span>
+        }
+
+<span class="nc" id="L382">        return toAdaIdentifier(super.toParamName(name), &quot;P_&quot;);</span>
+    }
+
+    /**
+     * Output the proper model name (capitalized).
+     * In case the name belongs to the TypeSystem it won't be renamed.
+     *
+     * @param name the name of the model
+     * @return capitalized model name
+     */
+    @Override
+    public String toModelName(final String name) {
+<span class="nc" id="L394">        String result = camelize(sanitizeName(name));</span>
+
+<span class="nc bnc" id="L396" title="All 2 branches missed.">        if (!StringUtils.isEmpty(modelNamePrefix)) {</span>
+<span class="nc" id="L397">            result = modelNamePrefix + &quot;_&quot; + result;</span>
+        }
+
+        // model name cannot use reserved keyword, e.g. return
+<span class="nc bnc" id="L401" title="All 2 branches missed.">        if (isReservedWord(name)) {</span>
+<span class="nc" id="L402">            String modelName = &quot;Model_&quot; + result;</span>
+<span class="nc" id="L403">            LOGGER.warn(&quot;{} (reserved word) cannot be used as model name. Renamed to {}&quot;, name, modelName);</span>
+<span class="nc" id="L404">            return modelName;</span>
+        }
+
+        // model name starts with number
+<span class="nc bnc" id="L408" title="All 2 branches missed.">        if (result.matches(&quot;^\\d.*&quot;)) {</span>
+<span class="nc" id="L409">            String modelName = &quot;Model_&quot; + result; // e.g. 200Response =&gt; Model_200Response (after camelize)</span>
+<span class="nc" id="L410">            LOGGER.warn(&quot;{} (model name starts with number) cannot be used as model name. Renamed to {}&quot;, name,</span>
+                    modelName);
+<span class="nc" id="L412">            return modelName;</span>
+        }
+
+<span class="nc bnc" id="L415" title="All 2 branches missed.">        if (languageSpecificPrimitives.contains(result)) {</span>
+<span class="nc" id="L416">            String modelName = &quot;Model_&quot; + result;</span>
+<span class="nc" id="L417">            LOGGER.warn(&quot;{} (model name matches existing language type) cannot be used as a model name. Renamed to {}&quot;,</span>
+                    name, modelName);
+<span class="nc" id="L419">            return modelName;</span>
+        }
+
+<span class="nc bnc" id="L422" title="All 2 branches missed.">        if (!StringUtils.isEmpty(modelNameSuffix)) {</span>
+<span class="nc" id="L423">            result = result + &quot;_&quot; + modelNameSuffix;</span>
+        }
+
+<span class="nc" id="L426">        return result;</span>
+    }
+
+    @Override
+    public String toEnumVarName(String value, String datatype) {
+<span class="nc bnc" id="L431" title="All 2 branches missed.">        if (enumNameMapping.containsKey(value)) {</span>
+<span class="nc" id="L432">            return enumNameMapping.get(value);</span>
+        }
+
+        String var;
+<span class="nc bnc" id="L436" title="All 2 branches missed.">        if (value.isEmpty()) {</span>
+<span class="nc" id="L437">            var = &quot;EMPTY&quot;;</span>
+        }
+
+        // for symbol, e.g. $, #
+<span class="nc bnc" id="L441" title="All 2 branches missed.">        else if (getSymbolName(value) != null) {</span>
+<span class="nc" id="L442">            var = getSymbolName(value).toUpperCase(Locale.ROOT);</span>
+        }
+
+        // number
+<span class="nc bnc" id="L446" title="All 4 branches missed.">        else if (&quot;Integer&quot;.equals(datatype) || &quot;Long&quot;.equals(datatype) ||</span>
+<span class="nc bnc" id="L447" title="All 4 branches missed.">                &quot;Float&quot;.equals(datatype) || &quot;Double&quot;.equals(datatype)) {</span>
+<span class="nc" id="L448">            String varName = &quot;NUMBER_&quot; + value;</span>
+<span class="nc" id="L449">            varName = varName.replaceAll(&quot;-&quot;, &quot;MINUS_&quot;);</span>
+<span class="nc" id="L450">            varName = varName.replaceAll(&quot;\\+&quot;, &quot;PLUS_&quot;);</span>
+<span class="nc" id="L451">            varName = varName.replaceAll(&quot;\\.&quot;, &quot;_DOT_&quot;);</span>
+<span class="nc" id="L452">            var = varName;</span>
+<span class="nc" id="L453">        }</span>
+
+        // string
+        else {
+<span class="nc" id="L457">            var = value.replaceAll(&quot;\\W+&quot;, &quot;_&quot;).toUpperCase(Locale.ROOT);</span>
+<span class="nc bnc" id="L458" title="All 2 branches missed.">            if (var.matches(&quot;\\d.*&quot;)) {</span>
+<span class="nc" id="L459">                var = &quot;_&quot; + var;</span>
+            } else {
+<span class="nc" id="L461">                var = sanitizeName(var);</span>
+            }
+        }
+<span class="nc" id="L464">        return var;</span>
+    }
+
+    @SuppressWarnings(&quot;rawtypes&quot;)
+    @Override
+    public CodegenProperty fromProperty(String name, Schema p, boolean required) {
+<span class="nc" id="L470">        CodegenProperty property = super.fromProperty(name, p, required);</span>
+<span class="nc bnc" id="L471" title="All 2 branches missed.">        if (property != null) {</span>
+<span class="nc" id="L472">            String nameInPascalCase = property.nameInPascalCase;</span>
+<span class="nc" id="L473">            nameInPascalCase = sanitizeName(nameInPascalCase);</span>
+<span class="nc" id="L474">            property.nameInPascalCase = nameInPascalCase;</span>
+        }
+<span class="nc" id="L476">        return property;</span>
+    }
+
+    /**
+     * Escapes a reserved word as defined in the `reservedWords` array. Handle
+     * escaping those terms here. This logic is only called if a variable
+     * matches the reserved words
+     *
+     * @return the escaped term
+     */
+    @Override
+    public String escapeReservedWord(String name) {
+<span class="nc" id="L488">        return &quot;p_&quot; + name; // add an underscore to the name</span>
+    }
+
+    @Override
+    public String escapeQuotationMark(String input) {
+        // remove &quot; to avoid code injection
+<span class="nc" id="L494">        return input.replace(&quot;\&quot;&quot;, &quot;&quot;);</span>
+    }
+
+    @Override
+    public String escapeUnsafeCharacters(String input) {
+<span class="nc" id="L499">        return input.replace(&quot;*/&quot;, &quot;*_/&quot;).replace(&quot;/*&quot;, &quot;/_*&quot;).replace(&quot;-&quot;, &quot;_&quot;);</span>
+    }
+
+    /**
+     * Override the Mustache compiler configuration.
+     * &lt;p&gt;
+     * We don't want to have special characters escaped
+     *
+     * @param compiler the compiler.
+     * @return the compiler to use.
+     */
+    @Override
+    public Mustache.Compiler processCompiler(Mustache.Compiler compiler) {
+<span class="nc" id="L512">        compiler = super.processCompiler(compiler).emptyStringIsFalse(true);</span>
+
+<span class="nc" id="L514">        return compiler.withEscaper(Escapers.NONE);</span>
+    }
+
+    /**
+     * Optional - type declaration. This is a String which is used by the
+     * templates to instantiate your types. There is typically special handling
+     * for different property types
+     *
+     * @return a string value used as the `dataType` field for model templates,
+     * `returnType` for api templates
+     */
+    @SuppressWarnings(&quot;rawtypes&quot;)
+    @Override
+    public String getTypeDeclaration(Schema p) {
+<span class="nc" id="L528">        String schemaType = getSchemaType(p);</span>
+
+<span class="nc bnc" id="L530" title="All 2 branches missed.">        if (schemaType != null) {</span>
+<span class="nc" id="L531">            schemaType = schemaType.replace(&quot;-&quot;, &quot;_&quot;);</span>
+        }
+
+<span class="nc bnc" id="L534" title="All 2 branches missed.">        if (ModelUtils.isArraySchema(p)) {</span>
+<span class="nc" id="L535">            Schema inner = ModelUtils.getSchemaItems(p);</span>
+<span class="nc" id="L536">            String itemType = getTypeDeclaration(inner);</span>
+<span class="nc bnc" id="L537" title="All 2 branches missed.">            if (itemType.startsWith(&quot;OpenAPI.&quot;)) {</span>
+<span class="nc" id="L538">                return itemType + &quot;_Vector&quot;;</span>
+            } else {
+<span class="nc" id="L540">                return itemType + &quot;_Vectors.Vector&quot;;</span>
+            }
+        }
+<span class="nc bnc" id="L543" title="All 2 branches missed.">        if (ModelUtils.isMapSchema(p)) {</span>
+<span class="nc" id="L544">            Schema inner = ModelUtils.getAdditionalProperties(p);</span>
+<span class="nc" id="L545">            String name = getTypeDeclaration(inner) + &quot;_Map&quot;;</span>
+<span class="nc bnc" id="L546" title="All 2 branches missed.">            if (name.startsWith(openApiPackageName)) {</span>
+<span class="nc" id="L547">                return name;</span>
+            } else {
+<span class="nc" id="L549">                return openApiPackageName + &quot;.&quot; + name;</span>
+            }
+        }
+<span class="nc bnc" id="L552" title="All 2 branches missed.">        if (typeMapping.containsKey(schemaType)) {</span>
+<span class="nc" id="L553">            return typeMapping.get(schemaType);</span>
+        }
+        //  LOGGER.info(&quot;OpenAPI type &quot; + schemaType);
+<span class="nc bnc" id="L556" title="All 2 branches missed.">        if (languageSpecificPrimitives.contains(schemaType)) {</span>
+<span class="nc" id="L557">            return schemaType;</span>
+        }
+<span class="nc" id="L559">        String modelType = toModelName(schemaType).replace(&quot;-&quot;, &quot;_&quot;);</span>
+<span class="nc bnc" id="L560" title="All 4 branches missed.">        if (ModelUtils.isStringSchema(p) || ModelUtils.isFileSchema(p)</span>
+<span class="nc bnc" id="L561" title="All 2 branches missed.">                || languageSpecificPrimitives.contains(modelType)) {</span>
+<span class="nc" id="L562">            return modelType;</span>
+        }
+
+<span class="nc" id="L565">        return modelPackage + &quot;.Models.&quot; + modelType;</span>
+    }
+
+    /**
+     * Overrides postProcessParameter to add a vendor extension &quot;x-is-model-type&quot;.
+     * This boolean indicates that the parameter comes from the model package.
+     *
+     * @param parameter CodegenParameter object to be processed.
+     */
+    @Override
+    public void postProcessParameter(CodegenParameter parameter) {
+        // Give the base class a chance to process
+<span class="nc" id="L577">        super.postProcessParameter(parameter);</span>
+
+<span class="nc bnc" id="L579" title="All 2 branches missed.">        if (parameter.dataType == null) {</span>
+<span class="nc" id="L580">            return;</span>
+        }
+<span class="nc" id="L582">        parameter.vendorExtensions.put(&quot;x-is-model-type&quot;, isModelType(parameter));</span>
+<span class="nc" id="L583">        parameter.vendorExtensions.put(&quot;x-is-stream-type&quot;, isStreamType(parameter));</span>
+<span class="nc" id="L584">    }</span>
+
+    @Override
+    public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, List&lt;Server&gt; servers) {
+<span class="nc" id="L588">        CodegenOperation op = super.fromOperation(path, httpMethod, operation, servers);</span>
+
+        // Add a vendor extension attribute that provides a map of auth methods and the scopes
+        // which are expected by the operation.  This map is then used by postProcessOperationsWithModels
+        // to build another vendor extension that provides a subset of the auth methods with only
+        // the scopes required by the operation.
+<span class="nc" id="L594">        final List&lt;SecurityRequirement&gt; securities = operation.getSecurity();</span>
+<span class="nc bnc" id="L595" title="All 4 branches missed.">        if (securities != null &amp;&amp; securities.size() &gt; 0) {</span>
+<span class="nc bnc" id="L596" title="All 2 branches missed.">            final Map&lt;String, SecurityScheme&gt; securitySchemes = this.openAPI.getComponents() != null ? this.openAPI.getComponents().getSecuritySchemes() : null;</span>
+<span class="nc" id="L597">            final List&lt;SecurityRequirement&gt; globalSecurities = this.openAPI.getSecurity();</span>
+
+<span class="nc" id="L599">            Map&lt;String, List&lt;String&gt;&gt; scopes = getAuthScopes(securities, securitySchemes);</span>
+<span class="nc bnc" id="L600" title="All 4 branches missed.">            if (scopes.isEmpty() &amp;&amp; globalSecurities != null) {</span>
+<span class="nc" id="L601">                scopes = getAuthScopes(globalSecurities, securitySchemes);</span>
+            }
+<span class="nc" id="L603">            op.vendorExtensions.put(&quot;x-scopes&quot;, scopes);</span>
+        }
+
+        // Determine the types that this operation produces. `getProducesInfo`
+        // simply lists all the types, and then we collect the list of media types
+        // for the operation and keep the global index assigned to that list in x-produces-media-index.
+<span class="nc" id="L609">        Set&lt;String&gt; produces = getProducesInfo(openAPI, operation);</span>
+<span class="nc" id="L610">        boolean producesPlainText = false;</span>
+<span class="nc bnc" id="L611" title="All 4 branches missed.">        if (produces != null &amp;&amp; !produces.isEmpty()) {</span>
+<span class="nc" id="L612">            List&lt;String&gt; mediaList = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L613">            List&lt;Map&lt;String, String&gt;&gt; c = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L614" title="All 2 branches missed.">            for (String mimeType : produces) {</span>
+<span class="nc" id="L615">                Map&lt;String, String&gt; mediaType = new HashMap&lt;&gt;();</span>
+
+<span class="nc bnc" id="L617" title="All 2 branches missed.">                if (isMimetypePlain(mimeType)) {</span>
+<span class="nc" id="L618">                    producesPlainText = true;</span>
+                }
+
+<span class="nc" id="L621">                mediaType.put(&quot;mediaType&quot;, mimeType);</span>
+<span class="nc" id="L622">                c.add(mediaType);</span>
+<span class="nc" id="L623">                mediaList.add(mimeType);</span>
+<span class="nc" id="L624">            }</span>
+<span class="nc" id="L625">            op.produces = c;</span>
+<span class="nc" id="L626">            op.hasProduces = true;</span>
+<span class="nc" id="L627">            op.vendorExtensions.put(&quot;x-produces-media-index&quot;, collectMediaList(mediaList));</span>
+        }
+
+<span class="nc bnc" id="L630" title="All 2 branches missed.">        for (CodegenResponse rsp : op.responses) {</span>
+
+<span class="nc bnc" id="L632" title="All 2 branches missed.">            if (rsp.dataType != null) {</span>
+
+                // Write out the type of data we actually expect this response
+                // to make.
+<span class="nc bnc" id="L636" title="All 2 branches missed.">                if (producesPlainText) {</span>
+                    // Plain text means that there is not structured data in
+                    // this response. So it'll either be a UTF-8 encoded string
+                    // 'plainText' or some generic 'bytes'.
+                    //
+                    // Note that we don't yet distinguish between string/binary
+                    // and string/bytes - that is we don't auto-detect whether
+                    // base64 encoding should be done. They both look like
+                    // 'producesBytes'.
+<span class="nc bnc" id="L645" title="All 2 branches missed.">                    if (bytesType.equals(rsp.dataType)) {</span>
+<span class="nc" id="L646">                        rsp.vendorExtensions.put(&quot;x-produces-bytes&quot;, true);</span>
+                    } else {
+<span class="nc" id="L648">                        rsp.vendorExtensions.put(&quot;x-produces-plain-text&quot;, true);</span>
+                    }
+                }
+            }
+<span class="nc" id="L652">        }</span>
+
+<span class="nc" id="L654">        return op;</span>
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+        // This is run after the postProcessModels
+
+<span class="nc" id="L662">        OperationMap operations = objs.getOperations();</span>
+<span class="nc" id="L663">        List&lt;CodegenOperation&gt; operationList = operations.getOperation();</span>
+
+<span class="nc bnc" id="L665" title="All 2 branches missed.">        for (CodegenOperation op : operationList) {</span>
+<span class="nc" id="L666">            postProcessOperationWithModels(op, allModels);</span>
+<span class="nc" id="L667">        }</span>
+
+        // Build the adaImports variable to create a list of Ada specific packages that must be imported.
+<span class="nc" id="L670">        adaImportSet.remove(openApiPackageName);</span>
+<span class="nc bnc" id="L671" title="All 2 branches missed.">        for (String adaImport : adaImportSet) {</span>
+<span class="nc" id="L672">            adaImports.add(new NameBinding(0, adaImport, adaImport));</span>
+<span class="nc" id="L673">        }</span>
+<span class="nc" id="L674">        additionalProperties.put(&quot;adaImports&quot;, adaImports);</span>
+
+        // Add the media list variables.
+<span class="nc" id="L677">        additionalProperties.put(&quot;mediaVariables&quot;, mediaVariables);</span>
+<span class="nc" id="L678">        additionalProperties.put(&quot;mediaLists&quot;, mediaLists);</span>
+
+<span class="nc" id="L680">        return objs;</span>
+    }
+
+    private void postProcessOperationWithModels(CodegenOperation op, List&lt;ModelMap&gt; allModels) {
+
+<span class="nc bnc" id="L685" title="All 2 branches missed.">        if (op.consumes != null) {</span>
+<span class="nc" id="L686">            List&lt;String&gt; mediaList = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L687" title="All 2 branches missed.">            for (Map&lt;String, String&gt; consume : op.consumes) {</span>
+<span class="nc" id="L688">                String mediaType = consume.get(&quot;mediaType&quot;);</span>
+<span class="nc bnc" id="L689" title="All 2 branches missed.">                if (mediaType != null) {</span>
+<span class="nc" id="L690">                    mediaList.add(mediaType.toLowerCase(Locale.ROOT));</span>
+<span class="nc bnc" id="L691" title="All 2 branches missed.">                    if (isMimetypeWwwFormUrlEncoded(mediaType)) {</span>
+<span class="nc" id="L692">                        additionalProperties.put(&quot;usesUrlEncodedForm&quot;, true);</span>
+<span class="nc bnc" id="L693" title="All 2 branches missed.">                    } else if (isMimetypeMultipartFormData(mediaType)) {</span>
+<span class="nc" id="L694">                        op.vendorExtensions.put(&quot;x-consumes-multipart&quot;, true);</span>
+<span class="nc" id="L695">                        additionalProperties.put(&quot;apiUsesMultipartFormData&quot;, true);</span>
+<span class="nc" id="L696">                        additionalProperties.put(&quot;apiUsesMultipart&quot;, true);</span>
+<span class="nc bnc" id="L697" title="All 2 branches missed.">                    } else if (isMimetypeMultipartRelated(mediaType)) {</span>
+<span class="nc" id="L698">                        op.vendorExtensions.put(&quot;x-consumes-multipart-related&quot;, true);</span>
+<span class="nc" id="L699">                        additionalProperties.put(&quot;apiUsesMultipartRelated&quot;, true);</span>
+<span class="nc" id="L700">                        additionalProperties.put(&quot;apiUsesMultipart&quot;, true);</span>
+                    }
+                }
+<span class="nc" id="L703">            }</span>
+<span class="nc" id="L704">            op.vendorExtensions.put(&quot;x-consumes-media-index&quot;, collectMediaList(mediaList));</span>
+        }
+
+<span class="nc bnc" id="L707" title="All 2 branches missed.">        if (op.summary != null) {</span>
+<span class="nc" id="L708">            op.summary = op.summary.trim();</span>
+        }
+<span class="nc bnc" id="L710" title="All 2 branches missed.">        if (op.notes != null) {</span>
+<span class="nc" id="L711">            op.notes = op.notes.trim();</span>
+        }
+<span class="nc bnc" id="L713" title="All 4 branches missed.">        op.vendorExtensions.put(&quot;x-has-notes&quot;, op.notes != null &amp;&amp; op.notes.length() &gt; 0);</span>
+<span class="nc" id="L714">        final String prefix = modelPackage() + &quot;.Models&quot;;</span>
+
+        // Set the file parameter type for both allParams and formParams.
+<span class="nc bnc" id="L717" title="All 2 branches missed.">        for (CodegenParameter p : op.allParams) {</span>
+<span class="nc bnc" id="L718" title="All 4 branches missed.">            if (p.isFormParam &amp;&amp; p.isFile) {</span>
+<span class="nc" id="L719">                p.dataType = openApiPackageName + &quot;.File_Part_Type&quot;;</span>
+            }
+            // Convert optional parameters to use the Nullable_&lt;T&gt; type.
+<span class="nc bnc" id="L722" title="All 4 branches missed.">            if (!p.required &amp;&amp; nullableTypeMapping.containsKey(p.dataType)) {</span>
+<span class="nc" id="L723">                p.dataType = nullableTypeMapping.get(p.dataType);</span>
+            }
+
+            String dataType;
+<span class="nc bnc" id="L727" title="All 2 branches missed.">            if (p.vendorExtensions.containsKey(X_ADA_TYPE_NAME)) {</span>
+<span class="nc" id="L728">                dataType = (String) p.vendorExtensions.get(X_ADA_TYPE_NAME);</span>
+            } else {
+<span class="nc" id="L730">                CodegenProperty schema = p.getSchema();</span>
+<span class="nc bnc" id="L731" title="All 2 branches missed.">                if (schema != null) {</span>
+<span class="nc" id="L732">                    dataType = (String) schema.vendorExtensions.get(X_ADA_TYPE_NAME);</span>
+                } else {
+<span class="nc" id="L734">                    dataType = p.dataType;</span>
+                }
+<span class="nc" id="L736">                p.vendorExtensions.put(X_ADA_TYPE_NAME, dataType);</span>
+            }
+<span class="nc" id="L738">            String pkgName = useType(dataType);</span>
+<span class="nc bnc" id="L739" title="All 4 branches missed.">            if (pkgName != null &amp;&amp; !pkgName.startsWith(prefix)) {</span>
+<span class="nc" id="L740">                adaImportSet.add(pkgName);</span>
+            }
+<span class="nc bnc" id="L742" title="All 2 branches missed.">            p.vendorExtensions.put(&quot;x-is-imported-type&quot;, pkgName != null);</span>
+<span class="nc" id="L743">            p.vendorExtensions.put(&quot;x-is-model-type&quot;, isModelType(p));</span>
+<span class="nc" id="L744">            p.vendorExtensions.put(&quot;x-is-stream-type&quot;, isStreamType(p));</span>
+<span class="nc" id="L745">        }</span>
+<span class="nc bnc" id="L746" title="All 2 branches missed.">        for (CodegenParameter p : op.formParams) {</span>
+<span class="nc bnc" id="L747" title="All 2 branches missed.">            if (p.isFile) {</span>
+<span class="nc" id="L748">                p.dataType = openApiPackageName + &quot;.File_Part_Type&quot;;</span>
+            }
+<span class="nc" id="L750">        }</span>
+
+        // Given the operation scopes and the auth methods, build a list of auth methods that only
+        // describe the auth methods and scopes required by the operation.
+<span class="nc" id="L754">        final Map&lt;String, List&lt;String&gt;&gt; scopes = (Map&lt;String, List&lt;String&gt;&gt;) op.vendorExtensions.get(&quot;x-scopes&quot;);</span>
+<span class="nc" id="L755">        List&lt;CodegenSecurity&gt; opScopes = postProcessAuthMethod(op.authMethods, scopes);</span>
+<span class="nc bnc" id="L756" title="All 2 branches missed.">        if (opScopes != null) {</span>
+<span class="nc" id="L757">            op.vendorExtensions.put(&quot;x-auth-scopes&quot;, opScopes);</span>
+        }
+
+<span class="nc" id="L760">        CodegenProperty returnProperty = op.returnProperty;</span>
+<span class="nc" id="L761">        CodegenProperty returnType = null;</span>
+<span class="nc bnc" id="L762" title="All 2 branches missed.">        if (returnProperty != null) {</span>
+<span class="nc" id="L763">            CodegenProperty itemType = returnProperty.getItems();</span>
+<span class="nc" id="L764">            returnType = itemType;</span>
+<span class="nc bnc" id="L765" title="All 2 branches missed.">            if (itemType != null) {</span>
+                String dataType;
+<span class="nc bnc" id="L767" title="All 2 branches missed.">                if (itemType.vendorExtensions.containsKey(X_ADA_VECTOR_TYPE_NAME)) {</span>
+<span class="nc" id="L768">                    dataType = (String) itemType.vendorExtensions.get(X_ADA_VECTOR_TYPE_NAME);</span>
+<span class="nc" id="L769">                    returnProperty.vendorExtensions.put(X_ADA_TYPE_NAME, dataType);</span>
+                }
+<span class="nc" id="L771">                returnProperty.vendorExtensions.put(&quot;x-is-model-type&quot;, isModelType(itemType));</span>
+<span class="nc" id="L772">                returnProperty.vendorExtensions.put(&quot;x-is-stream-type&quot;, isStreamType(itemType));</span>
+            } else {
+<span class="nc bnc" id="L774" title="All 2 branches missed.">                if (!returnProperty.vendorExtensions.containsKey(X_ADA_TYPE_NAME)) {</span>
+<span class="nc" id="L775">                    returnProperty.vendorExtensions.put(X_ADA_TYPE_NAME, returnProperty.dataType);</span>
+                }
+<span class="nc" id="L777">                returnProperty.vendorExtensions.put(&quot;x-is-model-type&quot;, isModelType(returnProperty));</span>
+<span class="nc" id="L778">                returnProperty.vendorExtensions.put(&quot;x-is-stream-type&quot;, isStreamType(returnProperty));</span>
+            }
+        }
+
+<span class="nc bnc" id="L782" title="All 2 branches missed.">        for (CodegenResponse rsp : op.responses) {</span>
+
+<span class="nc bnc" id="L784" title="All 2 branches missed.">            if (rsp.dataType != null) {</span>
+<span class="nc" id="L785">                String dataType = rsp.dataType;</span>
+<span class="nc bnc" id="L786" title="All 2 branches missed.">                if (returnType != null) {</span>
+<span class="nc bnc" id="L787" title="All 2 branches missed.">                    if (returnType.vendorExtensions.containsKey(X_ADA_VECTOR_TYPE_NAME)) {</span>
+<span class="nc" id="L788">                        dataType = (String) returnType.vendorExtensions.get(X_ADA_VECTOR_TYPE_NAME);</span>
+<span class="nc" id="L789">                        rsp.vendorExtensions.put(X_ADA_TYPE_NAME, dataType);</span>
+                    }
+<span class="nc" id="L791">                    rsp.vendorExtensions.put(&quot;x-is-model-type&quot;, isModelType(returnType));</span>
+<span class="nc" id="L792">                    rsp.vendorExtensions.put(&quot;x-is-stream-type&quot;, isStreamType(returnType));</span>
+<span class="nc" id="L793">                    rsp.vendorExtensions.put(&quot;x-is-nullable&quot;, returnType.isNull);</span>
+
+                    // Convert optional members to use the Nullable_&lt;T&gt; type.
+<span class="nc" id="L796">                    Boolean required = returnType.getHasRequired();</span>
+<span class="nc bnc" id="L797" title="All 4 branches missed.">                    if (!Boolean.TRUE.equals(required) &amp;&amp; nullableTypeMapping.containsKey(dataType)) {</span>
+<span class="nc" id="L798">                        rsp.dataType = nullableTypeMapping.get(dataType);</span>
+<span class="nc" id="L799">                        rsp.vendorExtensions.put(&quot;x-is-required&quot;, false);</span>
+                    } else {
+<span class="nc" id="L801">                        rsp.vendorExtensions.put(&quot;x-is-required&quot;, true);</span>
+                    }
+<span class="nc bnc" id="L803" title="All 2 branches missed.">                    if (!rsp.vendorExtensions.containsKey(X_ADA_SERIALIZE_OP)) {</span>
+<span class="nc bnc" id="L804" title="All 4 branches missed.">                        if (returnType.isLong &amp;&amp; !required) {</span>
+<span class="nc" id="L805">                            rsp.vendorExtensions.put(X_ADA_SERIALIZE_OP, &quot;Write_Entity&quot;);</span>
+<span class="nc bnc" id="L806" title="All 4 branches missed.">                        } else if (rsp.isLong &amp;&amp; &quot;int64&quot;.equals(returnType.dataFormat)) {</span>
+<span class="nc" id="L807">                            rsp.vendorExtensions.put(X_ADA_SERIALIZE_OP, &quot;Write_Long_Entity&quot;);</span>
+                        } else {
+<span class="nc" id="L809">                            rsp.vendorExtensions.put(X_ADA_SERIALIZE_OP, &quot;Write_Entity&quot;);</span>
+                        }
+                    }
+<span class="nc" id="L812">                    rsp.vendorExtensions.put(&quot;x-scz-return&quot;, true);</span>
+<span class="nc" id="L813">                } else {</span>
+<span class="nc" id="L814">                    rsp.vendorExtensions.put(&quot;x-scz-no-return&quot;, true);</span>
+<span class="nc bnc" id="L815" title="All 2 branches missed.">                    if (returnProperty != null) {</span>
+<span class="nc bnc" id="L816" title="All 2 branches missed.">                        if (!rsp.vendorExtensions.containsKey(X_ADA_TYPE_NAME)) {</span>
+<span class="nc" id="L817">                            rsp.vendorExtensions.put(X_ADA_TYPE_NAME, returnProperty.dataType);</span>
+                        }
+<span class="nc" id="L819">                        rsp.vendorExtensions.put(&quot;x-is-model-type&quot;, isModelType(returnProperty));</span>
+<span class="nc" id="L820">                        rsp.vendorExtensions.put(&quot;x-is-stream-type&quot;, isStreamType(returnProperty));</span>
+<span class="nc" id="L821">                        rsp.vendorExtensions.put(&quot;x-is-nullable&quot;, returnProperty.isNull);</span>
+
+                        // Convert optional members to use the Nullable_&lt;T&gt; type.
+<span class="nc" id="L824">                        Boolean required = returnProperty.getHasRequired();</span>
+<span class="nc bnc" id="L825" title="All 4 branches missed.">                        if (!Boolean.TRUE.equals(required) &amp;&amp; nullableTypeMapping.containsKey(dataType)) {</span>
+<span class="nc" id="L826">                            rsp.dataType = nullableTypeMapping.get(dataType);</span>
+<span class="nc" id="L827">                            rsp.vendorExtensions.put(&quot;x-is-required&quot;, false);</span>
+                        } else {
+<span class="nc" id="L829">                            rsp.vendorExtensions.put(&quot;x-is-required&quot;, true);</span>
+                        }
+<span class="nc bnc" id="L831" title="All 2 branches missed.">                        if (!rsp.vendorExtensions.containsKey(X_ADA_SERIALIZE_OP)) {</span>
+<span class="nc bnc" id="L832" title="All 4 branches missed.">                            if (returnProperty.isLong &amp;&amp; !required) {</span>
+<span class="nc" id="L833">                                rsp.vendorExtensions.put(X_ADA_SERIALIZE_OP, &quot;Write_Entity&quot;);</span>
+<span class="nc bnc" id="L834" title="All 4 branches missed.">                            } else if (rsp.isLong &amp;&amp; &quot;int64&quot;.equals(returnProperty.dataFormat)) {</span>
+<span class="nc" id="L835">                                rsp.vendorExtensions.put(X_ADA_SERIALIZE_OP, &quot;Write_Long_Entity&quot;);</span>
+                            } else {
+<span class="nc" id="L837">                                rsp.vendorExtensions.put(X_ADA_SERIALIZE_OP, &quot;Write_Entity&quot;);</span>
+                            }
+                        }
+                    }
+                }
+            }
+<span class="nc" id="L843">        }</span>
+
+        /*
+         * Scan the path parameter to construct a x-path-index that tells the index of
+         * the path parameter.
+         */
+<span class="nc bnc" id="L849" title="All 2 branches missed.">        for (CodegenParameter p : op.pathParams) {</span>
+<span class="nc" id="L850">            String path = op.path;</span>
+<span class="nc" id="L851">            int pos = 0;</span>
+<span class="nc" id="L852">            int index = 0;</span>
+<span class="nc bnc" id="L853" title="All 4 branches missed.">            while (pos &gt;= 0 &amp;&amp; pos &lt; path.length()) {</span>
+                int last;
+<span class="nc" id="L855">                pos = path.indexOf('{', pos);</span>
+<span class="nc bnc" id="L856" title="All 2 branches missed.">                if (pos &lt; 0) {</span>
+<span class="nc" id="L857">                    break;</span>
+                }
+<span class="nc" id="L859">                pos++;</span>
+<span class="nc" id="L860">                last = path.indexOf('}', pos);</span>
+<span class="nc" id="L861">                index++;</span>
+<span class="nc bnc" id="L862" title="All 2 branches missed.">                if (last &lt; 0) {</span>
+<span class="nc" id="L863">                    break;</span>
+                }
+<span class="nc bnc" id="L865" title="All 2 branches missed.">                if (path.substring(pos, last).equals(p.baseName)) {</span>
+<span class="nc" id="L866">                    break;</span>
+                }
+<span class="nc" id="L868">                pos = last + 1;</span>
+<span class="nc" id="L869">            }</span>
+<span class="nc" id="L870">            p.vendorExtensions.put(&quot;x-path-index&quot;, index);</span>
+<span class="nc" id="L871">        }</span>
+<span class="nc" id="L872">    }</span>
+
+    /**
+     * Helper class to sort the model according to their dependencies and names.
+     */
+    static class ModelDepend implements Comparable&lt;ModelDepend&gt; {
+        final List&lt;String&gt; depend;
+        final ModelMap model;
+        final String name;
+
+<span class="nc" id="L882">        ModelDepend(ModelMap model, List&lt;String&gt; depend, String name) {</span>
+<span class="nc" id="L883">            this.model = model;</span>
+<span class="nc" id="L884">            this.depend = depend;</span>
+<span class="nc" id="L885">            this.name = name;</span>
+<span class="nc" id="L886">        }</span>
+
+        public int compareTo(ModelDepend second) {
+
+<span class="nc bnc" id="L890" title="All 4 branches missed.">            if (depend != null &amp;&amp; depend.contains(second.name)) {</span>
+                //LOGGER.debug(&quot;Compare &quot; + name + &quot; with &quot; + second.name + &quot;=1&quot;);
+<span class="nc" id="L892">                return 1;</span>
+            }
+<span class="nc bnc" id="L894" title="All 4 branches missed.">            if (second.depend != null &amp;&amp; second.depend.contains(name)) {</span>
+                //LOGGER.debug(&quot;Compare &quot; + name + &quot; with &quot; + second.name + &quot;=-1&quot;);
+<span class="nc" id="L896">                return -1;</span>
+            }
+<span class="nc bnc" id="L898" title="All 6 branches missed.">            if (depend != null &amp;&amp; depend.size() != (second.depend == null ? 0 : second.depend.size())) {</span>
+                //LOGGER.debug(&quot;Compare &quot; + name + &quot; with &quot; + second.name + &quot;=D&quot;
+                //        + (depend.size() - second.depend.size()));
+<span class="nc" id="L901">                return depend.size() - second.depend.size();</span>
+            }
+            //LOGGER.debug(&quot;Compare &quot; + name + &quot; with &quot; + second.name + &quot;=&lt;name&gt;&quot;);
+<span class="nc" id="L904">            return name.compareTo(second.name);</span>
+        }
+    }
+
+    @Override
+    public ModelsMap postProcessModels(ModelsMap objs) {
+        // This is run first, before the operations.
+        // remove model imports to avoid error
+<span class="nc" id="L912">        List&lt;Map&lt;String, String&gt;&gt; imports = objs.getImports();</span>
+<span class="nc" id="L913">        final String prefix = modelPackage() + &quot;.Models&quot;;</span>
+<span class="nc" id="L914">        Iterator&lt;Map&lt;String, String&gt;&gt; iterator = imports.iterator();</span>
+<span class="nc bnc" id="L915" title="All 2 branches missed.">        while (iterator.hasNext()) {</span>
+<span class="nc" id="L916">            String _import = iterator.next().get(&quot;import&quot;);</span>
+<span class="nc bnc" id="L917" title="All 2 branches missed.">            if (_import.startsWith(prefix))</span>
+<span class="nc" id="L918">                iterator.remove();</span>
+<span class="nc" id="L919">        }</span>
+
+        // Collect the model dependencies.
+<span class="nc bnc" id="L922" title="All 2 branches missed.">        for (ModelMap model : objs.getModels()) {</span>
+<span class="nc" id="L923">            CodegenModel m = model.getModel();</span>
+<span class="nc" id="L924">            List&lt;String&gt; d = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L925" title="All 2 branches missed.">            for (CodegenProperty p : m.vars) {</span>
+<span class="nc" id="L926">                boolean isModel = false;</span>
+<span class="nc" id="L927">                CodegenProperty item = p;</span>
+<span class="nc" id="L928">                String dataType = null;</span>
+<span class="nc" id="L929">                String arrayDataType = null;</span>
+<span class="nc bnc" id="L930" title="All 2 branches missed.">                if (p.vendorExtensions.containsKey(X_ADA_TYPE_NAME)) {</span>
+<span class="nc" id="L931">                    dataType = (String) p.vendorExtensions.get(X_ADA_TYPE_NAME);</span>
+<span class="nc" id="L932">                    LOGGER.info(&quot;Data type {} mapped to {}&quot;, p.dataType, dataType);</span>
+                }
+<span class="nc" id="L934">                arrayDataType = (String) p.vendorExtensions.get(X_ADA_VECTOR_TYPE_NAME);</span>
+<span class="nc bnc" id="L935" title="All 2 branches missed.">                if (p.isContainer) {</span>
+<span class="nc" id="L936">                    item = p.items;</span>
+                }
+<span class="nc" id="L938">                boolean isStreamType = isStreamType(p);</span>
+<span class="nc bnc" id="L939" title="All 12 branches missed.">                if (!isStreamType &amp;&amp; item != null &amp;&amp; !item.isString &amp;&amp; !item.isPrimitiveType &amp;&amp; !item.isContainer &amp;&amp; !item.isInteger) {</span>
+<span class="nc bnc" id="L940" title="All 2 branches missed.">                    if (dataType == null) {</span>
+<span class="nc" id="L941">                        dataType = item.dataType;</span>
+<span class="nc bnc" id="L942" title="All 4 branches missed.">                        if (dataType.startsWith(modelPackage + &quot;.Models.&quot;) || item.isFreeFormObject) {</span>
+<span class="nc" id="L943">                            p.vendorExtensions.put(X_ADA_TYPE_NAME, dataType);</span>
+                        } else {
+<span class="nc" id="L945">                            p.vendorExtensions.put(X_ADA_TYPE_NAME, modelPackage + &quot;.Models.&quot; + dataType);</span>
+                        }
+<span class="nc" id="L947">                        LOGGER.debug(&quot;Setting ada-type name {} for datatype {}&quot;, modelPackage + &quot;.Models.&quot; + dataType,</span>
+                                dataType);
+                    }
+<span class="nc bnc" id="L950" title="All 2 branches missed.">                    if (!d.contains(dataType)) {</span>
+                        // LOGGER.info(&quot;Model &quot; + m.name + &quot; uses &quot; + p.datatype);
+<span class="nc" id="L952">                        d.add(dataType);</span>
+                    }
+<span class="nc" id="L954">                    isModel = true;</span>
+                }
+<span class="nc" id="L956">                Boolean noVector = Boolean.FALSE;</span>
+<span class="nc bnc" id="L957" title="All 2 branches missed.">                if (p.vendorExtensions.get(X_ADA_NO_VECTOR) instanceof Boolean) {</span>
+<span class="nc" id="L958">                    noVector = (Boolean) p.vendorExtensions.get(X_ADA_NO_VECTOR);</span>
+                }
+<span class="nc" id="L960">                p.vendorExtensions.put(X_ADA_NO_VECTOR, noVector);</span>
+<span class="nc" id="L961">                p.vendorExtensions.put(&quot;x-is-model-type&quot;, isModel);</span>
+<span class="nc" id="L962">                p.vendorExtensions.put(&quot;x-is-stream-type&quot;, isStreamType);</span>
+<span class="nc" id="L963">                String pkgImport = useType(dataType);</span>
+<span class="nc bnc" id="L964" title="All 2 branches missed.">                p.vendorExtensions.put(&quot;x-is-imported-type&quot;, pkgImport != null);</span>
+<span class="nc bnc" id="L965" title="All 2 branches missed.">                if (pkgImport != null) {</span>
+<span class="nc" id="L966">                    adaImportSet.add(pkgImport);</span>
+                }
+<span class="nc" id="L968">                Boolean required = p.getRequired();</span>
+<span class="nc bnc" id="L969" title="All 2 branches missed.">                if (!p.vendorExtensions.containsKey(X_ADA_SERIALIZE_OP)) {</span>
+<span class="nc bnc" id="L970" title="All 4 branches missed.">                    if (p.isLong &amp;&amp; !required) {</span>
+<span class="nc" id="L971">                        p.vendorExtensions.put(X_ADA_SERIALIZE_OP, &quot;Write_Entity&quot;);</span>
+<span class="nc bnc" id="L972" title="All 4 branches missed.">                    } else if (p.isLong &amp;&amp; &quot;int64&quot;.equals(p.dataFormat)) {</span>
+<span class="nc" id="L973">                        p.vendorExtensions.put(X_ADA_SERIALIZE_OP, &quot;Write_Long_Entity&quot;);</span>
+                    } else {
+<span class="nc" id="L975">                        p.vendorExtensions.put(X_ADA_SERIALIZE_OP, &quot;Write_Entity&quot;);</span>
+                    }
+                }
+
+                // Convert optional members to use the Nullable_&lt;T&gt; type.
+<span class="nc bnc" id="L980" title="All 4 branches missed.">                if (!Boolean.TRUE.equals(required) &amp;&amp; nullableTypeMapping.containsKey(p.dataType)) {</span>
+<span class="nc" id="L981">                    p.dataType = nullableTypeMapping.get(p.dataType);</span>
+<span class="nc" id="L982">                    p.vendorExtensions.put(&quot;x-is-required&quot;, false);</span>
+                } else {
+<span class="nc" id="L984">                    p.vendorExtensions.put(&quot;x-is-required&quot;, true);</span>
+                }
+<span class="nc" id="L986">                p.vendorExtensions.put(&quot;x-is-nullable&quot;, p.isNullable);</span>
+<span class="nc" id="L987">            }</span>
+<span class="nc" id="L988">            String name = (String) m.vendorExtensions.get(X_ADA_TYPE_NAME);</span>
+<span class="nc bnc" id="L989" title="All 2 branches missed.">            if (name == null) {</span>
+<span class="nc" id="L990">                name = modelPackage + &quot;.Models.&quot; + m.classname;</span>
+<span class="nc" id="L991">                m.vendorExtensions.put(X_ADA_TYPE_NAME, name);</span>
+            }
+<span class="nc" id="L993">            String pkgName = useType(name);</span>
+<span class="nc bnc" id="L994" title="All 2 branches missed.">            if (pkgName != null) {</span>
+<span class="nc" id="L995">                adaImportSet.add(pkgName);</span>
+            }
+<span class="nc" id="L997">            m.vendorExtensions.put(X_ADA_TYPE_NAME, name);</span>
+
+<span class="nc bnc" id="L999" title="All 2 branches missed.">            m.vendorExtensions.put(&quot;x-is-imported-type&quot;, pkgName != null);</span>
+            // let us work with fully qualified names only
+<span class="nc" id="L1001">            modelDepends.put(name, d);</span>
+<span class="nc" id="L1002">            orderedModels.add(model);</span>
+<span class="nc" id="L1003">        }</span>
+
+<span class="nc" id="L1005">        objs.setImports(imports);</span>
+
+        // Sort models using dependencies:
+<span class="nc" id="L1008">        TreeSet&lt;ModelDepend&gt; sorted = new TreeSet&lt;&gt;();</span>
+<span class="nc bnc" id="L1009" title="All 2 branches missed.">        for (ModelMap model : orderedModels) {</span>
+<span class="nc" id="L1010">            String modelName = modelPackage + &quot;.Models.&quot; + model.getModel().classname;</span>
+<span class="nc" id="L1011">            sorted.add(new ModelDepend(model, modelDepends.get(modelName), modelName));</span>
+<span class="nc" id="L1012">        }</span>
+
+        // The comparison method in ModelDepend does not provide a total order
+        // we have to adjust the sorted list to make sure the dependent models are
+        // written last.
+<span class="nc" id="L1017">        ArrayList&lt;ModelDepend&gt; models = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L1018" title="All 2 branches missed.">        for (ModelDepend item : sorted) {</span>
+<span class="nc" id="L1019">            int pos = models.size();</span>
+<span class="nc bnc" id="L1020" title="All 2 branches missed.">            for (int i = 0; i &lt; models.size(); i++) {</span>
+<span class="nc" id="L1021">                ModelDepend second = models.get(i);</span>
+<span class="nc bnc" id="L1022" title="All 4 branches missed.">                if (second.depend != null &amp;&amp; second.depend.contains(item.name)) {</span>
+<span class="nc" id="L1023">                    pos = i;</span>
+<span class="nc" id="L1024">                    break;</span>
+                }
+            }
+<span class="nc" id="L1027">            models.add(pos, item);</span>
+<span class="nc" id="L1028">        }</span>
+<span class="nc" id="L1029">        List&lt;ModelMap&gt; revisedOrderedModels = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L1030" title="All 2 branches missed.">        for (ModelDepend model : models) {</span>
+<span class="nc" id="L1031">            revisedOrderedModels.add(model.model);</span>
+<span class="nc" id="L1032">        }</span>
+<span class="nc" id="L1033">        orderedModels = revisedOrderedModels;</span>
+
+<span class="nc" id="L1035">        return postProcessModelsEnum(objs);</span>
+    }
+
+    @Override
+    public Map&lt;String, Object&gt; postProcessSupportingFileData(Map&lt;String, Object&gt; objs) {
+<span class="nc" id="L1040">        objs.put(&quot;orderedModels&quot;, orderedModels);</span>
+<span class="nc" id="L1041">        generateJSONSpecFile(objs);</span>
+
+        /**
+         * Collect the scopes to generate unique identifiers for each of them.
+         */
+<span class="nc" id="L1046">        List&lt;CodegenSecurity&gt; authMethods = (List&lt;CodegenSecurity&gt;) objs.get(&quot;authMethods&quot;);</span>
+<span class="nc" id="L1047">        postProcessAuthMethod(authMethods, null);</span>
+
+<span class="nc" id="L1049">        return super.postProcessSupportingFileData(objs);</span>
+    }
+
+    @Override
+    public void postProcessFile(File file, String fileType) {
+<span class="nc" id="L1054">        super.postProcessFile(file, fileType);</span>
+
+<span class="nc bnc" id="L1056" title="All 2 branches missed.">        if (file == null) {</span>
+<span class="nc" id="L1057">            return;</span>
+        }
+
+        // only process files with .ads or .adb extension
+<span class="nc" id="L1061">        String extension = FilenameUtils.getExtension(file.toString());</span>
+<span class="nc bnc" id="L1062" title="All 4 branches missed.">        if (&quot;ads&quot;.equals(extension) || &quot;adb&quot;.equals(extension)) {</span>
+
+<span class="nc" id="L1064">            String commandPrefix = System.getenv(&quot;ADA_POST_PROCESS_FILE&quot;);</span>
+<span class="nc bnc" id="L1065" title="All 2 branches missed.">            if (StringUtils.isEmpty(commandPrefix)) {</span>
+<span class="nc" id="L1066">                commandPrefix = &quot;gnatpp&quot;;</span>
+            }
+
+            try {
+<span class="nc" id="L1070">                Process p = Runtime.getRuntime().exec(new String[]{commandPrefix, &quot;--no-compact&quot;, &quot;--quiet&quot;, file.toString()});</span>
+<span class="nc" id="L1071">                int exitValue = p.waitFor();</span>
+<span class="nc bnc" id="L1072" title="All 2 branches missed.">                if (exitValue != 0) {</span>
+<span class="nc" id="L1073">                    LOGGER.error(&quot;Error running the command ({} {}). Exit code: {}&quot;, commandPrefix, file, exitValue);</span>
+                } else {
+<span class="nc" id="L1075">                    LOGGER.debug(&quot;Successfully executed: {} {}&quot;, commandPrefix, file);</span>
+                }
+<span class="nc" id="L1077">            } catch (InterruptedException | IOException e) {</span>
+<span class="nc" id="L1078">                LOGGER.error(&quot;Error running the command ({} {}). Exception: {}&quot;, commandPrefix, file, e.getMessage());</span>
+                // Restore interrupted state
+<span class="nc" id="L1080">                Thread.currentThread().interrupt();</span>
+<span class="nc" id="L1081">            }</span>
+        }
+<span class="nc" id="L1083">    }</span>
+
+    @Override
+    public GeneratorLanguage generatorLanguage() {
+<span class="nc" id="L1087">        return GeneratorLanguage.ADA;</span>
+    }
+
+    /**
+     * Collect the scopes to generate a unique identifier for each of them.
+     *
+     * @param authMethods the auth methods with their scopes.
+     * @param scopes      the optional auth methods and scopes required by an operation
+     * @return the authMethods to be used by the operation with its required scopes.
+     */
+    private List&lt;CodegenSecurity&gt; postProcessAuthMethod(List&lt;CodegenSecurity&gt; authMethods, Map&lt;String, List&lt;String&gt;&gt; scopes) {
+<span class="nc bnc" id="L1098" title="All 2 branches missed.">        List&lt;CodegenSecurity&gt; result = (scopes == null) ? null : new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L1099" title="All 2 branches missed.">        if (authMethods != null) {</span>
+<span class="nc bnc" id="L1100" title="All 2 branches missed.">            for (CodegenSecurity authMethod : authMethods) {</span>
+<span class="nc bnc" id="L1101" title="All 2 branches missed.">                if (authMethod.scopes != null) {</span>
+<span class="nc bnc" id="L1102" title="All 2 branches missed.">                    for (Map&lt;String, Object&gt; scope : authMethod.scopes) {</span>
+<span class="nc" id="L1103">                        String name = (String) scope.get(&quot;scope&quot;);</span>
+<span class="nc bnc" id="L1104" title="All 2 branches missed.">                        if (operationsScopes.containsKey(name)) {</span>
+<span class="nc" id="L1105">                            scope.put(&quot;ident&quot;, operationsScopes.get(name));</span>
+                        } else {
+                            String ident;
+<span class="nc bnc" id="L1108" title="All 2 branches missed.">                            if (name.startsWith(&quot;https://&quot;)) {</span>
+<span class="nc" id="L1109">                                int pos = name.lastIndexOf('/');</span>
+<span class="nc" id="L1110">                                ident = name.substring(pos + 1);</span>
+<span class="nc" id="L1111">                            } else {</span>
+<span class="nc" id="L1112">                                ident = name;</span>
+                            }
+<span class="nc" id="L1114">                            scopeIndex++;</span>
+<span class="nc" id="L1115">                            ident = toAdaIdentifier(sanitizeName(ident.replaceAll(&quot;:&quot;, &quot;_&quot;)), &quot;S_&quot;);</span>
+<span class="nc bnc" id="L1116" title="All 2 branches missed.">                            if (operationsScopes.containsValue(ident)) {</span>
+<span class="nc" id="L1117">                                ident = ident + &quot;_&quot; + scopeIndex;</span>
+                            }
+<span class="nc" id="L1119">                            operationsScopes.put(name, ident);</span>
+<span class="nc" id="L1120">                            scope.put(&quot;ident&quot;, ident);</span>
+                        }
+<span class="nc" id="L1122">                    }</span>
+                }
+
+                // If we have operation scopes, filter the auth method to describe the operation auth
+                // method with only the scope that it requires.  We have to create a new auth method
+                // instance because the original object must not be modified.
+<span class="nc bnc" id="L1128" title="All 2 branches missed.">                List&lt;String&gt; opScopes = (scopes == null) ? null : scopes.get(authMethod.name);</span>
+<span class="nc" id="L1129">                authMethod.name = camelize(sanitizeName(authMethod.name), LOWERCASE_FIRST_LETTER);</span>
+<span class="nc bnc" id="L1130" title="All 2 branches missed.">                if (opScopes != null) {</span>
+<span class="nc" id="L1131">                    CodegenSecurity opSecurity = authMethod.filterByScopeNames(opScopes);</span>
+<span class="nc" id="L1132">                    result.add(opSecurity);</span>
+                }
+<span class="nc" id="L1134">            }</span>
+        }
+<span class="nc" id="L1136">        return result;</span>
+    }
+
+    private boolean isStreamType(CodegenProperty parameter) {
+<span class="nc bnc" id="L1140" title="All 16 branches missed.">        return parameter.isString || parameter.isBoolean || parameter.isDate</span>
+                || parameter.isDateTime || parameter.isInteger || parameter.isLong
+                || (parameter.isFreeFormObject &amp;&amp; !parameter.isMap);
+    }
+
+    private boolean isModelType(CodegenProperty parameter) {
+<span class="nc" id="L1146">        boolean isModel = parameter.dataType.startsWith(modelPackage);</span>
+<span class="nc bnc" id="L1147" title="All 14 branches missed.">        if (!isModel &amp;&amp; !parameter.isPrimitiveType &amp;&amp; !parameter.isDate</span>
+                &amp;&amp; !parameter.isFreeFormObject
+                &amp;&amp; !parameter.isString &amp;&amp; !parameter.isContainer &amp;&amp; !parameter.isFile
+<span class="nc bnc" id="L1150" title="All 2 branches missed.">                &amp;&amp; !parameter.dataType.startsWith(openApiPackageName)) {</span>
+<span class="nc" id="L1151">            isModel = true;</span>
+        }
+<span class="nc" id="L1153">        return isModel;</span>
+    }
+
+    private boolean isStreamType(CodegenParameter parameter) {
+<span class="nc bnc" id="L1157" title="All 16 branches missed.">        return parameter.isString || parameter.isBoolean || parameter.isDate</span>
+                || parameter.isDateTime || parameter.isInteger || parameter.isLong
+                || (parameter.isFreeFormObject &amp;&amp; !parameter.isMap);
+    }
+
+    private boolean isModelType(CodegenParameter parameter) {
+<span class="nc" id="L1163">        boolean isModel = parameter.dataType.startsWith(modelPackage);</span>
+<span class="nc bnc" id="L1164" title="All 14 branches missed.">        if (!isModel &amp;&amp; !parameter.isPrimitiveType &amp;&amp; !parameter.isDate</span>
+                &amp;&amp; !parameter.isFreeFormObject
+                &amp;&amp; !parameter.isString &amp;&amp; !parameter.isContainer &amp;&amp; !parameter.isFile
+<span class="nc bnc" id="L1167" title="All 2 branches missed.">                &amp;&amp; !parameter.dataType.startsWith(openApiPackageName)) {</span>
+<span class="nc" id="L1168">            isModel = true;</span>
+        }
+<span class="nc" id="L1170">        return isModel;</span>
+    }
+
+    private Map&lt;String, List&lt;String&gt;&gt; getAuthScopes(List&lt;SecurityRequirement&gt; securities, Map&lt;String, SecurityScheme&gt; securitySchemes) {
+<span class="nc" id="L1174">        final Map&lt;String, List&lt;String&gt;&gt; scopes = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L1175">        Optional.ofNullable(securitySchemes).ifPresent(_securitySchemes -&gt; {</span>
+<span class="nc bnc" id="L1176" title="All 2 branches missed.">            for (SecurityRequirement requirement : securities) {</span>
+<span class="nc bnc" id="L1177" title="All 2 branches missed.">                for (String key : requirement.keySet()) {</span>
+<span class="nc" id="L1178">                    Optional.ofNullable(securitySchemes.get(key))</span>
+<span class="nc" id="L1179">                            .ifPresent(securityScheme -&gt; scopes.put(key, requirement.get(key)));</span>
+<span class="nc" id="L1180">                }</span>
+<span class="nc" id="L1181">            }</span>
+<span class="nc" id="L1182">        });</span>
+<span class="nc" id="L1183">        return scopes;</span>
+    }
+
+    /**
+     * Check if the Ada type name is imported from another package.
+     *
+     * @param name the Ada full qualified type name.
+     * @return true if this Ada type is imported.
+     */
+    private String useType(String name) {
+<span class="nc bnc" id="L1193" title="All 2 branches missed.">        if (name == null) {</span>
+<span class="nc" id="L1194">            return null;</span>
+        }
+<span class="nc" id="L1196">        int pos = name.lastIndexOf('.');</span>
+<span class="nc bnc" id="L1197" title="All 2 branches missed.">        if (pos &lt;= 0) {</span>
+<span class="nc" id="L1198">            return null;</span>
+        }
+
+<span class="nc" id="L1201">        String pkg = name.substring(0, pos);</span>
+<span class="nc bnc" id="L1202" title="All 2 branches missed.">        if (pkg.equals(modelPackage + &quot;.Models&quot;)) {</span>
+<span class="nc" id="L1203">            return null;</span>
+        }
+
+<span class="nc" id="L1206">        return pkg;</span>
+    }
+
+    private boolean isMimetypeXml(String mimetype) {
+<span class="nc bnc" id="L1210" title="All 2 branches missed.">        return mimetype.toLowerCase(Locale.ROOT).startsWith(APPLICATION_XML) ||</span>
+<span class="nc bnc" id="L1211" title="All 2 branches missed.">                mimetype.toLowerCase(Locale.ROOT).startsWith(APPLICATION_PROBLEM_XML) ||</span>
+<span class="nc bnc" id="L1212" title="All 2 branches missed.">                mimetype.toLowerCase(Locale.ROOT).startsWith(TEXT_XML);</span>
+    }
+
+    private boolean isMimetypeJson(String mimetype) {
+<span class="nc bnc" id="L1216" title="All 2 branches missed.">        return mimetype.toLowerCase(Locale.ROOT).startsWith(APPLICATION_JSON) ||</span>
+<span class="nc bnc" id="L1217" title="All 2 branches missed.">                mimetype.toLowerCase(Locale.ROOT).startsWith(APPLICATION_MERGE_PATCH_JSON) ||</span>
+<span class="nc bnc" id="L1218" title="All 2 branches missed.">                mimetype.toLowerCase(Locale.ROOT).startsWith(APPLICATION_PROBLEM_JSON);</span>
+    }
+
+    private boolean isMimetypeWwwFormUrlEncoded(String mimetype) {
+<span class="nc" id="L1222">        return mimetype.toLowerCase(Locale.ROOT).startsWith(APPLICATION_X_WWW_FORM_URLENCODED);</span>
+    }
+
+    private boolean isMimetypeMultipartFormData(String mimetype) {
+<span class="nc" id="L1226">        return mimetype.toLowerCase(Locale.ROOT).startsWith(&quot;multipart/form-data&quot;);</span>
+    }
+
+    private boolean isMimetypeOctetStream(String mimetype) {
+<span class="nc" id="L1230">        return mimetype.toLowerCase(Locale.ROOT).startsWith(APPLICATION_OCTET_STREAM);</span>
+    }
+
+    private boolean isMimetypeMultipartRelated(String mimetype) {
+<span class="nc" id="L1234">        return mimetype.toLowerCase(Locale.ROOT).startsWith(&quot;multipart/related&quot;);</span>
+    }
+
+    private boolean isMimetypeUnknown(String mimetype) {
+<span class="nc" id="L1238">        return &quot;*/*&quot;.equals(mimetype);</span>
+    }
+
+    /**
+     * Do we have any special handling for this mimetype?
+     */
+    private boolean isMimetypePlain(String mimetype) {
+<span class="nc bnc" id="L1245" title="All 2 branches missed.">        return !(isMimetypeUnknown(mimetype) ||</span>
+<span class="nc bnc" id="L1246" title="All 2 branches missed.">                isMimetypeXml(mimetype) ||</span>
+<span class="nc bnc" id="L1247" title="All 2 branches missed.">                isMimetypeJson(mimetype) ||</span>
+<span class="nc bnc" id="L1248" title="All 2 branches missed.">                isMimetypeWwwFormUrlEncoded(mimetype) ||</span>
+<span class="nc bnc" id="L1249" title="All 2 branches missed.">                isMimetypeMultipartFormData(mimetype) ||</span>
+<span class="nc bnc" id="L1250" title="All 2 branches missed.">                isMimetypeMultipartRelated(mimetype));</span>
+    }
+
+    /**
+     * Collect the list of media types to emit unique arrays of media types.
+     * An array represents a list of media types and it can be referenced by several operations.
+     * These arrays are emitted at the top of the client/server body packages.
+     *
+     * @param mediaList the list of media types.
+     * @return the unique index assigned to that media list.
+     */
+    private int collectMediaList(List&lt;String&gt; mediaList) {
+<span class="nc bnc" id="L1262" title="All 2 branches missed.">        for (int i = 0; i &lt; mediaGroups.size(); i++) {</span>
+<span class="nc bnc" id="L1263" title="All 2 branches missed.">            if (mediaList.equals(mediaGroups.get(i))) {</span>
+<span class="nc" id="L1264">                return i + 1;</span>
+            }
+        }
+
+<span class="nc" id="L1268">        mediaGroups.add(mediaList);</span>
+<span class="nc" id="L1269">        List&lt;NameBinding&gt; varList = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L1270">        int pos = 0;</span>
+<span class="nc bnc" id="L1271" title="All 2 branches missed.">        for (String media : mediaList) {</span>
+<span class="nc" id="L1272">            String varName = mediaToVariableName.get(media);</span>
+<span class="nc bnc" id="L1273" title="All 2 branches missed.">            if (varName == null) {</span>
+<span class="nc" id="L1274">                varName = &quot;Mime_&quot; + (mediaVariables.size() + 1);</span>
+<span class="nc" id="L1275">                mediaVariables.add(new NameBinding(mediaVariables.size() + 1, varName, media));</span>
+<span class="nc" id="L1276">                varName = varName + &quot;'Access&quot;;</span>
+            }
+<span class="nc" id="L1278">            pos++;</span>
+<span class="nc" id="L1279">            varList.add(new NameBinding(pos, varName, media));</span>
+<span class="nc" id="L1280">        }</span>
+<span class="nc" id="L1281">        mediaLists.add(varList);</span>
+<span class="nc" id="L1282">        return mediaGroups.size();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

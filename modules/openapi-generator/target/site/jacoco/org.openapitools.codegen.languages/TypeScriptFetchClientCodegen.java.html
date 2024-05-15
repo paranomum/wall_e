@@ -1,0 +1,1648 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TypeScriptFetchClientCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">TypeScriptFetchClientCodegen.java</span></div><h1>TypeScriptFetchClientCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import com.google.common.collect.ImmutableMap;
+import com.samskivert.mustache.Mustache;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.servers.Server;
+import io.swagger.v3.parser.util.SchemaTypeUtil;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.meta.features.DocumentationFeature;
+import org.openapitools.codegen.meta.features.SecurityFeature;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.templating.mustache.IndentedLambda;
+import org.openapitools.codegen.utils.ModelUtils;
+
+import java.io.File;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.openapitools.codegen.utils.CamelizeOption.LOWERCASE_FIRST_LETTER;
+import static org.openapitools.codegen.utils.StringUtils.*;
+
+public class TypeScriptFetchClientCodegen extends AbstractTypeScriptClientCodegen {
+    public static final String NPM_REPOSITORY = &quot;npmRepository&quot;;
+    public static final String WITH_INTERFACES = &quot;withInterfaces&quot;;
+    public static final String USE_SINGLE_REQUEST_PARAMETER = &quot;useSingleRequestParameter&quot;;
+    public static final String PREFIX_PARAMETER_INTERFACES = &quot;prefixParameterInterfaces&quot;;
+    public static final String WITHOUT_RUNTIME_CHECKS = &quot;withoutRuntimeChecks&quot;;
+    public static final String STRING_ENUMS = &quot;stringEnums&quot;;
+    public static final String STRING_ENUMS_DESC = &quot;Generate string enums instead of objects for enum values.&quot;;
+    public static final String IMPORT_FILE_EXTENSION_SWITCH = &quot;importFileExtension&quot;;
+    public static final String IMPORT_FILE_EXTENSION_SWITCH_DESC = &quot;File extension to use with relative imports. Set it to '.js' or '.mjs' when using [ESM](https://nodejs.org/api/esm.html).&quot;;
+    public static final String FILE_NAMING = &quot;fileNaming&quot;;
+    public static final String KEBAB_CASE = &quot;kebab-case&quot;;
+    public static final String CAMEL_CASE = &quot;camelCase&quot;;
+    public static final String PASCAL_CASE = &quot;PascalCase&quot;;
+
+<span class="nc" id="L60">    protected String npmRepository = null;</span>
+<span class="nc" id="L61">    protected String importFileExtension = &quot;&quot;;</span>
+<span class="nc" id="L62">    private boolean useSingleRequestParameter = true;</span>
+<span class="nc" id="L63">    private boolean prefixParameterInterfaces = false;</span>
+<span class="nc" id="L64">    protected boolean addedApiIndex = false;</span>
+<span class="nc" id="L65">    protected boolean addedModelIndex = false;</span>
+<span class="nc" id="L66">    protected boolean withoutRuntimeChecks = false;</span>
+<span class="nc" id="L67">    protected boolean stringEnums = false;</span>
+<span class="nc" id="L68">    protected String fileNaming = PASCAL_CASE;</span>
+
+    // &quot;Saga and Record&quot; mode.
+    public static final String SAGAS_AND_RECORDS = &quot;sagasAndRecords&quot;;
+    public static final String DETECT_PASSTHROUGH_MODELS_WITH_SUFFIX_AND_FIELD = &quot;detectPassthroughModelsWithSuffixAndField&quot;;
+    public static final String INFER_UNIQUE_ID_FROM_NAME_SUFFIX = &quot;inferUniqueIdFromNameSuffix&quot;;
+    public static final String INFER_ENTITY_FROM_UNIQUE_ID_WITH_NAME = &quot;inferEntityFromUniqueIdWithName&quot;;
+    public static final String PACKAGE_AS_SOURCE_ONLY_LIBRARY = &quot;packageAsSourceOnlyLibrary&quot;;
+
+    private static final String X_IS_UNIQUE_ID = &quot;x-isUniqueId&quot;;
+    private static final String X_ENTITY_ID = &quot;x-entityId&quot;;
+    private static final String X_OPERATION_RETURN_PASSTHROUGH = &quot;x-operationReturnPassthrough&quot;;
+    private static final String X_KEEP_AS_JS_OBJECT = &quot;x-keepAsJSObject&quot;;
+
+<span class="nc" id="L82">    protected boolean sagasAndRecords = false;</span>
+<span class="nc" id="L83">    protected String detectPassthroughModelsWithSuffixAndField = null; // Ex: &quot;Response;data&quot;</span>
+<span class="nc" id="L84">    protected boolean inferUniqueIdFromNameSuffix = false;</span>
+<span class="nc" id="L85">    protected String inferEntityFromUniqueIdWithName = null;</span>
+<span class="nc" id="L86">    protected boolean packageAsSourceOnlyLibrary = false;</span>
+
+
+    public TypeScriptFetchClientCodegen() {
+<span class="nc" id="L90">        super();</span>
+
+<span class="nc" id="L92">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L93">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="nc" id="L94">                .includeSecurityFeatures(SecurityFeature.BearerToken));</span>
+
+        // clear import mapping (from default generator) as TS does not use it
+        // at the moment
+<span class="nc" id="L98">        importMapping.clear();</span>
+
+<span class="nc" id="L100">        outputFolder = &quot;generated-code/typescript-fetch&quot;;</span>
+<span class="nc" id="L101">        embeddedTemplateDir = templateDir = &quot;typescript-fetch&quot;;</span>
+
+<span class="nc" id="L103">        this.apiTemplateFiles.put(&quot;apis.mustache&quot;, &quot;.ts&quot;);</span>
+
+<span class="nc" id="L105">        this.addExtraReservedWords();</span>
+
+<span class="nc" id="L107">        supportModelPropertyNaming(CodegenConstants.MODEL_PROPERTY_NAMING_TYPE.camelCase);</span>
+<span class="nc" id="L108">        this.cliOptions.add(new CliOption(NPM_REPOSITORY, &quot;Use this property to set an url your private npmRepo in the package.json&quot;));</span>
+<span class="nc" id="L109">        this.cliOptions.add(new CliOption(WITH_INTERFACES, &quot;Setting this property to true will generate interfaces next to the default class implementations.&quot;, SchemaTypeUtil.BOOLEAN_TYPE).defaultValue(Boolean.FALSE.toString()));</span>
+<span class="nc" id="L110">        this.cliOptions.add(new CliOption(CodegenConstants.USE_SINGLE_REQUEST_PARAMETER, CodegenConstants.USE_SINGLE_REQUEST_PARAMETER_DESC, SchemaTypeUtil.BOOLEAN_TYPE).defaultValue(Boolean.TRUE.toString()));</span>
+<span class="nc" id="L111">        this.cliOptions.add(new CliOption(PREFIX_PARAMETER_INTERFACES, &quot;Setting this property to true will generate parameter interface declarations prefixed with API class name to avoid name conflicts.&quot;, SchemaTypeUtil.BOOLEAN_TYPE).defaultValue(Boolean.FALSE.toString()));</span>
+<span class="nc" id="L112">        this.cliOptions.add(new CliOption(WITHOUT_RUNTIME_CHECKS, &quot;Setting this property to true will remove any runtime checks on the request and response payloads. Payloads will be casted to their expected types.&quot;, SchemaTypeUtil.BOOLEAN_TYPE).defaultValue(Boolean.FALSE.toString()));</span>
+<span class="nc" id="L113">        this.cliOptions.add(new CliOption(SAGAS_AND_RECORDS, &quot;Setting this property to true will generate additional files for use with redux-saga and immutablejs.&quot;, SchemaTypeUtil.BOOLEAN_TYPE).defaultValue(Boolean.FALSE.toString()));</span>
+<span class="nc" id="L114">        this.cliOptions.add(new CliOption(STRING_ENUMS, STRING_ENUMS_DESC, SchemaTypeUtil.BOOLEAN_TYPE).defaultValue(Boolean.FALSE.toString()));</span>
+<span class="nc" id="L115">        this.cliOptions.add(new CliOption(IMPORT_FILE_EXTENSION_SWITCH, IMPORT_FILE_EXTENSION_SWITCH_DESC).defaultValue(&quot;&quot;));</span>
+<span class="nc" id="L116">        this.cliOptions.add(new CliOption(FILE_NAMING, &quot;Naming convention for the output files: 'PascalCase', 'camelCase', 'kebab-case'.&quot;).defaultValue(this.fileNaming));</span>
+<span class="nc" id="L117">    }</span>
+
+    @Override
+    public String toApiFilename(String name) {
+<span class="nc" id="L121">        return convertUsingFileNamingConvention(super.toApiFilename(name));</span>
+    }
+
+    @Override
+    public String toModelFilename(String name) {
+<span class="nc" id="L126">        return convertUsingFileNamingConvention(super.toModelFilename(name));</span>
+    }
+
+    /**
+     * Converts the original name according to the current &lt;code&gt;fileNaming&lt;/code&gt; strategy.
+     *
+     * @param originalName the original name to transform
+     * @return the transformed name
+     */
+    private String convertUsingFileNamingConvention(String originalName) {
+<span class="nc" id="L136">        String name = originalName;</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">        if (KEBAB_CASE.equals(fileNaming)) {</span>
+<span class="nc" id="L138">            name = dashize(underscore(name));</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">        } else if (CAMEL_CASE.equals(fileNaming)) {</span>
+<span class="nc" id="L140">            name = camelize(name, LOWERCASE_FIRST_LETTER);</span>
+        }
+<span class="nc" id="L142">        return name;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L147">        return &quot;typescript-fetch&quot;;</span>
+    }
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L152">        return &quot;Generates a TypeScript client library using Fetch API (beta).&quot;;</span>
+    }
+
+    public String getNpmRepository() {
+<span class="nc" id="L156">        return npmRepository;</span>
+    }
+
+    public void setNpmRepository(String npmRepository) {
+<span class="nc" id="L160">        this.npmRepository = npmRepository;</span>
+<span class="nc" id="L161">    }</span>
+
+    public String getImportFileExtension() {
+<span class="nc" id="L164">        return importFileExtension;</span>
+    }
+
+    public void setImportFileExtension(String importFileExtension) {
+<span class="nc" id="L168">        this.importFileExtension = importFileExtension;</span>
+<span class="nc" id="L169">    }</span>
+
+    public Boolean getWithoutRuntimeChecks() {
+<span class="nc" id="L172">        return withoutRuntimeChecks;</span>
+    }
+
+    public void setWithoutRuntimeChecks(Boolean withoutRuntimeChecks) {
+<span class="nc" id="L176">        this.withoutRuntimeChecks = withoutRuntimeChecks;</span>
+<span class="nc" id="L177">    }</span>
+
+    public Boolean getStringEnums() {
+<span class="nc" id="L180">        return this.stringEnums;</span>
+    }
+    public void setStringEnums(Boolean stringEnums) {
+<span class="nc" id="L183">        this.stringEnums = stringEnums;</span>
+<span class="nc" id="L184">    }</span>
+
+    /**
+     * Set the file naming type.
+     *
+     * @param fileNaming the file naming to use
+     */
+    public void setFileNaming(String fileNaming) {
+<span class="nc bnc" id="L192" title="All 6 branches missed.">        if (PASCAL_CASE.equals(fileNaming) || CAMEL_CASE.equals(fileNaming) || KEBAB_CASE.equals(fileNaming)) {</span>
+<span class="nc" id="L193">            this.fileNaming = fileNaming;</span>
+        } else {
+<span class="nc" id="L195">            throw new IllegalArgumentException(&quot;Invalid file naming '&quot; +</span>
+                    fileNaming + &quot;'. Must be 'PascalCase', 'camelCase' or 'kebab-case'&quot;);
+        }
+<span class="nc" id="L198">    }</span>
+
+    public Boolean getSagasAndRecords() {
+<span class="nc" id="L201">        return sagasAndRecords;</span>
+    }
+
+    public void setSagasAndRecords(Boolean sagasAndRecords) {
+<span class="nc" id="L205">        this.sagasAndRecords = sagasAndRecords;</span>
+<span class="nc" id="L206">    }</span>
+
+    public String getPassthroughSuffix() {
+<span class="nc bnc" id="L209" title="All 2 branches missed.">        return detectPassthroughModelsWithSuffixAndField != null ? detectPassthroughModelsWithSuffixAndField.split(&quot;\\.&quot;)[0] : null;</span>
+    }
+
+    public String getPassthroughField() {
+<span class="nc bnc" id="L213" title="All 2 branches missed.">        return detectPassthroughModelsWithSuffixAndField != null ? detectPassthroughModelsWithSuffixAndField.split(&quot;\\.&quot;)[1] : null;</span>
+    }
+
+    public String getDetectPassthroughModelsWithSuffixAndField() {
+<span class="nc" id="L217">        return detectPassthroughModelsWithSuffixAndField;</span>
+    }
+
+    public void setDetectPassthroughModelsWithSuffixAndField(String detectPassthroughModelsWithSuffixAndField) {
+<span class="nc" id="L221">        this.detectPassthroughModelsWithSuffixAndField = detectPassthroughModelsWithSuffixAndField;</span>
+<span class="nc" id="L222">    }</span>
+
+    public boolean getInferUniqueIdFromNameSuffix() {
+<span class="nc" id="L225">        return inferUniqueIdFromNameSuffix;</span>
+    }
+
+    public void setInferUniqueIdFromNameSuffix(boolean inferUniqueIdFromNameSuffix) {
+<span class="nc" id="L229">        this.inferUniqueIdFromNameSuffix = inferUniqueIdFromNameSuffix;</span>
+<span class="nc" id="L230">    }</span>
+
+    public String getInferEntityFromUniqueIdWithName() {
+<span class="nc" id="L233">        return inferEntityFromUniqueIdWithName;</span>
+    }
+
+    public void setInferEntityFromUniqueIdWithName(String inferEntityFromUniqueIdWithName) {
+<span class="nc" id="L237">        this.inferEntityFromUniqueIdWithName = inferEntityFromUniqueIdWithName;</span>
+<span class="nc" id="L238">    }</span>
+
+    public boolean getPackageAsSourceOnlyLibrary() {
+<span class="nc" id="L241">        return packageAsSourceOnlyLibrary;</span>
+    }
+
+    public void setPackageAsSourceOnlyLibrary(boolean packageAsSourceOnlyLibrary) {
+<span class="nc" id="L245">        this.packageAsSourceOnlyLibrary = packageAsSourceOnlyLibrary;</span>
+<span class="nc" id="L246">    }</span>
+
+    public boolean isUniqueIdAccordingToNameSuffix(String name) {
+<span class="nc bnc" id="L249" title="All 2 branches missed.">        if (name == null) {</span>
+<span class="nc" id="L250">            return false;</span>
+        }
+<span class="nc bnc" id="L252" title="All 2 branches missed.">        return &quot;id&quot;.equals(name) ||</span>
+<span class="nc bnc" id="L253" title="All 2 branches missed.">                &quot;ids&quot;.equals(name) ||</span>
+<span class="nc bnc" id="L254" title="All 4 branches missed.">                (name.length() &gt;= 3 &amp;&amp; name.endsWith(&quot;Id&quot;)) ||</span>
+<span class="nc bnc" id="L255" title="All 4 branches missed.">                (name.length() &gt;= 4 &amp;&amp; name.endsWith(&quot;Ids&quot;));</span>
+    }
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L260">        super.processOpts();</span>
+<span class="nc bnc" id="L261" title="All 2 branches missed.">        additionalProperties.put(&quot;isOriginalModelPropertyNaming&quot;, getModelPropertyNaming() == CodegenConstants.MODEL_PROPERTY_NAMING_TYPE.original);</span>
+<span class="nc" id="L262">        additionalProperties.put(&quot;modelPropertyNaming&quot;, getModelPropertyNaming().name());</span>
+
+<span class="nc" id="L264">        String sourceDir = &quot;&quot;;</span>
+<span class="nc bnc" id="L265" title="All 2 branches missed.">        if (additionalProperties.containsKey(NPM_NAME)) {</span>
+<span class="nc" id="L266">            sourceDir = &quot;src&quot; + File.separator;</span>
+        }
+
+<span class="nc" id="L269">        this.apiPackage = sourceDir + &quot;apis&quot;;</span>
+<span class="nc" id="L270">        this.modelPackage = sourceDir + &quot;models&quot;;</span>
+
+<span class="nc" id="L272">        supportingFiles.add(new SupportingFile(&quot;index.mustache&quot;, sourceDir, &quot;index.ts&quot;));</span>
+<span class="nc" id="L273">        supportingFiles.add(new SupportingFile(&quot;runtime.mustache&quot;, sourceDir, &quot;runtime.ts&quot;));</span>
+
+<span class="nc bnc" id="L275" title="All 2 branches missed.">        if (additionalProperties.containsKey(IMPORT_FILE_EXTENSION_SWITCH)) {</span>
+<span class="nc" id="L276">            this.setImportFileExtension(additionalProperties.get(IMPORT_FILE_EXTENSION_SWITCH).toString());</span>
+        }
+<span class="nc" id="L278">        writePropertyBack(IMPORT_FILE_EXTENSION_SWITCH, getImportFileExtension());</span>
+
+<span class="nc bnc" id="L280" title="All 2 branches missed.">        if (additionalProperties.containsKey(CodegenConstants.USE_SINGLE_REQUEST_PARAMETER)) {</span>
+<span class="nc" id="L281">            this.setUseSingleRequestParameter(convertPropertyToBoolean(CodegenConstants.USE_SINGLE_REQUEST_PARAMETER));</span>
+        }
+<span class="nc" id="L283">        writePropertyBack(CodegenConstants.USE_SINGLE_REQUEST_PARAMETER, getUseSingleRequestParameter());</span>
+
+<span class="nc bnc" id="L285" title="All 2 branches missed.">        if (additionalProperties.containsKey(PREFIX_PARAMETER_INTERFACES)) {</span>
+<span class="nc" id="L286">            this.setPrefixParameterInterfaces(convertPropertyToBoolean(PREFIX_PARAMETER_INTERFACES));</span>
+        }
+<span class="nc" id="L288">        writePropertyBack(PREFIX_PARAMETER_INTERFACES, getPrefixParameterInterfaces());</span>
+
+<span class="nc bnc" id="L290" title="All 2 branches missed.">        if (additionalProperties.containsKey(NPM_NAME)) {</span>
+<span class="nc" id="L291">            addNpmPackageGeneration();</span>
+        }
+
+<span class="nc bnc" id="L294" title="All 2 branches missed.">        if (additionalProperties.containsKey(WITHOUT_RUNTIME_CHECKS)) {</span>
+<span class="nc" id="L295">            this.setWithoutRuntimeChecks(convertPropertyToBoolean(WITHOUT_RUNTIME_CHECKS));</span>
+        }
+
+<span class="nc bnc" id="L298" title="All 2 branches missed.">        if (additionalProperties.containsKey(STRING_ENUMS)) {</span>
+<span class="nc" id="L299">            this.setStringEnums(convertPropertyToBoolean(STRING_ENUMS));</span>
+        }
+
+<span class="nc bnc" id="L302" title="All 2 branches missed.">        if (additionalProperties.containsKey(FILE_NAMING)) {</span>
+<span class="nc" id="L303">            this.setFileNaming(additionalProperties.get(FILE_NAMING).toString());</span>
+        }
+
+<span class="nc bnc" id="L306" title="All 2 branches missed.">        if (!withoutRuntimeChecks) {</span>
+<span class="nc" id="L307">            this.modelTemplateFiles.put(&quot;models.mustache&quot;, &quot;.ts&quot;);</span>
+<span class="nc" id="L308">            typeMapping.put(&quot;date&quot;, &quot;Date&quot;);</span>
+<span class="nc" id="L309">            typeMapping.put(&quot;DateTime&quot;, &quot;Date&quot;);</span>
+        }
+
+<span class="nc bnc" id="L312" title="All 2 branches missed.">        if (additionalProperties.containsKey(SAGAS_AND_RECORDS)) {</span>
+<span class="nc" id="L313">            this.setSagasAndRecords(convertPropertyToBoolean(SAGAS_AND_RECORDS));</span>
+<span class="nc bnc" id="L314" title="All 2 branches missed.">            if (this.getSagasAndRecords()) {</span>
+<span class="nc" id="L315">                apiTemplateFiles.put(&quot;sagas.mustache&quot;, &quot;Sagas.ts&quot;);</span>
+<span class="nc" id="L316">                modelTemplateFiles.put(&quot;records.mustache&quot;, &quot;Record.ts&quot;);</span>
+<span class="nc" id="L317">                supportingFiles.add(new SupportingFile(&quot;runtimeSagasAndRecords.mustache&quot;, sourceDir, &quot;runtimeSagasAndRecords.ts&quot;));</span>
+<span class="nc" id="L318">                supportingFiles.add(new SupportingFile(&quot;ApiEntitiesRecord.mustache&quot;, sourceDir, &quot;ApiEntitiesRecord.ts&quot;));</span>
+<span class="nc" id="L319">                supportingFiles.add(new SupportingFile(&quot;ApiEntitiesReducer.mustache&quot;, sourceDir, &quot;ApiEntitiesReducer.ts&quot;));</span>
+<span class="nc" id="L320">                supportingFiles.add(new SupportingFile(&quot;ApiEntitiesSelectors.mustache&quot;, sourceDir, &quot;ApiEntitiesSelectors.ts&quot;));</span>
+
+<span class="nc bnc" id="L322" title="All 2 branches missed.">                if (additionalProperties.containsKey(DETECT_PASSTHROUGH_MODELS_WITH_SUFFIX_AND_FIELD)) {</span>
+<span class="nc" id="L323">                    this.setDetectPassthroughModelsWithSuffixAndField((String) additionalProperties.get(DETECT_PASSTHROUGH_MODELS_WITH_SUFFIX_AND_FIELD));</span>
+                }
+<span class="nc bnc" id="L325" title="All 2 branches missed.">                if (additionalProperties.containsKey(INFER_UNIQUE_ID_FROM_NAME_SUFFIX)) {</span>
+<span class="nc" id="L326">                    this.setInferUniqueIdFromNameSuffix(convertPropertyToBoolean(INFER_UNIQUE_ID_FROM_NAME_SUFFIX));</span>
+                }
+<span class="nc bnc" id="L328" title="All 2 branches missed.">                if (additionalProperties.containsKey(INFER_ENTITY_FROM_UNIQUE_ID_WITH_NAME)) {</span>
+<span class="nc" id="L329">                    this.setInferEntityFromUniqueIdWithName((String) additionalProperties.get(INFER_ENTITY_FROM_UNIQUE_ID_WITH_NAME));</span>
+                }
+<span class="nc bnc" id="L331" title="All 2 branches missed.">                if (additionalProperties.containsKey(PACKAGE_AS_SOURCE_ONLY_LIBRARY)) {</span>
+<span class="nc" id="L332">                    this.setPackageAsSourceOnlyLibrary(convertPropertyToBoolean(PACKAGE_AS_SOURCE_ONLY_LIBRARY));</span>
+                }
+
+<span class="nc" id="L335">                this.addExtraReservedWordsForSagasAndRecords();</span>
+
+<span class="nc bnc" id="L337" title="All 2 branches missed.">                if (this.getPackageAsSourceOnlyLibrary()) {</span>
+<span class="nc" id="L338">                    supportingFiles.add(new SupportingFile(&quot;sourceLibraryIndex.mustache&quot;, &quot;&quot;, &quot;index.ts&quot;));</span>
+                }
+            }
+        }
+<span class="nc" id="L342">    }</span>
+
+    @Override
+    public String toEnumDefaultValue(String value, String datatype) {
+<span class="nc bnc" id="L346" title="All 2 branches missed.">        if (this.getSagasAndRecords()) {</span>
+<span class="nc" id="L347">            return datatype + &quot;.&quot; + value;</span>
+        }
+<span class="nc" id="L349">        return super.toEnumDefaultValue(value, datatype);</span>
+    }
+
+    @Override
+    protected String getEnumDefaultValue(String defaultValue, String dataType) {
+<span class="nc bnc" id="L354" title="All 2 branches missed.">        if (this.getSagasAndRecords()) {</span>
+<span class="nc" id="L355">            return defaultValue;</span>
+        }
+<span class="nc" id="L357">        return super.getEnumDefaultValue(defaultValue, dataType);</span>
+    }
+
+
+    @Override
+    protected ImmutableMap.Builder&lt;String, Mustache.Lambda&gt; addMustacheLambdas() {
+<span class="nc" id="L363">        ImmutableMap.Builder&lt;String, Mustache.Lambda&gt; lambdas = super.addMustacheLambdas();</span>
+<span class="nc" id="L364">        lambdas.put(&quot;indented_star_1&quot;, new IndentedLambda(1, &quot; &quot;, &quot;* &quot;, false, false));</span>
+<span class="nc" id="L365">        lambdas.put(&quot;indented_star_4&quot;, new IndentedLambda(5, &quot; &quot;, &quot;* &quot;, false, false));</span>
+<span class="nc" id="L366">        return lambdas;</span>
+    }
+
+    @Override
+    public String getTypeDeclaration(Schema p) {
+<span class="nc bnc" id="L371" title="All 2 branches missed.">        if (ModelUtils.isFileSchema(p)) {</span>
+<span class="nc" id="L372">            return &quot;Blob&quot;;</span>
+<span class="nc bnc" id="L373" title="All 2 branches missed.">        } else if (ModelUtils.isBinarySchema(p)) {</span>
+<span class="nc" id="L374">            return &quot;Blob&quot;;</span>
+        }
+<span class="nc" id="L376">        return super.getTypeDeclaration(p);</span>
+    }
+
+    @Override
+    protected void addAdditionPropertiesToCodeGenModel(CodegenModel codegenModel, Schema schema) {
+<span class="nc" id="L381">        codegenModel.additionalPropertiesType = getTypeDeclaration(ModelUtils.getAdditionalProperties(schema));</span>
+<span class="nc" id="L382">        addImport(codegenModel, codegenModel.additionalPropertiesType);</span>
+<span class="nc" id="L383">    }</span>
+
+    @Override
+    public ModelsMap postProcessModels(ModelsMap objs) {
+<span class="nc" id="L387">        List&lt;ModelMap&gt; models = postProcessModelsEnum(objs).getModels();</span>
+
+        // process enum and custom properties in models
+<span class="nc bnc" id="L390" title="All 2 branches missed.">        for (ModelMap mo : models) {</span>
+<span class="nc" id="L391">            ExtendedCodegenModel cm = (ExtendedCodegenModel) mo.getModel();</span>
+<span class="nc" id="L392">            cm.imports = new TreeSet&lt;&gt;(cm.imports);</span>
+<span class="nc" id="L393">            this.processCodeGenModel(cm);</span>
+<span class="nc" id="L394">        }</span>
+
+        // Add supporting file only if we plan to generate files in /models
+<span class="nc bnc" id="L397" title="All 4 branches missed.">        if (!objs.isEmpty() &amp;&amp; !addedModelIndex) {</span>
+<span class="nc" id="L398">            addedModelIndex = true;</span>
+<span class="nc" id="L399">            supportingFiles.add(new SupportingFile(&quot;models.index.mustache&quot;, modelPackage().replace('.', File.separatorChar), &quot;index.ts&quot;));</span>
+        }
+
+<span class="nc" id="L402">        return objs;</span>
+    }
+
+    @Override
+    public void postProcessParameter(CodegenParameter parameter) {
+<span class="nc" id="L407">        super.postProcessParameter(parameter);</span>
+<span class="nc bnc" id="L408" title="All 6 branches missed.">        if (parameter.isFormParam &amp;&amp; parameter.isArray &amp;&amp; &quot;binary&quot;.equals(parameter.dataFormat)) {</span>
+<span class="nc" id="L409">            parameter.isCollectionFormatMulti = true;</span>
+        }
+<span class="nc" id="L411">    }</span>
+
+    @Override
+    public Map&lt;String, ModelsMap&gt; postProcessAllModels(Map&lt;String, ModelsMap&gt; objs) {
+<span class="nc" id="L415">        List&lt;ExtendedCodegenModel&gt; allModels = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L416">        List&lt;String&gt; entityModelClassnames = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L418">        Map&lt;String, ModelsMap&gt; result = super.postProcessAllModels(objs);</span>
+<span class="nc bnc" id="L419" title="All 2 branches missed.">        for (ModelsMap entry : result.values()) {</span>
+<span class="nc bnc" id="L420" title="All 2 branches missed.">            for (ModelMap model : entry.getModels()) {</span>
+<span class="nc" id="L421">                ExtendedCodegenModel codegenModel = (ExtendedCodegenModel) model.getModel();</span>
+<span class="nc bnc" id="L422" title="All 2 branches missed.">                model.put(&quot;hasImports&quot;, codegenModel.imports.size() &gt; 0);</span>
+<span class="nc" id="L423">                model.put(&quot;tsImports&quot;, toTsImports(codegenModel, parseImports(codegenModel)));</span>
+<span class="nc" id="L424">                allModels.add(codegenModel);</span>
+<span class="nc bnc" id="L425" title="All 2 branches missed.">                if (codegenModel.isEntity) {</span>
+<span class="nc" id="L426">                    entityModelClassnames.add(codegenModel.classname);</span>
+                }
+<span class="nc" id="L428">            }</span>
+<span class="nc" id="L429">        }</span>
+
+<span class="nc bnc" id="L431" title="All 2 branches missed.">        for (ExtendedCodegenModel rootModel : allModels) {</span>
+<span class="nc bnc" id="L432" title="All 2 branches missed.">            for (String curImport : rootModel.imports) {</span>
+<span class="nc" id="L433">                boolean isModelImport = false;</span>
+<span class="nc bnc" id="L434" title="All 2 branches missed.">                for (ExtendedCodegenModel model : allModels) {</span>
+<span class="nc bnc" id="L435" title="All 4 branches missed.">                    if (model.classname.equals(curImport) &amp;&amp; !model.isEnum) {</span>
+<span class="nc" id="L436">                        isModelImport = true;</span>
+<span class="nc" id="L437">                        break;</span>
+                    }
+<span class="nc" id="L439">                }</span>
+<span class="nc bnc" id="L440" title="All 2 branches missed.">                if (isModelImport) {</span>
+<span class="nc" id="L441">                    rootModel.modelImports.add(curImport);</span>
+                }
+<span class="nc" id="L443">            }</span>
+
+<span class="nc bnc" id="L445" title="All 2 branches missed.">            for (CodegenProperty cpVar : rootModel.vars) {</span>
+<span class="nc" id="L446">                ExtendedCodegenProperty var = (ExtendedCodegenProperty) cpVar;</span>
+<span class="nc bnc" id="L447" title="All 4 branches missed.">                if (var.isModel &amp;&amp; entityModelClassnames.indexOf(var.dataType) != -1) {</span>
+<span class="nc" id="L448">                    var.isEntity = true;</span>
+<span class="nc bnc" id="L449" title="All 6 branches missed.">                } else if (var.isArray &amp;&amp; var.items.isModel &amp;&amp; entityModelClassnames.indexOf(var.items.dataType) != -1) {</span>
+<span class="nc" id="L450">                    ((ExtendedCodegenProperty) var.items).isEntity = true;</span>
+                }
+<span class="nc" id="L452">            }</span>
+<span class="nc" id="L453">        }</span>
+<span class="nc" id="L454">        return result;</span>
+    }
+
+    /**
+     * Parse imports
+     */
+    private Set&lt;String&gt; parseImports(CodegenModel cm) {
+<span class="nc" id="L461">        Set&lt;String&gt; newImports = new HashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L462" title="All 2 branches missed.">        if (cm.imports.size() &gt; 0) {</span>
+<span class="nc bnc" id="L463" title="All 2 branches missed.">            for (String name : cm.imports) {</span>
+<span class="nc bnc" id="L464" title="All 2 branches missed.">                if (name.indexOf(&quot; | &quot;) &gt;= 0) {</span>
+<span class="nc" id="L465">                    String[] parts = name.split(&quot; \\| &quot;);</span>
+<span class="nc" id="L466">                    Collections.addAll(newImports, parts);</span>
+<span class="nc" id="L467">                } else {</span>
+<span class="nc" id="L468">                    newImports.add(name);</span>
+                }
+<span class="nc" id="L470">            }</span>
+        }
+<span class="nc" id="L472">        return newImports;</span>
+    }
+
+    private List&lt;Map&lt;String, String&gt;&gt; toTsImports(CodegenModel cm, Set&lt;String&gt; imports) {
+<span class="nc" id="L476">        List&lt;Map&lt;String, String&gt;&gt; tsImports = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L477" title="All 2 branches missed.">        for (String im : imports) {</span>
+<span class="nc bnc" id="L478" title="All 2 branches missed.">            if (!im.equals(cm.classname)) {</span>
+<span class="nc" id="L479">                HashMap&lt;String, String&gt; tsImport = new HashMap&lt;&gt;();</span>
+                // TVG: This is used as class name in the import statements of the model file
+<span class="nc" id="L481">                tsImport.put(&quot;classname&quot;, im);</span>
+<span class="nc" id="L482">                tsImport.put(&quot;filename&quot;, toModelFilename(im));</span>
+<span class="nc" id="L483">                tsImports.add(tsImport);</span>
+            }
+<span class="nc" id="L485">        }</span>
+<span class="nc" id="L486">        return tsImports;</span>
+    }
+
+    private void autoSetDefaultValueForProperty(ExtendedCodegenProperty var) {
+<span class="nc bnc" id="L490" title="All 4 branches missed.">        if (var.isArray || var.isModel) {</span>
+<span class="nc" id="L491">            var.defaultValue = var.dataTypeAlternate + &quot;()&quot;;</span>
+<span class="nc bnc" id="L492" title="All 2 branches missed.">        } else if (var.isUniqueId) {</span>
+<span class="nc" id="L493">            var.defaultValue = &quot;\&quot;-1\&quot;&quot;;</span>
+<span class="nc bnc" id="L494" title="All 2 branches missed.">        } else if (var.isEnum) {</span>
+<span class="nc" id="L495">            var.defaultValue = &quot;'&quot; + var._enum.get(0) + &quot;'&quot;;</span>
+<span class="nc" id="L496">            updateCodegenPropertyEnum(var);</span>
+<span class="nc bnc" id="L497" title="All 2 branches missed.">        } else if (var.dataType.equalsIgnoreCase(&quot;string&quot;)) {</span>
+<span class="nc" id="L498">            var.defaultValue = &quot;\&quot;\&quot;&quot;;</span>
+<span class="nc bnc" id="L499" title="All 2 branches missed.">        } else if (var.dataType.equalsIgnoreCase(&quot;number&quot;)) {</span>
+<span class="nc" id="L500">            var.defaultValue = &quot;0&quot;;</span>
+<span class="nc bnc" id="L501" title="All 2 branches missed.">        } else if (var.dataType.equalsIgnoreCase(&quot;boolean&quot;)) {</span>
+<span class="nc" id="L502">            var.defaultValue = &quot;false&quot;;</span>
+        } else {
+<span class="nc bnc" id="L504" title="All 6 branches missed.">            if (var.allowableValues != null &amp;&amp; var.allowableValues.get(&quot;enumVars&quot;) instanceof ArrayList &amp;&amp; ((ArrayList) var.allowableValues.get(&quot;enumVars&quot;)).get(0) instanceof HashMap) {</span>
+<span class="nc" id="L505">                var.defaultValue = var.dataTypeAlternate + &quot;.&quot; + ((HashMap&lt;String, String&gt;) ((ArrayList) var.allowableValues.get(&quot;enumVars&quot;)).get(0)).get(&quot;name&quot;);</span>
+            }
+        }
+<span class="nc" id="L508">    }</span>
+
+    private void addNpmPackageGeneration() {
+
+<span class="nc bnc" id="L512" title="All 2 branches missed.">        if (additionalProperties.containsKey(NPM_REPOSITORY)) {</span>
+<span class="nc" id="L513">            this.setNpmRepository(additionalProperties.get(NPM_REPOSITORY).toString());</span>
+        }
+
+        //Files for building our lib
+<span class="nc" id="L517">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;));</span>
+<span class="nc" id="L518">        supportingFiles.add(new SupportingFile(&quot;package.mustache&quot;, &quot;&quot;, &quot;package.json&quot;));</span>
+<span class="nc" id="L519">        supportingFiles.add(new SupportingFile(&quot;tsconfig.mustache&quot;, &quot;&quot;, &quot;tsconfig.json&quot;));</span>
+        // in case ECMAScript 6 is supported add another tsconfig for an ESM (ECMAScript Module)
+<span class="nc bnc" id="L521" title="All 2 branches missed.">        if (supportsES6) {</span>
+<span class="nc" id="L522">            supportingFiles.add(new SupportingFile(&quot;tsconfig.esm.mustache&quot;, &quot;&quot;, &quot;tsconfig.esm.json&quot;));</span>
+        }
+<span class="nc" id="L524">        supportingFiles.add(new SupportingFile(&quot;npmignore.mustache&quot;, &quot;&quot;, &quot;.npmignore&quot;));</span>
+<span class="nc" id="L525">        supportingFiles.add(new SupportingFile(&quot;gitignore&quot;, &quot;&quot;, &quot;.gitignore&quot;));</span>
+<span class="nc" id="L526">    }</span>
+
+    @Override
+    public List&lt;CodegenParameter&gt; fromRequestBodyToFormParameters(RequestBody body, Set&lt;String&gt; imports) {
+<span class="nc" id="L530">        List&lt;CodegenParameter&gt; superParams = super.fromRequestBodyToFormParameters(body, imports);</span>
+<span class="nc" id="L531">        List&lt;CodegenParameter&gt; extendedParams = new ArrayList&lt;CodegenParameter&gt;();</span>
+<span class="nc bnc" id="L532" title="All 2 branches missed.">        for (CodegenParameter cp : superParams) {</span>
+<span class="nc" id="L533">            extendedParams.add(new ExtendedCodegenParameter(cp));</span>
+<span class="nc" id="L534">        }</span>
+<span class="nc" id="L535">        return extendedParams;</span>
+    }
+
+    @Override
+    public ExtendedCodegenParameter fromParameter(Parameter parameter, Set&lt;String&gt; imports) {
+<span class="nc" id="L540">        CodegenParameter cp = super.fromParameter(parameter, imports);</span>
+<span class="nc" id="L541">        return new ExtendedCodegenParameter(cp);</span>
+    }
+
+    @Override
+    public CodegenParameter fromFormProperty(String name, Schema propertySchema, Set&lt;String&gt; imports) {
+<span class="nc" id="L546">        CodegenParameter cp = super.fromFormProperty(name, propertySchema, imports);</span>
+<span class="nc" id="L547">        return new ExtendedCodegenParameter(cp);</span>
+    }
+
+    @Override
+    public CodegenParameter fromRequestBody(RequestBody body, Set&lt;String&gt; imports, String bodyParameterName) {
+<span class="nc" id="L552">        CodegenParameter cp = super.fromRequestBody(body, imports, bodyParameterName);</span>
+<span class="nc" id="L553">        return new ExtendedCodegenParameter(cp);</span>
+    }
+
+    @Override
+    public ExtendedCodegenProperty fromProperty(String name, Schema p, boolean required) {
+<span class="nc" id="L558">        CodegenProperty cp = super.fromProperty(name, p, required);</span>
+<span class="nc" id="L559">        return new ExtendedCodegenProperty(cp);</span>
+    }
+
+    @Override
+    public ExtendedCodegenModel fromModel(String name, Schema model) {
+<span class="nc" id="L564">        CodegenModel cm = super.fromModel(name, model);</span>
+<span class="nc" id="L565">        return new ExtendedCodegenModel(cm);</span>
+    }
+
+    @Override
+    public ExtendedCodegenOperation fromOperation(String path, String httpMethod, Operation operation, List&lt;Server&gt; servers) {
+<span class="nc" id="L570">        CodegenOperation superOp = super.fromOperation(path, httpMethod, operation, servers);</span>
+<span class="nc" id="L571">        ExtendedCodegenOperation op = new ExtendedCodegenOperation(superOp);</span>
+
+<span class="nc bnc" id="L573" title="All 2 branches missed.">        if (this.getSagasAndRecords()) {</span>
+<span class="nc" id="L574">            ApiResponse methodResponse = findMethodResponse(operation.getResponses());</span>
+<span class="nc bnc" id="L575" title="All 2 branches missed.">            if (methodResponse != null) {</span>
+<span class="nc" id="L576">                Map&lt;String, Schema&gt; schemas = ModelUtils.getSchemas(this.openAPI);</span>
+<span class="nc" id="L577">                Schema schema = null;</span>
+<span class="nc bnc" id="L578" title="All 2 branches missed.">                if (schemas != null) {</span>
+<span class="nc" id="L579">                    schema = schemas.get(op.returnBaseType);</span>
+                }
+
+<span class="nc" id="L582">                ExtendedCodegenModel cm = null;</span>
+<span class="nc bnc" id="L583" title="All 2 branches missed.">                if (schema != null) {</span>
+<span class="nc" id="L584">                    cm = fromModel(op.returnBaseType, schema);</span>
+
+<span class="nc" id="L586">                    Object returnPassthrough = cm.vendorExtensions.get(X_OPERATION_RETURN_PASSTHROUGH);</span>
+<span class="nc bnc" id="L587" title="All 2 branches missed.">                    if (returnPassthrough instanceof String) {</span>
+<span class="nc bnc" id="L588" title="All 2 branches missed.">                        if (((String) returnPassthrough).isEmpty()) {</span>
+<span class="nc" id="L589">                            op.hasReturnPassthroughVoid = true;</span>
+<span class="nc" id="L590">                            op.returnPassthrough = null;</span>
+                        } else {
+<span class="nc" id="L592">                            boolean foundMatch = false;</span>
+<span class="nc bnc" id="L593" title="All 2 branches missed.">                            for (CodegenProperty var : cm.vars) {</span>
+<span class="nc bnc" id="L594" title="All 2 branches missed.">                                if (var.name.equals(returnPassthrough)) {</span>
+<span class="nc" id="L595">                                    foundMatch = true;</span>
+<span class="nc" id="L596">                                    break;</span>
+                                }
+<span class="nc" id="L598">                            }</span>
+<span class="nc bnc" id="L599" title="All 2 branches missed.">                            if (foundMatch) {</span>
+<span class="nc" id="L600">                                op.returnPassthrough = (String) returnPassthrough;</span>
+                            } else { // no match, treat as if empty.
+<span class="nc" id="L602">                                op.hasReturnPassthroughVoid = true;</span>
+<span class="nc" id="L603">                                op.returnPassthrough = null;</span>
+                            }
+<span class="nc" id="L605">                        }</span>
+<span class="nc bnc" id="L606" title="All 6 branches missed.">                    } else if (this.getDetectPassthroughModelsWithSuffixAndField() != null &amp;&amp; op.returnBaseType.length() &gt; this.getPassthroughSuffix().length() &amp;&amp; op.returnBaseType.endsWith(this.getPassthroughSuffix())) {</span>
+<span class="nc" id="L607">                        boolean foundMatch = false;</span>
+<span class="nc bnc" id="L608" title="All 2 branches missed.">                        for (CodegenProperty var : cm.vars) {</span>
+<span class="nc bnc" id="L609" title="All 2 branches missed.">                            if (var.name.equals(this.getPassthroughField())) {</span>
+<span class="nc" id="L610">                                foundMatch = true;</span>
+<span class="nc" id="L611">                                break;</span>
+                            }
+<span class="nc" id="L613">                        }</span>
+<span class="nc bnc" id="L614" title="All 2 branches missed.">                        if (foundMatch) {</span>
+<span class="nc" id="L615">                            op.returnPassthrough = this.getPassthroughField();</span>
+                        } else { // no match, treat as if empty.
+<span class="nc" id="L617">                            op.hasReturnPassthroughVoid = true;</span>
+<span class="nc" id="L618">                            op.returnPassthrough = null;</span>
+                        }
+                    }
+                }
+
+<span class="nc bnc" id="L623" title="All 2 branches missed.">                if (!op.hasReturnPassthroughVoid) {</span>
+<span class="nc" id="L624">                    Schema responseSchema = unaliasSchema(ModelUtils.getSchemaFromResponse(openAPI, methodResponse));</span>
+<span class="nc" id="L625">                    ExtendedCodegenProperty cp = null;</span>
+<span class="nc bnc" id="L626" title="All 4 branches missed.">                    if (op.returnPassthrough instanceof String &amp;&amp; cm != null) {</span>
+<span class="nc" id="L627">                        cp = (ExtendedCodegenProperty) this.processCodeGenModel(cm).vars.get(1);</span>
+<span class="nc bnc" id="L628" title="All 2 branches missed.">                    } else if (responseSchema != null) {</span>
+<span class="nc" id="L629">                        cp = fromProperty(&quot;response&quot;, responseSchema, false);</span>
+<span class="nc" id="L630">                        this.processCodegenProperty(cp, &quot;&quot;, null);</span>
+                    }
+
+<span class="nc" id="L633">                    op.returnBaseTypeAlternate = null;</span>
+<span class="nc bnc" id="L634" title="All 2 branches missed.">                    if (cp != null) {</span>
+<span class="nc" id="L635">                        op.returnTypeAlternate = cp.dataTypeAlternate;</span>
+<span class="nc" id="L636">                        op.returnTypeIsModel = cp.isModel;</span>
+<span class="nc" id="L637">                        op.returnTypeIsArray = cp.isArray;</span>
+<span class="nc bnc" id="L638" title="All 2 branches missed.">                        if (cp.isArray) {</span>
+<span class="nc bnc" id="L639" title="All 2 branches missed.">                            if (cp.items.isModel) {</span>
+<span class="nc" id="L640">                                op.returnTypeSupportsEntities = true;</span>
+<span class="nc" id="L641">                                op.returnBaseTypeAlternate = cp.items.dataType + &quot;Record&quot;;</span>
+<span class="nc bnc" id="L642" title="All 2 branches missed.">                            } else if (cp.items.allowableValues != null) {</span>
+<span class="nc" id="L643">                                op.returnBaseTypeAlternate = cp.items.dataType;</span>
+                            }
+<span class="nc bnc" id="L645" title="All 2 branches missed.">                        } else if (cp.isModel) {</span>
+<span class="nc" id="L646">                            op.returnTypeSupportsEntities = true;</span>
+<span class="nc" id="L647">                            op.returnBaseTypeAlternate = cp.dataTypeAlternate;</span>
+<span class="nc bnc" id="L648" title="All 2 branches missed.">                        } else if (cp.allowableValues != null) {</span>
+<span class="nc" id="L649">                            op.returnBaseTypeAlternate = cp.dataTypeAlternate;</span>
+                        }
+
+                    }
+                }
+            }
+        }
+
+<span class="nc" id="L657">        return op;</span>
+    }
+
+    @Override
+    public String escapeReservedWord(String name) {
+<span class="nc bnc" id="L662" title="All 2 branches missed.">        if (this.getSagasAndRecords()) {</span>
+<span class="nc bnc" id="L663" title="All 2 branches missed.">            if (this.reservedWordsMappings().containsKey(name)) {</span>
+<span class="nc" id="L664">                return this.reservedWordsMappings().get(name);</span>
+            }
+<span class="nc" id="L666">            return &quot;_&quot; + name;</span>
+        } else {
+<span class="nc" id="L668">            return super.escapeReservedWord(name);</span>
+        }
+    }
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap operations, List&lt;ModelMap&gt; allModels) {
+        // Add supporting file only if we plan to generate files in /apis
+<span class="nc bnc" id="L675" title="All 4 branches missed.">        if (!operations.isEmpty() &amp;&amp; !addedApiIndex) {</span>
+<span class="nc" id="L676">            addedApiIndex = true;</span>
+<span class="nc" id="L677">            supportingFiles.add(new SupportingFile(&quot;apis.index.mustache&quot;, apiPackage().replace('.', File.separatorChar), &quot;index.ts&quot;));</span>
+<span class="nc bnc" id="L678" title="All 2 branches missed.">            if (this.getSagasAndRecords()) {</span>
+<span class="nc" id="L679">                supportingFiles.add(new SupportingFile(&quot;sagaApiManager.mustache&quot;, apiPackage().replace('.', File.separatorChar), &quot;SagaApiManager.ts&quot;));</span>
+<span class="nc" id="L680">                supportingFiles.add(new SupportingFile(&quot;allSagas.mustache&quot;, apiPackage().replace('.', File.separatorChar), &quot;allSagas.ts&quot;));</span>
+            }
+        }
+
+        // Add supporting file only if we plan to generate files in /models
+<span class="nc bnc" id="L685" title="All 4 branches missed.">        if (!allModels.isEmpty() &amp;&amp; !addedModelIndex) {</span>
+<span class="nc" id="L686">            addedModelIndex = true;</span>
+<span class="nc" id="L687">            supportingFiles.add(new SupportingFile(&quot;models.index.mustache&quot;, modelPackage().replace('.', File.separatorChar), &quot;index.ts&quot;));</span>
+        }
+
+<span class="nc" id="L690">        this.addOperationModelImportInformation(operations);</span>
+<span class="nc" id="L691">        this.updateOperationParameterForEnum(operations);</span>
+<span class="nc bnc" id="L692" title="All 2 branches missed.">        if (this.getSagasAndRecords()) {</span>
+<span class="nc" id="L693">            this.updateOperationParameterForSagaAndRecords(operations);</span>
+        }
+<span class="nc" id="L695">        this.addOperationObjectResponseInformation(operations);</span>
+<span class="nc" id="L696">        this.addOperationPrefixParameterInterfacesInformation(operations);</span>
+<span class="nc" id="L697">        this.escapeOperationIds(operations);</span>
+<span class="nc" id="L698">        return operations;</span>
+    }
+
+    @Override
+    public Map&lt;String, Object&gt; postProcessSupportingFileData(Map&lt;String, Object&gt; objs) {
+<span class="nc" id="L703">        Map&lt;String, Object&gt; parentObjs = super.postProcessSupportingFileData(objs);</span>
+
+<span class="nc" id="L705">        parentObjs.put(&quot;useSagaAndRecords&quot;, this.getSagasAndRecords());</span>
+
+<span class="nc" id="L707">        return parentObjs;</span>
+    }
+
+    private ExtendedCodegenModel processCodeGenModel(ExtendedCodegenModel cm) {
+<span class="nc bnc" id="L711" title="All 2 branches missed.">        if (this.getSagasAndRecords()) {</span>
+<span class="nc" id="L712">            Object xEntityId = cm.vendorExtensions.get(X_ENTITY_ID);</span>
+<span class="nc bnc" id="L713" title="All 4 branches missed.">            if (xEntityId == null &amp;&amp; this.getInferEntityFromUniqueIdWithName() != null) {</span>
+<span class="nc" id="L714">                xEntityId = this.getInferEntityFromUniqueIdWithName();</span>
+            }
+<span class="nc" id="L716">            Object vendorKeepAsJSObject = cm.vendorExtensions.get(X_KEEP_AS_JS_OBJECT);</span>
+<span class="nc" id="L717">            String[] propertiesToKeepAsJSObject = null;</span>
+<span class="nc bnc" id="L718" title="All 2 branches missed.">            if (vendorKeepAsJSObject instanceof String) {</span>
+<span class="nc" id="L719">                propertiesToKeepAsJSObject = ((String) vendorKeepAsJSObject).split(&quot;,&quot;);</span>
+            }
+
+<span class="nc bnc" id="L722" title="All 2 branches missed.">            for (CodegenProperty cpVar : cm.vars) {</span>
+<span class="nc" id="L723">                ExtendedCodegenProperty var = (ExtendedCodegenProperty) cpVar;</span>
+<span class="nc bnc" id="L724" title="All 4 branches missed.">                if (propertiesToKeepAsJSObject != null &amp;&amp; Arrays.asList(propertiesToKeepAsJSObject).contains(var.name)) {</span>
+<span class="nc" id="L725">                    var.keepAsJSObject = true;</span>
+                }
+<span class="nc" id="L727">                boolean parentIsEntity = this.processCodegenProperty(var, cm.classname, xEntityId);</span>
+<span class="nc bnc" id="L728" title="All 2 branches missed.">                if (parentIsEntity) {</span>
+<span class="nc" id="L729">                    cm.isEntity = true;</span>
+                }
+<span class="nc" id="L731">            }</span>
+
+<span class="nc" id="L733">            Object returnPassthrough = cm.vendorExtensions.get(X_OPERATION_RETURN_PASSTHROUGH);</span>
+<span class="nc bnc" id="L734" title="All 2 branches missed.">            if (returnPassthrough instanceof String) {</span>
+<span class="nc bnc" id="L735" title="All 2 branches missed.">                if (((String) returnPassthrough).isEmpty()) {</span>
+<span class="nc" id="L736">                    cm.hasReturnPassthroughVoid = true;</span>
+<span class="nc" id="L737">                    cm.returnPassthrough = null;</span>
+                } else {
+<span class="nc" id="L739">                    boolean foundMatch = false;</span>
+<span class="nc bnc" id="L740" title="All 2 branches missed.">                    for (CodegenProperty var : cm.vars) {</span>
+<span class="nc bnc" id="L741" title="All 2 branches missed.">                        if (var.name.equals(returnPassthrough)) {</span>
+<span class="nc" id="L742">                            foundMatch = true;</span>
+<span class="nc" id="L743">                            break;</span>
+                        }
+<span class="nc" id="L745">                    }</span>
+<span class="nc bnc" id="L746" title="All 2 branches missed.">                    if (foundMatch) {</span>
+<span class="nc" id="L747">                        cm.returnPassthrough = (String) returnPassthrough;</span>
+                    } else { // no match, treat as if empty.
+<span class="nc" id="L749">                        cm.hasReturnPassthroughVoid = true;</span>
+<span class="nc" id="L750">                        cm.returnPassthrough = null;</span>
+                    }
+<span class="nc" id="L752">                }</span>
+<span class="nc bnc" id="L753" title="All 6 branches missed.">            } else if (this.getDetectPassthroughModelsWithSuffixAndField() != null &amp;&amp; cm.name.length() &gt; this.getPassthroughSuffix().length() &amp;&amp; cm.name.endsWith(this.getPassthroughSuffix())) {</span>
+<span class="nc" id="L754">                boolean foundMatch = false;</span>
+<span class="nc bnc" id="L755" title="All 2 branches missed.">                for (CodegenProperty var : cm.vars) {</span>
+<span class="nc bnc" id="L756" title="All 2 branches missed.">                    if (var.name.equals(this.getPassthroughField())) {</span>
+<span class="nc" id="L757">                        foundMatch = true;</span>
+<span class="nc" id="L758">                        break;</span>
+                    }
+<span class="nc" id="L760">                }</span>
+<span class="nc bnc" id="L761" title="All 2 branches missed.">                if (foundMatch) {</span>
+<span class="nc" id="L762">                    cm.returnPassthrough = this.getPassthroughField();</span>
+                } else { // no match, treat as if empty.
+<span class="nc" id="L764">                    cm.hasReturnPassthroughVoid = true;</span>
+<span class="nc" id="L765">                    cm.returnPassthrough = null;</span>
+                }
+            }
+<span class="nc" id="L768">        } else {</span>
+<span class="nc bnc" id="L769" title="All 2 branches missed.">            for (CodegenProperty cpVar : cm.vars) {</span>
+<span class="nc" id="L770">                ExtendedCodegenProperty var = (ExtendedCodegenProperty) cpVar;</span>
+<span class="nc" id="L771">                this.processCodegenProperty(var, cm.classname, null);</span>
+<span class="nc" id="L772">            }</span>
+        }
+
+<span class="nc bnc" id="L775" title="All 2 branches missed.">        if (cm.parent != null) {</span>
+<span class="nc bnc" id="L776" title="All 2 branches missed.">            for (CodegenProperty cpVar : cm.allVars) {</span>
+<span class="nc" id="L777">                ExtendedCodegenProperty var = (ExtendedCodegenProperty) cpVar;</span>
+
+<span class="nc bnc" id="L779" title="All 2 branches missed.">                if (Boolean.TRUE.equals(var.isEnum)) {</span>
+<span class="nc" id="L780">                    var.datatypeWithEnum = var.datatypeWithEnum</span>
+<span class="nc" id="L781">                            .replace(var.enumName, cm.classname + var.enumName);</span>
+                }
+<span class="nc" id="L783">            }</span>
+        }
+<span class="nc bnc" id="L785" title="All 2 branches missed.">        if (!cm.oneOf.isEmpty()) {</span>
+            // For oneOfs only import $refs within the oneOf
+<span class="nc" id="L787">            TreeSet&lt;String&gt; oneOfRefs = new TreeSet&lt;&gt;();</span>
+<span class="nc bnc" id="L788" title="All 2 branches missed.">            for (String im : cm.imports) {</span>
+<span class="nc bnc" id="L789" title="All 2 branches missed.">                if (cm.oneOf.contains(im)) {</span>
+<span class="nc" id="L790">                    oneOfRefs.add(im);</span>
+                }
+<span class="nc" id="L792">            }</span>
+<span class="nc" id="L793">            cm.imports = oneOfRefs;</span>
+        }
+<span class="nc" id="L795">        return cm;</span>
+    }
+
+    private boolean processCodegenProperty(ExtendedCodegenProperty var, String parentClassName, Object xEntityId) {
+        // name enum with model name, e.g. StatusEnum =&gt; PetStatusEnum
+<span class="nc bnc" id="L800" title="All 2 branches missed.">        if (Boolean.TRUE.equals(var.isEnum)) {</span>
+            // behaviour for enum names is specific for Typescript Fetch, not using namespaces
+<span class="nc" id="L802">            var.datatypeWithEnum = var.datatypeWithEnum.replace(var.enumName, parentClassName + var.enumName);</span>
+
+            // need to post-process defaultValue, was computed with previous var.datatypeWithEnum
+<span class="nc bnc" id="L805" title="All 4 branches missed.">            if (var.defaultValue != null &amp;&amp; !var.defaultValue.equals(&quot;undefined&quot;)) {</span>
+<span class="nc" id="L806">                int dotPos = var.defaultValue.indexOf(&quot;.&quot;);</span>
+<span class="nc bnc" id="L807" title="All 2 branches missed.">                if (dotPos != -1) {</span>
+<span class="nc" id="L808">                    var.defaultValue = var.datatypeWithEnum + var.defaultValue.substring(dotPos);</span>
+                }
+            }
+        }
+
+<span class="nc" id="L813">        boolean parentIsEntity = false;</span>
+<span class="nc bnc" id="L814" title="All 2 branches missed.">        if (this.getSagasAndRecords()) {</span>
+<span class="nc bnc" id="L815" title="All 2 branches missed.">            if (var.vendorExtensions.get(X_IS_UNIQUE_ID) instanceof Boolean) {</span>
+<span class="nc" id="L816">                var.isUniqueId = Boolean.TRUE.equals(var.vendorExtensions.get(X_IS_UNIQUE_ID));</span>
+<span class="nc bnc" id="L817" title="All 8 branches missed.">            } else if (this.getInferUniqueIdFromNameSuffix() &amp;&amp; (var.isArray &amp;&amp; &quot;number&quot;.equals(var.items.dataType)) || (&quot;number&quot;.equals(var.dataType))) {</span>
+<span class="nc" id="L818">                var.isUniqueId = this.isUniqueIdAccordingToNameSuffix(var.name);</span>
+            }
+<span class="nc bnc" id="L820" title="All 6 branches missed.">            if (var.isUniqueId &amp;&amp; xEntityId != null &amp;&amp; xEntityId.equals(var.name)) {</span>
+<span class="nc" id="L821">                parentIsEntity = true;</span>
+            }
+
+<span class="nc" id="L824">            var.dataTypeAlternate = var.dataType;</span>
+<span class="nc bnc" id="L825" title="All 2 branches missed.">            if (var.isArray) {</span>
+<span class="nc bnc" id="L826" title="All 4 branches missed.">                var.isUniqueId = var.isUniqueId || var.itemsAreUniqueId();</span>
+<span class="nc" id="L827">                var.dataTypeAlternate = var.dataType.replace(&quot;Array&lt;&quot;, &quot;List&lt;&quot;);</span>
+<span class="nc" id="L828">                String newItemsDataType = var.getItemsDataType();</span>
+<span class="nc bnc" id="L829" title="All 2 branches missed.">                if (var.items.isModel) {</span>
+<span class="nc" id="L830">                    newItemsDataType = var.items.dataType + &quot;Record&quot;;</span>
+<span class="nc" id="L831">                    var.dataTypeAlternate = var.dataTypeAlternate.replace(var.items.dataType, newItemsDataType);</span>
+<span class="nc bnc" id="L832" title="All 2 branches missed.">                } else if (var.items.isEnum) {</span>
+<span class="nc" id="L833">                    newItemsDataType = var.items.datatypeWithEnum;</span>
+<span class="nc" id="L834">                    var.dataTypeAlternate = var.dataTypeAlternate.replace(var.items.dataType, newItemsDataType);</span>
+<span class="nc bnc" id="L835" title="All 2 branches missed.">                } else if (var.isUniqueId) {</span>
+<span class="nc" id="L836">                    newItemsDataType = &quot;string&quot;;</span>
+<span class="nc" id="L837">                    var.dataTypeAlternate = var.dataTypeAlternate.replace(&quot;number&quot;, newItemsDataType);</span>
+                }
+
+<span class="nc bnc" id="L840" title="All 2 branches missed.">                if (var.itemsAreNullable()) {</span>
+<span class="nc" id="L841">                    var.dataTypeAlternate = var.dataTypeAlternate.replace(newItemsDataType, newItemsDataType + &quot; | null&quot;);</span>
+                }
+<span class="nc bnc" id="L843" title="All 2 branches missed.">            } else if (var.isEnum) {</span>
+<span class="nc" id="L844">                var.dataTypeAlternate = var.datatypeWithEnum;</span>
+<span class="nc bnc" id="L845" title="All 2 branches missed.">            } else if (var.isModel) {</span>
+<span class="nc" id="L846">                var.dataTypeAlternate = var.dataType + &quot;Record&quot;;</span>
+<span class="nc bnc" id="L847" title="All 2 branches missed.">            } else if (var.isUniqueId) {</span>
+<span class="nc" id="L848">                var.dataTypeAlternate = &quot;string&quot;;</span>
+<span class="nc bnc" id="L849" title="All 2 branches missed.">                if (var.isNullable) {</span>
+<span class="nc" id="L850">                    var.dataTypeAlternate = var.dataTypeAlternate + &quot; | null&quot;;</span>
+                }
+            }
+<span class="nc bnc" id="L853" title="All 4 branches missed.">            if (var.defaultValue == null || var.defaultValue.equals(&quot;undefined&quot;)) {</span>
+<span class="nc" id="L854">                this.autoSetDefaultValueForProperty(var);</span>
+            }
+        }
+<span class="nc" id="L857">        return parentIsEntity;</span>
+    }
+
+    private boolean itemsAreNullable(ExtendedCodegenProperty var) {
+<span class="nc bnc" id="L861" title="All 6 branches missed.">        return var.items.isNullable || (var.items.items != null &amp;&amp; var.items.items.isNullable);</span>
+    }
+
+    private void escapeOperationIds(OperationsMap operations) {
+<span class="nc bnc" id="L865" title="All 2 branches missed.">        for (CodegenOperation _op : operations.getOperations().getOperation()) {</span>
+<span class="nc" id="L866">            ExtendedCodegenOperation op = (ExtendedCodegenOperation) _op;</span>
+<span class="nc" id="L867">            String param = op.operationIdCamelCase + &quot;Request&quot;;</span>
+<span class="nc bnc" id="L868" title="All 2 branches missed.">            if (op.imports.contains(param)) {</span>
+                // we import a model with the same name as the generated operation, escape it
+<span class="nc" id="L870">                op.operationIdCamelCase += &quot;Operation&quot;;</span>
+<span class="nc" id="L871">                op.operationIdLowerCase += &quot;operation&quot;;</span>
+<span class="nc" id="L872">                op.operationIdSnakeCase += &quot;_operation&quot;;</span>
+            }
+<span class="nc" id="L874">        }</span>
+<span class="nc" id="L875">    }</span>
+
+    private void addOperationModelImportInformation(OperationsMap operations) {
+        // This method will add extra information to the operations.imports array.
+        // The api template uses this information to import all the required
+        // models for a given operation.
+<span class="nc" id="L881">        List&lt;Map&lt;String, String&gt;&gt; imports = operations.getImports();</span>
+<span class="nc" id="L882">        List&lt;String&gt; existingRecordClassNames = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L883">        List&lt;String&gt; existingClassNames = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L884" title="All 2 branches missed.">        for (Map&lt;String, String&gt; im : imports) {</span>
+<span class="nc" id="L885">            String className = im.get(&quot;import&quot;).replace(modelPackage() + &quot;.&quot;, &quot;&quot;);</span>
+<span class="nc" id="L886">            existingClassNames.add(className);</span>
+<span class="nc" id="L887">            existingRecordClassNames.add(className + &quot;Record&quot;);</span>
+<span class="nc" id="L888">            im.put(&quot;className&quot;, className);</span>
+<span class="nc" id="L889">        }</span>
+
+<span class="nc bnc" id="L891" title="All 2 branches missed.">        if (this.getSagasAndRecords()) {</span>
+<span class="nc" id="L892">            Set&lt;String&gt; additionalPassthroughImports = new TreeSet&lt;&gt;();</span>
+<span class="nc bnc" id="L893" title="All 2 branches missed.">            for (CodegenOperation _op : operations.getOperations().getOperation()) {</span>
+<span class="nc" id="L894">                ExtendedCodegenOperation op = (ExtendedCodegenOperation) _op;</span>
+<span class="nc bnc" id="L895" title="All 4 branches missed.">                if (op.returnPassthrough != null &amp;&amp; op.returnBaseTypeAlternate != null) {</span>
+<span class="nc bnc" id="L896" title="All 4 branches missed.">                    if (op.returnTypeSupportsEntities &amp;&amp; !existingRecordClassNames.contains(op.returnBaseTypeAlternate)) {</span>
+<span class="nc" id="L897">                        additionalPassthroughImports.add(op.returnBaseTypeAlternate);</span>
+<span class="nc bnc" id="L898" title="All 4 branches missed.">                    } else if (!op.returnTypeSupportsEntities &amp;&amp; !existingClassNames.contains(op.returnBaseTypeAlternate)) {</span>
+<span class="nc" id="L899">                        additionalPassthroughImports.add(op.returnBaseTypeAlternate);</span>
+                    }
+                }
+<span class="nc" id="L902">            }</span>
+<span class="nc" id="L903">            operations.put(&quot;passthroughImports&quot;, additionalPassthroughImports);</span>
+<span class="nc bnc" id="L904" title="All 2 branches missed.">            operations.put(&quot;hasPassthroughImports&quot;, additionalPassthroughImports.size() &gt; 0);</span>
+        }
+<span class="nc" id="L906">    }</span>
+
+    private void updateOperationParameterForEnum(OperationsMap operations) {
+        // This method will add extra information as to whether or not we have enums and
+        // update their names with the operation.id prefixed.
+        // It will also set the uniqueId status if provided.
+<span class="nc" id="L912">        boolean hasEnum = false;</span>
+<span class="nc bnc" id="L913" title="All 2 branches missed.">        for (CodegenOperation _op : operations.getOperations().getOperation()) {</span>
+<span class="nc" id="L914">            ExtendedCodegenOperation op = (ExtendedCodegenOperation) _op;</span>
+<span class="nc bnc" id="L915" title="All 2 branches missed.">            for (CodegenParameter cpParam : op.allParams) {</span>
+<span class="nc" id="L916">                ExtendedCodegenParameter param = (ExtendedCodegenParameter) cpParam;</span>
+
+<span class="nc bnc" id="L918" title="All 2 branches missed.">                if (Boolean.TRUE.equals(param.isEnum)) {</span>
+<span class="nc" id="L919">                    hasEnum = true;</span>
+<span class="nc" id="L920">                    param.datatypeWithEnum = param.datatypeWithEnum</span>
+<span class="nc" id="L921">                            .replace(param.enumName, op.operationIdCamelCase + param.enumName);</span>
+                }
+<span class="nc" id="L923">            }</span>
+<span class="nc" id="L924">        }</span>
+
+<span class="nc" id="L926">        operations.put(&quot;hasEnums&quot;, hasEnum);</span>
+<span class="nc" id="L927">    }</span>
+
+    private void updateOperationParameterForSagaAndRecords(OperationsMap operations) {
+        // This method will add extra information as to whether or not we have enums and
+        // update their names with the operation.id prefixed.
+        // It will also set the uniqueId status if provided.
+<span class="nc bnc" id="L933" title="All 2 branches missed.">        for (CodegenOperation _op : operations.getOperations().getOperation()) {</span>
+<span class="nc" id="L934">            ExtendedCodegenOperation op = (ExtendedCodegenOperation) _op;</span>
+<span class="nc bnc" id="L935" title="All 2 branches missed.">            for (CodegenParameter cpParam : op.allParams) {</span>
+<span class="nc" id="L936">                ExtendedCodegenParameter param = (ExtendedCodegenParameter) cpParam;</span>
+
+<span class="nc bnc" id="L938" title="All 2 branches missed.">                if (param.vendorExtensions.get(X_IS_UNIQUE_ID) instanceof Boolean) {</span>
+<span class="nc" id="L939">                    param.isUniqueId = Boolean.TRUE.equals(param.vendorExtensions.get(X_IS_UNIQUE_ID));</span>
+<span class="nc bnc" id="L940" title="All 8 branches missed.">                } else if (this.getInferUniqueIdFromNameSuffix() &amp;&amp; (param.isArray &amp;&amp; &quot;number&quot;.equals(param.items.dataType)) || (&quot;number&quot;.equals(param.dataType))) {</span>
+<span class="nc" id="L941">                    param.isUniqueId = this.isUniqueIdAccordingToNameSuffix(param.paramName);</span>
+                }
+
+
+<span class="nc" id="L945">                param.dataTypeAlternate = param.dataType;</span>
+<span class="nc bnc" id="L946" title="All 2 branches missed.">                if (param.isArray) {</span>
+<span class="nc bnc" id="L947" title="All 4 branches missed.">                    param.isUniqueId = param.isUniqueId || param.itemsAreUniqueId();</span>
+<span class="nc" id="L948">                    param.dataTypeAlternate = param.dataType.replace(&quot;Array&lt;&quot;, &quot;List&lt;&quot;);</span>
+<span class="nc" id="L949">                    String newItemsDataType = param.getItemsDataType();</span>
+<span class="nc bnc" id="L950" title="All 2 branches missed.">                    if (param.items.isModel) {</span>
+<span class="nc" id="L951">                        newItemsDataType = param.items.dataType + &quot;Record&quot;;</span>
+<span class="nc" id="L952">                        param.dataTypeAlternate = param.dataTypeAlternate.replace(param.items.dataType, newItemsDataType);</span>
+<span class="nc bnc" id="L953" title="All 2 branches missed.">                    } else if (param.items.isEnum) {</span>
+<span class="nc" id="L954">                        newItemsDataType = param.datatypeWithEnum.substring(param.datatypeWithEnum.lastIndexOf(&quot;&lt;&quot;) + 1, param.datatypeWithEnum.indexOf(&quot;&gt;&quot;));</span>
+<span class="nc" id="L955">                        param.dataTypeAlternate = param.datatypeWithEnum.replace(&quot;Array&lt;&quot;, &quot;List&lt;&quot;);</span>
+<span class="nc bnc" id="L956" title="All 2 branches missed.">                    } else if (param.isUniqueId) {</span>
+<span class="nc" id="L957">                        newItemsDataType = &quot;string&quot;;</span>
+<span class="nc" id="L958">                        param.dataTypeAlternate = param.dataTypeAlternate.replace(&quot;number&quot;, newItemsDataType);</span>
+                    }
+
+<span class="nc bnc" id="L961" title="All 2 branches missed.">                    if (param.itemsAreNullable()) {</span>
+<span class="nc" id="L962">                        param.dataTypeAlternate = param.dataTypeAlternate.replace(newItemsDataType, newItemsDataType + &quot; | null&quot;);</span>
+                    }
+<span class="nc bnc" id="L964" title="All 2 branches missed.">                } else if (param.isEnum) {</span>
+<span class="nc" id="L965">                    param.dataTypeAlternate = param.datatypeWithEnum;</span>
+<span class="nc bnc" id="L966" title="All 2 branches missed.">                } else if (param.isModel) {</span>
+<span class="nc" id="L967">                    param.dataTypeAlternate = param.dataType + &quot;Record&quot;;</span>
+<span class="nc bnc" id="L968" title="All 2 branches missed.">                } else if (param.isUniqueId) {</span>
+<span class="nc" id="L969">                    param.dataTypeAlternate = &quot;string&quot;;</span>
+<span class="nc bnc" id="L970" title="All 2 branches missed.">                    if (param.isNullable) {</span>
+<span class="nc" id="L971">                        param.dataTypeAlternate = param.dataTypeAlternate + &quot; | null&quot;;</span>
+                    }
+                }
+<span class="nc" id="L974">            }</span>
+<span class="nc" id="L975">        }</span>
+<span class="nc" id="L976">    }</span>
+
+    private void addOperationObjectResponseInformation(OperationsMap operations) {
+        // This method will modify the information on the operations' return type.
+        // The api template uses this information to know when to return a text
+        // response for a given simple response operation.
+<span class="nc bnc" id="L982" title="All 2 branches missed.">        for (CodegenOperation _op : operations.getOperations().getOperation()) {</span>
+<span class="nc" id="L983">            ExtendedCodegenOperation op = (ExtendedCodegenOperation) _op;</span>
+<span class="nc bnc" id="L984" title="All 2 branches missed.">            if (&quot;object&quot;.equals(op.returnType)) {</span>
+<span class="nc" id="L985">                op.isMap = true;</span>
+<span class="nc" id="L986">                op.returnSimpleType = false;</span>
+            }
+<span class="nc" id="L988">        }</span>
+<span class="nc" id="L989">    }</span>
+
+    private void addOperationPrefixParameterInterfacesInformation(Map&lt;String, Object&gt; operations) {
+<span class="nc" id="L992">        operations.put(&quot;prefixParameterInterfaces&quot;, getPrefixParameterInterfaces());</span>
+<span class="nc" id="L993">    }</span>
+
+    private void addExtraReservedWords() {
+<span class="nc" id="L996">        this.reservedWords.add(&quot;BASE_PATH&quot;);</span>
+<span class="nc" id="L997">        this.reservedWords.add(&quot;BaseAPI&quot;);</span>
+<span class="nc" id="L998">        this.reservedWords.add(&quot;RequiredError&quot;);</span>
+<span class="nc" id="L999">        this.reservedWords.add(&quot;COLLECTION_FORMATS&quot;);</span>
+<span class="nc" id="L1000">        this.reservedWords.add(&quot;FetchAPI&quot;);</span>
+<span class="nc" id="L1001">        this.reservedWords.add(&quot;ConfigurationParameters&quot;);</span>
+<span class="nc" id="L1002">        this.reservedWords.add(&quot;Configuration&quot;);</span>
+<span class="nc" id="L1003">        this.reservedWords.add(&quot;configuration&quot;);</span>
+<span class="nc" id="L1004">        this.reservedWords.add(&quot;HTTPMethod&quot;);</span>
+<span class="nc" id="L1005">        this.reservedWords.add(&quot;HTTPHeaders&quot;);</span>
+<span class="nc" id="L1006">        this.reservedWords.add(&quot;HTTPQuery&quot;);</span>
+<span class="nc" id="L1007">        this.reservedWords.add(&quot;HTTPBody&quot;);</span>
+<span class="nc" id="L1008">        this.reservedWords.add(&quot;ModelPropertyNaming&quot;);</span>
+<span class="nc" id="L1009">        this.reservedWords.add(&quot;FetchParams&quot;);</span>
+<span class="nc" id="L1010">        this.reservedWords.add(&quot;RequestOpts&quot;);</span>
+<span class="nc" id="L1011">        this.reservedWords.add(&quot;exists&quot;);</span>
+<span class="nc" id="L1012">        this.reservedWords.add(&quot;RequestContext&quot;);</span>
+<span class="nc" id="L1013">        this.reservedWords.add(&quot;ResponseContext&quot;);</span>
+<span class="nc" id="L1014">        this.reservedWords.add(&quot;Middleware&quot;);</span>
+<span class="nc" id="L1015">        this.reservedWords.add(&quot;ApiResponse&quot;);</span>
+<span class="nc" id="L1016">        this.reservedWords.add(&quot;ResponseTransformer&quot;);</span>
+<span class="nc" id="L1017">        this.reservedWords.add(&quot;JSONApiResponse&quot;);</span>
+<span class="nc" id="L1018">        this.reservedWords.add(&quot;VoidApiResponse&quot;);</span>
+<span class="nc" id="L1019">        this.reservedWords.add(&quot;BlobApiResponse&quot;);</span>
+<span class="nc" id="L1020">        this.reservedWords.add(&quot;TextApiResponse&quot;);</span>
+        // &quot;Index&quot; would create a file &quot;Index.ts&quot; which on case insensitive filesystems
+        // would override our &quot;index.js&quot; file
+<span class="nc" id="L1023">        this.reservedWords.add(&quot;Index&quot;);</span>
+<span class="nc" id="L1024">    }</span>
+
+    private void addExtraReservedWordsForSagasAndRecords() {
+        // immutablejs Records have potentially many reserved words. Adding only strict minimum for now.
+<span class="nc" id="L1028">        this.reservedWords.add(&quot;entries&quot;);</span>
+<span class="nc" id="L1029">    }</span>
+
+    private boolean getUseSingleRequestParameter() {
+<span class="nc" id="L1032">        return useSingleRequestParameter;</span>
+    }
+
+    private void setUseSingleRequestParameter(boolean useSingleRequestParameter) {
+<span class="nc" id="L1036">        this.useSingleRequestParameter = useSingleRequestParameter;</span>
+<span class="nc" id="L1037">    }</span>
+
+    private boolean getPrefixParameterInterfaces() {
+<span class="nc" id="L1040">        return prefixParameterInterfaces;</span>
+    }
+
+    private void setPrefixParameterInterfaces(boolean prefixParameterInterfaces) {
+<span class="nc" id="L1044">        this.prefixParameterInterfaces = prefixParameterInterfaces;</span>
+<span class="nc" id="L1045">    }</span>
+
+    private static boolean itemsAreUniqueId(CodegenProperty items) {
+<span class="nc bnc" id="L1048" title="All 4 branches missed.">        if (items != null &amp;&amp; items.items != null) {</span>
+<span class="nc" id="L1049">            return itemsAreUniqueId(items.items);</span>
+        };
+<span class="nc bnc" id="L1051" title="All 4 branches missed.">        if (items != null &amp;&amp; items.vendorExtensions.get(X_IS_UNIQUE_ID) instanceof Boolean) {</span>
+<span class="nc" id="L1052">            return Boolean.TRUE.equals(items.vendorExtensions.get(X_IS_UNIQUE_ID));</span>
+        }
+<span class="nc" id="L1054">        return false;</span>
+    }
+
+    private static boolean itemsAreNullable(CodegenProperty items) {
+<span class="nc bnc" id="L1058" title="All 2 branches missed.">        if (items == null) {</span>
+<span class="nc" id="L1059">            return true;</span>
+        }
+<span class="nc bnc" id="L1061" title="All 2 branches missed.">        if (items.items != null) {</span>
+<span class="nc" id="L1062">            return itemsAreNullable(items.items);</span>
+        };
+<span class="nc" id="L1064">        return items.isNullable;</span>
+    }
+
+    private static String getItemsDataType(CodegenProperty items) {
+<span class="nc bnc" id="L1068" title="All 2 branches missed.">        if (items == null) {</span>
+<span class="nc" id="L1069">            return null;</span>
+        }
+<span class="nc bnc" id="L1071" title="All 2 branches missed.">        if (items.items != null) {</span>
+<span class="nc" id="L1072">            return getItemsDataType(items.items);</span>
+        };
+<span class="nc" id="L1074">        return items.dataType;</span>
+    }
+
+    class ExtendedCodegenParameter extends CodegenParameter {
+        public String dataTypeAlternate;
+        public boolean isUniqueId; // this parameter represents a unique id (x-isUniqueId: true)
+        public List&lt;CodegenProperty&gt; readOnlyVars; // a list of read-only properties
+<span class="nc" id="L1081">        public boolean hasReadOnly = false; // indicates the type has at least one read-only property</span>
+
+        public boolean itemsAreUniqueId() {
+<span class="nc" id="L1084">            return TypeScriptFetchClientCodegen.itemsAreUniqueId(this.items);</span>
+        }
+
+        public boolean itemsAreNullable() {
+<span class="nc" id="L1088">            return TypeScriptFetchClientCodegen.itemsAreNullable(this.items);</span>
+        }
+
+        public String getItemsDataType() {
+<span class="nc" id="L1092">            return TypeScriptFetchClientCodegen.getItemsDataType(this.items);</span>
+        }
+
+        public boolean isDateType() {
+<span class="nc bnc" id="L1096" title="All 4 branches missed.">            return isDate &amp;&amp; &quot;Date&quot;.equals(dataType);</span>
+        }
+
+        public boolean isDateTimeType() {
+<span class="nc bnc" id="L1100" title="All 4 branches missed.">            return isDateTime &amp;&amp; &quot;Date&quot;.equals(dataType);</span>
+        }
+
+<span class="nc" id="L1103">        public ExtendedCodegenParameter(CodegenParameter cp) {</span>
+<span class="nc" id="L1104">            super();</span>
+
+<span class="nc" id="L1106">            this.isFormParam = cp.isFormParam;</span>
+<span class="nc" id="L1107">            this.isQueryParam = cp.isQueryParam;</span>
+<span class="nc" id="L1108">            this.isPathParam = cp.isPathParam;</span>
+<span class="nc" id="L1109">            this.isHeaderParam = cp.isHeaderParam;</span>
+<span class="nc" id="L1110">            this.isCookieParam = cp.isCookieParam;</span>
+<span class="nc" id="L1111">            this.isBodyParam = cp.isBodyParam;</span>
+<span class="nc" id="L1112">            this.isContainer = cp.isContainer;</span>
+<span class="nc" id="L1113">            this.isCollectionFormatMulti = cp.isCollectionFormatMulti;</span>
+<span class="nc" id="L1114">            this.isPrimitiveType = cp.isPrimitiveType;</span>
+<span class="nc" id="L1115">            this.isModel = cp.isModel;</span>
+<span class="nc" id="L1116">            this.isExplode = cp.isExplode;</span>
+<span class="nc" id="L1117">            this.baseName = cp.baseName;</span>
+<span class="nc" id="L1118">            this.paramName = cp.paramName;</span>
+<span class="nc" id="L1119">            this.dataType = cp.dataType;</span>
+<span class="nc" id="L1120">            this.datatypeWithEnum = cp.datatypeWithEnum;</span>
+<span class="nc" id="L1121">            this.dataFormat = cp.dataFormat;</span>
+<span class="nc" id="L1122">            this.contentType = cp.contentType;</span>
+<span class="nc" id="L1123">            this.collectionFormat = cp.collectionFormat;</span>
+<span class="nc" id="L1124">            this.description = cp.description;</span>
+<span class="nc" id="L1125">            this.unescapedDescription = cp.unescapedDescription;</span>
+<span class="nc" id="L1126">            this.baseType = cp.baseType;</span>
+<span class="nc" id="L1127">            this.defaultValue = cp.defaultValue;</span>
+<span class="nc" id="L1128">            this.enumName = cp.enumName;</span>
+<span class="nc" id="L1129">            this.style = cp.style;</span>
+<span class="nc" id="L1130">            this.nameInLowerCase = cp.nameInLowerCase;</span>
+<span class="nc" id="L1131">            this.example = cp.example;</span>
+<span class="nc" id="L1132">            this.jsonSchema = cp.jsonSchema;</span>
+<span class="nc" id="L1133">            this.isString = cp.isString;</span>
+<span class="nc" id="L1134">            this.isNumeric = cp.isNumeric;</span>
+<span class="nc" id="L1135">            this.isInteger = cp.isInteger;</span>
+<span class="nc" id="L1136">            this.isLong = cp.isLong;</span>
+<span class="nc" id="L1137">            this.isNumber = cp.isNumber;</span>
+<span class="nc" id="L1138">            this.isFloat = cp.isFloat;</span>
+<span class="nc" id="L1139">            this.isDouble = cp.isDouble;</span>
+<span class="nc" id="L1140">            this.isDecimal = cp.isDecimal;</span>
+<span class="nc" id="L1141">            this.isByteArray = cp.isByteArray;</span>
+<span class="nc" id="L1142">            this.isBinary = cp.isBinary;</span>
+<span class="nc" id="L1143">            this.isBoolean = cp.isBoolean;</span>
+<span class="nc" id="L1144">            this.isDate = cp.isDate;</span>
+<span class="nc" id="L1145">            this.isDateTime = cp.isDateTime;</span>
+<span class="nc" id="L1146">            this.isUuid = cp.isUuid;</span>
+<span class="nc" id="L1147">            this.isUri = cp.isUri;</span>
+<span class="nc" id="L1148">            this.isEmail = cp.isEmail;</span>
+<span class="nc" id="L1149">            this.isFreeFormObject = cp.isFreeFormObject;</span>
+<span class="nc" id="L1150">            this.isAnyType = cp.isAnyType;</span>
+<span class="nc" id="L1151">            this.isArray = cp.isArray;</span>
+<span class="nc" id="L1152">            this.isMap = cp.isMap;</span>
+<span class="nc" id="L1153">            this.isFile = cp.isFile;</span>
+<span class="nc" id="L1154">            this.isEnum = cp.isEnum;</span>
+<span class="nc" id="L1155">            this._enum = cp._enum;</span>
+<span class="nc" id="L1156">            this.allowableValues = cp.allowableValues;</span>
+<span class="nc" id="L1157">            this.items = cp.items;</span>
+<span class="nc" id="L1158">            this.additionalProperties = cp.additionalProperties;</span>
+<span class="nc" id="L1159">            this.vars = cp.vars;</span>
+<span class="nc" id="L1160">            this.requiredVars = cp.requiredVars;</span>
+<span class="nc" id="L1161">            this.mostInnerItems = cp.mostInnerItems;</span>
+<span class="nc" id="L1162">            this.vendorExtensions = cp.vendorExtensions;</span>
+<span class="nc" id="L1163">            this.hasValidation = cp.hasValidation;</span>
+<span class="nc" id="L1164">            this.isNullable = cp.isNullable;</span>
+<span class="nc" id="L1165">            this.required = cp.required;</span>
+<span class="nc" id="L1166">            this.maximum = cp.maximum;</span>
+<span class="nc" id="L1167">            this.exclusiveMaximum = cp.exclusiveMaximum;</span>
+<span class="nc" id="L1168">            this.minimum = cp.minimum;</span>
+<span class="nc" id="L1169">            this.exclusiveMinimum = cp.exclusiveMinimum;</span>
+<span class="nc" id="L1170">            this.maxLength = cp.maxLength;</span>
+<span class="nc" id="L1171">            this.minLength = cp.minLength;</span>
+<span class="nc" id="L1172">            this.pattern = cp.pattern;</span>
+<span class="nc" id="L1173">            this.maxItems = cp.maxItems;</span>
+<span class="nc" id="L1174">            this.minItems = cp.minItems;</span>
+<span class="nc" id="L1175">            this.uniqueItems = cp.uniqueItems;</span>
+<span class="nc" id="L1176">            this.multipleOf = cp.multipleOf;</span>
+<span class="nc" id="L1177">            this.setHasVars(cp.getHasVars());</span>
+<span class="nc" id="L1178">            this.setHasRequired(cp.getHasRequired());</span>
+<span class="nc" id="L1179">            this.setMaxProperties(cp.getMaxProperties());</span>
+<span class="nc" id="L1180">            this.setMinProperties(cp.getMinProperties());</span>
+<span class="nc" id="L1181">            setReadOnlyVars();</span>
+<span class="nc" id="L1182">        }</span>
+
+        @Override
+        public ExtendedCodegenParameter copy() {
+<span class="nc" id="L1186">            CodegenParameter superCopy = super.copy();</span>
+<span class="nc" id="L1187">            ExtendedCodegenParameter output = new ExtendedCodegenParameter(superCopy);</span>
+<span class="nc" id="L1188">            output.dataTypeAlternate = this.dataTypeAlternate;</span>
+<span class="nc" id="L1189">            output.isUniqueId = this.isUniqueId;</span>
+<span class="nc" id="L1190">            return output;</span>
+        }
+
+        @Override
+        public boolean equals(Object o) {
+<span class="nc bnc" id="L1195" title="All 2 branches missed.">            if (o == null)</span>
+<span class="nc" id="L1196">                return false;</span>
+
+<span class="nc bnc" id="L1198" title="All 2 branches missed.">            if (this.getClass() != o.getClass())</span>
+<span class="nc" id="L1199">                return false;</span>
+
+<span class="nc" id="L1201">            boolean result = super.equals(o);</span>
+<span class="nc" id="L1202">            ExtendedCodegenParameter that = (ExtendedCodegenParameter) o;</span>
+<span class="nc bnc" id="L1203" title="All 4 branches missed.">            return result &amp;&amp;</span>
+                    isUniqueId == that.isUniqueId &amp;&amp;
+<span class="nc bnc" id="L1205" title="All 2 branches missed.">                    Objects.equals(dataTypeAlternate, that.dataTypeAlternate);</span>
+        }
+
+        @Override
+        public int hashCode() {
+<span class="nc" id="L1210">            int superHash = super.hashCode();</span>
+<span class="nc" id="L1211">            return Objects.hash(superHash, dataTypeAlternate, isUniqueId);</span>
+        }
+
+        @Override
+        public String toString() {
+<span class="nc" id="L1216">            String superString = super.toString();</span>
+<span class="nc" id="L1217">            final StringBuilder sb = new StringBuilder(superString);</span>
+<span class="nc" id="L1218">            sb.append(&quot;, isUniqueId=&quot;).append(isUniqueId);</span>
+<span class="nc" id="L1219">            sb.append(&quot;, dataTypeAlternate='&quot;).append(dataTypeAlternate).append('\'');</span>
+<span class="nc" id="L1220">            return sb.toString();</span>
+        }
+
+        private void setReadOnlyVars() {
+<span class="nc" id="L1224">            readOnlyVars = vars.stream().filter(v -&gt; v.isReadOnly).collect(Collectors.toList());</span>
+<span class="nc bnc" id="L1225" title="All 2 branches missed.">            hasReadOnly = !readOnlyVars.isEmpty();</span>
+<span class="nc" id="L1226">        }</span>
+    }
+
+    class ExtendedCodegenProperty extends CodegenProperty {
+        public String dataTypeAlternate;
+        public boolean isEntity; //Is a model containing an &quot;id&quot; property marked as isUniqueId and which matches the 'x-entityId' value.
+        public boolean isUniqueId; // The property represents a unique id (x-isUniqueId: true)
+        public boolean keepAsJSObject;
+        public boolean isReservedRecordField;
+
+        public boolean itemsAreUniqueId() {
+<span class="nc" id="L1237">            return TypeScriptFetchClientCodegen.itemsAreUniqueId(this.items);</span>
+        }
+
+        public boolean itemsAreNullable() {
+<span class="nc" id="L1241">            return TypeScriptFetchClientCodegen.itemsAreNullable(this.items);</span>
+        }
+
+        public String getItemsDataType() {
+<span class="nc" id="L1245">            return TypeScriptFetchClientCodegen.getItemsDataType(this.items);</span>
+        }
+
+        public boolean isDateType() {
+<span class="nc bnc" id="L1249" title="All 4 branches missed.">            return isDate &amp;&amp; &quot;Date&quot;.equals(dataType);</span>
+        }
+
+        public boolean isDateTimeType() {
+<span class="nc bnc" id="L1253" title="All 4 branches missed.">            return isDateTime &amp;&amp; &quot;Date&quot;.equals(dataType);</span>
+        }
+
+<span class="nc" id="L1256">        public ExtendedCodegenProperty(CodegenProperty cp) {</span>
+<span class="nc" id="L1257">            super();</span>
+
+<span class="nc" id="L1259">            this.openApiType = cp.openApiType;</span>
+<span class="nc" id="L1260">            this.baseName = cp.baseName;</span>
+<span class="nc" id="L1261">            this.complexType = cp.complexType;</span>
+<span class="nc" id="L1262">            this.getter = cp.getter;</span>
+<span class="nc" id="L1263">            this.setter = cp.setter;</span>
+<span class="nc" id="L1264">            this.description = cp.description;</span>
+<span class="nc" id="L1265">            this.dataType = cp.dataType;</span>
+<span class="nc" id="L1266">            this.datatypeWithEnum = cp.datatypeWithEnum;</span>
+<span class="nc" id="L1267">            this.dataFormat = cp.dataFormat;</span>
+<span class="nc" id="L1268">            this.name = cp.name;</span>
+<span class="nc" id="L1269">            this.min = cp.min;</span>
+<span class="nc" id="L1270">            this.max = cp.max;</span>
+<span class="nc" id="L1271">            this.defaultValue = cp.defaultValue;</span>
+<span class="nc" id="L1272">            this.defaultValueWithParam = cp.defaultValueWithParam;</span>
+<span class="nc" id="L1273">            this.baseType = cp.baseType;</span>
+<span class="nc" id="L1274">            this.containerType = cp.containerType;</span>
+<span class="nc" id="L1275">            this.title = cp.title;</span>
+<span class="nc" id="L1276">            this.unescapedDescription = cp.unescapedDescription;</span>
+<span class="nc" id="L1277">            this.maxLength = cp.maxLength;</span>
+<span class="nc" id="L1278">            this.minLength = cp.minLength;</span>
+<span class="nc" id="L1279">            this.pattern = cp.pattern;</span>
+<span class="nc" id="L1280">            this.example = cp.example;</span>
+<span class="nc" id="L1281">            this.jsonSchema = cp.jsonSchema;</span>
+<span class="nc" id="L1282">            this.minimum = cp.minimum;</span>
+<span class="nc" id="L1283">            this.maximum = cp.maximum;</span>
+<span class="nc" id="L1284">            this.multipleOf = cp.multipleOf;</span>
+<span class="nc" id="L1285">            this.exclusiveMinimum = cp.exclusiveMinimum;</span>
+<span class="nc" id="L1286">            this.exclusiveMaximum = cp.exclusiveMaximum;</span>
+<span class="nc" id="L1287">            this.required = cp.required;</span>
+<span class="nc" id="L1288">            this.deprecated = cp.deprecated;</span>
+<span class="nc" id="L1289">            this.hasMoreNonReadOnly = cp.hasMoreNonReadOnly;</span>
+<span class="nc" id="L1290">            this.isPrimitiveType = cp.isPrimitiveType;</span>
+<span class="nc" id="L1291">            this.isModel = cp.isModel;</span>
+<span class="nc" id="L1292">            this.isContainer = cp.isContainer;</span>
+<span class="nc" id="L1293">            this.isString = cp.isString;</span>
+<span class="nc" id="L1294">            this.isNumeric = cp.isNumeric;</span>
+<span class="nc" id="L1295">            this.isInteger = cp.isInteger;</span>
+<span class="nc" id="L1296">            this.isLong = cp.isLong;</span>
+<span class="nc" id="L1297">            this.isNumber = cp.isNumber;</span>
+<span class="nc" id="L1298">            this.isFloat = cp.isFloat;</span>
+<span class="nc" id="L1299">            this.isDouble = cp.isDouble;</span>
+<span class="nc" id="L1300">            this.isDecimal = cp.isDecimal;</span>
+<span class="nc" id="L1301">            this.isByteArray = cp.isByteArray;</span>
+<span class="nc" id="L1302">            this.isBinary = cp.isBinary;</span>
+<span class="nc" id="L1303">            this.isFile = cp.isFile;</span>
+<span class="nc" id="L1304">            this.isBoolean = cp.isBoolean;</span>
+<span class="nc" id="L1305">            this.isDate = cp.isDate; // full-date notation as defined by RFC 3339, section 5.6, for example, 2017-07-21</span>
+<span class="nc" id="L1306">            this.isDateTime = cp.isDateTime; // the date-time notation as defined by RFC 3339, section 5.6, for example, 2017-07-21T17:32:28Z</span>
+<span class="nc" id="L1307">            this.isUuid = cp.isUuid;</span>
+<span class="nc" id="L1308">            this.isUri = cp.isUri;</span>
+<span class="nc" id="L1309">            this.isEmail = cp.isEmail;</span>
+<span class="nc" id="L1310">            this.isFreeFormObject = cp.isFreeFormObject;</span>
+<span class="nc" id="L1311">            this.isAnyType = cp.isAnyType;</span>
+<span class="nc" id="L1312">            this.isArray = cp.isArray;</span>
+<span class="nc" id="L1313">            this.isMap = cp.isMap;</span>
+<span class="nc" id="L1314">            this.isEnum = cp.isEnum;</span>
+<span class="nc" id="L1315">            this.isReadOnly = cp.isReadOnly;</span>
+<span class="nc" id="L1316">            this.isWriteOnly = cp.isWriteOnly;</span>
+<span class="nc" id="L1317">            this.isNullable = cp.isNullable;</span>
+<span class="nc" id="L1318">            this.isSelfReference = cp.isSelfReference;</span>
+<span class="nc" id="L1319">            this.isCircularReference = cp.isCircularReference;</span>
+<span class="nc" id="L1320">            this.isDiscriminator = cp.isDiscriminator;</span>
+<span class="nc" id="L1321">            this._enum = cp._enum;</span>
+<span class="nc" id="L1322">            this.allowableValues = cp.allowableValues;</span>
+<span class="nc" id="L1323">            this.items = cp.items;</span>
+<span class="nc" id="L1324">            this.additionalProperties = cp.additionalProperties;</span>
+<span class="nc" id="L1325">            this.vars = cp.vars;</span>
+<span class="nc" id="L1326">            this.requiredVars = cp.requiredVars;</span>
+<span class="nc" id="L1327">            this.mostInnerItems = cp.mostInnerItems;</span>
+<span class="nc" id="L1328">            this.vendorExtensions = cp.vendorExtensions;</span>
+<span class="nc" id="L1329">            this.hasValidation = cp.hasValidation;</span>
+<span class="nc" id="L1330">            this.isInherited = cp.isInherited;</span>
+<span class="nc" id="L1331">            this.discriminatorValue = cp.discriminatorValue;</span>
+<span class="nc" id="L1332">            this.nameInLowerCase = cp.nameInLowerCase;</span>
+<span class="nc" id="L1333">            this.nameInPascalCase = cp.nameInPascalCase;</span>
+<span class="nc" id="L1334">            this.nameInSnakeCase = cp.nameInSnakeCase;</span>
+<span class="nc" id="L1335">            this.enumName = cp.enumName;</span>
+<span class="nc" id="L1336">            this.maxItems = cp.maxItems;</span>
+<span class="nc" id="L1337">            this.minItems = cp.minItems;</span>
+<span class="nc" id="L1338">            this.setMaxProperties(cp.getMaxProperties());</span>
+<span class="nc" id="L1339">            this.setMinProperties(cp.getMinProperties());</span>
+<span class="nc" id="L1340">            this.setUniqueItems(cp.getUniqueItems());</span>
+<span class="nc" id="L1341">            this.isXmlAttribute = cp.isXmlAttribute;</span>
+<span class="nc" id="L1342">            this.xmlPrefix = cp.xmlPrefix;</span>
+<span class="nc" id="L1343">            this.xmlName = cp.xmlName;</span>
+<span class="nc" id="L1344">            this.xmlNamespace = cp.xmlNamespace;</span>
+<span class="nc" id="L1345">            this.isXmlWrapped = cp.isXmlWrapped;</span>
+<span class="nc" id="L1346">        }</span>
+
+        @Override
+        public boolean equals(Object o) {
+<span class="nc bnc" id="L1350" title="All 2 branches missed.">            if (o == null)</span>
+<span class="nc" id="L1351">                return false;</span>
+
+<span class="nc bnc" id="L1353" title="All 2 branches missed.">            if (this.getClass() != o.getClass())</span>
+<span class="nc" id="L1354">                return false;</span>
+
+<span class="nc" id="L1356">            boolean result = super.equals(o);</span>
+<span class="nc" id="L1357">            ExtendedCodegenProperty that = (ExtendedCodegenProperty) o;</span>
+<span class="nc bnc" id="L1358" title="All 10 branches missed.">            return result &amp;&amp;</span>
+                    isEntity == that.isEntity &amp;&amp;
+                    isUniqueId == that.isUniqueId &amp;&amp;
+                    keepAsJSObject == that.keepAsJSObject &amp;&amp;
+                    isReservedRecordField == that.isReservedRecordField &amp;&amp;
+<span class="nc bnc" id="L1363" title="All 2 branches missed.">                    Objects.equals(dataTypeAlternate, that.dataTypeAlternate);</span>
+        }
+
+        @Override
+        public int hashCode() {
+<span class="nc" id="L1368">            int superHash = super.hashCode();</span>
+<span class="nc" id="L1369">            return Objects.hash(superHash, dataTypeAlternate, isEntity, isUniqueId, keepAsJSObject, isReservedRecordField);</span>
+        }
+
+        @Override
+        public String toString() {
+<span class="nc" id="L1374">            String superString = super.toString();</span>
+<span class="nc" id="L1375">            final StringBuilder sb = new StringBuilder(superString);</span>
+<span class="nc" id="L1376">            sb.append(&quot;, dataTypeAlternate='&quot;).append(dataTypeAlternate).append('\'');</span>
+<span class="nc" id="L1377">            sb.append(&quot;, isEntity=&quot;).append(isEntity);</span>
+<span class="nc" id="L1378">            sb.append(&quot;, isUniqueId=&quot;).append(isUniqueId);</span>
+<span class="nc" id="L1379">            sb.append(&quot;, keepAsJSObject=&quot;).append(keepAsJSObject);</span>
+<span class="nc" id="L1380">            sb.append(&quot;, isReservedRecordField=&quot;).append(isReservedRecordField);</span>
+<span class="nc" id="L1381">            return sb.toString();</span>
+        }
+    }
+
+    class ExtendedCodegenOperation extends CodegenOperation {
+        boolean hasReturnPassthroughVoid, returnTypeSupportsEntities, returnTypeIsModel, returnTypeIsArray;
+        String returnTypeAlternate, returnBaseTypeAlternate, returnPassthrough;
+
+<span class="nc" id="L1389">        public ExtendedCodegenOperation(CodegenOperation o) {</span>
+<span class="nc" id="L1390">            super();</span>
+
+<span class="nc" id="L1392">            this.responseHeaders.addAll(o.responseHeaders);</span>
+<span class="nc" id="L1393">            this.hasAuthMethods = o.hasAuthMethods;</span>
+<span class="nc" id="L1394">            this.hasConsumes = o.hasConsumes;</span>
+<span class="nc" id="L1395">            this.hasProduces = o.hasProduces;</span>
+<span class="nc" id="L1396">            this.hasParams = o.hasParams;</span>
+<span class="nc" id="L1397">            this.hasOptionalParams = o.hasOptionalParams;</span>
+<span class="nc" id="L1398">            this.hasRequiredParams = o.hasRequiredParams;</span>
+<span class="nc" id="L1399">            this.returnTypeIsPrimitive = o.returnTypeIsPrimitive;</span>
+<span class="nc" id="L1400">            this.returnSimpleType = o.returnSimpleType;</span>
+<span class="nc" id="L1401">            this.subresourceOperation = o.subresourceOperation;</span>
+<span class="nc" id="L1402">            this.isMap = o.isMap;</span>
+<span class="nc" id="L1403">            this.isArray = o.isArray;</span>
+<span class="nc" id="L1404">            this.isMultipart = o.isMultipart;</span>
+<span class="nc" id="L1405">            this.isResponseBinary = o.isResponseBinary;</span>
+<span class="nc" id="L1406">            this.isResponseFile = o.isResponseFile;</span>
+<span class="nc" id="L1407">            this.isResponseOptional = o.isResponseOptional;</span>
+<span class="nc" id="L1408">            this.hasReference = o.hasReference;</span>
+<span class="nc" id="L1409">            this.isRestfulIndex = o.isRestfulIndex;</span>
+<span class="nc" id="L1410">            this.isRestfulShow = o.isRestfulShow;</span>
+<span class="nc" id="L1411">            this.isRestfulCreate = o.isRestfulCreate;</span>
+<span class="nc" id="L1412">            this.isRestfulUpdate = o.isRestfulUpdate;</span>
+<span class="nc" id="L1413">            this.isRestfulDestroy = o.isRestfulDestroy;</span>
+<span class="nc" id="L1414">            this.isRestful = o.isRestful;</span>
+<span class="nc" id="L1415">            this.isDeprecated = o.isDeprecated;</span>
+<span class="nc" id="L1416">            this.isCallbackRequest = o.isCallbackRequest;</span>
+<span class="nc" id="L1417">            this.uniqueItems = o.uniqueItems;</span>
+<span class="nc" id="L1418">            this.path = o.path;</span>
+<span class="nc" id="L1419">            this.operationId = o.operationId;</span>
+<span class="nc" id="L1420">            this.returnType = o.returnType;</span>
+<span class="nc" id="L1421">            this.returnFormat = o.returnFormat;</span>
+<span class="nc" id="L1422">            this.httpMethod = o.httpMethod;</span>
+<span class="nc" id="L1423">            this.returnBaseType = o.returnBaseType;</span>
+<span class="nc" id="L1424">            this.returnContainer = o.returnContainer;</span>
+<span class="nc" id="L1425">            this.summary = o.summary;</span>
+<span class="nc" id="L1426">            this.unescapedNotes = o.unescapedNotes;</span>
+<span class="nc" id="L1427">            this.notes = o.notes;</span>
+<span class="nc" id="L1428">            this.baseName = o.baseName;</span>
+<span class="nc" id="L1429">            this.defaultResponse = o.defaultResponse;</span>
+<span class="nc" id="L1430">            this.discriminator = o.discriminator;</span>
+<span class="nc" id="L1431">            this.consumes = o.consumes;</span>
+<span class="nc" id="L1432">            this.produces = o.produces;</span>
+<span class="nc" id="L1433">            this.prioritizedContentTypes = o.prioritizedContentTypes;</span>
+<span class="nc" id="L1434">            this.servers = o.servers;</span>
+<span class="nc" id="L1435">            this.bodyParam = o.bodyParam;</span>
+<span class="nc" id="L1436">            this.allParams = o.allParams;</span>
+<span class="nc" id="L1437">            this.bodyParams = o.bodyParams;</span>
+<span class="nc" id="L1438">            this.pathParams = o.pathParams;</span>
+<span class="nc" id="L1439">            this.queryParams = o.queryParams;</span>
+<span class="nc" id="L1440">            this.headerParams = o.headerParams;</span>
+<span class="nc" id="L1441">            this.formParams = o.formParams;</span>
+<span class="nc" id="L1442">            this.cookieParams = o.cookieParams;</span>
+<span class="nc" id="L1443">            this.requiredParams = o.requiredParams;</span>
+<span class="nc" id="L1444">            this.optionalParams = o.optionalParams;</span>
+<span class="nc" id="L1445">            this.authMethods = o.authMethods;</span>
+<span class="nc" id="L1446">            this.tags = o.tags;</span>
+<span class="nc" id="L1447">            this.responses = o.responses;</span>
+<span class="nc" id="L1448">            this.callbacks = o.callbacks;</span>
+<span class="nc" id="L1449">            this.imports = o.imports;</span>
+<span class="nc" id="L1450">            this.examples = o.examples;</span>
+<span class="nc" id="L1451">            this.requestBodyExamples = o.requestBodyExamples;</span>
+<span class="nc" id="L1452">            this.externalDocs = o.externalDocs;</span>
+<span class="nc" id="L1453">            this.vendorExtensions = o.vendorExtensions;</span>
+<span class="nc" id="L1454">            this.nickname = o.nickname;</span>
+<span class="nc" id="L1455">            this.operationIdOriginal = o.operationIdOriginal;</span>
+<span class="nc" id="L1456">            this.operationIdLowerCase = o.operationIdLowerCase;</span>
+<span class="nc" id="L1457">            this.operationIdCamelCase = o.operationIdCamelCase;</span>
+<span class="nc" id="L1458">            this.operationIdSnakeCase = o.operationIdSnakeCase;</span>
+<span class="nc" id="L1459">        }</span>
+
+        @Override
+        public boolean equals(Object o) {
+<span class="nc bnc" id="L1463" title="All 2 branches missed.">            if (o == null)</span>
+<span class="nc" id="L1464">                return false;</span>
+
+<span class="nc bnc" id="L1466" title="All 2 branches missed.">            if (this.getClass() != o.getClass())</span>
+<span class="nc" id="L1467">                return false;</span>
+
+<span class="nc" id="L1469">            boolean result = super.equals(o);</span>
+<span class="nc" id="L1470">            ExtendedCodegenOperation that = (ExtendedCodegenOperation) o;</span>
+<span class="nc bnc" id="L1471" title="All 10 branches missed.">            return result &amp;&amp;</span>
+                    hasReturnPassthroughVoid == that.hasReturnPassthroughVoid &amp;&amp;
+                    returnTypeSupportsEntities == that.returnTypeSupportsEntities &amp;&amp;
+                    returnTypeIsArray == that.returnTypeIsArray &amp;&amp;
+                    returnTypeIsModel == that.returnTypeIsModel &amp;&amp;
+<span class="nc bnc" id="L1476" title="All 2 branches missed.">                    Objects.equals(returnTypeAlternate, that.returnTypeAlternate) &amp;&amp;</span>
+<span class="nc bnc" id="L1477" title="All 2 branches missed.">                    Objects.equals(returnBaseTypeAlternate, that.returnBaseTypeAlternate) &amp;&amp;</span>
+<span class="nc bnc" id="L1478" title="All 2 branches missed.">                    Objects.equals(returnPassthrough, that.returnPassthrough);</span>
+        }
+
+        @Override
+        public int hashCode() {
+<span class="nc" id="L1483">            int superHash = super.hashCode();</span>
+<span class="nc" id="L1484">            return Objects.hash(superHash, returnPassthrough, hasReturnPassthroughVoid, returnTypeSupportsEntities, returnTypeIsArray, returnTypeIsModel, returnTypeAlternate, returnBaseTypeAlternate);</span>
+        }
+
+        @Override
+        public String toString() {
+<span class="nc" id="L1489">            String superString = super.toString();</span>
+<span class="nc" id="L1490">            final StringBuilder sb = new StringBuilder(superString);</span>
+<span class="nc" id="L1491">            sb.append(&quot;, hasReturnPassthroughVoid=&quot;).append(hasReturnPassthroughVoid);</span>
+<span class="nc" id="L1492">            sb.append(&quot;, returnTypeSupportsEntities=&quot;).append(returnTypeSupportsEntities);</span>
+<span class="nc" id="L1493">            sb.append(&quot;, returnTypeIsArray=&quot;).append(returnTypeIsArray);</span>
+<span class="nc" id="L1494">            sb.append(&quot;, returnTypeIsModel=&quot;).append(returnTypeIsModel);</span>
+<span class="nc" id="L1495">            sb.append(&quot;, returnTypeAlternate='&quot;).append(returnTypeAlternate).append('\'');</span>
+<span class="nc" id="L1496">            sb.append(&quot;, returnBaseTypeAlternate='&quot;).append(returnBaseTypeAlternate).append('\'');</span>
+<span class="nc" id="L1497">            sb.append(&quot;, returnPassthrough='&quot;).append(returnPassthrough).append('\'');</span>
+<span class="nc" id="L1498">            return sb.toString();</span>
+        }
+    }
+
+    class ExtendedCodegenModel extends CodegenModel {
+<span class="nc" id="L1503">        public Set&lt;String&gt; modelImports = new TreeSet&lt;String&gt;();</span>
+        public boolean isEntity; // Is a model containing an &quot;id&quot; property marked as isUniqueId
+        public String returnPassthrough;
+        public boolean hasReturnPassthroughVoid;
+
+        public boolean isDateType() {
+<span class="nc bnc" id="L1509" title="All 4 branches missed.">            return isDate &amp;&amp; &quot;Date&quot;.equals(dataType);</span>
+        }
+
+        public boolean isDateTimeType() {
+<span class="nc bnc" id="L1513" title="All 4 branches missed.">            return isDateTime &amp;&amp; &quot;Date&quot;.equals(dataType);</span>
+        }
+
+<span class="nc" id="L1516">        public ExtendedCodegenModel(CodegenModel cm) {</span>
+<span class="nc" id="L1517">            super();</span>
+
+<span class="nc" id="L1519">            this.parent = cm.parent;</span>
+<span class="nc" id="L1520">            this.parentSchema = cm.parentSchema;</span>
+<span class="nc" id="L1521">            this.interfaces = cm.interfaces;</span>
+<span class="nc" id="L1522">            this.allParents = cm.allParents;</span>
+<span class="nc" id="L1523">            this.parentModel = cm.parentModel;</span>
+<span class="nc" id="L1524">            this.interfaceModels = cm.interfaceModels;</span>
+<span class="nc" id="L1525">            this.children = cm.children;</span>
+<span class="nc" id="L1526">            this.anyOf = cm.anyOf;</span>
+<span class="nc" id="L1527">            this.oneOf = cm.oneOf;</span>
+<span class="nc" id="L1528">            this.allOf = cm.allOf;</span>
+<span class="nc" id="L1529">            this.name = cm.name;</span>
+<span class="nc" id="L1530">            this.classname = cm.classname;</span>
+<span class="nc" id="L1531">            this.title = cm.title;</span>
+<span class="nc" id="L1532">            this.description = cm.description;</span>
+<span class="nc" id="L1533">            this.classVarName = cm.classVarName;</span>
+<span class="nc" id="L1534">            this.modelJson = cm.modelJson;</span>
+<span class="nc" id="L1535">            this.dataType = cm.dataType;</span>
+<span class="nc" id="L1536">            this.xmlPrefix = cm.xmlPrefix;</span>
+<span class="nc" id="L1537">            this.xmlNamespace = cm.xmlNamespace;</span>
+<span class="nc" id="L1538">            this.xmlName = cm.xmlName;</span>
+<span class="nc" id="L1539">            this.classFilename = cm.classFilename;</span>
+<span class="nc" id="L1540">            this.unescapedDescription = cm.unescapedDescription;</span>
+<span class="nc" id="L1541">            this.discriminator = cm.discriminator;</span>
+<span class="nc" id="L1542">            this.defaultValue = cm.defaultValue;</span>
+<span class="nc" id="L1543">            this.arrayModelType = cm.arrayModelType;</span>
+<span class="nc" id="L1544">            this.isAlias = cm.isAlias;</span>
+<span class="nc" id="L1545">            this.isString = cm.isString;</span>
+<span class="nc" id="L1546">            this.isInteger = cm.isInteger;</span>
+<span class="nc" id="L1547">            this.isLong = cm.isLong;</span>
+<span class="nc" id="L1548">            this.isNumber = cm.isNumber;</span>
+<span class="nc" id="L1549">            this.isNumeric = cm.isNumeric;</span>
+<span class="nc" id="L1550">            this.isFloat = cm.isFloat;</span>
+<span class="nc" id="L1551">            this.isDouble = cm.isDouble;</span>
+<span class="nc" id="L1552">            this.isDate = cm.isDate;</span>
+<span class="nc" id="L1553">            this.isDateTime = cm.isDateTime;</span>
+<span class="nc" id="L1554">            this.vars = cm.vars;</span>
+<span class="nc" id="L1555">            this.allVars = cm.allVars;</span>
+<span class="nc" id="L1556">            this.requiredVars = cm.requiredVars;</span>
+<span class="nc" id="L1557">            this.optionalVars = cm.optionalVars;</span>
+<span class="nc" id="L1558">            this.hasReadOnly = cm.hasReadOnly;</span>
+<span class="nc" id="L1559">            this.readOnlyVars = cm.readOnlyVars;</span>
+<span class="nc" id="L1560">            this.readWriteVars = cm.readWriteVars;</span>
+<span class="nc" id="L1561">            this.parentVars = cm.parentVars;</span>
+<span class="nc" id="L1562">            this.allowableValues = cm.allowableValues;</span>
+<span class="nc" id="L1563">            this.mandatory = cm.mandatory;</span>
+<span class="nc" id="L1564">            this.allMandatory = cm.allMandatory;</span>
+<span class="nc" id="L1565">            this.imports = cm.imports;</span>
+<span class="nc" id="L1566">            this.hasVars = cm.hasVars;</span>
+<span class="nc" id="L1567">            this.emptyVars = cm.emptyVars;</span>
+<span class="nc" id="L1568">            this.hasMoreModels = cm.hasMoreModels;</span>
+<span class="nc" id="L1569">            this.hasEnums = cm.hasEnums;</span>
+<span class="nc" id="L1570">            this.isEnum = cm.isEnum;</span>
+<span class="nc" id="L1571">            this.isNullable = cm.isNullable;</span>
+<span class="nc" id="L1572">            this.hasRequired = cm.hasRequired;</span>
+<span class="nc" id="L1573">            this.hasOptional = cm.hasOptional;</span>
+<span class="nc" id="L1574">            this.isArray = cm.isArray;</span>
+<span class="nc" id="L1575">            this.hasChildren = cm.hasChildren;</span>
+<span class="nc" id="L1576">            this.isMap = cm.isMap;</span>
+<span class="nc" id="L1577">            this.isDeprecated = cm.isDeprecated;</span>
+<span class="nc" id="L1578">            this.hasOnlyReadOnly = cm.hasOnlyReadOnly;</span>
+<span class="nc" id="L1579">            this.externalDocumentation = cm.externalDocumentation;</span>
+
+<span class="nc" id="L1581">            this.vendorExtensions = cm.vendorExtensions;</span>
+<span class="nc" id="L1582">            this.additionalPropertiesType = cm.additionalPropertiesType;</span>
+<span class="nc" id="L1583">            this.isAdditionalPropertiesTrue = cm.isAdditionalPropertiesTrue;</span>
+<span class="nc" id="L1584">            this.setMaxProperties(cm.getMaxProperties());</span>
+<span class="nc" id="L1585">            this.setMinProperties(cm.getMinProperties());</span>
+<span class="nc" id="L1586">            this.setUniqueItems(cm.getUniqueItems());</span>
+<span class="nc" id="L1587">            this.setMaxItems(cm.getMaxItems());</span>
+<span class="nc" id="L1588">            this.setMinItems(cm.getMinItems());</span>
+<span class="nc" id="L1589">            this.setMaxLength(cm.getMaxLength());</span>
+<span class="nc" id="L1590">            this.setMinLength(cm.getMinLength());</span>
+<span class="nc" id="L1591">            this.setExclusiveMinimum(cm.getExclusiveMinimum());</span>
+<span class="nc" id="L1592">            this.setExclusiveMaximum(cm.getExclusiveMaximum());</span>
+<span class="nc" id="L1593">            this.setMinimum(cm.getMinimum());</span>
+<span class="nc" id="L1594">            this.setMaximum(cm.getMaximum());</span>
+<span class="nc" id="L1595">            this.setPattern(cm.getPattern());</span>
+<span class="nc" id="L1596">            this.setMultipleOf(cm.getMultipleOf());</span>
+<span class="nc" id="L1597">            this.setItems(cm.getItems());</span>
+<span class="nc" id="L1598">            this.setAdditionalProperties(cm.getAdditionalProperties());</span>
+<span class="nc" id="L1599">            this.setIsModel(cm.getIsModel());</span>
+<span class="nc" id="L1600">        }</span>
+
+        public Set&lt;String&gt; getModelImports() {
+<span class="nc" id="L1603">            return modelImports;</span>
+        }
+
+        public void setModelImports(Set&lt;String&gt; modelImports) {
+<span class="nc" id="L1607">            this.modelImports = modelImports;</span>
+<span class="nc" id="L1608">        }</span>
+
+        @Override
+        public boolean equals(Object o) {
+<span class="nc bnc" id="L1612" title="All 2 branches missed.">            if (o == null)</span>
+<span class="nc" id="L1613">                return false;</span>
+
+<span class="nc bnc" id="L1615" title="All 2 branches missed.">            if (this.getClass() != o.getClass())</span>
+<span class="nc" id="L1616">                return false;</span>
+
+<span class="nc" id="L1618">            boolean result = super.equals(o);</span>
+<span class="nc" id="L1619">            ExtendedCodegenModel that = (ExtendedCodegenModel) o;</span>
+<span class="nc bnc" id="L1620" title="All 6 branches missed.">            return result &amp;&amp;</span>
+                    isEntity == that.isEntity &amp;&amp;
+                    hasReturnPassthroughVoid == that.hasReturnPassthroughVoid &amp;&amp;
+<span class="nc bnc" id="L1623" title="All 2 branches missed.">                    Objects.equals(returnPassthrough, that.returnPassthrough) &amp;&amp;</span>
+<span class="nc bnc" id="L1624" title="All 2 branches missed.">                    Objects.equals(modelImports, that.modelImports);</span>
+
+        }
+
+        @Override
+        public int hashCode() {
+<span class="nc" id="L1630">            int superHash = super.hashCode();</span>
+<span class="nc" id="L1631">            return Objects.hash(superHash, isEntity, returnPassthrough, hasReturnPassthroughVoid, getModelImports());</span>
+        }
+
+        @Override
+        public String toString() {
+<span class="nc" id="L1636">            String superString = super.toString();</span>
+<span class="nc" id="L1637">            final StringBuilder sb = new StringBuilder(superString);</span>
+<span class="nc" id="L1638">            sb.append(&quot;, modelImports=&quot;).append(modelImports);</span>
+<span class="nc" id="L1639">            sb.append(&quot;, isEntity=&quot;).append(isEntity);</span>
+<span class="nc" id="L1640">            sb.append(&quot;, returnPassthrough='&quot;).append(returnPassthrough).append('\'');</span>
+<span class="nc" id="L1641">            sb.append(&quot;, hasReturnPassthroughVoid=&quot;).append(hasReturnPassthroughVoid);</span>
+<span class="nc" id="L1642">            return sb.toString();</span>
+        }
+
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

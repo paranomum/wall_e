@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OneOfImplementorAdditionalData.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.utils</a> &gt; <span class="el_source">OneOfImplementorAdditionalData.java</span></div><h1>OneOfImplementorAdditionalData.java</h1><pre class="source lang-java linenums">package org.openapitools.codegen.utils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.openapitools.codegen.CodegenConfig;
+import org.openapitools.codegen.CodegenModel;
+import org.openapitools.codegen.CodegenProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * This class holds data to add to `oneOf` members. Let's consider this example:
+ *
+ * Foo:
+ *   properties:
+ *     x:
+ *       oneOf:
+ *         - $ref: &quot;#/components/schemas/One
+ *         - $ref: &quot;#/components/schemas/Two
+ *     y:
+ *       type: string
+ * One:
+ *   properties:
+ *     z:
+ *       type: string
+ * Two:
+ *   properties:
+ *     a:
+ *       type: string
+ *
+ * In codegens that use this mechanism, `Foo` will become an interface and `One` will
+ * become its implementing class. This class carries all data necessary to properly modify
+ * the implementing class model. Specifically:
+ *
+ * * Interfaces that the implementing classes have to implement (in the example above, `One` and `Two` will implement `Foo`)
+ * * Properties that need to be added to implementing classes (as `Foo` is interface, the `y` property will get pushed
+ *   to implementing classes `One` and `Two`)
+ * * Imports that need to be added to implementing classes (e.g. if type of property `y` needs a specific import, it
+ *   needs to be added to `One` and `Two` because of the above point)
+ */
+public class OneOfImplementorAdditionalData {
+    private String implementorName;
+<span class="nc" id="L47">    private List&lt;String&gt; additionalInterfaces = new ArrayList&lt;String&gt;();</span>
+<span class="nc" id="L48">    private List&lt;CodegenProperty&gt; additionalProps = new ArrayList&lt;CodegenProperty&gt;();</span>
+<span class="nc" id="L49">    private List&lt;Map&lt;String, String&gt;&gt; additionalImports = new ArrayList&lt;Map&lt;String, String&gt;&gt;();</span>
+<span class="nc" id="L50">    private final Logger LOGGER = LoggerFactory.getLogger(OneOfImplementorAdditionalData.class);</span>
+
+<span class="nc" id="L52">    public OneOfImplementorAdditionalData(String implementorName) {</span>
+<span class="nc" id="L53">        this.implementorName = implementorName;</span>
+<span class="nc" id="L54">    }</span>
+
+    public String getImplementorName() {
+<span class="nc" id="L57">        return implementorName;</span>
+    }
+
+    /**
+     * Add data from a given CodegenModel that the oneOf implementor should implement. For example:
+     *
+     * @param cm model that the implementor should implement
+     * @param modelsImports imports of the given `cm`
+     */
+    public void addFromInterfaceModel(CodegenModel cm, List&lt;Map&lt;String, String&gt;&gt; modelsImports) {
+        // Add cm as implemented interface
+<span class="nc" id="L68">        additionalInterfaces.add(cm.classname);</span>
+
+        // Add all vars defined on cm
+        // a &quot;oneOf&quot; model (cm) by default inherits all properties from its &quot;interfaceModels&quot;,
+        // but we only want to add properties defined on cm itself
+<span class="nc" id="L73">        List&lt;CodegenProperty&gt; toAdd = new ArrayList&lt;&gt;(cm.vars);</span>
+
+        // note that we can't just toAdd.removeAll(m.vars) for every interfaceModel,
+        // as they might have different value of `hasMore` and thus are not equal
+<span class="nc" id="L77">        Set&lt;String&gt; omitAdding = new HashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">        if (cm.interfaceModels != null) {</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">            for (CodegenModel m : cm.interfaceModels) {</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">                for (CodegenProperty v : m.vars) {</span>
+<span class="nc" id="L81">                    omitAdding.add(v.baseName);</span>
+<span class="nc" id="L82">                }</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">                for (CodegenProperty v : m.allVars) {</span>
+<span class="nc" id="L84">                    omitAdding.add(v.baseName);</span>
+<span class="nc" id="L85">                }</span>
+<span class="nc" id="L86">            }</span>
+        }
+<span class="nc bnc" id="L88" title="All 2 branches missed.">        for (CodegenProperty v : toAdd) {</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">            if (!omitAdding.contains(v.baseName)) {</span>
+<span class="nc" id="L90">                additionalProps.add(v.clone());</span>
+            }
+<span class="nc" id="L92">        }</span>
+
+        // Add all imports of cm
+<span class="nc bnc" id="L95" title="All 2 branches missed.">        for (Map&lt;String, String&gt; importMap : modelsImports) {</span>
+            // we're ok with shallow clone here, because imports are strings only
+<span class="nc" id="L97">            additionalImports.add(new HashMap&lt;&gt;(importMap));</span>
+<span class="nc" id="L98">        }</span>
+<span class="nc" id="L99">    }</span>
+
+    /**
+     * Adds stored data to given implementing model
+     *
+     * @param cc CodegenConfig running this operation
+     * @param implcm the implementing model
+     * @param implImports imports of the implementing model
+     * @param addInterfaceImports whether or not to add the interface model as import (will vary by language)
+     */
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public void addToImplementor(CodegenConfig cc, CodegenModel implcm, List&lt;Map&lt;String, String&gt;&gt; implImports, boolean addInterfaceImports) {
+<span class="nc" id="L111">        implcm.getVendorExtensions().putIfAbsent(&quot;x-implements&quot;, new ArrayList&lt;String&gt;());</span>
+
+        // Add implemented interfaces
+<span class="nc bnc" id="L114" title="All 2 branches missed.">        for (String intf : additionalInterfaces) {</span>
+<span class="nc" id="L115">            List&lt;String&gt; impl = (List&lt;String&gt;) implcm.getVendorExtensions().get(&quot;x-implements&quot;);</span>
+<span class="nc" id="L116">            impl.add(intf);</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">            if (addInterfaceImports) {</span>
+                // Add imports for interfaces
+<span class="nc" id="L119">                implcm.imports.add(intf);</span>
+<span class="nc" id="L120">                Map&lt;String, String&gt; importsItem = new HashMap&lt;String, String&gt;();</span>
+<span class="nc" id="L121">                importsItem.put(&quot;import&quot;, cc.toModelImport(intf));</span>
+<span class="nc" id="L122">                implImports.add(importsItem);</span>
+            }
+<span class="nc" id="L124">        }</span>
+
+        // Add oneOf-containing models properties - we need to properly set the hasMore values to make rendering correct
+<span class="nc" id="L127">        implcm.vars.addAll(additionalProps);</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">        implcm.hasVars = ! implcm.vars.isEmpty();</span>
+
+        // Add imports
+<span class="nc bnc" id="L131" title="All 2 branches missed.">        for (Map&lt;String, String&gt; oneImport : additionalImports) {</span>
+            // exclude imports from this package - these are imports that only the oneOf interface needs
+<span class="nc bnc" id="L133" title="All 4 branches missed.">            if (!implImports.contains(oneImport) &amp;&amp; !oneImport.getOrDefault(&quot;import&quot;, &quot;&quot;).startsWith(cc.modelPackage())) {</span>
+<span class="nc" id="L134">                implImports.add(oneImport);</span>
+            }
+<span class="nc" id="L136">        }</span>
+<span class="nc" id="L137">    }</span>
+
+    @Override
+    public String toString() {
+<span class="nc" id="L141">        return &quot;OneOfImplementorAdditionalData{&quot; +</span>
+                &quot;implementorName='&quot; + implementorName + '\'' +
+                &quot;, additionalInterfaces=&quot; + additionalInterfaces +
+                &quot;, additionalProps=&quot; + additionalProps +
+                &quot;, additionalImports=&quot; + additionalImports +
+                '}';
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

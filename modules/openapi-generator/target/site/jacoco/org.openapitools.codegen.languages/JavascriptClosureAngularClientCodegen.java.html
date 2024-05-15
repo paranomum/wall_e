@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JavascriptClosureAngularClientCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">JavascriptClosureAngularClientCodegen.java</span></div><h1>JavascriptClosureAngularClientCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Schema;
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.utils.ModelUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.*;
+
+import static org.openapitools.codegen.utils.CamelizeOption.LOWERCASE_FIRST_LETTER;
+import static org.openapitools.codegen.utils.StringUtils.camelize;
+
+public class JavascriptClosureAngularClientCodegen extends DefaultCodegen implements CodegenConfig {
+<span class="fc" id="L39">    private final Logger LOGGER = LoggerFactory.getLogger(JavascriptClosureAngularClientCodegen.class);</span>
+
+    public static final String USE_ES6 = &quot;useEs6&quot;;
+
+    protected boolean useEs6;
+
+    public JavascriptClosureAngularClientCodegen() {
+<span class="fc" id="L46">        super();</span>
+<span class="fc" id="L47">        outputFolder = &quot;generated-code/javascript-closure-angular&quot;;</span>
+
+        // default HIDE_GENERATION_TIMESTAMP to true
+<span class="fc" id="L50">        hideGenerationTimestamp = Boolean.TRUE;</span>
+
+<span class="fc" id="L52">        supportsInheritance = false;</span>
+<span class="fc" id="L53">        setReservedWordsLowerCase(Arrays.asList(&quot;abstract&quot;,</span>
+            &quot;continue&quot;, &quot;for&quot;, &quot;new&quot;, &quot;switch&quot;, &quot;assert&quot;, &quot;default&quot;, &quot;if&quot;,
+            &quot;package&quot;, &quot;synchronized&quot;, &quot;do&quot;, &quot;goto&quot;, &quot;private&quot;,
+            &quot;this&quot;, &quot;break&quot;, &quot;double&quot;, &quot;implements&quot;, &quot;protected&quot;, &quot;throw&quot;,
+            &quot;byte&quot;, &quot;else&quot;, &quot;import&quot;, &quot;public&quot;, &quot;throws&quot;, &quot;case&quot;, &quot;enum&quot;,
+            &quot;instanceof&quot;, &quot;return&quot;, &quot;transient&quot;, &quot;catch&quot;, &quot;extends&quot;, &quot;int&quot;,
+            &quot;short&quot;, &quot;try&quot;, &quot;char&quot;, &quot;final&quot;, &quot;interface&quot;, &quot;static&quot;, &quot;void&quot;,
+            &quot;class&quot;, &quot;finally&quot;, &quot;const&quot;, &quot;super&quot;, &quot;while&quot;));
+
+<span class="fc" id="L62">        languageSpecificPrimitives = new HashSet&lt;&gt;(Arrays.asList(</span>
+                &quot;string&quot;,
+                &quot;boolean&quot;,
+                &quot;number&quot;,
+                &quot;Object&quot;,
+                &quot;Blob&quot;,
+                &quot;Date&quot;));
+<span class="fc" id="L69">        instantiationTypes.put(&quot;array&quot;, &quot;Array&quot;);</span>
+
+<span class="fc" id="L71">        typeMapping = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L72">        typeMapping.put(&quot;Array&quot;, &quot;Array&quot;);</span>
+<span class="fc" id="L73">        typeMapping.put(&quot;array&quot;, &quot;Array&quot;);</span>
+<span class="fc" id="L74">        typeMapping.put(&quot;List&quot;, &quot;Array&quot;);</span>
+<span class="fc" id="L75">        typeMapping.put(&quot;boolean&quot;, &quot;boolean&quot;);</span>
+<span class="fc" id="L76">        typeMapping.put(&quot;string&quot;, &quot;string&quot;);</span>
+<span class="fc" id="L77">        typeMapping.put(&quot;int&quot;, &quot;number&quot;);</span>
+<span class="fc" id="L78">        typeMapping.put(&quot;float&quot;, &quot;number&quot;);</span>
+<span class="fc" id="L79">        typeMapping.put(&quot;number&quot;, &quot;number&quot;);</span>
+<span class="fc" id="L80">        typeMapping.put(&quot;long&quot;, &quot;number&quot;);</span>
+<span class="fc" id="L81">        typeMapping.put(&quot;short&quot;, &quot;number&quot;);</span>
+<span class="fc" id="L82">        typeMapping.put(&quot;char&quot;, &quot;string&quot;);</span>
+<span class="fc" id="L83">        typeMapping.put(&quot;double&quot;, &quot;number&quot;);</span>
+<span class="fc" id="L84">        typeMapping.put(&quot;object&quot;, &quot;Object&quot;);</span>
+<span class="fc" id="L85">        typeMapping.put(&quot;Object&quot;, &quot;Object&quot;);</span>
+<span class="fc" id="L86">        typeMapping.put(&quot;File&quot;, &quot;Blob&quot;);</span>
+<span class="fc" id="L87">        typeMapping.put(&quot;file&quot;, &quot;Blob&quot;);</span>
+<span class="fc" id="L88">        typeMapping.put(&quot;integer&quot;, &quot;number&quot;);</span>
+<span class="fc" id="L89">        typeMapping.put(&quot;Map&quot;, &quot;Object&quot;);</span>
+<span class="fc" id="L90">        typeMapping.put(&quot;map&quot;, &quot;Object&quot;);</span>
+<span class="fc" id="L91">        typeMapping.put(&quot;DateTime&quot;, &quot;Date&quot;);</span>
+
+<span class="fc" id="L93">        importMapping = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L94">        defaultIncludes = new HashSet&lt;&gt;(Arrays.asList(</span>
+                &quot;Object&quot;,
+                &quot;Array&quot;,
+                &quot;Blob&quot;
+        ));
+
+<span class="fc" id="L100">        typeMapping.put(&quot;binary&quot;, &quot;string&quot;);</span>
+
+<span class="fc" id="L102">        cliOptions.add(new CliOption(CodegenConstants.HIDE_GENERATION_TIMESTAMP, CodegenConstants.HIDE_GENERATION_TIMESTAMP_DESC)</span>
+<span class="fc" id="L103">                .defaultValue(Boolean.TRUE.toString()));</span>
+<span class="fc" id="L104">        cliOptions.add(new CliOption(USE_ES6,</span>
+                &quot;use ES6 templates&quot;)
+<span class="fc" id="L106">                .defaultValue(Boolean.FALSE.toString()));</span>
+<span class="fc" id="L107">    }</span>
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L111">        super.processOpts();</span>
+
+<span class="nc bnc" id="L113" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_ES6)) {</span>
+<span class="nc" id="L114">            setUseEs6(convertPropertyToBooleanAndWriteBack(USE_ES6));</span>
+        }
+<span class="nc" id="L116">    }</span>
+
+    @Override
+    public void preprocessOpenAPI(OpenAPI openAPI) {
+<span class="nc" id="L120">        super.preprocessOpenAPI(openAPI);</span>
+
+<span class="nc bnc" id="L122" title="All 2 branches missed.">        if (useEs6) {</span>
+<span class="nc" id="L123">            embeddedTemplateDir = templateDir = &quot;Javascript-Closure-Angular/es6&quot;;</span>
+<span class="nc" id="L124">            apiPackage = &quot;resources&quot;;</span>
+<span class="nc" id="L125">            apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.js&quot;);</span>
+<span class="nc" id="L126">            supportingFiles.add(new SupportingFile(&quot;module.mustache&quot;, &quot;&quot;, &quot;module.js&quot;));</span>
+        } else {
+<span class="nc" id="L128">            modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.js&quot;);</span>
+<span class="nc" id="L129">            apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.js&quot;);</span>
+<span class="nc" id="L130">            embeddedTemplateDir = templateDir = &quot;Javascript-Closure-Angular&quot;;</span>
+<span class="nc" id="L131">            apiPackage = &quot;API.Client&quot;;</span>
+<span class="nc" id="L132">            modelPackage = &quot;API.Client&quot;;</span>
+        }
+<span class="nc" id="L134">    }</span>
+
+    @Override
+    public String getName() {
+<span class="fc" id="L138">        return &quot;javascript-closure-angular&quot;;</span>
+    }
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L143">        return &quot;Generates a Javascript AngularJS client library (beta) annotated with Google Closure Compiler annotations&quot; +</span>
+            &quot;(https://developers.google.com/closure/compiler/docs/js-for-compiler?hl=en)&quot;;
+    }
+
+    @Override
+    public CodegenType getTag() {
+<span class="fc" id="L149">        return CodegenType.CLIENT;</span>
+    }
+
+    @Override
+    public String escapeReservedWord(String name) {
+<span class="nc bnc" id="L154" title="All 2 branches missed.">        if(this.reservedWordsMappings().containsKey(name)) {</span>
+<span class="nc" id="L155">            return this.reservedWordsMappings().get(name);</span>
+        }
+<span class="nc" id="L157">        return &quot;_&quot; + name;</span>
+    }
+
+    @Override
+    public String apiFileFolder() {
+<span class="nc" id="L162">        return outputFolder + File.separator + apiPackage().replace('.', File.separatorChar);</span>
+    }
+
+    public String modelFileFolder() {
+<span class="nc" id="L166">        return outputFolder + File.separator + modelPackage().replace('.', File.separatorChar);</span>
+    }
+
+    @Override
+    public String toVarName(String name) {
+        // sanitize name
+<span class="nc" id="L172">        name = sanitizeName(name);</span>
+
+        // replace - with _ e.g. created-at =&gt; created_at
+<span class="nc" id="L175">        name = name.replaceAll(&quot;-&quot;, &quot;_&quot;);</span>
+
+        // if it's all upper case, do nothing
+<span class="nc bnc" id="L178" title="All 2 branches missed.">        if (name.matches(&quot;^[A-Z_]*$&quot;))</span>
+<span class="nc" id="L179">            return name;</span>
+
+        // camelize the variable name
+        // pet_id =&gt; PetId
+<span class="nc" id="L183">        name = camelize(name, LOWERCASE_FIRST_LETTER);</span>
+
+        // for reserved word or word starting with number, append _
+<span class="nc bnc" id="L186" title="All 4 branches missed.">        if (isReservedWord(name) || name.matches(&quot;^\\d.*&quot;))</span>
+<span class="nc" id="L187">            name = escapeReservedWord(name);</span>
+
+<span class="nc" id="L189">        return name;</span>
+    }
+
+    @Override
+    public String toParamName(String name) {
+        // should be the same as variable name
+<span class="nc" id="L195">        return toVarName(name);</span>
+    }
+
+    @Override
+    public String toModelName(String name) {
+<span class="nc bnc" id="L200" title="All 2 branches missed.">        if (!StringUtils.isEmpty(modelNamePrefix)) {</span>
+<span class="nc" id="L201">            name = modelNamePrefix + &quot;_&quot; + name;</span>
+        }
+
+<span class="nc bnc" id="L204" title="All 2 branches missed.">        if (!StringUtils.isEmpty(modelNameSuffix)) {</span>
+<span class="nc" id="L205">            name = name + &quot;_&quot; + modelNameSuffix;</span>
+        }
+
+        // model name cannot use reserved keyword, e.g. return
+<span class="nc bnc" id="L209" title="All 2 branches missed.">        if (isReservedWord(name)) {</span>
+<span class="nc" id="L210">            LOGGER.warn(&quot;{} (reserved word) cannot be used as model name. Renamed to {}&quot;, name, camelize(&quot;model_&quot; + name));</span>
+<span class="nc" id="L211">            name = &quot;model_&quot; + name; // e.g. return =&gt; ModelReturn (after camelize)</span>
+        }
+
+        // camelize the model name
+        // phone_number =&gt; PhoneNumber
+<span class="nc" id="L216">        return camelize(name);</span>
+    }
+
+    @Override
+    public String toModelFilename(String name) {
+        // should be the same as the model name
+<span class="nc" id="L222">        return toModelName(name);</span>
+    }
+
+    @Override
+    public String getTypeDeclaration(Schema p) {
+<span class="nc bnc" id="L227" title="All 2 branches missed.">        if (ModelUtils.isArraySchema(p)) {</span>
+<span class="nc" id="L228">            Schema inner = ModelUtils.getSchemaItems(p);</span>
+<span class="nc" id="L229">            return getSchemaType(p) + &quot;&lt;!&quot; + getTypeDeclaration(inner) + &quot;&gt;&quot;;</span>
+<span class="nc bnc" id="L230" title="All 2 branches missed.">        } else if (ModelUtils.isMapSchema(p)) {</span>
+<span class="nc" id="L231">            Schema inner = ModelUtils.getAdditionalProperties(p);</span>
+<span class="nc" id="L232">            return &quot;Object&lt;!string, &quot;+ getTypeDeclaration(inner) + &quot;&gt;&quot;;</span>
+<span class="nc bnc" id="L233" title="All 2 branches missed.">        } else if (ModelUtils.isFileSchema(p)) {</span>
+<span class="nc" id="L234">            return &quot;Object&quot;;</span>
+        }
+<span class="nc" id="L236">        String type = super.getTypeDeclaration(p);</span>
+<span class="nc bnc" id="L237" title="All 2 branches missed.">        if (type.equals(&quot;boolean&quot;) ||</span>
+<span class="nc bnc" id="L238" title="All 2 branches missed.">                type.equals(&quot;Date&quot;) ||</span>
+<span class="nc bnc" id="L239" title="All 2 branches missed.">                type.equals(&quot;number&quot;) ||</span>
+<span class="nc bnc" id="L240" title="All 2 branches missed.">                type.equals(&quot;string&quot;)) {</span>
+<span class="nc" id="L241">            return type;</span>
+                }
+<span class="nc" id="L243">        return apiPackage + &quot;.&quot; + type;</span>
+    }
+
+    @Override
+    public String getSchemaType(Schema p) {
+<span class="nc" id="L248">        String schemaType = super.getSchemaType(p);</span>
+<span class="nc" id="L249">        String type = null;</span>
+<span class="nc bnc" id="L250" title="All 2 branches missed.">        if (typeMapping.containsKey(schemaType)) {</span>
+<span class="nc" id="L251">            type = typeMapping.get(schemaType);</span>
+<span class="nc bnc" id="L252" title="All 2 branches missed.">            if (languageSpecificPrimitives.contains(type)) {</span>
+<span class="nc" id="L253">                return type;</span>
+            }
+        } else
+<span class="nc" id="L256">            type = schemaType;</span>
+<span class="nc" id="L257">        return type;</span>
+    }
+
+    @Override
+    public ModelsMap postProcessModels(ModelsMap objs) {
+<span class="nc bnc" id="L262" title="All 2 branches missed.">        for (ModelMap mo : objs.getModels()) {</span>
+<span class="nc" id="L263">            CodegenModel cm = mo.getModel();</span>
+<span class="nc" id="L264">            cm.imports = new TreeSet&lt;&gt;(cm.imports);</span>
+<span class="nc bnc" id="L265" title="All 2 branches missed.">            for (CodegenProperty var : cm.vars) {</span>
+                // handle default value for enum, e.g. available =&gt; StatusEnum.available
+<span class="nc bnc" id="L267" title="All 6 branches missed.">                if (var.isEnum &amp;&amp; var.defaultValue != null &amp;&amp; !&quot;null&quot;.equals(var.defaultValue)) {</span>
+<span class="nc" id="L268">                    var.defaultValue = var.datatypeWithEnum + &quot;.&quot; + var.defaultValue;</span>
+                }
+<span class="nc" id="L270">            }</span>
+<span class="nc" id="L271">        }</span>
+<span class="nc" id="L272">        return objs;</span>
+    }
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L277">        List&lt;Map&lt;String, String&gt;&gt; imports = objs.getImports();</span>
+<span class="nc" id="L278">        imports.sort(Comparator.comparing(o -&gt; o.get(&quot;import&quot;)));</span>
+<span class="nc" id="L279">        objs.put(&quot;imports&quot;, imports);</span>
+<span class="nc" id="L280">        return objs;</span>
+    }
+
+    @Override
+    public String toOperationId(String operationId) {
+        // throw exception if method name is empty
+<span class="nc bnc" id="L286" title="All 2 branches missed.">        if (StringUtils.isEmpty(operationId)) {</span>
+<span class="nc" id="L287">            throw new RuntimeException(&quot;Empty method/operation name (operationId) not allowed&quot;);</span>
+        }
+
+<span class="nc" id="L290">        operationId = camelize(sanitizeName(operationId), LOWERCASE_FIRST_LETTER);</span>
+
+        // method name cannot use reserved keyword, e.g. return
+<span class="nc bnc" id="L293" title="All 2 branches missed.">        if (isReservedWord(operationId)) {</span>
+<span class="nc" id="L294">            String newOperationId = camelize(&quot;call_&quot; + operationId, LOWERCASE_FIRST_LETTER);</span>
+<span class="nc" id="L295">            LOGGER.warn(&quot;{} (reserved word) cannot be used as method name. Renamed to {}&quot;, operationId, newOperationId);</span>
+<span class="nc" id="L296">            return newOperationId;</span>
+        }
+
+<span class="nc" id="L299">        return operationId;</span>
+    }
+
+    @Override
+    public String escapeQuotationMark(String input) {
+        // remove ', &quot; to avoid code injection
+<span class="nc" id="L305">        return input.replace(&quot;\&quot;&quot;, &quot;&quot;).replace(&quot;'&quot;, &quot;&quot;);</span>
+    }
+
+    @Override
+    public String escapeUnsafeCharacters(String input) {
+<span class="nc" id="L310">        return input.replace(&quot;*/&quot;, &quot;*_/&quot;).replace(&quot;/*&quot;, &quot;/_*&quot;);</span>
+    }
+
+    public void setUseEs6(boolean useEs6) {
+<span class="nc" id="L314">        this.useEs6 = useEs6;</span>
+<span class="nc" id="L315">    }</span>
+
+    @Override
+<span class="nc" id="L318">    public GeneratorLanguage generatorLanguage() { return GeneratorLanguage.JAVASCRIPT; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

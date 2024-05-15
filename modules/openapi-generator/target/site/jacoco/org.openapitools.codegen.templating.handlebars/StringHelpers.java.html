@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StringHelpers.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.templating.handlebars</a> &gt; <span class="el_source">StringHelpers.java</span></div><h1>StringHelpers.java</h1><pre class="source lang-java linenums">package org.openapitools.codegen.templating.handlebars;
+
+import com.github.jknack.handlebars.Helper;
+import com.github.jknack.handlebars.Options;
+import com.github.jknack.handlebars.TagType;
+
+import java.io.IOException;
+import java.util.Locale;
+
+<span class="nc" id="L10">public enum StringHelpers implements Helper&lt;Object&gt; {</span>
+
+    /**
+     * Indicates whether the string starts with the given value.
+     * For example:
+     *
+     * &lt;pre&gt;
+     * {{startsWith a b [&quot;insensitive&quot;]}}
+     * &lt;/pre&gt;
+     *
+     * &lt;pre&gt;
+     * {{startsWith a text='b' [insensitive=true]}}
+     * &lt;/pre&gt;
+     *
+     * Render 'yes' or 'no':
+     * &lt;pre&gt;
+     *   {{#startsWith a b}}
+     *     yes
+     *   {{else}}
+     *     no
+     *   {{/startsWith}}
+     * &lt;/pre&gt;
+     *
+     * Render 'true' or 'false':
+     * &lt;pre&gt;
+     *   {{startsWith a b}}
+     * &lt;/pre&gt;
+     *
+     * Render 'y' or 'n':
+     * &lt;pre&gt;
+     *   {{startsWith a b yes='y' no='n'}}
+     * &lt;/pre&gt;
+     */
+<span class="nc" id="L43">    startsWith {</span>
+        @Override
+        public Object apply(Object value, Options options) throws IOException {
+<span class="nc" id="L46">            String match = options.param(0, options.hash(&quot;text&quot;, &quot;&quot;));</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">            if (match.length() &lt; 1) {</span>
+<span class="nc" id="L48">                return false;</span>
+            }
+
+<span class="nc" id="L51">            boolean caseInsensitive = options.hash(&quot;insensitive&quot;, false);</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">            boolean result = caseInsensitive ? value.toString().toLowerCase(Locale.ROOT).startsWith(match.toLowerCase(Locale.ROOT)) : value.toString().startsWith(match);</span>
+
+<span class="nc bnc" id="L54" title="All 2 branches missed.">            if (options.tagType == TagType.SECTION) {</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">                return result ? options.fn() : options.inverse();</span>
+            }
+
+<span class="nc bnc" id="L58" title="All 2 branches missed.">            return result</span>
+<span class="nc" id="L59">                    ? options.hash(&quot;yes&quot;, true)</span>
+<span class="nc" id="L60">                    : options.hash(&quot;no&quot;, false);</span>
+        }
+    },
+
+    /**
+     * Indicates whether the string ends with the given value.
+     * For example:
+     *
+     * &lt;pre&gt;
+     * {{endsWith a b [&quot;insensitive&quot;]}}
+     * &lt;/pre&gt;
+     *
+     * &lt;pre&gt;
+     * {{endsWith a text='b' [insensitive=true]}}
+     * &lt;/pre&gt;
+     *
+     * Render 'yes' or 'no':
+     * &lt;pre&gt;
+     *   {{#endsWith a b}}
+     *     yes
+     *   {{else}}
+     *     no
+     *   {{/endsWith}}
+     * &lt;/pre&gt;
+     *
+     * Render 'true' or 'false':
+     * &lt;pre&gt;
+     *   {{endsWith a b}}
+     * &lt;/pre&gt;
+     *
+     * Render 'y' or 'n':
+     * &lt;pre&gt;
+     *   {{endsWith a b yes='y' no='n'}}
+     * &lt;/pre&gt;
+     */
+<span class="nc" id="L95">    endsWith {</span>
+        @Override
+        public Object apply(Object value, Options options) throws IOException {
+<span class="nc" id="L98">            String match = options.param(0, options.hash(&quot;text&quot;, &quot;&quot;));</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">            if (match.length() &lt; 1) {</span>
+<span class="nc" id="L100">                return false;</span>
+            }
+
+<span class="nc" id="L103">            boolean caseInsensitive = options.hash(&quot;insensitive&quot;, false);</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">            boolean result = caseInsensitive</span>
+<span class="nc" id="L105">                    ? value.toString().toLowerCase(Locale.ROOT).endsWith(match.toLowerCase(Locale.ROOT))</span>
+<span class="nc" id="L106">                    : value.toString().endsWith(match);</span>
+
+<span class="nc bnc" id="L108" title="All 2 branches missed.">            if (options.tagType == TagType.SECTION) {</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">                return result ? options.fn() : options.inverse();</span>
+            }
+
+<span class="nc bnc" id="L112" title="All 2 branches missed.">            return result</span>
+<span class="nc" id="L113">                    ? options.hash(&quot;yes&quot;, true)</span>
+<span class="nc" id="L114">                    : options.hash(&quot;no&quot;, false);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

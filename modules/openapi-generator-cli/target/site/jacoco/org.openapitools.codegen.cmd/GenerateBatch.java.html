@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GenerateBatch.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (executable)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.cmd</a> &gt; <span class="el_source">GenerateBatch.java</span></div><h1>GenerateBatch.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2019 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.cmd;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.TreeNode;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
+import com.fasterxml.jackson.databind.deser.std.DelegatingDeserializer;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.util.TokenBuffer;
+
+import io.airlift.airline.Arguments;
+import io.airlift.airline.Command;
+import io.airlift.airline.Option;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.ClientOptInput;
+import org.openapitools.codegen.CodegenConfig;
+import org.openapitools.codegen.DefaultGenerator;
+import org.openapitools.codegen.config.CodegenConfigurator;
+import org.openapitools.codegen.config.DynamicSettings;
+import org.openapitools.codegen.config.GlobalSettings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+@SuppressWarnings({&quot;unused&quot;, &quot;MismatchedQueryAndUpdateOfCollection&quot;, &quot;java:S106&quot;})
+@Command(name = &quot;batch&quot;, description = &quot;Generate code in batch via external configs.&quot;)
+<span class="nc" id="L65">public class GenerateBatch extends OpenApiGeneratorCommand {</span>
+<span class="fc" id="L66">    private static AtomicInteger failures = new AtomicInteger(0);</span>
+<span class="fc" id="L67">    private static AtomicInteger successes = new AtomicInteger(0);</span>
+<span class="nc" id="L68">    private final Logger LOGGER = LoggerFactory.getLogger(GenerateBatch.class);</span>
+
+    @Option(name = {&quot;-v&quot;, &quot;--verbose&quot;}, description = &quot;verbose mode&quot;)
+    private Boolean verbose;
+
+    @Option(name = {&quot;-r&quot;, &quot;--threads&quot;}, description = &quot;thread count&quot;)
+    private Integer threads;
+
+    @Arguments(description = &quot;Generator configuration files.&quot;, required = true)
+    private List&lt;String&gt; configs;
+
+    @Option(name = {&quot;--fail-fast&quot;}, description = &quot;fail fast on any errors&quot;)
+    private Boolean failFast;
+
+    @Option(name = {&quot;--clean&quot;}, description = &quot;clean output of previously written files before generation&quot;)
+    private Boolean clean;
+
+    @Option(name = {&quot;--timeout&quot;}, description = &quot;execution timeout (minutes)&quot;)
+    private Integer timeout;
+
+    @Option(name = {&quot;--includes-base-dir&quot;}, description = &quot;base directory used for includes&quot;)
+    private String includes;
+
+    @Option(name = {&quot;--root-dir&quot;}, description = &quot;root directory used output/includes (includes can be overridden)&quot;)
+    private String root;
+
+    /**
+     * When an object implementing interface &lt;code&gt;Runnable&lt;/code&gt; is used
+     * to create a thread, starting the thread causes the object's
+     * &lt;code&gt;run&lt;/code&gt; method to be called in that separately executing
+     * thread.
+     * &lt;p&gt;
+     * The general contract of the method &lt;code&gt;run&lt;/code&gt; is that it may
+     * take any action whatsoever.
+     *
+     * @see Thread#run()
+     */
+    @Override
+    public void execute() {
+<span class="nc bnc" id="L107" title="All 2 branches missed.">        if (configs.size() &lt; 1) {</span>
+<span class="nc" id="L108">            LOGGER.error(&quot;No configuration file inputs specified&quot;);</span>
+<span class="nc" id="L109">            System.exit(1);</span>
+        }
+
+<span class="nc" id="L112">        int cores = Runtime.getRuntime().availableProcessors();</span>
+<span class="nc" id="L113">        int numThreads = 2 * cores;</span>
+<span class="nc bnc" id="L114" title="All 6 branches missed.">        if (null != threads &amp;&amp; (threads &gt; 0 &amp;&amp; threads &lt; Thread.activeCount())) {</span>
+<span class="nc" id="L115">            numThreads = threads;</span>
+        }
+
+        Path rootDir;
+<span class="nc bnc" id="L119" title="All 2 branches missed.">        if (root != null) {</span>
+<span class="nc" id="L120">            rootDir = Paths.get(root);</span>
+        } else {
+<span class="nc" id="L122">            rootDir = Paths.get(System.getProperty(&quot;user.dir&quot;));</span>
+        }
+
+        // This allows us to put meta-configs in a different file from referenced configs.
+        // If not specified, we'll assume it's the parent directory of the first file.
+        File includesDir;
+<span class="nc bnc" id="L128" title="All 2 branches missed.">        if (includes != null) {</span>
+<span class="nc" id="L129">            includesDir = new File(includes);</span>
+        } else {
+<span class="nc" id="L131">            Path first = Paths.get(configs.get(0));</span>
+<span class="nc bnc" id="L132" title="All 4 branches missed.">            if (Files.isRegularFile(first) &amp;&amp; !Files.isSymbolicLink(first)) {</span>
+<span class="nc" id="L133">                includesDir = first.toAbsolutePath().getParent().toFile();</span>
+            } else {
+                // Not traversing symbolic links for includes. Falling back to rooted working directory.
+<span class="nc" id="L136">                includesDir = rootDir.toFile();</span>
+            }
+        }
+
+<span class="nc" id="L140">        LOGGER.info(String.format(Locale.ROOT, &quot;Batch generation using up to %d threads.\nIncludes: %s\nRoot: %s&quot;, numThreads, includesDir.getAbsolutePath(), rootDir.toAbsolutePath().toString()));</span>
+
+        // Create a module which loads our config files, but supports a special &quot;!include&quot; key which can point to an existing config file.
+        // This allows us to create a sort of meta-config which holds configs which are otherwise required at CLI time (via generate task).
+        // That is, this allows us to create a wrapper config for generatorName, inputSpec, outputDir, etc.
+<span class="nc" id="L145">        SimpleModule module = getCustomDeserializationModel(includesDir);</span>
+<span class="nc" id="L146">        List&lt;CodegenConfigurator&gt; configurators = configs.stream().map(config -&gt; CodegenConfigurator.fromFile(config, module)).collect(Collectors.toList());</span>
+
+        // it doesn't make sense to interleave INFO level logs, so limit these to only ERROR.
+<span class="nc" id="L149">        LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();</span>
+<span class="nc" id="L150">        Stream.of(Logger.ROOT_LOGGER_NAME, &quot;io.swagger&quot;, &quot;org.openapitools&quot;)</span>
+<span class="nc" id="L151">                .map(lc::getLogger)</span>
+<span class="nc" id="L152">                .forEach(logger -&gt; logger.setLevel(Level.ERROR));</span>
+
+<span class="nc" id="L154">        ExecutorService executor = Executors.newFixedThreadPool(numThreads);</span>
+
+        // Execute each configurator on a separate pooled thread.
+<span class="nc" id="L157">        configurators.forEach(configurator -&gt; {</span>
+<span class="nc" id="L158">            GenerationRunner runner = new GenerationRunner(configurator, rootDir, Boolean.TRUE.equals(failFast), Boolean.TRUE.equals(clean));</span>
+<span class="nc" id="L159">            executor.execute(runner);</span>
+<span class="nc" id="L160">        });</span>
+
+<span class="nc" id="L162">        executor.shutdown();</span>
+
+        try {
+            // Allow the batch job to terminate, never running for more than 30 minutes (defaulted to max 10 minutes)
+<span class="nc bnc" id="L166" title="All 2 branches missed.">            if (timeout == null) timeout = 10;</span>
+<span class="nc" id="L167">            int awaitFor = Math.min(Math.max(timeout, 1), 30);</span>
+
+<span class="nc" id="L169">            executor.awaitTermination(awaitFor, TimeUnit.MINUTES);</span>
+
+<span class="nc" id="L171">            int failCount = failures.intValue();</span>
+<span class="nc bnc" id="L172" title="All 2 branches missed.">            if (failCount &gt; 0) {</span>
+<span class="nc" id="L173">                System.err.println(String.format(Locale.ROOT, &quot;[FAIL] Completed with %d failures, %d successes&quot;, failCount, successes.intValue()));</span>
+<span class="nc" id="L174">                System.exit(1);</span>
+            } else {
+<span class="nc" id="L176">                System.out.println(String.format(Locale.ROOT, &quot;[SUCCESS] Batch generation finished %d generators successfully.&quot;, successes.intValue()));</span>
+            }
+<span class="nc" id="L178">        } catch (InterruptedException e) {</span>
+<span class="nc" id="L179">            e.printStackTrace();</span>
+            // re-interrupt
+<span class="nc" id="L181">            Thread.currentThread().interrupt();</span>
+<span class="nc" id="L182">        }</span>
+<span class="nc" id="L183">    }</span>
+
+    private static class GenerationRunner implements Runnable {
+        private final CodegenConfigurator configurator;
+        private final Path rootDir;
+        private final boolean exitOnError;
+        private final boolean clean;
+
+<span class="nc" id="L191">        private GenerationRunner(CodegenConfigurator configurator, Path rootDir, boolean failFast, boolean clean) {</span>
+<span class="nc" id="L192">            this.configurator = configurator;</span>
+<span class="nc" id="L193">            this.rootDir = rootDir;</span>
+<span class="nc" id="L194">            this.exitOnError = failFast;</span>
+<span class="nc" id="L195">            this.clean = clean;</span>
+<span class="nc" id="L196">        }</span>
+
+        /**
+         * When an object implementing interface &lt;code&gt;Runnable&lt;/code&gt; is used
+         * to create a thread, starting the thread causes the object's
+         * &lt;code&gt;run&lt;/code&gt; method to be called in that separately executing
+         * thread.
+         * &lt;p&gt;
+         * The general contract of the method &lt;code&gt;run&lt;/code&gt; is that it may
+         * take any action whatsoever.
+         *
+         * @see Thread#run()
+         */
+        @Override
+        public void run() {
+<span class="nc" id="L211">            String name = null;</span>
+            try {
+<span class="nc" id="L213">                GlobalSettings.reset();</span>
+
+<span class="nc" id="L215">                ClientOptInput opts = configurator.toClientOptInput();</span>
+<span class="nc" id="L216">                CodegenConfig config = opts.getConfig();</span>
+<span class="nc" id="L217">                name = config.getName();</span>
+                
+<span class="nc" id="L219">                Path target = Paths.get(config.getOutputDir());</span>
+<span class="nc" id="L220">                Path updated = rootDir.resolve(target);</span>
+<span class="nc" id="L221">                config.setOutputDir(updated.toString());</span>
+
+<span class="nc bnc" id="L223" title="All 2 branches missed.">                if (this.clean) {</span>
+<span class="nc" id="L224">                    cleanPreviousFiles(name, updated);</span>
+                }
+
+<span class="nc" id="L227">                System.out.printf(Locale.ROOT, &quot;[%s] Generating %s (outputs to %s)…%n&quot;, Thread.currentThread().getName(), name, updated.toString());</span>
+
+<span class="nc" id="L229">                DefaultGenerator defaultGenerator = new DefaultGenerator();</span>
+<span class="nc" id="L230">                defaultGenerator.opts(opts);</span>
+
+<span class="nc" id="L232">                defaultGenerator.generate();</span>
+
+<span class="nc" id="L234">                System.out.printf(Locale.ROOT, &quot;[%s] Finished generating %s…%n&quot;, Thread.currentThread().getName(), name);</span>
+<span class="nc" id="L235">                successes.incrementAndGet();</span>
+<span class="nc" id="L236">            } catch (Throwable e) {</span>
+<span class="nc" id="L237">                failures.incrementAndGet();</span>
+<span class="nc" id="L238">                String failedOn = name;</span>
+<span class="nc bnc" id="L239" title="All 2 branches missed.">                if (StringUtils.isEmpty(failedOn)) {</span>
+<span class="nc" id="L240">                    failedOn = &quot;unspecified&quot;;</span>
+                }
+<span class="nc" id="L242">                System.err.printf(Locale.ROOT, &quot;[%s] Generation failed for %s: (%s) %s%n&quot;, Thread.currentThread().getName(), failedOn, e.getClass().getSimpleName(), e.getMessage());</span>
+<span class="nc" id="L243">                e.printStackTrace(System.err);</span>
+<span class="nc bnc" id="L244" title="All 2 branches missed.">                if (exitOnError) {</span>
+<span class="nc" id="L245">                    System.exit(1);</span>
+                }
+            } finally {
+<span class="nc" id="L248">                GlobalSettings.reset();</span>
+            }
+<span class="nc" id="L250">        }</span>
+
+        private void cleanPreviousFiles(final String name, Path outDir) throws IOException {
+<span class="nc" id="L253">            System.out.printf(Locale.ROOT, &quot;[%s] Cleaning previous contents for %s in %s…%n&quot;, Thread.currentThread().getName(), name, outDir.toString());</span>
+<span class="nc" id="L254">            Path filesMeta = Paths.get(outDir.toAbsolutePath().toString(), &quot;.openapi-generator&quot;, &quot;FILES&quot;);</span>
+<span class="nc bnc" id="L255" title="All 2 branches missed.">            if (filesMeta.toFile().exists()) {</span>
+<span class="nc" id="L256">                FileUtils.readLines(filesMeta.toFile(), StandardCharsets.UTF_8).forEach(relativePath -&gt; {</span>
+<span class="nc bnc" id="L257" title="All 2 branches missed.">                    if (!StringUtils.startsWith(relativePath, &quot;.&quot;)) {</span>
+<span class="nc" id="L258">                        Path file = outDir.resolve(relativePath).toAbsolutePath();</span>
+                        // hack: disallow directory traversal outside of output directory. we don't want to delete wrong files.
+<span class="nc bnc" id="L260" title="All 2 branches missed.">                        if (file.toString().startsWith(outDir.toAbsolutePath().toString())) {</span>
+                            try {
+<span class="nc" id="L262">                                Files.delete(file);</span>
+<span class="nc" id="L263">                            } catch (Throwable e) {</span>
+<span class="nc" id="L264">                                System.out.printf(Locale.ROOT, &quot;[%s] Generator %s failed to clean file %s…%n&quot;, Thread.currentThread().getName(), name, file);</span>
+<span class="nc" id="L265">                            }</span>
+                        }
+<span class="nc" id="L267">                    } else {</span>
+<span class="nc" id="L268">                        System.out.printf(Locale.ROOT, &quot;[%s] Generator %s skip cleaning special filename %s…%n&quot;, Thread.currentThread().getName(), name, relativePath);</span>
+                    }
+<span class="nc" id="L270">                });</span>
+            }
+<span class="nc" id="L272">        }</span>
+    }
+
+    static SimpleModule getCustomDeserializationModel(final File includesDir) {
+        // Create a module which loads our config files, but supports a special &quot;!include&quot; key which can point to an existing config file.
+        // This allows us to create a sort of meta-config which holds configs which are otherwise required at CLI time (via generate task).
+        // That is, this allows us to create a wrapper config for generatorName, inputSpec, outputDir, etc.
+<span class="fc" id="L279">        SimpleModule module = new SimpleModule(&quot;GenerateBatch&quot;);</span>
+<span class="fc" id="L280">        module.setDeserializerModifier(new BeanDeserializerModifier() {</span>
+            @Override
+            public JsonDeserializer&lt;?&gt; modifyDeserializer(DeserializationConfig config,
+                                                          BeanDescription bd, JsonDeserializer&lt;?&gt; original) {
+                JsonDeserializer&lt;?&gt; result;
+<span class="fc bfc" id="L285" title="All 2 branches covered.">                if (bd.getBeanClass() == DynamicSettings.class) {</span>
+<span class="fc" id="L286">                    result = new DynamicSettingsRefSupport(original, includesDir);</span>
+                } else {
+<span class="fc" id="L288">                    result = original;</span>
+                }
+<span class="fc" id="L290">                return result;</span>
+            }
+        });
+
+<span class="fc" id="L294">        return module;</span>
+    }
+
+    static class DynamicSettingsRefSupport extends DelegatingDeserializer {
+        private static final String INCLUDE = &quot;!include&quot;;
+        private File scanDir;
+
+        DynamicSettingsRefSupport(JsonDeserializer&lt;?&gt; delegate, File scanDir) {
+<span class="fc" id="L302">            super(delegate);</span>
+<span class="fc" id="L303">            this.scanDir = scanDir;</span>
+<span class="fc" id="L304">        }</span>
+
+        @Override
+        protected JsonDeserializer&lt;?&gt; newDelegatingInstance(JsonDeserializer&lt;?&gt; newDelegatee) {
+<span class="nc" id="L308">            return new DynamicSettingsRefSupport(newDelegatee, null);</span>
+        }
+
+        @Override
+        public Object deserialize(JsonParser p, DeserializationContext ctx) throws IOException {
+<span class="fc" id="L313">            ObjectMapper codec = (ObjectMapper) ctx.getParser().getCodec();</span>
+<span class="fc" id="L314">            TokenBuffer buffer = new TokenBuffer(p);</span>
+            
+<span class="fc" id="L316">            recurse(buffer, p, codec, false);</span>
+            
+<span class="fc" id="L318">            JsonParser newParser = buffer.asParser(codec);</span>
+<span class="fc" id="L319">            newParser.nextToken();</span>
+            
+<span class="fc" id="L321">            return super.deserialize(newParser, ctx);</span>
+        }
+        
+        private void recurse(TokenBuffer buffer, JsonParser p, ObjectMapper codec, boolean skipOuterbraces) throws IOException {
+<span class="fc" id="L325">            boolean firstToken = true;</span>
+            JsonToken token; 
+            
+<span class="fc bfc" id="L328" title="All 2 branches covered.">            while ((token = p.nextToken()) != null) {</span>
+<span class="fc" id="L329">                String name = p.currentName();</span>
+                
+<span class="fc bfc" id="L331" title="All 6 branches covered.">                if (skipOuterbraces &amp;&amp; firstToken &amp;&amp; JsonToken.START_OBJECT.equals(token)) {</span>
+<span class="fc" id="L332">                    continue;</span>
+                }
+                
+<span class="pc bpc" id="L335" title="1 of 6 branches missed.">                if (skipOuterbraces &amp;&amp; p.getParsingContext().inRoot() &amp;&amp; JsonToken.END_OBJECT.equals(token)) {</span>
+<span class="fc" id="L336">                    continue;</span>
+                }
+                
+<span class="pc bpc" id="L339" title="1 of 2 branches missed.">                if (JsonToken.VALUE_NULL.equals(token)) {</span>
+<span class="nc" id="L340">                    continue;</span>
+                }
+                
+<span class="fc bfc" id="L343" title="All 6 branches covered.">                if (name != null &amp;&amp; JsonToken.FIELD_NAME.equals(token) &amp;&amp; name.startsWith(INCLUDE)) {</span>
+<span class="fc" id="L344">                    p.nextToken();</span>
+<span class="fc" id="L345">                    String fileName = p.getText();</span>
+<span class="pc bpc" id="L346" title="1 of 2 branches missed.">                    if (fileName != null) {</span>
+<span class="pc bpc" id="L347" title="1 of 2 branches missed.">                        File includeFile = scanDir != null ? new File(scanDir, fileName) : new File(fileName);</span>
+<span class="pc bpc" id="L348" title="1 of 2 branches missed.">                        if (includeFile.exists()) {</span>
+<span class="fc" id="L349">                            recurse(buffer, codec.getFactory().createParser(includeFile), codec, true);</span>
+                        }
+                    }
+<span class="fc" id="L352">                } else {</span>
+<span class="fc" id="L353">                    buffer.copyCurrentEvent(p);</span>
+                }
+                
+<span class="fc" id="L356">                firstToken = false;</span>
+<span class="fc" id="L357">            }</span>
+<span class="fc" id="L358">        }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PhpFlightServerCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">PhpFlightServerCodegen.java</span></div><h1>PhpFlightServerCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import static org.openapitools.codegen.utils.StringUtils.camelize;
+
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.servers.Server;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.CliOption;
+import org.openapitools.codegen.CodegenConstants;
+import org.openapitools.codegen.CodegenModel;
+import org.openapitools.codegen.CodegenOperation;
+import org.openapitools.codegen.CodegenProperty;
+import org.openapitools.codegen.CodegenResponse;
+import org.openapitools.codegen.CodegenType;
+import org.openapitools.codegen.SupportingFile;
+import org.openapitools.codegen.meta.GeneratorMetadata;
+import org.openapitools.codegen.meta.Stability;
+import org.openapitools.codegen.meta.features.DataTypeFeature;
+import org.openapitools.codegen.meta.features.DocumentationFeature;
+import org.openapitools.codegen.meta.features.GlobalFeature;
+import org.openapitools.codegen.meta.features.ParameterFeature;
+import org.openapitools.codegen.meta.features.SchemaSupportFeature;
+import org.openapitools.codegen.meta.features.SecurityFeature;
+import org.openapitools.codegen.meta.features.WireFormatFeature;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class PhpFlightServerCodegen extends AbstractPhpCodegen {
+
+<span class="nc" id="L58">    private final Logger LOGGER = LoggerFactory.getLogger(PhpFlightServerCodegen.class);</span>
+
+    // Type-hintable primitive types
+    // ref: http://php.net/manual/en/functions.arguments.php#functions.arguments.type-declaration
+<span class="nc" id="L62">    protected HashSet&lt;String&gt; typeHintable = new HashSet&lt;&gt;(</span>
+<span class="nc" id="L63">            Arrays.asList(</span>
+                    &quot;array&quot;,
+                    &quot;bool&quot;,
+                    &quot;float&quot;,
+                    &quot;int&quot;,
+                    &quot;string&quot;
+            )
+    );
+
+    public PhpFlightServerCodegen() {
+<span class="nc" id="L73">        super();</span>
+
+<span class="nc" id="L75">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L76">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="nc" id="L77">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON))</span>
+<span class="nc" id="L78">                .securityFeatures(EnumSet.of(</span>
+                        SecurityFeature.BasicAuth,
+                        SecurityFeature.BearerToken,
+                        SecurityFeature.ApiKey,
+                        SecurityFeature.OAuth2_Implicit))
+<span class="nc" id="L83">                .excludeDataTypeFeatures(</span>
+                        DataTypeFeature.MapOfCollectionOfEnum,
+                        DataTypeFeature.MapOfEnum,
+                        DataTypeFeature.MapOfCollectionOfModel,
+                        DataTypeFeature.MapOfModel)
+<span class="nc" id="L88">                .excludeParameterFeatures(</span>
+                        ParameterFeature.FormMultipart,
+                        ParameterFeature.FormUnencoded,
+                        ParameterFeature.Cookie)
+<span class="nc" id="L92">                .excludeGlobalFeatures(</span>
+                        GlobalFeature.XMLStructureDefinitions,
+                        GlobalFeature.Callbacks,
+                        GlobalFeature.LinkObjects,
+                        GlobalFeature.ParameterStyling
+                )
+<span class="nc" id="L98">                .excludeSchemaSupportFeatures(</span>
+                        SchemaSupportFeature.Polymorphism
+                )
+        );
+
+<span class="nc" id="L103">        generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
+<span class="nc" id="L104">                .stability(Stability.EXPERIMENTAL)</span>
+<span class="nc" id="L105">                .build();</span>
+
+<span class="nc" id="L107">        embeddedTemplateDir = templateDir = &quot;php-flight&quot;;</span>
+
+        // clear import mapping (from default generator) as slim does not use it
+        // at the moment
+<span class="nc" id="L111">        importMapping.clear();</span>
+
+<span class="nc" id="L113">        srcBasePath = &quot;&quot;;</span>
+
+<span class="nc" id="L115">        defaultIncludes = new HashSet&lt;&gt;(</span>
+<span class="nc" id="L116">                Arrays.asList(</span>
+                        &quot;\\DateTime&quot;
+                )
+        );
+
+<span class="nc" id="L121">        variableNamingConvention = &quot;camelCase&quot;;</span>
+<span class="nc" id="L122">        artifactVersion = &quot;1.0.0&quot;;</span>
+<span class="nc" id="L123">        setInvokerPackage(&quot;OpenAPIServer&quot;);</span>
+<span class="nc" id="L124">        testPackage = invokerPackage + &quot;\\Test&quot;;</span>
+<span class="nc" id="L125">        apiPackage = invokerPackage + &quot;\\&quot; + apiDirName;</span>
+<span class="nc" id="L126">        modelPackage = invokerPackage + &quot;\\&quot; + modelDirName;</span>
+<span class="nc" id="L127">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;php-flight&quot;;</span>
+
+        // no doc files
+<span class="nc" id="L130">        modelDocTemplateFiles.clear();</span>
+<span class="nc" id="L131">        apiDocTemplateFiles.clear();</span>
+<span class="nc" id="L132">        apiTestTemplateFiles.clear();</span>
+
+<span class="nc" id="L134">        embeddedTemplateDir = templateDir = &quot;php-flight&quot;;</span>
+
+<span class="nc" id="L136">        cliOptions.add(new CliOption(CodegenConstants.HIDE_GENERATION_TIMESTAMP, CodegenConstants.HIDE_GENERATION_TIMESTAMP_DESC)</span>
+<span class="nc" id="L137">                .defaultValue(Boolean.TRUE.toString()));</span>
+<span class="nc" id="L138">        cliOptions.stream().filter(o -&gt; Objects.equals(o.getOpt(), VARIABLE_NAMING_CONVENTION)).findFirst().ifPresent(o -&gt; o.defaultValue(&quot;camelCase&quot;));</span>
+<span class="nc" id="L139">    }</span>
+
+    @Override
+    public CodegenType getTag() {
+<span class="nc" id="L143">        return CodegenType.SERVER;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L148">        return &quot;php-flight&quot;;</span>
+    }
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L153">        return &quot;Generates a PHP Flight Framework server library.&quot;;</span>
+    }
+
+    @Override
+    public String apiFileFolder() {
+<span class="nc bnc" id="L158" title="All 2 branches missed.">        if (apiPackage.startsWith(invokerPackage + &quot;\\&quot;)) {</span>
+            // need to strip out invokerPackage from path
+<span class="nc" id="L160">            return (outputFolder + File.separator + toSrcPath(StringUtils.removeStart(apiPackage, invokerPackage + &quot;\\&quot;), srcBasePath));</span>
+        }
+<span class="nc" id="L162">        return (outputFolder + File.separator + toSrcPath(apiPackage, srcBasePath));</span>
+    }
+
+    @Override
+    public String modelFileFolder() {
+<span class="nc bnc" id="L167" title="All 2 branches missed.">        if (modelPackage.startsWith(invokerPackage + &quot;\\&quot;)) {</span>
+            // need to strip out invokerPackage from path
+<span class="nc" id="L169">            return (outputFolder + File.separator + toSrcPath(StringUtils.removeStart(modelPackage, invokerPackage + &quot;\\&quot;), srcBasePath));</span>
+        }
+<span class="nc" id="L171">        return (outputFolder + File.separator + toSrcPath(modelPackage, srcBasePath));</span>
+    }
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L176">        super.processOpts();</span>
+
+<span class="nc" id="L178">        inlineSchemaOption.put(&quot;RESOLVE_INLINE_ENUMS&quot;, &quot;true&quot;);</span>
+
+        // add trailing slash for mustache templates
+<span class="nc bnc" id="L181" title="All 2 branches missed.">        additionalProperties.put(&quot;relativeSrcBasePath&quot;, srcBasePath.isEmpty() ? &quot;&quot; : srcBasePath + &quot;/&quot;);</span>
+<span class="nc" id="L182">        additionalProperties.put(&quot;modelSrcPath&quot;, &quot;.&quot; + &quot;/&quot; + toSrcPath(modelPackage, srcBasePath));</span>
+<span class="nc" id="L183">        additionalProperties.put(&quot;apiSrcPath&quot;, &quot;.&quot; + &quot;/&quot; + toSrcPath(apiPackage, srcBasePath));</span>
+<span class="nc" id="L184">        additionalProperties.put(&quot;testSrcPath&quot;, &quot;.&quot; + &quot;/&quot; + toSrcPath(testPackage, srcBasePath));</span>
+<span class="nc" id="L185">        additionalProperties.put(&quot;escapedModelPackage&quot;, modelPackage.replace(&quot;\\&quot;, &quot;\\\\&quot;));</span>
+
+<span class="nc bnc" id="L187" title="All 2 branches missed.">        if (additionalProperties.containsKey(&quot;testPackage&quot;)) {</span>
+            // Update model package to contain the specified model package name and the invoker package
+<span class="nc" id="L189">            testPackage = invokerPackage + &quot;\\&quot; + (String) additionalProperties.get(&quot;testPackage&quot;);</span>
+        }
+<span class="nc" id="L191">        additionalProperties.put(&quot;testPackage&quot;, testPackage);</span>
+
+<span class="nc" id="L193">        supportingFiles.add(new SupportingFile(&quot;composer.mustache&quot;, &quot;&quot;, &quot;composer.json&quot;));</span>
+<span class="nc" id="L194">        supportingFiles.add(new SupportingFile(&quot;phpunit.mustache&quot;, &quot;&quot;, &quot;phpunit.xml.dist&quot;));</span>
+<span class="nc" id="L195">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;));</span>
+<span class="nc" id="L196">        supportingFiles.add(new SupportingFile(&quot;register_routes.mustache&quot;, toSrcPath(invokerPackage, srcBasePath), &quot;RegisterRoutes.php&quot;));</span>
+<span class="nc" id="L197">        supportingFiles.add(new SupportingFile(&quot;register_routes_test.mustache&quot;, toSrcPath(testPackage, srcBasePath), &quot;RegisterRoutesTest.php&quot;));</span>
+<span class="nc" id="L198">    }</span>
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L202">        OperationMap operations = objs.getOperations();</span>
+<span class="nc" id="L203">        List&lt;CodegenOperation&gt; operationList = operations.getOperation();</span>
+<span class="nc" id="L204">        operationList.forEach(operation -&gt; {</span>
+<span class="nc" id="L205">            operation.vendorExtensions.put(&quot;x-path&quot;, mapToFlightPath(operation.path));</span>
+<span class="nc bnc" id="L206" title="All 6 branches missed.">            CodegenResponse defaultResponse = operation.responses.stream().filter(r -&gt; r.is2xx &amp;&amp; r.dataType != null &amp;&amp; !this.getTypeHint(r.dataType, false, false).isEmpty()).findFirst().orElse(null);</span>
+<span class="nc bnc" id="L207" title="All 2 branches missed.">            String returnType = defaultResponse != null ? this.getTypeHint(defaultResponse.dataType, false, false) + &quot;|null&quot; : &quot;void&quot;;</span>
+<span class="nc" id="L208">            operation.vendorExtensions.put(&quot;x-return-type&quot;, returnType);</span>
+<span class="nc" id="L209">            operation.vendorExtensions.put(&quot;x-return-type-is-void&quot;, returnType.equals(&quot;void&quot;));</span>
+<span class="nc bnc" id="L210" title="All 2 branches missed.">            operation.vendorExtensions.put(&quot;x-return-type-comment&quot;, defaultResponse != null ? this.getTypeHint(defaultResponse.dataType, true, false) + &quot;|null&quot; : &quot;void&quot;);</span>
+<span class="nc bnc" id="L211" title="All 2 branches missed.">            operation.vendorExtensions.put(&quot;x-default-media-type&quot;, defaultResponse != null ? (</span>
+<span class="nc bnc" id="L212" title="All 2 branches missed.">                defaultResponse.getContent().containsKey(&quot;application/json&quot;) ? &quot;application/json&quot; : defaultResponse.getContent().keySet().stream().findFirst().orElse(null)) : null);</span>
+<span class="nc bnc" id="L213" title="All 4 branches missed.">            operation.vendorExtensions.put(&quot;x-default-status-code&quot;, defaultResponse != null ? defaultResponse.code : operation.responses.stream().filter(r -&gt; !r.isDefault).findFirst().map(r -&gt; r.code).orElse(&quot;200&quot;));</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">            operation.vendorExtensions.put(&quot;x-nonFormParams&quot;, operation.allParams.stream().filter(p -&gt; !p.isFormParam).toArray());</span>
+
+<span class="nc" id="L216">            operation.allParams.forEach(param -&gt; {</span>
+<span class="nc bnc" id="L217" title="All 2 branches missed.">                param.vendorExtensions.put(&quot;x-parameter-type&quot;, param.required ? getTypeHint(param.dataType, false, false) : getTypeHintNullable(param.dataType, false));</span>
+<span class="nc bnc" id="L218" title="All 2 branches missed.">                String commentType = param.required ? getTypeHint(param.dataType, true, false) : getTypeHintNullable(param.dataType, false);</span>
+<span class="nc" id="L219">                param.vendorExtensions.put(&quot;x-comment-type&quot;, commentType);</span>
+<span class="nc" id="L220">                param.vendorExtensions.put(&quot;x-comment-type-escaped&quot;, commentType.replace(&quot;\\&quot;, &quot;\\\\&quot;));</span>
+<span class="nc" id="L221">            });</span>
+<span class="nc" id="L222">        });</span>
+<span class="nc" id="L223">        escapeMediaType(operationList);</span>
+<span class="nc" id="L224">        return objs;</span>
+    }
+
+    private String mapToFlightPath(String path) {
+<span class="nc" id="L228">        return path.replaceAll(&quot;\\{([^}]+)}&quot;, &quot;@$1&quot;);</span>
+    }
+
+    @Override
+    public ModelsMap postProcessModels(ModelsMap objs) {
+<span class="nc" id="L233">        objs = super.postProcessModels(objs);</span>
+
+<span class="nc" id="L235">        ModelMap models = objs.getModels().get(0);</span>
+<span class="nc" id="L236">        CodegenModel model = models.getModel();</span>
+
+        // Simplify model var type
+<span class="nc bnc" id="L239" title="All 2 branches missed.">        for (CodegenProperty var : model.vars) {</span>
+<span class="nc bnc" id="L240" title="All 2 branches missed.">            if (var.dataType != null) {</span>
+                // Determine if the parameter type is supported as a type hint and make it available
+                // to the templating engine
+<span class="nc bnc" id="L243" title="All 2 branches missed.">                var.vendorExtensions.put(&quot;x-parameter-type&quot;, var.required ? getTypeHint(var.dataType, false, true) : getTypeHintNullable(var.dataType, true));</span>
+<span class="nc bnc" id="L244" title="All 2 branches missed.">                var.vendorExtensions.put(&quot;x-comment-type&quot;, var.required ? getTypeHint(var.dataType, true, true) : getTypeHintNullableForComments(var.dataType, true));</span>
+            }
+<span class="nc" id="L246">        }</span>
+
+<span class="nc" id="L248">        return objs;</span>
+    }
+
+    protected String getTypeHintNullable(String type, boolean modelContext) {
+<span class="nc" id="L252">        String typeHint = getTypeHint(type, false, modelContext);</span>
+<span class="nc bnc" id="L253" title="All 2 branches missed.">        if (!typeHint.equals(&quot;&quot;)) {</span>
+<span class="nc" id="L254">            return &quot;?&quot; + typeHint;</span>
+        }
+
+<span class="nc" id="L257">        return typeHint;</span>
+    }
+
+    protected String getTypeHintNullableForComments(String type, boolean modelContext) {
+<span class="nc" id="L261">        String typeHint = getTypeHint(type, true, modelContext);</span>
+<span class="nc bnc" id="L262" title="All 2 branches missed.">        if (!typeHint.equals(&quot;&quot;)) {</span>
+<span class="nc" id="L263">            return typeHint + &quot;|null&quot;;</span>
+        }
+
+<span class="nc" id="L266">        return typeHint;</span>
+    }
+
+    protected String getTypeHint(String type, boolean forComments, boolean modelContext) {
+        // Type hint array types
+<span class="nc bnc" id="L271" title="All 2 branches missed.">        if (type.endsWith(&quot;[]&quot;)) {</span>
+<span class="nc bnc" id="L272" title="All 2 branches missed.">            if (forComments) {</span>
+                //Make type hints for array in comments. Call getTypeHint recursive for extractSimpleName for models
+<span class="nc" id="L274">                String typeWithoutArray = type.substring(0, type.length() - 2);</span>
+<span class="nc" id="L275">                return this.getTypeHint(typeWithoutArray, true, modelContext) + &quot;[]&quot;;</span>
+            } else {
+<span class="nc" id="L277">                return &quot;array&quot;;</span>
+            }
+        }
+
+        // Check if the type is a native type that is type hintable in PHP
+<span class="nc bnc" id="L282" title="All 2 branches missed.">        if (typeHintable.contains(type)) {</span>
+<span class="nc" id="L283">            return type;</span>
+        }
+
+        // Default includes are referenced by their fully-qualified class name (including namespace)
+<span class="nc bnc" id="L287" title="All 2 branches missed.">        if (defaultIncludes.contains(type)) {</span>
+<span class="nc" id="L288">            return type;</span>
+        }
+
+        // Model classes are assumed to be imported and we reference them by their class name
+<span class="nc bnc" id="L292" title="All 2 branches missed.">        if (isModelClass(type)) {</span>
+            // This parameter is an instance of a model
+<span class="nc bnc" id="L294" title="All 2 branches missed.">            return modelContext ? extractSimpleName(type) : type;</span>
+        }
+
+        // PHP does not support type hinting for this parameter data type
+<span class="nc" id="L298">        return &quot;&quot;;</span>
+    }
+
+    protected Boolean isModelClass(String type) {
+<span class="nc" id="L302">        return Boolean.valueOf(type.contains(modelPackage()));</span>
+    }
+
+    @Override
+    public String toApiName(String name) {
+<span class="nc bnc" id="L307" title="All 2 branches missed.">        if (name.length() == 0) {</span>
+<span class="nc" id="L308">            return toAbstractName(&quot;DefaultApi&quot;);</span>
+        }
+<span class="nc" id="L310">        return toAbstractName(camelize(name) + &quot;Api&quot;);</span>
+    }
+
+    @Override
+    public String toApiTestFilename(String name) {
+<span class="nc bnc" id="L315" title="All 2 branches missed.">        if (name.length() == 0) {</span>
+<span class="nc" id="L316">            return &quot;DefaultApiTest&quot;;</span>
+        }
+<span class="nc" id="L318">        return camelize(name) + &quot;ApiTest&quot;;</span>
+    }
+
+    @Override
+    public CodegenOperation fromOperation(String path,
+                                          String httpMethod,
+                                          Operation operation,
+                                          List&lt;Server&gt; servers) {
+<span class="nc" id="L326">        CodegenOperation op = super.fromOperation(path, httpMethod, operation, servers);</span>
+<span class="nc" id="L327">        op.path = encodePath(path);</span>
+<span class="nc" id="L328">        return op;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

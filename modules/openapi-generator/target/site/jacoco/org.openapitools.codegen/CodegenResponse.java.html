@@ -1,0 +1,893 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CodegenResponse.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen</a> &gt; <span class="el_source">CodegenResponse.java</span></div><h1>CodegenResponse.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen;
+
+import java.util.*;
+
+<span class="fc" id="L22">public class CodegenResponse implements IJsonSchemaValidationProperties {</span>
+<span class="fc" id="L23">    public final List&lt;CodegenProperty&gt; headers = new ArrayList&lt;CodegenProperty&gt;();</span>
+<span class="fc" id="L24">    private List&lt;CodegenParameter&gt; responseHeaders = new ArrayList&lt;CodegenParameter&gt;();</span>
+    public String code;
+    public boolean is1xx;
+    public boolean is2xx;
+    public boolean is3xx;
+    public boolean is4xx;
+    public boolean is5xx;
+    public String message;
+    public List&lt;Map&lt;String, Object&gt;&gt; examples;
+    public String dataType;
+    public String baseType;
+    public String containerType;
+    public String containerTypeMapped; // language-specified container type (e.g. `dict` in python for map)
+    public boolean hasHeaders;
+    public boolean isString;
+    public boolean isNumeric;
+    public boolean isInteger;
+    public boolean isShort;
+    public boolean isLong;
+    public boolean isUnboundedInteger;
+    public boolean isNumber;
+    public boolean isFloat;
+    public boolean isDouble;
+    public boolean isDecimal;
+    public boolean isByteArray;
+    public boolean isBoolean;
+    public boolean isDate;
+    public boolean isDateTime;
+    public boolean isUuid;
+    public boolean isEmail;
+    public boolean isPassword;
+    public boolean isModel;
+    public boolean isFreeFormObject;
+    public boolean isAnyType;
+    public boolean isDefault;
+    public boolean simpleType;
+    public boolean primitiveType;
+    public boolean isMap;
+    public boolean isArray;
+<span class="fc" id="L63">    public boolean isBinary = false;</span>
+<span class="fc" id="L64">    public boolean isFile = false;</span>
+    public boolean isNull;
+<span class="fc" id="L66">    public boolean isVoid = false;</span>
+    public Object schema;
+    public String jsonSchema;
+<span class="fc" id="L69">    public Map&lt;String, Object&gt; vendorExtensions = new HashMap&lt;String, Object&gt;();</span>
+    private Integer maxProperties;
+    private Integer minProperties;
+    private boolean uniqueItems;
+    private Boolean uniqueItemsBoolean;
+    private Integer maxItems;
+    private Integer minItems;
+    private Integer maxLength;
+    private Integer minLength;
+    private boolean exclusiveMinimum;
+    private boolean exclusiveMaximum;
+    private String minimum;
+    private String maximum;
+    public String pattern;
+    public Number multipleOf;
+    public CodegenProperty items;
+    public CodegenProperty additionalProperties;
+<span class="fc" id="L86">    public List&lt;CodegenProperty&gt; vars = new ArrayList&lt;CodegenProperty&gt;(); // all properties (without parent's properties)</span>
+<span class="fc" id="L87">    public List&lt;CodegenProperty&gt; requiredVars = new ArrayList&lt;CodegenProperty&gt;();</span>
+    private boolean hasValidation;
+    private boolean additionalPropertiesIsAnyType;
+    private boolean hasVars;
+    private boolean hasRequired;
+    private boolean hasDiscriminatorWithNonEmptyMapping;
+    private CodegenComposedSchemas composedSchemas;
+<span class="fc" id="L94">    private boolean hasMultipleTypes = false;</span>
+    private LinkedHashMap&lt;String, CodegenMediaType&gt; content;
+    private Map&lt;String, CodegenProperty&gt; requiredVarsMap;
+    private String ref;
+    public CodegenProperty returnProperty;
+    private boolean schemaIsFromAdditionalProperties;
+
+    @Override
+    public int hashCode() {
+<span class="nc" id="L103">        return Objects.hash(headers, code, message, examples, dataType, baseType, containerType, containerTypeMapped, hasHeaders,</span>
+<span class="nc" id="L104">                isString, isNumeric, isInteger, isLong, isNumber, isFloat, isDouble, isDecimal, isByteArray, isBoolean, isDate,</span>
+<span class="nc" id="L105">                isDateTime, isUuid, isEmail, isPassword, isModel, isFreeFormObject, isAnyType, isDefault, simpleType, primitiveType,</span>
+<span class="nc" id="L106">                isMap, isArray, isBinary, isFile, schema, jsonSchema, vendorExtensions, items, additionalProperties,</span>
+<span class="nc" id="L107">                vars, requiredVars, isNull, isVoid, hasValidation, isShort, isUnboundedInteger,</span>
+<span class="nc" id="L108">                getMaxProperties(), getMinProperties(), uniqueItems, getMaxItems(), getMinItems(), getMaxLength(),</span>
+<span class="nc" id="L109">                getMinLength(), exclusiveMinimum, exclusiveMaximum, getMinimum(), getMaximum(), getPattern(),</span>
+<span class="nc" id="L110">                is1xx, is2xx, is3xx, is4xx, is5xx, additionalPropertiesIsAnyType, hasVars, hasRequired,</span>
+<span class="nc" id="L111">                hasDiscriminatorWithNonEmptyMapping, composedSchemas, hasMultipleTypes, responseHeaders, content,</span>
+<span class="nc" id="L112">                requiredVarsMap, ref, uniqueItemsBoolean, schemaIsFromAdditionalProperties);</span>
+    }
+
+    @Override
+    public boolean equals(Object o) {
+<span class="nc bnc" id="L117" title="All 2 branches missed.">        if (this == o) return true;</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">        if (!(o instanceof CodegenResponse)) return false;</span>
+<span class="nc" id="L119">        CodegenResponse that = (CodegenResponse) o;</span>
+<span class="nc bnc" id="L120" title="All 76 branches missed.">        return hasHeaders == that.hasHeaders &amp;&amp;</span>
+                isString == that.isString &amp;&amp;
+                isNumeric == that.isNumeric &amp;&amp;
+                isInteger == that.isInteger &amp;&amp;
+                isShort == that.isShort &amp;&amp;
+                isLong == that.isLong &amp;&amp;
+                isUnboundedInteger == that.isUnboundedInteger &amp;&amp;
+                isNumber == that.isNumber &amp;&amp;
+                isFloat == that.isFloat &amp;&amp;
+                isDouble == that.isDouble &amp;&amp;
+                isDecimal == that.isDecimal &amp;&amp;
+                isByteArray == that.isByteArray &amp;&amp;
+                isBoolean == that.isBoolean &amp;&amp;
+                isDate == that.isDate &amp;&amp;
+                isDateTime == that.isDateTime &amp;&amp;
+                isUuid == that.isUuid &amp;&amp;
+                isEmail == that.isEmail &amp;&amp;
+                isPassword == that.isPassword &amp;&amp;
+                isModel == that.isModel &amp;&amp;
+                isFreeFormObject == that.isFreeFormObject &amp;&amp;
+                isAnyType == that.isAnyType &amp;&amp;
+                isDefault == that.isDefault &amp;&amp;
+                simpleType == that.simpleType &amp;&amp;
+                primitiveType == that.primitiveType &amp;&amp;
+                isMap == that.isMap &amp;&amp;
+                isArray == that.isArray &amp;&amp;
+                isBinary == that.isBinary &amp;&amp;
+                isFile == that.isFile &amp;&amp;
+                items == that.items &amp;&amp;
+                additionalProperties == that.additionalProperties &amp;&amp;
+                isNull == that.isNull &amp;&amp;
+                isVoid == that.isVoid &amp;&amp;
+                hasValidation == that.hasValidation &amp;&amp;
+                is1xx == that.is1xx &amp;&amp;
+                is2xx == that.is2xx &amp;&amp;
+                is3xx == that.is3xx &amp;&amp;
+                is4xx == that.is4xx &amp;&amp;
+                is5xx == that.is5xx &amp;&amp;
+<span class="nc bnc" id="L158" title="All 2 branches missed.">                hasDiscriminatorWithNonEmptyMapping == that.getHasDiscriminatorWithNonEmptyMapping() &amp;&amp;</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">                hasMultipleTypes == that.getHasMultipleTypes() &amp;&amp;</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">                getSchemaIsFromAdditionalProperties() == that.getSchemaIsFromAdditionalProperties() &amp;&amp;</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">                getAdditionalPropertiesIsAnyType() == that.getAdditionalPropertiesIsAnyType() &amp;&amp;</span>
+<span class="nc bnc" id="L162" title="All 2 branches missed.">                getHasVars() == that.getHasVars() &amp;&amp;</span>
+<span class="nc bnc" id="L163" title="All 2 branches missed.">                getHasRequired() == that.getHasRequired() &amp;&amp;</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">                Objects.equals(uniqueItemsBoolean, that.getUniqueItemsBoolean()) &amp;&amp;</span>
+<span class="nc bnc" id="L165" title="All 2 branches missed.">                Objects.equals(ref, that.getRef()) &amp;&amp;</span>
+<span class="nc bnc" id="L166" title="All 2 branches missed.">                Objects.equals(requiredVarsMap, that.getRequiredVarsMap()) &amp;&amp;</span>
+<span class="nc bnc" id="L167" title="All 2 branches missed.">                Objects.equals(content, that.getContent()) &amp;&amp;</span>
+<span class="nc bnc" id="L168" title="All 2 branches missed.">                Objects.equals(responseHeaders, that.getResponseHeaders()) &amp;&amp;</span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">                Objects.equals(composedSchemas, that.getComposedSchemas()) &amp;&amp;</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">                Objects.equals(vars, that.vars) &amp;&amp;</span>
+<span class="nc bnc" id="L171" title="All 2 branches missed.">                Objects.equals(requiredVars, that.requiredVars) &amp;&amp;</span>
+<span class="nc bnc" id="L172" title="All 2 branches missed.">                Objects.equals(headers, that.headers) &amp;&amp;</span>
+<span class="nc bnc" id="L173" title="All 2 branches missed.">                Objects.equals(code, that.code) &amp;&amp;</span>
+<span class="nc bnc" id="L174" title="All 2 branches missed.">                Objects.equals(message, that.message) &amp;&amp;</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">                Objects.equals(examples, that.examples) &amp;&amp;</span>
+<span class="nc bnc" id="L176" title="All 2 branches missed.">                Objects.equals(dataType, that.dataType) &amp;&amp;</span>
+<span class="nc bnc" id="L177" title="All 2 branches missed.">                Objects.equals(baseType, that.baseType) &amp;&amp;</span>
+<span class="nc bnc" id="L178" title="All 2 branches missed.">                Objects.equals(containerType, that.containerType) &amp;&amp;</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">                Objects.equals(containerTypeMapped, that.containerTypeMapped) &amp;&amp;</span>
+<span class="nc bnc" id="L180" title="All 2 branches missed.">                Objects.equals(schema, that.schema) &amp;&amp;</span>
+<span class="nc bnc" id="L181" title="All 2 branches missed.">                Objects.equals(jsonSchema, that.jsonSchema) &amp;&amp;</span>
+<span class="nc bnc" id="L182" title="All 2 branches missed.">                Objects.equals(vendorExtensions, that.vendorExtensions) &amp;&amp;</span>
+<span class="nc bnc" id="L183" title="All 2 branches missed.">                Objects.equals(getMaxProperties(), that.getMaxProperties()) &amp;&amp;</span>
+<span class="nc bnc" id="L184" title="All 2 branches missed.">                Objects.equals(getMinProperties(), that.getMinProperties()) &amp;&amp;</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">                Objects.equals(uniqueItems, that.uniqueItems) &amp;&amp;</span>
+<span class="nc bnc" id="L186" title="All 2 branches missed.">                Objects.equals(getMaxItems(), that.getMaxItems()) &amp;&amp;</span>
+<span class="nc bnc" id="L187" title="All 2 branches missed.">                Objects.equals(getMinItems(), that.getMinItems()) &amp;&amp;</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">                Objects.equals(getMaxLength(), that.getMaxLength()) &amp;&amp;</span>
+<span class="nc bnc" id="L189" title="All 2 branches missed.">                Objects.equals(getMinLength(), that.getMinLength()) &amp;&amp;</span>
+<span class="nc bnc" id="L190" title="All 2 branches missed.">                Objects.equals(exclusiveMinimum, that.exclusiveMinimum) &amp;&amp;</span>
+<span class="nc bnc" id="L191" title="All 2 branches missed.">                Objects.equals(exclusiveMaximum, that.exclusiveMaximum) &amp;&amp;</span>
+<span class="nc bnc" id="L192" title="All 2 branches missed.">                Objects.equals(getMinimum(), that.getMinimum()) &amp;&amp;</span>
+<span class="nc bnc" id="L193" title="All 2 branches missed.">                Objects.equals(getMaximum(), that.getMaximum()) &amp;&amp;</span>
+<span class="nc bnc" id="L194" title="All 2 branches missed.">                Objects.equals(getPattern(), that.getPattern()) &amp;&amp;</span>
+<span class="nc bnc" id="L195" title="All 2 branches missed.">                Objects.equals(getMultipleOf(), that.getMultipleOf());</span>
+
+    }
+
+    // use content.mediaType.schema.getContains instead of this
+    @Override
+    public CodegenProperty getContains() {
+<span class="nc" id="L202">        return null;</span>
+    }
+
+    // use content.mediaType.schema.setContains instead of this
+    @Override
+<span class="nc" id="L207">    public void setContains(CodegenProperty contains) {}</span>
+
+    // use content.mediaType.schema.getDependentRequired instead of this
+    @Override
+    public LinkedHashMap&lt;String, List&lt;String&gt;&gt; getDependentRequired() {
+<span class="nc" id="L212">        return null;</span>
+    }
+
+    // use content.mediaType.schema.setDependentRequired instead of this
+    @Override
+<span class="nc" id="L217">    public void setDependentRequired(LinkedHashMap&lt;String, List&lt;String&gt;&gt; dependentRequired) {}</span>
+
+    // use content.mediaType.schema.getIsBooleanSchemaTrue instead of this
+    @Override
+    public boolean getIsBooleanSchemaTrue() {
+<span class="nc" id="L222">        return false;</span>
+    }
+
+    // use content.mediaType.schema.setIsBooleanSchemaTrue instead of this
+    @Override
+<span class="nc" id="L227">    public void setIsBooleanSchemaTrue(boolean isBooleanSchemaTrue) {}</span>
+
+    // use content.mediaType.schema.getIsBooleanSchemaFalse instead of this
+    @Override
+    public boolean getIsBooleanSchemaFalse() {
+<span class="nc" id="L232">        return false;</span>
+    }
+
+    // use content.mediaType.schema.setIsBooleanSchemaFalse instead of this
+    @Override
+<span class="nc" id="L237">    public void setIsBooleanSchemaFalse(boolean isBooleanSchemaFalse) {}</span>
+
+    // use content.mediaType.schema.getFormat instead of this
+    @Override
+    public String getFormat() {
+<span class="nc" id="L242">        return null;</span>
+    }
+
+    // use content.mediaType.schema.setFormat instead of this
+    @Override
+<span class="nc" id="L247">    public void setFormat(String format) {}</span>
+
+    public LinkedHashMap&lt;String, CodegenMediaType&gt; getContent() {
+<span class="nc" id="L250">        return content;</span>
+    }
+
+    public void setContent(LinkedHashMap&lt;String, CodegenMediaType&gt; content) {
+<span class="fc" id="L254">        this.content = content;</span>
+<span class="fc" id="L255">    }</span>
+
+    public List&lt;CodegenParameter&gt; getResponseHeaders() {
+<span class="nc" id="L258">        return responseHeaders;</span>
+    }
+
+    public void setResponseHeaders(List&lt;CodegenParameter&gt; responseHeaders) {
+<span class="nc" id="L262">        this.responseHeaders = responseHeaders;</span>
+<span class="nc" id="L263">    }</span>
+
+    @Override
+    public String getPattern() {
+<span class="nc" id="L267">        return pattern;</span>
+    }
+
+    @Override
+    public void setPattern(String pattern) {
+<span class="nc" id="L272">        this.pattern = pattern;</span>
+<span class="nc" id="L273">    }</span>
+
+    @Override
+    public String getMaximum() {
+<span class="nc" id="L277">        return maximum;</span>
+    }
+
+    @Override
+    public void setMaximum(String maximum) {
+<span class="nc" id="L282">        this.maximum = maximum;</span>
+<span class="nc" id="L283">    }</span>
+
+    @Override
+    public String getMinimum() {
+<span class="nc" id="L287">        return minimum;</span>
+    }
+
+    @Override
+    public void setMinimum(String minimum) {
+<span class="nc" id="L292">        this.minimum = minimum;</span>
+<span class="nc" id="L293">    }</span>
+
+    @Override
+    public boolean getExclusiveMaximum() {
+<span class="nc" id="L297">        return exclusiveMaximum;</span>
+    }
+
+    @Override
+    public void setExclusiveMaximum(boolean exclusiveMaximum) {
+<span class="nc" id="L302">        this.exclusiveMaximum = exclusiveMaximum;</span>
+<span class="nc" id="L303">    }</span>
+
+    @Override
+    public boolean getExclusiveMinimum() {
+<span class="nc" id="L307">        return exclusiveMinimum;</span>
+    }
+
+    @Override
+    public void setExclusiveMinimum(boolean exclusiveMinimum) {
+<span class="nc" id="L312">        this.exclusiveMinimum = exclusiveMinimum;</span>
+<span class="nc" id="L313">    }</span>
+
+    @Override
+    public Integer getMinLength() {
+<span class="nc" id="L317">        return minLength;</span>
+    }
+
+    @Override
+    public void setMinLength(Integer minLength) {
+<span class="nc" id="L322">        this.minLength = minLength;</span>
+<span class="nc" id="L323">    }</span>
+
+    @Override
+    public Integer getMaxLength() {
+<span class="nc" id="L327">        return maxLength;</span>
+    }
+
+    @Override
+    public void setMaxLength(Integer maxLength) {
+<span class="nc" id="L332">        this.maxLength = maxLength;</span>
+<span class="nc" id="L333">    }</span>
+
+    @Override
+    public Integer getMinItems() {
+<span class="nc" id="L337">        return minItems;</span>
+    }
+
+    @Override
+    public void setMinItems(Integer minItems) {
+<span class="nc" id="L342">        this.minItems = minItems;</span>
+<span class="nc" id="L343">    }</span>
+
+    @Override
+    public Integer getMaxItems() {
+<span class="nc" id="L347">        return maxItems;</span>
+    }
+
+    @Override
+    public void setMaxItems(Integer maxItems) {
+<span class="nc" id="L352">        this.maxItems = maxItems;</span>
+<span class="nc" id="L353">    }</span>
+
+    @Override
+    public boolean getUniqueItems() {
+<span class="nc" id="L357">        return uniqueItems;</span>
+    }
+
+    @Override
+    public void setUniqueItems(boolean uniqueItems) {
+<span class="nc" id="L362">        this.uniqueItems = uniqueItems;</span>
+<span class="nc" id="L363">    }</span>
+
+    @Override
+    public Boolean getUniqueItemsBoolean() {
+<span class="nc" id="L367">        return uniqueItemsBoolean;</span>
+    }
+
+    @Override
+    public void setUniqueItemsBoolean(Boolean uniqueItemsBoolean) {
+<span class="nc" id="L372">        this.uniqueItemsBoolean = uniqueItemsBoolean;</span>
+<span class="nc" id="L373">    }</span>
+
+
+    @Override
+    public Integer getMinProperties() {
+<span class="nc" id="L378">        return minProperties;</span>
+    }
+
+    @Override
+    public void setMinProperties(Integer minProperties) {
+<span class="nc" id="L383">        this.minProperties = minProperties;</span>
+<span class="nc" id="L384">    }</span>
+
+    @Override
+    public Integer getMaxProperties() {
+<span class="nc" id="L388">        return maxProperties;</span>
+    }
+
+    @Override
+    public void setMaxProperties(Integer maxProperties) {
+<span class="nc" id="L393">        this.maxProperties = maxProperties;</span>
+<span class="nc" id="L394">    }</span>
+
+    @Override
+    public Number getMultipleOf() {
+<span class="nc" id="L398">        return multipleOf;</span>
+    }
+
+    @Override
+    public void setMultipleOf(Number multipleOf) {
+<span class="nc" id="L403">        this.multipleOf = multipleOf;</span>
+<span class="nc" id="L404">    }</span>
+
+    @Override
+    public CodegenProperty getItems() {
+<span class="nc" id="L408">        return items;</span>
+    }
+
+    @Override
+    public void setItems(CodegenProperty items) {
+<span class="fc" id="L413">        this.items = items;</span>
+<span class="fc" id="L414">    }</span>
+
+    @Override
+    public boolean getIsModel() {
+<span class="nc" id="L418">        return isModel;</span>
+    }
+
+    @Override
+    public boolean getIsArray() {
+<span class="nc" id="L423">        return isArray;</span>
+    }
+
+    @Override
+    public void setIsArray(boolean isArray) {
+<span class="fc" id="L428">        this.isArray = isArray;</span>
+<span class="fc" id="L429">    }</span>
+
+    @Override
+    public boolean getIsShort() {
+<span class="nc" id="L433">        return isShort;</span>
+    }
+
+    @Override
+    public void setIsShort(boolean isShort) {
+<span class="nc" id="L438">        this.isShort = isShort;</span>
+<span class="nc" id="L439">    }</span>
+
+    @Override
+    public boolean getIsBoolean() {
+<span class="nc" id="L443">        return isBoolean;</span>
+    }
+
+    @Override
+    public void setIsBoolean(boolean isBoolean) {
+<span class="nc" id="L448">        this.isBoolean = isBoolean;</span>
+<span class="nc" id="L449">    }</span>
+
+    @Override
+    public boolean getIsUnboundedInteger() {
+<span class="nc" id="L453">        return isUnboundedInteger;</span>
+    }
+
+    @Override
+    public void setIsUnboundedInteger(boolean isUnboundedInteger) {
+<span class="nc" id="L458">        this.isUnboundedInteger = isUnboundedInteger;</span>
+<span class="nc" id="L459">    }</span>
+
+    @Override
+    public boolean getIsPrimitiveType() {
+<span class="nc" id="L463">        return primitiveType;</span>
+    }
+
+    @Override
+    public void setIsPrimitiveType(boolean isPrimitiveType) {
+<span class="nc" id="L468">        this.primitiveType = isPrimitiveType;</span>
+<span class="nc" id="L469">    }</span>
+
+    @Override
+    public void setIsModel(boolean isModel) {
+<span class="nc" id="L473">        this.isModel = isModel;</span>
+<span class="nc" id="L474">    }</span>
+
+    @Override
+    public boolean getIsDate() {
+<span class="nc" id="L478">        return isDate;</span>
+    }
+
+    @Override
+    public void setIsDate(boolean isDate) {
+<span class="nc" id="L483">        this.isDate = isDate;</span>
+<span class="nc" id="L484">    }</span>
+
+    @Override
+    public boolean getIsDateTime() {
+<span class="nc" id="L488">        return isDateTime;</span>
+    }
+
+    @Override
+    public void setIsDateTime(boolean isDateTime) {
+<span class="nc" id="L493">        this.isDateTime = isDateTime;</span>
+<span class="nc" id="L494">    }</span>
+
+    @Override
+    public boolean getIsMap() {
+<span class="nc" id="L498">        return isMap;</span>
+    }
+
+    @Override
+    public void setIsMap(boolean isMap) {
+<span class="nc" id="L503">        this.isMap = isMap;</span>
+<span class="nc" id="L504">    }</span>
+
+    @Override
+    public CodegenProperty getAdditionalProperties() {
+<span class="nc" id="L508">        return additionalProperties;</span>
+    }
+
+    @Override
+    public void setAdditionalProperties(CodegenProperty additionalProperties) {
+<span class="nc" id="L513">        this.additionalProperties = additionalProperties;</span>
+<span class="nc" id="L514">    }</span>
+
+    @Override
+    public List&lt;CodegenProperty&gt; getVars() {
+<span class="nc" id="L518">        return vars;</span>
+    }
+
+    @Override
+    public void setVars(List&lt;CodegenProperty&gt; vars) {
+<span class="nc" id="L523">        this.vars = vars;</span>
+<span class="nc" id="L524">    }</span>
+
+    @Override
+    public List&lt;CodegenProperty&gt; getRequiredVars() {
+<span class="nc" id="L528">        return requiredVars;</span>
+    }
+
+    @Override
+    public void setRequiredVars(List&lt;CodegenProperty&gt; requiredVars) {
+<span class="nc" id="L533">        this.requiredVars = requiredVars;</span>
+<span class="nc" id="L534">    }</span>
+
+    @Override
+    public boolean getHasRequired() {
+<span class="nc" id="L538">        return this.hasRequired;</span>
+    }
+
+    @Override
+    public void setHasRequired(boolean hasRequired) {
+<span class="nc" id="L543">        this.hasRequired = hasRequired;</span>
+<span class="nc" id="L544">    }</span>
+
+    @Override
+    public boolean getIsUuid() {
+<span class="nc" id="L548">        return isUuid;</span>
+    }
+
+    @Override
+    public void setIsUuid(boolean isUuid) {
+<span class="nc" id="L553">        this.isUuid = isUuid;</span>
+<span class="nc" id="L554">    }</span>
+
+    @Override
+    public String toString() {
+<span class="nc" id="L558">        final StringBuilder sb = new StringBuilder(&quot;CodegenResponse{&quot;);</span>
+<span class="nc" id="L559">        sb.append(&quot;headers=&quot;).append(headers);</span>
+<span class="nc" id="L560">        sb.append(&quot;, code='&quot;).append(code).append('\'');</span>
+<span class="nc" id="L561">        sb.append(&quot;, is1xx='&quot;).append(is1xx).append('\'');</span>
+<span class="nc" id="L562">        sb.append(&quot;, is2xx='&quot;).append(is2xx).append('\'');</span>
+<span class="nc" id="L563">        sb.append(&quot;, is3xx='&quot;).append(is3xx).append('\'');</span>
+<span class="nc" id="L564">        sb.append(&quot;, is4xx='&quot;).append(is4xx).append('\'');</span>
+<span class="nc" id="L565">        sb.append(&quot;, is5xx='&quot;).append(is5xx).append('\'');</span>
+<span class="nc" id="L566">        sb.append(&quot;, message='&quot;).append(message).append('\'');</span>
+<span class="nc" id="L567">        sb.append(&quot;, examples=&quot;).append(examples);</span>
+<span class="nc" id="L568">        sb.append(&quot;, dataType='&quot;).append(dataType).append('\'');</span>
+<span class="nc" id="L569">        sb.append(&quot;, baseType='&quot;).append(baseType).append('\'');</span>
+<span class="nc" id="L570">        sb.append(&quot;, containerType='&quot;).append(containerType).append('\'');</span>
+<span class="nc" id="L571">        sb.append(&quot;, containerTypeMapped='&quot;).append(containerTypeMapped).append('\'');</span>
+<span class="nc" id="L572">        sb.append(&quot;, hasHeaders=&quot;).append(hasHeaders);</span>
+<span class="nc" id="L573">        sb.append(&quot;, isString=&quot;).append(isString);</span>
+<span class="nc" id="L574">        sb.append(&quot;, isNumeric=&quot;).append(isNumeric);</span>
+<span class="nc" id="L575">        sb.append(&quot;, isInteger=&quot;).append(isInteger);</span>
+<span class="nc" id="L576">        sb.append(&quot;, isShort=&quot;).append(isShort);</span>
+<span class="nc" id="L577">        sb.append(&quot;, isLong=&quot;).append(isLong);</span>
+<span class="nc" id="L578">        sb.append(&quot;, isUnboundedInteger=&quot;).append(isUnboundedInteger);</span>
+<span class="nc" id="L579">        sb.append(&quot;, isNumber=&quot;).append(isNumber);</span>
+<span class="nc" id="L580">        sb.append(&quot;, isFloat=&quot;).append(isFloat);</span>
+<span class="nc" id="L581">        sb.append(&quot;, isDouble=&quot;).append(isDouble);</span>
+<span class="nc" id="L582">        sb.append(&quot;, isDecimal=&quot;).append(isDecimal);</span>
+<span class="nc" id="L583">        sb.append(&quot;, isByteArray=&quot;).append(isByteArray);</span>
+<span class="nc" id="L584">        sb.append(&quot;, isBoolean=&quot;).append(isBoolean);</span>
+<span class="nc" id="L585">        sb.append(&quot;, isDate=&quot;).append(isDate);</span>
+<span class="nc" id="L586">        sb.append(&quot;, isDateTime=&quot;).append(isDateTime);</span>
+<span class="nc" id="L587">        sb.append(&quot;, isUuid=&quot;).append(isUuid);</span>
+<span class="nc" id="L588">        sb.append(&quot;, isEmail=&quot;).append(isEmail);</span>
+<span class="nc" id="L589">        sb.append(&quot;, isPassword=&quot;).append(isPassword);</span>
+<span class="nc" id="L590">        sb.append(&quot;, isModel=&quot;).append(isModel);</span>
+<span class="nc" id="L591">        sb.append(&quot;, isFreeFormObject=&quot;).append(isFreeFormObject);</span>
+<span class="nc" id="L592">        sb.append(&quot;, isAnyType=&quot;).append(isAnyType);</span>
+<span class="nc" id="L593">        sb.append(&quot;, isDefault=&quot;).append(isDefault);</span>
+<span class="nc" id="L594">        sb.append(&quot;, simpleType=&quot;).append(simpleType);</span>
+<span class="nc" id="L595">        sb.append(&quot;, primitiveType=&quot;).append(primitiveType);</span>
+<span class="nc" id="L596">        sb.append(&quot;, isMap=&quot;).append(isMap);</span>
+<span class="nc" id="L597">        sb.append(&quot;, isArray=&quot;).append(isArray);</span>
+<span class="nc" id="L598">        sb.append(&quot;, isBinary=&quot;).append(isBinary);</span>
+<span class="nc" id="L599">        sb.append(&quot;, isFile=&quot;).append(isFile);</span>
+<span class="nc" id="L600">        sb.append(&quot;, schema=&quot;).append(schema);</span>
+<span class="nc" id="L601">        sb.append(&quot;, jsonSchema='&quot;).append(jsonSchema).append('\'');</span>
+<span class="nc" id="L602">        sb.append(&quot;, vendorExtensions=&quot;).append(vendorExtensions);</span>
+<span class="nc" id="L603">        sb.append(&quot;, maxProperties=&quot;).append(maxProperties);</span>
+<span class="nc" id="L604">        sb.append(&quot;, minProperties=&quot;).append(minProperties);</span>
+<span class="nc" id="L605">        sb.append(&quot;, uniqueItems=&quot;).append(uniqueItems);</span>
+<span class="nc" id="L606">        sb.append(&quot;, uniqueItemsBoolean=&quot;).append(uniqueItemsBoolean);</span>
+<span class="nc" id="L607">        sb.append(&quot;, maxItems=&quot;).append(maxItems);</span>
+<span class="nc" id="L608">        sb.append(&quot;, minItems=&quot;).append(minItems);</span>
+<span class="nc" id="L609">        sb.append(&quot;, maxLength=&quot;).append(maxLength);</span>
+<span class="nc" id="L610">        sb.append(&quot;, minLength=&quot;).append(minLength);</span>
+<span class="nc" id="L611">        sb.append(&quot;, exclusiveMinimum=&quot;).append(exclusiveMinimum);</span>
+<span class="nc" id="L612">        sb.append(&quot;, exclusiveMaximum=&quot;).append(exclusiveMaximum);</span>
+<span class="nc" id="L613">        sb.append(&quot;, minimum='&quot;).append(minimum).append('\'');</span>
+<span class="nc" id="L614">        sb.append(&quot;, maximum='&quot;).append(maximum).append('\'');</span>
+<span class="nc" id="L615">        sb.append(&quot;, pattern='&quot;).append(pattern).append('\'');</span>
+<span class="nc" id="L616">        sb.append(&quot;, multipleOf='&quot;).append(multipleOf).append('\'');</span>
+<span class="nc" id="L617">        sb.append(&quot;, items='&quot;).append(items).append('\'');</span>
+<span class="nc" id="L618">        sb.append(&quot;, additionalProperties='&quot;).append(additionalProperties).append('\'');</span>
+<span class="nc" id="L619">        sb.append(&quot;, vars='&quot;).append(vars).append('\'');</span>
+<span class="nc" id="L620">        sb.append(&quot;, requiredVars='&quot;).append(requiredVars).append('\'');</span>
+<span class="nc" id="L621">        sb.append(&quot;, isNull='&quot;).append(isNull);</span>
+<span class="nc" id="L622">        sb.append(&quot;, isVoid='&quot;).append(isVoid);</span>
+<span class="nc" id="L623">        sb.append(&quot;, hasValidation='&quot;).append(hasValidation);</span>
+<span class="nc" id="L624">        sb.append(&quot;, getAdditionalPropertiesIsAnyType=&quot;).append(additionalPropertiesIsAnyType);</span>
+<span class="nc" id="L625">        sb.append(&quot;, getHasVars=&quot;).append(hasVars);</span>
+<span class="nc" id="L626">        sb.append(&quot;, getHasRequired=&quot;).append(hasRequired);</span>
+<span class="nc" id="L627">        sb.append(&quot;, getHasDiscriminatorWithNonEmptyMapping=&quot;).append(hasDiscriminatorWithNonEmptyMapping);</span>
+<span class="nc" id="L628">        sb.append(&quot;, composedSchemas=&quot;).append(composedSchemas);</span>
+<span class="nc" id="L629">        sb.append(&quot;, hasMultipleTypes=&quot;).append(hasMultipleTypes);</span>
+<span class="nc" id="L630">        sb.append(&quot;, responseHeaders=&quot;).append(responseHeaders);</span>
+<span class="nc" id="L631">        sb.append(&quot;, content=&quot;).append(content);</span>
+<span class="nc" id="L632">        sb.append(&quot;, requiredVarsMap=&quot;).append(requiredVarsMap);</span>
+<span class="nc" id="L633">        sb.append(&quot;, ref=&quot;).append(ref);</span>
+<span class="nc" id="L634">        sb.append(&quot;, schemaIsFromAdditionalProperties=&quot;).append(schemaIsFromAdditionalProperties);</span>
+<span class="nc" id="L635">        sb.append('}');</span>
+<span class="nc" id="L636">        return sb.toString();</span>
+    }
+
+    // this is used in templates. Do not remove it.
+    @SuppressWarnings(&quot;unused&quot;)
+    public boolean isWildcard() {
+<span class="pc bpc" id="L642" title="2 of 4 branches missed.">        return &quot;0&quot;.equals(code) || &quot;default&quot;.equals(code);</span>
+    }
+
+    /*
+     * Boolean value indicating whether the status code is a range
+     *
+     * @return True if the status code is a range (e.g. 2XX)
+     */
+    public boolean isRange() {
+<span class="pc bpc" id="L651" title="3 of 6 branches missed.">        if (code != null &amp;&amp; code.length() == 3 &amp;&amp; &quot;XX&quot;.equalsIgnoreCase(code.substring(1)))</span>
+<span class="nc" id="L652">            return true;</span>
+<span class="fc" id="L653">        return false;</span>
+    }
+
+    @Override
+    public boolean getIsNull() {
+<span class="nc" id="L658">        return isNull;</span>
+    }
+
+    @Override
+    public void setIsNull(boolean isNull) {
+<span class="nc" id="L663">        this.isNull = isNull;</span>
+<span class="nc" id="L664">    }</span>
+
+    @Override
+    public boolean getIsVoid() {
+<span class="nc" id="L668">        return isVoid;</span>
+    }
+
+    @Override
+    public void setIsVoid(boolean isVoid) {
+<span class="nc" id="L673">        this.isVoid = isVoid;</span>
+<span class="nc" id="L674">    }</span>
+
+    @Override
+    public boolean getHasValidation() {
+<span class="nc" id="L678">        return hasValidation;</span>
+    }
+
+    @Override
+    public void setHasValidation(boolean hasValidation) {
+<span class="nc" id="L683">        this.hasValidation = hasValidation;</span>
+<span class="nc" id="L684">    }</span>
+
+    @Override
+    public boolean getAdditionalPropertiesIsAnyType() {
+<span class="nc" id="L688">        return additionalPropertiesIsAnyType;</span>
+    }
+
+    @Override
+    public void setAdditionalPropertiesIsAnyType(boolean additionalPropertiesIsAnyType) {
+<span class="nc" id="L693">        this.additionalPropertiesIsAnyType = additionalPropertiesIsAnyType;</span>
+<span class="nc" id="L694">    }</span>
+
+    @Override
+    public boolean getHasVars() {
+<span class="nc" id="L698">        return this.hasVars;</span>
+    }
+
+    @Override
+    public void setHasVars(boolean hasVars) {
+<span class="nc" id="L703">        this.hasVars = hasVars;</span>
+<span class="nc" id="L704">    }</span>
+
+    @Override
+    public boolean getHasDiscriminatorWithNonEmptyMapping() {
+<span class="nc" id="L708">        return hasDiscriminatorWithNonEmptyMapping;</span>
+    }
+
+    ;
+
+    @Override
+    public void setHasDiscriminatorWithNonEmptyMapping(boolean hasDiscriminatorWithNonEmptyMapping) {
+<span class="nc" id="L715">        this.hasDiscriminatorWithNonEmptyMapping = hasDiscriminatorWithNonEmptyMapping;</span>
+<span class="nc" id="L716">    }</span>
+
+    @Override
+    public boolean getIsString() {
+<span class="nc" id="L720">        return isString;</span>
+    }
+
+    @Override
+    public void setIsString(boolean isString) {
+<span class="nc" id="L725">        this.isString = isString;</span>
+<span class="nc" id="L726">    }</span>
+
+    @Override
+    public boolean getIsNumber() {
+<span class="nc" id="L730">        return isNumber;</span>
+    }
+
+    @Override
+    public void setIsNumber(boolean isNumber) {
+<span class="nc" id="L735">        this.isNumber = isNumber;</span>
+<span class="nc" id="L736">    }</span>
+
+    @Override
+    public boolean getIsAnyType() {
+<span class="nc" id="L740">        return isAnyType;</span>
+    }
+
+    @Override
+    public void setIsAnyType(boolean isAnyType) {
+<span class="nc" id="L745">        this.isAnyType = isAnyType;</span>
+<span class="nc" id="L746">    }</span>
+
+    @Override
+    public boolean getIsFreeFormObject() {
+<span class="nc" id="L750">        return isFreeFormObject;</span>
+    }
+
+    @Override
+    public void setIsFreeFormObject(boolean isFreeFormObject) {
+<span class="nc" id="L755">        this.isFreeFormObject = isFreeFormObject;</span>
+<span class="nc" id="L756">    }</span>
+
+    @Override
+    public void setComposedSchemas(CodegenComposedSchemas composedSchemas) {
+<span class="fc" id="L760">        this.composedSchemas = composedSchemas;</span>
+<span class="fc" id="L761">    }</span>
+
+    @Override
+    public CodegenComposedSchemas getComposedSchemas() {
+<span class="nc" id="L765">        return composedSchemas;</span>
+    }
+
+    @Override
+    public boolean getHasMultipleTypes() {
+<span class="nc" id="L770">        return hasMultipleTypes;</span>
+    }
+
+    @Override
+    public void setHasMultipleTypes(boolean hasMultipleTypes) {
+<span class="nc" id="L775">        this.hasMultipleTypes = hasMultipleTypes;</span>
+<span class="nc" id="L776">    }</span>
+
+    @Override
+    public String getBaseType() {
+<span class="nc" id="L780">        return baseType;</span>
+    }
+
+    @Override
+<span class="nc" id="L784">    public Map&lt;String, CodegenProperty&gt; getRequiredVarsMap() { return requiredVarsMap; }</span>
+
+    @Override
+<span class="nc" id="L787">    public void setRequiredVarsMap(Map&lt;String, CodegenProperty&gt; requiredVarsMap) { this.requiredVarsMap=requiredVarsMap; }</span>
+
+    @Override
+<span class="nc" id="L790">    public String getRef() { return ref; }</span>
+
+    @Override
+<span class="nc" id="L793">    public void setRef(String ref) { this.ref=ref; }</span>
+
+    @Override
+    public boolean getSchemaIsFromAdditionalProperties() {
+<span class="nc" id="L797">        return schemaIsFromAdditionalProperties;</span>
+    }
+
+    @Override
+    public void setSchemaIsFromAdditionalProperties(boolean schemaIsFromAdditionalProperties) {
+<span class="nc" id="L802">        this.schemaIsFromAdditionalProperties = schemaIsFromAdditionalProperties;</span>
+<span class="nc" id="L803">    }</span>
+
+    @Override
+    public String getDataType() {
+<span class="nc" id="L807">        return dataType;</span>
+    }
+
+    @Override
+    public void setDataType(String dataType) {
+<span class="nc" id="L812">        this.dataType = dataType;</span>
+<span class="nc" id="L813">    }</span>
+
+    @Override
+    public boolean getIsFloat() {
+<span class="nc" id="L817">        return isFloat;</span>
+    }
+
+    @Override
+    public void setIsFloat(boolean isFloat) {
+<span class="nc" id="L822">        this.isFloat = isFloat;</span>
+<span class="nc" id="L823">    }</span>
+
+    @Override
+    public boolean getIsDouble() {
+<span class="nc" id="L827">        return isDouble;</span>
+    }
+
+    @Override
+    public void setIsDouble(boolean isDouble) {
+<span class="nc" id="L832">        this.isDouble = isDouble;</span>
+<span class="nc" id="L833">    }</span>
+
+    @Override
+    public boolean getIsInteger() {
+<span class="nc" id="L837">        return isInteger;</span>
+    }
+
+    @Override
+    public void setIsInteger(boolean isInteger) {
+<span class="nc" id="L842">        this.isInteger = isInteger;</span>
+<span class="nc" id="L843">    }</span>
+
+    @Override
+    public boolean getIsLong() {
+<span class="nc" id="L847">        return isLong;</span>
+    }
+
+    @Override
+    public void setIsLong(boolean isLong) {
+<span class="nc" id="L852">        this.isLong = isLong;</span>
+<span class="nc" id="L853">    }</span>
+
+    @Override
+    public boolean getIsBinary() {
+<span class="nc" id="L857">        return isBinary;</span>
+    }
+
+    @Override
+    public void setIsBinary(boolean isBinary) {
+<span class="nc" id="L862">        this.isBinary = isBinary;</span>
+<span class="nc" id="L863">    }</span>
+
+    @Override
+    public boolean getIsByteArray() {
+<span class="nc" id="L867">        return isByteArray;</span>
+    }
+
+    @Override
+    public void setIsByteArray(boolean isByteArray) {
+<span class="nc" id="L872">        this.isByteArray = isByteArray;</span>
+<span class="nc" id="L873">    }</span>
+
+    @Override
+    public boolean getIsDecimal() {
+<span class="nc" id="L877">        return isDecimal;</span>
+    }
+
+    @Override
+    public void setIsDecimal(boolean isDecimal) {
+<span class="nc" id="L882">        this.isDecimal = isDecimal;</span>
+<span class="nc" id="L883">    }</span>
+
+    @Override
+    public boolean getIsEnum() {
+<span class="nc" id="L887">        return false;</span>
+    }
+
+    @Override
+<span class="nc" id="L891">    public void setIsEnum(boolean isEnum) {}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

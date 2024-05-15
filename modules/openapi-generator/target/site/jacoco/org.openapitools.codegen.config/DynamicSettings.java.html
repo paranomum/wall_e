@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DynamicSettings.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.config</a> &gt; <span class="el_source">DynamicSettings.java</span></div><h1>DynamicSettings.java</h1><pre class="source lang-java linenums">package org.openapitools.codegen.config;
+
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.api.TemplateDefinition;
+import org.openapitools.codegen.api.TemplateFileType;
+
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.stream.Collectors;
+
+/**
+ * Represents a serialization helper of {@link org.openapitools.codegen.config.GeneratorSettings} and {@link org.openapitools.codegen.config.WorkflowSettings}. When used to deserialize any available Jackson binding input,
+ * this will accumulate any &quot;unknown properties&quot; into {@link org.openapitools.codegen.config.GeneratorSettings#getAdditionalProperties()} as a side effect of calling
+ * {@link org.openapitools.codegen.config.DynamicSettings#getGeneratorSettings()}.
+ */
+@SuppressWarnings({&quot;unused&quot;, &quot;WeakerAccess&quot;})
+public class DynamicSettings {
+<span class="nc" id="L23">    @JsonAnySetter</span>
+    private Map&lt;String, Object&gt; dynamicProperties = new HashMap&lt;&gt;();
+
+    @JsonUnwrapped
+    @JsonDeserialize(builder = GeneratorSettings.Builder.class)
+    private GeneratorSettings generatorSettings;
+
+    @JsonUnwrapped
+    @JsonDeserialize(builder = WorkflowSettings.Builder.class)
+    private WorkflowSettings workflowSettings;
+
+    /**
+     * Gets the list of template files allowing user redefinition and addition of templating files
+     *
+     * @return A list of template files
+     */
+    public List&lt;TemplateDefinition&gt; getFiles() {
+<span class="nc bnc" id="L40" title="All 2 branches missed.">        if (files == null) return new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L42">        return files.entrySet().stream().map(kvp -&gt; {</span>
+<span class="nc" id="L43">            TemplateDefinition file = kvp.getValue();</span>
+<span class="nc" id="L44">            String templateFile = kvp.getKey();</span>
+<span class="nc" id="L45">            String destination = file.getDestinationFilename();</span>
+<span class="nc bnc" id="L46" title="All 4 branches missed.">            if (TemplateFileType.SupportingFiles.equals(file.getTemplateType()) &amp;&amp; StringUtils.isBlank(destination)) {</span>
+                // this special case allows definitions such as LICENSE:{}
+<span class="nc" id="L48">                destination = templateFile;</span>
+            }
+<span class="nc" id="L50">            TemplateDefinition definition = new TemplateDefinition(templateFile, file.getFolder(), destination);</span>
+<span class="nc" id="L51">            definition.setTemplateType(file.getTemplateType());</span>
+<span class="nc" id="L52">            return definition;</span>
+<span class="nc" id="L53">        }).collect(Collectors.toList());</span>
+    }
+
+    @SuppressWarnings(&quot;MismatchedQueryAndUpdateOfCollection&quot;)
+    @JsonProperty(&quot;files&quot;)
+    private Map&lt;String, TemplateDefinition&gt; files;
+
+    /**
+     * Gets the {@link org.openapitools.codegen.config.GeneratorSettings} included in the config object.
+     *
+     * @return A new instance of settings
+     */
+    public GeneratorSettings getGeneratorSettings() {
+<span class="nc" id="L66">        excludeSettingsFromDynamicProperties();</span>
+<span class="nc" id="L67">        GeneratorSettings.Builder builder = GeneratorSettings.newBuilder(generatorSettings);</span>
+
+        // This allows us to put any unknown top-level properties into additionalProperties of the generator object.
+<span class="nc bnc" id="L70" title="All 2 branches missed.">        for (Map.Entry&lt;String, Object&gt; entry : dynamicProperties.entrySet()) {</span>
+<span class="nc" id="L71">            builder.withAdditionalProperty(entry.getKey(), entry.getValue());</span>
+<span class="nc" id="L72">        }</span>
+
+<span class="nc" id="L74">        return builder.build();</span>
+    }
+
+    /**
+     * Gets the {@link org.openapitools.codegen.config.WorkflowSettings} included in the config object.
+     *
+     * @return A new instance of settings
+     */
+    public WorkflowSettings getWorkflowSettings() {
+<span class="nc" id="L83">        excludeSettingsFromDynamicProperties();</span>
+<span class="nc" id="L84">        return WorkflowSettings.newBuilder(workflowSettings)</span>
+<span class="nc" id="L85">                .build();</span>
+    }
+
+    /**
+     * &lt;p&gt;Constructor for DynamicSettings.&lt;/p&gt;
+     */
+    @JsonCreator
+<span class="nc" id="L92">    public DynamicSettings() { }</span>
+
+    /**
+     * Gets all &quot;custom&quot; properties included in the config object.
+     *
+     * @return All user-specified custom properties.
+     */
+    public Map&lt;String, Object&gt; getDynamicProperties() {
+<span class="nc" id="L100">        return dynamicProperties;</span>
+    }
+
+    private void excludeSettingsFromDynamicProperties(){
+<span class="nc" id="L104">        Set&lt;String&gt; fieldNames = new HashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">        for (Field field : GeneratorSettings.class.getDeclaredFields()) {</span>
+<span class="nc" id="L106">            fieldNames.add(field.getName());</span>
+        }
+<span class="nc bnc" id="L108" title="All 2 branches missed.">        for (Field field : WorkflowSettings.class.getDeclaredFields()) {</span>
+<span class="nc" id="L109">            fieldNames.add(field.getName());</span>
+        }
+<span class="nc" id="L111">        dynamicProperties.keySet().removeAll(fieldNames);</span>
+<span class="nc" id="L112">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

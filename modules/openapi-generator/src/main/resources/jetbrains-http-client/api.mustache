@@ -1,0 +1,37 @@
+## {{classname}}
+{{#operations}}
+{{#operation}}
+
+{{#vendorExtensions.requests}}
+### {{#summary}}{{summary}}{{/summary}}
+## {{name}}
+{{httpMethod}} {{basePath}}{{#lambda.doubleMustache}}{{path}}{{/lambda.doubleMustache}}{{#authMethods}}{{#isKeyInQuery}}?{{keyParamName}}={{#lambda.doubleMustache}}{queryKey}{{/lambda.doubleMustache}}{{/isKeyInQuery}}{{/authMethods}}
+{{#consumes}}
+Content-Type: {{{mediaType}}}
+{{/consumes}}
+{{#produces}}
+Accept: {{{mediaType}}}
+{{/produces}}
+{{#vendorExtensions.customHeaders}}
+{{{.}}}
+{{/vendorExtensions.customHeaders}}
+{{#authMethods}}
+    {{#isKeyInCookie}}
+Cookie: {{keyParamName}}={{#lambda.doubleMustache}}{cookieKey}{{/lambda.doubleMustache}}
+    {{/isKeyInCookie}}
+    {{#isKeyInHeader}}
+{{keyParamName}}: {{#lambda.doubleMustache}}{apiKey}{{/lambda.doubleMustache}}
+    {{/isKeyInHeader}}
+    {{#isBasicBasic}}
+Authorization: Basic: {{#lambda.doubleMustache}}{username-password}{{/lambda.doubleMustache}}
+    {{/isBasicBasic}}
+    {{#isBasicBearer}}
+Authorization: Bearer {{#lambda.doubleMustache}}{bearerToken}{{/lambda.doubleMustache}}
+    {{/isBasicBearer}}
+{{/authMethods}}
+{{#body}}
+
+{{{.}}}
+
+{{/body}}
+{{/vendorExtensions.requests}}{{/operation}}{{/operations}}

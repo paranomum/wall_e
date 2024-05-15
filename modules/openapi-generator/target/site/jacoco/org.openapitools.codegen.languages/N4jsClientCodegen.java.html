@@ -1,0 +1,698 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>N4jsClientCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">N4jsClientCodegen.java</span></div><h1>N4jsClientCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import static org.openapitools.codegen.CodegenConstants.API_NAME_PREFIX;
+import static org.openapitools.codegen.CodegenConstants.API_NAME_PREFIX_DESC;
+import static org.openapitools.codegen.CodegenConstants.API_PACKAGE;
+import static org.openapitools.codegen.CodegenConstants.API_PACKAGE_DESC;
+import static org.openapitools.codegen.CodegenConstants.MODEL_PACKAGE;
+import static org.openapitools.codegen.CodegenConstants.MODEL_PACKAGE_DESC;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.openapitools.codegen.CliOption;
+import org.openapitools.codegen.CodegenConfig;
+import org.openapitools.codegen.CodegenModel;
+import org.openapitools.codegen.CodegenOperation;
+import org.openapitools.codegen.CodegenProperty;
+import org.openapitools.codegen.CodegenResponse;
+import org.openapitools.codegen.CodegenSecurity;
+import org.openapitools.codegen.CodegenType;
+import org.openapitools.codegen.DefaultCodegen;
+import org.openapitools.codegen.IJsonSchemaValidationProperties;
+import org.openapitools.codegen.SupportingFile;
+import org.openapitools.codegen.config.GlobalSettings;
+import org.openapitools.codegen.meta.GeneratorMetadata;
+import org.openapitools.codegen.meta.Stability;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.utils.ModelUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.Parameter;
+
+public class N4jsClientCodegen extends DefaultCodegen implements CodegenConfig {
+    public static final String CHECK_REQUIRED_PARAMS_NOT_NULL = &quot;checkRequiredParamsNotNull&quot;;
+    public static final String CHECK_SUPERFLUOUS_BODY_PROPS = &quot;checkSuperfluousBodyProps&quot;;
+    public static final String GENERATE_DEFAULT_API_EXECUTER = &quot;generateDefaultApiExecuter&quot;;
+
+<span class="nc" id="L74">    final Logger LOGGER = LoggerFactory.getLogger(N4jsClientCodegen.class);</span>
+
+<span class="nc" id="L76">    final Set&lt;String&gt; forbiddenChars = new HashSet&lt;&gt;();</span>
+
+<span class="nc" id="L78">    private boolean checkRequiredBodyPropsNotNull = true;</span>
+<span class="nc" id="L79">    private boolean checkSuperfluousBodyProps = true;</span>
+<span class="nc" id="L80">    private boolean generateDefaultApiExecuter = true;</span>
+
+    public CodegenType getTag() {
+<span class="nc" id="L83">        return CodegenType.CLIENT;</span>
+    }
+
+    public String getName() {
+<span class="nc" id="L87">        return &quot;n4js&quot;;</span>
+    }
+
+    public String getHelp() {
+<span class="nc" id="L91">        return &quot;Generates a n4js client.&quot;;</span>
+    }
+
+    public N4jsClientCodegen() {
+<span class="nc" id="L95">        super();</span>
+
+<span class="nc" id="L97">        generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
+<span class="nc" id="L98">                .stability(Stability.BETA)</span>
+<span class="nc" id="L99">                .build();</span>
+
+<span class="nc" id="L101">        specialCharReplacements.clear();</span>
+
+<span class="nc" id="L103">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;n4js&quot;;</span>
+<span class="nc" id="L104">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.n4jsd&quot;);</span>
+<span class="nc" id="L105">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.n4js&quot;);</span>
+<span class="nc" id="L106">        embeddedTemplateDir = templateDir = &quot;n4js&quot;;</span>
+<span class="nc" id="L107">        apiPackage = &quot;&quot;;</span>
+<span class="nc" id="L108">        modelPackage = &quot;&quot;;</span>
+
+<span class="nc" id="L110">        typeMapping = new HashMap&lt;String, String&gt;();</span>
+<span class="nc" id="L111">        typeMapping.put(&quot;Set&quot;, &quot;Set&quot;);</span>
+<span class="nc" id="L112">        typeMapping.put(&quot;set&quot;, &quot;Set&quot;);</span>
+<span class="nc" id="L113">        typeMapping.put(&quot;Array&quot;, &quot;Array&quot;);</span>
+<span class="nc" id="L114">        typeMapping.put(&quot;array&quot;, &quot;Array&quot;);</span>
+<span class="nc" id="L115">        typeMapping.put(&quot;boolean&quot;, &quot;boolean&quot;);</span>
+<span class="nc" id="L116">        typeMapping.put(&quot;string&quot;, &quot;string&quot;);</span>
+<span class="nc" id="L117">        typeMapping.put(&quot;char&quot;, &quot;string&quot;);</span>
+<span class="nc" id="L118">        typeMapping.put(&quot;float&quot;, &quot;number&quot;);</span>
+<span class="nc" id="L119">        typeMapping.put(&quot;long&quot;, &quot;int&quot;);</span>
+<span class="nc" id="L120">        typeMapping.put(&quot;short&quot;, &quot;int&quot;);</span>
+<span class="nc" id="L121">        typeMapping.put(&quot;int&quot;, &quot;int&quot;);</span>
+<span class="nc" id="L122">        typeMapping.put(&quot;integer&quot;, &quot;int&quot;);</span>
+<span class="nc" id="L123">        typeMapping.put(&quot;number&quot;, &quot;number&quot;);</span>
+<span class="nc" id="L124">        typeMapping.put(&quot;double&quot;, &quot;number&quot;);</span>
+<span class="nc" id="L125">        typeMapping.put(&quot;object&quot;, &quot;object&quot;);</span>
+<span class="nc" id="L126">        typeMapping.put(&quot;Map&quot;, &quot;any&quot;);</span>
+<span class="nc" id="L127">        typeMapping.put(&quot;map&quot;, &quot;any&quot;);</span>
+<span class="nc" id="L128">        typeMapping.put(&quot;date&quot;, &quot;string&quot;);</span>
+<span class="nc" id="L129">        typeMapping.put(&quot;DateTime&quot;, &quot;string&quot;);</span>
+<span class="nc" id="L130">        typeMapping.put(&quot;binary&quot;, &quot;any&quot;);</span>
+<span class="nc" id="L131">        typeMapping.put(&quot;File&quot;, &quot;any&quot;);</span>
+<span class="nc" id="L132">        typeMapping.put(&quot;file&quot;, &quot;any&quot;);</span>
+<span class="nc" id="L133">        typeMapping.put(&quot;ByteArray&quot;, &quot;string&quot;);</span>
+<span class="nc" id="L134">        typeMapping.put(&quot;UUID&quot;, &quot;string&quot;);</span>
+<span class="nc" id="L135">        typeMapping.put(&quot;URI&quot;, &quot;string&quot;);</span>
+<span class="nc" id="L136">        typeMapping.put(&quot;Error&quot;, &quot;Error&quot;);</span>
+<span class="nc" id="L137">        typeMapping.put(&quot;AnyType&quot;, &quot;any&quot;);</span>
+
+<span class="nc" id="L139">        importMapping.clear(); // not used</span>
+
+<span class="nc" id="L141">        supportsInheritance = true;</span>
+<span class="nc" id="L142">        supportsMultipleInheritance = false;</span>
+
+<span class="nc" id="L144">        reservedWords.addAll(Arrays.asList(</span>
+                // local variable names used in API methods (endpoints)
+                &quot;varLocalPath&quot;, &quot;queryParameters&quot;, &quot;headerParams&quot;, &quot;formParams&quot;, &quot;useFormData&quot;, &quot;varLocalDeferred&quot;,
+                &quot;requestOptions&quot;,
+                // N4JS reserved words
+                &quot;abstract&quot;, &quot;await&quot;, &quot;boolean&quot;, &quot;break&quot;, &quot;byte&quot;, &quot;case&quot;, &quot;catch&quot;, &quot;char&quot;, &quot;class&quot;, &quot;const&quot;, &quot;continue&quot;,
+                &quot;debugger&quot;, &quot;default&quot;, &quot;delete&quot;, &quot;do&quot;, &quot;double&quot;, &quot;else&quot;, &quot;enum&quot;, &quot;export&quot;, &quot;extends&quot;, &quot;false&quot;, &quot;final&quot;,
+                &quot;finally&quot;, &quot;float&quot;, &quot;for&quot;, &quot;function&quot;, &quot;goto&quot;, &quot;if&quot;, &quot;implements&quot;, &quot;import&quot;, &quot;in&quot;, &quot;instanceof&quot;, &quot;int&quot;,
+                &quot;interface&quot;, &quot;let&quot;, &quot;long&quot;, &quot;native&quot;, &quot;new&quot;, &quot;null&quot;, &quot;package&quot;, &quot;private&quot;, &quot;protected&quot;, &quot;public&quot;,
+                &quot;return&quot;, &quot;short&quot;, &quot;static&quot;, &quot;super&quot;, &quot;switch&quot;, &quot;synchronized&quot;, &quot;this&quot;, &quot;throw&quot;, &quot;transient&quot;, &quot;true&quot;,
+                &quot;try&quot;, &quot;typeof&quot;, &quot;var&quot;, &quot;void&quot;, &quot;volatile&quot;, &quot;while&quot;, &quot;with&quot;, &quot;yield&quot;));
+
+<span class="nc" id="L156">        languageSpecificPrimitives = new HashSet&lt;&gt;(Arrays.asList(&quot;string&quot;, &quot;String&quot;, &quot;boolean&quot;, &quot;number&quot;, &quot;int&quot;,</span>
+                &quot;Object&quot;, &quot;object&quot;, &quot;Array&quot;, &quot;any&quot;, &quot;any+&quot;, &quot;Error&quot;));
+
+<span class="nc" id="L159">        defaultIncludes.add(&quot;~Object+&quot;);</span>
+<span class="nc" id="L160">        defaultIncludes.add(&quot;Object+&quot;);</span>
+
+<span class="nc" id="L162">        forbiddenChars.add(&quot;@&quot;);</span>
+
+<span class="nc" id="L164">        cliOptions.clear();</span>
+<span class="nc" id="L165">        cliOptions.add(new CliOption(API_PACKAGE, API_PACKAGE_DESC));</span>
+<span class="nc" id="L166">        cliOptions.add(new CliOption(MODEL_PACKAGE, MODEL_PACKAGE_DESC));</span>
+<span class="nc" id="L167">        cliOptions.add(new CliOption(API_NAME_PREFIX, API_NAME_PREFIX_DESC));</span>
+<span class="nc" id="L168">        cliOptions.add(new CliOption(CHECK_REQUIRED_PARAMS_NOT_NULL,</span>
+                &quot;Iff true null-checks are performed for required parameters.&quot;));
+<span class="nc" id="L170">        cliOptions.add(new CliOption(CHECK_SUPERFLUOUS_BODY_PROPS,</span>
+                &quot;Iff true a new copy of the given body object is transmitted. This copy only contains those properties defined in its model specification.&quot;));
+<span class="nc" id="L172">        cliOptions.add(new CliOption(GENERATE_DEFAULT_API_EXECUTER,</span>
+                &quot;Iff true a default implementation of the api executer interface is generated.&quot;));
+<span class="nc" id="L174">    }</span>
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L178">        super.processOpts();</span>
+
+        // disable since otherwise Modules/Classes are not generated iff used as
+        // parameters only
+<span class="nc" id="L182">        GlobalSettings.setProperty(&quot;skipFormModel&quot;, &quot;false&quot;);</span>
+
+<span class="nc" id="L184">        supportingFiles.clear();</span>
+<span class="nc" id="L185">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;));</span>
+<span class="nc" id="L186">        supportingFiles.add(new SupportingFile(&quot;ApiHelper.mustache&quot;, apiPackage, &quot;ApiHelper.n4js&quot;));</span>
+
+<span class="nc" id="L188">        checkRequiredBodyPropsNotNull = processBooleanOpt(CHECK_REQUIRED_PARAMS_NOT_NULL,</span>
+                checkRequiredBodyPropsNotNull);
+<span class="nc" id="L190">        checkSuperfluousBodyProps = processBooleanOpt(CHECK_SUPERFLUOUS_BODY_PROPS, checkSuperfluousBodyProps);</span>
+<span class="nc" id="L191">        generateDefaultApiExecuter = processBooleanOpt(GENERATE_DEFAULT_API_EXECUTER, generateDefaultApiExecuter);</span>
+
+<span class="nc bnc" id="L193" title="All 2 branches missed.">        if (additionalProperties.get(API_PACKAGE) instanceof String) {</span>
+<span class="nc" id="L194">            apiPackage = additionalProperties.get(API_PACKAGE).toString();</span>
+        } else {
+<span class="nc" id="L196">            additionalProperties.put(API_PACKAGE, apiPackage);</span>
+        }
+
+<span class="nc bnc" id="L199" title="All 2 branches missed.">        if (additionalProperties.get(MODEL_PACKAGE) instanceof String) {</span>
+<span class="nc" id="L200">            modelPackage = additionalProperties.get(MODEL_PACKAGE).toString();</span>
+        } else {
+<span class="nc" id="L202">            additionalProperties.put(MODEL_PACKAGE, modelPackage);</span>
+        }
+
+<span class="nc bnc" id="L205" title="All 2 branches missed.">        if (additionalProperties.get(API_NAME_PREFIX) instanceof String) {</span>
+<span class="nc" id="L206">            apiNamePrefix = additionalProperties.get(API_NAME_PREFIX).toString();</span>
+        } else {
+<span class="nc" id="L208">            additionalProperties.put(API_NAME_PREFIX, apiNamePrefix);</span>
+        }
+<span class="nc" id="L210">    }</span>
+
+    private boolean processBooleanOpt(String OPT, boolean defaultValue) {
+<span class="nc" id="L213">        boolean passedValue = defaultValue;</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">        if (additionalProperties.containsKey(OPT)) {</span>
+<span class="nc" id="L215">            Object value = additionalProperties.get(OPT);</span>
+<span class="nc bnc" id="L216" title="All 2 branches missed.">            if (value instanceof Boolean) {</span>
+<span class="nc" id="L217">                passedValue = (Boolean) value;</span>
+            } else {
+                try {
+<span class="nc" id="L220">                    passedValue = Boolean.parseBoolean(value.toString());</span>
+<span class="nc" id="L221">                } catch (Exception e) {</span>
+                    // ignore
+<span class="nc" id="L223">                }</span>
+            }
+        }
+<span class="nc" id="L226">        additionalProperties.put(OPT, passedValue);</span>
+<span class="nc" id="L227">        return defaultValue;</span>
+    }
+
+    @Override
+    public String toModelFilename(String name) {
+<span class="nc bnc" id="L232" title="All 4 branches missed.">        if (typeMapping.containsKey(name) || defaultIncludes.contains(name)) {</span>
+<span class="nc" id="L233">            return name;</span>
+        }
+<span class="nc" id="L235">        return super.toModelFilename(name);</span>
+    }
+
+    public boolean checkRequiredBodyPropsNotNull() {
+<span class="nc" id="L239">        return checkRequiredBodyPropsNotNull;</span>
+    }
+
+    public boolean checkSuperfluousBodyProps() {
+<span class="nc" id="L243">        return checkSuperfluousBodyProps;</span>
+    }
+
+    public boolean generateDefaultApiExecuter() {
+<span class="nc" id="L247">        return generateDefaultApiExecuter;</span>
+    }
+
+    @Override
+    public boolean getUseInlineModelResolver() {
+<span class="nc" id="L252">        return false;</span>
+    }
+
+    @Override
+    public void setOpenAPI(OpenAPI openAPI) {
+<span class="nc" id="L257">        super.setOpenAPI(openAPI);</span>
+<span class="nc" id="L258">        typeAliases.put(&quot;object&quot;, &quot;~Object+&quot;);</span>
+<span class="nc" id="L259">    }</span>
+
+    @Override
+    protected boolean isReservedWord(String word) {
+        // case sensitive matching
+<span class="nc" id="L264">        return reservedWords.contains(word);</span>
+    }
+
+    @Override
+    public String toAnyOfName(List&lt;String&gt; names, Schema composedSchema) {
+<span class="nc" id="L269">        List&lt;String&gt; types = getTypesFromSchemas(composedSchema.getAnyOf());</span>
+<span class="nc" id="L270">        return String.join(&quot; | &quot;, types);</span>
+    }
+
+    @Override
+    public String toOneOfName(List&lt;String&gt; names, Schema composedSchema) {
+<span class="nc" id="L275">        List&lt;String&gt; types = getTypesFromSchemas(composedSchema.getOneOf());</span>
+<span class="nc" id="L276">        return String.join(&quot; | &quot;, types);</span>
+    }
+
+    @Override
+    public String toAllOfName(List&lt;String&gt; names, Schema composedSchema) {
+<span class="nc" id="L281">        List&lt;String&gt; types = getTypesFromSchemas(composedSchema.getAllOf());</span>
+<span class="nc" id="L282">        return String.join(&quot; &amp; &quot;, types);</span>
+    }
+
+    /**
+     * Extracts the list of type names from a list of schemas. Excludes `AnyType` if
+     * there are other valid types extracted.
+     *
+     * @param schemas list of schemas
+     * @return list of types
+     */
+    @SuppressWarnings(&quot;rawtypes&quot;)
+    protected List&lt;String&gt; getTypesFromSchemas(List&lt;Schema&gt; schemas) {
+<span class="nc bnc" id="L294" title="All 2 branches missed.">        List&lt;Schema&gt; filteredSchemas = schemas.size() &gt; 1 ? schemas.stream()</span>
+<span class="nc bnc" id="L295" title="All 2 branches missed.">                .filter(schema -&gt; !&quot;AnyType&quot;.equals(super.getSchemaType(schema))).collect(Collectors.toList())</span>
+<span class="nc" id="L296">                : schemas;</span>
+
+<span class="nc" id="L298">        return filteredSchemas.stream().map(schema -&gt; getTypeDeclaration(schema)).distinct()</span>
+<span class="nc" id="L299">                .collect(Collectors.toList());</span>
+    }
+
+    @Override
+    protected void addImports(Set&lt;String&gt; importsToBeAddedTo, IJsonSchemaValidationProperties type) {
+<span class="nc" id="L304">        Set&lt;String&gt; imports = type.getImports(importContainerType, importBaseType, generatorMetadata.getFeatureSet());</span>
+<span class="nc" id="L305">        Set&lt;String&gt; mappedImports = new HashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L306" title="All 2 branches missed.">        for (String imp : imports) {</span>
+<span class="nc" id="L307">            String mappedImp = imp;</span>
+<span class="nc bnc" id="L308" title="All 2 branches missed.">            if (typeMapping.containsKey(imp)) {</span>
+<span class="nc" id="L309">                mappedImp = typeMapping.get(imp);</span>
+            } else {
+<span class="nc" id="L311">                mappedImp = imp;</span>
+            }
+<span class="nc" id="L313">            mappedImports.add(mappedImp);</span>
+<span class="nc" id="L314">        }</span>
+<span class="nc" id="L315">        addImports(importsToBeAddedTo, mappedImports);</span>
+<span class="nc" id="L316">    }</span>
+
+    @Override
+    protected void addImport(Set&lt;String&gt; importsToBeAddedTo, String type) {
+<span class="nc" id="L320">        String[] parts = splitComposedType(type);</span>
+<span class="nc bnc" id="L321" title="All 2 branches missed.">        for (String s : parts) {</span>
+<span class="nc" id="L322">            super.addImport(importsToBeAddedTo, s);</span>
+        }
+<span class="nc" id="L324">    }</span>
+
+    private String[] splitComposedType(String name) {
+<span class="nc" id="L327">        return name.replace(&quot; &quot;, &quot;&quot;).split(&quot;[|&amp;&lt;&gt;]&quot;);</span>
+    }
+
+    @Override
+    public ModelsMap postProcessModels(ModelsMap objs) {
+<span class="nc" id="L332">        objs = super.postProcessModels(objs);</span>
+
+<span class="nc bnc" id="L334" title="All 2 branches missed.">        for (ModelMap modelMap : objs.getModels()) {</span>
+<span class="nc" id="L335">            CodegenModel cgModel = modelMap.getModel();</span>
+<span class="nc bnc" id="L336" title="All 4 branches missed.">            if (cgModel.unescapedDescription != null &amp;&amp; !cgModel.unescapedDescription.contains(&quot;\n * &quot;)) {</span>
+<span class="nc" id="L337">                cgModel.description = escapeTextWhileAllowingNewLines(cgModel.unescapedDescription.trim()).replace(&quot;\n&quot;,</span>
+                        &quot;\n * &quot;);
+            }
+<span class="nc" id="L340">        }</span>
+
+<span class="nc" id="L342">        postProcessModelsEnum(objs); // enable enums</span>
+<span class="nc" id="L343">        return objs;</span>
+    }
+
+    @Override
+    protected void addImportsForPropertyType(CodegenModel model, CodegenProperty property) {
+<span class="nc bnc" id="L348" title="All 2 branches missed.">        if (model.getIsAnyType()) {</span>
+<span class="nc" id="L349">            return; // disable (unused) imports created for properties of type aliases</span>
+        }
+<span class="nc" id="L351">        super.addImportsForPropertyType(model, property);</span>
+<span class="nc" id="L352">    }</span>
+
+    @Override
+    public Map&lt;String, ModelsMap&gt; postProcessAllModels(Map&lt;String, ModelsMap&gt; objs) {
+<span class="nc" id="L356">        objs = super.postProcessAllModels(objs);</span>
+<span class="nc bnc" id="L357" title="All 2 branches missed.">        for (String modelName : objs.keySet()) {</span>
+<span class="nc" id="L358">            ModelsMap modelsMap = objs.get(modelName);</span>
+
+            // imports
+<span class="nc" id="L361">            List&lt;Map&lt;String, String&gt;&gt; imports = modelsMap.getImports();</span>
+<span class="nc" id="L362">            ArrayList&lt;Map&lt;String, String&gt;&gt; n4jsImports = new ArrayList&lt;Map&lt;String, String&gt;&gt;();</span>
+<span class="nc" id="L363">            modelsMap.put(&quot;n4jsimports&quot;, n4jsImports);</span>
+<span class="nc" id="L364">            String className = modelsMap.get(&quot;classname&quot;).toString();</span>
+<span class="nc bnc" id="L365" title="All 2 branches missed.">            for (Map&lt;String, String&gt; imp : imports) {</span>
+<span class="nc" id="L366">                Map&lt;String, String&gt; n4jsImport = toN4jsImports(className, objs, imp);</span>
+<span class="nc bnc" id="L367" title="All 2 branches missed.">                if (n4jsImport != null) {</span>
+<span class="nc" id="L368">                    n4jsImports.add(n4jsImport);</span>
+                }
+<span class="nc" id="L370">            }</span>
+
+            // app description -&gt; module documentation
+<span class="nc" id="L373">            adjustDescriptionWithNewLines(modelsMap);</span>
+<span class="nc" id="L374">        }</span>
+<span class="nc" id="L375">        return objs;</span>
+    }
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap operations, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L380">        OperationMap objs = operations.getOperations();</span>
+
+<span class="nc" id="L382">        boolean needImportCleanCopyBody = false;</span>
+
+        // The api.mustache template requires all of the auth methods for the whole api
+        // Loop over all the operations and pick out each unique auth method
+<span class="nc" id="L386">        Map&lt;String, CodegenSecurity&gt; authMethodsMap = new HashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L387" title="All 2 branches missed.">        for (CodegenOperation op : objs.getOperation()) {</span>
+<span class="nc bnc" id="L388" title="All 2 branches missed.">            if (op.hasAuthMethods) {</span>
+<span class="nc bnc" id="L389" title="All 2 branches missed.">                for (CodegenSecurity sec : op.authMethods) {</span>
+<span class="nc" id="L390">                    authMethodsMap.put(sec.name, sec);</span>
+<span class="nc" id="L391">                }</span>
+            }
+<span class="nc bnc" id="L393" title="All 4 branches missed.">            if (op.bodyParam != null &amp;&amp; !op.bodyParam.vars.isEmpty()) {</span>
+<span class="nc" id="L394">                needImportCleanCopyBody = true;</span>
+            }
+<span class="nc bnc" id="L396" title="All 4 branches missed.">            if (op.responses != null &amp;&amp; op.responses.size() &gt; 0) {</span>
+<span class="nc" id="L397">                Map&lt;String, CodegenResponse&gt; responses2xx = new LinkedHashMap&lt;&gt;();</span>
+<span class="nc" id="L398">                Map&lt;String, CodegenResponse&gt; responses4xx = new LinkedHashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L399" title="All 2 branches missed.">                for (CodegenResponse response : op.responses) {</span>
+<span class="nc bnc" id="L400" title="All 2 branches missed.">                    if (response.is2xx) {</span>
+<span class="nc" id="L401">                        responses2xx.put(response.baseType, response);</span>
+                    }
+<span class="nc bnc" id="L403" title="All 2 branches missed.">                    if (response.is4xx) {</span>
+<span class="nc" id="L404">                        responses4xx.put(response.baseType, response);</span>
+                    }
+<span class="nc" id="L406">                }</span>
+<span class="nc" id="L407">                op.vendorExtensions.put(&quot;responses2xx&quot;, new ArrayList&lt;&gt;(responses2xx.values()));</span>
+<span class="nc" id="L408">                op.vendorExtensions.put(&quot;responses4xx&quot;, new ArrayList&lt;&gt;(responses4xx.values()));</span>
+            }
+<span class="nc" id="L410">        }</span>
+
+<span class="nc" id="L412">        operations.put(&quot;needImportCleanCopyBody&quot;, needImportCleanCopyBody);</span>
+
+        // If there were any auth methods specified add them to the operations context
+<span class="nc bnc" id="L415" title="All 2 branches missed.">        if (!authMethodsMap.isEmpty()) {</span>
+<span class="nc" id="L416">            operations.put(&quot;authMethods&quot;, authMethodsMap.values());</span>
+<span class="nc" id="L417">            operations.put(&quot;hasAuthMethods&quot;, true);</span>
+        }
+
+        // Add additional filename information for model imports in the apis
+<span class="nc" id="L421">        Iterator&lt;Map&lt;String, String&gt;&gt; iter = operations.getImports().iterator();</span>
+<span class="nc bnc" id="L422" title="All 2 branches missed.">        while (iter.hasNext()) {</span>
+<span class="nc" id="L423">            Map&lt;String, String&gt; im = iter.next();</span>
+<span class="nc" id="L424">            String className = im.get(&quot;classname&quot;);</span>
+<span class="nc" id="L425">            className = convertToModelName(className);</span>
+<span class="nc" id="L426">            String adjClassName = typeMapping.getOrDefault(className, className);</span>
+<span class="nc bnc" id="L427" title="All 2 branches missed.">            if (needToImport(adjClassName)) {</span>
+<span class="nc" id="L428">                im.put(&quot;classname&quot;, className);</span>
+<span class="nc" id="L429">                im.put(&quot;filename&quot;, toModelImport(className));</span>
+            } else {
+<span class="nc" id="L431">                iter.remove();</span>
+            }
+<span class="nc" id="L433">        }</span>
+
+        // app description -&gt; module documentation
+<span class="nc" id="L436">        adjustDescriptionWithNewLines(additionalProperties);</span>
+
+<span class="nc" id="L438">        return operations;</span>
+    }
+
+    private String convertToModelName(String modelName) {
+<span class="nc bnc" id="L442" title="All 2 branches missed.">        if (modelName == null) {</span>
+<span class="nc" id="L443">            return modelName;</span>
+        }
+<span class="nc" id="L445">        Schema&lt;?&gt; schema = ModelUtils.getSchema(openAPI, modelName);</span>
+<span class="nc bnc" id="L446" title="All 2 branches missed.">        if (schema == null) {</span>
+<span class="nc" id="L447">            return modelName;</span>
+        }
+<span class="nc bnc" id="L449" title="All 2 branches missed.">        if (ModelUtils.isObjectSchema(schema)) {</span>
+<span class="nc" id="L450">            return toModelFilename(modelName);</span>
+        }
+<span class="nc" id="L452">        return modelName;</span>
+    }
+
+    private void adjustDescriptionWithNewLines(Map&lt;String, Object&gt; map) {
+<span class="nc bnc" id="L456" title="All 2 branches missed.">        if (map.containsKey(&quot;appDescriptionWithNewLines&quot;)</span>
+<span class="nc bnc" id="L457" title="All 2 branches missed.">                &amp;&amp; !map.get(&quot;appDescriptionWithNewLines&quot;).toString().contains(&quot;\n * &quot;)) {</span>
+
+<span class="nc" id="L459">            String appDescriptionWithNewLines = map.get(&quot;appDescriptionWithNewLines&quot;).toString();</span>
+<span class="nc" id="L460">            appDescriptionWithNewLines = appDescriptionWithNewLines.trim().replace(&quot;\n&quot;, &quot;\n * &quot;);</span>
+<span class="nc" id="L461">            map.put(&quot;appDescriptionWithNewLines&quot;, appDescriptionWithNewLines);</span>
+        }
+<span class="nc" id="L463">    }</span>
+
+    private Map&lt;String, String&gt; toN4jsImports(String className, Map&lt;String, ModelsMap&gt; objs, Map&lt;String, String&gt; imp) {
+<span class="nc" id="L466">        String modelImpName = imp.get(&quot;import&quot;);</span>
+<span class="nc bnc" id="L467" title="All 2 branches missed.">        if (modelImpName == null) {</span>
+<span class="nc" id="L468">            return null;</span>
+        }
+<span class="nc" id="L470">        String modelName = fromModelImport(modelImpName);</span>
+<span class="nc bnc" id="L471" title="All 2 branches missed.">        if (!objs.containsKey(modelName)) {</span>
+<span class="nc" id="L472">            return null;</span>
+        }
+<span class="nc" id="L474">        ModelsMap modelsMap = objs.get(modelName);</span>
+<span class="nc" id="L475">        String impClassName = modelsMap.get(&quot;classname&quot;).toString();</span>
+<span class="nc bnc" id="L476" title="All 4 branches missed.">        if (impClassName == null || Objects.equals(impClassName, className)) {</span>
+<span class="nc" id="L477">            return null;</span>
+        }
+<span class="nc" id="L479">        Map&lt;String, String&gt; n4jsImport = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L480">        n4jsImport.put(&quot;elementname&quot;, impClassName);</span>
+<span class="nc" id="L481">        n4jsImport.put(&quot;modulename&quot;, modelImpName);</span>
+<span class="nc" id="L482">        return n4jsImport;</span>
+    }
+
+    @Override
+    public String toModelImport(String name) {
+<span class="nc" id="L487">     String modelImportName = toModelFilename(name);</span>
+<span class="nc bnc" id="L488" title="All 2 branches missed.">        if (&quot;&quot;.equals(modelPackage())) {</span>
+<span class="nc" id="L489">            return modelImportName;</span>
+        } else {
+<span class="nc" id="L491">            return modelPackage() + &quot;/&quot; + modelImportName;</span>
+        }
+    }
+
+    protected String fromModelImport(String modelImportName) {
+<span class="nc bnc" id="L496" title="All 2 branches missed.">        if (&quot;&quot;.equals(modelPackage())) {</span>
+<span class="nc" id="L497">            return modelImportName;</span>
+<span class="nc bnc" id="L498" title="All 2 branches missed.">        } else if (modelImportName == null) {</span>
+<span class="nc" id="L499">            return modelImportName;</span>
+        } else {
+<span class="nc bnc" id="L501" title="All 2 branches missed.">            if (modelImportName.startsWith(modelPackage() + &quot;/&quot;)) {</span>
+<span class="nc" id="L502">                String nameWithoutModelPackage = modelImportName.substring(1 + modelPackage().length());</span>
+<span class="nc bnc" id="L503" title="All 4 branches missed.">                if (modelNamePrefix != null &amp;&amp; nameWithoutModelPackage.startsWith(modelNamePrefix)) {</span>
+<span class="nc" id="L504">                    return nameWithoutModelPackage.substring(modelNamePrefix.length());</span>
+                }
+<span class="nc" id="L506">                return nameWithoutModelPackage;</span>
+            }
+<span class="nc" id="L508">            return modelImportName;</span>
+        }
+    }
+
+    @SuppressWarnings({&quot;rawtypes&quot;, &quot;unchecked&quot;})
+    @Override
+    public String getTypeDeclaration(Schema p) {
+<span class="nc bnc" id="L515" title="All 2 branches missed.">        if (ModelUtils.isArraySchema(p)) {</span>
+<span class="nc" id="L516">            Schema&lt;?&gt; items = ModelUtils.getSchemaItems(p);</span>
+<span class="nc" id="L517">            return getTypeDeclaration(unaliasSchema(items)) + &quot;[]&quot;;</span>
+<span class="nc bnc" id="L518" title="All 2 branches missed.">        } else if (ModelUtils.isMapSchema(p)) {</span>
+<span class="nc" id="L519">            return &quot;~Object+&quot;;</span>
+<span class="nc bnc" id="L520" title="All 2 branches missed.">        } else if (ModelUtils.isStringSchema(p)) {</span>
+<span class="nc bnc" id="L521" title="All 2 branches missed.">            if (p.getEnum() != null) {</span>
+<span class="nc" id="L522">                return enumValuesToEnumTypeUnion(p.getEnum(), &quot;string&quot;);</span>
+            }
+<span class="nc bnc" id="L524" title="All 4 branches missed.">        } else if (ModelUtils.isIntegerSchema(p) || ModelUtils.isNumberSchema(p)) {</span>
+            // Handle integer and double enums
+<span class="nc bnc" id="L526" title="All 2 branches missed.">            if (p.getEnum() != null) {</span>
+<span class="nc" id="L527">                return numericEnumValuesToEnumTypeUnion(new ArrayList&lt;Number&gt;(p.getEnum()));</span>
+            }
+<span class="nc bnc" id="L529" title="All 2 branches missed.">        } else if (ModelUtils.isFileSchema(p)) {</span>
+<span class="nc" id="L530">            return &quot;File&quot;;</span>
+<span class="nc bnc" id="L531" title="All 2 branches missed.">        } else if (ModelUtils.isObjectSchema(p)</span>
+<span class="nc bnc" id="L532" title="All 2 branches missed.">                || ModelUtils.isObjectSchema(ModelUtils.getReferencedSchema(openAPI, p))) {</span>
+<span class="nc" id="L533">            String result = super.getTypeDeclaration(p);</span>
+<span class="nc" id="L534">            return toModelFilename(result);</span>
+<span class="nc bnc" id="L535" title="All 2 branches missed.">        } else if (ModelUtils.isBinarySchema(p)) {</span>
+<span class="nc" id="L536">            return &quot;ArrayBuffer&quot;;</span>
+        }
+
+<span class="nc" id="L539">        return super.getTypeDeclaration(p);</span>
+    }
+
+    @SuppressWarnings({&quot;rawtypes&quot;, &quot;unchecked&quot;})
+    @Override
+    protected String getParameterDataType(Parameter parameter, Schema p) {
+        // handle enums of various data types
+<span class="nc bnc" id="L546" title="All 2 branches missed.">        if (ModelUtils.isArraySchema(p)) {</span>
+<span class="nc" id="L547">            Schema&lt;?&gt; inner = ModelUtils.getSchemaItems(p);</span>
+<span class="nc" id="L548">            return getParameterDataType(parameter, inner) + &quot;[]&quot;;</span>
+<span class="nc bnc" id="L549" title="All 2 branches missed.">        } else if (ModelUtils.isMapSchema(p)) {</span>
+<span class="nc" id="L550">            return &quot;~Object+&quot;;</span>
+<span class="nc bnc" id="L551" title="All 2 branches missed.">        } else if (ModelUtils.isStringSchema(p)) {</span>
+            // Handle string enums
+<span class="nc bnc" id="L553" title="All 2 branches missed.">            if (p.getEnum() != null) {</span>
+<span class="nc" id="L554">                return enumValuesToEnumTypeUnion(p.getEnum(), &quot;string&quot;);</span>
+            }
+<span class="nc bnc" id="L556" title="All 2 branches missed.">        } else if (ModelUtils.isObjectSchema(p)</span>
+<span class="nc bnc" id="L557" title="All 2 branches missed.">                || ModelUtils.isObjectSchema(ModelUtils.getReferencedSchema(openAPI, p))) {</span>
+<span class="nc" id="L558">            String result = super.getTypeDeclaration(p);</span>
+<span class="nc" id="L559">            return toModelFilename(result);</span>
+<span class="nc bnc" id="L560" title="All 4 branches missed.">        } else if (ModelUtils.isIntegerSchema(p) || ModelUtils.isNumberSchema(p)) {</span>
+            // Handle integer and double enums
+<span class="nc bnc" id="L562" title="All 2 branches missed.">            if (p.getEnum() != null) {</span>
+<span class="nc" id="L563">                return numericEnumValuesToEnumTypeUnion(new ArrayList&lt;Number&gt;(p.getEnum()));</span>
+            }
+        }
+<span class="nc" id="L566">        String result = this.getTypeDeclaration(p);</span>
+<span class="nc bnc" id="L567" title="All 2 branches missed.">        if (result != null) {</span>
+<span class="nc" id="L568">            result = toModelFilename(result);</span>
+        }
+<span class="nc" id="L570">        return result;</span>
+    }
+
+    @Override
+    protected String getSingleSchemaType(@SuppressWarnings(&quot;rawtypes&quot;) Schema schema) {
+<span class="nc" id="L575">        Schema&lt;?&gt; unaliasSchema = unaliasSchema(schema);</span>
+<span class="nc bnc" id="L576" title="All 2 branches missed.">        if (StringUtils.isNotBlank(unaliasSchema.get$ref())) {</span>
+<span class="nc" id="L577">            String schemaName = ModelUtils.getSimpleRef(unaliasSchema.get$ref());</span>
+<span class="nc bnc" id="L578" title="All 2 branches missed.">            if (StringUtils.isNotEmpty(schemaName)) {</span>
+<span class="nc bnc" id="L579" title="All 2 branches missed.">                if (schemaMapping.containsKey(schemaName)) {</span>
+<span class="nc" id="L580">                    return schemaName;</span>
+                }
+            }
+        }
+<span class="nc" id="L584">        String result = super.getSingleSchemaType(unaliasSchema);</span>
+<span class="nc bnc" id="L585" title="All 2 branches missed.">        if (result != null) {</span>
+<span class="nc" id="L586">            result = toModelFilename(result);</span>
+        }
+<span class="nc" id="L588">        return result;</span>
+    }
+
+    /**
+     * Converts a list of strings to a literal union for representing enum values as
+     * a type. Example output: 'available' | 'pending' | 'sold'
+     *
+     * @param values   list of allowed enum values
+     * @param dataType either &quot;string&quot; or &quot;number&quot;
+     * @return a literal union for representing enum values as a type
+     */
+    private String enumValuesToEnumTypeUnion(List&lt;String&gt; values, String dataType) {
+<span class="nc" id="L600">        StringBuilder b = new StringBuilder();</span>
+<span class="nc" id="L601">        boolean isFirst = true;</span>
+<span class="nc bnc" id="L602" title="All 2 branches missed.">        for (String value : values) {</span>
+<span class="nc bnc" id="L603" title="All 2 branches missed.">            if (!isFirst) {</span>
+<span class="nc" id="L604">                b.append(&quot; | &quot;);</span>
+            }
+<span class="nc" id="L606">            b.append(toEnumValue(value, dataType));</span>
+<span class="nc" id="L607">            isFirst = false;</span>
+<span class="nc" id="L608">        }</span>
+<span class="nc" id="L609">        return b.toString();</span>
+    }
+
+    /**
+     * Converts a list of numbers to a literal union for representing enum values as
+     * a type. Example output: 3 | 9 | 55
+     *
+     * @param values a list of numbers
+     * @return a literal union for representing enum values as a type
+     */
+    private String numericEnumValuesToEnumTypeUnion(List&lt;Number&gt; values) {
+<span class="nc" id="L620">        List&lt;String&gt; stringValues = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L621" title="All 2 branches missed.">        for (Number value : values) {</span>
+<span class="nc" id="L622">            stringValues.add(value.toString());</span>
+<span class="nc" id="L623">        }</span>
+<span class="nc" id="L624">        return enumValuesToEnumTypeUnion(stringValues, &quot;number&quot;);</span>
+    }
+
+    @Override
+    public void postProcessModelProperty(CodegenModel model, CodegenProperty property) {
+<span class="nc bnc" id="L629" title="All 4 branches missed.">        if (property.unescapedDescription != null &amp;&amp; property.unescapedDescription.contains(&quot;\n&quot;)) {</span>
+<span class="nc" id="L630">            property.description = escapeTextWhileAllowingNewLines(property.unescapedDescription.trim()).replace(&quot;\n&quot;,</span>
+                    &quot;\n     * &quot;);
+        }
+<span class="nc" id="L633">    }</span>
+
+    @Override
+    public String escapeText(String input) {
+<span class="nc" id="L637">        input = escapeTextWhileAllowingNewLines(input);</span>
+<span class="nc bnc" id="L638" title="All 2 branches missed.">        if (input == null) {</span>
+<span class="nc" id="L639">            return input;</span>
+        }
+
+        // remove \n, \r
+<span class="nc" id="L643">        return input.replaceAll(&quot;[\\n\\r]&quot;, &quot; &quot;);</span>
+    }
+
+    @Override
+    public String escapeTextWhileAllowingNewLines(String input) {
+<span class="nc bnc" id="L648" title="All 2 branches missed.">        if (input == null) {</span>
+<span class="nc" id="L649">            return input;</span>
+        }
+
+        // remove \t
+        // outer unescape to retain the original multi-byte characters
+        // finally escalate characters avoiding code injection
+<span class="nc" id="L655">        return escapeUnsafeCharacters(</span>
+<span class="nc" id="L656">                StringEscapeUtils.unescapeEcmaScript(StringEscapeUtils.escapeEcmaScript(input).replace(&quot;\\/&quot;, &quot;/&quot;))</span>
+<span class="nc" id="L657">                        .replaceAll(&quot;[\\t]&quot;, &quot; &quot;));</span>
+    }
+
+    @Override
+    public String escapeReservedWord(String name) {
+<span class="nc" id="L662">        return &quot;_&quot; + name;</span>
+    }
+
+    @Override
+    public String toVarName(final String name) {
+<span class="nc" id="L667">        String name2 = super.toVarName(name);</span>
+<span class="nc bnc" id="L668" title="All 2 branches missed.">        for (String forbiddenChar : forbiddenChars) {</span>
+<span class="nc bnc" id="L669" title="All 2 branches missed.">            if (name2.contains(forbiddenChar)) {</span>
+<span class="nc" id="L670">                return &quot;[\&quot;&quot; + name2 + &quot;\&quot;]&quot;;</span>
+            }
+<span class="nc" id="L672">        }</span>
+<span class="nc" id="L673">        return name2;</span>
+    }
+
+    @Override
+    public String toParamName(String name) {
+<span class="nc" id="L678">        String name2 = super.toParamName(name);</span>
+<span class="nc bnc" id="L679" title="All 2 branches missed.">        for (String forbiddenChar : forbiddenChars) {</span>
+<span class="nc bnc" id="L680" title="All 2 branches missed.">            if (name2.contains(forbiddenChar)) {</span>
+<span class="nc" id="L681">                return &quot;[\&quot;&quot; + name2 + &quot;\&quot;]&quot;;</span>
+            }
+<span class="nc" id="L683">        }</span>
+<span class="nc" id="L684">        return name2;</span>
+    }
+
+    @Override
+    public String escapeQuotationMark(String input) {
+        // remove ', &quot; to avoid code injection
+<span class="nc" id="L690">        return input.replace(&quot;\&quot;&quot;, &quot;&quot;).replace(&quot;'&quot;, &quot;&quot;);</span>
+    }
+
+    @Override
+    public String escapeUnsafeCharacters(String input) {
+<span class="nc" id="L695">        return input.replace(&quot;*/&quot;, &quot;*_/&quot;).replace(&quot;/*&quot;, &quot;/_*&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

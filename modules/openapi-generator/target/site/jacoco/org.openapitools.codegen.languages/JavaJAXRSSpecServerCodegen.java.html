@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JavaJAXRSSpecServerCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">JavaJAXRSSpecServerCodegen.java</span></div><h1>JavaJAXRSSpecServerCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import io.swagger.v3.oas.models.media.Schema;
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.meta.features.DocumentationFeature;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.meta.features.SecurityFeature;
+
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+
+import static org.openapitools.codegen.languages.features.GzipFeatures.USE_GZIP_FEATURE;
+
+public class JavaJAXRSSpecServerCodegen extends AbstractJavaJAXRSServerCodegen {
+
+    public static final String INTERFACE_ONLY = &quot;interfaceOnly&quot;;
+    public static final String RETURN_RESPONSE = &quot;returnResponse&quot;;
+    public static final String GENERATE_POM = &quot;generatePom&quot;;
+    public static final String USE_SWAGGER_ANNOTATIONS = &quot;useSwaggerAnnotations&quot;;
+    public static final String USE_MICROPROFILE_OPENAPI_ANNOTATIONS = &quot;useMicroProfileOpenAPIAnnotations&quot;;
+    public static final String USE_MUTINY = &quot;useMutiny&quot;;
+    public static final String OPEN_API_SPEC_FILE_LOCATION = &quot;openApiSpecFileLocation&quot;;
+    public static final String GENERATE_BUILDERS = &quot;generateBuilders&quot;;
+
+    public static final String QUARKUS_LIBRARY = &quot;quarkus&quot;;
+    public static final String THORNTAIL_LIBRARY = &quot;thorntail&quot;;
+    public static final String OPEN_LIBERTY_LIBRARY = &quot;openliberty&quot;;
+    public static final String HELIDON_LIBRARY = &quot;helidon&quot;;
+    public static final String KUMULUZEE_LIBRARY = &quot;kumuluzee&quot;;
+
+<span class="fc" id="L51">    private boolean interfaceOnly = false;</span>
+<span class="fc" id="L52">    private boolean returnResponse = false;</span>
+<span class="fc" id="L53">    private boolean generatePom = true;</span>
+<span class="fc" id="L54">    private boolean generateBuilders = false;</span>
+<span class="fc" id="L55">    private boolean useSwaggerAnnotations = true;</span>
+<span class="fc" id="L56">    private boolean useMicroProfileOpenAPIAnnotations = false;</span>
+<span class="fc" id="L57">    private boolean useMutiny = false;</span>
+
+<span class="fc" id="L59">    protected boolean useGzipFeature = false;</span>
+<span class="fc" id="L60">    private boolean useJackson = false;</span>
+<span class="fc" id="L61">    private String openApiSpecFileLocation = &quot;src/main/openapi/openapi.yaml&quot;;</span>
+
+    public JavaJAXRSSpecServerCodegen() {
+<span class="fc" id="L64">        super();</span>
+
+<span class="fc" id="L66">        modifyFeatureSet(features -&gt; features</span>
+<span class="fc" id="L67">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="fc" id="L68">                .includeSecurityFeatures(SecurityFeature.OpenIDConnect,//quarkus only</span>
+                        SecurityFeature.OAuth2_ClientCredentials,
+                        SecurityFeature.OAuth2_AuthorizationCode,
+                        SecurityFeature.OAuth2_Password)
+        );
+
+<span class="fc" id="L74">        invokerPackage = &quot;org.openapitools.api&quot;;</span>
+<span class="fc" id="L75">        artifactId = &quot;openapi-jaxrs-server&quot;;</span>
+<span class="fc" id="L76">        outputFolder = &quot;generated-code/JavaJaxRS-Spec&quot;;</span>
+<span class="fc" id="L77">        apiPackage = &quot;org.openapitools.api&quot;;</span>
+<span class="fc" id="L78">        modelPackage = &quot;org.openapitools.model&quot;;</span>
+
+        // cliOptions default redefinition need to be updated
+<span class="fc" id="L81">        updateOption(CodegenConstants.INVOKER_PACKAGE, this.getInvokerPackage());</span>
+<span class="fc" id="L82">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
+<span class="fc" id="L83">        updateOption(CodegenConstants.API_PACKAGE, apiPackage);</span>
+<span class="fc" id="L84">        updateOption(CodegenConstants.MODEL_PACKAGE, modelPackage);</span>
+
+<span class="fc" id="L86">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.java&quot;);</span>
+<span class="fc" id="L87">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.java&quot;);</span>
+
+<span class="fc" id="L89">        apiTestTemplateFiles.clear(); // TODO: add api test template</span>
+<span class="fc" id="L90">        modelTestTemplateFiles.clear(); // TODO: add model test template</span>
+
+        // clear model and api doc template as this codegen
+        // does not support auto-generated markdown doc at the moment
+        //TODO: add doc templates
+<span class="fc" id="L95">        modelDocTemplateFiles.remove(&quot;model_doc.mustache&quot;);</span>
+<span class="fc" id="L96">        apiDocTemplateFiles.remove(&quot;api_doc.mustache&quot;);</span>
+
+<span class="fc" id="L98">        additionalProperties.put(&quot;title&quot;, title);</span>
+
+<span class="fc" id="L100">        typeMapping.put(&quot;date&quot;, &quot;LocalDate&quot;);</span>
+
+<span class="fc" id="L102">        importMapping.put(&quot;LocalDate&quot;, &quot;org.joda.time.LocalDate&quot;);</span>
+
+<span class="fc" id="L104">        super.embeddedTemplateDir = templateDir = JAXRS_TEMPLATE_DIRECTORY_NAME + File.separator + &quot;spec&quot;;</span>
+
+<span class="fc" id="L106">        removeOption(CodegenConstants.LIBRARY);</span>
+<span class="fc" id="L107">        CliOption library = new CliOption(CodegenConstants.LIBRARY, CodegenConstants.LIBRARY_DESC).defaultValue(DEFAULT_LIBRARY);</span>
+<span class="fc" id="L108">        supportedLibraries.put(DEFAULT_LIBRARY, &quot;JAXRS spec only, to be deployed in an app server (TomEE, JBoss, WLS, ...)&quot;);</span>
+<span class="fc" id="L109">        supportedLibraries.put(QUARKUS_LIBRARY, &quot;Server using Quarkus&quot;);</span>
+<span class="fc" id="L110">        supportedLibraries.put(THORNTAIL_LIBRARY, &quot;Server using Thorntail&quot;);</span>
+<span class="fc" id="L111">        supportedLibraries.put(OPEN_LIBERTY_LIBRARY, &quot;Server using Open Liberty&quot;);</span>
+<span class="fc" id="L112">        supportedLibraries.put(HELIDON_LIBRARY, &quot;Server using Helidon&quot;);</span>
+<span class="fc" id="L113">        supportedLibraries.put(KUMULUZEE_LIBRARY, &quot;Server using KumuluzEE&quot;);</span>
+<span class="fc" id="L114">        library.setEnum(supportedLibraries);</span>
+
+<span class="fc" id="L116">        cliOptions.add(library);</span>
+<span class="fc" id="L117">        cliOptions.add(CliOption.newBoolean(GENERATE_POM, &quot;Whether to generate pom.xml if the file does not already exist.&quot;).defaultValue(String.valueOf(generatePom)));</span>
+<span class="fc" id="L118">        cliOptions.add(CliOption.newBoolean(GENERATE_BUILDERS, &quot;Whether to generate builders for models.&quot;).defaultValue(String.valueOf(generateBuilders)));</span>
+<span class="fc" id="L119">        cliOptions.add(CliOption.newBoolean(INTERFACE_ONLY, &quot;Whether to generate only API interface stubs without the server files.&quot;).defaultValue(String.valueOf(interfaceOnly)));</span>
+<span class="fc" id="L120">        cliOptions.add(CliOption.newBoolean(RETURN_RESPONSE, &quot;Whether generate API interface should return javax.ws.rs.core.Response instead of a deserialized entity. Only useful if interfaceOnly is true.&quot;).defaultValue(String.valueOf(returnResponse)));</span>
+<span class="fc" id="L121">        cliOptions.add(CliOption.newBoolean(USE_SWAGGER_ANNOTATIONS, &quot;Whether to generate Swagger annotations.&quot;, useSwaggerAnnotations));</span>
+<span class="fc" id="L122">        cliOptions.add(CliOption.newBoolean(USE_MICROPROFILE_OPENAPI_ANNOTATIONS, &quot;Whether to generate Microprofile OpenAPI annotations. Only valid when library is set to quarkus.&quot;, useMicroProfileOpenAPIAnnotations));</span>
+<span class="fc" id="L123">        cliOptions.add(CliOption.newString(OPEN_API_SPEC_FILE_LOCATION, &quot;Location where the file containing the spec will be generated in the output folder. No file generated when set to null or empty string.&quot;));</span>
+<span class="fc" id="L124">        cliOptions.add(CliOption.newBoolean(SUPPORT_ASYNC, &quot;Wrap responses in CompletionStage type, allowing asynchronous computation (requires JAX-RS 2.1).&quot;, supportAsync));</span>
+<span class="fc" id="L125">        cliOptions.add(CliOption.newBoolean(USE_MUTINY, &quot;Whether to use Smallrye Mutiny instead of CompletionStage for asynchronous computation. Only valid when library is set to quarkus.&quot;, useMutiny));</span>
+<span class="fc" id="L126">    }</span>
+
+    @Override
+    public void processOpts() {
+<span class="nc bnc" id="L130" title="All 2 branches missed.">        if (additionalProperties.containsKey(GENERATE_POM)) {</span>
+<span class="nc" id="L131">            generatePom = Boolean.parseBoolean(additionalProperties.get(GENERATE_POM).toString());</span>
+        }
+<span class="nc bnc" id="L133" title="All 2 branches missed.">        if (additionalProperties.containsKey(INTERFACE_ONLY)) {</span>
+<span class="nc" id="L134">            interfaceOnly = Boolean.parseBoolean(additionalProperties.get(INTERFACE_ONLY).toString());</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">            if (!interfaceOnly) {</span>
+<span class="nc" id="L136">                additionalProperties.remove(INTERFACE_ONLY);</span>
+            }
+        }
+<span class="nc bnc" id="L139" title="All 2 branches missed.">        if (additionalProperties.containsKey(RETURN_RESPONSE)) {</span>
+<span class="nc" id="L140">            returnResponse = Boolean.parseBoolean(additionalProperties.get(RETURN_RESPONSE).toString());</span>
+<span class="nc bnc" id="L141" title="All 2 branches missed.">            if (!returnResponse) {</span>
+<span class="nc" id="L142">                additionalProperties.remove(RETURN_RESPONSE);</span>
+            }
+        }
+<span class="nc bnc" id="L145" title="All 2 branches missed.">        if (additionalProperties.containsKey(SUPPORT_ASYNC)) {</span>
+<span class="nc" id="L146">            supportAsync = Boolean.parseBoolean(additionalProperties.get(SUPPORT_ASYNC).toString());</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">            if (!supportAsync) {</span>
+<span class="nc" id="L148">                additionalProperties.remove(SUPPORT_ASYNC);</span>
+            } else {
+                // java8 tag has been deprecated
+                //setJava8ModeAndAdditionalProperties(true);
+            }
+        }
+<span class="nc bnc" id="L154" title="All 10 branches missed.">        if (QUARKUS_LIBRARY.equals(library) || THORNTAIL_LIBRARY.equals(library) || HELIDON_LIBRARY.equals(library) || OPEN_LIBERTY_LIBRARY.equals(library) || KUMULUZEE_LIBRARY.equals(library)) {</span>
+<span class="nc" id="L155">            useSwaggerAnnotations = false;</span>
+        } else {
+<span class="nc bnc" id="L157" title="All 2 branches missed.">            if (additionalProperties.containsKey(USE_SWAGGER_ANNOTATIONS)) {</span>
+<span class="nc" id="L158">                useSwaggerAnnotations = Boolean.parseBoolean(additionalProperties.get(USE_SWAGGER_ANNOTATIONS).toString());</span>
+            }
+        }
+<span class="nc bnc" id="L161" title="All 2 branches missed.">        if (KUMULUZEE_LIBRARY.equals(library)){</span>
+<span class="nc" id="L162">            super.setSourceFolder(&quot;src/main/java&quot;);</span>
+        }
+<span class="nc" id="L164">        writePropertyBack(USE_SWAGGER_ANNOTATIONS, useSwaggerAnnotations);</span>
+
+<span class="nc bnc" id="L166" title="All 2 branches missed.">        if (QUARKUS_LIBRARY.equals(library)) {</span>
+<span class="nc bnc" id="L167" title="All 2 branches missed.">            if (additionalProperties.containsKey(USE_MICROPROFILE_OPENAPI_ANNOTATIONS)) {</span>
+<span class="nc" id="L168">                useMicroProfileOpenAPIAnnotations = Boolean.parseBoolean(additionalProperties.get(USE_MICROPROFILE_OPENAPI_ANNOTATIONS).toString());</span>
+            }
+<span class="nc" id="L170">            writePropertyBack(USE_MICROPROFILE_OPENAPI_ANNOTATIONS, useMicroProfileOpenAPIAnnotations);</span>
+        }
+
+<span class="nc bnc" id="L173" title="All 2 branches missed.">        if (QUARKUS_LIBRARY.equals(library)) {</span>
+<span class="nc bnc" id="L174" title="All 2 branches missed.">            if (additionalProperties.containsKey(USE_MUTINY)) {</span>
+<span class="nc" id="L175">                useMutiny = Boolean.parseBoolean(additionalProperties.get(USE_MUTINY).toString());</span>
+            }
+<span class="nc" id="L177">            writePropertyBack(USE_MUTINY, useMutiny);</span>
+        }
+
+<span class="nc bnc" id="L180" title="All 2 branches missed.">        if (additionalProperties.containsKey(GENERATE_BUILDERS)) {</span>
+<span class="nc" id="L181">            generateBuilders = Boolean.parseBoolean(additionalProperties.get(GENERATE_BUILDERS).toString());</span>
+        }
+<span class="nc" id="L183">        additionalProperties.put(GENERATE_BUILDERS, generateBuilders);</span>
+
+<span class="nc bnc" id="L185" title="All 2 branches missed.">        if (additionalProperties.containsKey(OPEN_API_SPEC_FILE_LOCATION)) {</span>
+<span class="nc" id="L186">            openApiSpecFileLocation = additionalProperties.get(OPEN_API_SPEC_FILE_LOCATION).toString();</span>
+<span class="nc bnc" id="L187" title="All 8 branches missed.">        } else if(QUARKUS_LIBRARY.equals(library) || THORNTAIL_LIBRARY.equals(library) || HELIDON_LIBRARY.equals(library) || KUMULUZEE_LIBRARY.equals(library)) {</span>
+<span class="nc" id="L188">            openApiSpecFileLocation = &quot;src/main/resources/META-INF/openapi.yaml&quot;;</span>
+<span class="nc bnc" id="L189" title="All 2 branches missed.">        } else if(OPEN_LIBERTY_LIBRARY.equals(library)) {</span>
+<span class="nc" id="L190">            openApiSpecFileLocation = &quot;src/main/webapp/META-INF/openapi.yaml&quot;;</span>
+        }
+
+<span class="nc" id="L193">        additionalProperties.put(OPEN_API_SPEC_FILE_LOCATION, openApiSpecFileLocation);</span>
+
+<span class="nc" id="L195">        useJackson = convertPropertyToBoolean(JACKSON);</span>
+
+<span class="nc bnc" id="L197" title="All 2 branches missed.">        if (interfaceOnly) {</span>
+            // Change default artifactId if generating interfaces only, before command line options are applied in base class.
+<span class="nc" id="L199">            artifactId = &quot;openapi-jaxrs-client&quot;;</span>
+        }
+
+<span class="nc" id="L202">        super.processOpts();</span>
+
+<span class="nc" id="L204">        supportingFiles.clear(); // Don't need extra files provided by AbstractJAX-RS &amp; Java Codegen</span>
+<span class="nc" id="L205">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;)</span>
+<span class="nc" id="L206">            .doNotOverwrite());</span>
+<span class="nc" id="L207">        supportingFiles.add(new SupportingFile(&quot;RestResourceRoot.mustache&quot;,</span>
+<span class="nc" id="L208">                (sourceFolder + '/' + invokerPackage).replace(&quot;.&quot;, &quot;/&quot;), &quot;RestResourceRoot.java&quot;)</span>
+<span class="nc" id="L209">                .doNotOverwrite());</span>
+
+<span class="nc bnc" id="L211" title="All 2 branches missed.">        if (generatePom) {</span>
+<span class="nc" id="L212">            supportingFiles.add(new SupportingFile(&quot;pom.mustache&quot;, &quot;&quot;, &quot;pom.xml&quot;)</span>
+<span class="nc" id="L213">                .doNotOverwrite());</span>
+        }
+
+<span class="nc" id="L216">        supportingFiles.add(new SupportingFile(&quot;RestApplication.mustache&quot;,</span>
+<span class="nc" id="L217">                (sourceFolder + '/' + invokerPackage).replace(&quot;.&quot;, &quot;/&quot;), &quot;RestApplication.java&quot;)</span>
+<span class="nc" id="L218">                .doNotOverwrite());</span>
+
+<span class="nc bnc" id="L220" title="All 2 branches missed.">        if(StringUtils.isNotEmpty(openApiSpecFileLocation)) {</span>
+<span class="nc" id="L221">            int index = openApiSpecFileLocation.lastIndexOf('/');</span>
+            String fileFolder;
+            String fileName;
+<span class="nc bnc" id="L224" title="All 2 branches missed.">            if(index &gt;= 0) {</span>
+<span class="nc" id="L225">                fileFolder = openApiSpecFileLocation.substring(0, index);</span>
+<span class="nc" id="L226">                fileName = openApiSpecFileLocation.substring(index + 1);</span>
+            } else {
+<span class="nc" id="L228">                fileFolder = &quot;&quot;;</span>
+<span class="nc" id="L229">                fileName = openApiSpecFileLocation;</span>
+            }
+<span class="nc" id="L231">            supportingFiles.add(new SupportingFile(&quot;openapi.mustache&quot;, fileFolder, fileName));</span>
+        }
+
+<span class="nc bnc" id="L234" title="All 2 branches missed.">        if(QUARKUS_LIBRARY.equals(library)) {</span>
+<span class="nc" id="L235">            supportingFiles.add(new SupportingFile(&quot;application.properties.mustache&quot;, &quot;src/main/resources&quot;, &quot;application.properties&quot;)</span>
+<span class="nc" id="L236">                    .doNotOverwrite());</span>
+<span class="nc" id="L237">            supportingFiles.add(new SupportingFile(&quot;Dockerfile.jvm.mustache&quot;, &quot;src/main/docker&quot;, &quot;Dockerfile.jvm&quot;)</span>
+<span class="nc" id="L238">                    .doNotOverwrite());</span>
+<span class="nc" id="L239">            supportingFiles.add(new SupportingFile(&quot;Dockerfile.native.mustache&quot;, &quot;src/main/docker&quot;, &quot;Dockerfile.native&quot;)</span>
+<span class="nc" id="L240">                    .doNotOverwrite());</span>
+<span class="nc" id="L241">            supportingFiles.add(new SupportingFile(&quot;dockerignore.mustache&quot;, &quot;&quot;, &quot;.dockerignore&quot;)</span>
+<span class="nc" id="L242">                    .doNotOverwrite());</span>
+<span class="nc bnc" id="L243" title="All 2 branches missed.">        } else if(OPEN_LIBERTY_LIBRARY.equals(library)) {</span>
+<span class="nc" id="L244">            supportingFiles.add(new SupportingFile(&quot;server.xml.mustache&quot;, &quot;src/main/liberty/config&quot;, &quot;server.xml&quot;)</span>
+<span class="nc" id="L245">                    .doNotOverwrite());</span>
+<span class="nc" id="L246">            supportingFiles.add(new SupportingFile(&quot;beans.xml.mustache&quot;, &quot;src/main/webapp/META-INF&quot;, &quot;beans.xml&quot;)</span>
+<span class="nc" id="L247">                    .doNotOverwrite());</span>
+<span class="nc" id="L248">            supportingFiles.add(new SupportingFile(&quot;MANIFEST.MF.mustache&quot;, &quot;src/main/webapp/META-INF&quot;, &quot;MANIFEST.MF&quot;)</span>
+<span class="nc" id="L249">                    .doNotOverwrite());</span>
+<span class="nc" id="L250">            supportingFiles.add(new SupportingFile(&quot;microprofile-config.properties.mustache&quot;, &quot;src/main/webapp/META-INF&quot;, &quot;microprofile-config.properties&quot;)</span>
+<span class="nc" id="L251">                    .doNotOverwrite());</span>
+<span class="nc" id="L252">            supportingFiles.add(new SupportingFile(&quot;ibm-web-ext.xml.mustache&quot;, &quot;src/main/webapp/WEB-INF&quot;, &quot;ibm-web-ext.xml&quot;)</span>
+<span class="nc" id="L253">                    .doNotOverwrite());</span>
+<span class="nc bnc" id="L254" title="All 2 branches missed.">        } else if(HELIDON_LIBRARY.equals(library)) {</span>
+<span class="nc" id="L255">            additionalProperties.computeIfAbsent(&quot;helidonVersion&quot;, key -&gt; &quot;2.4.1&quot;);</span>
+<span class="nc" id="L256">            supportingFiles.add(new SupportingFile(&quot;logging.properties.mustache&quot;, &quot;src/main/resources&quot;, &quot;logging.properties&quot;)</span>
+<span class="nc" id="L257">                    .doNotOverwrite());</span>
+<span class="nc" id="L258">            supportingFiles.add(new SupportingFile(&quot;microprofile-config.properties.mustache&quot;, &quot;src/main/resources/META-INF&quot;, &quot;microprofile-config.properties&quot;)</span>
+<span class="nc" id="L259">                    .doNotOverwrite());</span>
+<span class="nc" id="L260">            supportingFiles.add(new SupportingFile(&quot;beans.xml.mustache&quot;, &quot;src/main/resources/META-INF&quot;, &quot;beans.xml&quot;)</span>
+<span class="nc" id="L261">                    .doNotOverwrite());</span>
+<span class="nc bnc" id="L262" title="All 2 branches missed.">        } else if(KUMULUZEE_LIBRARY.equals(library)) {</span>
+<span class="nc" id="L263">            supportingFiles.add(new SupportingFile(&quot;config.yaml.mustache&quot;, &quot;src/main/resources&quot;, &quot;config.yaml&quot;));</span>
+        }
+
+<span class="nc bnc" id="L266" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_GZIP_FEATURE)) {</span>
+<span class="nc" id="L267">            useGzipFeature = Boolean.parseBoolean(additionalProperties.get(USE_GZIP_FEATURE).toString());</span>
+<span class="nc bnc" id="L268" title="All 2 branches missed.">            if (!useGzipFeature) {</span>
+<span class="nc" id="L269">                additionalProperties.remove(USE_GZIP_FEATURE);</span>
+            }
+        }
+<span class="nc" id="L272">    }</span>
+
+    @Override
+    public String getName() {
+<span class="fc" id="L276">        return &quot;jaxrs-spec&quot;;</span>
+    }
+
+    public String getOpenApiSpecFileLocation() {
+<span class="nc" id="L280">        return openApiSpecFileLocation;</span>
+    }
+
+    /**
+     * Location where the file containing the spec will be generated in the output folder.
+     * @param location location inside the output folder. No file generated when set to null or empty string.
+     */
+    public void setOpenApiSpecFileLocation(String location) {
+<span class="nc" id="L288">        this.openApiSpecFileLocation = location;</span>
+<span class="nc" id="L289">    }</span>
+
+    @Override
+    public CodegenModel fromModel(String name, Schema model) {
+<span class="nc" id="L293">        CodegenModel codegenModel = super.fromModel(name, model);</span>
+<span class="nc bnc" id="L294" title="All 2 branches missed.">        if (!useSwaggerAnnotations) {</span>
+<span class="nc" id="L295">            codegenModel.imports.remove(&quot;ApiModelProperty&quot;);</span>
+<span class="nc" id="L296">            codegenModel.imports.remove(&quot;ApiModel&quot;);</span>
+        }
+<span class="nc bnc" id="L298" title="All 2 branches missed.">        if (!useJackson) {</span>
+<span class="nc" id="L299">            codegenModel.imports.remove(&quot;JsonSerialize&quot;);</span>
+<span class="nc" id="L300">            codegenModel.imports.remove(&quot;ToStringSerializer&quot;);</span>
+<span class="nc" id="L301">            codegenModel.imports.remove(&quot;JsonValue&quot;);</span>
+<span class="nc" id="L302">            codegenModel.imports.remove(&quot;JsonProperty&quot;);</span>
+        }
+<span class="nc" id="L304">        return codegenModel;</span>
+    }
+
+    @Override
+    public Map&lt;String, Object&gt; postProcessSupportingFileData(Map&lt;String, Object&gt; objs) {
+<span class="nc" id="L309">        generateYAMLSpecFile(objs);</span>
+<span class="nc" id="L310">        return super.postProcessSupportingFileData(objs);</span>
+    }
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L315">        return &quot;Generates a Java JAXRS Server according to JAXRS 2.0 specification.&quot;;</span>
+    }
+
+    @Override
+    public void postProcessModelProperty(CodegenModel model, CodegenProperty property) {
+<span class="nc" id="L320">        super.postProcessModelProperty(model, property);</span>
+
+        // Add imports for java.util.Arrays
+<span class="nc bnc" id="L323" title="All 2 branches missed.">        if (property.isByteArray) {</span>
+<span class="nc" id="L324">            model.imports.add(&quot;Arrays&quot;);</span>
+        }
+<span class="nc" id="L326">    }</span>
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L330">        objs = super.postProcessOperationsWithModels(objs, allModels);</span>
+<span class="nc" id="L331">        removeImport(objs, &quot;java.util.List&quot;);</span>
+<span class="nc" id="L332">        return objs;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JavaCXFServerCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">JavaCXFServerCodegen.java</span></div><h1>JavaCXFServerCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.Schema;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.languages.features.CXFServerFeatures;
+import org.openapitools.codegen.languages.features.GzipTestFeatures;
+import org.openapitools.codegen.languages.features.LoggingTestFeatures;
+import org.openapitools.codegen.languages.features.UseGenericResponseFeatures;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.utils.ModelUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.List;
+
+public class JavaCXFServerCodegen extends AbstractJavaJAXRSServerCodegen
+        implements CXFServerFeatures, GzipTestFeatures, LoggingTestFeatures, UseGenericResponseFeatures {
+<span class="fc" id="L38">    private final Logger LOGGER = LoggerFactory.getLogger(JavaCXFServerCodegen.class);</span>
+
+    public static final String USE_ABSTRACTION_FOR_FILES = &quot;useAbstractionForFiles&quot;;
+
+<span class="fc" id="L42">    protected boolean addConsumesProducesJson = true;</span>
+
+<span class="fc" id="L44">    protected boolean generateSpringApplication = false;</span>
+
+<span class="fc" id="L46">    protected boolean useSpringAnnotationConfig = false;</span>
+
+<span class="fc" id="L48">    protected boolean useSwaggerFeature = false;</span>
+
+<span class="fc" id="L50">    protected boolean useSwaggerUI = false;</span>
+
+<span class="fc" id="L52">    protected boolean useWadlFeature = false;</span>
+
+<span class="fc" id="L54">    protected boolean useMultipartFeature = false;</span>
+
+<span class="fc" id="L56">    protected boolean useBeanValidationFeature = false;</span>
+
+<span class="fc" id="L58">    protected boolean generateSpringBootApplication = false;</span>
+
+<span class="fc" id="L60">    protected boolean generateJbossDeploymentDescriptor = false;</span>
+
+<span class="fc" id="L62">    protected boolean useGzipFeature = false;</span>
+
+<span class="fc" id="L64">    protected boolean useGzipFeatureForTests = false;</span>
+
+<span class="fc" id="L66">    protected boolean useLoggingFeature = false;</span>
+
+<span class="fc" id="L68">    protected boolean useLoggingFeatureForTests = false;</span>
+
+<span class="fc" id="L70">    protected boolean useAnnotatedBasePath = false;</span>
+
+<span class="fc" id="L72">    protected boolean generateNonSpringApplication = false;</span>
+
+<span class="fc" id="L74">    protected boolean useGenericResponse = false;</span>
+
+<span class="fc" id="L76">    protected boolean useAbstractionForFiles = false;</span>
+
+    public JavaCXFServerCodegen() {
+<span class="fc" id="L79">        super();</span>
+
+<span class="fc" id="L81">        supportsInheritance = true;</span>
+<span class="fc" id="L82">        useTags = true;</span>
+
+<span class="fc" id="L84">        artifactId = &quot;openapi-cxf-server&quot;;</span>
+
+<span class="fc" id="L86">        outputFolder = &quot;generated-code/JavaJaxRS-CXF&quot;;</span>
+
+        // clioOptions default redefinition need to be updated
+<span class="fc" id="L89">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
+<span class="fc" id="L90">        updateOption(USE_TAGS, String.valueOf(true));</span>
+
+<span class="fc" id="L92">        apiTemplateFiles.put(&quot;apiServiceImpl.mustache&quot;, &quot;.java&quot;);</span>
+
+        // clear model and api doc template as this codegen
+        // does not support auto-generated markdown doc at the moment
+        //TODO: add doc templates
+<span class="fc" id="L97">        modelDocTemplateFiles.remove(&quot;model_doc.mustache&quot;);</span>
+<span class="fc" id="L98">        apiDocTemplateFiles.remove(&quot;api_doc.mustache&quot;);</span>
+
+
+<span class="fc" id="L101">        typeMapping.put(&quot;date&quot;, &quot;LocalDate&quot;);</span>
+
+<span class="fc" id="L103">        importMapping.put(&quot;LocalDate&quot;, &quot;org.joda.time.LocalDate&quot;);</span>
+
+<span class="fc" id="L105">        embeddedTemplateDir = templateDir = JAXRS_TEMPLATE_DIRECTORY_NAME + File.separator + &quot;cxf&quot;;</span>
+
+<span class="fc" id="L107">        cliOptions.add(CliOption.newBoolean(GENERATE_SPRING_APPLICATION, &quot;Generate Spring application&quot;));</span>
+<span class="fc" id="L108">        cliOptions.add(CliOption.newBoolean(USE_SPRING_ANNOTATION_CONFIG, &quot;Use Spring Annotation Config&quot;));</span>
+
+<span class="fc" id="L110">        cliOptions.add(CliOption.newBoolean(USE_SWAGGER_FEATURE, &quot;Use Swagger Feature&quot;));</span>
+<span class="fc" id="L111">        cliOptions.add(CliOption.newBoolean(USE_SWAGGER_UI, &quot;Use Swagger UI&quot;));</span>
+
+<span class="fc" id="L113">        cliOptions.add(CliOption.newBoolean(USE_WADL_FEATURE, &quot;Use WADL Feature&quot;));</span>
+<span class="fc" id="L114">        cliOptions.add(CliOption.newBoolean(USE_MULTIPART_FEATURE, &quot;Use Multipart Feature&quot;));</span>
+
+<span class="fc" id="L116">        cliOptions.add(CliOption.newBoolean(USE_GZIP_FEATURE, &quot;Use Gzip Feature&quot;));</span>
+<span class="fc" id="L117">        cliOptions.add(CliOption.newBoolean(USE_GZIP_FEATURE_FOR_TESTS, &quot;Use Gzip Feature for tests&quot;));</span>
+
+<span class="fc" id="L119">        cliOptions.add(CliOption.newBoolean(USE_BEANVALIDATION_FEATURE, &quot;Use BeanValidation Feature&quot;));</span>
+<span class="fc" id="L120">        cliOptions.add(CliOption.newBoolean(USE_LOGGING_FEATURE, &quot;Use Logging Feature&quot;));</span>
+<span class="fc" id="L121">        cliOptions.add(CliOption.newBoolean(USE_LOGGING_FEATURE_FOR_TESTS, &quot;Use Logging Feature for tests&quot;));</span>
+
+<span class="fc" id="L123">        cliOptions.add(CliOption.newBoolean(GENERATE_SPRING_BOOT_APPLICATION, &quot;Generate Spring Boot application&quot;));</span>
+<span class="fc" id="L124">        cliOptions.add(</span>
+<span class="fc" id="L125">                CliOption.newBoolean(GENERATE_JBOSS_DEPLOYMENT_DESCRIPTOR, &quot;Generate Jboss Deployment Descriptor&quot;));</span>
+
+<span class="fc" id="L127">        cliOptions</span>
+<span class="fc" id="L128">                .add(CliOption.newBoolean(ADD_CONSUMES_PRODUCES_JSON, &quot;Add @Consumes/@Produces Json to API interface&quot;));</span>
+
+<span class="fc" id="L130">        cliOptions.add(CliOption.newBoolean(USE_ANNOTATED_BASE_PATH, &quot;Use @Path annotations for basePath&quot;));</span>
+
+<span class="fc" id="L132">        cliOptions.add(CliOption.newBoolean(GENERATE_NON_SPRING_APPLICATION, &quot;Generate non-Spring application&quot;));</span>
+<span class="fc" id="L133">        cliOptions.add(CliOption.newBoolean(USE_GENERIC_RESPONSE, &quot;Use generic response&quot;));</span>
+<span class="fc" id="L134">        cliOptions.add(CliOption.newBoolean(USE_ABSTRACTION_FOR_FILES, &quot;Use alternative types instead of java.io.File to allow passing bytes without a file on disk.&quot;));</span>
+
+<span class="fc" id="L136">    }</span>
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L140">        super.processOpts();</span>
+
+<span class="nc bnc" id="L142" title="All 2 branches missed.">        if (additionalProperties.containsKey(ADD_CONSUMES_PRODUCES_JSON)) {</span>
+<span class="nc" id="L143">            this.setAddConsumesProducesJson(convertPropertyToBooleanAndWriteBack(ADD_CONSUMES_PRODUCES_JSON));</span>
+        }
+
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_GENERIC_RESPONSE)) {</span>
+<span class="nc" id="L147">            this.setUseGenericResponse(convertPropertyToBoolean(USE_GENERIC_RESPONSE));</span>
+        }
+
+<span class="nc bnc" id="L150" title="All 2 branches missed.">        if (useGenericResponse) {</span>
+<span class="nc" id="L151">            writePropertyBack(USE_GENERIC_RESPONSE, useGenericResponse);</span>
+        }
+
+<span class="nc bnc" id="L154" title="All 2 branches missed.">        if (additionalProperties.containsKey(GENERATE_SPRING_APPLICATION)) {</span>
+<span class="nc" id="L155">            this.setGenerateSpringApplication(convertPropertyToBooleanAndWriteBack(GENERATE_SPRING_APPLICATION));</span>
+
+<span class="nc" id="L157">            this.setUseSwaggerFeature(convertPropertyToBooleanAndWriteBack(USE_SWAGGER_FEATURE));</span>
+<span class="nc" id="L158">            this.setUseSwaggerUI(convertPropertyToBooleanAndWriteBack(USE_SWAGGER_UI));</span>
+
+<span class="nc" id="L160">            this.setUseWadlFeature(convertPropertyToBooleanAndWriteBack(USE_WADL_FEATURE));</span>
+<span class="nc" id="L161">            this.setUseMultipartFeature(convertPropertyToBooleanAndWriteBack(USE_MULTIPART_FEATURE));</span>
+<span class="nc" id="L162">            this.setUseGzipFeature(convertPropertyToBooleanAndWriteBack(USE_GZIP_FEATURE));</span>
+<span class="nc" id="L163">            this.setUseGzipFeatureForTests(convertPropertyToBooleanAndWriteBack(USE_GZIP_FEATURE_FOR_TESTS));</span>
+<span class="nc" id="L164">            this.setUseLoggingFeature(convertPropertyToBooleanAndWriteBack(USE_LOGGING_FEATURE));</span>
+<span class="nc" id="L165">            this.setUseLoggingFeatureForTests(convertPropertyToBooleanAndWriteBack(USE_LOGGING_FEATURE_FOR_TESTS));</span>
+<span class="nc" id="L166">            this.setUseSpringAnnotationConfig(convertPropertyToBooleanAndWriteBack(USE_SPRING_ANNOTATION_CONFIG));</span>
+
+<span class="nc" id="L168">            boolean useBeanValidationFeature = convertPropertyToBooleanAndWriteBack(USE_BEANVALIDATION_FEATURE);</span>
+<span class="nc" id="L169">            this.setUseBeanValidationFeature(useBeanValidationFeature);</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">            if (useBeanValidationFeature) {</span>
+<span class="nc" id="L171">                LOGGER.info(&quot;make sure your target server supports Bean Validation 1.1&quot;);</span>
+            }
+
+<span class="nc" id="L174">            this.setGenerateSpringBootApplication(convertPropertyToBooleanAndWriteBack(GENERATE_SPRING_BOOT_APPLICATION));</span>
+        }
+
+<span class="nc bnc" id="L177" title="All 2 branches missed.">        if (additionalProperties.containsKey(GENERATE_JBOSS_DEPLOYMENT_DESCRIPTOR)) {</span>
+<span class="nc" id="L178">            boolean generateJbossDeploymentDescriptorProp = convertPropertyToBooleanAndWriteBack(</span>
+                    GENERATE_JBOSS_DEPLOYMENT_DESCRIPTOR);
+<span class="nc" id="L180">            this.setGenerateJbossDeploymentDescriptor(generateJbossDeploymentDescriptorProp);</span>
+        }
+
+<span class="nc bnc" id="L183" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_ANNOTATED_BASE_PATH)) {</span>
+<span class="nc" id="L184">            boolean useAnnotatedBasePathProp = convertPropertyToBooleanAndWriteBack(USE_ANNOTATED_BASE_PATH);</span>
+<span class="nc" id="L185">            this.setUseAnnotatedBasePath(useAnnotatedBasePathProp);</span>
+        }
+
+<span class="nc bnc" id="L188" title="All 2 branches missed.">        if (additionalProperties.containsKey(GENERATE_NON_SPRING_APPLICATION)) {</span>
+<span class="nc" id="L189">            boolean generateNonSpringApplication = convertPropertyToBooleanAndWriteBack(GENERATE_NON_SPRING_APPLICATION);</span>
+<span class="nc" id="L190">            this.setGenerateNonSpringApplication(generateNonSpringApplication);</span>
+        }
+
+<span class="nc bnc" id="L193" title="All 2 branches missed.">        if (additionalProperties.containsKey(USE_ABSTRACTION_FOR_FILES)) {</span>
+<span class="nc" id="L194">            this.setUseAbstractionForFiles(convertPropertyToBooleanAndWriteBack(USE_ABSTRACTION_FOR_FILES));</span>
+        }
+
+<span class="nc" id="L197">        supportingFiles.clear(); // Don't need extra files provided by AbstractJAX-RS &amp; Java Codegen</span>
+
+<span class="nc" id="L199">        supportingFiles.add(new SupportingFile(&quot;server/pom.mustache&quot;, &quot;&quot;, &quot;pom.xml&quot;)</span>
+<span class="nc" id="L200">            .doNotOverwrite());</span>
+
+<span class="nc" id="L202">        supportingFiles.add(new SupportingFile(&quot;server/openapi-generator-ignore.mustache&quot;, &quot;&quot;, &quot;.openapi-generator-ignore&quot;)</span>
+<span class="nc" id="L203">            .doNotOverwrite());</span>
+
+<span class="nc bnc" id="L205" title="All 2 branches missed.">        if (this.generateSpringApplication) {</span>
+<span class="nc" id="L206">            supportingFiles.add(new SupportingFile(&quot;server/readme.md&quot;, &quot;&quot;, &quot;readme.md&quot;)</span>
+<span class="nc" id="L207">                .doNotOverwrite());</span>
+<span class="nc" id="L208">            supportingFiles.add(new SupportingFile(&quot;server/ApplicationContext.xml.mustache&quot;,</span>
+                    (&quot;src/main/resources&quot;), &quot;ApplicationContext.xml&quot;)
+<span class="nc" id="L210">                .doNotOverwrite());</span>
+<span class="nc" id="L211">            supportingFiles.add(new SupportingFile(&quot;server/web.mustache&quot;,</span>
+                    (&quot;src/main/webapp/WEB-INF&quot;), &quot;web.xml&quot;)
+<span class="nc" id="L213">                .doNotOverwrite());</span>
+<span class="nc" id="L214">            supportingFiles.add(new SupportingFile(&quot;server/context.xml.mustache&quot;,</span>
+                    (&quot;src/main/webapp/WEB-INF&quot;), &quot;context.xml&quot;)
+<span class="nc" id="L216">                .doNotOverwrite());</span>
+
+            // Jboss
+<span class="nc bnc" id="L219" title="All 2 branches missed.">            if (generateJbossDeploymentDescriptor) {</span>
+<span class="nc" id="L220">                supportingFiles.add(new SupportingFile(&quot;server/jboss-web.xml.mustache&quot;,</span>
+                        (&quot;src/main/webapp/WEB-INF&quot;), &quot;jboss-web.xml&quot;)
+<span class="nc" id="L222">                    .doNotOverwrite());</span>
+
+            }
+
+            // Spring Boot
+<span class="nc bnc" id="L227" title="All 2 branches missed.">            if (this.generateSpringBootApplication) {</span>
+<span class="nc" id="L228">                supportingFiles.add(new SupportingFile(&quot;server/SpringBootApplication.mustache&quot;,</span>
+<span class="nc" id="L229">                        (testFolder + '/' + apiPackage).replace(&quot;.&quot;, &quot;/&quot;), &quot;SpringBootApplication.java&quot;)</span>
+<span class="nc" id="L230">                    .doNotOverwrite());</span>
+<span class="nc" id="L231">                supportingFiles.add(new SupportingFile(&quot;server/application.properties.mustache&quot;,</span>
+                        (testResourcesFolder + '/'), &quot;application.properties&quot;)
+<span class="nc" id="L233">                    .doNotOverwrite());</span>
+
+            }
+        }
+
+<span class="nc bnc" id="L238" title="All 2 branches missed.">        if (this.generateNonSpringApplication) {</span>
+<span class="nc" id="L239">            supportingFiles.add(new SupportingFile(&quot;server/nonspring-web.mustache&quot;,</span>
+                    (&quot;src/main/webapp/WEB-INF&quot;), &quot;web.xml&quot;)
+<span class="nc" id="L241">                .doNotOverwrite());</span>
+        }
+<span class="nc" id="L243">    }</span>
+
+    @Override
+    public String getName() {
+<span class="fc" id="L247">        return &quot;jaxrs-cxf&quot;;</span>
+    }
+
+    @Override
+    public void postProcessModelProperty(CodegenModel model, CodegenProperty property) {
+<span class="nc" id="L252">        super.postProcessModelProperty(model, property);</span>
+<span class="nc" id="L253">        model.imports.remove(&quot;ApiModelProperty&quot;);</span>
+<span class="nc" id="L254">        model.imports.remove(&quot;ApiModel&quot;);</span>
+<span class="nc" id="L255">        model.imports.remove(&quot;JsonSerialize&quot;);</span>
+<span class="nc" id="L256">        model.imports.remove(&quot;ToStringSerializer&quot;);</span>
+
+        //Add imports for Jackson when model has inner enum
+<span class="nc bnc" id="L259" title="All 2 branches missed.">        if (additionalProperties.containsKey(JACKSON)) {</span>
+<span class="nc bnc" id="L260" title="All 4 branches missed.">            if (Boolean.FALSE.equals(model.isEnum) &amp;&amp; Boolean.TRUE.equals(model.hasEnums)) {</span>
+<span class="nc" id="L261">                model.imports.add(&quot;JsonCreator&quot;);</span>
+<span class="nc" id="L262">                model.imports.add(&quot;JsonValue&quot;);</span>
+            }
+        }
+<span class="nc" id="L265">    }</span>
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L269">        objs = super.postProcessOperationsWithModels(objs, allModels);</span>
+<span class="nc" id="L270">        removeImport(objs, &quot;java.util.List&quot;);</span>
+<span class="nc" id="L271">        return objs;</span>
+    }
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L276">        return &quot;Generates a Java JAXRS Server application based on Apache CXF framework.&quot;;</span>
+    }
+
+    public void setGenerateSpringApplication(boolean generateSpringApplication) {
+<span class="nc" id="L280">        this.generateSpringApplication = generateSpringApplication;</span>
+<span class="nc" id="L281">    }</span>
+
+    public void setUseSpringAnnotationConfig(boolean useSpringAnnotationConfig) {
+<span class="nc" id="L284">        this.useSpringAnnotationConfig = useSpringAnnotationConfig;</span>
+<span class="nc" id="L285">    }</span>
+
+    public void setUseSwaggerFeature(boolean useSwaggerFeature) {
+<span class="nc" id="L288">        this.useSwaggerFeature = useSwaggerFeature;</span>
+<span class="nc" id="L289">    }</span>
+
+
+    public void setUseWadlFeature(boolean useWadlFeature) {
+<span class="nc" id="L293">        this.useWadlFeature = useWadlFeature;</span>
+<span class="nc" id="L294">    }</span>
+
+
+    public void setUseMultipartFeature(boolean useMultipartFeature) {
+<span class="nc" id="L298">        this.useMultipartFeature = useMultipartFeature;</span>
+<span class="nc" id="L299">    }</span>
+
+
+    public void setUseGzipFeature(boolean useGzipFeature) {
+<span class="nc" id="L303">        this.useGzipFeature = useGzipFeature;</span>
+<span class="nc" id="L304">    }</span>
+
+
+    public void setUseLoggingFeature(boolean useLoggingFeature) {
+<span class="nc" id="L308">        this.useLoggingFeature = useLoggingFeature;</span>
+<span class="nc" id="L309">    }</span>
+
+
+    public void setUseBeanValidationFeature(boolean useBeanValidationFeature) {
+<span class="nc" id="L313">        this.useBeanValidationFeature = useBeanValidationFeature;</span>
+<span class="nc" id="L314">    }</span>
+
+    public void setGenerateSpringBootApplication(boolean generateSpringBootApplication) {
+<span class="nc" id="L317">        this.generateSpringBootApplication = generateSpringBootApplication;</span>
+<span class="nc" id="L318">    }</span>
+
+    public void setGenerateJbossDeploymentDescriptor(boolean generateJbossDeploymentDescriptor) {
+<span class="nc" id="L321">        this.generateJbossDeploymentDescriptor = generateJbossDeploymentDescriptor;</span>
+<span class="nc" id="L322">    }</span>
+
+    public void setUseGzipFeatureForTests(boolean useGzipFeatureForTests) {
+<span class="nc" id="L325">        this.useGzipFeatureForTests = useGzipFeatureForTests;</span>
+<span class="nc" id="L326">    }</span>
+
+    public void setUseLoggingFeatureForTests(boolean useLoggingFeatureForTests) {
+<span class="nc" id="L329">        this.useLoggingFeatureForTests = useLoggingFeatureForTests;</span>
+<span class="nc" id="L330">    }</span>
+
+    public void setUseSwaggerUI(boolean useSwaggerUI) {
+<span class="nc" id="L333">        this.useSwaggerUI = useSwaggerUI;</span>
+<span class="nc" id="L334">    }</span>
+
+    public void setAddConsumesProducesJson(boolean addConsumesProducesJson) {
+<span class="nc" id="L337">        this.addConsumesProducesJson = addConsumesProducesJson;</span>
+<span class="nc" id="L338">    }</span>
+
+    public void setUseAnnotatedBasePath(boolean useAnnotatedBasePath) {
+<span class="nc" id="L341">        this.useAnnotatedBasePath = useAnnotatedBasePath;</span>
+<span class="nc" id="L342">    }</span>
+
+    public void setGenerateNonSpringApplication(boolean generateNonSpringApplication) {
+<span class="nc" id="L345">        this.generateNonSpringApplication = generateNonSpringApplication;</span>
+<span class="nc" id="L346">    }</span>
+
+    public void setUseGenericResponse(boolean useGenericResponse) {
+<span class="nc" id="L349">        this.useGenericResponse = useGenericResponse;</span>
+<span class="nc" id="L350">    }</span>
+
+    public void setUseAbstractionForFiles(boolean useAbstractionForFiles) {
+<span class="nc" id="L353">        this.useAbstractionForFiles = useAbstractionForFiles;</span>
+<span class="nc" id="L354">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

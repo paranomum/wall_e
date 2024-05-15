@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ScalaLagomServerCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">ScalaLagomServerCodegen.java</span></div><h1>ScalaLagomServerCodegen.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
+ * Copyright 2018 SmartBear Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.codegen.languages;
+
+import org.apache.commons.lang3.StringUtils;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.meta.features.*;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+
+import static org.openapitools.codegen.utils.CamelizeOption.LOWERCASE_FIRST_LETTER;
+import static org.openapitools.codegen.utils.StringUtils.camelize;
+
+public class ScalaLagomServerCodegen extends AbstractScalaCodegen implements CodegenConfig {
+<span class="nc" id="L36">    private final Logger LOGGER = LoggerFactory.getLogger(ScalaLagomServerCodegen.class);</span>
+
+<span class="nc" id="L38">    private String authScheme = &quot;&quot;;</span>
+<span class="nc" id="L39">    private boolean authPreemptive = false;</span>
+<span class="nc" id="L40">    protected String groupId = &quot;org.openapitools&quot;;</span>
+<span class="nc" id="L41">    protected String artifactId = &quot;scala-lagom-server&quot;;</span>
+<span class="nc" id="L42">    protected String artifactVersion = &quot;1.0.0&quot;;</span>
+
+    public ScalaLagomServerCodegen() {
+<span class="nc" id="L45">        super();</span>
+<span class="nc" id="L46">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L47">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="nc" id="L48">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON, WireFormatFeature.XML, WireFormatFeature.Custom))</span>
+<span class="nc" id="L49">                .securityFeatures(EnumSet.noneOf(SecurityFeature.class))</span>
+<span class="nc" id="L50">                .excludeGlobalFeatures(</span>
+                        GlobalFeature.XMLStructureDefinitions,
+                        GlobalFeature.Callbacks,
+                        GlobalFeature.LinkObjects,
+                        GlobalFeature.ParameterStyling
+                )
+<span class="nc" id="L56">                .excludeSchemaSupportFeatures(</span>
+                        SchemaSupportFeature.Polymorphism
+                )
+<span class="nc" id="L59">                .excludeParameterFeatures(</span>
+                        ParameterFeature.Cookie
+                )
+        );
+
+<span class="nc" id="L64">        outputFolder = &quot;generated-code/scala-lagom-server&quot;;</span>
+<span class="nc" id="L65">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.scala&quot;);</span>
+<span class="nc" id="L66">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.scala&quot;);</span>
+<span class="nc" id="L67">        embeddedTemplateDir = templateDir = &quot;scala-lagom-server&quot;;</span>
+<span class="nc" id="L68">        apiPackage = &quot;io.swagger.client.api&quot;;</span>
+<span class="nc" id="L69">        modelPackage = &quot;io.swagger.client.model&quot;;</span>
+
+<span class="nc" id="L71">        setReservedWordsLowerCase(</span>
+<span class="nc" id="L72">                Arrays.asList(</span>
+                        // local variable names used in API methods (endpoints)
+                        &quot;path&quot;, &quot;contentTypes&quot;, &quot;contentType&quot;, &quot;queryParams&quot;, &quot;headerParams&quot;,
+                        &quot;formParams&quot;, &quot;postBody&quot;, &quot;mp&quot;, &quot;basePath&quot;, &quot;apiInvoker&quot;,
+
+                        // scala reserved words
+                        &quot;abstract&quot;, &quot;case&quot;, &quot;catch&quot;, &quot;class&quot;, &quot;def&quot;, &quot;do&quot;, &quot;else&quot;, &quot;extends&quot;,
+                        &quot;false&quot;, &quot;final&quot;, &quot;finally&quot;, &quot;for&quot;, &quot;forSome&quot;, &quot;if&quot;, &quot;implicit&quot;,
+                        &quot;import&quot;, &quot;lazy&quot;, &quot;match&quot;, &quot;new&quot;, &quot;null&quot;, &quot;object&quot;, &quot;override&quot;, &quot;package&quot;,
+                        &quot;private&quot;, &quot;protected&quot;, &quot;return&quot;, &quot;sealed&quot;, &quot;super&quot;, &quot;this&quot;, &quot;throw&quot;,
+                        &quot;trait&quot;, &quot;try&quot;, &quot;true&quot;, &quot;type&quot;, &quot;val&quot;, &quot;var&quot;, &quot;while&quot;, &quot;with&quot;, &quot;yield&quot;)
+        );
+
+<span class="nc" id="L85">        additionalProperties.put(CodegenConstants.GROUP_ID, groupId);</span>
+<span class="nc" id="L86">        additionalProperties.put(CodegenConstants.ARTIFACT_ID, artifactId);</span>
+<span class="nc" id="L87">        additionalProperties.put(CodegenConstants.ARTIFACT_VERSION, artifactVersion);</span>
+<span class="nc" id="L88">        additionalProperties.put(&quot;authScheme&quot;, authScheme);</span>
+<span class="nc" id="L89">        additionalProperties.put(&quot;authPreemptive&quot;, authPreemptive);</span>
+
+<span class="nc" id="L91">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;));</span>
+<span class="nc" id="L92">        supportingFiles.add(new SupportingFile(&quot;gitignore.mustache&quot;, &quot;&quot;, &quot;.gitignore&quot;));</span>
+<span class="nc" id="L93">        supportingFiles.add(new SupportingFile(&quot;build.sbt.mustache&quot;, &quot;&quot;, &quot;build.sbt&quot;));</span>
+<span class="nc" id="L94">        supportingFiles.add(new SupportingFile(&quot;build.properties.mustache&quot;, &quot;&quot;, &quot;project/build.properties&quot;));</span>
+<span class="nc" id="L95">        supportingFiles.add(new SupportingFile(&quot;plugins.sbt.mustache&quot;, &quot;&quot;, &quot;project/plugins.sbt&quot;));</span>
+
+<span class="nc" id="L97">        importMapping.remove(&quot;List&quot;);</span>
+<span class="nc" id="L98">        importMapping.remove(&quot;Set&quot;);</span>
+<span class="nc" id="L99">        importMapping.remove(&quot;Map&quot;);</span>
+
+<span class="nc" id="L101">        importMapping.put(&quot;DateTime&quot;, &quot;org.joda.time.DateTime&quot;);</span>
+
+<span class="nc" id="L103">        typeMapping = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L104">        typeMapping.put(&quot;Integer&quot;, &quot;Int&quot;);</span>
+<span class="nc" id="L105">        typeMapping.put(&quot;enum&quot;, &quot;NSString&quot;);</span>
+<span class="nc" id="L106">        typeMapping.put(&quot;array&quot;, &quot;Seq&quot;);</span>
+<span class="nc" id="L107">        typeMapping.put(&quot;set&quot;, &quot;Set&quot;);</span>
+<span class="nc" id="L108">        typeMapping.put(&quot;boolean&quot;, &quot;Boolean&quot;);</span>
+<span class="nc" id="L109">        typeMapping.put(&quot;string&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L110">        typeMapping.put(&quot;int&quot;, &quot;Int&quot;);</span>
+<span class="nc" id="L111">        typeMapping.put(&quot;long&quot;, &quot;Long&quot;);</span>
+<span class="nc" id="L112">        typeMapping.put(&quot;float&quot;, &quot;Float&quot;);</span>
+<span class="nc" id="L113">        typeMapping.put(&quot;byte&quot;, &quot;Byte&quot;);</span>
+<span class="nc" id="L114">        typeMapping.put(&quot;short&quot;, &quot;Short&quot;);</span>
+<span class="nc" id="L115">        typeMapping.put(&quot;char&quot;, &quot;Char&quot;);</span>
+<span class="nc" id="L116">        typeMapping.put(&quot;double&quot;, &quot;Double&quot;);</span>
+<span class="nc" id="L117">        typeMapping.put(&quot;object&quot;, &quot;Any&quot;);</span>
+<span class="nc" id="L118">        typeMapping.put(&quot;file&quot;, &quot;File&quot;);</span>
+
+        //TODO binary should be mapped to byte array
+        // mapped to String as a workaround
+<span class="nc" id="L122">        typeMapping.put(&quot;binary&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L123">        typeMapping.put(&quot;ByteArray&quot;, &quot;String&quot;);</span>
+
+<span class="nc" id="L125">        instantiationTypes.put(&quot;array&quot;, &quot;ListBuffer&quot;);</span>
+<span class="nc" id="L126">        instantiationTypes.put(&quot;map&quot;, &quot;HashMap&quot;);</span>
+<span class="nc" id="L127">    }</span>
+
+    @Override
+    public void processOpts() {
+<span class="nc" id="L131">        super.processOpts();</span>
+<span class="nc" id="L132">    }</span>
+
+    @Override
+    public String toParamName(String name) {
+        // obtain the name from parameterNameMapping directly if provided
+<span class="nc bnc" id="L137" title="All 2 branches missed.">        if (parameterNameMapping.containsKey(name)) {</span>
+<span class="nc" id="L138">            return parameterNameMapping.get(name);</span>
+        }
+
+        // should be the same as variable name
+<span class="nc" id="L142">        return toVarName(name);</span>
+    }
+
+    @Override
+    public CodegenType getTag() {
+<span class="nc" id="L147">        return CodegenType.SERVER;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L152">        return &quot;scala-lagom-server&quot;;</span>
+    }
+
+    @Override
+    public String getHelp() {
+<span class="nc" id="L157">        return &quot;Generates a Lagom API server (Beta) in scala&quot;;</span>
+    }
+
+    @Override
+    public String toOperationId(String operationId) {
+        // throw exception if method name is empty
+<span class="nc bnc" id="L163" title="All 2 branches missed.">        if (StringUtils.isEmpty(operationId)) {</span>
+<span class="nc" id="L164">            throw new RuntimeException(&quot;Empty method name (operationId) not allowed&quot;);</span>
+        }
+
+        // method name cannot use reserved keyword, e.g. return
+<span class="nc bnc" id="L168" title="All 2 branches missed.">        if (isReservedWord(operationId)) {</span>
+<span class="nc" id="L169">            throw new RuntimeException(operationId + &quot; (reserved word) cannot be used as method name&quot;);</span>
+        }
+
+<span class="nc" id="L172">        return camelize(operationId, LOWERCASE_FIRST_LETTER);</span>
+    }
+
+    @Override
+    public ModelsMap postProcessModelsEnum(ModelsMap objs) {
+<span class="nc" id="L177">        objs = super.postProcessModelsEnum(objs);</span>
+<span class="nc bnc" id="L178" title="All 2 branches missed.">        for (ModelMap mo : objs.getModels()) {</span>
+<span class="nc" id="L179">            CodegenModel cm = mo.getModel();</span>
+
+<span class="nc bnc" id="L181" title="All 2 branches missed.">            for (CodegenProperty var : cm.vars) {</span>
+<span class="nc bnc" id="L182" title="All 2 branches missed.">                if (var.isEnum) {</span>
+<span class="nc" id="L183">                    List&lt;Object&gt; enumValues = (List&lt;Object&gt;) var.allowableValues.get(&quot;values&quot;);</span>
+
+<span class="nc bnc" id="L185" title="All 2 branches missed.">                    for (final ListIterator&lt;Object&gt; i = enumValues.listIterator(); i.hasNext(); ) {</span>
+<span class="nc" id="L186">                        final String element = String.valueOf(i.next());</span>
+<span class="nc" id="L187">                        i.set(element.replaceAll(&quot;^\&quot;|\&quot;$&quot;, &quot;&quot;));</span>
+<span class="nc" id="L188">                    }</span>
+                }
+<span class="nc" id="L190">            }</span>
+<span class="nc" id="L191">        }</span>
+
+        //Needed import for Gson based libraries
+<span class="nc bnc" id="L194" title="All 2 branches missed.">        if (additionalProperties.containsKey(&quot;gson&quot;)) {</span>
+<span class="nc" id="L195">            List&lt;Map&lt;String, String&gt;&gt; imports = (List&lt;Map&lt;String, String&gt;&gt;) objs.get(&quot;imports&quot;);</span>
+
+<span class="nc bnc" id="L197" title="All 2 branches missed.">            for (ModelMap mo : objs.getModels()) {</span>
+<span class="nc" id="L198">                CodegenModel cm = mo.getModel();</span>
+                // for enum model
+<span class="nc bnc" id="L200" title="All 4 branches missed.">                if (Boolean.TRUE.equals(cm.isEnum) &amp;&amp; cm.allowableValues != null) {</span>
+<span class="nc" id="L201">                    cm.imports.add(importMapping.get(&quot;SerializedName&quot;));</span>
+<span class="nc" id="L202">                    Map&lt;String, String&gt; item = new HashMap&lt;String, String&gt;();</span>
+<span class="nc" id="L203">                    item.put(&quot;import&quot;, importMapping.get(&quot;SerializedName&quot;));</span>
+<span class="nc" id="L204">                    imports.add(item);</span>
+                }
+<span class="nc" id="L206">            }</span>
+        }
+
+<span class="nc" id="L209">        return objs;</span>
+    }
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List&lt;ModelMap&gt; allModels) {
+<span class="nc" id="L214">        OperationMap operations = objs.getOperations();</span>
+<span class="nc" id="L215">        List&lt;CodegenOperation&gt; oplist = operations.getOperation();</span>
+
+<span class="nc bnc" id="L217" title="All 2 branches missed.">        for (CodegenOperation codegenOperation : oplist) {</span>
+<span class="nc" id="L218">            String path = codegenOperation.path;</span>
+<span class="nc" id="L219">            codegenOperation.path = path.replaceAll(&quot;\\{&quot;, &quot;:&quot;).replaceAll(&quot;}&quot;, &quot;&quot;);</span>
+<span class="nc" id="L220">        }</span>
+<span class="nc" id="L221">        return objs;</span>
+    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

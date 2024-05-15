@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DocumentationProviderFeatures.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages.features</a> &gt; <span class="el_source">DocumentationProviderFeatures.java</span></div><h1>DocumentationProviderFeatures.java</h1><pre class="source lang-java linenums">package org.openapitools.codegen.languages.features;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
+
+/**
+ * The DocumentationProvider Features support to additional properties to select the
+ * documentation provider and the annotation library to use during code generation.
+ *
+ * @author cachescrubber, 2022-01-08
+ * @since 5.4.0
+ */
+public interface DocumentationProviderFeatures {
+
+  String DOCUMENTATION_PROVIDER = &quot;documentationProvider&quot;;
+
+  String ANNOTATION_LIBRARY = &quot;annotationLibrary&quot;;
+
+  /**
+   * Define the default documentation Provider for CliOpts processing.
+   * A NULL return value will disable the documentation provider support.
+   * Override in subclasses to customize.
+   * @return the default documentation provider
+   */
+  default DocumentationProvider defaultDocumentationProvider() {
+<span class="fc" id="L29">    return null;</span>
+  }
+
+  /**
+   * Define the List of supported documentation Provider for CliOpts processing.
+   * Override in subclasses to customize.
+   * @return the list of supported documentation provider
+   */
+  default List&lt;DocumentationProvider&gt; supportedDocumentationProvider() {
+<span class="nc" id="L38">    List&lt;DocumentationProvider&gt; supportedProviders = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L39">    supportedProviders.add(DocumentationProvider.NONE);</span>
+<span class="nc" id="L40">    return supportedProviders;</span>
+  }
+
+  /**
+   * Define the list of supported annotation libraries for CliOpts processing.
+   * Override in subclasses to customize.
+   * @return the list of supported annotation libraries
+   */
+  default List&lt;AnnotationLibrary&gt; supportedAnnotationLibraries() {
+<span class="nc" id="L49">    List&lt;AnnotationLibrary&gt; supportedLibraries = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L50">    supportedLibraries.add(AnnotationLibrary.NONE);</span>
+<span class="nc" id="L51">    return supportedLibraries;</span>
+  }
+
+  DocumentationProvider getDocumentationProvider();
+
+  void setDocumentationProvider(DocumentationProvider documentationProvider);
+
+  AnnotationLibrary getAnnotationLibrary();
+
+  void setAnnotationLibrary(AnnotationLibrary annotationLibrary);
+
+<span class="fc" id="L62">  enum DocumentationProvider {</span>
+<span class="fc" id="L63">      NONE(&quot;withoutDocumentationProvider&quot;, &quot;Do not publish an OpenAPI specification.&quot;,</span>
+<span class="fc" id="L64">          AnnotationLibrary.NONE, AnnotationLibrary.values()),</span>
+
+<span class="fc" id="L66">      SOURCE(&quot;sourceDocumentationProvider&quot;, &quot;Publish the original input OpenAPI specification.&quot;,</span>
+<span class="fc" id="L67">          AnnotationLibrary.NONE, AnnotationLibrary.values()),</span>
+
+<span class="fc" id="L69">      SWAGGER1(&quot;swagger1DocumentationProvider&quot;, &quot;Generate an OpenAPI 2 (fka Swagger RESTful API Documentation Specification) specification using Swagger-Core 1.x.&quot;,</span>
+          AnnotationLibrary.SWAGGER1, AnnotationLibrary.SWAGGER1),
+
+<span class="fc" id="L72">      SWAGGER2(&quot;swagger2DocumentationProvider&quot;, &quot;Generate an OpenAPI 3 specification using Swagger-Core 2.x.&quot;,</span>
+          AnnotationLibrary.SWAGGER2, AnnotationLibrary.SWAGGER2),
+
+<span class="fc" id="L75">      SPRINGFOX(&quot;springFoxDocumentationProvider&quot;, &quot;Generate an OpenAPI 2 (fka Swagger RESTful API Documentation Specification) specification using SpringFox 2.x. Deprecated (for removal); use springdoc instead.&quot;,</span>
+          AnnotationLibrary.SWAGGER1, AnnotationLibrary.SWAGGER1),
+
+<span class="fc" id="L78">      SPRINGDOC(&quot;springDocDocumentationProvider&quot;, &quot;Generate an OpenAPI 3 specification using SpringDoc.&quot;,</span>
+          AnnotationLibrary.SWAGGER2, AnnotationLibrary.SWAGGER2);
+
+      private final String propertyName;
+
+      private final String description;
+
+      private final AnnotationLibrary preferredAnnotationLibrary;
+
+      private final AnnotationLibrary[] supportedAnnotationLibraries;
+
+      DocumentationProvider(String propertyName, String description,
+          AnnotationLibrary preferredAnnotationLibrary,
+<span class="fc" id="L91">          AnnotationLibrary... supportedAnnotationLibraries) {</span>
+<span class="fc" id="L92">          this.propertyName = propertyName;</span>
+<span class="fc" id="L93">          this.description = description;</span>
+<span class="fc" id="L94">          this.preferredAnnotationLibrary = preferredAnnotationLibrary;</span>
+<span class="fc" id="L95">          this.supportedAnnotationLibraries = supportedAnnotationLibraries;</span>
+<span class="fc" id="L96">      }</span>
+
+      public static DocumentationProvider ofCliOption(String optVal) {
+<span class="nc" id="L99">          optVal = Objects.requireNonNull(optVal).toUpperCase(Locale.ROOT);</span>
+<span class="nc" id="L100">          return valueOf(optVal);</span>
+      }
+
+    /**
+     * The property name should be used in the codegen model as a boolean property.
+     *
+     * @return the property name for this documentation provider
+     */
+      public String getPropertyName() {
+<span class="nc" id="L109">          return propertyName;</span>
+      }
+
+      public String getDescription() {
+<span class="fc" id="L113">          return description;</span>
+      }
+
+      public AnnotationLibrary getPreferredAnnotationLibrary() {
+<span class="fc" id="L117">          return preferredAnnotationLibrary;</span>
+      }
+
+      public AnnotationLibrary[] getSupportedAnnotationLibraries() {
+<span class="nc" id="L121">          return supportedAnnotationLibraries;</span>
+      }
+
+      public List&lt;AnnotationLibrary&gt; supportedAnnotationLibraries() {
+<span class="nc" id="L125">          return Arrays.asList(getSupportedAnnotationLibraries());</span>
+      }
+
+      public String toCliOptValue() {
+<span class="fc" id="L129">          return name().toLowerCase(Locale.ROOT);</span>
+      }
+  }
+
+<span class="fc" id="L133">  enum AnnotationLibrary {</span>
+<span class="fc" id="L134">      NONE(&quot;withoutAnnotationLibrary&quot;, &quot;Do not annotate Model and Api with complementary annotations.&quot;),</span>
+
+<span class="fc" id="L136">      SWAGGER1(&quot;swagger1AnnotationLibrary&quot;, &quot;Annotate Model and Api using the Swagger Annotations 1.x library.&quot;),</span>
+
+<span class="fc" id="L138">      SWAGGER2(&quot;swagger2AnnotationLibrary&quot;, &quot;Annotate Model and Api using the Swagger Annotations 2.x library.&quot;),</span>
+
+<span class="fc" id="L140">      MICROPROFILE(&quot;microprofileAnnotationLibrary&quot;, &quot;Annotate Model and Api using the Microprofile annotations.&quot;);</span>
+
+      private final String propertyName;
+
+      private final String description;
+
+      public static AnnotationLibrary ofCliOption(String optVal) {
+<span class="nc" id="L147">          optVal = Objects.requireNonNull(optVal).toUpperCase(Locale.ROOT);</span>
+<span class="nc" id="L148">          return valueOf(optVal);</span>
+      }
+
+    /**
+     * The property name is used in the codegen model as a boolean property.
+     *
+     * @return the property name for this annotation library
+     */
+    public String getPropertyName() {
+<span class="nc" id="L157">          return propertyName;</span>
+      }
+
+      public String getDescription() {
+<span class="fc" id="L161">          return description;</span>
+      }
+
+<span class="fc" id="L164">      AnnotationLibrary(String propertyName, String description) {</span>
+<span class="fc" id="L165">          this.propertyName = propertyName;</span>
+<span class="fc" id="L166">          this.description = description;</span>
+<span class="fc" id="L167">      }</span>
+
+      public String toCliOptValue() {
+<span class="fc" id="L170">          return name().toLowerCase(Locale.ROOT);</span>
+      }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
