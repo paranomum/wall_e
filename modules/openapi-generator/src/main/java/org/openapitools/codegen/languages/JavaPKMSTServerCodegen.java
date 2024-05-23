@@ -243,7 +243,7 @@ public class JavaPKMSTServerCodegen extends AbstractJavaCodegen {
 
         // manifest
 
-        this.supportingFiles.add(new SupportingFile("manifest.mustache", "", "manifest.yml"));
+//        this.supportingFiles.add(new SupportingFile("manifest.mustache", "", "manifest.yml"));
 
         // docker
         this.supportingFiles.add(new SupportingFile("docker.mustache", "", "Dockerfile"));
