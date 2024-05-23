@@ -1,1 +1,0 @@
-typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"org.openapitools.codegen.plugin","l":"CodeGenMojo"},{"p":"org.openapitools.openapi_generator_maven_plugin","l":"HelpMojo"}];updateSearchResults();

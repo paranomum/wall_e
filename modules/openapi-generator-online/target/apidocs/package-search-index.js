@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"org.openapitools.codegen.online"},{"l":"org.openapitools.codegen.online.api"},{"l":"org.openapitools.codegen.online.configuration"},{"l":"org.openapitools.codegen.online.model"},{"l":"org.openapitools.codegen.online.service"}];updateSearchResults();

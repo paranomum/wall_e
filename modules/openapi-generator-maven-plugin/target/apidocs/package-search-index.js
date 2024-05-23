@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"org.openapitools.codegen.plugin"},{"l":"org.openapitools.openapi_generator_maven_plugin"}];updateSearchResults();
