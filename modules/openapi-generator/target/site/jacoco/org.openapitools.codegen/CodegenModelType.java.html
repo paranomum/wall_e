@@ -17,23 +17,23 @@
 
 package org.openapitools.codegen;
 
-<span class="fc" id="L20">public enum CodegenModelType {</span>
+<span class="nc" id="L20">public enum CodegenModelType {</span>
 
-<span class="fc" id="L22">    MODEL(CodegenModel.class),</span>
-<span class="fc" id="L23">    OPERATION(CodegenOperation.class),</span>
-<span class="fc" id="L24">    PARAMETER(CodegenParameter.class),</span>
-<span class="fc" id="L25">    PROPERTY(CodegenProperty.class),</span>
-<span class="fc" id="L26">    RESPONSE(CodegenResponse.class),</span>
-<span class="fc" id="L27">    SECURITY(CodegenSecurity.class);</span>
+<span class="nc" id="L22">    MODEL(CodegenModel.class),</span>
+<span class="nc" id="L23">    OPERATION(CodegenOperation.class),</span>
+<span class="nc" id="L24">    PARAMETER(CodegenParameter.class),</span>
+<span class="nc" id="L25">    PROPERTY(CodegenProperty.class),</span>
+<span class="nc" id="L26">    RESPONSE(CodegenResponse.class),</span>
+<span class="nc" id="L27">    SECURITY(CodegenSecurity.class);</span>
 
     private final Class&lt;?&gt; defaultImplementation;
 
-<span class="fc" id="L31">    private CodegenModelType(Class&lt;?&gt; defaultImplementation) {</span>
-<span class="fc" id="L32">        this.defaultImplementation = defaultImplementation;</span>
-<span class="fc" id="L33">    }</span>
+<span class="nc" id="L31">    private CodegenModelType(Class&lt;?&gt; defaultImplementation) {</span>
+<span class="nc" id="L32">        this.defaultImplementation = defaultImplementation;</span>
+<span class="nc" id="L33">    }</span>
 
     public Class&lt;?&gt; getDefaultImplementation() {
-<span class="fc" id="L36">        return defaultImplementation;</span>
+<span class="nc" id="L36">        return defaultImplementation;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

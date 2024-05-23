@@ -1,0 +1,133 @@
+-J-Xmx1024m
+@options
+@packages
+-classpath
+'/Users/admin/Desktop/wall_e/modules/openapi-generator/target/openapi-generator-7.6.0-SNAPSHOT.jar:/Users/admin/.m2/repository/io/swagger/parser/v3/swagger-parser/2.1.22/swagger-parser-2.1.22.jar:/Users/admin/.m2/repository/io/swagger/parser/v3/swagger-parser-v2-converter/2.1.22/swagger-parser-v2-converter-2.1.22.jar:/Users/admin/.m2/repository/io/swagger/swagger-core/1.6.14/swagger-core-1.6.14.jar:/Users/admin/.m2/repository/jakarta/xml/bind/jakarta.xml.bind-api/2.3.3/jakarta.xml.bind-api-2.3.3.jar:/Users/admin/.m2/repository/jakarta/activation/jakarta.activation-api/1.2.2/jakarta.activation-api-1.2.2.jar:/Users/admin/.m2/repository/io/swagger/swagger-models/1.6.14/swagger-models-1.6.14.jar:/Users/admin/.m2/repository/io/swagger/swagger-annotations/1.6.14/swagger-annotations-1.6.14.jar:/Users/admin/.m2/repository/io/swagger/swagger-parser/1.0.70/swagger-parser-1.0.70.jar:/Users/admin/.m2/repository/io/swagger/swagger-parser-safe-url-resolver/1.0.70/swagger-parser-safe-url-resolver-1.0.70.jar:/Users/admin/.m2/repository/io/swagger/swagger-compat-spec-parser/1.0.70/swagger-compat-spec-parser-1.0.70.jar:/Users/admin/.m2/repository/com/github/java-json-tools/json-schema-validator/2.2.14/json-schema-validator-2.2.14.jar:/Users/admin/.m2/repository/com/github/java-json-tools/jackson-coreutils-equivalence/1.0/jackson-coreutils-equivalence-1.0.jar:/Users/admin/.m2/repository/com/github/java-json-tools/json-schema-core/1.2.14/json-schema-core-1.2.14.jar:/Users/admin/.m2/repository/com/github/java-json-tools/uri-template/0.10/uri-template-0.10.jar:/Users/admin/.m2/repository/org/mozilla/rhino/1.7.7.2/rhino-1.7.7.2.jar:/Users/admin/.m2/repository/com/googlecode/libphonenumber/libphonenumber/8.11.1/libphonenumber-8.11.1.jar:/Users/admin/.m2/repository/net/sf/jopt-simple/jopt-simple/5.0.4/jopt-simple-5.0.4.jar:/Users/admin/.m2/repository/com/github/java-json-tools/json-patch/1.13/json-patch-1.13.jar:/Users/admin/.m2/repository/com/github/java-json-tools/msg-simple/1.2/msg-simple-1.2.jar:/Users/admin/.m2/repository/com/github/java-json-tools/btf/1.3/btf-1.3.jar:/Users/admin/.m2/repository/com/github/java-json-tools/jackson-coreutils/2.0/jackson-coreutils-2.0.jar:/Users/admin/.m2/repository/org/apache/httpcomponents/httpclient/4.5.14/httpclient-4.5.14.jar:/Users/admin/.m2/repository/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.jar:/Users/admin/.m2/repository/commons-logging/commons-logging/1.2/commons-logging-1.2.jar:/Users/admin/.m2/repository/commons-codec/commons-codec/1.11/commons-codec-1.11.jar:/Users/admin/.m2/repository/io/swagger/core/v3/swagger-models/2.2.21/swagger-models-2.2.21.jar:/Users/admin/.m2/repository/io/swagger/parser/v3/swagger-parser-core/2.1.22/swagger-parser-core-2.1.22.jar:/Users/admin/.m2/repository/io/swagger/parser/v3/swagger-parser-v3/2.1.22/swagger-parser-v3-2.1.22.jar:/Users/admin/.m2/repository/io/swagger/core/v3/swagger-core/2.2.21/swagger-core-2.2.21.jar:/Users/admin/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.16.2/jackson-datatype-jsr310-2.16.2.jar:/Users/admin/.m2/repository/io/swagger/core/v3/swagger-annotations/2.2.21/swagger-annotations-2.2.21.jar:/Users/admin/.m2/repository/jakarta/validation/jakarta.validation-api/2.0.2/jakarta.validation-api-2.0.2.jar:/Users/admin/.m2/repository/io/swagger/parser/v3/swagger-parser-safe-url-resolver/2.1.22/swagger-parser-safe-url-resolver-2.1.22.jar:/Users/admin/.m2/repository/com/fasterxml/jackson/dataformat/jackson-dataformat-yaml/2.16.2/jackson-dataformat-yaml-2.16.2.jar:/Users/admin/.m2/repository/org/yaml/snakeyaml/2.2/snakeyaml-2.2.jar:/Users/admin/.m2/repository/com/samskivert/jmustache/1.15/jmustache-1.15.jar:/Users/admin/.m2/repository/com/github/jknack/handlebars/4.3.1/handlebars-4.3.1.jar:/Users/admin/.m2/repository/com/github/jknack/handlebars-jackson2/4.3.1/handlebars-jackson2-4.3.1.jar:/Users/admin/.m2/repository/commons-io/commons-io/2.11.0/commons-io-2.11.0.jar:/Users/admin/.m2/repository/org/slf4j/slf4j-ext/1.7.36/slf4j-ext-1.7.36.jar:/Users/admin/.m2/repository/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar:/Users/admin/.m2/repository/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.jar:/Users/admin/.m2/repository/org/apache/commons/commons-text/1.10.0/commons-text-1.10.0.jar:/Users/admin/.m2/repository/commons-cli/commons-cli/1.5.0/commons-cli-1.5.0.jar:/Users/admin/.m2/repository/com/google/guava/guava/32.1.3-jre/guava-32.1.3-jre.jar:/Users/admin/.m2/repository/com/google/guava/failureaccess/1.0.1/failureaccess-1.0.1.jar:/Users/admin/.m2/repository/com/google/guava/listenablefuture/9999.0-empty-to-avoid-conflict-with-guava/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar:/Users/admin/.m2/repository/org/checkerframework/checker-qual/3.37.0/checker-qual-3.37.0.jar:/Users/admin/.m2/repository/com/google/errorprone/error_prone_annotations/2.21.1/error_prone_annotations-2.21.1.jar:/Users/admin/.m2/repository/com/google/j2objc/j2objc-annotations/2.8/j2objc-annotations-2.8.jar:/Users/admin/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-guava/2.16.2/jackson-datatype-guava-2.16.2.jar:/Users/admin/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.16.2/jackson-core-2.16.2.jar:/Users/admin/.m2/repository/org/commonmark/commonmark/0.21.0/commonmark-0.21.0.jar:/Users/admin/.m2/repository/com/github/mifmif/generex/1.0.2/generex-1.0.2.jar:/Users/admin/.m2/repository/dk/brics/automaton/automaton/1.11-8/automaton-1.11-8.jar:/Users/admin/.m2/repository/com/github/curious-odd-man/rgxgen/1.4/rgxgen-1.4.jar:/Users/admin/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.16.2/jackson-databind-2.16.2.jar:/Users/admin/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.16.2/jackson-annotations-2.16.2.jar:/Users/admin/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-joda/2.16.2/jackson-datatype-joda-2.16.2.jar:/Users/admin/.m2/repository/joda-time/joda-time/2.10.14/joda-time-2.10.14.jar:/Users/admin/.m2/repository/com/github/joschi/jackson/jackson-datatype-threetenbp/2.15.2/jackson-datatype-threetenbp-2.15.2.jar:/Users/admin/.m2/repository/org/threeten/threetenbp/1.6.8/threetenbp-1.6.8.jar:/Users/admin/Desktop/wall_e/modules/openapi-generator-core/target/openapi-generator-core-7.6.0-SNAPSHOT.jar:/Users/admin/.m2/repository/net/java/dev/jna/jna/5.12.1/jna-5.12.1.jar:/Users/admin/.m2/repository/com/github/ben-manes/caffeine/caffeine/2.9.3/caffeine-2.9.3.jar:/Users/admin/.m2/repository/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar:/Users/admin/.m2/repository/io/airlift/airline/0.9/airline-0.9.jar:/Users/admin/.m2/repository/javax/inject/javax.inject/1/javax.inject-1.jar:/Users/admin/.m2/repository/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar:/Users/admin/.m2/repository/com/googlecode/lambdaj/lambdaj/2.3.3/lambdaj-2.3.3.jar:/Users/admin/.m2/repository/org/hamcrest/hamcrest-all/1.1/hamcrest-all-1.1.jar:/Users/admin/.m2/repository/org/objenesis/objenesis/1.2/objenesis-1.2.jar:/Users/admin/.m2/repository/cglib/cglib-nodep/2.2/cglib-nodep-2.2.jar:/Users/admin/.m2/repository/ch/qos/logback/logback-classic/1.2.13/logback-classic-1.2.13.jar:/Users/admin/.m2/repository/ch/qos/logback/logback-core/1.2.13/logback-core-1.2.13.jar:/Users/admin/.m2/repository/org/codehaus/janino/janino/3.1.9/janino-3.1.9.jar:/Users/admin/.m2/repository/org/codehaus/janino/commons-compiler/3.1.9/commons-compiler-3.1.9.jar'
+-encoding
+'UTF-8'
+-protected
+-source
+'11'
+-sourcepath
+'/Users/admin/Desktop/wall_e/modules/openapi-generator-cli/src/main/java:/Users/admin/Desktop/wall_e/modules/openapi-generator-cli/target/generated-sources/annotations'
+-author
+-bottom
+'Copyright &#169; 2024. All rights reserved.'
+-charset
+'UTF-8'
+-d
+'/Users/admin/Desktop/wall_e/modules/openapi-generator-cli/target/apidocs'
+-docencoding
+'UTF-8'
+-Xdoclint:none
+-doctitle
+'openapi-generator (executable) 7.6.0-SNAPSHOT API'
+-linkoffline
+'https://docs.oracle.com/en/java/javase/11/docs/api' '/Users/admin/Desktop/wall_e/modules/openapi-generator-cli/target/javadoc-bundle-options'
+-use
+-version
+-windowtitle
+'openapi-generator (executable) 7.6.0-SNAPSHOT API'
+org.openapitools.codegen.cmd
+org.openapitools.codegen
+/Users/admin/Desktop/wall_e/modules/openapi-generator/target/openapi-generator-7.6.0-SNAPSHOT.jar = 1716459330864
+/Users/admin/.m2/repository/io/swagger/parser/v3/swagger-parser/2.1.22/swagger-parser-2.1.22.jar = 1716401191488
+/Users/admin/.m2/repository/io/swagger/parser/v3/swagger-parser-v2-converter/2.1.22/swagger-parser-v2-converter-2.1.22.jar = 1716401191498
+/Users/admin/.m2/repository/io/swagger/swagger-core/1.6.14/swagger-core-1.6.14.jar = 1716401191761
+/Users/admin/.m2/repository/jakarta/xml/bind/jakarta.xml.bind-api/2.3.3/jakarta.xml.bind-api-2.3.3.jar = 1716401192637
+/Users/admin/.m2/repository/jakarta/activation/jakarta.activation-api/1.2.2/jakarta.activation-api-1.2.2.jar = 1716401191508
+/Users/admin/.m2/repository/io/swagger/swagger-models/1.6.14/swagger-models-1.6.14.jar = 1716401191596
+/Users/admin/.m2/repository/io/swagger/swagger-annotations/1.6.14/swagger-annotations-1.6.14.jar = 1716401191627
+/Users/admin/.m2/repository/io/swagger/swagger-parser/1.0.70/swagger-parser-1.0.70.jar = 1716401191770
+/Users/admin/.m2/repository/io/swagger/swagger-parser-safe-url-resolver/1.0.70/swagger-parser-safe-url-resolver-1.0.70.jar = 1716401191734
+/Users/admin/.m2/repository/io/swagger/swagger-compat-spec-parser/1.0.70/swagger-compat-spec-parser-1.0.70.jar = 1716401191747
+/Users/admin/.m2/repository/com/github/java-json-tools/json-schema-validator/2.2.14/json-schema-validator-2.2.14.jar = 1716401191812
+/Users/admin/.m2/repository/com/github/java-json-tools/jackson-coreutils-equivalence/1.0/jackson-coreutils-equivalence-1.0.jar = 1716401192062
+/Users/admin/.m2/repository/com/github/java-json-tools/json-schema-core/1.2.14/json-schema-core-1.2.14.jar = 1716401191974
+/Users/admin/.m2/repository/com/github/java-json-tools/uri-template/0.10/uri-template-0.10.jar = 1716401192099
+/Users/admin/.m2/repository/org/mozilla/rhino/1.7.7.2/rhino-1.7.7.2.jar = 1716401192210
+/Users/admin/.m2/repository/com/googlecode/libphonenumber/libphonenumber/8.11.1/libphonenumber-8.11.1.jar = 1716401192226
+/Users/admin/.m2/repository/net/sf/jopt-simple/jopt-simple/5.0.4/jopt-simple-5.0.4.jar = 1716401192250
+/Users/admin/.m2/repository/com/github/java-json-tools/json-patch/1.13/json-patch-1.13.jar = 1716401192282
+/Users/admin/.m2/repository/com/github/java-json-tools/msg-simple/1.2/msg-simple-1.2.jar = 1716401192408
+/Users/admin/.m2/repository/com/github/java-json-tools/btf/1.3/btf-1.3.jar = 1716401192316
+/Users/admin/.m2/repository/com/github/java-json-tools/jackson-coreutils/2.0/jackson-coreutils-2.0.jar = 1716401192365
+/Users/admin/.m2/repository/org/apache/httpcomponents/httpclient/4.5.14/httpclient-4.5.14.jar = 1716401192481
+/Users/admin/.m2/repository/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.jar = 1716401192461
+/Users/admin/.m2/repository/commons-logging/commons-logging/1.2/commons-logging-1.2.jar = 1716401192475
+/Users/admin/.m2/repository/commons-codec/commons-codec/1.11/commons-codec-1.11.jar = 1716401192501
+/Users/admin/.m2/repository/io/swagger/core/v3/swagger-models/2.2.21/swagger-models-2.2.21.jar = 1716401192886
+/Users/admin/.m2/repository/io/swagger/parser/v3/swagger-parser-core/2.1.22/swagger-parser-core-2.1.22.jar = 1716401192878
+/Users/admin/.m2/repository/io/swagger/parser/v3/swagger-parser-v3/2.1.22/swagger-parser-v3-2.1.22.jar = 1716401192570
+/Users/admin/.m2/repository/io/swagger/core/v3/swagger-core/2.2.21/swagger-core-2.2.21.jar = 1716401192606
+/Users/admin/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.16.2/jackson-datatype-jsr310-2.16.2.jar = 1710012520000
+/Users/admin/.m2/repository/io/swagger/core/v3/swagger-annotations/2.2.21/swagger-annotations-2.2.21.jar = 1716401192782
+/Users/admin/.m2/repository/jakarta/validation/jakarta.validation-api/2.0.2/jakarta.validation-api-2.0.2.jar = 1716401192883
+/Users/admin/.m2/repository/io/swagger/parser/v3/swagger-parser-safe-url-resolver/2.1.22/swagger-parser-safe-url-resolver-2.1.22.jar = 1716401192883
+/Users/admin/.m2/repository/com/fasterxml/jackson/dataformat/jackson-dataformat-yaml/2.16.2/jackson-dataformat-yaml-2.16.2.jar = 1716401192953
+/Users/admin/.m2/repository/org/yaml/snakeyaml/2.2/snakeyaml-2.2.jar = 1693124795000
+/Users/admin/.m2/repository/com/samskivert/jmustache/1.15/jmustache-1.15.jar = 1716401193048
+/Users/admin/.m2/repository/com/github/jknack/handlebars/4.3.1/handlebars-4.3.1.jar = 1716401193132
+/Users/admin/.m2/repository/com/github/jknack/handlebars-jackson2/4.3.1/handlebars-jackson2-4.3.1.jar = 1716401193099
+/Users/admin/.m2/repository/commons-io/commons-io/2.11.0/commons-io-2.11.0.jar = 1625881379000
+/Users/admin/.m2/repository/org/slf4j/slf4j-ext/1.7.36/slf4j-ext-1.7.36.jar = 1716401193195
+/Users/admin/.m2/repository/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar = 1644327230000
+/Users/admin/.m2/repository/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.jar = 1614372051000
+/Users/admin/.m2/repository/org/apache/commons/commons-text/1.10.0/commons-text-1.10.0.jar = 1716401193217
+/Users/admin/.m2/repository/commons-cli/commons-cli/1.5.0/commons-cli-1.5.0.jar = 1716401193249
+/Users/admin/.m2/repository/com/google/guava/guava/32.1.3-jre/guava-32.1.3-jre.jar = 1696971215000
+/Users/admin/.m2/repository/com/google/guava/failureaccess/1.0.1/failureaccess-1.0.1.jar = 1542650246000
+/Users/admin/.m2/repository/com/google/guava/listenablefuture/9999.0-empty-to-avoid-conflict-with-guava/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar = 1536694843000
+/Users/admin/.m2/repository/org/checkerframework/checker-qual/3.37.0/checker-qual-3.37.0.jar = 1716401137630
+/Users/admin/.m2/repository/com/google/errorprone/error_prone_annotations/2.21.1/error_prone_annotations-2.21.1.jar = 1691185028000
+/Users/admin/.m2/repository/com/google/j2objc/j2objc-annotations/2.8/j2objc-annotations-2.8.jar = 1673409222000
+/Users/admin/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-guava/2.16.2/jackson-datatype-guava-2.16.2.jar = 1716401193267
+/Users/admin/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.16.2/jackson-core-2.16.2.jar = 1716401193550
+/Users/admin/.m2/repository/org/commonmark/commonmark/0.21.0/commonmark-0.21.0.jar = 1716401193370
+/Users/admin/.m2/repository/com/github/mifmif/generex/1.0.2/generex-1.0.2.jar = 1716401193371
+/Users/admin/.m2/repository/dk/brics/automaton/automaton/1.11-8/automaton-1.11-8.jar = 1716401193435
+/Users/admin/.m2/repository/com/github/curious-odd-man/rgxgen/1.4/rgxgen-1.4.jar = 1716401193448
+/Users/admin/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.16.2/jackson-databind-2.16.2.jar = 1716401193710
+/Users/admin/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.16.2/jackson-annotations-2.16.2.jar = 1716401193504
+/Users/admin/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-joda/2.16.2/jackson-datatype-joda-2.16.2.jar = 1716401193535
+/Users/admin/.m2/repository/joda-time/joda-time/2.10.14/joda-time-2.10.14.jar = 1716401193640
+/Users/admin/.m2/repository/com/github/joschi/jackson/jackson-datatype-threetenbp/2.15.2/jackson-datatype-threetenbp-2.15.2.jar = 1716401193619
+/Users/admin/.m2/repository/org/threeten/threetenbp/1.6.8/threetenbp-1.6.8.jar = 1716401193702
+/Users/admin/Desktop/wall_e/modules/openapi-generator-core/target/openapi-generator-core-7.6.0-SNAPSHOT.jar = 1716455661767
+/Users/admin/.m2/repository/net/java/dev/jna/jna/5.12.1/jna-5.12.1.jar = 1716401193819
+/Users/admin/.m2/repository/com/github/ben-manes/caffeine/caffeine/2.9.3/caffeine-2.9.3.jar = 1716401193802
+/Users/admin/.m2/repository/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar = 1716401193928
+/Users/admin/.m2/repository/io/airlift/airline/0.9/airline-0.9.jar = 1716401193878
+/Users/admin/.m2/repository/javax/inject/javax.inject/1/javax.inject-1.jar = 1255476900000
+/Users/admin/.m2/repository/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar = 1490936147000
+/Users/admin/.m2/repository/com/googlecode/lambdaj/lambdaj/2.3.3/lambdaj-2.3.3.jar = 1716401193891
+/Users/admin/.m2/repository/org/hamcrest/hamcrest-all/1.1/hamcrest-all-1.1.jar = 1716401193951
+/Users/admin/.m2/repository/org/objenesis/objenesis/1.2/objenesis-1.2.jar = 1716401193955
+/Users/admin/.m2/repository/cglib/cglib-nodep/2.2/cglib-nodep-2.2.jar = 1716401193983
+/Users/admin/.m2/repository/ch/qos/logback/logback-classic/1.2.13/logback-classic-1.2.13.jar = 1716401194006
+/Users/admin/.m2/repository/ch/qos/logback/logback-core/1.2.13/logback-core-1.2.13.jar = 1716401194031
+/Users/admin/.m2/repository/org/codehaus/janino/janino/3.1.9/janino-3.1.9.jar = 1716401194051
+/Users/admin/.m2/repository/org/codehaus/janino/commons-compiler/3.1.9/commons-compiler-3.1.9.jar = 1716401194059
+/Users/admin/Desktop/wall_e/modules/openapi-generator-cli/src/main/java = 1715785493404
+/Users/admin/Desktop/wall_e/modules/openapi-generator-cli/target/generated-sources/annotations = 1715785493008
+/Users/admin/Desktop/wall_e/modules/openapi-generator-cli/target/apidocs/constant-values.html = 1716459519418
+/Users/admin/Desktop/wall_e/modules/openapi-generator-cli/target/apidocs/tag-search-index.js = 1716459519717
+/Users/admin/Desktop/wall_e/modules/openapi-generator-cli/target/apidocs/overview-tree.html = 1716459519637
+/Users/admin/Desktop/wall_e/modules/openapi-generator-cli/target/apidocs/module-search-index.js = 1716459519710
+/Users/admin/Desktop/wall_e/modules/openapi-generator-cli/target/apidocs/index.html = 1716459519643
+/Users/admin/Desktop/wall_e/modules/openapi-generator-cli/target/apidocs/package-search-index.js = 1716459519711
+/Users/admin/Desktop/wall_e/modules/openapi-generator-cli/target/apidocs/jquery-ui.overrides.css = 1716459519875
+/Users/admin/Desktop/wall_e/modules/openapi-generator-cli/target/apidocs/index-all.html = 1716459519796
+/Users/admin/Desktop/wall_e/modules/openapi-generator-cli/target/apidocs/allpackages-index.html = 1716459519708
+/Users/admin/Desktop/wall_e/modules/openapi-generator-cli/target/apidocs/member-search-index.js = 1716459519716
+/Users/admin/Desktop/wall_e/modules/openapi-generator-cli/target/apidocs/copy.svg = 1716459519845
+/Users/admin/Desktop/wall_e/modules/openapi-generator-cli/target/apidocs/script.js = 1716459519843
+/Users/admin/Desktop/wall_e/modules/openapi-generator-cli/target/apidocs/stylesheet.css = 1716459519840
+/Users/admin/Desktop/wall_e/modules/openapi-generator-cli/target/apidocs/search-page.js = 1716459519867
+/Users/admin/Desktop/wall_e/modules/openapi-generator-cli/target/apidocs/overview-summary.html = 1716459519805
+/Users/admin/Desktop/wall_e/modules/openapi-generator-cli/target/apidocs/help-doc.html = 1716459519830
+/Users/admin/Desktop/wall_e/modules/openapi-generator-cli/target/apidocs/element-list = 1716459519312
+/Users/admin/Desktop/wall_e/modules/openapi-generator-cli/target/apidocs/search.html = 1716459519803
+/Users/admin/Desktop/wall_e/modules/openapi-generator-cli/target/apidocs/allclasses-index.html = 1716459519692
+/Users/admin/Desktop/wall_e/modules/openapi-generator-cli/target/apidocs/type-search-index.js = 1716459519713
+/Users/admin/Desktop/wall_e/modules/openapi-generator-cli/target/apidocs/search.js = 1716459519862

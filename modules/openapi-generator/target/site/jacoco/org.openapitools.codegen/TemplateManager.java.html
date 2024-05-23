@@ -25,7 +25,7 @@ public class TemplateManager implements TemplatingExecutor, TemplateProcessor {
     private final TemplatingEngineAdapter engineAdapter;
     private final TemplatePathLocator[] templateLoaders;
 
-<span class="fc" id="L28">    private final Logger LOGGER = LoggerFactory.getLogger(TemplateManager.class);</span>
+<span class="nc" id="L28">    private final Logger LOGGER = LoggerFactory.getLogger(TemplateManager.class);</span>
 
     /**
      * Constructs a new instance of a {@link TemplateManager}
@@ -37,28 +37,28 @@ public class TemplateManager implements TemplatingExecutor, TemplateProcessor {
     public TemplateManager(
             TemplateManagerOptions options,
             TemplatingEngineAdapter engineAdapter,
-<span class="fc" id="L40">            TemplatePathLocator[] templateLoaders) {</span>
-<span class="fc" id="L41">        this.options = options;</span>
-<span class="fc" id="L42">        this.engineAdapter = engineAdapter;</span>
-<span class="fc" id="L43">        this.templateLoaders = templateLoaders;</span>
-<span class="fc" id="L44">    }</span>
+<span class="nc" id="L40">            TemplatePathLocator[] templateLoaders) {</span>
+<span class="nc" id="L41">        this.options = options;</span>
+<span class="nc" id="L42">        this.engineAdapter = engineAdapter;</span>
+<span class="nc" id="L43">        this.templateLoaders = templateLoaders;</span>
+<span class="nc" id="L44">    }</span>
 
     private String getFullTemplateFile(String name) {
-<span class="fc" id="L47">        String template = Arrays.stream(this.templateLoaders)</span>
-<span class="fc" id="L48">                .map(i -&gt; i.getFullTemplatePath(name))</span>
-<span class="fc" id="L49">                .filter(Objects::nonNull)</span>
-<span class="fc" id="L50">                .findFirst()</span>
-<span class="fc" id="L51">                .orElse(&quot;&quot;);</span>
+<span class="nc" id="L47">        String template = Arrays.stream(this.templateLoaders)</span>
+<span class="nc" id="L48">                .map(i -&gt; i.getFullTemplatePath(name))</span>
+<span class="nc" id="L49">                .filter(Objects::nonNull)</span>
+<span class="nc" id="L50">                .findFirst()</span>
+<span class="nc" id="L51">                .orElse(&quot;&quot;);</span>
 
-<span class="pc bpc" id="L53" title="1 of 2 branches missed.">        if (StringUtils.isEmpty(template)) {</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">        if (StringUtils.isEmpty(template)) {</span>
 <span class="nc" id="L54">            throw new TemplateNotFoundException(name);</span>
         }
 
-<span class="pc bpc" id="L57" title="2 of 4 branches missed.">        if (name == null || name.contains(&quot;..&quot;)) {</span>
+<span class="nc bnc" id="L57" title="All 4 branches missed.">        if (name == null || name.contains(&quot;..&quot;)) {</span>
 <span class="nc" id="L58">            throw new IllegalArgumentException(&quot;Template location must be constrained to template directory.&quot;);</span>
         }
 
-<span class="fc" id="L61">        return template;</span>
+<span class="nc" id="L61">        return template;</span>
     }
 
     /**
@@ -69,7 +69,7 @@ public class TemplateManager implements TemplatingExecutor, TemplateProcessor {
      */
     @Override
     public String getFullTemplateContents(String name) {
-<span class="fc" id="L72">        return readTemplate(getFullTemplateFile(name));</span>
+<span class="nc" id="L72">        return readTemplate(getFullTemplateFile(name));</span>
     }
 
     /**
@@ -91,10 +91,10 @@ public class TemplateManager implements TemplatingExecutor, TemplateProcessor {
      * @return A normalized string according to OS-specific file separator
      */
     public static String getCPResourcePath(final String name) {
-<span class="pc bpc" id="L94" title="1 of 2 branches missed.">        if (!&quot;/&quot;.equals(File.separator)) {</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">        if (!&quot;/&quot;.equals(File.separator)) {</span>
 <span class="nc" id="L95">            return name.replaceAll(Pattern.quote(File.separator), &quot;/&quot;);</span>
         }
-<span class="fc" id="L97">        return name;</span>
+<span class="nc" id="L97">        return name;</span>
     }
 
     /**
@@ -106,15 +106,15 @@ public class TemplateManager implements TemplatingExecutor, TemplateProcessor {
     @SuppressWarnings(&quot;java:S112&quot;)
     // ignored rule java:S112 as RuntimeException is used to match previous exception type
     public String readTemplate(String name) {
-<span class="pc bpc" id="L109" title="2 of 4 branches missed.">        if (name == null || name.contains(&quot;..&quot;)) {</span>
+<span class="nc bnc" id="L109" title="All 4 branches missed.">        if (name == null || name.contains(&quot;..&quot;)) {</span>
 <span class="nc" id="L110">            throw new IllegalArgumentException(&quot;Template location must be constrained to template directory.&quot;);</span>
         }
-<span class="fc" id="L112">        try (Reader reader = getTemplateReader(name)) {</span>
-<span class="pc bpc" id="L113" title="1 of 2 branches missed.">            if (reader == null) {</span>
+<span class="nc" id="L112">        try (Reader reader = getTemplateReader(name)) {</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">            if (reader == null) {</span>
 <span class="nc" id="L114">                throw new RuntimeException(&quot;no file found&quot;);</span>
             }
-<span class="fc" id="L116">            try (Scanner s = new Scanner(reader).useDelimiter(&quot;\\A&quot;)) {</span>
-<span class="pc bpc" id="L117" title="1 of 2 branches missed.">                return s.hasNext() ? s.next() : &quot;&quot;;</span>
+<span class="nc" id="L116">            try (Scanner s = new Scanner(reader).useDelimiter(&quot;\\A&quot;)) {</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">                return s.hasNext() ? s.next() : &quot;&quot;;</span>
             }
 <span class="nc" id="L119">        } catch (Exception e) {</span>
 <span class="nc" id="L120">            LOGGER.error(&quot;{}&quot;, e.getMessage(), e);</span>
@@ -127,8 +127,8 @@ public class TemplateManager implements TemplatingExecutor, TemplateProcessor {
     // ignored rule java:S112 as RuntimeException is used to match previous exception type
     public Reader getTemplateReader(String name) {
         try {
-<span class="fc" id="L130">            InputStream is = getInputStream(name);</span>
-<span class="fc" id="L131">            return new InputStreamReader(is, StandardCharsets.UTF_8);</span>
+<span class="nc" id="L130">            InputStream is = getInputStream(name);</span>
+<span class="nc" id="L131">            return new InputStreamReader(is, StandardCharsets.UTF_8);</span>
 <span class="nc" id="L132">        } catch (FileNotFoundException e) {</span>
 <span class="nc" id="L133">            LOGGER.error(e.getMessage());</span>
 <span class="nc" id="L134">            throw new RuntimeException(&quot;can't load template &quot; + name);</span>
@@ -137,14 +137,14 @@ public class TemplateManager implements TemplatingExecutor, TemplateProcessor {
 
     private InputStream getInputStream(String name) throws FileNotFoundException {
         InputStream is;
-<span class="fc" id="L140">        is = this.getClass().getClassLoader().getResourceAsStream(getCPResourcePath(name));</span>
-<span class="pc bpc" id="L141" title="1 of 2 branches missed.">        if (is == null) {</span>
+<span class="nc" id="L140">        is = this.getClass().getClassLoader().getResourceAsStream(getCPResourcePath(name));</span>
+<span class="nc bnc" id="L141" title="All 2 branches missed.">        if (is == null) {</span>
 <span class="nc bnc" id="L142" title="All 4 branches missed.">            if (name == null || name.contains(&quot;..&quot;)) {</span>
 <span class="nc" id="L143">                throw new IllegalArgumentException(&quot;Template location must be constrained to template directory.&quot;);</span>
             }
 <span class="nc" id="L145">            is = new FileInputStream(name); // May throw but never return a null value</span>
         }
-<span class="fc" id="L147">        return is;</span>
+<span class="nc" id="L147">        return is;</span>
     }
 
     /**
@@ -158,21 +158,21 @@ public class TemplateManager implements TemplatingExecutor, TemplateProcessor {
      */
     @Override
     public File write(Map&lt;String, Object&gt; data, String template, File target) throws IOException {
-<span class="fc bfc" id="L161" title="All 2 branches covered.">        if (this.engineAdapter.handlesFile(template)) {</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">        if (this.engineAdapter.handlesFile(template)) {</span>
             // Only pass files with valid endings through template engine
-<span class="fc" id="L163">            String templateContent = this.engineAdapter.compileTemplate(this, data, template);</span>
-<span class="fc" id="L164">            return writeToFile(target.getPath(), templateContent);</span>
+<span class="nc" id="L163">            String templateContent = this.engineAdapter.compileTemplate(this, data, template);</span>
+<span class="nc" id="L164">            return writeToFile(target.getPath(), templateContent);</span>
         } else {
             // Do a straight copy of the file if not listed as supported by the template engine.
             InputStream is;
             try {
                 // look up the file using the same template resolution logic the adapters would use.
-<span class="fc" id="L170">                String fullTemplatePath = getFullTemplateFile(template);</span>
-<span class="fc" id="L171">                is = getInputStream(fullTemplatePath);</span>
+<span class="nc" id="L170">                String fullTemplatePath = getFullTemplateFile(template);</span>
+<span class="nc" id="L171">                is = getInputStream(fullTemplatePath);</span>
 <span class="nc" id="L172">            } catch (TemplateNotFoundException ex) {</span>
 <span class="nc" id="L173">                is = new FileInputStream(Paths.get(template).toFile());</span>
-<span class="fc" id="L174">            }</span>
-<span class="fc" id="L175">            return writeToFile(target.getAbsolutePath(), IOUtils.toByteArray(is));</span>
+<span class="nc" id="L174">            }</span>
+<span class="nc" id="L175">            return writeToFile(target.getAbsolutePath(), IOUtils.toByteArray(is));</span>
         }
     }
 
@@ -195,7 +195,7 @@ public class TemplateManager implements TemplatingExecutor, TemplateProcessor {
      * @throws IOException If file cannot be written.
      */
     public File writeToFile(String filename, String contents) throws IOException {
-<span class="fc" id="L198">        return writeToFile(filename, contents.getBytes(StandardCharsets.UTF_8));</span>
+<span class="nc" id="L198">        return writeToFile(filename, contents.getBytes(StandardCharsets.UTF_8));</span>
     }
 
     /**
@@ -209,9 +209,9 @@ public class TemplateManager implements TemplatingExecutor, TemplateProcessor {
     @Override
     public File writeToFile(String filename, byte[] contents) throws IOException {
         // Use Paths.get here to normalize path (for Windows file separator, space escaping on Linux/Mac, etc)
-<span class="fc" id="L212">        File outputFile = Paths.get(filename).toFile();</span>
+<span class="nc" id="L212">        File outputFile = Paths.get(filename).toFile();</span>
 
-<span class="pc bpc" id="L214" title="1 of 2 branches missed.">        if (this.options.isMinimalUpdate()) {</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">        if (this.options.isMinimalUpdate()) {</span>
 <span class="nc" id="L215">            String tempFilename = filename + &quot;.tmp&quot;;</span>
 <span class="nc" id="L216">            File tempFile = null;</span>
             try {
@@ -233,28 +233,28 @@ public class TemplateManager implements TemplatingExecutor, TemplateProcessor {
                 }
             }
 <span class="nc" id="L235">        } else {</span>
-<span class="fc" id="L236">            LOGGER.info(&quot;writing file {}&quot;, filename);</span>
-<span class="fc" id="L237">            outputFile = writeToFileRaw(filename, contents);</span>
+<span class="nc" id="L236">            LOGGER.info(&quot;writing file {}&quot;, filename);</span>
+<span class="nc" id="L237">            outputFile = writeToFileRaw(filename, contents);</span>
         }
 
-<span class="fc" id="L240">        return outputFile;</span>
+<span class="nc" id="L240">        return outputFile;</span>
     }
 
     private File writeToFileRaw(String filename, byte[] contents) throws IOException {
         // Use Paths.get here to normalize path (for Windows file separator, space escaping on Linux/Mac, etc)
-<span class="fc" id="L245">        File output = Paths.get(filename).toFile();</span>
-<span class="pc bpc" id="L246" title="3 of 4 branches missed.">        if (this.options.isSkipOverwrite() &amp;&amp; output.exists()) {</span>
+<span class="nc" id="L245">        File output = Paths.get(filename).toFile();</span>
+<span class="nc bnc" id="L246" title="All 4 branches missed.">        if (this.options.isSkipOverwrite() &amp;&amp; output.exists()) {</span>
 <span class="nc" id="L247">            LOGGER.info(&quot;skip overwrite of file {}&quot;, filename);</span>
 <span class="nc" id="L248">            return output;</span>
         }
 
-<span class="pc bpc" id="L251" title="1 of 4 branches missed.">        if (output.getParent() != null &amp;&amp; !new File(output.getParent()).exists()) {</span>
-<span class="fc" id="L252">            File parent = Paths.get(output.getParent()).toFile();</span>
-<span class="fc" id="L253">            parent.mkdirs();</span>
+<span class="nc bnc" id="L251" title="All 4 branches missed.">        if (output.getParent() != null &amp;&amp; !new File(output.getParent()).exists()) {</span>
+<span class="nc" id="L252">            File parent = Paths.get(output.getParent()).toFile();</span>
+<span class="nc" id="L253">            parent.mkdirs();</span>
         }
-<span class="fc" id="L255">        Files.write(output.toPath(), contents);</span>
+<span class="nc" id="L255">        Files.write(output.toPath(), contents);</span>
 
-<span class="fc" id="L257">        return output;</span>
+<span class="nc" id="L257">        return output;</span>
     }
 
     private boolean filesEqual(File file1, File file2) throws IOException {

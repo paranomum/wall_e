@@ -24,10 +24,10 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-<span class="fc" id="L27">public enum CodegenType {</span>
-<span class="fc" id="L28">    CLIENT, SERVER, DOCUMENTATION, SCHEMA, CONFIG, OTHER;</span>
+<span class="nc" id="L27">public enum CodegenType {</span>
+<span class="nc" id="L28">    CLIENT, SERVER, DOCUMENTATION, SCHEMA, CONFIG, OTHER;</span>
 
-<span class="fc" id="L30">    private static Map&lt;String, CodegenType&gt; names = new HashMap&lt;String, CodegenType&gt;();</span>
+<span class="nc" id="L30">    private static Map&lt;String, CodegenType&gt; names = new HashMap&lt;String, CodegenType&gt;();</span>
 
     @JsonCreator
     public static CodegenType forValue(String value) {
@@ -36,22 +36,22 @@ import java.util.Map;
 
     @JsonValue
     public String toValue() {
-<span class="pc bpc" id="L39" title="1 of 2 branches missed.">        for (Map.Entry&lt;String, CodegenType&gt; entry : names.entrySet()) {</span>
-<span class="fc bfc" id="L40" title="All 2 branches covered.">            if (entry.getValue() == this) {</span>
-<span class="fc" id="L41">                return entry.getKey();</span>
+<span class="nc bnc" id="L39" title="All 2 branches missed.">        for (Map.Entry&lt;String, CodegenType&gt; entry : names.entrySet()) {</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">            if (entry.getValue() == this) {</span>
+<span class="nc" id="L41">                return entry.getKey();</span>
             }
-<span class="fc" id="L43">        }</span>
+<span class="nc" id="L43">        }</span>
 
 <span class="nc" id="L45">        return null; // or fail</span>
     }
 
     static {
-<span class="fc" id="L49">        names.put(&quot;client&quot;, CLIENT);</span>
-<span class="fc" id="L50">        names.put(&quot;server&quot;, SERVER);</span>
-<span class="fc" id="L51">        names.put(&quot;documentation&quot;, DOCUMENTATION);</span>
-<span class="fc" id="L52">        names.put(&quot;schema&quot;, SCHEMA);</span>
-<span class="fc" id="L53">        names.put(&quot;config&quot;, CONFIG);</span>
-<span class="fc" id="L54">        names.put(&quot;other&quot;, OTHER);</span>
-<span class="fc" id="L55">    }</span>
+<span class="nc" id="L49">        names.put(&quot;client&quot;, CLIENT);</span>
+<span class="nc" id="L50">        names.put(&quot;server&quot;, SERVER);</span>
+<span class="nc" id="L51">        names.put(&quot;documentation&quot;, DOCUMENTATION);</span>
+<span class="nc" id="L52">        names.put(&quot;schema&quot;, SCHEMA);</span>
+<span class="nc" id="L53">        names.put(&quot;config&quot;, CONFIG);</span>
+<span class="nc" id="L54">        names.put(&quot;other&quot;, OTHER);</span>
+<span class="nc" id="L55">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

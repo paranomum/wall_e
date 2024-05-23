@@ -37,32 +37,32 @@ public class JavaJAXRSCXFCDIServerCodegen extends JavaJAXRSSpecServerCodegen imp
     /**
      * Default constructor
      */
-<span class="fc" id="L40">    public JavaJAXRSCXFCDIServerCodegen() {</span>
-<span class="fc" id="L41">        outputFolder = &quot;generated-code/JavaJaxRS-CXF-CDI&quot;;</span>
-<span class="fc" id="L42">        artifactId = &quot;openapi-jaxrs-cxf-cdi-server&quot;;</span>
-<span class="fc" id="L43">        sourceFolder = &quot;src/gen/java&quot;;</span>
-<span class="fc" id="L44">        useBeanValidation = true;</span>
+<span class="nc" id="L40">    public JavaJAXRSCXFCDIServerCodegen() {</span>
+<span class="nc" id="L41">        outputFolder = &quot;generated-code/JavaJaxRS-CXF-CDI&quot;;</span>
+<span class="nc" id="L42">        artifactId = &quot;openapi-jaxrs-cxf-cdi-server&quot;;</span>
+<span class="nc" id="L43">        sourceFolder = &quot;src/gen/java&quot;;</span>
+<span class="nc" id="L44">        useBeanValidation = true;</span>
 
         // clioOptions default redefinition need to be updated
-<span class="fc" id="L47">        updateOption(CodegenConstants.SOURCE_FOLDER, this.getSourceFolder());</span>
-<span class="fc" id="L48">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
+<span class="nc" id="L47">        updateOption(CodegenConstants.SOURCE_FOLDER, this.getSourceFolder());</span>
+<span class="nc" id="L48">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
 
         // Three API templates to support CDI injection
-<span class="fc" id="L51">        apiTemplateFiles.put(&quot;apiService.mustache&quot;, &quot;.java&quot;);</span>
-<span class="fc" id="L52">        apiTemplateFiles.put(&quot;apiServiceImpl.mustache&quot;, &quot;.java&quot;);</span>
+<span class="nc" id="L51">        apiTemplateFiles.put(&quot;apiService.mustache&quot;, &quot;.java&quot;);</span>
+<span class="nc" id="L52">        apiTemplateFiles.put(&quot;apiServiceImpl.mustache&quot;, &quot;.java&quot;);</span>
 
         // Use standard types
-<span class="fc" id="L55">        typeMapping.put(&quot;DateTime&quot;, &quot;java.util.Date&quot;);</span>
-<span class="fc" id="L56">        typeMapping.put(&quot;binary&quot;, &quot;java.io.InputStream&quot;);</span>
-<span class="fc" id="L57">        typeMapping.put(&quot;file&quot;, &quot;java.io.InputStream&quot;);</span>
+<span class="nc" id="L55">        typeMapping.put(&quot;DateTime&quot;, &quot;java.util.Date&quot;);</span>
+<span class="nc" id="L56">        typeMapping.put(&quot;binary&quot;, &quot;java.io.InputStream&quot;);</span>
+<span class="nc" id="L57">        typeMapping.put(&quot;file&quot;, &quot;java.io.InputStream&quot;);</span>
 
         // Updated template directory
-<span class="fc" id="L60">        embeddedTemplateDir = templateDir = JAXRS_TEMPLATE_DIRECTORY_NAME + File.separator + &quot;cxf-cdi&quot;;</span>
-<span class="fc" id="L61">    }</span>
+<span class="nc" id="L60">        embeddedTemplateDir = templateDir = JAXRS_TEMPLATE_DIRECTORY_NAME + File.separator + &quot;cxf-cdi&quot;;</span>
+<span class="nc" id="L61">    }</span>
 
     @Override
     public String getName() {
-<span class="fc" id="L65">        return &quot;jaxrs-cxf-cdi&quot;;</span>
+<span class="nc" id="L65">        return &quot;jaxrs-cxf-cdi&quot;;</span>
     }
 
     @Override

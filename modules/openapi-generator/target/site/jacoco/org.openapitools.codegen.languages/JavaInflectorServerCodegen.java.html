@@ -38,52 +38,52 @@ import static org.openapitools.codegen.utils.StringUtils.camelize;
 
 public class JavaInflectorServerCodegen extends AbstractJavaCodegen {
 
-<span class="fc" id="L41">    private final Logger LOGGER = LoggerFactory.getLogger(JavaInflectorServerCodegen.class);</span>
+<span class="nc" id="L41">    private final Logger LOGGER = LoggerFactory.getLogger(JavaInflectorServerCodegen.class);</span>
 
-<span class="fc" id="L43">    protected String title = &quot;OpenAPI Inflector&quot;;</span>
-<span class="fc" id="L44">    protected String implFolder = &quot;src/main/java&quot;;</span>
+<span class="nc" id="L43">    protected String title = &quot;OpenAPI Inflector&quot;;</span>
+<span class="nc" id="L44">    protected String implFolder = &quot;src/main/java&quot;;</span>
 
     public JavaInflectorServerCodegen() {
-<span class="fc" id="L47">        super();</span>
+<span class="nc" id="L47">        super();</span>
 
-<span class="fc" id="L49">        modifyFeatureSet(features -&gt; features.includeDocumentationFeatures(DocumentationFeature.Readme));</span>
+<span class="nc" id="L49">        modifyFeatureSet(features -&gt; features.includeDocumentationFeatures(DocumentationFeature.Readme));</span>
 
-<span class="fc" id="L51">        sourceFolder = &quot;src&quot;+ File.separator+&quot;gen&quot;+ File.separator +&quot;java&quot;;</span>
-<span class="fc" id="L52">        apiTestTemplateFiles.clear(); // TODO: add test template</span>
-<span class="fc" id="L53">        embeddedTemplateDir = templateDir = &quot;JavaInflector&quot;;</span>
-<span class="fc" id="L54">        invokerPackage = &quot;org.openapitools.controllers&quot;;</span>
-<span class="fc" id="L55">        artifactId = &quot;openapi-inflector-server&quot;;</span>
-<span class="fc" id="L56">        dateLibrary = &quot;legacy&quot;; //TODO: add joda support</span>
-<span class="fc" id="L57">        apiPackage = GlobalSettings.getProperty(&quot;swagger.codegen.inflector.apipackage&quot;, &quot;org.openapitools.controllers&quot;);</span>
-<span class="fc" id="L58">        modelPackage = GlobalSettings.getProperty(&quot;swagger.codegen.inflector.modelpackage&quot;, &quot;org.openapitools.model&quot;);</span>
+<span class="nc" id="L51">        sourceFolder = &quot;src&quot;+ File.separator+&quot;gen&quot;+ File.separator +&quot;java&quot;;</span>
+<span class="nc" id="L52">        apiTestTemplateFiles.clear(); // TODO: add test template</span>
+<span class="nc" id="L53">        embeddedTemplateDir = templateDir = &quot;JavaInflector&quot;;</span>
+<span class="nc" id="L54">        invokerPackage = &quot;org.openapitools.controllers&quot;;</span>
+<span class="nc" id="L55">        artifactId = &quot;openapi-inflector-server&quot;;</span>
+<span class="nc" id="L56">        dateLibrary = &quot;legacy&quot;; //TODO: add joda support</span>
+<span class="nc" id="L57">        apiPackage = GlobalSettings.getProperty(&quot;swagger.codegen.inflector.apipackage&quot;, &quot;org.openapitools.controllers&quot;);</span>
+<span class="nc" id="L58">        modelPackage = GlobalSettings.getProperty(&quot;swagger.codegen.inflector.modelpackage&quot;, &quot;org.openapitools.model&quot;);</span>
 
         // clear model and api doc template as this codegen
         // does not support auto-generated markdown doc at the moment
         //TODO: add doc templates
-<span class="fc" id="L63">        modelDocTemplateFiles.remove(&quot;model_doc.mustache&quot;);</span>
-<span class="fc" id="L64">        apiDocTemplateFiles.remove(&quot;api_doc.mustache&quot;);</span>
+<span class="nc" id="L63">        modelDocTemplateFiles.remove(&quot;model_doc.mustache&quot;);</span>
+<span class="nc" id="L64">        apiDocTemplateFiles.remove(&quot;api_doc.mustache&quot;);</span>
 
         // clioOptions default redefinition need to be updated
-<span class="fc" id="L67">        updateOption(CodegenConstants.SOURCE_FOLDER, this.getSourceFolder());</span>
-<span class="fc" id="L68">        updateOption(CodegenConstants.INVOKER_PACKAGE, this.getInvokerPackage());</span>
-<span class="fc" id="L69">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
-<span class="fc" id="L70">        updateOption(CodegenConstants.API_PACKAGE, apiPackage);</span>
-<span class="fc" id="L71">        updateOption(CodegenConstants.MODEL_PACKAGE, modelPackage);</span>
-<span class="fc" id="L72">        updateOption(DATE_LIBRARY, this.getDateLibrary());</span>
+<span class="nc" id="L67">        updateOption(CodegenConstants.SOURCE_FOLDER, this.getSourceFolder());</span>
+<span class="nc" id="L68">        updateOption(CodegenConstants.INVOKER_PACKAGE, this.getInvokerPackage());</span>
+<span class="nc" id="L69">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
+<span class="nc" id="L70">        updateOption(CodegenConstants.API_PACKAGE, apiPackage);</span>
+<span class="nc" id="L71">        updateOption(CodegenConstants.MODEL_PACKAGE, modelPackage);</span>
+<span class="nc" id="L72">        updateOption(DATE_LIBRARY, this.getDateLibrary());</span>
 
-<span class="fc" id="L74">        additionalProperties.put(&quot;title&quot;, title);</span>
+<span class="nc" id="L74">        additionalProperties.put(&quot;title&quot;, title);</span>
         // java inflector uses the jackson lib
-<span class="fc" id="L76">        additionalProperties.put(JACKSON, &quot;true&quot;);</span>
-<span class="fc" id="L77">    }</span>
+<span class="nc" id="L76">        additionalProperties.put(JACKSON, &quot;true&quot;);</span>
+<span class="nc" id="L77">    }</span>
 
     @Override
     public CodegenType getTag() {
-<span class="fc" id="L81">        return CodegenType.SERVER;</span>
+<span class="nc" id="L81">        return CodegenType.SERVER;</span>
     }
 
     @Override
     public String getName() {
-<span class="fc" id="L86">        return &quot;java-inflector&quot;;</span>
+<span class="nc" id="L86">        return &quot;java-inflector&quot;;</span>
     }
 
     @Override

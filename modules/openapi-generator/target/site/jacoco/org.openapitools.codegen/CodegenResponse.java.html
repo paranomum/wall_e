@@ -19,9 +19,9 @@ package org.openapitools.codegen;
 
 import java.util.*;
 
-<span class="fc" id="L22">public class CodegenResponse implements IJsonSchemaValidationProperties {</span>
-<span class="fc" id="L23">    public final List&lt;CodegenProperty&gt; headers = new ArrayList&lt;CodegenProperty&gt;();</span>
-<span class="fc" id="L24">    private List&lt;CodegenParameter&gt; responseHeaders = new ArrayList&lt;CodegenParameter&gt;();</span>
+<span class="nc" id="L22">public class CodegenResponse implements IJsonSchemaValidationProperties {</span>
+<span class="nc" id="L23">    public final List&lt;CodegenProperty&gt; headers = new ArrayList&lt;CodegenProperty&gt;();</span>
+<span class="nc" id="L24">    private List&lt;CodegenParameter&gt; responseHeaders = new ArrayList&lt;CodegenParameter&gt;();</span>
     public String code;
     public boolean is1xx;
     public boolean is2xx;
@@ -60,13 +60,13 @@ import java.util.*;
     public boolean primitiveType;
     public boolean isMap;
     public boolean isArray;
-<span class="fc" id="L63">    public boolean isBinary = false;</span>
-<span class="fc" id="L64">    public boolean isFile = false;</span>
+<span class="nc" id="L63">    public boolean isBinary = false;</span>
+<span class="nc" id="L64">    public boolean isFile = false;</span>
     public boolean isNull;
-<span class="fc" id="L66">    public boolean isVoid = false;</span>
+<span class="nc" id="L66">    public boolean isVoid = false;</span>
     public Object schema;
     public String jsonSchema;
-<span class="fc" id="L69">    public Map&lt;String, Object&gt; vendorExtensions = new HashMap&lt;String, Object&gt;();</span>
+<span class="nc" id="L69">    public Map&lt;String, Object&gt; vendorExtensions = new HashMap&lt;String, Object&gt;();</span>
     private Integer maxProperties;
     private Integer minProperties;
     private boolean uniqueItems;
@@ -83,15 +83,15 @@ import java.util.*;
     public Number multipleOf;
     public CodegenProperty items;
     public CodegenProperty additionalProperties;
-<span class="fc" id="L86">    public List&lt;CodegenProperty&gt; vars = new ArrayList&lt;CodegenProperty&gt;(); // all properties (without parent's properties)</span>
-<span class="fc" id="L87">    public List&lt;CodegenProperty&gt; requiredVars = new ArrayList&lt;CodegenProperty&gt;();</span>
+<span class="nc" id="L86">    public List&lt;CodegenProperty&gt; vars = new ArrayList&lt;CodegenProperty&gt;(); // all properties (without parent's properties)</span>
+<span class="nc" id="L87">    public List&lt;CodegenProperty&gt; requiredVars = new ArrayList&lt;CodegenProperty&gt;();</span>
     private boolean hasValidation;
     private boolean additionalPropertiesIsAnyType;
     private boolean hasVars;
     private boolean hasRequired;
     private boolean hasDiscriminatorWithNonEmptyMapping;
     private CodegenComposedSchemas composedSchemas;
-<span class="fc" id="L94">    private boolean hasMultipleTypes = false;</span>
+<span class="nc" id="L94">    private boolean hasMultipleTypes = false;</span>
     private LinkedHashMap&lt;String, CodegenMediaType&gt; content;
     private Map&lt;String, CodegenProperty&gt; requiredVarsMap;
     private String ref;
@@ -251,8 +251,8 @@ import java.util.*;
     }
 
     public void setContent(LinkedHashMap&lt;String, CodegenMediaType&gt; content) {
-<span class="fc" id="L254">        this.content = content;</span>
-<span class="fc" id="L255">    }</span>
+<span class="nc" id="L254">        this.content = content;</span>
+<span class="nc" id="L255">    }</span>
 
     public List&lt;CodegenParameter&gt; getResponseHeaders() {
 <span class="nc" id="L258">        return responseHeaders;</span>
@@ -410,8 +410,8 @@ import java.util.*;
 
     @Override
     public void setItems(CodegenProperty items) {
-<span class="fc" id="L413">        this.items = items;</span>
-<span class="fc" id="L414">    }</span>
+<span class="nc" id="L413">        this.items = items;</span>
+<span class="nc" id="L414">    }</span>
 
     @Override
     public boolean getIsModel() {
@@ -425,8 +425,8 @@ import java.util.*;
 
     @Override
     public void setIsArray(boolean isArray) {
-<span class="fc" id="L428">        this.isArray = isArray;</span>
-<span class="fc" id="L429">    }</span>
+<span class="nc" id="L428">        this.isArray = isArray;</span>
+<span class="nc" id="L429">    }</span>
 
     @Override
     public boolean getIsShort() {
@@ -639,7 +639,7 @@ import java.util.*;
     // this is used in templates. Do not remove it.
     @SuppressWarnings(&quot;unused&quot;)
     public boolean isWildcard() {
-<span class="pc bpc" id="L642" title="2 of 4 branches missed.">        return &quot;0&quot;.equals(code) || &quot;default&quot;.equals(code);</span>
+<span class="nc bnc" id="L642" title="All 4 branches missed.">        return &quot;0&quot;.equals(code) || &quot;default&quot;.equals(code);</span>
     }
 
     /*
@@ -648,9 +648,9 @@ import java.util.*;
      * @return True if the status code is a range (e.g. 2XX)
      */
     public boolean isRange() {
-<span class="pc bpc" id="L651" title="3 of 6 branches missed.">        if (code != null &amp;&amp; code.length() == 3 &amp;&amp; &quot;XX&quot;.equalsIgnoreCase(code.substring(1)))</span>
+<span class="nc bnc" id="L651" title="All 6 branches missed.">        if (code != null &amp;&amp; code.length() == 3 &amp;&amp; &quot;XX&quot;.equalsIgnoreCase(code.substring(1)))</span>
 <span class="nc" id="L652">            return true;</span>
-<span class="fc" id="L653">        return false;</span>
+<span class="nc" id="L653">        return false;</span>
     }
 
     @Override
@@ -757,8 +757,8 @@ import java.util.*;
 
     @Override
     public void setComposedSchemas(CodegenComposedSchemas composedSchemas) {
-<span class="fc" id="L760">        this.composedSchemas = composedSchemas;</span>
-<span class="fc" id="L761">    }</span>
+<span class="nc" id="L760">        this.composedSchemas = composedSchemas;</span>
+<span class="nc" id="L761">    }</span>
 
     @Override
     public CodegenComposedSchemas getComposedSchemas() {

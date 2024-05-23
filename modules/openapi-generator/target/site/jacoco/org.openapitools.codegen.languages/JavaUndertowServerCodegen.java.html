@@ -38,58 +38,58 @@ import static org.openapitools.codegen.utils.StringUtils.camelize;
 
 public class JavaUndertowServerCodegen extends AbstractJavaCodegen {
 
-<span class="fc" id="L41">    private final Logger LOGGER = LoggerFactory.getLogger(JavaUndertowServerCodegen.class);</span>
+<span class="nc" id="L41">    private final Logger LOGGER = LoggerFactory.getLogger(JavaUndertowServerCodegen.class);</span>
 
-<span class="fc" id="L43">    protected String title = &quot;OpenAPI Undertow Server&quot;;</span>
-<span class="fc" id="L44">    protected String implFolder = &quot;src/main/java&quot;;</span>
+<span class="nc" id="L43">    protected String title = &quot;OpenAPI Undertow Server&quot;;</span>
+<span class="nc" id="L44">    protected String implFolder = &quot;src/main/java&quot;;</span>
 
     public JavaUndertowServerCodegen() {
-<span class="fc" id="L47">        super();</span>
+<span class="nc" id="L47">        super();</span>
 
-<span class="fc" id="L49">        modifyFeatureSet(features -&gt; features.includeDocumentationFeatures(DocumentationFeature.Readme));</span>
+<span class="nc" id="L49">        modifyFeatureSet(features -&gt; features.includeDocumentationFeatures(DocumentationFeature.Readme));</span>
 
-<span class="fc" id="L51">        embeddedTemplateDir = templateDir = &quot;java-undertow-server&quot;;</span>
-<span class="fc" id="L52">        invokerPackage = &quot;org.openapitools.handler&quot;;</span>
-<span class="fc" id="L53">        artifactId = &quot;openapi-undertow-server&quot;;</span>
-<span class="fc" id="L54">        dateLibrary = &quot;legacy&quot;; //TODO: add joda support</span>
+<span class="nc" id="L51">        embeddedTemplateDir = templateDir = &quot;java-undertow-server&quot;;</span>
+<span class="nc" id="L52">        invokerPackage = &quot;org.openapitools.handler&quot;;</span>
+<span class="nc" id="L53">        artifactId = &quot;openapi-undertow-server&quot;;</span>
+<span class="nc" id="L54">        dateLibrary = &quot;legacy&quot;; //TODO: add joda support</span>
 
         // clioOptions default redefinition need to be updated
-<span class="fc" id="L57">        updateOption(CodegenConstants.INVOKER_PACKAGE, this.getInvokerPackage());</span>
-<span class="fc" id="L58">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
-<span class="fc" id="L59">        updateOption(DATE_LIBRARY, this.getDateLibrary());</span>
+<span class="nc" id="L57">        updateOption(CodegenConstants.INVOKER_PACKAGE, this.getInvokerPackage());</span>
+<span class="nc" id="L58">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
+<span class="nc" id="L59">        updateOption(DATE_LIBRARY, this.getDateLibrary());</span>
 
-<span class="fc" id="L61">        apiTestTemplateFiles.clear(); // TODO: add test template</span>
+<span class="nc" id="L61">        apiTestTemplateFiles.clear(); // TODO: add test template</span>
 
         // clear model and api doc template as this codegen
         // does not support auto-generated markdown doc at the moment
         //TODO: add doc templates
-<span class="fc" id="L66">        modelDocTemplateFiles.remove(&quot;model_doc.mustache&quot;);</span>
-<span class="fc" id="L67">        apiDocTemplateFiles.remove(&quot;api_doc.mustache&quot;);</span>
+<span class="nc" id="L66">        modelDocTemplateFiles.remove(&quot;model_doc.mustache&quot;);</span>
+<span class="nc" id="L67">        apiDocTemplateFiles.remove(&quot;api_doc.mustache&quot;);</span>
 
-<span class="pc bpc" id="L69" title="3 of 4 branches missed.">        if(GlobalSettings.getProperty(&quot;swagger.codegen.undertow.apipackage&quot;) != null &amp;&amp; GlobalSettings.getProperty(&quot;openapi.codegen.undertow.apipackage&quot;) == null) {</span>
+<span class="nc bnc" id="L69" title="All 4 branches missed.">        if(GlobalSettings.getProperty(&quot;swagger.codegen.undertow.apipackage&quot;) != null &amp;&amp; GlobalSettings.getProperty(&quot;openapi.codegen.undertow.apipackage&quot;) == null) {</span>
 <span class="nc" id="L70">            LOGGER.warn(&quot;System property 'swagger.codegen.undertow.apipackage' was renamed to 'openapi.codegen.undertow.apipackage'&quot;);</span>
 <span class="nc" id="L71">            apiPackage = GlobalSettings.getProperty(&quot;swagger.codegen.undertow.apipackage&quot;, &quot;org.openapitools.handler&quot;);</span>
         } else {
-<span class="fc" id="L73">            apiPackage = GlobalSettings.getProperty(&quot;openapi.codegen.undertow.apipackage&quot;, &quot;org.openapitools.handler&quot;);</span>
+<span class="nc" id="L73">            apiPackage = GlobalSettings.getProperty(&quot;openapi.codegen.undertow.apipackage&quot;, &quot;org.openapitools.handler&quot;);</span>
         }
-<span class="pc bpc" id="L75" title="3 of 4 branches missed.">        if(GlobalSettings.getProperty(&quot;swagger.codegen.undertow.modelpackage&quot;) != null &amp;&amp; GlobalSettings.getProperty(&quot;openapi.codegen.undertow.modelpackage&quot;) == null) {</span>
+<span class="nc bnc" id="L75" title="All 4 branches missed.">        if(GlobalSettings.getProperty(&quot;swagger.codegen.undertow.modelpackage&quot;) != null &amp;&amp; GlobalSettings.getProperty(&quot;openapi.codegen.undertow.modelpackage&quot;) == null) {</span>
 <span class="nc" id="L76">            LOGGER.warn(&quot;System property 'swagger.codegen.undertow.modelpackage' was renamed to 'openapi.codegen.undertow.modelpackage'&quot;);</span>
 <span class="nc" id="L77">            modelPackage = GlobalSettings.getProperty(&quot;swagger.codegen.undertow.modelpackage&quot;, &quot;org.openapitools.model&quot;);</span>
         } else {
-<span class="fc" id="L79">            modelPackage = GlobalSettings.getProperty(&quot;openapi.codegen.undertow.modelpackage&quot;, &quot;org.openapitools.model&quot;);</span>
+<span class="nc" id="L79">            modelPackage = GlobalSettings.getProperty(&quot;openapi.codegen.undertow.modelpackage&quot;, &quot;org.openapitools.model&quot;);</span>
         }
 
-<span class="fc" id="L82">        additionalProperties.put(&quot;title&quot;, title);</span>
-<span class="fc" id="L83">    }</span>
+<span class="nc" id="L82">        additionalProperties.put(&quot;title&quot;, title);</span>
+<span class="nc" id="L83">    }</span>
 
     @Override
     public CodegenType getTag() {
-<span class="fc" id="L87">        return CodegenType.SERVER;</span>
+<span class="nc" id="L87">        return CodegenType.SERVER;</span>
     }
 
     @Override
     public String getName() {
-<span class="fc" id="L92">        return &quot;java-undertow-server&quot;;</span>
+<span class="nc" id="L92">        return &quot;java-undertow-server&quot;;</span>
     }
 
     @Override

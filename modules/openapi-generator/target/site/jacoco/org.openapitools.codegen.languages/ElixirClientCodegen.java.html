@@ -45,20 +45,20 @@ import static org.openapitools.codegen.utils.StringUtils.camelize;
 import static org.openapitools.codegen.utils.StringUtils.underscore;
 
 public class ElixirClientCodegen extends DefaultCodegen {
-<span class="fc" id="L48">    private final Logger LOGGER = LoggerFactory.getLogger(ElixirClientCodegen.class);</span>
+<span class="nc" id="L48">    private final Logger LOGGER = LoggerFactory.getLogger(ElixirClientCodegen.class);</span>
 
-<span class="fc" id="L50">    private final Pattern simpleAtomPattern = Pattern.compile(&quot;\\A(?:(?:[_@\\p{Alpha}][_@\\p{Alnum}]*[?!]?)|-)\\z&quot;);</span>
+<span class="nc" id="L50">    private final Pattern simpleAtomPattern = Pattern.compile(&quot;\\A(?:(?:[_@\\p{Alpha}][_@\\p{Alnum}]*[?!]?)|-)\\z&quot;);</span>
 
-<span class="fc" id="L52">    protected String apiVersion = &quot;1.0.0&quot;;</span>
+<span class="nc" id="L52">    protected String apiVersion = &quot;1.0.0&quot;;</span>
     protected String moduleName;
     protected static final String defaultModuleName = &quot;OpenAPI.Client&quot;;
 
     // This is the name of elixir project name;
     protected static final String defaultPackageName = &quot;openapi_client&quot;;
 
-<span class="fc" id="L59">    String supportedElixirVersion = &quot;1.10&quot;;</span>
-<span class="fc" id="L60">    List&lt;String&gt; extraApplications = Arrays.asList(&quot;:logger&quot;);</span>
-<span class="fc" id="L61">    List&lt;String&gt; deps = Arrays.asList(</span>
+<span class="nc" id="L59">    String supportedElixirVersion = &quot;1.10&quot;;</span>
+<span class="nc" id="L60">    List&lt;String&gt; extraApplications = Arrays.asList(&quot;:logger&quot;);</span>
+<span class="nc" id="L61">    List&lt;String&gt; deps = Arrays.asList(</span>
             &quot;{:tesla, \&quot;~&gt; 1.7\&quot;}&quot;,
             &quot;{:jason, \&quot;~&gt; 1.4\&quot;}&quot;,
             &quot;{:ex_doc, \&quot;~&gt; 0.30\&quot;, only: :dev, runtime: false}&quot;,
@@ -66,36 +66,36 @@ public class ElixirClientCodegen extends DefaultCodegen {
     );
 
     public ElixirClientCodegen() {
-<span class="fc" id="L69">        super();</span>
+<span class="nc" id="L69">        super();</span>
 
-<span class="fc" id="L71">        modifyFeatureSet(features -&gt; features</span>
-<span class="fc" id="L72">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
-<span class="fc" id="L73">                .securityFeatures(EnumSet.of(</span>
+<span class="nc" id="L71">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L72">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="nc" id="L73">                .securityFeatures(EnumSet.of(</span>
                         SecurityFeature.OAuth2_Implicit,
                         SecurityFeature.BasicAuth
                 ))
-<span class="fc" id="L77">                .excludeGlobalFeatures(</span>
+<span class="nc" id="L77">                .excludeGlobalFeatures(</span>
                         GlobalFeature.XMLStructureDefinitions,
                         GlobalFeature.Callbacks,
                         GlobalFeature.LinkObjects,
                         GlobalFeature.ParameterStyling
                 )
-<span class="fc" id="L83">                .excludeSchemaSupportFeatures(</span>
+<span class="nc" id="L83">                .excludeSchemaSupportFeatures(</span>
                         SchemaSupportFeature.Polymorphism
                 )
-<span class="fc" id="L86">                .excludeParameterFeatures(</span>
+<span class="nc" id="L86">                .excludeParameterFeatures(</span>
                         ParameterFeature.Cookie
                 )
-<span class="fc" id="L89">                .includeClientModificationFeatures(</span>
+<span class="nc" id="L89">                .includeClientModificationFeatures(</span>
                         ClientModificationFeature.BasePath
                 )
-<span class="fc" id="L92">                .includeDataTypeFeatures(</span>
+<span class="nc" id="L92">                .includeDataTypeFeatures(</span>
                         DataTypeFeature.AnyType
                 )
         );
 
         // set the output folder here
-<span class="fc" id="L98">        outputFolder = &quot;generated-code/elixir&quot;;</span>
+<span class="nc" id="L98">        outputFolder = &quot;generated-code/elixir&quot;;</span>
 
         /*
          * Models.  You can write model files using the modelTemplateFiles map.
@@ -103,7 +103,7 @@ public class ElixirClientCodegen extends DefaultCodegen {
          * for multiple files for model, just put another entry in the `modelTemplateFiles` with
          * a different extension
          */
-<span class="fc" id="L106">        modelTemplateFiles.put(</span>
+<span class="nc" id="L106">        modelTemplateFiles.put(</span>
                 &quot;model.mustache&quot;, // the template to use
                 &quot;.ex&quot;);       // the extension for each file to write
 
@@ -112,7 +112,7 @@ public class ElixirClientCodegen extends DefaultCodegen {
          * as with models, add multiple entries with different extensions for multiple files per
          * class
          */
-<span class="fc" id="L115">        apiTemplateFiles.put(</span>
+<span class="nc" id="L115">        apiTemplateFiles.put(</span>
                 &quot;api.mustache&quot;,   // the template to use
                 &quot;.ex&quot;);       // the extension for each file to write
 
@@ -120,14 +120,14 @@ public class ElixirClientCodegen extends DefaultCodegen {
          * Template Location.  This is the location which templates will be read from.  The generator
          * will use the resource stream to attempt to read the templates.
          */
-<span class="fc" id="L123">        templateDir = &quot;elixir&quot;;</span>
+<span class="nc" id="L123">        templateDir = &quot;elixir&quot;;</span>
 
         /**
          * Reserved words.  Override this with reserved words specific to your language
          * Ref: https://github.com/itsgreggreg/elixir_quick_reference#reserved-words
          */
-<span class="fc" id="L129">        reservedWords = new HashSet&lt;&gt;(</span>
-<span class="fc" id="L130">                Arrays.asList(</span>
+<span class="nc" id="L129">        reservedWords = new HashSet&lt;&gt;(</span>
+<span class="nc" id="L130">                Arrays.asList(</span>
                         &quot;nil&quot;,
                         &quot;true&quot;,
                         &quot;false&quot;,
@@ -142,38 +142,38 @@ public class ElixirClientCodegen extends DefaultCodegen {
          * Additional Properties.  These values can be passed to the templates and
          * are available in models, apis, and supporting files
          */
-<span class="fc" id="L145">        additionalProperties.put(&quot;apiVersion&quot;, apiVersion);</span>
+<span class="nc" id="L145">        additionalProperties.put(&quot;apiVersion&quot;, apiVersion);</span>
 
         /**
          * Supporting Files.  You can write single files for the generator with the
          * entire object tree available.  If the input file has a suffix of `.mustache
          * it will be processed by the template engine.  Otherwise, it will be copied
          */
-<span class="fc" id="L152">        supportingFiles.add(new SupportingFile(&quot;README.md.mustache&quot;,   // the input template or file</span>
+<span class="nc" id="L152">        supportingFiles.add(new SupportingFile(&quot;README.md.mustache&quot;,   // the input template or file</span>
                 &quot;&quot;,                                                       // the destination folder, relative `outputFolder`
                 &quot;README.md&quot;)                                          // the output file
         );
-<span class="fc" id="L156">        supportingFiles.add(new SupportingFile(&quot;config.exs.mustache&quot;,</span>
+<span class="nc" id="L156">        supportingFiles.add(new SupportingFile(&quot;config.exs.mustache&quot;,</span>
                 &quot;config&quot;,
                 &quot;config.exs&quot;)
         );
-<span class="fc" id="L160">        supportingFiles.add(new SupportingFile(&quot;runtime.exs.mustache&quot;,</span>
+<span class="nc" id="L160">        supportingFiles.add(new SupportingFile(&quot;runtime.exs.mustache&quot;,</span>
                 &quot;config&quot;,
                 &quot;runtime.exs&quot;)
         );
-<span class="fc" id="L164">        supportingFiles.add(new SupportingFile(&quot;mix.exs.mustache&quot;,</span>
+<span class="nc" id="L164">        supportingFiles.add(new SupportingFile(&quot;mix.exs.mustache&quot;,</span>
                 &quot;&quot;,
                 &quot;mix.exs&quot;)
         );
-<span class="fc" id="L168">        supportingFiles.add(new SupportingFile(&quot;formatter.exs&quot;,</span>
+<span class="nc" id="L168">        supportingFiles.add(new SupportingFile(&quot;formatter.exs&quot;,</span>
                 &quot;&quot;,
                 &quot;.formatter.exs&quot;)
         );
-<span class="fc" id="L172">        supportingFiles.add(new SupportingFile(&quot;test_helper.exs.mustache&quot;,</span>
+<span class="nc" id="L172">        supportingFiles.add(new SupportingFile(&quot;test_helper.exs.mustache&quot;,</span>
                 &quot;test&quot;,
                 &quot;test_helper.exs&quot;)
         );
-<span class="fc" id="L176">        supportingFiles.add(new SupportingFile(&quot;gitignore.mustache&quot;,</span>
+<span class="nc" id="L176">        supportingFiles.add(new SupportingFile(&quot;gitignore.mustache&quot;,</span>
                 &quot;&quot;,
                 &quot;.gitignore&quot;)
         );
@@ -182,8 +182,8 @@ public class ElixirClientCodegen extends DefaultCodegen {
          * Language Specific Primitives.  These types will not trigger imports by
          * the client generator
          */
-<span class="fc" id="L185">        languageSpecificPrimitives = new HashSet&lt;&gt;(</span>
-<span class="fc" id="L186">                Arrays.asList(</span>
+<span class="nc" id="L185">        languageSpecificPrimitives = new HashSet&lt;&gt;(</span>
+<span class="nc" id="L186">                Arrays.asList(</span>
                         &quot;Integer&quot;,
                         &quot;Float&quot;,
                         &quot;Decimal&quot;,
@@ -201,31 +201,31 @@ public class ElixirClientCodegen extends DefaultCodegen {
         );
 
         // ref: https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#data-types
-<span class="fc" id="L204">        typeMapping = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L205">        typeMapping.put(&quot;integer&quot;, &quot;Integer&quot;);</span>
-<span class="fc" id="L206">        typeMapping.put(&quot;long&quot;, &quot;Integer&quot;);</span>
-<span class="fc" id="L207">        typeMapping.put(&quot;number&quot;, &quot;Float&quot;);</span>
-<span class="fc" id="L208">        typeMapping.put(&quot;float&quot;, &quot;Float&quot;);</span>
-<span class="fc" id="L209">        typeMapping.put(&quot;double&quot;, &quot;Float&quot;);</span>
-<span class="fc" id="L210">        typeMapping.put(&quot;string&quot;, &quot;String&quot;);</span>
-<span class="fc" id="L211">        typeMapping.put(&quot;byte&quot;, &quot;Integer&quot;);</span>
-<span class="fc" id="L212">        typeMapping.put(&quot;boolean&quot;, &quot;Boolean&quot;);</span>
-<span class="fc" id="L213">        typeMapping.put(&quot;Date&quot;, &quot;Date&quot;);</span>
-<span class="fc" id="L214">        typeMapping.put(&quot;DateTime&quot;, &quot;DateTime&quot;);</span>
-<span class="fc" id="L215">        typeMapping.put(&quot;file&quot;, &quot;String&quot;);</span>
-<span class="fc" id="L216">        typeMapping.put(&quot;map&quot;, &quot;Map&quot;);</span>
-<span class="fc" id="L217">        typeMapping.put(&quot;array&quot;, &quot;List&quot;);</span>
-<span class="fc" id="L218">        typeMapping.put(&quot;list&quot;, &quot;List&quot;);</span>
-<span class="fc" id="L219">        typeMapping.put(&quot;object&quot;, &quot;Map&quot;);</span>
-<span class="fc" id="L220">        typeMapping.put(&quot;binary&quot;, &quot;String&quot;);</span>
-<span class="fc" id="L221">        typeMapping.put(&quot;ByteArray&quot;, &quot;String&quot;);</span>
-<span class="fc" id="L222">        typeMapping.put(&quot;UUID&quot;, &quot;String&quot;);</span>
-<span class="fc" id="L223">        typeMapping.put(&quot;URI&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L204">        typeMapping = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L205">        typeMapping.put(&quot;integer&quot;, &quot;Integer&quot;);</span>
+<span class="nc" id="L206">        typeMapping.put(&quot;long&quot;, &quot;Integer&quot;);</span>
+<span class="nc" id="L207">        typeMapping.put(&quot;number&quot;, &quot;Float&quot;);</span>
+<span class="nc" id="L208">        typeMapping.put(&quot;float&quot;, &quot;Float&quot;);</span>
+<span class="nc" id="L209">        typeMapping.put(&quot;double&quot;, &quot;Float&quot;);</span>
+<span class="nc" id="L210">        typeMapping.put(&quot;string&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L211">        typeMapping.put(&quot;byte&quot;, &quot;Integer&quot;);</span>
+<span class="nc" id="L212">        typeMapping.put(&quot;boolean&quot;, &quot;Boolean&quot;);</span>
+<span class="nc" id="L213">        typeMapping.put(&quot;Date&quot;, &quot;Date&quot;);</span>
+<span class="nc" id="L214">        typeMapping.put(&quot;DateTime&quot;, &quot;DateTime&quot;);</span>
+<span class="nc" id="L215">        typeMapping.put(&quot;file&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L216">        typeMapping.put(&quot;map&quot;, &quot;Map&quot;);</span>
+<span class="nc" id="L217">        typeMapping.put(&quot;array&quot;, &quot;List&quot;);</span>
+<span class="nc" id="L218">        typeMapping.put(&quot;list&quot;, &quot;List&quot;);</span>
+<span class="nc" id="L219">        typeMapping.put(&quot;object&quot;, &quot;Map&quot;);</span>
+<span class="nc" id="L220">        typeMapping.put(&quot;binary&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L221">        typeMapping.put(&quot;ByteArray&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L222">        typeMapping.put(&quot;UUID&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L223">        typeMapping.put(&quot;URI&quot;, &quot;String&quot;);</span>
 
-<span class="fc" id="L225">        cliOptions.add(new CliOption(CodegenConstants.INVOKER_PACKAGE, &quot;The main namespace to use for all classes. e.g. Yay.Pets&quot;));</span>
-<span class="fc" id="L226">        cliOptions.add(new CliOption(&quot;licenseHeader&quot;, &quot;The license header to prepend to the top of all source files.&quot;));</span>
-<span class="fc" id="L227">        cliOptions.add(new CliOption(CodegenConstants.PACKAGE_NAME, &quot;Elixir package name (convention: lowercase).&quot;));</span>
-<span class="fc" id="L228">    }</span>
+<span class="nc" id="L225">        cliOptions.add(new CliOption(CodegenConstants.INVOKER_PACKAGE, &quot;The main namespace to use for all classes. e.g. Yay.Pets&quot;));</span>
+<span class="nc" id="L226">        cliOptions.add(new CliOption(&quot;licenseHeader&quot;, &quot;The license header to prepend to the top of all source files.&quot;));</span>
+<span class="nc" id="L227">        cliOptions.add(new CliOption(CodegenConstants.PACKAGE_NAME, &quot;Elixir package name (convention: lowercase).&quot;));</span>
+<span class="nc" id="L228">    }</span>
 
     /**
      * Configures the type of generator.
@@ -235,7 +235,7 @@ public class ElixirClientCodegen extends DefaultCodegen {
      */
     @Override
     public CodegenType getTag() {
-<span class="fc" id="L238">        return CodegenType.CLIENT;</span>
+<span class="nc" id="L238">        return CodegenType.CLIENT;</span>
     }
 
     /**
@@ -246,7 +246,7 @@ public class ElixirClientCodegen extends DefaultCodegen {
      */
     @Override
     public String getName() {
-<span class="fc" id="L249">        return &quot;elixir&quot;;</span>
+<span class="nc" id="L249">        return &quot;elixir&quot;;</span>
     }
 
     /**

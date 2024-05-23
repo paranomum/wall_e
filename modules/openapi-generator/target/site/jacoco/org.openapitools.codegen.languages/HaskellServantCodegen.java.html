@@ -39,20 +39,20 @@ import static org.openapitools.codegen.utils.CamelizeOption.LOWERCASE_FIRST_LETT
 import static org.openapitools.codegen.utils.StringUtils.camelize;
 
 public class HaskellServantCodegen extends DefaultCodegen implements CodegenConfig {
-<span class="fc" id="L42">    private final Logger LOGGER = LoggerFactory.getLogger(HaskellServantCodegen.class);</span>
+<span class="nc" id="L42">    private final Logger LOGGER = LoggerFactory.getLogger(HaskellServantCodegen.class);</span>
 
     // source folder where to write the files
-<span class="fc" id="L45">    protected String sourceFolder = &quot;src&quot;;</span>
-<span class="fc" id="L46">    protected String apiVersion = &quot;0.0.1&quot;;</span>
-<span class="fc" id="L47">    private static final Pattern LEADING_UNDERSCORE = Pattern.compile(&quot;^_+&quot;);</span>
+<span class="nc" id="L45">    protected String sourceFolder = &quot;src&quot;;</span>
+<span class="nc" id="L46">    protected String apiVersion = &quot;0.0.1&quot;;</span>
+<span class="nc" id="L47">    private static final Pattern LEADING_UNDERSCORE = Pattern.compile(&quot;^_+&quot;);</span>
 
     public static final String PROP_SERVE_STATIC = &quot;serveStatic&quot;;
     public static final String PROP_SERVE_STATIC_DESC = &quot;serve will serve files from the directory 'static'.&quot;;
-<span class="fc" id="L51">    public static final Boolean PROP_SERVE_STATIC_DEFAULT = Boolean.TRUE;</span>
+<span class="nc" id="L51">    public static final Boolean PROP_SERVE_STATIC_DEFAULT = Boolean.TRUE;</span>
 
     public static final String USE_CUSTOM_MONAD = &quot;useCustomMonad&quot;;
     public static final String USE_CUSTOM_MONAD_DESC = &quot;use a custom monad instead of the default Handler&quot;;
-<span class="fc" id="L55">    public static final Boolean USE_CUSTOM_MONAD_DEFAULT = Boolean.FALSE;</span>
+<span class="nc" id="L55">    public static final Boolean USE_CUSTOM_MONAD_DEFAULT = Boolean.FALSE;</span>
 
     /**
      * Configures the type of generator.
@@ -60,7 +60,7 @@ public class HaskellServantCodegen extends DefaultCodegen implements CodegenConf
      * @return the CodegenType for this generator
      */
     public CodegenType getTag() {
-<span class="fc" id="L63">        return CodegenType.SERVER;</span>
+<span class="nc" id="L63">        return CodegenType.SERVER;</span>
     }
 
     /**
@@ -70,7 +70,7 @@ public class HaskellServantCodegen extends DefaultCodegen implements CodegenConf
      * @return the friendly name for the generator
      */
     public String getName() {
-<span class="fc" id="L73">        return &quot;haskell&quot;;</span>
+<span class="nc" id="L73">        return &quot;haskell&quot;;</span>
     }
 
     /**
@@ -84,58 +84,58 @@ public class HaskellServantCodegen extends DefaultCodegen implements CodegenConf
     }
 
     public HaskellServantCodegen() {
-<span class="fc" id="L87">        super();</span>
+<span class="nc" id="L87">        super();</span>
 
-<span class="fc" id="L89">        modifyFeatureSet(features -&gt; features</span>
-<span class="fc" id="L90">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
-<span class="fc" id="L91">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON, WireFormatFeature.XML))</span>
-<span class="fc" id="L92">                .securityFeatures(EnumSet.of(</span>
+<span class="nc" id="L89">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L90">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="nc" id="L91">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON, WireFormatFeature.XML))</span>
+<span class="nc" id="L92">                .securityFeatures(EnumSet.of(</span>
                         SecurityFeature.BasicAuth,
                         SecurityFeature.BearerToken,
                         SecurityFeature.ApiKey,
                         SecurityFeature.OAuth2_Implicit
                 ))
-<span class="fc" id="L98">                .excludeGlobalFeatures(</span>
+<span class="nc" id="L98">                .excludeGlobalFeatures(</span>
                         GlobalFeature.XMLStructureDefinitions,
                         GlobalFeature.Callbacks,
                         GlobalFeature.LinkObjects,
                         GlobalFeature.ParameterStyling
                 )
-<span class="fc" id="L104">                .excludeSchemaSupportFeatures(</span>
+<span class="nc" id="L104">                .excludeSchemaSupportFeatures(</span>
                         SchemaSupportFeature.Polymorphism
                 )
-<span class="fc" id="L107">                .includeParameterFeatures(</span>
+<span class="nc" id="L107">                .includeParameterFeatures(</span>
                         ParameterFeature.Cookie
                 )
         );
 
         // override the mapping to keep the original mapping in Haskell
-<span class="fc" id="L113">        specialCharReplacements.put(&quot;-&quot;, &quot;Dash&quot;);</span>
-<span class="fc" id="L114">        specialCharReplacements.put(&quot;&gt;&quot;, &quot;GreaterThan&quot;);</span>
-<span class="fc" id="L115">        specialCharReplacements.put(&quot;&lt;&quot;, &quot;LessThan&quot;);</span>
+<span class="nc" id="L113">        specialCharReplacements.put(&quot;-&quot;, &quot;Dash&quot;);</span>
+<span class="nc" id="L114">        specialCharReplacements.put(&quot;&gt;&quot;, &quot;GreaterThan&quot;);</span>
+<span class="nc" id="L115">        specialCharReplacements.put(&quot;&lt;&quot;, &quot;LessThan&quot;);</span>
 
         // set the output folder here
-<span class="fc" id="L118">        outputFolder = &quot;generated-code/haskell-servant&quot;;</span>
+<span class="nc" id="L118">        outputFolder = &quot;generated-code/haskell-servant&quot;;</span>
 
         /*
          * Template Location.  This is the location which templates will be read from.  The generator
          * will use the resource stream to attempt to read the templates.
          */
-<span class="fc" id="L124">        embeddedTemplateDir = templateDir = &quot;haskell-servant&quot;;</span>
+<span class="nc" id="L124">        embeddedTemplateDir = templateDir = &quot;haskell-servant&quot;;</span>
 
         /*
          * Api Package.  Optional, if needed, this can be used in templates
          */
-<span class="fc" id="L129">        apiPackage = &quot;API&quot;;</span>
+<span class="nc" id="L129">        apiPackage = &quot;API&quot;;</span>
 
         /*
          * Model Package.  Optional, if needed, this can be used in templates
          */
-<span class="fc" id="L134">        modelPackage = &quot;Types&quot;;</span>
+<span class="nc" id="L134">        modelPackage = &quot;Types&quot;;</span>
 
         // Haskell keywords and reserved function names, taken mostly from https://wiki.haskell.org/Keywords
-<span class="fc" id="L137">        setReservedWordsLowerCase(</span>
-<span class="fc" id="L138">                Arrays.asList(</span>
+<span class="nc" id="L137">        setReservedWordsLowerCase(</span>
+<span class="nc" id="L138">                Arrays.asList(</span>
                         // Keywords
                         &quot;as&quot;, &quot;case&quot;, &quot;of&quot;,
                         &quot;class&quot;, &quot;data&quot;, &quot;family&quot;,
@@ -154,23 +154,23 @@ public class HaskellServantCodegen extends DefaultCodegen implements CodegenConf
          * Additional Properties.  These values can be passed to the templates and
          * are available in models, apis, and supporting files
          */
-<span class="fc" id="L157">        additionalProperties.put(&quot;apiVersion&quot;, apiVersion);</span>
+<span class="nc" id="L157">        additionalProperties.put(&quot;apiVersion&quot;, apiVersion);</span>
 
         /*
          * Supporting Files.  You can write single files for the generator with the
          * entire object tree available.  If the input file has a suffix of `.mustache
          * it will be processed by the template engine.  Otherwise, it will be copied
          */
-<span class="fc" id="L164">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;));</span>
-<span class="fc" id="L165">        supportingFiles.add(new SupportingFile(&quot;stack.mustache&quot;, &quot;&quot;, &quot;stack.yaml&quot;));</span>
-<span class="fc" id="L166">        supportingFiles.add(new SupportingFile(&quot;Setup.mustache&quot;, &quot;&quot;, &quot;Setup.hs&quot;));</span>
+<span class="nc" id="L164">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;));</span>
+<span class="nc" id="L165">        supportingFiles.add(new SupportingFile(&quot;stack.mustache&quot;, &quot;&quot;, &quot;stack.yaml&quot;));</span>
+<span class="nc" id="L166">        supportingFiles.add(new SupportingFile(&quot;Setup.mustache&quot;, &quot;&quot;, &quot;Setup.hs&quot;));</span>
 
         /*
          * Language Specific Primitives.  These types will not trigger imports by
          * the client generator
          */
-<span class="fc" id="L172">        languageSpecificPrimitives = new HashSet&lt;&gt;(</span>
-<span class="fc" id="L173">                Arrays.asList(</span>
+<span class="nc" id="L172">        languageSpecificPrimitives = new HashSet&lt;&gt;(</span>
+<span class="nc" id="L173">                Arrays.asList(</span>
                         &quot;Bool&quot;,
                         &quot;String&quot;,
                         &quot;Int&quot;,
@@ -183,38 +183,38 @@ public class HaskellServantCodegen extends DefaultCodegen implements CodegenConf
                 )
         );
 
-<span class="fc" id="L186">        typeMapping.clear();</span>
-<span class="fc" id="L187">        typeMapping.put(&quot;array&quot;, &quot;List&quot;);</span>
-<span class="fc" id="L188">        typeMapping.put(&quot;set&quot;, &quot;Set&quot;);</span>
-<span class="fc" id="L189">        typeMapping.put(&quot;boolean&quot;, &quot;Bool&quot;);</span>
-<span class="fc" id="L190">        typeMapping.put(&quot;string&quot;, &quot;Text&quot;);</span>
-<span class="fc" id="L191">        typeMapping.put(&quot;integer&quot;, &quot;Int&quot;);</span>
-<span class="fc" id="L192">        typeMapping.put(&quot;long&quot;, &quot;Integer&quot;);</span>
-<span class="fc" id="L193">        typeMapping.put(&quot;short&quot;, &quot;Int&quot;);</span>
-<span class="fc" id="L194">        typeMapping.put(&quot;char&quot;, &quot;Char&quot;);</span>
-<span class="fc" id="L195">        typeMapping.put(&quot;float&quot;, &quot;Float&quot;);</span>
-<span class="fc" id="L196">        typeMapping.put(&quot;double&quot;, &quot;Double&quot;);</span>
-<span class="fc" id="L197">        typeMapping.put(&quot;DateTime&quot;, &quot;UTCTime&quot;);</span>
-<span class="fc" id="L198">        typeMapping.put(&quot;Date&quot;, &quot;Day&quot;);</span>
-<span class="fc" id="L199">        typeMapping.put(&quot;file&quot;, &quot;FilePath&quot;);</span>
-<span class="fc" id="L200">        typeMapping.put(&quot;binary&quot;, &quot;FilePath&quot;);</span>
-<span class="fc" id="L201">        typeMapping.put(&quot;number&quot;, &quot;Double&quot;);</span>
-<span class="fc" id="L202">        typeMapping.put(&quot;BigDecimal&quot;, &quot;Double&quot;);</span>
-<span class="fc" id="L203">        typeMapping.put(&quot;any&quot;, &quot;Value&quot;);</span>
-<span class="fc" id="L204">        typeMapping.put(&quot;AnyType&quot;, &quot;Value&quot;);</span>
-<span class="fc" id="L205">        typeMapping.put(&quot;UUID&quot;, &quot;UUID&quot;);</span>
-<span class="fc" id="L206">        typeMapping.put(&quot;URI&quot;, &quot;Text&quot;);</span>
-<span class="fc" id="L207">        typeMapping.put(&quot;ByteArray&quot;, &quot;Text&quot;);</span>
-<span class="fc" id="L208">        typeMapping.put(&quot;object&quot;, &quot;Value&quot;);</span>
+<span class="nc" id="L186">        typeMapping.clear();</span>
+<span class="nc" id="L187">        typeMapping.put(&quot;array&quot;, &quot;List&quot;);</span>
+<span class="nc" id="L188">        typeMapping.put(&quot;set&quot;, &quot;Set&quot;);</span>
+<span class="nc" id="L189">        typeMapping.put(&quot;boolean&quot;, &quot;Bool&quot;);</span>
+<span class="nc" id="L190">        typeMapping.put(&quot;string&quot;, &quot;Text&quot;);</span>
+<span class="nc" id="L191">        typeMapping.put(&quot;integer&quot;, &quot;Int&quot;);</span>
+<span class="nc" id="L192">        typeMapping.put(&quot;long&quot;, &quot;Integer&quot;);</span>
+<span class="nc" id="L193">        typeMapping.put(&quot;short&quot;, &quot;Int&quot;);</span>
+<span class="nc" id="L194">        typeMapping.put(&quot;char&quot;, &quot;Char&quot;);</span>
+<span class="nc" id="L195">        typeMapping.put(&quot;float&quot;, &quot;Float&quot;);</span>
+<span class="nc" id="L196">        typeMapping.put(&quot;double&quot;, &quot;Double&quot;);</span>
+<span class="nc" id="L197">        typeMapping.put(&quot;DateTime&quot;, &quot;UTCTime&quot;);</span>
+<span class="nc" id="L198">        typeMapping.put(&quot;Date&quot;, &quot;Day&quot;);</span>
+<span class="nc" id="L199">        typeMapping.put(&quot;file&quot;, &quot;FilePath&quot;);</span>
+<span class="nc" id="L200">        typeMapping.put(&quot;binary&quot;, &quot;FilePath&quot;);</span>
+<span class="nc" id="L201">        typeMapping.put(&quot;number&quot;, &quot;Double&quot;);</span>
+<span class="nc" id="L202">        typeMapping.put(&quot;BigDecimal&quot;, &quot;Double&quot;);</span>
+<span class="nc" id="L203">        typeMapping.put(&quot;any&quot;, &quot;Value&quot;);</span>
+<span class="nc" id="L204">        typeMapping.put(&quot;AnyType&quot;, &quot;Value&quot;);</span>
+<span class="nc" id="L205">        typeMapping.put(&quot;UUID&quot;, &quot;UUID&quot;);</span>
+<span class="nc" id="L206">        typeMapping.put(&quot;URI&quot;, &quot;Text&quot;);</span>
+<span class="nc" id="L207">        typeMapping.put(&quot;ByteArray&quot;, &quot;Text&quot;);</span>
+<span class="nc" id="L208">        typeMapping.put(&quot;object&quot;, &quot;Value&quot;);</span>
 
-<span class="fc" id="L210">        importMapping.clear();</span>
-<span class="fc" id="L211">        importMapping.put(&quot;Map&quot;, &quot;qualified Data.Map as Map&quot;);</span>
+<span class="nc" id="L210">        importMapping.clear();</span>
+<span class="nc" id="L211">        importMapping.put(&quot;Map&quot;, &quot;qualified Data.Map as Map&quot;);</span>
 
-<span class="fc" id="L213">        cliOptions.add(new CliOption(CodegenConstants.MODEL_PACKAGE, CodegenConstants.MODEL_PACKAGE_DESC));</span>
-<span class="fc" id="L214">        cliOptions.add(new CliOption(CodegenConstants.API_PACKAGE, CodegenConstants.API_PACKAGE_DESC));</span>
-<span class="fc" id="L215">        cliOptions.add(new CliOption(PROP_SERVE_STATIC, PROP_SERVE_STATIC_DESC).defaultValue(PROP_SERVE_STATIC_DEFAULT.toString()));</span>
-<span class="fc" id="L216">        cliOptions.add(new CliOption(USE_CUSTOM_MONAD, USE_CUSTOM_MONAD_DESC).defaultValue(USE_CUSTOM_MONAD_DEFAULT.toString()));</span>
-<span class="fc" id="L217">    }</span>
+<span class="nc" id="L213">        cliOptions.add(new CliOption(CodegenConstants.MODEL_PACKAGE, CodegenConstants.MODEL_PACKAGE_DESC));</span>
+<span class="nc" id="L214">        cliOptions.add(new CliOption(CodegenConstants.API_PACKAGE, CodegenConstants.API_PACKAGE_DESC));</span>
+<span class="nc" id="L215">        cliOptions.add(new CliOption(PROP_SERVE_STATIC, PROP_SERVE_STATIC_DESC).defaultValue(PROP_SERVE_STATIC_DEFAULT.toString()));</span>
+<span class="nc" id="L216">        cliOptions.add(new CliOption(USE_CUSTOM_MONAD, USE_CUSTOM_MONAD_DESC).defaultValue(USE_CUSTOM_MONAD_DEFAULT.toString()));</span>
+<span class="nc" id="L217">    }</span>
 
     public void setBooleanProperty(String property, Boolean defaultValue) {
 <span class="nc bnc" id="L220" title="All 2 branches missed.">        if (additionalProperties.containsKey(property)) {</span>

@@ -49,83 +49,83 @@ import static org.openapitools.codegen.utils.StringUtils.camelize;
 
 public class JavaHelidonServerCodegen extends JavaHelidonCommonCodegen {
 
-<span class="fc" id="L52">    private final Logger LOGGER = LoggerFactory.getLogger(JavaHelidonServerCodegen.class);</span>
+<span class="nc" id="L52">    private final Logger LOGGER = LoggerFactory.getLogger(JavaHelidonServerCodegen.class);</span>
 
     public static final String USE_ABSTRACT_CLASS = &quot;useAbstractClass&quot;;
     public static final String GRADLE_PROJECT = &quot;gradleProject&quot;;
 
-<span class="fc" id="L57">    protected boolean useBeanValidation = true;</span>
-<span class="fc" id="L58">    protected String implFolder = &quot;src/main/java&quot;;</span>
-<span class="fc" id="L59">    protected String serializationLibrary = null;</span>
+<span class="nc" id="L57">    protected boolean useBeanValidation = true;</span>
+<span class="nc" id="L58">    protected String implFolder = &quot;src/main/java&quot;;</span>
+<span class="nc" id="L59">    protected String serializationLibrary = null;</span>
 
-<span class="fc" id="L61">    private boolean useAbstractClass = false;</span>
-<span class="fc" id="L62">    private boolean gradleProject = false;</span>
+<span class="nc" id="L61">    private boolean useAbstractClass = false;</span>
+<span class="nc" id="L62">    private boolean gradleProject = false;</span>
 
     public JavaHelidonServerCodegen() {
-<span class="fc" id="L65">        super();</span>
+<span class="nc" id="L65">        super();</span>
         // beta for now
-<span class="fc" id="L67">        generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
-<span class="fc" id="L68">                .stability(Stability.BETA)</span>
-<span class="fc" id="L69">                .build();</span>
+<span class="nc" id="L67">        generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
+<span class="nc" id="L68">                .stability(Stability.BETA)</span>
+<span class="nc" id="L69">                .build();</span>
 
-<span class="fc" id="L71">        modifyFeatureSet(features -&gt; features.includeDocumentationFeatures(DocumentationFeature.Readme));</span>
+<span class="nc" id="L71">        modifyFeatureSet(features -&gt; features.includeDocumentationFeatures(DocumentationFeature.Readme));</span>
 
-<span class="fc" id="L73">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;java&quot;;</span>
-<span class="fc" id="L74">        embeddedTemplateDir = templateDir = &quot;java-helidon&quot; + File.separator + &quot;server&quot;;</span>
-<span class="fc" id="L75">        invokerPackage = &quot;org.openapitools.server&quot;;</span>
-<span class="fc" id="L76">        artifactId = &quot;openapi-java-server&quot;;</span>
-<span class="fc" id="L77">        apiPackage = invokerPackage + &quot;.api&quot;;</span>
-<span class="fc" id="L78">        modelPackage = invokerPackage + &quot;.model&quot;;</span>
-<span class="fc" id="L79">        sourceFolder = &quot;src&quot; + File.separator + &quot;main&quot; + File.separator + &quot;java&quot;;</span>
+<span class="nc" id="L73">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;java&quot;;</span>
+<span class="nc" id="L74">        embeddedTemplateDir = templateDir = &quot;java-helidon&quot; + File.separator + &quot;server&quot;;</span>
+<span class="nc" id="L75">        invokerPackage = &quot;org.openapitools.server&quot;;</span>
+<span class="nc" id="L76">        artifactId = &quot;openapi-java-server&quot;;</span>
+<span class="nc" id="L77">        apiPackage = invokerPackage + &quot;.api&quot;;</span>
+<span class="nc" id="L78">        modelPackage = invokerPackage + &quot;.model&quot;;</span>
+<span class="nc" id="L79">        sourceFolder = &quot;src&quot; + File.separator + &quot;main&quot; + File.separator + &quot;java&quot;;</span>
 
         // clioOptions default redefinition need to be updated
-<span class="fc" id="L82">        updateOption(CodegenConstants.INVOKER_PACKAGE, this.getInvokerPackage());</span>
-<span class="fc" id="L83">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
-<span class="fc" id="L84">        updateOption(CodegenConstants.API_PACKAGE, apiPackage);</span>
-<span class="fc" id="L85">        updateOption(CodegenConstants.MODEL_PACKAGE, modelPackage);</span>
+<span class="nc" id="L82">        updateOption(CodegenConstants.INVOKER_PACKAGE, this.getInvokerPackage());</span>
+<span class="nc" id="L83">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
+<span class="nc" id="L84">        updateOption(CodegenConstants.API_PACKAGE, apiPackage);</span>
+<span class="nc" id="L85">        updateOption(CodegenConstants.MODEL_PACKAGE, modelPackage);</span>
 
-<span class="fc" id="L87">        modelTestTemplateFiles.put(&quot;model_test.mustache&quot;, &quot;.java&quot;);</span>
+<span class="nc" id="L87">        modelTestTemplateFiles.put(&quot;model_test.mustache&quot;, &quot;.java&quot;);</span>
 
-<span class="fc" id="L89">        cliOptions.add(CliOption.newBoolean(USE_BEANVALIDATION, &quot;Use Bean Validation&quot;));</span>
-<span class="fc" id="L90">        cliOptions.add(CliOption.newBoolean(PERFORM_BEANVALIDATION, &quot;Perform BeanValidation&quot;));</span>
-<span class="fc" id="L91">        cliOptions.add(CliOption.newBoolean(USE_ABSTRACT_CLASS,</span>
+<span class="nc" id="L89">        cliOptions.add(CliOption.newBoolean(USE_BEANVALIDATION, &quot;Use Bean Validation&quot;));</span>
+<span class="nc" id="L90">        cliOptions.add(CliOption.newBoolean(PERFORM_BEANVALIDATION, &quot;Perform BeanValidation&quot;));</span>
+<span class="nc" id="L91">        cliOptions.add(CliOption.newBoolean(USE_ABSTRACT_CLASS,</span>
                 &quot;Whether to generate abstract classes for REST API instead of interfaces.&quot;, useAbstractClass));
-<span class="fc" id="L93">        cliOptions.add(CliOption.newBoolean(GRADLE_PROJECT,</span>
+<span class="nc" id="L93">        cliOptions.add(CliOption.newBoolean(GRADLE_PROJECT,</span>
                 &quot;Whether to generate gradle project instead of maven.&quot;, gradleProject));
 
         // clear model and api doc template as this codegen
         // does not support auto-generated markdown doc at the moment
-<span class="fc" id="L98">        modelDocTemplateFiles.remove(&quot;model_doc.mustache&quot;);</span>
-<span class="fc" id="L99">        apiDocTemplateFiles.remove(&quot;api_doc.mustache&quot;);</span>
+<span class="nc" id="L98">        modelDocTemplateFiles.remove(&quot;model_doc.mustache&quot;);</span>
+<span class="nc" id="L99">        apiDocTemplateFiles.remove(&quot;api_doc.mustache&quot;);</span>
 
         // clear test templates
         // as this codegen does not support api tests at the moment
-<span class="fc" id="L103">        apiTestTemplateFiles.clear();</span>
+<span class="nc" id="L103">        apiTestTemplateFiles.clear();</span>
 
-<span class="fc" id="L105">        supportedLibraries.put(HELIDON_MP, &quot;Helidon MP Server&quot;);</span>
-<span class="fc" id="L106">        supportedLibraries.put(HELIDON_SE, &quot;Helidon SE Server&quot;);</span>
-<span class="fc" id="L107">        supportedLibraries.put(HELIDON_NIMA, &quot;Helidon NIMA Server&quot;);</span>
-<span class="fc" id="L108">        supportedLibraries.put(HELIDON_NIMA_ANNOTATIONS, &quot;Helidon NIMA Annotations Server&quot;);</span>
+<span class="nc" id="L105">        supportedLibraries.put(HELIDON_MP, &quot;Helidon MP Server&quot;);</span>
+<span class="nc" id="L106">        supportedLibraries.put(HELIDON_SE, &quot;Helidon SE Server&quot;);</span>
+<span class="nc" id="L107">        supportedLibraries.put(HELIDON_NIMA, &quot;Helidon NIMA Server&quot;);</span>
+<span class="nc" id="L108">        supportedLibraries.put(HELIDON_NIMA_ANNOTATIONS, &quot;Helidon NIMA Annotations Server&quot;);</span>
 
-<span class="fc" id="L110">        CliOption libraryOption = new CliOption(CodegenConstants.LIBRARY, &quot;library template (sub-template) to use&quot;);</span>
-<span class="fc" id="L111">        libraryOption.setEnum(supportedLibraries);</span>
-<span class="fc" id="L112">        libraryOption.setDefault(HELIDON_SE);</span>
-<span class="fc" id="L113">        cliOptions.add(libraryOption);</span>
-<span class="fc" id="L114">        setLibrary(HELIDON_SE);</span>
+<span class="nc" id="L110">        CliOption libraryOption = new CliOption(CodegenConstants.LIBRARY, &quot;library template (sub-template) to use&quot;);</span>
+<span class="nc" id="L111">        libraryOption.setEnum(supportedLibraries);</span>
+<span class="nc" id="L112">        libraryOption.setDefault(HELIDON_SE);</span>
+<span class="nc" id="L113">        cliOptions.add(libraryOption);</span>
+<span class="nc" id="L114">        setLibrary(HELIDON_SE);</span>
 
-<span class="fc" id="L116">        CliOption serializationLibrary = new CliOption(CodegenConstants.SERIALIZATION_LIBRARY,</span>
+<span class="nc" id="L116">        CliOption serializationLibrary = new CliOption(CodegenConstants.SERIALIZATION_LIBRARY,</span>
                 &quot;Serialization library, defaults to Jackson&quot;);
-<span class="fc" id="L118">        Map&lt;String, String&gt; serializationOptions = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L119">        serializationOptions.put(SERIALIZATION_LIBRARY_JACKSON, &quot;Use Jackson as serialization library&quot;);</span>
-<span class="fc" id="L120">        serializationOptions.put(SERIALIZATION_LIBRARY_JSONB, &quot;Use JSON-B as serialization library&quot;);</span>
-<span class="fc" id="L121">        serializationLibrary.setEnum(serializationOptions);</span>
-<span class="fc" id="L122">        cliOptions.add(serializationLibrary);</span>
-<span class="fc" id="L123">        setSerializationLibrary(SERIALIZATION_LIBRARY_JACKSON);</span>
+<span class="nc" id="L118">        Map&lt;String, String&gt; serializationOptions = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L119">        serializationOptions.put(SERIALIZATION_LIBRARY_JACKSON, &quot;Use Jackson as serialization library&quot;);</span>
+<span class="nc" id="L120">        serializationOptions.put(SERIALIZATION_LIBRARY_JSONB, &quot;Use JSON-B as serialization library&quot;);</span>
+<span class="nc" id="L121">        serializationLibrary.setEnum(serializationOptions);</span>
+<span class="nc" id="L122">        cliOptions.add(serializationLibrary);</span>
+<span class="nc" id="L123">        setSerializationLibrary(SERIALIZATION_LIBRARY_JACKSON);</span>
 
-<span class="fc" id="L125">        removeUnusedOptions();</span>
+<span class="nc" id="L125">        removeUnusedOptions();</span>
 
-<span class="fc" id="L127">        this.setLegacyDiscriminatorBehavior(false);</span>
-<span class="fc" id="L128">    }</span>
+<span class="nc" id="L127">        this.setLegacyDiscriminatorBehavior(false);</span>
+<span class="nc" id="L128">    }</span>
 
     @Override
     public void processOpts() {
@@ -367,12 +367,12 @@ public class JavaHelidonServerCodegen extends JavaHelidonCommonCodegen {
 
     @Override
     public CodegenType getTag() {
-<span class="fc" id="L370">        return CodegenType.SERVER;</span>
+<span class="nc" id="L370">        return CodegenType.SERVER;</span>
     }
 
     @Override
     public String getName() {
-<span class="fc" id="L375">        return &quot;java-helidon-server&quot;;</span>
+<span class="nc" id="L375">        return &quot;java-helidon-server&quot;;</span>
     }
 
     @Override
@@ -396,14 +396,14 @@ public class JavaHelidonServerCodegen extends JavaHelidonCommonCodegen {
     }
 
     public void setSerializationLibrary(String serializationLibrary) {
-<span class="pc bpc" id="L399" title="1 of 2 branches missed.">        if (SERIALIZATION_LIBRARY_JACKSON.equalsIgnoreCase(serializationLibrary)) {</span>
-<span class="fc" id="L400">            this.serializationLibrary = SERIALIZATION_LIBRARY_JACKSON;</span>
+<span class="nc bnc" id="L399" title="All 2 branches missed.">        if (SERIALIZATION_LIBRARY_JACKSON.equalsIgnoreCase(serializationLibrary)) {</span>
+<span class="nc" id="L400">            this.serializationLibrary = SERIALIZATION_LIBRARY_JACKSON;</span>
 <span class="nc bnc" id="L401" title="All 2 branches missed.">        } else if (SERIALIZATION_LIBRARY_JSONB.equalsIgnoreCase(serializationLibrary)) {</span>
 <span class="nc" id="L402">            this.serializationLibrary = SERIALIZATION_LIBRARY_JSONB;</span>
         } else {
 <span class="nc" id="L404">            throw new IllegalArgumentException(&quot;Unexpected serializationLibrary value: &quot; + serializationLibrary);</span>
         }
-<span class="fc" id="L406">    }</span>
+<span class="nc" id="L406">    }</span>
 
     /**
      * Check if pom file and src directory already exist.

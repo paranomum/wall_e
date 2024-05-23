@@ -45,19 +45,19 @@ public class HaskellYesodServerCodegen extends DefaultCodegen implements Codegen
     public static final String PROJECT_NAME = &quot;projectName&quot;;
     public static final String API_MODULE_NAME = &quot;apiModuleName&quot;;
 
-<span class="fc" id="L48">    private static final Pattern LEADING_UNDERSCORE = Pattern.compile(&quot;^_+&quot;);</span>
+<span class="nc" id="L48">    private static final Pattern LEADING_UNDERSCORE = Pattern.compile(&quot;^_+&quot;);</span>
 
-<span class="fc" id="L50">    private final Logger LOGGER = LoggerFactory.getLogger(HaskellYesodServerCodegen.class);</span>
+<span class="nc" id="L50">    private final Logger LOGGER = LoggerFactory.getLogger(HaskellYesodServerCodegen.class);</span>
 
     protected String projectName;
     protected String apiModuleName;
 
     public CodegenType getTag() {
-<span class="fc" id="L56">        return CodegenType.SERVER;</span>
+<span class="nc" id="L56">        return CodegenType.SERVER;</span>
     }
 
     public String getName() {
-<span class="fc" id="L60">        return &quot;haskell-yesod&quot;;</span>
+<span class="nc" id="L60">        return &quot;haskell-yesod&quot;;</span>
     }
 
     public String getHelp() {
@@ -81,42 +81,42 @@ public class HaskellYesodServerCodegen extends DefaultCodegen implements Codegen
 <span class="nc" id="L81">    }</span>
 
     public HaskellYesodServerCodegen() {
-<span class="fc" id="L84">        super();</span>
+<span class="nc" id="L84">        super();</span>
 
-<span class="fc" id="L86">        modifyFeatureSet(features -&gt; features</span>
-<span class="fc" id="L87">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
-<span class="fc" id="L88">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON))</span>
-<span class="fc" id="L89">                .securityFeatures(EnumSet.of(</span>
+<span class="nc" id="L86">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L87">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="nc" id="L88">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON))</span>
+<span class="nc" id="L89">                .securityFeatures(EnumSet.of(</span>
                         SecurityFeature.BasicAuth,
                         SecurityFeature.ApiKey,
                         SecurityFeature.OAuth2_Implicit
                 ))
-<span class="fc" id="L94">                .excludeGlobalFeatures(</span>
+<span class="nc" id="L94">                .excludeGlobalFeatures(</span>
                         GlobalFeature.Callbacks
                 )
-<span class="fc" id="L97">                .excludeSchemaSupportFeatures(</span>
+<span class="nc" id="L97">                .excludeSchemaSupportFeatures(</span>
                         SchemaSupportFeature.Polymorphism
                 )
         );
 
-<span class="fc" id="L102">        generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
-<span class="fc" id="L103">                .stability(Stability.BETA)</span>
-<span class="fc" id="L104">                .build();</span>
+<span class="nc" id="L102">        generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
+<span class="nc" id="L103">                .stability(Stability.BETA)</span>
+<span class="nc" id="L104">                .build();</span>
 
         // override the mapping to keep the original mapping in Haskell
-<span class="fc" id="L107">        specialCharReplacements.put(&quot;-&quot;, &quot;Dash&quot;);</span>
-<span class="fc" id="L108">        specialCharReplacements.put(&quot;&gt;&quot;, &quot;GreaterThan&quot;);</span>
-<span class="fc" id="L109">        specialCharReplacements.put(&quot;&lt;&quot;, &quot;LessThan&quot;);</span>
+<span class="nc" id="L107">        specialCharReplacements.put(&quot;-&quot;, &quot;Dash&quot;);</span>
+<span class="nc" id="L108">        specialCharReplacements.put(&quot;&gt;&quot;, &quot;GreaterThan&quot;);</span>
+<span class="nc" id="L109">        specialCharReplacements.put(&quot;&lt;&quot;, &quot;LessThan&quot;);</span>
 
-<span class="fc" id="L111">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;haskell-yesod&quot;;</span>
-<span class="fc" id="L112">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.hs&quot;);</span>
-<span class="fc" id="L113">        apiTestTemplateFiles.put(&quot;api_test.mustache&quot;, &quot;.hs&quot;);</span>
-<span class="fc" id="L114">        embeddedTemplateDir = templateDir = &quot;haskell-yesod&quot;;</span>
-<span class="fc" id="L115">        apiNameSuffix = &quot;&quot;;</span>
+<span class="nc" id="L111">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;haskell-yesod&quot;;</span>
+<span class="nc" id="L112">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.hs&quot;);</span>
+<span class="nc" id="L113">        apiTestTemplateFiles.put(&quot;api_test.mustache&quot;, &quot;.hs&quot;);</span>
+<span class="nc" id="L114">        embeddedTemplateDir = templateDir = &quot;haskell-yesod&quot;;</span>
+<span class="nc" id="L115">        apiNameSuffix = &quot;&quot;;</span>
 
         // Haskell keywords and reserved function names, taken mostly from https://wiki.haskell.org/Keywords
-<span class="fc" id="L118">        setReservedWordsLowerCase(</span>
-<span class="fc" id="L119">                Arrays.asList(</span>
+<span class="nc" id="L118">        setReservedWordsLowerCase(</span>
+<span class="nc" id="L119">                Arrays.asList(</span>
                         // Keywords
                         &quot;as&quot;, &quot;case&quot;, &quot;of&quot;,
                         &quot;class&quot;, &quot;data&quot;, &quot;family&quot;,
@@ -131,8 +131,8 @@ public class HaskellYesodServerCodegen extends DefaultCodegen implements Codegen
                 )
         );
 
-<span class="fc" id="L134">        languageSpecificPrimitives = new HashSet&lt;&gt;(</span>
-<span class="fc" id="L135">                Arrays.asList(</span>
+<span class="nc" id="L134">        languageSpecificPrimitives = new HashSet&lt;&gt;(</span>
+<span class="nc" id="L135">                Arrays.asList(</span>
                         &quot;Bool&quot;,
                         &quot;Int&quot;,
                         &quot;Int64&quot;,
@@ -144,23 +144,23 @@ public class HaskellYesodServerCodegen extends DefaultCodegen implements Codegen
                 )
         );
 
-<span class="fc" id="L147">        typeMapping.clear();</span>
-<span class="fc" id="L148">        typeMapping.put(&quot;boolean&quot;, &quot;Bool&quot;);     // type:boolean</span>
-<span class="fc" id="L149">        typeMapping.put(&quot;integer&quot;, &quot;Int&quot;);      // type:integer+format:int32, type:integer</span>
-<span class="fc" id="L150">        typeMapping.put(&quot;long&quot;, &quot;Int64&quot;);       // type:integer+format:int64</span>
-<span class="fc" id="L151">        typeMapping.put(&quot;number&quot;, &quot;Double&quot;);    // type:number</span>
-<span class="fc" id="L152">        typeMapping.put(&quot;float&quot;, &quot;Float&quot;);      // type:number+format:float</span>
-<span class="fc" id="L153">        typeMapping.put(&quot;double&quot;, &quot;Double&quot;);    // type:number+format:double</span>
-<span class="fc" id="L154">        typeMapping.put(&quot;string&quot;, &quot;Text&quot;);      // type:string</span>
-<span class="fc" id="L155">        typeMapping.put(&quot;date&quot;, &quot;Day&quot;);         // type:string+format:date</span>
-<span class="fc" id="L156">        typeMapping.put(&quot;DateTime&quot;, &quot;UTCTime&quot;); // type:string+format:date-time</span>
-<span class="fc" id="L157">        typeMapping.put(&quot;decimal&quot;, &quot;Text&quot;);     // type:string+format:number</span>
-<span class="fc" id="L158">        typeMapping.put(&quot;URI&quot;, &quot;Text&quot;);         // type:string+format:uri</span>
-<span class="fc" id="L159">        typeMapping.put(&quot;UUID&quot;, &quot;Text&quot;);        // type:string+format:uuid</span>
-<span class="fc" id="L160">        typeMapping.put(&quot;ByteArray&quot;, &quot;Text&quot;);   // type:string+format:byte</span>
-<span class="fc" id="L161">        typeMapping.put(&quot;binary&quot;, &quot;Text&quot;);      // type:string+format:binary</span>
-<span class="fc" id="L162">        typeMapping.put(&quot;file&quot;, &quot;Text&quot;);        // type:string+format:binary(OAS3), type:file(OAS2)</span>
-<span class="fc" id="L163">        typeMapping.put(&quot;AnyType&quot;, &quot;Value&quot;);    // type not specified</span>
+<span class="nc" id="L147">        typeMapping.clear();</span>
+<span class="nc" id="L148">        typeMapping.put(&quot;boolean&quot;, &quot;Bool&quot;);     // type:boolean</span>
+<span class="nc" id="L149">        typeMapping.put(&quot;integer&quot;, &quot;Int&quot;);      // type:integer+format:int32, type:integer</span>
+<span class="nc" id="L150">        typeMapping.put(&quot;long&quot;, &quot;Int64&quot;);       // type:integer+format:int64</span>
+<span class="nc" id="L151">        typeMapping.put(&quot;number&quot;, &quot;Double&quot;);    // type:number</span>
+<span class="nc" id="L152">        typeMapping.put(&quot;float&quot;, &quot;Float&quot;);      // type:number+format:float</span>
+<span class="nc" id="L153">        typeMapping.put(&quot;double&quot;, &quot;Double&quot;);    // type:number+format:double</span>
+<span class="nc" id="L154">        typeMapping.put(&quot;string&quot;, &quot;Text&quot;);      // type:string</span>
+<span class="nc" id="L155">        typeMapping.put(&quot;date&quot;, &quot;Day&quot;);         // type:string+format:date</span>
+<span class="nc" id="L156">        typeMapping.put(&quot;DateTime&quot;, &quot;UTCTime&quot;); // type:string+format:date-time</span>
+<span class="nc" id="L157">        typeMapping.put(&quot;decimal&quot;, &quot;Text&quot;);     // type:string+format:number</span>
+<span class="nc" id="L158">        typeMapping.put(&quot;URI&quot;, &quot;Text&quot;);         // type:string+format:uri</span>
+<span class="nc" id="L159">        typeMapping.put(&quot;UUID&quot;, &quot;Text&quot;);        // type:string+format:uuid</span>
+<span class="nc" id="L160">        typeMapping.put(&quot;ByteArray&quot;, &quot;Text&quot;);   // type:string+format:byte</span>
+<span class="nc" id="L161">        typeMapping.put(&quot;binary&quot;, &quot;Text&quot;);      // type:string+format:binary</span>
+<span class="nc" id="L162">        typeMapping.put(&quot;file&quot;, &quot;Text&quot;);        // type:string+format:binary(OAS3), type:file(OAS2)</span>
+<span class="nc" id="L163">        typeMapping.put(&quot;AnyType&quot;, &quot;Value&quot;);    // type not specified</span>
 
         // See getTypeDeclaration() for the followings.
         // typeMapping.put(&quot;array&quot;, &quot;List&quot;);           // type:array (ArraySchema)
@@ -170,13 +170,13 @@ public class HaskellYesodServerCodegen extends DefaultCodegen implements Codegen
         // type:object is defined as a separate data type, so the type mapping is not required.
         // typeMapping.put(&quot;object&quot;, &quot;Value&quot;);         // type:object
 
-<span class="fc" id="L173">        importMapping.clear();</span>
+<span class="nc" id="L173">        importMapping.clear();</span>
 
-<span class="fc" id="L175">        cliOptions.add(new CliOption(PROJECT_NAME,</span>
+<span class="nc" id="L175">        cliOptions.add(new CliOption(PROJECT_NAME,</span>
                 &quot;name of the project (Default: generated from info.title or \&quot;openapi-haskell-yesod-server\&quot;)&quot;));
-<span class="fc" id="L177">        cliOptions.add(new CliOption(API_MODULE_NAME,</span>
+<span class="nc" id="L177">        cliOptions.add(new CliOption(API_MODULE_NAME,</span>
                 &quot;name of the API module (Default: generated from info.title or \&quot;API\&quot;)&quot;));
-<span class="fc" id="L179">    }</span>
+<span class="nc" id="L179">    }</span>
 
     @Override
     public String apiFileFolder() {

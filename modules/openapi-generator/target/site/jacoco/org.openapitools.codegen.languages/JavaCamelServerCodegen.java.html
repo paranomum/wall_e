@@ -48,22 +48,22 @@ public class JavaCamelServerCodegen extends SpringCodegen implements BeanValidat
     public static final String CAMEL_SECURITY_DEFINITIONS = &quot;camelSecurityDefinitions&quot;;
     public static final String CAMEL_DATAFORMAT_PROPERTIES = &quot;camelDataformatProperties&quot;;
 
-<span class="fc" id="L51">    private String camelRestComponent = &quot;servlet&quot;;</span>
-<span class="fc" id="L52">    private String camelRestBindingMode = &quot;auto&quot;;</span>
-<span class="fc" id="L53">    private boolean camelRestClientRequestValidation = false;</span>
-<span class="fc" id="L54">    private boolean camelUseDefaultValidationErrorProcessor = true;</span>
-<span class="fc" id="L55">    private String camelValidationErrorProcessor = &quot;validationErrorProcessor&quot;;</span>
-<span class="fc" id="L56">    private boolean camelSecurityDefinitions = true;</span>
-<span class="fc" id="L57">    private String camelDataformatProperties = &quot;&quot;;</span>
+<span class="nc" id="L51">    private String camelRestComponent = &quot;servlet&quot;;</span>
+<span class="nc" id="L52">    private String camelRestBindingMode = &quot;auto&quot;;</span>
+<span class="nc" id="L53">    private boolean camelRestClientRequestValidation = false;</span>
+<span class="nc" id="L54">    private boolean camelUseDefaultValidationErrorProcessor = true;</span>
+<span class="nc" id="L55">    private String camelValidationErrorProcessor = &quot;validationErrorProcessor&quot;;</span>
+<span class="nc" id="L56">    private boolean camelSecurityDefinitions = true;</span>
+<span class="nc" id="L57">    private String camelDataformatProperties = &quot;&quot;;</span>
 
-<span class="fc" id="L59">    private final Logger LOGGER = LoggerFactory.getLogger(JavaCamelServerCodegen.class);</span>
+<span class="nc" id="L59">    private final Logger LOGGER = LoggerFactory.getLogger(JavaCamelServerCodegen.class);</span>
 
     public CodegenType getTag() {
-<span class="fc" id="L62">        return CodegenType.SERVER;</span>
+<span class="nc" id="L62">        return CodegenType.SERVER;</span>
     }
 
     public String getName() {
-<span class="fc" id="L66">        return &quot;java-camel&quot;;</span>
+<span class="nc" id="L66">        return &quot;java-camel&quot;;</span>
     }
 
     public String getHelp() {
@@ -71,12 +71,12 @@ public class JavaCamelServerCodegen extends SpringCodegen implements BeanValidat
     }
 
     public JavaCamelServerCodegen() {
-<span class="fc" id="L74">        super();</span>
-<span class="fc" id="L75">        templateDir = &quot;java-camel-server&quot;;</span>
-<span class="fc" id="L76">        addCliOptions();</span>
-<span class="fc" id="L77">        artifactId = &quot;openapi-camel&quot;;</span>
-<span class="fc" id="L78">        super.library = &quot;&quot;;</span>
-<span class="fc" id="L79">    }</span>
+<span class="nc" id="L74">        super();</span>
+<span class="nc" id="L75">        templateDir = &quot;java-camel-server&quot;;</span>
+<span class="nc" id="L76">        addCliOptions();</span>
+<span class="nc" id="L77">        artifactId = &quot;openapi-camel&quot;;</span>
+<span class="nc" id="L78">        super.library = &quot;&quot;;</span>
+<span class="nc" id="L79">    }</span>
 
     @Override
     public void processOpts() {
@@ -159,14 +159,14 @@ public class JavaCamelServerCodegen extends SpringCodegen implements BeanValidat
 <span class="nc" id="L159">    }</span>
 
     private void addCliOptions() {
-<span class="fc" id="L162">        cliOptions.add(new CliOption(CAMEL_REST_COMPONENT, &quot;name of the Camel component to use as the REST consumer&quot;).defaultValue(camelRestComponent));</span>
-<span class="fc" id="L163">        cliOptions.add(new CliOption(CAMEL_REST_BINDING_MODE, &quot;binding mode to be used by the REST consumer&quot;).defaultValue(camelRestBindingMode));</span>
-<span class="fc" id="L164">        cliOptions.add(CliOption.newBoolean(CAMEL_REST_CLIENT_REQUEST_VALIDATION, &quot;enable validation of the client request to check whether the Content-Type and Accept headers from the client is supported by the Rest-DSL configuration&quot;, camelRestClientRequestValidation));</span>
-<span class="fc" id="L165">        cliOptions.add(CliOption.newBoolean(CAMEL_USE_DEFAULT_VALIDATION_ERROR_PROCESSOR, &quot;generate default validation error processor&quot;, camelUseDefaultValidationErrorProcessor));</span>
-<span class="fc" id="L166">        cliOptions.add(new CliOption(CAMEL_VALIDATION_ERROR_PROCESSOR, &quot;validation error processor bean name&quot;).defaultValue(camelValidationErrorProcessor));</span>
-<span class="fc" id="L167">        cliOptions.add(CliOption.newBoolean(CAMEL_SECURITY_DEFINITIONS, &quot;generate camel security definitions&quot;, camelSecurityDefinitions));</span>
-<span class="fc" id="L168">        cliOptions.add(new CliOption(CAMEL_DATAFORMAT_PROPERTIES, &quot;list of dataformat properties separated by comma (propertyName1=propertyValue2,...&quot;).defaultValue(camelDataformatProperties));</span>
-<span class="fc" id="L169">    }</span>
+<span class="nc" id="L162">        cliOptions.add(new CliOption(CAMEL_REST_COMPONENT, &quot;name of the Camel component to use as the REST consumer&quot;).defaultValue(camelRestComponent));</span>
+<span class="nc" id="L163">        cliOptions.add(new CliOption(CAMEL_REST_BINDING_MODE, &quot;binding mode to be used by the REST consumer&quot;).defaultValue(camelRestBindingMode));</span>
+<span class="nc" id="L164">        cliOptions.add(CliOption.newBoolean(CAMEL_REST_CLIENT_REQUEST_VALIDATION, &quot;enable validation of the client request to check whether the Content-Type and Accept headers from the client is supported by the Rest-DSL configuration&quot;, camelRestClientRequestValidation));</span>
+<span class="nc" id="L165">        cliOptions.add(CliOption.newBoolean(CAMEL_USE_DEFAULT_VALIDATION_ERROR_PROCESSOR, &quot;generate default validation error processor&quot;, camelUseDefaultValidationErrorProcessor));</span>
+<span class="nc" id="L166">        cliOptions.add(new CliOption(CAMEL_VALIDATION_ERROR_PROCESSOR, &quot;validation error processor bean name&quot;).defaultValue(camelValidationErrorProcessor));</span>
+<span class="nc" id="L167">        cliOptions.add(CliOption.newBoolean(CAMEL_SECURITY_DEFINITIONS, &quot;generate camel security definitions&quot;, camelSecurityDefinitions));</span>
+<span class="nc" id="L168">        cliOptions.add(new CliOption(CAMEL_DATAFORMAT_PROPERTIES, &quot;list of dataformat properties separated by comma (propertyName1=propertyValue2,...&quot;).defaultValue(camelDataformatProperties));</span>
+<span class="nc" id="L169">    }</span>
 
     private void manageAdditionalProperties() {
 <span class="nc" id="L172">        camelRestComponent = manageAdditionalProperty(CAMEL_REST_COMPONENT, camelRestComponent);</span>

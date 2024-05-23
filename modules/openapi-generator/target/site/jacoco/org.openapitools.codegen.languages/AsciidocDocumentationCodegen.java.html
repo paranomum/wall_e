@@ -44,7 +44,7 @@ import io.swagger.v3.oas.models.OpenAPI;
  */
 public class AsciidocDocumentationCodegen extends DefaultCodegen implements CodegenConfig {
 
-<span class="fc" id="L47">    private final Logger LOGGER = LoggerFactory.getLogger(AsciidocDocumentationCodegen.class);</span>
+<span class="nc" id="L47">    private final Logger LOGGER = LoggerFactory.getLogger(AsciidocDocumentationCodegen.class);</span>
 
     public static final String SPEC_DIR = &quot;specDir&quot;;
     public static final String SNIPPET_DIR = &quot;snippetDir&quot;;
@@ -149,15 +149,15 @@ public class AsciidocDocumentationCodegen extends DefaultCodegen implements Code
 <span class="nc" id="L149">        }</span>
     }
 
-<span class="fc" id="L152">    protected String invokerPackage = &quot;org.openapitools.client&quot;;</span>
-<span class="fc" id="L153">    protected String groupId = &quot;org.openapitools&quot;;</span>
-<span class="fc" id="L154">    protected String artifactId = &quot;openapi-client&quot;;</span>
-<span class="fc" id="L155">    protected String artifactVersion = &quot;1.0.0&quot;;</span>
-<span class="fc" id="L156">    protected boolean headerAttributes = true;</span>
-<span class="fc" id="L157">    protected boolean useIntroduction = false;</span>
-<span class="fc" id="L158">    protected boolean skipExamples = false;</span>
-<span class="fc" id="L159">    protected boolean useMethodAndPath = false;</span>
-<span class="fc" id="L160">    protected boolean useTableTitles = false;</span>
+<span class="nc" id="L152">    protected String invokerPackage = &quot;org.openapitools.client&quot;;</span>
+<span class="nc" id="L153">    protected String groupId = &quot;org.openapitools&quot;;</span>
+<span class="nc" id="L154">    protected String artifactId = &quot;openapi-client&quot;;</span>
+<span class="nc" id="L155">    protected String artifactVersion = &quot;1.0.0&quot;;</span>
+<span class="nc" id="L156">    protected boolean headerAttributes = true;</span>
+<span class="nc" id="L157">    protected boolean useIntroduction = false;</span>
+<span class="nc" id="L158">    protected boolean skipExamples = false;</span>
+<span class="nc" id="L159">    protected boolean useMethodAndPath = false;</span>
+<span class="nc" id="L160">    protected boolean useTableTitles = false;</span>
 
     private IncludeMarkupLambda includeSpecMarkupLambda;
     private IncludeMarkupLambda includeSnippetMarkupLambda;
@@ -165,7 +165,7 @@ public class AsciidocDocumentationCodegen extends DefaultCodegen implements Code
 
     @Override
     public CodegenType getTag() {
-<span class="fc" id="L168">        return CodegenType.DOCUMENTATION;</span>
+<span class="nc" id="L168">        return CodegenType.DOCUMENTATION;</span>
     }
 
     /**
@@ -184,7 +184,7 @@ public class AsciidocDocumentationCodegen extends DefaultCodegen implements Code
 
     @Override
     public String getName() {
-<span class="fc" id="L187">        return &quot;asciidoc&quot;;</span>
+<span class="nc" id="L187">        return &quot;asciidoc&quot;;</span>
     }
 
     @Override
@@ -201,75 +201,75 @@ public class AsciidocDocumentationCodegen extends DefaultCodegen implements Code
     }
 
     public AsciidocDocumentationCodegen() {
-<span class="fc" id="L204">        super();</span>
+<span class="nc" id="L204">        super();</span>
 
         // TODO: Asciidoc maintainer review.
-<span class="fc" id="L207">        modifyFeatureSet(features -&gt; features</span>
-<span class="fc" id="L208">                .securityFeatures(EnumSet.noneOf(SecurityFeature.class))</span>
-<span class="fc" id="L209">                .documentationFeatures(EnumSet.noneOf(DocumentationFeature.class))</span>
-<span class="fc" id="L210">                .globalFeatures(EnumSet.noneOf(GlobalFeature.class))</span>
-<span class="fc" id="L211">                .schemaSupportFeatures(EnumSet.noneOf(SchemaSupportFeature.class))</span>
-<span class="fc" id="L212">                .clientModificationFeatures(EnumSet.noneOf(ClientModificationFeature.class))</span>
+<span class="nc" id="L207">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L208">                .securityFeatures(EnumSet.noneOf(SecurityFeature.class))</span>
+<span class="nc" id="L209">                .documentationFeatures(EnumSet.noneOf(DocumentationFeature.class))</span>
+<span class="nc" id="L210">                .globalFeatures(EnumSet.noneOf(GlobalFeature.class))</span>
+<span class="nc" id="L211">                .schemaSupportFeatures(EnumSet.noneOf(SchemaSupportFeature.class))</span>
+<span class="nc" id="L212">                .clientModificationFeatures(EnumSet.noneOf(ClientModificationFeature.class))</span>
         );
 
-<span class="fc" id="L215">        LOGGER.trace(&quot;start asciidoc codegen&quot;);</span>
+<span class="nc" id="L215">        LOGGER.trace(&quot;start asciidoc codegen&quot;);</span>
 
-<span class="fc" id="L217">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;asciidoc&quot;;</span>
-<span class="fc" id="L218">        embeddedTemplateDir = templateDir = &quot;asciidoc-documentation&quot;;</span>
+<span class="nc" id="L217">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;asciidoc&quot;;</span>
+<span class="nc" id="L218">        embeddedTemplateDir = templateDir = &quot;asciidoc-documentation&quot;;</span>
 
-<span class="fc" id="L220">        defaultIncludes = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L220">        defaultIncludes = new HashSet&lt;&gt;();</span>
 
-<span class="fc" id="L222">        cliOptions.add(new CliOption(&quot;appName&quot;, &quot;short name of the application&quot;));</span>
-<span class="fc" id="L223">        cliOptions.add(new CliOption(&quot;appDescription&quot;, &quot;description of the application&quot;));</span>
-<span class="fc" id="L224">        cliOptions.add(new CliOption(&quot;infoUrl&quot;, &quot;a URL where users can get more information about the application&quot;));</span>
-<span class="fc" id="L225">        cliOptions.add(new CliOption(&quot;infoEmail&quot;, &quot;an email address to contact for inquiries about the application&quot;));</span>
-<span class="fc" id="L226">        cliOptions.add(new CliOption(&quot;licenseInfo&quot;, &quot;a short description of the license&quot;));</span>
-<span class="fc" id="L227">        cliOptions.add(new CliOption(CodegenConstants.LICENSE_URL, &quot;a URL pointing to the full license&quot;));</span>
-<span class="fc" id="L228">        cliOptions.add(new CliOption(CodegenConstants.INVOKER_PACKAGE, CodegenConstants.INVOKER_PACKAGE_DESC));</span>
-<span class="fc" id="L229">        cliOptions.add(new CliOption(CodegenConstants.GROUP_ID, CodegenConstants.GROUP_ID_DESC));</span>
-<span class="fc" id="L230">        cliOptions.add(new CliOption(CodegenConstants.ARTIFACT_ID, CodegenConstants.ARTIFACT_ID_DESC));</span>
-<span class="fc" id="L231">        cliOptions.add(new CliOption(CodegenConstants.ARTIFACT_VERSION, CodegenConstants.ARTIFACT_VERSION_DESC));</span>
+<span class="nc" id="L222">        cliOptions.add(new CliOption(&quot;appName&quot;, &quot;short name of the application&quot;));</span>
+<span class="nc" id="L223">        cliOptions.add(new CliOption(&quot;appDescription&quot;, &quot;description of the application&quot;));</span>
+<span class="nc" id="L224">        cliOptions.add(new CliOption(&quot;infoUrl&quot;, &quot;a URL where users can get more information about the application&quot;));</span>
+<span class="nc" id="L225">        cliOptions.add(new CliOption(&quot;infoEmail&quot;, &quot;an email address to contact for inquiries about the application&quot;));</span>
+<span class="nc" id="L226">        cliOptions.add(new CliOption(&quot;licenseInfo&quot;, &quot;a short description of the license&quot;));</span>
+<span class="nc" id="L227">        cliOptions.add(new CliOption(CodegenConstants.LICENSE_URL, &quot;a URL pointing to the full license&quot;));</span>
+<span class="nc" id="L228">        cliOptions.add(new CliOption(CodegenConstants.INVOKER_PACKAGE, CodegenConstants.INVOKER_PACKAGE_DESC));</span>
+<span class="nc" id="L229">        cliOptions.add(new CliOption(CodegenConstants.GROUP_ID, CodegenConstants.GROUP_ID_DESC));</span>
+<span class="nc" id="L230">        cliOptions.add(new CliOption(CodegenConstants.ARTIFACT_ID, CodegenConstants.ARTIFACT_ID_DESC));</span>
+<span class="nc" id="L231">        cliOptions.add(new CliOption(CodegenConstants.ARTIFACT_VERSION, CodegenConstants.ARTIFACT_VERSION_DESC));</span>
 
-<span class="fc" id="L233">        cliOptions.add(new CliOption(SNIPPET_DIR,</span>
+<span class="nc" id="L233">        cliOptions.add(new CliOption(SNIPPET_DIR,</span>
                 &quot;path with includable markup snippets (e.g. test output generated by restdoc, default: .)&quot;)
-<span class="fc" id="L235">                .defaultValue(&quot;.&quot;));</span>
-<span class="fc" id="L236">        cliOptions.add(new CliOption(SPEC_DIR,</span>
+<span class="nc" id="L235">                .defaultValue(&quot;.&quot;));</span>
+<span class="nc" id="L236">        cliOptions.add(new CliOption(SPEC_DIR,</span>
                 &quot;path with includable markup spec files (e.g. handwritten additional docs, default: ..)&quot;)
-<span class="fc" id="L238">                .defaultValue(&quot;..&quot;));</span>
-<span class="fc" id="L239">        cliOptions.add(CliOption.newBoolean(HEADER_ATTRIBUTES_FLAG,</span>
+<span class="nc" id="L238">                .defaultValue(&quot;..&quot;));</span>
+<span class="nc" id="L239">        cliOptions.add(CliOption.newBoolean(HEADER_ATTRIBUTES_FLAG,</span>
                 &quot;generation of asciidoc header meta data attributes (set to false to suppress, default: true)&quot;,
                 true));
-<span class="fc" id="L242">        cliOptions.add(CliOption.newBoolean(USE_INTRODUCTION_FLAG,</span>
+<span class="nc" id="L242">        cliOptions.add(CliOption.newBoolean(USE_INTRODUCTION_FLAG,</span>
                 &quot;use introduction section, rather than an initial abstract (default: false)&quot;,
                 false));
-<span class="fc" id="L245">        cliOptions.add(CliOption.newBoolean(SKIP_EXAMPLES_FLAG,</span>
+<span class="nc" id="L245">        cliOptions.add(CliOption.newBoolean(SKIP_EXAMPLES_FLAG,</span>
                 &quot;skip examples sections (default: false)&quot;,
                 false));
-<span class="fc" id="L248">        cliOptions.add(CliOption.newBoolean(USE_METHOD_AND_PATH_FLAG,</span>
+<span class="nc" id="L248">        cliOptions.add(CliOption.newBoolean(USE_METHOD_AND_PATH_FLAG,</span>
                 &quot;Use HTTP method and path as operation heading, instead of operation id (default: false)&quot;,
                 false));
-<span class="fc" id="L251">        cliOptions.add(CliOption.newBoolean(USE_TABLE_TITLES_FLAG,</span>
+<span class="nc" id="L251">        cliOptions.add(CliOption.newBoolean(USE_TABLE_TITLES_FLAG,</span>
                 &quot;Use titles for tables, rather than wrapping tables instead their own section (default: false)&quot;,
                 false));
 
-<span class="fc" id="L255">        additionalProperties.put(&quot;appName&quot;, &quot;OpenAPI Sample description&quot;);</span>
-<span class="fc" id="L256">        additionalProperties.put(&quot;appDescription&quot;, &quot;A sample OpenAPI documentation&quot;);</span>
-<span class="fc" id="L257">        additionalProperties.put(&quot;infoUrl&quot;, &quot;https://openapi-generator.tech&quot;);</span>
-<span class="fc" id="L258">        additionalProperties.put(&quot;infoEmail&quot;, &quot;team@openapitools.org&quot;);</span>
-<span class="fc" id="L259">        additionalProperties.put(&quot;licenseInfo&quot;, &quot;All rights reserved&quot;);</span>
-<span class="fc" id="L260">        additionalProperties.put(CodegenConstants.LICENSE_URL, &quot;http://apache.org/licenses/LICENSE-2.0.html&quot;);</span>
-<span class="fc" id="L261">        additionalProperties.put(CodegenConstants.INVOKER_PACKAGE, invokerPackage);</span>
-<span class="fc" id="L262">        additionalProperties.put(CodegenConstants.GROUP_ID, groupId);</span>
-<span class="fc" id="L263">        additionalProperties.put(CodegenConstants.ARTIFACT_ID, artifactId);</span>
-<span class="fc" id="L264">        additionalProperties.put(CodegenConstants.ARTIFACT_VERSION, artifactVersion);</span>
+<span class="nc" id="L255">        additionalProperties.put(&quot;appName&quot;, &quot;OpenAPI Sample description&quot;);</span>
+<span class="nc" id="L256">        additionalProperties.put(&quot;appDescription&quot;, &quot;A sample OpenAPI documentation&quot;);</span>
+<span class="nc" id="L257">        additionalProperties.put(&quot;infoUrl&quot;, &quot;https://openapi-generator.tech&quot;);</span>
+<span class="nc" id="L258">        additionalProperties.put(&quot;infoEmail&quot;, &quot;team@openapitools.org&quot;);</span>
+<span class="nc" id="L259">        additionalProperties.put(&quot;licenseInfo&quot;, &quot;All rights reserved&quot;);</span>
+<span class="nc" id="L260">        additionalProperties.put(CodegenConstants.LICENSE_URL, &quot;http://apache.org/licenses/LICENSE-2.0.html&quot;);</span>
+<span class="nc" id="L261">        additionalProperties.put(CodegenConstants.INVOKER_PACKAGE, invokerPackage);</span>
+<span class="nc" id="L262">        additionalProperties.put(CodegenConstants.GROUP_ID, groupId);</span>
+<span class="nc" id="L263">        additionalProperties.put(CodegenConstants.ARTIFACT_ID, artifactId);</span>
+<span class="nc" id="L264">        additionalProperties.put(CodegenConstants.ARTIFACT_VERSION, artifactVersion);</span>
 
-<span class="fc" id="L266">        supportingFiles.add(new SupportingFile(&quot;index.mustache&quot;, &quot;&quot;, &quot;index.adoc&quot;));</span>
-<span class="fc" id="L267">        reservedWords = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L266">        supportingFiles.add(new SupportingFile(&quot;index.mustache&quot;, &quot;&quot;, &quot;index.adoc&quot;));</span>
+<span class="nc" id="L267">        reservedWords = new HashSet&lt;&gt;();</span>
 
-<span class="fc" id="L269">        languageSpecificPrimitives = new HashSet&lt;&gt;();</span>
-<span class="fc" id="L270">        importMapping = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L269">        languageSpecificPrimitives = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L270">        importMapping = new HashMap&lt;&gt;();</span>
 
-<span class="fc" id="L272">    }</span>
+<span class="nc" id="L272">    }</span>
 
     @Override
     public String escapeQuotationMark(String input) {

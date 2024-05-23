@@ -38,35 +38,35 @@ public class JavaJerseyServerCodegen extends AbstractJavaJAXRSServerCodegen {
     public static final String DEFAULT_JERSEY_LIBRARY = LIBRARY_JERSEY2;
 
     public JavaJerseyServerCodegen() {
-<span class="fc" id="L41">        super();</span>
+<span class="nc" id="L41">        super();</span>
 
-<span class="fc" id="L43">        modifyFeatureSet(features -&gt; features.includeDocumentationFeatures(DocumentationFeature.Readme));</span>
+<span class="nc" id="L43">        modifyFeatureSet(features -&gt; features.includeDocumentationFeatures(DocumentationFeature.Readme));</span>
 
-<span class="fc" id="L45">        outputFolder = &quot;generated-code/JavaJaxRS-Jersey&quot;;</span>
+<span class="nc" id="L45">        outputFolder = &quot;generated-code/JavaJaxRS-Jersey&quot;;</span>
 
-<span class="fc" id="L47">        apiTemplateFiles.put(&quot;apiService.mustache&quot;, &quot;.java&quot;);</span>
-<span class="fc" id="L48">        apiTemplateFiles.put(&quot;apiServiceImpl.mustache&quot;, &quot;.java&quot;);</span>
-<span class="fc" id="L49">        apiTemplateFiles.put(&quot;apiServiceFactory.mustache&quot;, &quot;.java&quot;);</span>
-<span class="fc" id="L50">        apiTestTemplateFiles.clear(); // TODO: add test template</span>
+<span class="nc" id="L47">        apiTemplateFiles.put(&quot;apiService.mustache&quot;, &quot;.java&quot;);</span>
+<span class="nc" id="L48">        apiTemplateFiles.put(&quot;apiServiceImpl.mustache&quot;, &quot;.java&quot;);</span>
+<span class="nc" id="L49">        apiTemplateFiles.put(&quot;apiServiceFactory.mustache&quot;, &quot;.java&quot;);</span>
+<span class="nc" id="L50">        apiTestTemplateFiles.clear(); // TODO: add test template</span>
 
         // clear model and api doc template as this codegen
         // does not support auto-generated markdown doc at the moment
         //TODO: add doc templates
-<span class="fc" id="L55">        modelDocTemplateFiles.remove(&quot;model_doc.mustache&quot;);</span>
-<span class="fc" id="L56">        apiDocTemplateFiles.remove(&quot;api_doc.mustache&quot;);</span>
+<span class="nc" id="L55">        modelDocTemplateFiles.remove(&quot;model_doc.mustache&quot;);</span>
+<span class="nc" id="L56">        apiDocTemplateFiles.remove(&quot;api_doc.mustache&quot;);</span>
 
-<span class="fc" id="L58">        embeddedTemplateDir = templateDir = JAXRS_TEMPLATE_DIRECTORY_NAME;</span>
+<span class="nc" id="L58">        embeddedTemplateDir = templateDir = JAXRS_TEMPLATE_DIRECTORY_NAME;</span>
 
-<span class="fc" id="L60">        CliOption library = new CliOption(CodegenConstants.LIBRARY, CodegenConstants.LIBRARY_DESC).defaultValue(DEFAULT_JERSEY_LIBRARY);</span>
-<span class="fc" id="L61">        supportedLibraries.put(LIBRARY_JERSEY2, &quot;Jersey core 2.x&quot;);</span>
-<span class="fc" id="L62">        supportedLibraries.put(LIBRARY_JERSEY3, &quot;Jersey core 3.x&quot;);</span>
-<span class="fc" id="L63">        library.setEnum(supportedLibraries);</span>
-<span class="fc" id="L64">        cliOptions.add(library);</span>
-<span class="fc" id="L65">    }</span>
+<span class="nc" id="L60">        CliOption library = new CliOption(CodegenConstants.LIBRARY, CodegenConstants.LIBRARY_DESC).defaultValue(DEFAULT_JERSEY_LIBRARY);</span>
+<span class="nc" id="L61">        supportedLibraries.put(LIBRARY_JERSEY2, &quot;Jersey core 2.x&quot;);</span>
+<span class="nc" id="L62">        supportedLibraries.put(LIBRARY_JERSEY3, &quot;Jersey core 3.x&quot;);</span>
+<span class="nc" id="L63">        library.setEnum(supportedLibraries);</span>
+<span class="nc" id="L64">        cliOptions.add(library);</span>
+<span class="nc" id="L65">    }</span>
 
     @Override
     public String getName() {
-<span class="fc" id="L69">        return &quot;jaxrs-jersey&quot;;</span>
+<span class="nc" id="L69">        return &quot;jaxrs-jersey&quot;;</span>
     }
 
     @Override

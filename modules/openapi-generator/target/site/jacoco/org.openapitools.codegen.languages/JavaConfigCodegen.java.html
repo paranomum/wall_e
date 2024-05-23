@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JavaConfigCodegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-generator (core library)</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.codegen.languages</a> &gt; <span class="el_source">JavaConfigCodegen.java</span></div><h1>JavaConfigCodegen.java</h1><pre class="source lang-java linenums">package org.openapitools.codegen.languages;
+
+import org.openapitools.codegen.*;
+import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.MapProperty;
+import io.swagger.models.properties.Property;
+import io.swagger.models.parameters.Parameter;
+
+import java.io.File;
+import java.util.*;
+
+import org.apache.commons.lang3.StringUtils;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class JavaConfigCodegen extends DefaultCodegen implements CodegenConfig {
+    public static final String PROJECT_NAME = &quot;projectName&quot;;
+
+<span class="nc" id="L20">    private final Logger LOGGER = LoggerFactory.getLogger(JavaConfigCodegen.class);</span>
+
+    public CodegenType getTag() {
+<span class="nc" id="L23">        return CodegenType.CONFIG;</span>
+    }
+
+    public String getName() {
+<span class="nc" id="L27">        return &quot;java&quot;;</span>
+    }
+
+    public String getHelp() {
+<span class="nc" id="L31">        return &quot;Generates a java config.&quot;;</span>
+    }
+
+    public JavaConfigCodegen() {
+<span class="nc" id="L35">        super();</span>
+
+<span class="nc" id="L37">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;java&quot;;</span>
+<span class="nc" id="L38">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.zz&quot;);</span>
+<span class="nc" id="L39">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.zz&quot;);</span>
+<span class="nc" id="L40">        embeddedTemplateDir = templateDir = &quot;java&quot;;</span>
+<span class="nc" id="L41">        apiPackage = &quot;Apis&quot;;</span>
+<span class="nc" id="L42">        modelPackage = &quot;Models&quot;;</span>
+<span class="nc" id="L43">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;));</span>
+        // TODO: Fill this out.
+<span class="nc" id="L45">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -30,18 +30,18 @@ import java.util.*;
 
 public class Apache2ConfigCodegen extends DefaultCodegen implements CodegenConfig {
     public static final String USER_INFO_PATH = &quot;userInfoPath&quot;;
-<span class="fc" id="L33">    private final Logger LOGGER = LoggerFactory.getLogger(Apache2ConfigCodegen.class);</span>
+<span class="nc" id="L33">    private final Logger LOGGER = LoggerFactory.getLogger(Apache2ConfigCodegen.class);</span>
 
-<span class="fc" id="L35">    protected String userInfoPath = &quot;/var/www/html/&quot;;</span>
+<span class="nc" id="L35">    protected String userInfoPath = &quot;/var/www/html/&quot;;</span>
 
     @Override
     public CodegenType getTag() {
-<span class="fc" id="L39">        return CodegenType.CONFIG;</span>
+<span class="nc" id="L39">        return CodegenType.CONFIG;</span>
     }
 
     @Override
     public String getName() {
-<span class="fc" id="L44">        return &quot;apache2&quot;;</span>
+<span class="nc" id="L44">        return &quot;apache2&quot;;</span>
     }
 
     @Override
@@ -50,26 +50,26 @@ public class Apache2ConfigCodegen extends DefaultCodegen implements CodegenConfi
     }
 
     public Apache2ConfigCodegen() {
-<span class="fc" id="L53">        super();</span>
+<span class="nc" id="L53">        super();</span>
 
         // TODO: Apache2 maintainer review.
-<span class="fc" id="L56">        modifyFeatureSet(features -&gt; features</span>
-<span class="fc" id="L57">                .parameterFeatures(EnumSet.of(ParameterFeature.Path))</span>
-<span class="fc" id="L58">                .securityFeatures(EnumSet.of(SecurityFeature.BasicAuth))</span>
-<span class="fc" id="L59">                .dataTypeFeatures(EnumSet.noneOf(DataTypeFeature.class))</span>
-<span class="fc" id="L60">                .wireFormatFeatures(EnumSet.noneOf(WireFormatFeature.class))</span>
-<span class="fc" id="L61">                .documentationFeatures(EnumSet.noneOf(DocumentationFeature.class))</span>
-<span class="fc" id="L62">                .globalFeatures(EnumSet.noneOf(GlobalFeature.class))</span>
-<span class="fc" id="L63">                .schemaSupportFeatures(EnumSet.noneOf(SchemaSupportFeature.class))</span>
-<span class="fc" id="L64">                .clientModificationFeatures(EnumSet.noneOf(ClientModificationFeature.class))</span>
+<span class="nc" id="L56">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L57">                .parameterFeatures(EnumSet.of(ParameterFeature.Path))</span>
+<span class="nc" id="L58">                .securityFeatures(EnumSet.of(SecurityFeature.BasicAuth))</span>
+<span class="nc" id="L59">                .dataTypeFeatures(EnumSet.noneOf(DataTypeFeature.class))</span>
+<span class="nc" id="L60">                .wireFormatFeatures(EnumSet.noneOf(WireFormatFeature.class))</span>
+<span class="nc" id="L61">                .documentationFeatures(EnumSet.noneOf(DocumentationFeature.class))</span>
+<span class="nc" id="L62">                .globalFeatures(EnumSet.noneOf(GlobalFeature.class))</span>
+<span class="nc" id="L63">                .schemaSupportFeatures(EnumSet.noneOf(SchemaSupportFeature.class))</span>
+<span class="nc" id="L64">                .clientModificationFeatures(EnumSet.noneOf(ClientModificationFeature.class))</span>
         );
 
-<span class="fc" id="L67">        apiTemplateFiles.put(&quot;apache-config.mustache&quot;, &quot;.conf&quot;);</span>
+<span class="nc" id="L67">        apiTemplateFiles.put(&quot;apache-config.mustache&quot;, &quot;.conf&quot;);</span>
 
-<span class="fc" id="L69">        embeddedTemplateDir = templateDir = &quot;apache2&quot;;</span>
+<span class="nc" id="L69">        embeddedTemplateDir = templateDir = &quot;apache2&quot;;</span>
 
-<span class="fc" id="L71">        cliOptions.add(new CliOption(USER_INFO_PATH, &quot;Path to the user and group files&quot;));</span>
-<span class="fc" id="L72">    }</span>
+<span class="nc" id="L71">        cliOptions.add(new CliOption(USER_INFO_PATH, &quot;Path to the user and group files&quot;));</span>
+<span class="nc" id="L72">    }</span>
 
 
     @Override

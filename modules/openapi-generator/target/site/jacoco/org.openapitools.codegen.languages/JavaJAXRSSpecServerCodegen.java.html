@@ -48,82 +48,82 @@ public class JavaJAXRSSpecServerCodegen extends AbstractJavaJAXRSServerCodegen {
     public static final String HELIDON_LIBRARY = &quot;helidon&quot;;
     public static final String KUMULUZEE_LIBRARY = &quot;kumuluzee&quot;;
 
-<span class="fc" id="L51">    private boolean interfaceOnly = false;</span>
-<span class="fc" id="L52">    private boolean returnResponse = false;</span>
-<span class="fc" id="L53">    private boolean generatePom = true;</span>
-<span class="fc" id="L54">    private boolean generateBuilders = false;</span>
-<span class="fc" id="L55">    private boolean useSwaggerAnnotations = true;</span>
-<span class="fc" id="L56">    private boolean useMicroProfileOpenAPIAnnotations = false;</span>
-<span class="fc" id="L57">    private boolean useMutiny = false;</span>
+<span class="nc" id="L51">    private boolean interfaceOnly = false;</span>
+<span class="nc" id="L52">    private boolean returnResponse = false;</span>
+<span class="nc" id="L53">    private boolean generatePom = true;</span>
+<span class="nc" id="L54">    private boolean generateBuilders = false;</span>
+<span class="nc" id="L55">    private boolean useSwaggerAnnotations = true;</span>
+<span class="nc" id="L56">    private boolean useMicroProfileOpenAPIAnnotations = false;</span>
+<span class="nc" id="L57">    private boolean useMutiny = false;</span>
 
-<span class="fc" id="L59">    protected boolean useGzipFeature = false;</span>
-<span class="fc" id="L60">    private boolean useJackson = false;</span>
-<span class="fc" id="L61">    private String openApiSpecFileLocation = &quot;src/main/openapi/openapi.yaml&quot;;</span>
+<span class="nc" id="L59">    protected boolean useGzipFeature = false;</span>
+<span class="nc" id="L60">    private boolean useJackson = false;</span>
+<span class="nc" id="L61">    private String openApiSpecFileLocation = &quot;src/main/openapi/openapi.yaml&quot;;</span>
 
     public JavaJAXRSSpecServerCodegen() {
-<span class="fc" id="L64">        super();</span>
+<span class="nc" id="L64">        super();</span>
 
-<span class="fc" id="L66">        modifyFeatureSet(features -&gt; features</span>
-<span class="fc" id="L67">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
-<span class="fc" id="L68">                .includeSecurityFeatures(SecurityFeature.OpenIDConnect,//quarkus only</span>
+<span class="nc" id="L66">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L67">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="nc" id="L68">                .includeSecurityFeatures(SecurityFeature.OpenIDConnect,//quarkus only</span>
                         SecurityFeature.OAuth2_ClientCredentials,
                         SecurityFeature.OAuth2_AuthorizationCode,
                         SecurityFeature.OAuth2_Password)
         );
 
-<span class="fc" id="L74">        invokerPackage = &quot;org.openapitools.api&quot;;</span>
-<span class="fc" id="L75">        artifactId = &quot;openapi-jaxrs-server&quot;;</span>
-<span class="fc" id="L76">        outputFolder = &quot;generated-code/JavaJaxRS-Spec&quot;;</span>
-<span class="fc" id="L77">        apiPackage = &quot;org.openapitools.api&quot;;</span>
-<span class="fc" id="L78">        modelPackage = &quot;org.openapitools.model&quot;;</span>
+<span class="nc" id="L74">        invokerPackage = &quot;org.openapitools.api&quot;;</span>
+<span class="nc" id="L75">        artifactId = &quot;openapi-jaxrs-server&quot;;</span>
+<span class="nc" id="L76">        outputFolder = &quot;generated-code/JavaJaxRS-Spec&quot;;</span>
+<span class="nc" id="L77">        apiPackage = &quot;org.openapitools.api&quot;;</span>
+<span class="nc" id="L78">        modelPackage = &quot;org.openapitools.model&quot;;</span>
 
         // cliOptions default redefinition need to be updated
-<span class="fc" id="L81">        updateOption(CodegenConstants.INVOKER_PACKAGE, this.getInvokerPackage());</span>
-<span class="fc" id="L82">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
-<span class="fc" id="L83">        updateOption(CodegenConstants.API_PACKAGE, apiPackage);</span>
-<span class="fc" id="L84">        updateOption(CodegenConstants.MODEL_PACKAGE, modelPackage);</span>
+<span class="nc" id="L81">        updateOption(CodegenConstants.INVOKER_PACKAGE, this.getInvokerPackage());</span>
+<span class="nc" id="L82">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
+<span class="nc" id="L83">        updateOption(CodegenConstants.API_PACKAGE, apiPackage);</span>
+<span class="nc" id="L84">        updateOption(CodegenConstants.MODEL_PACKAGE, modelPackage);</span>
 
-<span class="fc" id="L86">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.java&quot;);</span>
-<span class="fc" id="L87">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.java&quot;);</span>
+<span class="nc" id="L86">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.java&quot;);</span>
+<span class="nc" id="L87">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.java&quot;);</span>
 
-<span class="fc" id="L89">        apiTestTemplateFiles.clear(); // TODO: add api test template</span>
-<span class="fc" id="L90">        modelTestTemplateFiles.clear(); // TODO: add model test template</span>
+<span class="nc" id="L89">        apiTestTemplateFiles.clear(); // TODO: add api test template</span>
+<span class="nc" id="L90">        modelTestTemplateFiles.clear(); // TODO: add model test template</span>
 
         // clear model and api doc template as this codegen
         // does not support auto-generated markdown doc at the moment
         //TODO: add doc templates
-<span class="fc" id="L95">        modelDocTemplateFiles.remove(&quot;model_doc.mustache&quot;);</span>
-<span class="fc" id="L96">        apiDocTemplateFiles.remove(&quot;api_doc.mustache&quot;);</span>
+<span class="nc" id="L95">        modelDocTemplateFiles.remove(&quot;model_doc.mustache&quot;);</span>
+<span class="nc" id="L96">        apiDocTemplateFiles.remove(&quot;api_doc.mustache&quot;);</span>
 
-<span class="fc" id="L98">        additionalProperties.put(&quot;title&quot;, title);</span>
+<span class="nc" id="L98">        additionalProperties.put(&quot;title&quot;, title);</span>
 
-<span class="fc" id="L100">        typeMapping.put(&quot;date&quot;, &quot;LocalDate&quot;);</span>
+<span class="nc" id="L100">        typeMapping.put(&quot;date&quot;, &quot;LocalDate&quot;);</span>
 
-<span class="fc" id="L102">        importMapping.put(&quot;LocalDate&quot;, &quot;org.joda.time.LocalDate&quot;);</span>
+<span class="nc" id="L102">        importMapping.put(&quot;LocalDate&quot;, &quot;org.joda.time.LocalDate&quot;);</span>
 
-<span class="fc" id="L104">        super.embeddedTemplateDir = templateDir = JAXRS_TEMPLATE_DIRECTORY_NAME + File.separator + &quot;spec&quot;;</span>
+<span class="nc" id="L104">        super.embeddedTemplateDir = templateDir = JAXRS_TEMPLATE_DIRECTORY_NAME + File.separator + &quot;spec&quot;;</span>
 
-<span class="fc" id="L106">        removeOption(CodegenConstants.LIBRARY);</span>
-<span class="fc" id="L107">        CliOption library = new CliOption(CodegenConstants.LIBRARY, CodegenConstants.LIBRARY_DESC).defaultValue(DEFAULT_LIBRARY);</span>
-<span class="fc" id="L108">        supportedLibraries.put(DEFAULT_LIBRARY, &quot;JAXRS spec only, to be deployed in an app server (TomEE, JBoss, WLS, ...)&quot;);</span>
-<span class="fc" id="L109">        supportedLibraries.put(QUARKUS_LIBRARY, &quot;Server using Quarkus&quot;);</span>
-<span class="fc" id="L110">        supportedLibraries.put(THORNTAIL_LIBRARY, &quot;Server using Thorntail&quot;);</span>
-<span class="fc" id="L111">        supportedLibraries.put(OPEN_LIBERTY_LIBRARY, &quot;Server using Open Liberty&quot;);</span>
-<span class="fc" id="L112">        supportedLibraries.put(HELIDON_LIBRARY, &quot;Server using Helidon&quot;);</span>
-<span class="fc" id="L113">        supportedLibraries.put(KUMULUZEE_LIBRARY, &quot;Server using KumuluzEE&quot;);</span>
-<span class="fc" id="L114">        library.setEnum(supportedLibraries);</span>
+<span class="nc" id="L106">        removeOption(CodegenConstants.LIBRARY);</span>
+<span class="nc" id="L107">        CliOption library = new CliOption(CodegenConstants.LIBRARY, CodegenConstants.LIBRARY_DESC).defaultValue(DEFAULT_LIBRARY);</span>
+<span class="nc" id="L108">        supportedLibraries.put(DEFAULT_LIBRARY, &quot;JAXRS spec only, to be deployed in an app server (TomEE, JBoss, WLS, ...)&quot;);</span>
+<span class="nc" id="L109">        supportedLibraries.put(QUARKUS_LIBRARY, &quot;Server using Quarkus&quot;);</span>
+<span class="nc" id="L110">        supportedLibraries.put(THORNTAIL_LIBRARY, &quot;Server using Thorntail&quot;);</span>
+<span class="nc" id="L111">        supportedLibraries.put(OPEN_LIBERTY_LIBRARY, &quot;Server using Open Liberty&quot;);</span>
+<span class="nc" id="L112">        supportedLibraries.put(HELIDON_LIBRARY, &quot;Server using Helidon&quot;);</span>
+<span class="nc" id="L113">        supportedLibraries.put(KUMULUZEE_LIBRARY, &quot;Server using KumuluzEE&quot;);</span>
+<span class="nc" id="L114">        library.setEnum(supportedLibraries);</span>
 
-<span class="fc" id="L116">        cliOptions.add(library);</span>
-<span class="fc" id="L117">        cliOptions.add(CliOption.newBoolean(GENERATE_POM, &quot;Whether to generate pom.xml if the file does not already exist.&quot;).defaultValue(String.valueOf(generatePom)));</span>
-<span class="fc" id="L118">        cliOptions.add(CliOption.newBoolean(GENERATE_BUILDERS, &quot;Whether to generate builders for models.&quot;).defaultValue(String.valueOf(generateBuilders)));</span>
-<span class="fc" id="L119">        cliOptions.add(CliOption.newBoolean(INTERFACE_ONLY, &quot;Whether to generate only API interface stubs without the server files.&quot;).defaultValue(String.valueOf(interfaceOnly)));</span>
-<span class="fc" id="L120">        cliOptions.add(CliOption.newBoolean(RETURN_RESPONSE, &quot;Whether generate API interface should return javax.ws.rs.core.Response instead of a deserialized entity. Only useful if interfaceOnly is true.&quot;).defaultValue(String.valueOf(returnResponse)));</span>
-<span class="fc" id="L121">        cliOptions.add(CliOption.newBoolean(USE_SWAGGER_ANNOTATIONS, &quot;Whether to generate Swagger annotations.&quot;, useSwaggerAnnotations));</span>
-<span class="fc" id="L122">        cliOptions.add(CliOption.newBoolean(USE_MICROPROFILE_OPENAPI_ANNOTATIONS, &quot;Whether to generate Microprofile OpenAPI annotations. Only valid when library is set to quarkus.&quot;, useMicroProfileOpenAPIAnnotations));</span>
-<span class="fc" id="L123">        cliOptions.add(CliOption.newString(OPEN_API_SPEC_FILE_LOCATION, &quot;Location where the file containing the spec will be generated in the output folder. No file generated when set to null or empty string.&quot;));</span>
-<span class="fc" id="L124">        cliOptions.add(CliOption.newBoolean(SUPPORT_ASYNC, &quot;Wrap responses in CompletionStage type, allowing asynchronous computation (requires JAX-RS 2.1).&quot;, supportAsync));</span>
-<span class="fc" id="L125">        cliOptions.add(CliOption.newBoolean(USE_MUTINY, &quot;Whether to use Smallrye Mutiny instead of CompletionStage for asynchronous computation. Only valid when library is set to quarkus.&quot;, useMutiny));</span>
-<span class="fc" id="L126">    }</span>
+<span class="nc" id="L116">        cliOptions.add(library);</span>
+<span class="nc" id="L117">        cliOptions.add(CliOption.newBoolean(GENERATE_POM, &quot;Whether to generate pom.xml if the file does not already exist.&quot;).defaultValue(String.valueOf(generatePom)));</span>
+<span class="nc" id="L118">        cliOptions.add(CliOption.newBoolean(GENERATE_BUILDERS, &quot;Whether to generate builders for models.&quot;).defaultValue(String.valueOf(generateBuilders)));</span>
+<span class="nc" id="L119">        cliOptions.add(CliOption.newBoolean(INTERFACE_ONLY, &quot;Whether to generate only API interface stubs without the server files.&quot;).defaultValue(String.valueOf(interfaceOnly)));</span>
+<span class="nc" id="L120">        cliOptions.add(CliOption.newBoolean(RETURN_RESPONSE, &quot;Whether generate API interface should return javax.ws.rs.core.Response instead of a deserialized entity. Only useful if interfaceOnly is true.&quot;).defaultValue(String.valueOf(returnResponse)));</span>
+<span class="nc" id="L121">        cliOptions.add(CliOption.newBoolean(USE_SWAGGER_ANNOTATIONS, &quot;Whether to generate Swagger annotations.&quot;, useSwaggerAnnotations));</span>
+<span class="nc" id="L122">        cliOptions.add(CliOption.newBoolean(USE_MICROPROFILE_OPENAPI_ANNOTATIONS, &quot;Whether to generate Microprofile OpenAPI annotations. Only valid when library is set to quarkus.&quot;, useMicroProfileOpenAPIAnnotations));</span>
+<span class="nc" id="L123">        cliOptions.add(CliOption.newString(OPEN_API_SPEC_FILE_LOCATION, &quot;Location where the file containing the spec will be generated in the output folder. No file generated when set to null or empty string.&quot;));</span>
+<span class="nc" id="L124">        cliOptions.add(CliOption.newBoolean(SUPPORT_ASYNC, &quot;Wrap responses in CompletionStage type, allowing asynchronous computation (requires JAX-RS 2.1).&quot;, supportAsync));</span>
+<span class="nc" id="L125">        cliOptions.add(CliOption.newBoolean(USE_MUTINY, &quot;Whether to use Smallrye Mutiny instead of CompletionStage for asynchronous computation. Only valid when library is set to quarkus.&quot;, useMutiny));</span>
+<span class="nc" id="L126">    }</span>
 
     @Override
     public void processOpts() {
@@ -273,7 +273,7 @@ public class JavaJAXRSSpecServerCodegen extends AbstractJavaJAXRSServerCodegen {
 
     @Override
     public String getName() {
-<span class="fc" id="L276">        return &quot;jaxrs-spec&quot;;</span>
+<span class="nc" id="L276">        return &quot;jaxrs-spec&quot;;</span>
     }
 
     public String getOpenApiSpecFileLocation() {

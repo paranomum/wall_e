@@ -31,7 +31,7 @@ import io.swagger.v3.oas.models.examples.Example;
  * A unique parameter is defined by a combination of a name and location.
  * Parameters may be located in a path, query, header or cookie.
  */
-<span class="fc" id="L34">public class CodegenParameter implements IJsonSchemaValidationProperties {</span>
+<span class="nc" id="L34">public class CodegenParameter implements IJsonSchemaValidationProperties {</span>
     public boolean isFormParam, isQueryParam, isPathParam, isHeaderParam,
             isCookieParam, isBodyParam, isContainer,
             isCollectionFormatMulti, isPrimitiveType, isModel, isExplode, isDeepObject, isMatrix, isAllowEmptyValue;
@@ -55,10 +55,10 @@ import io.swagger.v3.oas.models.examples.Example;
     public Map&lt;String, Object&gt; allowableValues;
     public CodegenProperty items;
     public CodegenProperty additionalProperties;
-<span class="fc" id="L58">    public List&lt;CodegenProperty&gt; vars = new ArrayList&lt;CodegenProperty&gt;(); // all properties (without parent's properties)</span>
-<span class="fc" id="L59">    public List&lt;CodegenProperty&gt; requiredVars = new ArrayList&lt;CodegenProperty&gt;();</span>
+<span class="nc" id="L58">    public List&lt;CodegenProperty&gt; vars = new ArrayList&lt;CodegenProperty&gt;(); // all properties (without parent's properties)</span>
+<span class="nc" id="L59">    public List&lt;CodegenProperty&gt; requiredVars = new ArrayList&lt;CodegenProperty&gt;();</span>
     public CodegenProperty mostInnerItems;
-<span class="fc" id="L61">    public Map&lt;String, Object&gt; vendorExtensions = new HashMap&lt;String, Object&gt;();</span>
+<span class="nc" id="L61">    public Map&lt;String, Object&gt; vendorExtensions = new HashMap&lt;String, Object&gt;();</span>
     public boolean hasValidation;
     public boolean isNullable;
     public boolean isDeprecated;
@@ -123,11 +123,11 @@ import io.swagger.v3.oas.models.examples.Example;
     private Integer maxProperties;
     private Integer minProperties;
     public boolean isNull;
-<span class="fc" id="L126">    public boolean isVoid = false;</span>
+<span class="nc" id="L126">    public boolean isVoid = false;</span>
     private boolean hasRequired;
     private boolean hasDiscriminatorWithNonEmptyMapping;
     private CodegenComposedSchemas composedSchemas;
-<span class="fc" id="L130">    private boolean hasMultipleTypes = false;</span>
+<span class="nc" id="L130">    private boolean hasMultipleTypes = false;</span>
     private LinkedHashMap&lt;String, CodegenMediaType&gt; content;
     private Map&lt;String, CodegenProperty&gt; requiredVarsMap;
     private String ref;
@@ -135,140 +135,140 @@ import io.swagger.v3.oas.models.examples.Example;
     private boolean schemaIsFromAdditionalProperties;
 
     public CodegenParameter copy() {
-<span class="fc" id="L138">        CodegenParameter output = new CodegenParameter();</span>
-<span class="fc" id="L139">        output.isFile = this.isFile;</span>
-<span class="fc" id="L140">        output.isContainer = this.isContainer;</span>
-<span class="fc" id="L141">        output.baseName = this.baseName;</span>
-<span class="fc" id="L142">        output.paramName = this.paramName;</span>
-<span class="fc" id="L143">        output.dataType = this.dataType;</span>
-<span class="fc" id="L144">        output.datatypeWithEnum = this.datatypeWithEnum;</span>
-<span class="fc" id="L145">        output.enumName = this.enumName;</span>
-<span class="fc" id="L146">        output.dataFormat = this.dataFormat;</span>
-<span class="fc" id="L147">        output.collectionFormat = this.collectionFormat;</span>
-<span class="fc" id="L148">        output.isCollectionFormatMulti = this.isCollectionFormatMulti;</span>
-<span class="fc" id="L149">        output.isPrimitiveType = this.isPrimitiveType;</span>
-<span class="fc" id="L150">        output.isModel = this.isModel;</span>
-<span class="fc" id="L151">        output.description = this.description;</span>
-<span class="fc" id="L152">        output.unescapedDescription = this.unescapedDescription;</span>
-<span class="fc" id="L153">        output.baseType = this.baseType;</span>
-<span class="fc" id="L154">        output.containerType = this.containerType;</span>
-<span class="fc" id="L155">        output.containerTypeMapped = this.containerTypeMapped;</span>
-<span class="fc" id="L156">        output.isFormParam = this.isFormParam;</span>
-<span class="fc" id="L157">        output.isQueryParam = this.isQueryParam;</span>
-<span class="fc" id="L158">        output.isPathParam = this.isPathParam;</span>
-<span class="fc" id="L159">        output.isHeaderParam = this.isHeaderParam;</span>
-<span class="fc" id="L160">        output.isCookieParam = this.isCookieParam;</span>
-<span class="fc" id="L161">        output.isBodyParam = this.isBodyParam;</span>
-<span class="fc" id="L162">        output.required = this.required;</span>
-<span class="fc" id="L163">        output.maximum = this.maximum;</span>
-<span class="fc" id="L164">        output.exclusiveMaximum = this.exclusiveMaximum;</span>
-<span class="fc" id="L165">        output.minimum = this.minimum;</span>
-<span class="fc" id="L166">        output.exclusiveMinimum = this.exclusiveMinimum;</span>
-<span class="fc" id="L167">        output.maxLength = this.maxLength;</span>
-<span class="fc" id="L168">        output.minLength = this.minLength;</span>
-<span class="fc" id="L169">        output.pattern = this.pattern;</span>
-<span class="fc" id="L170">        output.maxItems = this.maxItems;</span>
-<span class="fc" id="L171">        output.minItems = this.minItems;</span>
-<span class="fc" id="L172">        output.uniqueItems = this.uniqueItems;</span>
-<span class="fc" id="L173">        output.setUniqueItemsBoolean(this.uniqueItemsBoolean);</span>
-<span class="fc" id="L174">        output.multipleOf = this.multipleOf;</span>
-<span class="fc" id="L175">        output.jsonSchema = this.jsonSchema;</span>
-<span class="fc" id="L176">        output.defaultValue = this.defaultValue;</span>
-<span class="fc" id="L177">        output.enumDefaultValue = this.enumDefaultValue;</span>
-<span class="fc" id="L178">        output.example = this.example;</span>
-<span class="fc" id="L179">        output.examples = this.examples;</span>
-<span class="fc" id="L180">        output.isEnum = this.isEnum;</span>
-<span class="fc" id="L181">        output.isEnumRef = this.isEnumRef;</span>
-<span class="fc" id="L182">        output.maxProperties = this.maxProperties;</span>
-<span class="fc" id="L183">        output.minProperties = this.minProperties;</span>
-<span class="fc" id="L184">        output.maximum = this.maximum;</span>
-<span class="fc" id="L185">        output.minimum = this.minimum;</span>
-<span class="fc" id="L186">        output.pattern = this.pattern;</span>
-<span class="fc" id="L187">        output.additionalProperties = this.additionalProperties;</span>
-<span class="fc" id="L188">        output.isNull = this.isNull;</span>
-<span class="fc" id="L189">        output.isVoid = this.isVoid;</span>
-<span class="fc" id="L190">        output.nameInPascalCase = this.nameInPascalCase;</span>
-<span class="fc" id="L191">        output.nameInCamelCase = this.nameInCamelCase;</span>
-<span class="fc" id="L192">        output.nameInLowerCase = this.nameInLowerCase;</span>
-<span class="fc" id="L193">        output.nameInSnakeCase = this.nameInSnakeCase;</span>
+<span class="nc" id="L138">        CodegenParameter output = new CodegenParameter();</span>
+<span class="nc" id="L139">        output.isFile = this.isFile;</span>
+<span class="nc" id="L140">        output.isContainer = this.isContainer;</span>
+<span class="nc" id="L141">        output.baseName = this.baseName;</span>
+<span class="nc" id="L142">        output.paramName = this.paramName;</span>
+<span class="nc" id="L143">        output.dataType = this.dataType;</span>
+<span class="nc" id="L144">        output.datatypeWithEnum = this.datatypeWithEnum;</span>
+<span class="nc" id="L145">        output.enumName = this.enumName;</span>
+<span class="nc" id="L146">        output.dataFormat = this.dataFormat;</span>
+<span class="nc" id="L147">        output.collectionFormat = this.collectionFormat;</span>
+<span class="nc" id="L148">        output.isCollectionFormatMulti = this.isCollectionFormatMulti;</span>
+<span class="nc" id="L149">        output.isPrimitiveType = this.isPrimitiveType;</span>
+<span class="nc" id="L150">        output.isModel = this.isModel;</span>
+<span class="nc" id="L151">        output.description = this.description;</span>
+<span class="nc" id="L152">        output.unescapedDescription = this.unescapedDescription;</span>
+<span class="nc" id="L153">        output.baseType = this.baseType;</span>
+<span class="nc" id="L154">        output.containerType = this.containerType;</span>
+<span class="nc" id="L155">        output.containerTypeMapped = this.containerTypeMapped;</span>
+<span class="nc" id="L156">        output.isFormParam = this.isFormParam;</span>
+<span class="nc" id="L157">        output.isQueryParam = this.isQueryParam;</span>
+<span class="nc" id="L158">        output.isPathParam = this.isPathParam;</span>
+<span class="nc" id="L159">        output.isHeaderParam = this.isHeaderParam;</span>
+<span class="nc" id="L160">        output.isCookieParam = this.isCookieParam;</span>
+<span class="nc" id="L161">        output.isBodyParam = this.isBodyParam;</span>
+<span class="nc" id="L162">        output.required = this.required;</span>
+<span class="nc" id="L163">        output.maximum = this.maximum;</span>
+<span class="nc" id="L164">        output.exclusiveMaximum = this.exclusiveMaximum;</span>
+<span class="nc" id="L165">        output.minimum = this.minimum;</span>
+<span class="nc" id="L166">        output.exclusiveMinimum = this.exclusiveMinimum;</span>
+<span class="nc" id="L167">        output.maxLength = this.maxLength;</span>
+<span class="nc" id="L168">        output.minLength = this.minLength;</span>
+<span class="nc" id="L169">        output.pattern = this.pattern;</span>
+<span class="nc" id="L170">        output.maxItems = this.maxItems;</span>
+<span class="nc" id="L171">        output.minItems = this.minItems;</span>
+<span class="nc" id="L172">        output.uniqueItems = this.uniqueItems;</span>
+<span class="nc" id="L173">        output.setUniqueItemsBoolean(this.uniqueItemsBoolean);</span>
+<span class="nc" id="L174">        output.multipleOf = this.multipleOf;</span>
+<span class="nc" id="L175">        output.jsonSchema = this.jsonSchema;</span>
+<span class="nc" id="L176">        output.defaultValue = this.defaultValue;</span>
+<span class="nc" id="L177">        output.enumDefaultValue = this.enumDefaultValue;</span>
+<span class="nc" id="L178">        output.example = this.example;</span>
+<span class="nc" id="L179">        output.examples = this.examples;</span>
+<span class="nc" id="L180">        output.isEnum = this.isEnum;</span>
+<span class="nc" id="L181">        output.isEnumRef = this.isEnumRef;</span>
+<span class="nc" id="L182">        output.maxProperties = this.maxProperties;</span>
+<span class="nc" id="L183">        output.minProperties = this.minProperties;</span>
+<span class="nc" id="L184">        output.maximum = this.maximum;</span>
+<span class="nc" id="L185">        output.minimum = this.minimum;</span>
+<span class="nc" id="L186">        output.pattern = this.pattern;</span>
+<span class="nc" id="L187">        output.additionalProperties = this.additionalProperties;</span>
+<span class="nc" id="L188">        output.isNull = this.isNull;</span>
+<span class="nc" id="L189">        output.isVoid = this.isVoid;</span>
+<span class="nc" id="L190">        output.nameInPascalCase = this.nameInPascalCase;</span>
+<span class="nc" id="L191">        output.nameInCamelCase = this.nameInCamelCase;</span>
+<span class="nc" id="L192">        output.nameInLowerCase = this.nameInLowerCase;</span>
+<span class="nc" id="L193">        output.nameInSnakeCase = this.nameInSnakeCase;</span>
 
-<span class="fc" id="L195">        output.setAdditionalPropertiesIsAnyType(this.getAdditionalPropertiesIsAnyType());</span>
-<span class="fc" id="L196">        output.setHasVars(this.hasVars);</span>
-<span class="fc" id="L197">        output.setHasRequired(this.hasRequired);</span>
-<span class="fc" id="L198">        output.setHasDiscriminatorWithNonEmptyMapping(this.hasDiscriminatorWithNonEmptyMapping);</span>
-<span class="fc" id="L199">        output.setHasMultipleTypes(this.hasMultipleTypes);</span>
-<span class="fc" id="L200">        output.setSchemaIsFromAdditionalProperties(this.schemaIsFromAdditionalProperties);</span>
+<span class="nc" id="L195">        output.setAdditionalPropertiesIsAnyType(this.getAdditionalPropertiesIsAnyType());</span>
+<span class="nc" id="L196">        output.setHasVars(this.hasVars);</span>
+<span class="nc" id="L197">        output.setHasRequired(this.hasRequired);</span>
+<span class="nc" id="L198">        output.setHasDiscriminatorWithNonEmptyMapping(this.hasDiscriminatorWithNonEmptyMapping);</span>
+<span class="nc" id="L199">        output.setHasMultipleTypes(this.hasMultipleTypes);</span>
+<span class="nc" id="L200">        output.setSchemaIsFromAdditionalProperties(this.schemaIsFromAdditionalProperties);</span>
 
-<span class="fc bfc" id="L202" title="All 2 branches covered.">        if (this.content != null) {</span>
-<span class="fc" id="L203">            output.setContent(this.content);</span>
+<span class="nc bnc" id="L202" title="All 2 branches missed.">        if (this.content != null) {</span>
+<span class="nc" id="L203">            output.setContent(this.content);</span>
         }
-<span class="fc bfc" id="L205" title="All 2 branches covered.">        if (this.schema != null) {</span>
-<span class="fc" id="L206">            output.setSchema(this.schema);</span>
+<span class="nc bnc" id="L205" title="All 2 branches missed.">        if (this.schema != null) {</span>
+<span class="nc" id="L206">            output.setSchema(this.schema);</span>
         }
-<span class="pc bpc" id="L208" title="1 of 2 branches missed.">        if (this.composedSchemas != null) {</span>
+<span class="nc bnc" id="L208" title="All 2 branches missed.">        if (this.composedSchemas != null) {</span>
 <span class="nc" id="L209">            output.setComposedSchemas(this.getComposedSchemas());</span>
         }
-<span class="pc bpc" id="L211" title="1 of 2 branches missed.">        if (this._enum != null) {</span>
+<span class="nc bnc" id="L211" title="All 2 branches missed.">        if (this._enum != null) {</span>
 <span class="nc" id="L212">            output._enum = new ArrayList&lt;String&gt;(this._enum);</span>
         }
-<span class="pc bpc" id="L214" title="1 of 2 branches missed.">        if (this.allowableValues != null) {</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">        if (this.allowableValues != null) {</span>
 <span class="nc" id="L215">            output.allowableValues = new HashMap&lt;String, Object&gt;(this.allowableValues);</span>
         }
-<span class="pc bpc" id="L217" title="1 of 2 branches missed.">        if (this.items != null) {</span>
+<span class="nc bnc" id="L217" title="All 2 branches missed.">        if (this.items != null) {</span>
 <span class="nc" id="L218">            output.items = this.items;</span>
         }
-<span class="pc bpc" id="L220" title="1 of 2 branches missed.">        if (this.vars != null) {</span>
-<span class="fc" id="L221">            output.vars = this.vars;</span>
+<span class="nc bnc" id="L220" title="All 2 branches missed.">        if (this.vars != null) {</span>
+<span class="nc" id="L221">            output.vars = this.vars;</span>
         }
-<span class="pc bpc" id="L223" title="1 of 2 branches missed.">        if (this.requiredVars != null) {</span>
-<span class="fc" id="L224">            output.requiredVars = this.requiredVars;</span>
+<span class="nc bnc" id="L223" title="All 2 branches missed.">        if (this.requiredVars != null) {</span>
+<span class="nc" id="L224">            output.requiredVars = this.requiredVars;</span>
         }
-<span class="pc bpc" id="L226" title="1 of 2 branches missed.">        if (this.mostInnerItems != null) {</span>
+<span class="nc bnc" id="L226" title="All 2 branches missed.">        if (this.mostInnerItems != null) {</span>
 <span class="nc" id="L227">            output.mostInnerItems = this.mostInnerItems;</span>
         }
-<span class="pc bpc" id="L229" title="1 of 2 branches missed.">        if (this.vendorExtensions != null) {</span>
-<span class="fc" id="L230">            output.vendorExtensions = new HashMap&lt;String, Object&gt;(this.vendorExtensions);</span>
+<span class="nc bnc" id="L229" title="All 2 branches missed.">        if (this.vendorExtensions != null) {</span>
+<span class="nc" id="L230">            output.vendorExtensions = new HashMap&lt;String, Object&gt;(this.vendorExtensions);</span>
         }
-<span class="fc bfc" id="L232" title="All 2 branches covered.">        if (this.requiredVarsMap != null) {</span>
-<span class="fc" id="L233">            output.setRequiredVarsMap(this.requiredVarsMap);</span>
+<span class="nc bnc" id="L232" title="All 2 branches missed.">        if (this.requiredVarsMap != null) {</span>
+<span class="nc" id="L233">            output.setRequiredVarsMap(this.requiredVarsMap);</span>
         }
-<span class="pc bpc" id="L235" title="1 of 2 branches missed.">        if (this.ref != null) {</span>
+<span class="nc bnc" id="L235" title="All 2 branches missed.">        if (this.ref != null) {</span>
 <span class="nc" id="L236">            output.setRef(this.ref);</span>
         }
-<span class="fc" id="L238">        output.hasValidation = this.hasValidation;</span>
-<span class="fc" id="L239">        output.isNullable = this.isNullable;</span>
-<span class="fc" id="L240">        output.isDeprecated = this.isDeprecated;</span>
-<span class="fc" id="L241">        output.isBinary = this.isBinary;</span>
-<span class="fc" id="L242">        output.isByteArray = this.isByteArray;</span>
-<span class="fc" id="L243">        output.isString = this.isString;</span>
-<span class="fc" id="L244">        output.isNumeric = this.isNumeric;</span>
-<span class="fc" id="L245">        output.isInteger = this.isInteger;</span>
-<span class="fc" id="L246">        output.isShort = this.isShort;</span>
-<span class="fc" id="L247">        output.isLong = this.isLong;</span>
-<span class="fc" id="L248">        output.isUnboundedInteger = this.isUnboundedInteger;</span>
-<span class="fc" id="L249">        output.isDouble = this.isDouble;</span>
-<span class="fc" id="L250">        output.isDecimal = this.isDecimal;</span>
-<span class="fc" id="L251">        output.isFloat = this.isFloat;</span>
-<span class="fc" id="L252">        output.isNumber = this.isNumber;</span>
-<span class="fc" id="L253">        output.isBoolean = this.isBoolean;</span>
-<span class="fc" id="L254">        output.isDate = this.isDate;</span>
-<span class="fc" id="L255">        output.isDateTime = this.isDateTime;</span>
-<span class="fc" id="L256">        output.isUuid = this.isUuid;</span>
-<span class="fc" id="L257">        output.isUri = this.isUri;</span>
-<span class="fc" id="L258">        output.isEmail = this.isEmail;</span>
-<span class="fc" id="L259">        output.isPassword = this.isPassword;</span>
-<span class="fc" id="L260">        output.isFreeFormObject = this.isFreeFormObject;</span>
-<span class="fc" id="L261">        output.isAnyType = this.isAnyType;</span>
-<span class="fc" id="L262">        output.isArray = this.isArray;</span>
-<span class="fc" id="L263">        output.isMap = this.isMap;</span>
-<span class="fc" id="L264">        output.isExplode = this.isExplode;</span>
-<span class="fc" id="L265">        output.style = this.style;</span>
-<span class="fc" id="L266">        output.isDeepObject = this.isDeepObject;</span>
-<span class="fc" id="L267">        output.isMatrix = this.isMatrix;</span>
-<span class="fc" id="L268">        output.isAllowEmptyValue = this.isAllowEmptyValue;</span>
-<span class="fc" id="L269">        output.contentType = this.contentType;</span>
+<span class="nc" id="L238">        output.hasValidation = this.hasValidation;</span>
+<span class="nc" id="L239">        output.isNullable = this.isNullable;</span>
+<span class="nc" id="L240">        output.isDeprecated = this.isDeprecated;</span>
+<span class="nc" id="L241">        output.isBinary = this.isBinary;</span>
+<span class="nc" id="L242">        output.isByteArray = this.isByteArray;</span>
+<span class="nc" id="L243">        output.isString = this.isString;</span>
+<span class="nc" id="L244">        output.isNumeric = this.isNumeric;</span>
+<span class="nc" id="L245">        output.isInteger = this.isInteger;</span>
+<span class="nc" id="L246">        output.isShort = this.isShort;</span>
+<span class="nc" id="L247">        output.isLong = this.isLong;</span>
+<span class="nc" id="L248">        output.isUnboundedInteger = this.isUnboundedInteger;</span>
+<span class="nc" id="L249">        output.isDouble = this.isDouble;</span>
+<span class="nc" id="L250">        output.isDecimal = this.isDecimal;</span>
+<span class="nc" id="L251">        output.isFloat = this.isFloat;</span>
+<span class="nc" id="L252">        output.isNumber = this.isNumber;</span>
+<span class="nc" id="L253">        output.isBoolean = this.isBoolean;</span>
+<span class="nc" id="L254">        output.isDate = this.isDate;</span>
+<span class="nc" id="L255">        output.isDateTime = this.isDateTime;</span>
+<span class="nc" id="L256">        output.isUuid = this.isUuid;</span>
+<span class="nc" id="L257">        output.isUri = this.isUri;</span>
+<span class="nc" id="L258">        output.isEmail = this.isEmail;</span>
+<span class="nc" id="L259">        output.isPassword = this.isPassword;</span>
+<span class="nc" id="L260">        output.isFreeFormObject = this.isFreeFormObject;</span>
+<span class="nc" id="L261">        output.isAnyType = this.isAnyType;</span>
+<span class="nc" id="L262">        output.isArray = this.isArray;</span>
+<span class="nc" id="L263">        output.isMap = this.isMap;</span>
+<span class="nc" id="L264">        output.isExplode = this.isExplode;</span>
+<span class="nc" id="L265">        output.style = this.style;</span>
+<span class="nc" id="L266">        output.isDeepObject = this.isDeepObject;</span>
+<span class="nc" id="L267">        output.isMatrix = this.isMatrix;</span>
+<span class="nc" id="L268">        output.isAllowEmptyValue = this.isAllowEmptyValue;</span>
+<span class="nc" id="L269">        output.contentType = this.contentType;</span>
 
-<span class="fc" id="L271">        return output;</span>
+<span class="nc" id="L271">        return output;</span>
     }
 
     @Override
@@ -672,8 +672,8 @@ import io.swagger.v3.oas.models.examples.Example;
 
     @Override
     public void setUniqueItemsBoolean(Boolean uniqueItemsBoolean) {
-<span class="fc" id="L675">        this.uniqueItemsBoolean = uniqueItemsBoolean;</span>
-<span class="fc" id="L676">    }</span>
+<span class="nc" id="L675">        this.uniqueItemsBoolean = uniqueItemsBoolean;</span>
+<span class="nc" id="L676">    }</span>
 
     @Override
     public Integer getMinProperties() {
@@ -817,7 +817,7 @@ import io.swagger.v3.oas.models.examples.Example;
 
     @Override
     public List&lt;CodegenProperty&gt; getVars() {
-<span class="fc" id="L820">        return vars;</span>
+<span class="nc" id="L820">        return vars;</span>
     }
 
     @Override
@@ -827,7 +827,7 @@ import io.swagger.v3.oas.models.examples.Example;
 
     @Override
     public List&lt;CodegenProperty&gt; getRequiredVars() {
-<span class="fc" id="L830">        return requiredVars;</span>
+<span class="nc" id="L830">        return requiredVars;</span>
     }
 
     @Override
@@ -836,7 +836,7 @@ import io.swagger.v3.oas.models.examples.Example;
 <span class="nc" id="L836">    }</span>
 
     public boolean requiredAndNotNullable() {
-<span class="pc bpc" id="L839" title="1 of 4 branches missed.">        return required &amp;&amp; !isNullable;</span>
+<span class="nc bnc" id="L839" title="All 4 branches missed.">        return required &amp;&amp; !isNullable;</span>
     }
 
     public boolean notRequiredOrIsNullable() {
@@ -875,13 +875,13 @@ import io.swagger.v3.oas.models.examples.Example;
 
     @Override
     public boolean getAdditionalPropertiesIsAnyType() {
-<span class="fc" id="L878">        return additionalPropertiesIsAnyType;</span>
+<span class="nc" id="L878">        return additionalPropertiesIsAnyType;</span>
     }
 
     @Override
     public void setAdditionalPropertiesIsAnyType(boolean additionalPropertiesIsAnyType) {
-<span class="fc" id="L883">        this.additionalPropertiesIsAnyType = additionalPropertiesIsAnyType;</span>
-<span class="fc" id="L884">    }</span>
+<span class="nc" id="L883">        this.additionalPropertiesIsAnyType = additionalPropertiesIsAnyType;</span>
+<span class="nc" id="L884">    }</span>
 
     @Override
     public boolean getHasVars() {
@@ -890,8 +890,8 @@ import io.swagger.v3.oas.models.examples.Example;
 
     @Override
     public void setHasVars(boolean hasVars) {
-<span class="fc" id="L893">        this.hasVars = hasVars;</span>
-<span class="fc" id="L894">    }</span>
+<span class="nc" id="L893">        this.hasVars = hasVars;</span>
+<span class="nc" id="L894">    }</span>
 
     @Override
     public boolean getHasRequired() {
@@ -900,8 +900,8 @@ import io.swagger.v3.oas.models.examples.Example;
 
     @Override
     public void setHasRequired(boolean hasRequired) {
-<span class="fc" id="L903">        this.hasRequired = hasRequired;</span>
-<span class="fc" id="L904">    }</span>
+<span class="nc" id="L903">        this.hasRequired = hasRequired;</span>
+<span class="nc" id="L904">    }</span>
 
     @Override
     public boolean getHasDiscriminatorWithNonEmptyMapping() {
@@ -912,8 +912,8 @@ import io.swagger.v3.oas.models.examples.Example;
 
     @Override
     public void setHasDiscriminatorWithNonEmptyMapping(boolean hasDiscriminatorWithNonEmptyMapping) {
-<span class="fc" id="L915">        this.hasDiscriminatorWithNonEmptyMapping = hasDiscriminatorWithNonEmptyMapping;</span>
-<span class="fc" id="L916">    }</span>
+<span class="nc" id="L915">        this.hasDiscriminatorWithNonEmptyMapping = hasDiscriminatorWithNonEmptyMapping;</span>
+<span class="nc" id="L916">    }</span>
 
     @Override
     public boolean getIsString() {
@@ -922,8 +922,8 @@ import io.swagger.v3.oas.models.examples.Example;
 
     @Override
     public void setIsString(boolean isString) {
-<span class="fc" id="L925">        this.isString = isString;</span>
-<span class="fc" id="L926">    }</span>
+<span class="nc" id="L925">        this.isString = isString;</span>
+<span class="nc" id="L926">    }</span>
 
     @Override
     public boolean getIsNumber() {
@@ -957,8 +957,8 @@ import io.swagger.v3.oas.models.examples.Example;
 
     @Override
     public void setComposedSchemas(CodegenComposedSchemas composedSchemas) {
-<span class="fc" id="L960">        this.composedSchemas = composedSchemas;</span>
-<span class="fc" id="L961">    }</span>
+<span class="nc" id="L960">        this.composedSchemas = composedSchemas;</span>
+<span class="nc" id="L961">    }</span>
 
     @Override
     public CodegenComposedSchemas getComposedSchemas() {
@@ -972,24 +972,24 @@ import io.swagger.v3.oas.models.examples.Example;
 
     @Override
     public void setHasMultipleTypes(boolean hasMultipleTypes) {
-<span class="fc" id="L975">        this.hasMultipleTypes = hasMultipleTypes;</span>
-<span class="fc" id="L976">    }</span>
+<span class="nc" id="L975">        this.hasMultipleTypes = hasMultipleTypes;</span>
+<span class="nc" id="L976">    }</span>
 
     public CodegenProperty getSchema() {
 <span class="nc" id="L979">        return schema;</span>
     }
 
     public void setSchema(CodegenProperty schema) {
-<span class="fc" id="L983">        this.schema = schema;</span>
-<span class="fc" id="L984">    }</span>
+<span class="nc" id="L983">        this.schema = schema;</span>
+<span class="nc" id="L984">    }</span>
 
     public LinkedHashMap&lt;String, CodegenMediaType&gt; getContent() {
-<span class="fc" id="L987">        return content;</span>
+<span class="nc" id="L987">        return content;</span>
     }
 
     public void setContent(LinkedHashMap&lt;String, CodegenMediaType&gt; content) {
-<span class="fc" id="L991">        this.content = content;</span>
-<span class="fc" id="L992">    }</span>
+<span class="nc" id="L991">        this.content = content;</span>
+<span class="nc" id="L992">    }</span>
 
     @Override
     public String getBaseType() {
@@ -1003,8 +1003,8 @@ import io.swagger.v3.oas.models.examples.Example;
 
     @Override
     public void setRequiredVarsMap(Map&lt;String, CodegenProperty&gt; requiredVarsMap) {
-<span class="fc" id="L1006">        this.requiredVarsMap = requiredVarsMap;</span>
-<span class="fc" id="L1007">    }</span>
+<span class="nc" id="L1006">        this.requiredVarsMap = requiredVarsMap;</span>
+<span class="nc" id="L1007">    }</span>
 
     @Override
     public String getRef() {
@@ -1023,8 +1023,8 @@ import io.swagger.v3.oas.models.examples.Example;
 
     @Override
     public void setSchemaIsFromAdditionalProperties(boolean schemaIsFromAdditionalProperties) {
-<span class="fc" id="L1026">        this.schemaIsFromAdditionalProperties = schemaIsFromAdditionalProperties;</span>
-<span class="fc" id="L1027">    }</span>
+<span class="nc" id="L1026">        this.schemaIsFromAdditionalProperties = schemaIsFromAdditionalProperties;</span>
+<span class="nc" id="L1027">    }</span>
 
     @Override
     public String getDataType() {

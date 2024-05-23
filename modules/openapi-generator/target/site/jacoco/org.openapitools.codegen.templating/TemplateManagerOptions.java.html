@@ -13,10 +13,10 @@ public class TemplateManagerOptions {
      * @param minimalUpdate See {@link #isMinimalUpdate()}
      * @param skipOverwrite See {@link #isSkipOverwrite()}
      */
-<span class="fc" id="L16">    public TemplateManagerOptions(boolean minimalUpdate, boolean skipOverwrite) {</span>
-<span class="fc" id="L17">        this.minimalUpdate = minimalUpdate;</span>
-<span class="fc" id="L18">        this.skipOverwrite = skipOverwrite;</span>
-<span class="fc" id="L19">    }</span>
+<span class="nc" id="L16">    public TemplateManagerOptions(boolean minimalUpdate, boolean skipOverwrite) {</span>
+<span class="nc" id="L17">        this.minimalUpdate = minimalUpdate;</span>
+<span class="nc" id="L18">        this.skipOverwrite = skipOverwrite;</span>
+<span class="nc" id="L19">    }</span>
 
     /**
      * Determines whether the template should minimally update a target file.
@@ -28,7 +28,7 @@ public class TemplateManagerOptions {
      * @return true to prefer updating only changed files, false to disable that suggestion
      */
     public boolean isMinimalUpdate() {
-<span class="fc" id="L31">        return minimalUpdate;</span>
+<span class="nc" id="L31">        return minimalUpdate;</span>
     }
 
     /**
@@ -40,7 +40,7 @@ public class TemplateManagerOptions {
      * @return true to avoid overwriting existing files (where supported), false to disable that suggestion.
      */
     public boolean isSkipOverwrite() {
-<span class="fc" id="L43">        return skipOverwrite;</span>
+<span class="nc" id="L43">        return skipOverwrite;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -28,12 +28,12 @@ public class TemplatingEngineLoader {
 
     @SuppressWarnings(&quot;java:S112&quot;) // ignore java:S112 as generic RuntimeException is acceptable here
     public static TemplatingEngineAdapter byIdentifier(String id) {
-<span class="fc" id="L31">        ServiceLoader&lt;TemplatingEngineAdapter&gt; loader = ServiceLoader.load(TemplatingEngineAdapter.class, TemplatingEngineLoader.class.getClassLoader());</span>
+<span class="nc" id="L31">        ServiceLoader&lt;TemplatingEngineAdapter&gt; loader = ServiceLoader.load(TemplatingEngineAdapter.class, TemplatingEngineLoader.class.getClassLoader());</span>
 
-<span class="fc" id="L33">        StringBuilder sb = new StringBuilder();</span>
-<span class="pc bpc" id="L34" title="1 of 2 branches missed.">        for (TemplatingEngineAdapter templatingEngineAdapter : loader) {</span>
-<span class="pc bpc" id="L35" title="1 of 2 branches missed.">            if (id.equals(templatingEngineAdapter.getIdentifier())) {</span>
-<span class="fc" id="L36">                return templatingEngineAdapter;</span>
+<span class="nc" id="L33">        StringBuilder sb = new StringBuilder();</span>
+<span class="nc bnc" id="L34" title="All 2 branches missed.">        for (TemplatingEngineAdapter templatingEngineAdapter : loader) {</span>
+<span class="nc bnc" id="L35" title="All 2 branches missed.">            if (id.equals(templatingEngineAdapter.getIdentifier())) {</span>
+<span class="nc" id="L36">                return templatingEngineAdapter;</span>
             }
 <span class="nc" id="L38">            sb.append(templatingEngineAdapter.getIdentifier()).append(&quot;\n&quot;);</span>
 <span class="nc" id="L39">        }</span>

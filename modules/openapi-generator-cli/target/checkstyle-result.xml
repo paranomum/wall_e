@@ -1,30 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <checkstyle version="8.19">
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/cmd/Meta.java">
-<error line="26" severity="warning" message="&apos;com.samskivert.mustache.Mustache&apos; should be separated from previous import group by one line." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
-<error line="37" severity="warning" message="Wrong lexicographical order for &apos;org.openapitools.codegen.templating.CommonTemplateContentLocator&apos; import. Should be before &apos;org.openapitools.codegen.templating.TemplateManagerOptions&apos;." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
-<error line="48" severity="warning" message="Import statement for &apos;ch.lambdaj.function.convert.Converter&apos; is in the wrong order. Should be in the &apos;THIRD_PARTY_PACKAGE&apos; group, expecting not assigned imports on this line." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
-<error line="73" severity="warning" message="Line is longer than 100 characters (found 106)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="95" column="74" severity="warning" message="&apos;?&apos; should be on a new line." source="com.puppycrawl.tools.checkstyle.checks.whitespace.OperatorWrapCheck"/>
-<error line="100" severity="warning" message="Line is longer than 100 characters (found 169)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="101" severity="warning" message="Line is longer than 100 characters (found 177)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="104" severity="warning" message="Line is longer than 100 characters (found 120)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="105" severity="warning" message="Line is longer than 100 characters (found 124)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="106" severity="warning" message="Line is longer than 100 characters (found 144)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="107" severity="warning" message="Line is longer than 100 characters (found 144)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="110" severity="warning" message="Line is longer than 100 characters (found 162)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="111" severity="warning" message="Line is longer than 100 characters (found 170)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="113" severity="warning" message="Line is longer than 100 characters (found 120)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="114" severity="warning" message="Line is longer than 100 characters (found 124)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="115" severity="warning" message="Line is longer than 100 characters (found 144)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="116" severity="warning" message="Line is longer than 100 characters (found 145)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="134" severity="warning" message="First sentence of Javadoc is missing an ending period." source="com.puppycrawl.tools.checkstyle.checks.javadoc.SummaryJavadocCheck"/>
-<error line="156" severity="warning" message="Line is longer than 100 characters (found 136)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="160" severity="warning" message="Line is longer than 100 characters (found 126)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="174" column="34" severity="warning" message="Catch parameter name &apos;e&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.CatchParameterNameCheck"/>
-<error line="180" severity="warning" message="First sentence of Javadoc is missing an ending period." source="com.puppycrawl.tools.checkstyle.checks.javadoc.SummaryJavadocCheck"/>
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/Constants.java">
 </file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/cmd/BuildInfo.java">
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/cmd/HelpCommand.java">
+</file>
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/cmd/BuildInfo.java">
 <error line="12" severity="warning" message="Import statement for &apos;org.openapitools.codegen.Constants.*&apos; is in the wrong order. Should be in the &apos;STATIC&apos; group, expecting not assigned imports on this line." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
 <error line="12" severity="warning" message="Using the &apos;.*&apos; form of import should be avoided - org.openapitools.codegen.Constants.*." source="com.puppycrawl.tools.checkstyle.checks.imports.AvoidStarImportCheck"/>
 <error line="14" severity="warning" message="First sentence of Javadoc is missing an ending period." source="com.puppycrawl.tools.checkstyle.checks.javadoc.SummaryJavadocCheck"/>
@@ -37,38 +17,7 @@
 <error line="81" severity="warning" message="First sentence of Javadoc is missing an ending period." source="com.puppycrawl.tools.checkstyle.checks.javadoc.SummaryJavadocCheck"/>
 <error line="93" column="36" severity="warning" message="Catch parameter name &apos;e&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.CatchParameterNameCheck"/>
 </file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/cmd/ListGenerators.java">
-<error line="15" severity="warning" message="Using the &apos;.*&apos; form of import should be avoided - java.util.*." source="com.puppycrawl.tools.checkstyle.checks.imports.AvoidStarImportCheck"/>
-<error line="26" severity="warning" message="Line is longer than 100 characters (found 106)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="29" severity="warning" message="Line is longer than 100 characters (found 131)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="33" severity="warning" message="Line is longer than 100 characters (found 163)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="69" severity="warning" message="Distance between variable &apos;types&apos; declaration and its first usage is 4, but allowed 3.  Consider making that variable final if you still need to store its value in advance (before method calls that might have side effects on the original value)." source="com.puppycrawl.tools.checkstyle.checks.coding.VariableDeclarationUsageDistanceCheck"/>
-<error line="85" severity="warning" message="Line is longer than 100 characters (found 117)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="91" column="9" severity="warning" message="WhitespaceAround: &apos;if&apos; is not followed by whitespace. Empty blocks may only be represented as {} when not part of a multi-block statement (4.1.3)" source="com.puppycrawl.tools.checkstyle.checks.whitespace.WhitespaceAroundCheck"/>
-<error line="107" severity="warning" message="Line is longer than 100 characters (found 113)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="119" severity="warning" message="Line is longer than 100 characters (found 113)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-</file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/cmd/GlobalOptions.java">
-<error line="5" severity="warning" message="Import statement for &apos;io.airlift.airline.OptionType.GLOBAL&apos; is in the wrong order. Should be in the &apos;STATIC&apos; group, expecting not assigned imports on this line." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
-<error line="8" severity="warning" message="Line is longer than 100 characters (found 106)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="11" severity="warning" message="Line is longer than 100 characters (found 103)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-</file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/cmd/CompletionCommand.java">
-<error line="22" severity="warning" message="&apos;package&apos; should be separated from previous statement." source="com.puppycrawl.tools.checkstyle.checks.whitespace.EmptyLineSeparatorCheck"/>
-<error line="28" severity="warning" message="&apos;io.airlift.airline.*&apos; should be separated from previous import group by one line." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
-<error line="28" severity="warning" message="Using the &apos;.*&apos; form of import should be avoided - io.airlift.airline.*." source="com.puppycrawl.tools.checkstyle.checks.imports.AvoidStarImportCheck"/>
-<error line="29" severity="warning" message="Using the &apos;.*&apos; form of import should be avoided - io.airlift.airline.model.*." source="com.puppycrawl.tools.checkstyle.checks.imports.AvoidStarImportCheck"/>
-<error line="32" severity="warning" message="Wrong lexicographical order for &apos;java.util.List&apos; import. Should be before &apos;javax.inject.Inject&apos;." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
-<error line="33" severity="warning" message="Wrong lexicographical order for &apos;java.util.Map&apos; import. Should be before &apos;javax.inject.Inject&apos;." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
-<error line="34" severity="warning" message="Wrong lexicographical order for &apos;java.util.concurrent.Callable&apos; import. Should be before &apos;javax.inject.Inject&apos;." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
-<error line="36" severity="warning" message="Import statement for &apos;com.google.common.collect.Lists.newArrayList&apos; is in the wrong order. Should be in the &apos;STATIC&apos; group, expecting not assigned imports on this line." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
-<error line="37" severity="warning" message="Import statement for &apos;io.airlift.airline.ParserUtil.createInstance&apos; is in the wrong order. Should be in the &apos;STATIC&apos; group, expecting not assigned imports on this line." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
-<error line="40" severity="warning" message="Line is longer than 100 characters (found 128)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="43" severity="warning" message="Line is longer than 100 characters (found 146)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="61" column="5" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocMethodCheck"/>
-<error line="71" severity="warning" message="Line is longer than 100 characters (found 106)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-</file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/cmd/ConfigHelp.java">
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/cmd/ConfigHelp.java">
 <error line="32" severity="warning" message="Using the &apos;.*&apos; form of import should be avoided - java.io.*." source="com.puppycrawl.tools.checkstyle.checks.imports.AvoidStarImportCheck"/>
 <error line="35" severity="warning" message="Using the &apos;.*&apos; form of import should be avoided - java.util.*." source="com.puppycrawl.tools.checkstyle.checks.imports.AvoidStarImportCheck"/>
 <error line="40" severity="warning" message="Import statement for &apos;org.apache.commons.text.StringEscapeUtils.escapeHtml4&apos; is in the wrong order. Should be in the &apos;STATIC&apos; group, expecting not assigned imports on this line." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
@@ -185,26 +134,101 @@
 <error line="673" column="24" severity="warning" message="Local variable name &apos;v&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.LocalVariableNameCheck"/>
 <error line="681" severity="warning" message="Line is longer than 100 characters (found 144)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
 </file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/cmd/HelpCommand.java">
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/cmd/OpenApiGeneratorCommand.java">
+<error line="35" severity="warning" message="First sentence of Javadoc is missing an ending period." source="com.puppycrawl.tools.checkstyle.checks.javadoc.SummaryJavadocCheck"/>
 </file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/cmd/AuthorTemplate.java">
-<error line="16" severity="warning" message="Using the &apos;.*&apos; form of import should be avoided - java.nio.file.*." source="com.puppycrawl.tools.checkstyle.checks.imports.AvoidStarImportCheck"/>
-<error line="18" severity="warning" message="Using the &apos;.*&apos; form of import should be avoided - java.util.*." source="com.puppycrawl.tools.checkstyle.checks.imports.AvoidStarImportCheck"/>
-<error line="26" severity="warning" message="Abbreviation in name &apos;LOGGER&apos; must contain no more than &apos;2&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
-<error line="26" column="26" severity="warning" message="Member name &apos;LOGGER&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.MemberNameCheck"/>
-<error line="50" severity="warning" message="Line is longer than 100 characters (found 103)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="54" severity="warning" message="Line is longer than 100 characters (found 118)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="104" severity="warning" message="Line is longer than 100 characters (found 104)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="111" column="46" severity="warning" message="Catch parameter name &apos;e&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.CatchParameterNameCheck"/>
-<error line="125" severity="warning" message="Line is longer than 100 characters (found 124)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="131" severity="warning" message="Line is longer than 100 characters (found 116)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="135" severity="warning" message="Line is longer than 100 characters (found 122)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="139" severity="warning" message="Line is longer than 100 characters (found 141)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="141" severity="warning" message="&apos;block rcurly&apos; has incorrect indentation level 16, expected level should be 24." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="145" column="51" severity="warning" message="Catch parameter name &apos;e&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.CatchParameterNameCheck"/>
-<error line="160" severity="warning" message="Line is longer than 100 characters (found 131)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/cmd/Meta.java">
+<error line="26" severity="warning" message="&apos;com.samskivert.mustache.Mustache&apos; should be separated from previous import group by one line." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
+<error line="37" severity="warning" message="Wrong lexicographical order for &apos;org.openapitools.codegen.templating.CommonTemplateContentLocator&apos; import. Should be before &apos;org.openapitools.codegen.templating.TemplateManagerOptions&apos;." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
+<error line="48" severity="warning" message="Import statement for &apos;ch.lambdaj.function.convert.Converter&apos; is in the wrong order. Should be in the &apos;THIRD_PARTY_PACKAGE&apos; group, expecting not assigned imports on this line." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
+<error line="73" severity="warning" message="Line is longer than 100 characters (found 106)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="95" column="74" severity="warning" message="&apos;?&apos; should be on a new line." source="com.puppycrawl.tools.checkstyle.checks.whitespace.OperatorWrapCheck"/>
+<error line="100" severity="warning" message="Line is longer than 100 characters (found 169)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="101" severity="warning" message="Line is longer than 100 characters (found 177)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="104" severity="warning" message="Line is longer than 100 characters (found 120)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="105" severity="warning" message="Line is longer than 100 characters (found 124)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="106" severity="warning" message="Line is longer than 100 characters (found 144)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="107" severity="warning" message="Line is longer than 100 characters (found 144)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="110" severity="warning" message="Line is longer than 100 characters (found 162)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="111" severity="warning" message="Line is longer than 100 characters (found 170)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="113" severity="warning" message="Line is longer than 100 characters (found 120)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="114" severity="warning" message="Line is longer than 100 characters (found 124)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="115" severity="warning" message="Line is longer than 100 characters (found 144)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="116" severity="warning" message="Line is longer than 100 characters (found 145)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="134" severity="warning" message="First sentence of Javadoc is missing an ending period." source="com.puppycrawl.tools.checkstyle.checks.javadoc.SummaryJavadocCheck"/>
+<error line="156" severity="warning" message="Line is longer than 100 characters (found 136)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="160" severity="warning" message="Line is longer than 100 characters (found 126)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="174" column="34" severity="warning" message="Catch parameter name &apos;e&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.CatchParameterNameCheck"/>
+<error line="180" severity="warning" message="First sentence of Javadoc is missing an ending period." source="com.puppycrawl.tools.checkstyle.checks.javadoc.SummaryJavadocCheck"/>
 </file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/cmd/Generate.java">
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/cmd/CompletionCommand.java">
+<error line="22" severity="warning" message="&apos;package&apos; should be separated from previous statement." source="com.puppycrawl.tools.checkstyle.checks.whitespace.EmptyLineSeparatorCheck"/>
+<error line="28" severity="warning" message="&apos;io.airlift.airline.*&apos; should be separated from previous import group by one line." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
+<error line="28" severity="warning" message="Using the &apos;.*&apos; form of import should be avoided - io.airlift.airline.*." source="com.puppycrawl.tools.checkstyle.checks.imports.AvoidStarImportCheck"/>
+<error line="29" severity="warning" message="Using the &apos;.*&apos; form of import should be avoided - io.airlift.airline.model.*." source="com.puppycrawl.tools.checkstyle.checks.imports.AvoidStarImportCheck"/>
+<error line="32" severity="warning" message="Wrong lexicographical order for &apos;java.util.List&apos; import. Should be before &apos;javax.inject.Inject&apos;." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
+<error line="33" severity="warning" message="Wrong lexicographical order for &apos;java.util.Map&apos; import. Should be before &apos;javax.inject.Inject&apos;." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
+<error line="34" severity="warning" message="Wrong lexicographical order for &apos;java.util.concurrent.Callable&apos; import. Should be before &apos;javax.inject.Inject&apos;." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
+<error line="36" severity="warning" message="Import statement for &apos;com.google.common.collect.Lists.newArrayList&apos; is in the wrong order. Should be in the &apos;STATIC&apos; group, expecting not assigned imports on this line." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
+<error line="37" severity="warning" message="Import statement for &apos;io.airlift.airline.ParserUtil.createInstance&apos; is in the wrong order. Should be in the &apos;STATIC&apos; group, expecting not assigned imports on this line." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
+<error line="40" severity="warning" message="Line is longer than 100 characters (found 128)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="43" severity="warning" message="Line is longer than 100 characters (found 146)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="61" column="5" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocMethodCheck"/>
+<error line="71" severity="warning" message="Line is longer than 100 characters (found 106)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+</file>
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/cmd/GenerateBatch.java">
+<error line="27" severity="warning" message="Using the &apos;.*&apos; form of import should be avoided - com.fasterxml.jackson.databind.*." source="com.puppycrawl.tools.checkstyle.checks.imports.AvoidStarImportCheck"/>
+<error line="68" severity="warning" message="Abbreviation in name &apos;LOGGER&apos; must contain no more than &apos;2&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
+<error line="68" column="26" severity="warning" message="Member name &apos;LOGGER&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.MemberNameCheck"/>
+<error line="82" severity="warning" message="Line is longer than 100 characters (found 107)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="91" severity="warning" message="Line is longer than 100 characters (found 116)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="99" severity="warning" message="&lt;p&gt; tag should be placed immediately before the first word, with no space after." source="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocParagraphCheck"/>
+<error line="99" severity="warning" message="&lt;p&gt; tag should be preceded with an empty line." source="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocParagraphCheck"/>
+<error line="135" severity="warning" message="Line is longer than 100 characters (found 104)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="140" severity="warning" message="Line is longer than 100 characters (found 196)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="142" severity="warning" message="Line is longer than 100 characters (found 138)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="143" severity="warning" message="Line is longer than 100 characters (found 139)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="144" severity="warning" message="Line is longer than 100 characters (found 107)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="146" severity="warning" message="Line is longer than 100 characters (found 156)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="158" severity="warning" message="Line is longer than 100 characters (found 141)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="165" severity="warning" message="Line is longer than 100 characters (found 117)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="166" severity="warning" message="&apos;if&apos; construct must use &apos;{}&apos;s." source="com.puppycrawl.tools.checkstyle.checks.blocks.NeedBracesCheck"/>
+<error line="173" severity="warning" message="Line is longer than 100 characters (found 147)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="176" severity="warning" message="Line is longer than 100 characters (found 152)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="178" column="39" severity="warning" message="Catch parameter name &apos;e&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.CatchParameterNameCheck"/>
+<error line="191" severity="warning" message="Line is longer than 100 characters (found 115)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="203" severity="warning" message="&lt;p&gt; tag should be placed immediately before the first word, with no space after." source="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocParagraphCheck"/>
+<error line="203" severity="warning" message="&lt;p&gt; tag should be preceded with an empty line." source="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocParagraphCheck"/>
+<error line="227" severity="warning" message="Line is longer than 100 characters (found 148)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="234" severity="warning" message="Line is longer than 100 characters (found 121)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="236" column="32" severity="warning" message="Catch parameter name &apos;e&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.CatchParameterNameCheck"/>
+<error line="242" severity="warning" message="Line is longer than 100 characters (found 181)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="253" severity="warning" message="Line is longer than 100 characters (found 153)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="254" severity="warning" message="Line is longer than 100 characters (found 106)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="256" severity="warning" message="Line is longer than 100 characters (found 105)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="259" severity="warning" message="Line is longer than 100 characters (found 127)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="263" column="48" severity="warning" message="Catch parameter name &apos;e&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.CatchParameterNameCheck"/>
+<error line="264" severity="warning" message="Line is longer than 100 characters (found 157)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="268" severity="warning" message="Line is longer than 100 characters (found 167)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="276" severity="warning" message="Line is longer than 100 characters (found 138)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="277" severity="warning" message="Line is longer than 100 characters (found 139)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="278" severity="warning" message="Line is longer than 100 characters (found 107)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="283" severity="warning" message="Line is longer than 100 characters (found 109)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="312" column="46" severity="warning" message="Parameter name &apos;p&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.ParameterNameCheck"/>
+<error line="324" severity="warning" message="Line is longer than 100 characters (found 128)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="324" column="61" severity="warning" message="Parameter name &apos;p&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.ParameterNameCheck"/>
+<error line="329" severity="warning" message="Distance between variable &apos;name&apos; declaration and its first usage is 4, but allowed 3.  Consider making that variable final if you still need to store its value in advance (before method calls that might have side effects on the original value)." source="com.puppycrawl.tools.checkstyle.checks.coding.VariableDeclarationUsageDistanceCheck"/>
+<error line="335" severity="warning" message="Line is longer than 100 characters (found 110)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="343" severity="warning" message="Line is longer than 100 characters (found 101)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="347" severity="warning" message="Line is longer than 100 characters (found 110)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="349" severity="warning" message="Line is longer than 100 characters (found 103)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+</file>
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/cmd/GlobalOptions.java">
+<error line="5" severity="warning" message="Import statement for &apos;io.airlift.airline.OptionType.GLOBAL&apos; is in the wrong order. Should be in the &apos;STATIC&apos; group, expecting not assigned imports on this line." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
+<error line="8" severity="warning" message="Line is longer than 100 characters (found 106)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="11" severity="warning" message="Line is longer than 100 characters (found 103)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+</file>
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/cmd/Generate.java">
 <error line="21" severity="warning" message="Using the &apos;.*&apos; form of import should be avoided - org.openapitools.codegen.config.CodegenConfiguratorUtils.*." source="com.puppycrawl.tools.checkstyle.checks.imports.AvoidStarImportCheck"/>
 <error line="27" severity="warning" message="&apos;java.io.File&apos; should be separated from previous import group by one line." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
 <error line="32" severity="warning" message="Import statement for &apos;org.apache.commons.lang3.StringUtils&apos; is in the wrong order. Should be in the &apos;THIRD_PARTY_PACKAGE&apos; group, expecting not assigned imports on this line." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
@@ -254,10 +278,37 @@
 <error line="358" severity="warning" message="Line is longer than 100 characters (found 143)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
 <error line="536" column="45" severity="warning" message="Catch parameter name &apos;e&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.CatchParameterNameCheck"/>
 </file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/cmd/OpenApiGeneratorCommand.java">
-<error line="35" severity="warning" message="First sentence of Javadoc is missing an ending period." source="com.puppycrawl.tools.checkstyle.checks.javadoc.SummaryJavadocCheck"/>
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/cmd/ListGenerators.java">
+<error line="15" severity="warning" message="Using the &apos;.*&apos; form of import should be avoided - java.util.*." source="com.puppycrawl.tools.checkstyle.checks.imports.AvoidStarImportCheck"/>
+<error line="26" severity="warning" message="Line is longer than 100 characters (found 106)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="29" severity="warning" message="Line is longer than 100 characters (found 131)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="33" severity="warning" message="Line is longer than 100 characters (found 163)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="69" severity="warning" message="Distance between variable &apos;types&apos; declaration and its first usage is 4, but allowed 3.  Consider making that variable final if you still need to store its value in advance (before method calls that might have side effects on the original value)." source="com.puppycrawl.tools.checkstyle.checks.coding.VariableDeclarationUsageDistanceCheck"/>
+<error line="85" severity="warning" message="Line is longer than 100 characters (found 117)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="91" column="9" severity="warning" message="WhitespaceAround: &apos;if&apos; is not followed by whitespace. Empty blocks may only be represented as {} when not part of a multi-block statement (4.1.3)" source="com.puppycrawl.tools.checkstyle.checks.whitespace.WhitespaceAroundCheck"/>
+<error line="107" severity="warning" message="Line is longer than 100 characters (found 113)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="119" severity="warning" message="Line is longer than 100 characters (found 113)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
 </file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/cmd/Validate.java">
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/cmd/AuthorTemplate.java">
+<error line="16" severity="warning" message="Using the &apos;.*&apos; form of import should be avoided - java.nio.file.*." source="com.puppycrawl.tools.checkstyle.checks.imports.AvoidStarImportCheck"/>
+<error line="18" severity="warning" message="Using the &apos;.*&apos; form of import should be avoided - java.util.*." source="com.puppycrawl.tools.checkstyle.checks.imports.AvoidStarImportCheck"/>
+<error line="26" severity="warning" message="Abbreviation in name &apos;LOGGER&apos; must contain no more than &apos;2&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
+<error line="26" column="26" severity="warning" message="Member name &apos;LOGGER&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.MemberNameCheck"/>
+<error line="50" severity="warning" message="Line is longer than 100 characters (found 103)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="54" severity="warning" message="Line is longer than 100 characters (found 118)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="104" severity="warning" message="Line is longer than 100 characters (found 104)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="111" column="46" severity="warning" message="Catch parameter name &apos;e&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.CatchParameterNameCheck"/>
+<error line="125" severity="warning" message="Line is longer than 100 characters (found 124)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="131" severity="warning" message="Line is longer than 100 characters (found 116)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="135" severity="warning" message="Line is longer than 100 characters (found 122)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="139" severity="warning" message="Line is longer than 100 characters (found 141)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="141" severity="warning" message="&apos;block rcurly&apos; has incorrect indentation level 16, expected level should be 24." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="145" column="51" severity="warning" message="Catch parameter name &apos;e&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.CatchParameterNameCheck"/>
+<error line="160" severity="warning" message="Line is longer than 100 characters (found 131)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+</file>
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/cmd/Version.java">
+</file>
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/cmd/Validate.java">
 <error line="62" severity="warning" message="&apos;if&apos; construct must use &apos;{}&apos;s." source="com.puppycrawl.tools.checkstyle.checks.blocks.NeedBracesCheck"/>
 <error line="63" severity="warning" message="&apos;else&apos; construct must use &apos;{}&apos;s." source="com.puppycrawl.tools.checkstyle.checks.blocks.NeedBracesCheck"/>
 <error line="68" severity="warning" message="Line is longer than 100 characters (found 162)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
@@ -265,56 +316,7 @@
 <error line="76" severity="warning" message="Line is longer than 100 characters (found 165)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
 <error line="83" severity="warning" message="Line is longer than 100 characters (found 165)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
 </file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/cmd/Version.java">
-</file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/cmd/GenerateBatch.java">
-<error line="27" severity="warning" message="Using the &apos;.*&apos; form of import should be avoided - com.fasterxml.jackson.databind.*." source="com.puppycrawl.tools.checkstyle.checks.imports.AvoidStarImportCheck"/>
-<error line="68" severity="warning" message="Abbreviation in name &apos;LOGGER&apos; must contain no more than &apos;2&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
-<error line="68" column="26" severity="warning" message="Member name &apos;LOGGER&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.MemberNameCheck"/>
-<error line="82" severity="warning" message="Line is longer than 100 characters (found 107)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="91" severity="warning" message="Line is longer than 100 characters (found 116)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="99" severity="warning" message="&lt;p&gt; tag should be placed immediately before the first word, with no space after." source="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocParagraphCheck"/>
-<error line="99" severity="warning" message="&lt;p&gt; tag should be preceded with an empty line." source="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocParagraphCheck"/>
-<error line="135" severity="warning" message="Line is longer than 100 characters (found 104)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="140" severity="warning" message="Line is longer than 100 characters (found 196)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="142" severity="warning" message="Line is longer than 100 characters (found 138)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="143" severity="warning" message="Line is longer than 100 characters (found 139)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="144" severity="warning" message="Line is longer than 100 characters (found 107)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="146" severity="warning" message="Line is longer than 100 characters (found 156)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="158" severity="warning" message="Line is longer than 100 characters (found 141)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="165" severity="warning" message="Line is longer than 100 characters (found 117)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="166" severity="warning" message="&apos;if&apos; construct must use &apos;{}&apos;s." source="com.puppycrawl.tools.checkstyle.checks.blocks.NeedBracesCheck"/>
-<error line="173" severity="warning" message="Line is longer than 100 characters (found 147)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="176" severity="warning" message="Line is longer than 100 characters (found 152)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="178" column="39" severity="warning" message="Catch parameter name &apos;e&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.CatchParameterNameCheck"/>
-<error line="191" severity="warning" message="Line is longer than 100 characters (found 115)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="203" severity="warning" message="&lt;p&gt; tag should be placed immediately before the first word, with no space after." source="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocParagraphCheck"/>
-<error line="203" severity="warning" message="&lt;p&gt; tag should be preceded with an empty line." source="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocParagraphCheck"/>
-<error line="227" severity="warning" message="Line is longer than 100 characters (found 148)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="234" severity="warning" message="Line is longer than 100 characters (found 121)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="236" column="32" severity="warning" message="Catch parameter name &apos;e&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.CatchParameterNameCheck"/>
-<error line="242" severity="warning" message="Line is longer than 100 characters (found 181)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="253" severity="warning" message="Line is longer than 100 characters (found 153)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="254" severity="warning" message="Line is longer than 100 characters (found 106)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="256" severity="warning" message="Line is longer than 100 characters (found 105)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="259" severity="warning" message="Line is longer than 100 characters (found 127)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="263" column="48" severity="warning" message="Catch parameter name &apos;e&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.CatchParameterNameCheck"/>
-<error line="264" severity="warning" message="Line is longer than 100 characters (found 157)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="268" severity="warning" message="Line is longer than 100 characters (found 167)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="276" severity="warning" message="Line is longer than 100 characters (found 138)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="277" severity="warning" message="Line is longer than 100 characters (found 139)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="278" severity="warning" message="Line is longer than 100 characters (found 107)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="283" severity="warning" message="Line is longer than 100 characters (found 109)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="312" column="46" severity="warning" message="Parameter name &apos;p&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.ParameterNameCheck"/>
-<error line="324" severity="warning" message="Line is longer than 100 characters (found 128)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="324" column="61" severity="warning" message="Parameter name &apos;p&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.ParameterNameCheck"/>
-<error line="329" severity="warning" message="Distance between variable &apos;name&apos; declaration and its first usage is 4, but allowed 3.  Consider making that variable final if you still need to store its value in advance (before method calls that might have side effects on the original value)." source="com.puppycrawl.tools.checkstyle.checks.coding.VariableDeclarationUsageDistanceCheck"/>
-<error line="335" severity="warning" message="Line is longer than 100 characters (found 110)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="343" severity="warning" message="Line is longer than 100 characters (found 101)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="347" severity="warning" message="Line is longer than 100 characters (found 110)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="349" severity="warning" message="Line is longer than 100 characters (found 103)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-</file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/OpenAPIGenerator.java">
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/OpenAPIGenerator.java">
 <error line="24" severity="warning" message="Using the &apos;.*&apos; form of import should be avoided - org.openapitools.codegen.cmd.*." source="com.puppycrawl.tools.checkstyle.checks.imports.AvoidStarImportCheck"/>
 <error line="28" severity="warning" message="Import statement for &apos;org.openapitools.codegen.Constants.CLI_NAME&apos; is in the wrong order. Should be in the &apos;STATIC&apos; group, expecting not assigned imports on this line." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
 <error line="32" severity="warning" message="&lt;p&gt; tag should be placed immediately before the first word, with no space after." source="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocParagraphCheck"/>
@@ -330,8 +332,6 @@
 <error line="79" severity="warning" message="Line is longer than 100 characters (found 113)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
 <error line="81" column="81" severity="warning" message="Catch parameter name &apos;e&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.CatchParameterNameCheck"/>
 </file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-cli/src/main/java/org/openapitools/codegen/Constants.java">
-</file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-cli/src/main/resources/version.properties">
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-cli/src/main/resources/version.properties">
 </file>
 </checkstyle>

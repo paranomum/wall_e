@@ -23,24 +23,24 @@ public class SemVer implements Comparable&lt;SemVer&gt; {
     public final int minor;
     public final int revision;
 
-<span class="fc" id="L26">    public SemVer(String versionString) {</span>
-<span class="fc" id="L27">        String[] tokens = versionString.split(&quot;\\.&quot;);</span>
-<span class="fc" id="L28">        major = Integer.parseInt(tokens[0]);</span>
-<span class="pc bpc" id="L29" title="1 of 2 branches missed.">        minor = tokens.length &lt; 2 ? 0 : Integer.parseInt(tokens[1]);</span>
-<span class="pc bpc" id="L30" title="1 of 2 branches missed.">        revision = tokens.length &lt; 3 ? 0 : Integer.parseInt(tokens[2]);</span>
-<span class="fc" id="L31">    }</span>
+<span class="nc" id="L26">    public SemVer(String versionString) {</span>
+<span class="nc" id="L27">        String[] tokens = versionString.split(&quot;\\.&quot;);</span>
+<span class="nc" id="L28">        major = Integer.parseInt(tokens[0]);</span>
+<span class="nc bnc" id="L29" title="All 2 branches missed.">        minor = tokens.length &lt; 2 ? 0 : Integer.parseInt(tokens[1]);</span>
+<span class="nc bnc" id="L30" title="All 2 branches missed.">        revision = tokens.length &lt; 3 ? 0 : Integer.parseInt(tokens[2]);</span>
+<span class="nc" id="L31">    }</span>
 
     @Override
     public int compareTo(SemVer o) {
-<span class="fc" id="L35">        int cmp = major - o.major;</span>
-<span class="pc bpc" id="L36" title="1 of 2 branches missed.">        if (cmp != 0) return cmp;</span>
-<span class="fc" id="L37">        cmp = minor - o.minor;</span>
-<span class="fc bfc" id="L38" title="All 2 branches covered.">        if (cmp != 0) return cmp;</span>
-<span class="fc" id="L39">        return revision - o.revision;</span>
+<span class="nc" id="L35">        int cmp = major - o.major;</span>
+<span class="nc bnc" id="L36" title="All 2 branches missed.">        if (cmp != 0) return cmp;</span>
+<span class="nc" id="L37">        cmp = minor - o.minor;</span>
+<span class="nc bnc" id="L38" title="All 2 branches missed.">        if (cmp != 0) return cmp;</span>
+<span class="nc" id="L39">        return revision - o.revision;</span>
     }
 
     public boolean atLeast(String other) {
-<span class="fc bfc" id="L43" title="All 2 branches covered.">        return compareTo(new SemVer(other)) &gt;= 0;</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        return compareTo(new SemVer(other)) &gt;= 0;</span>
     }
 
     @Override

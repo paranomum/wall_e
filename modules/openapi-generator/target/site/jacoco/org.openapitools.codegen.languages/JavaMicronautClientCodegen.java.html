@@ -25,35 +25,35 @@ public class JavaMicronautClientCodegen extends JavaMicronautAbstractCodegen {
     protected boolean configureAuthorization;
     protected List&lt;String&gt; additionalClientTypeAnnotations;
     protected String authorizationFilterPattern;
-<span class="fc" id="L28">    protected String basePathSeparator = &quot;-&quot;;</span>
+<span class="nc" id="L28">    protected String basePathSeparator = &quot;-&quot;;</span>
     protected String clientId;
 
     public JavaMicronautClientCodegen() {
-<span class="fc" id="L32">        super();</span>
+<span class="nc" id="L32">        super();</span>
 
-<span class="fc" id="L34">        title = &quot;OpenAPI Micronaut Client&quot;;</span>
-<span class="fc" id="L35">        configureAuthorization = false;</span>
+<span class="nc" id="L34">        title = &quot;OpenAPI Micronaut Client&quot;;</span>
+<span class="nc" id="L35">        configureAuthorization = false;</span>
 
-<span class="fc" id="L37">        generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
-<span class="fc" id="L38">                .stability(Stability.BETA)</span>
-<span class="fc" id="L39">                .build();</span>
-<span class="fc" id="L40">        additionalProperties.put(&quot;client&quot;, &quot;true&quot;);</span>
+<span class="nc" id="L37">        generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
+<span class="nc" id="L38">                .stability(Stability.BETA)</span>
+<span class="nc" id="L39">                .build();</span>
+<span class="nc" id="L40">        additionalProperties.put(&quot;client&quot;, &quot;true&quot;);</span>
 
-<span class="fc" id="L42">        cliOptions.add(CliOption.newBoolean(OPT_CONFIGURE_AUTH, &quot;Configure all the authorization methods as specified in the file&quot;, configureAuthorization));</span>
-<span class="fc" id="L43">        cliOptions.add(CliOption.newString(ADDITIONAL_CLIENT_TYPE_ANNOTATIONS, &quot;Additional annotations for client type(class level annotations). List separated by semicolon(;) or new line (Linux or Windows)&quot;));</span>
-<span class="fc" id="L44">        cliOptions.add(CliOption.newString(AUTHORIZATION_FILTER_PATTERN, &quot;Configure the authorization filter pattern for the client. Generally defined when generating clients from multiple specification files&quot;));</span>
-<span class="fc" id="L45">        cliOptions.add(CliOption.newString(BASE_PATH_SEPARATOR, &quot;Configure the separator to use between the application name and base path when referencing the property&quot;).defaultValue(basePathSeparator));</span>
-<span class="fc" id="L46">        cliOptions.add(CliOption.newString(CLIENT_ID, &quot;Configure the service ID for the Client&quot;));</span>
-<span class="fc" id="L47">    }</span>
+<span class="nc" id="L42">        cliOptions.add(CliOption.newBoolean(OPT_CONFIGURE_AUTH, &quot;Configure all the authorization methods as specified in the file&quot;, configureAuthorization));</span>
+<span class="nc" id="L43">        cliOptions.add(CliOption.newString(ADDITIONAL_CLIENT_TYPE_ANNOTATIONS, &quot;Additional annotations for client type(class level annotations). List separated by semicolon(;) or new line (Linux or Windows)&quot;));</span>
+<span class="nc" id="L44">        cliOptions.add(CliOption.newString(AUTHORIZATION_FILTER_PATTERN, &quot;Configure the authorization filter pattern for the client. Generally defined when generating clients from multiple specification files&quot;));</span>
+<span class="nc" id="L45">        cliOptions.add(CliOption.newString(BASE_PATH_SEPARATOR, &quot;Configure the separator to use between the application name and base path when referencing the property&quot;).defaultValue(basePathSeparator));</span>
+<span class="nc" id="L46">        cliOptions.add(CliOption.newString(CLIENT_ID, &quot;Configure the service ID for the Client&quot;));</span>
+<span class="nc" id="L47">    }</span>
 
     @Override
     public CodegenType getTag() {
-<span class="fc" id="L51">        return CodegenType.CLIENT;</span>
+<span class="nc" id="L51">        return CodegenType.CLIENT;</span>
     }
 
     @Override
     public String getName() {
-<span class="fc" id="L56">        return NAME;</span>
+<span class="nc" id="L56">        return NAME;</span>
     }
 
     @Override

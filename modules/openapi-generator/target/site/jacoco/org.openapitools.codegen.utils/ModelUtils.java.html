@@ -60,7 +60,7 @@ import java.util.stream.Collectors;
 import static org.openapitools.codegen.utils.OnceLogger.once;
 
 <span class="nc" id="L62">public class ModelUtils {</span>
-<span class="fc" id="L63">    private static final Logger LOGGER = LoggerFactory.getLogger(ModelUtils.class);</span>
+<span class="nc" id="L63">    private static final Logger LOGGER = LoggerFactory.getLogger(ModelUtils.class);</span>
 
     private static final String URI_FORMAT = &quot;uri&quot;;
 
@@ -78,25 +78,25 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
     private static final ObjectMapper YAML_MAPPER;
 
     static {
-<span class="fc" id="L81">        JSON_MAPPER = ObjectMapperFactory.createJson();</span>
-<span class="fc" id="L82">        YAML_MAPPER = ObjectMapperFactory.createYaml();</span>
-<span class="fc" id="L83">    }</span>
+<span class="nc" id="L81">        JSON_MAPPER = ObjectMapperFactory.createJson();</span>
+<span class="nc" id="L82">        YAML_MAPPER = ObjectMapperFactory.createYaml();</span>
+<span class="nc" id="L83">    }</span>
 
     public static boolean isDisallowAdditionalPropertiesIfNotPresent() {
 <span class="nc" id="L86">        return Boolean.parseBoolean(GlobalSettings.getProperty(disallowAdditionalPropertiesIfNotPresent, &quot;true&quot;));</span>
     }
 
     public static void setDisallowAdditionalPropertiesIfNotPresent(boolean value) {
-<span class="fc" id="L90">        GlobalSettings.setProperty(disallowAdditionalPropertiesIfNotPresent, Boolean.toString(value));</span>
-<span class="fc" id="L91">    }</span>
+<span class="nc" id="L90">        GlobalSettings.setProperty(disallowAdditionalPropertiesIfNotPresent, Boolean.toString(value));</span>
+<span class="nc" id="L91">    }</span>
 
     public static boolean isGenerateAliasAsModel() {
 <span class="nc" id="L94">        return Boolean.parseBoolean(GlobalSettings.getProperty(generateAliasAsModelKey, &quot;false&quot;));</span>
     }
 
     public static void setGenerateAliasAsModel(boolean value) {
-<span class="fc" id="L98">        GlobalSettings.setProperty(generateAliasAsModelKey, Boolean.toString(value));</span>
-<span class="fc" id="L99">    }</span>
+<span class="nc" id="L98">        GlobalSettings.setProperty(generateAliasAsModelKey, Boolean.toString(value));</span>
+<span class="nc" id="L99">    }</span>
 
     public static boolean isGenerateAliasAsModel(Schema schema) {
 <span class="nc bnc" id="L102" title="All 6 branches missed.">        return isGenerateAliasAsModel() || (schema.getExtensions() != null &amp;&amp; schema.getExtensions().getOrDefault(&quot;x-generate-alias-as-model&quot;, false).equals(true));</span>
@@ -110,14 +110,14 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return model
      */
     public static CodegenModel getModelByName(final String name, final Map&lt;String, ModelsMap&gt; models) {
-<span class="fc" id="L113">        final ModelsMap data = models.get(name);</span>
-<span class="pc bpc" id="L114" title="1 of 2 branches missed.">        if (data != null) {</span>
-<span class="fc" id="L115">            final List&lt;ModelMap&gt; dataModelsList = data.getModels();</span>
-<span class="pc bpc" id="L116" title="1 of 2 branches missed.">            if (dataModelsList != null) {</span>
-<span class="pc bpc" id="L117" title="1 of 2 branches missed.">                for (final ModelMap entryMap : dataModelsList) {</span>
-<span class="fc" id="L118">                    final CodegenModel model = entryMap.getModel();</span>
-<span class="pc bpc" id="L119" title="1 of 2 branches missed.">                    if (model != null) {</span>
-<span class="fc" id="L120">                        return model;</span>
+<span class="nc" id="L113">        final ModelsMap data = models.get(name);</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">        if (data != null) {</span>
+<span class="nc" id="L115">            final List&lt;ModelMap&gt; dataModelsList = data.getModels();</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">            if (dataModelsList != null) {</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">                for (final ModelMap entryMap : dataModelsList) {</span>
+<span class="nc" id="L118">                    final CodegenModel model = entryMap.getModel();</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">                    if (model != null) {</span>
+<span class="nc" id="L120">                        return model;</span>
                     }
 <span class="nc" id="L122">                }</span>
             }
@@ -197,21 +197,21 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return schemas a list of schemas
      */
     public static List&lt;String&gt; getSchemasUsedOnlyInFormParam(OpenAPI openAPI) {
-<span class="fc" id="L200">        List&lt;String&gt; schemasUsedInFormParam = new ArrayList&lt;String&gt;();</span>
-<span class="fc" id="L201">        List&lt;String&gt; schemasUsedInOtherCases = new ArrayList&lt;String&gt;();</span>
+<span class="nc" id="L200">        List&lt;String&gt; schemasUsedInFormParam = new ArrayList&lt;String&gt;();</span>
+<span class="nc" id="L201">        List&lt;String&gt; schemasUsedInOtherCases = new ArrayList&lt;String&gt;();</span>
 
-<span class="fc" id="L203">        visitOpenAPI(openAPI, (s, t) -&gt; {</span>
-<span class="pc bpc" id="L204" title="1 of 4 branches missed.">            if (s != null &amp;&amp; s.get$ref() != null) {</span>
-<span class="fc" id="L205">                String ref = getSimpleRef(s.get$ref());</span>
-<span class="pc bpc" id="L206" title="1 of 2 branches missed.">                if (&quot;application/x-www-form-urlencoded&quot;.equalsIgnoreCase(t) ||</span>
-<span class="pc bpc" id="L207" title="1 of 2 branches missed.">                        &quot;multipart/form-data&quot;.equalsIgnoreCase(t)) {</span>
+<span class="nc" id="L203">        visitOpenAPI(openAPI, (s, t) -&gt; {</span>
+<span class="nc bnc" id="L204" title="All 4 branches missed.">            if (s != null &amp;&amp; s.get$ref() != null) {</span>
+<span class="nc" id="L205">                String ref = getSimpleRef(s.get$ref());</span>
+<span class="nc bnc" id="L206" title="All 2 branches missed.">                if (&quot;application/x-www-form-urlencoded&quot;.equalsIgnoreCase(t) ||</span>
+<span class="nc bnc" id="L207" title="All 2 branches missed.">                        &quot;multipart/form-data&quot;.equalsIgnoreCase(t)) {</span>
 <span class="nc" id="L208">                    schemasUsedInFormParam.add(ref);</span>
                 } else {
-<span class="fc" id="L210">                    schemasUsedInOtherCases.add(ref);</span>
+<span class="nc" id="L210">                    schemasUsedInOtherCases.add(ref);</span>
                 }
             }
-<span class="fc" id="L213">        });</span>
-<span class="pc bnc" id="L214" title="All 2 branches missed.">        return schemasUsedInFormParam.stream().filter(n -&gt; !schemasUsedInOtherCases.contains(n)).collect(Collectors.toList());</span>
+<span class="nc" id="L213">        });</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">        return schemasUsedInFormParam.stream().filter(n -&gt; !schemasUsedInOtherCases.contains(n)).collect(Collectors.toList());</span>
     }
 
     /**
@@ -224,36 +224,36 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @param visitor functional interface (can be defined as a lambda) called each time a schema is found.
      */
     private static void visitOpenAPI(OpenAPI openAPI, OpenAPISchemaVisitor visitor) {
-<span class="fc" id="L227">        Map&lt;String, PathItem&gt; paths = openAPI.getPaths();</span>
-<span class="fc" id="L228">        List&lt;String&gt; visitedSchemas = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L227">        Map&lt;String, PathItem&gt; paths = openAPI.getPaths();</span>
+<span class="nc" id="L228">        List&lt;String&gt; visitedSchemas = new ArrayList&lt;&gt;();</span>
 
-<span class="pc bpc" id="L230" title="1 of 2 branches missed.">        if (paths != null) {</span>
-<span class="fc bfc" id="L231" title="All 2 branches covered.">            for (PathItem path : paths.values()) {</span>
-<span class="fc" id="L232">                visitPathItem(path, openAPI, visitor, visitedSchemas);</span>
-<span class="fc" id="L233">            }</span>
+<span class="nc bnc" id="L230" title="All 2 branches missed.">        if (paths != null) {</span>
+<span class="nc bnc" id="L231" title="All 2 branches missed.">            for (PathItem path : paths.values()) {</span>
+<span class="nc" id="L232">                visitPathItem(path, openAPI, visitor, visitedSchemas);</span>
+<span class="nc" id="L233">            }</span>
         }
-<span class="fc" id="L235">    }</span>
+<span class="nc" id="L235">    }</span>
 
     private static void visitPathItem(PathItem pathItem, OpenAPI openAPI, OpenAPISchemaVisitor visitor, List&lt;String&gt; visitedSchemas) {
-<span class="fc" id="L238">        List&lt;Operation&gt; allOperations = pathItem.readOperations();</span>
-<span class="pc bpc" id="L239" title="1 of 2 branches missed.">        if (allOperations != null) {</span>
-<span class="fc bfc" id="L240" title="All 2 branches covered.">            for (Operation operation : allOperations) {</span>
+<span class="nc" id="L238">        List&lt;Operation&gt; allOperations = pathItem.readOperations();</span>
+<span class="nc bnc" id="L239" title="All 2 branches missed.">        if (allOperations != null) {</span>
+<span class="nc bnc" id="L240" title="All 2 branches missed.">            for (Operation operation : allOperations) {</span>
                 //Params:
-<span class="fc" id="L242">                visitParameters(openAPI, operation.getParameters(), visitor, visitedSchemas);</span>
+<span class="nc" id="L242">                visitParameters(openAPI, operation.getParameters(), visitor, visitedSchemas);</span>
 
                 //RequestBody:
-<span class="fc" id="L245">                RequestBody requestBody = getReferencedRequestBody(openAPI, operation.getRequestBody());</span>
-<span class="fc bfc" id="L246" title="All 2 branches covered.">                if (requestBody != null) {</span>
-<span class="fc" id="L247">                    visitContent(openAPI, requestBody.getContent(), visitor, visitedSchemas);</span>
+<span class="nc" id="L245">                RequestBody requestBody = getReferencedRequestBody(openAPI, operation.getRequestBody());</span>
+<span class="nc bnc" id="L246" title="All 2 branches missed.">                if (requestBody != null) {</span>
+<span class="nc" id="L247">                    visitContent(openAPI, requestBody.getContent(), visitor, visitedSchemas);</span>
                 }
 
                 //Responses:
-<span class="pc bpc" id="L251" title="1 of 2 branches missed.">                if (operation.getResponses() != null) {</span>
-<span class="fc bfc" id="L252" title="All 2 branches covered.">                    for (ApiResponse r : operation.getResponses().values()) {</span>
-<span class="fc" id="L253">                        ApiResponse apiResponse = getReferencedApiResponse(openAPI, r);</span>
-<span class="pc bpc" id="L254" title="1 of 2 branches missed.">                        if (apiResponse != null) {</span>
-<span class="fc" id="L255">                            visitContent(openAPI, apiResponse.getContent(), visitor, visitedSchemas);</span>
-<span class="pc bpc" id="L256" title="1 of 2 branches missed.">                            if (apiResponse.getHeaders() != null) {</span>
+<span class="nc bnc" id="L251" title="All 2 branches missed.">                if (operation.getResponses() != null) {</span>
+<span class="nc bnc" id="L252" title="All 2 branches missed.">                    for (ApiResponse r : operation.getResponses().values()) {</span>
+<span class="nc" id="L253">                        ApiResponse apiResponse = getReferencedApiResponse(openAPI, r);</span>
+<span class="nc bnc" id="L254" title="All 2 branches missed.">                        if (apiResponse != null) {</span>
+<span class="nc" id="L255">                            visitContent(openAPI, apiResponse.getContent(), visitor, visitedSchemas);</span>
+<span class="nc bnc" id="L256" title="All 2 branches missed.">                            if (apiResponse.getHeaders() != null) {</span>
 <span class="nc bnc" id="L257" title="All 2 branches missed.">                                for (Entry&lt;String, Header&gt; e : apiResponse.getHeaders().entrySet()) {</span>
 <span class="nc" id="L258">                                    Header header = getReferencedHeader(openAPI, e.getValue());</span>
 <span class="nc bnc" id="L259" title="All 2 branches missed.">                                    if (header.getSchema() != null) {</span>
@@ -263,11 +263,11 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
 <span class="nc" id="L263">                                }</span>
                             }
                         }
-<span class="fc" id="L266">                    }</span>
+<span class="nc" id="L266">                    }</span>
                 }
 
                 //Callbacks:
-<span class="pc bpc" id="L270" title="1 of 2 branches missed.">                if (operation.getCallbacks() != null) {</span>
+<span class="nc bnc" id="L270" title="All 2 branches missed.">                if (operation.getCallbacks() != null) {</span>
 <span class="nc bnc" id="L271" title="All 2 branches missed.">                    for (Callback c : operation.getCallbacks().values()) {</span>
 <span class="nc" id="L272">                        Callback callback = getReferencedCallback(openAPI, c);</span>
 <span class="nc bnc" id="L273" title="All 2 branches missed.">                        if (callback != null) {</span>
@@ -277,38 +277,38 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
                         }
 <span class="nc" id="L278">                    }</span>
                 }
-<span class="fc" id="L280">            }</span>
+<span class="nc" id="L280">            }</span>
         }
         //Params:
-<span class="fc" id="L283">        visitParameters(openAPI, pathItem.getParameters(), visitor, visitedSchemas);</span>
-<span class="fc" id="L284">    }</span>
+<span class="nc" id="L283">        visitParameters(openAPI, pathItem.getParameters(), visitor, visitedSchemas);</span>
+<span class="nc" id="L284">    }</span>
 
     private static void visitParameters(OpenAPI openAPI, List&lt;Parameter&gt; parameters, OpenAPISchemaVisitor visitor,
                                         List&lt;String&gt; visitedSchemas) {
-<span class="fc bfc" id="L288" title="All 2 branches covered.">        if (parameters != null) {</span>
-<span class="fc bfc" id="L289" title="All 2 branches covered.">            for (Parameter p : parameters) {</span>
-<span class="fc" id="L290">                Parameter parameter = getReferencedParameter(openAPI, p);</span>
-<span class="pc bpc" id="L291" title="1 of 2 branches missed.">                if (parameter != null) {</span>
-<span class="pc bpc" id="L292" title="1 of 2 branches missed.">                    if (parameter.getSchema() != null) {</span>
-<span class="fc" id="L293">                        visitSchema(openAPI, parameter.getSchema(), null, visitedSchemas, visitor);</span>
+<span class="nc bnc" id="L288" title="All 2 branches missed.">        if (parameters != null) {</span>
+<span class="nc bnc" id="L289" title="All 2 branches missed.">            for (Parameter p : parameters) {</span>
+<span class="nc" id="L290">                Parameter parameter = getReferencedParameter(openAPI, p);</span>
+<span class="nc bnc" id="L291" title="All 2 branches missed.">                if (parameter != null) {</span>
+<span class="nc bnc" id="L292" title="All 2 branches missed.">                    if (parameter.getSchema() != null) {</span>
+<span class="nc" id="L293">                        visitSchema(openAPI, parameter.getSchema(), null, visitedSchemas, visitor);</span>
                     }
-<span class="fc" id="L295">                    visitContent(openAPI, parameter.getContent(), visitor, visitedSchemas);</span>
+<span class="nc" id="L295">                    visitContent(openAPI, parameter.getContent(), visitor, visitedSchemas);</span>
                 } else {
 <span class="nc" id="L297">                    once(LOGGER).warn(&quot;Unreferenced parameter(s) found.&quot;);</span>
                 }
-<span class="fc" id="L299">            }</span>
+<span class="nc" id="L299">            }</span>
         }
-<span class="fc" id="L301">    }</span>
+<span class="nc" id="L301">    }</span>
 
     private static void visitContent(OpenAPI openAPI, Content content, OpenAPISchemaVisitor visitor, List&lt;String&gt; visitedSchemas) {
-<span class="fc bfc" id="L304" title="All 2 branches covered.">        if (content != null) {</span>
-<span class="fc bfc" id="L305" title="All 2 branches covered.">            for (Entry&lt;String, MediaType&gt; e : content.entrySet()) {</span>
-<span class="pc bpc" id="L306" title="1 of 2 branches missed.">                if (e.getValue().getSchema() != null) {</span>
-<span class="fc" id="L307">                    visitSchema(openAPI, e.getValue().getSchema(), e.getKey(), visitedSchemas, visitor);</span>
+<span class="nc bnc" id="L304" title="All 2 branches missed.">        if (content != null) {</span>
+<span class="nc bnc" id="L305" title="All 2 branches missed.">            for (Entry&lt;String, MediaType&gt; e : content.entrySet()) {</span>
+<span class="nc bnc" id="L306" title="All 2 branches missed.">                if (e.getValue().getSchema() != null) {</span>
+<span class="nc" id="L307">                    visitSchema(openAPI, e.getValue().getSchema(), e.getKey(), visitedSchemas, visitor);</span>
                 }
-<span class="fc" id="L309">            }</span>
+<span class="nc" id="L309">            }</span>
         }
-<span class="fc" id="L311">    }</span>
+<span class="nc" id="L311">    }</span>
 
     /**
      * Invoke the specified visitor function for every schema that matches mimeType in the OpenAPI document.
@@ -323,22 +323,22 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @param visitor        the visitor function which is invoked for every visited schema.
      */
     private static void visitSchema(OpenAPI openAPI, Schema schema, String mimeType, List&lt;String&gt; visitedSchemas, OpenAPISchemaVisitor visitor) {
-<span class="pc bpc" id="L326" title="1 of 2 branches missed.">        if (schema == null) {</span>
+<span class="nc bnc" id="L326" title="All 2 branches missed.">        if (schema == null) {</span>
 <span class="nc" id="L327">            return;</span>
         }
 
-<span class="fc" id="L330">        visitor.visit(schema, mimeType);</span>
-<span class="fc bfc" id="L331" title="All 2 branches covered.">        if (schema.get$ref() != null) {</span>
-<span class="fc" id="L332">            String ref = getSimpleRef(schema.get$ref());</span>
-<span class="fc bfc" id="L333" title="All 2 branches covered.">            if (!visitedSchemas.contains(ref)) {</span>
-<span class="fc" id="L334">                visitedSchemas.add(ref);</span>
-<span class="fc" id="L335">                Schema referencedSchema = getSchemas(openAPI).get(ref);</span>
-<span class="pc bpc" id="L336" title="1 of 2 branches missed.">                if (referencedSchema != null) {</span>
-<span class="fc" id="L337">                    visitSchema(openAPI, referencedSchema, mimeType, visitedSchemas, visitor);</span>
+<span class="nc" id="L330">        visitor.visit(schema, mimeType);</span>
+<span class="nc bnc" id="L331" title="All 2 branches missed.">        if (schema.get$ref() != null) {</span>
+<span class="nc" id="L332">            String ref = getSimpleRef(schema.get$ref());</span>
+<span class="nc bnc" id="L333" title="All 2 branches missed.">            if (!visitedSchemas.contains(ref)) {</span>
+<span class="nc" id="L334">                visitedSchemas.add(ref);</span>
+<span class="nc" id="L335">                Schema referencedSchema = getSchemas(openAPI).get(ref);</span>
+<span class="nc bnc" id="L336" title="All 2 branches missed.">                if (referencedSchema != null) {</span>
+<span class="nc" id="L337">                    visitSchema(openAPI, referencedSchema, mimeType, visitedSchemas, visitor);</span>
                 }
             }
         }
-<span class="pc bpc" id="L341" title="1 of 2 branches missed.">        if (isComposedSchema(schema)) {</span>
+<span class="nc bnc" id="L341" title="All 2 branches missed.">        if (isComposedSchema(schema)) {</span>
 <span class="nc" id="L342">            List&lt;Schema&gt; oneOf = schema.getOneOf();</span>
 <span class="nc bnc" id="L343" title="All 2 branches missed.">            if (oneOf != null) {</span>
 <span class="nc bnc" id="L344" title="All 2 branches missed.">                for (Schema s : oneOf) {</span>
@@ -357,35 +357,35 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
 <span class="nc" id="L357">                    visitSchema(openAPI, s, mimeType, visitedSchemas, visitor);</span>
 <span class="nc" id="L358">                }</span>
             }
-<span class="pc bfc" id="L360" title="All 2 branches covered.">        } else if (ModelUtils.isArraySchema(schema)) {</span>
-<span class="fc" id="L361">            Schema itemsSchema = ModelUtils.getSchemaItems(schema);</span>
-<span class="pc bpc" id="L362" title="1 of 2 branches missed.">            if (itemsSchema != null) {</span>
-<span class="fc" id="L363">                visitSchema(openAPI, itemsSchema, mimeType, visitedSchemas, visitor);</span>
+<span class="nc bnc" id="L360" title="All 2 branches missed.">        } else if (ModelUtils.isArraySchema(schema)) {</span>
+<span class="nc" id="L361">            Schema itemsSchema = ModelUtils.getSchemaItems(schema);</span>
+<span class="nc bnc" id="L362" title="All 2 branches missed.">            if (itemsSchema != null) {</span>
+<span class="nc" id="L363">                visitSchema(openAPI, itemsSchema, mimeType, visitedSchemas, visitor);</span>
             }
-<span class="pc bpc" id="L365" title="1 of 2 branches missed.">        } else if (isMapSchema(schema)) {</span>
+<span class="nc bnc" id="L365" title="All 2 branches missed.">        } else if (isMapSchema(schema)) {</span>
 <span class="nc" id="L366">            Object additionalProperties = schema.getAdditionalProperties();</span>
 <span class="nc bnc" id="L367" title="All 2 branches missed.">            if (additionalProperties instanceof Schema) {</span>
 <span class="nc" id="L368">                visitSchema(openAPI, (Schema) additionalProperties, mimeType, visitedSchemas, visitor);</span>
             }
         }
-<span class="pc bpc" id="L371" title="1 of 2 branches missed.">        if (schema.getNot() != null) {</span>
+<span class="nc bnc" id="L371" title="All 2 branches missed.">        if (schema.getNot() != null) {</span>
 <span class="nc" id="L372">            visitSchema(openAPI, schema.getNot(), mimeType, visitedSchemas, visitor);</span>
         }
-<span class="fc" id="L374">        Map&lt;String, Schema&gt; properties = schema.getProperties();</span>
-<span class="fc bfc" id="L375" title="All 2 branches covered.">        if (properties != null) {</span>
-<span class="fc bfc" id="L376" title="All 2 branches covered.">            for (Schema property : properties.values()) {</span>
-<span class="fc" id="L377">                visitSchema(openAPI, property, null, visitedSchemas, visitor);</span>
-<span class="fc" id="L378">            }</span>
+<span class="nc" id="L374">        Map&lt;String, Schema&gt; properties = schema.getProperties();</span>
+<span class="nc bnc" id="L375" title="All 2 branches missed.">        if (properties != null) {</span>
+<span class="nc bnc" id="L376" title="All 2 branches missed.">            for (Schema property : properties.values()) {</span>
+<span class="nc" id="L377">                visitSchema(openAPI, property, null, visitedSchemas, visitor);</span>
+<span class="nc" id="L378">            }</span>
         }
-<span class="fc" id="L380">    }</span>
+<span class="nc" id="L380">    }</span>
 
     public static String getSimpleRef(String ref) {
-<span class="pc bpc" id="L383" title="1 of 2 branches missed.">        if (ref == null) {</span>
+<span class="nc bnc" id="L383" title="All 2 branches missed.">        if (ref == null) {</span>
 <span class="nc" id="L384">            once(LOGGER).warn(&quot;Failed to get the schema name: null&quot;);</span>
             //throw new RuntimeException(&quot;Failed to get the schema: null&quot;);
 <span class="nc" id="L386">            return null;</span>
-<span class="pc bpc" id="L387" title="1 of 2 branches missed.">        } else if (ref.startsWith(&quot;#/components/&quot;)) {</span>
-<span class="fc" id="L388">            ref = ref.substring(ref.lastIndexOf(&quot;/&quot;) + 1);</span>
+<span class="nc bnc" id="L387" title="All 2 branches missed.">        } else if (ref.startsWith(&quot;#/components/&quot;)) {</span>
+<span class="nc" id="L388">            ref = ref.substring(ref.lastIndexOf(&quot;/&quot;) + 1);</span>
 <span class="nc bnc" id="L389" title="All 2 branches missed.">        } else if (ref.startsWith(&quot;#/definitions/&quot;)) {</span>
 <span class="nc" id="L390">            ref = ref.substring(ref.lastIndexOf(&quot;/&quot;) + 1);</span>
         } else {
@@ -395,19 +395,19 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
         }
 
         try {
-<span class="fc" id="L398">            ref = URLDecoder.decode(ref, &quot;UTF-8&quot;);</span>
+<span class="nc" id="L398">            ref = URLDecoder.decode(ref, &quot;UTF-8&quot;);</span>
 <span class="nc" id="L399">        } catch (UnsupportedEncodingException ignored) {</span>
 <span class="nc" id="L400">            once(LOGGER).warn(&quot;Found UnsupportedEncodingException: {}&quot;, ref);</span>
-<span class="fc" id="L401">        }</span>
+<span class="nc" id="L401">        }</span>
 
         // see https://tools.ietf.org/html/rfc6901#section-3
         // Because the characters '~' (%x7E) and '/' (%x2F) have special meanings in
         // JSON Pointer, '~' needs to be encoded as '~0' and '/' needs to be encoded
         // as '~1' when these characters appear in a reference token.
         // This reverses that encoding.
-<span class="fc" id="L408">        ref = ref.replace(&quot;~1&quot;, &quot;/&quot;).replace(&quot;~0&quot;, &quot;~&quot;);</span>
+<span class="nc" id="L408">        ref = ref.replace(&quot;~1&quot;, &quot;/&quot;).replace(&quot;~0&quot;, &quot;~&quot;);</span>
 
-<span class="fc" id="L410">        return ref;</span>
+<span class="nc" id="L410">        return ref;</span>
     }
 
     /**
@@ -419,7 +419,7 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return true if the specified schema is an Object schema.
      */
     public static boolean isTypeObjectSchema(Schema schema) {
-<span class="fc" id="L422">        return SchemaTypeUtil.OBJECT_TYPE.equals(getType(schema));</span>
+<span class="nc" id="L422">        return SchemaTypeUtil.OBJECT_TYPE.equals(getType(schema));</span>
     }
 
     /**
@@ -445,15 +445,15 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return true if the specified schema is an Object schema.
      */
     public static boolean isObjectSchema(Schema schema) {
-<span class="pc bpc" id="L448" title="1 of 2 branches missed.">        if (schema == null) {</span>
+<span class="nc bnc" id="L448" title="All 2 branches missed.">        if (schema == null) {</span>
 <span class="nc" id="L449">            return false;</span>
         }
 
-<span class="fc bfc" id="L452" title="All 2 branches covered.">        return (schema instanceof ObjectSchema) ||</span>
+<span class="nc bnc" id="L452" title="All 2 branches missed.">        return (schema instanceof ObjectSchema) ||</span>
                 // must not be a map
-<span class="pc bpc" id="L454" title="1 of 4 branches missed.">                (SchemaTypeUtil.OBJECT_TYPE.equals(getType(schema)) &amp;&amp; !(ModelUtils.isMapSchema(schema))) ||</span>
+<span class="nc bnc" id="L454" title="All 4 branches missed.">                (SchemaTypeUtil.OBJECT_TYPE.equals(getType(schema)) &amp;&amp; !(ModelUtils.isMapSchema(schema))) ||</span>
                 // must have at least one property
-<span class="pc bpc" id="L456" title="5 of 6 branches missed.">                (getType(schema) == null &amp;&amp; schema.getProperties() != null &amp;&amp; !schema.getProperties().isEmpty());</span>
+<span class="nc bnc" id="L456" title="All 6 branches missed.">                (getType(schema) == null &amp;&amp; schema.getProperties() != null &amp;&amp; !schema.getProperties().isEmpty());</span>
     }
 
     /**
@@ -464,32 +464,32 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return true if the specified schema is a Composed schema.
      */
     public static boolean isComposedSchema(Schema schema) {
-<span class="pc bpc" id="L467" title="1 of 2 branches missed.">        if (schema == null) {</span>
+<span class="nc bnc" id="L467" title="All 2 branches missed.">        if (schema == null) {</span>
 <span class="nc" id="L468">            return false;</span>
         }
 
         // in 3.0, ComposeSchema is used for anyOf/oneOf/allOf
         // in 3.1, it's not the case so we need more checks below
-<span class="pc bpc" id="L473" title="1 of 2 branches missed.">        if (schema instanceof ComposedSchema) {</span>
+<span class="nc bnc" id="L473" title="All 2 branches missed.">        if (schema instanceof ComposedSchema) {</span>
 <span class="nc" id="L474">            return true;</span>
         }
 
         // has oneOf
-<span class="pc bpc" id="L478" title="1 of 2 branches missed.">        if (schema.getOneOf() != null) {</span>
+<span class="nc bnc" id="L478" title="All 2 branches missed.">        if (schema.getOneOf() != null) {</span>
 <span class="nc" id="L479">            return true;</span>
         }
 
         // has anyOf
-<span class="pc bpc" id="L483" title="1 of 2 branches missed.">        if (schema.getAnyOf() != null) {</span>
+<span class="nc bnc" id="L483" title="All 2 branches missed.">        if (schema.getAnyOf() != null) {</span>
 <span class="nc" id="L484">            return true;</span>
         }
 
         // has allOf
-<span class="pc bpc" id="L488" title="1 of 2 branches missed.">        if (schema.getAllOf() != null) {</span>
+<span class="nc bnc" id="L488" title="All 2 branches missed.">        if (schema.getAllOf() != null) {</span>
 <span class="nc" id="L489">            return true;</span>
         }
 
-<span class="fc" id="L492">        return false;</span>
+<span class="nc" id="L492">        return false;</span>
     }
 
     /**
@@ -556,22 +556,22 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return true if the specified schema is a Map schema.
      */
     public static boolean isMapSchema(Schema schema) {
-<span class="pc bpc" id="L559" title="1 of 2 branches missed.">        if (schema == null) {</span>
+<span class="nc bnc" id="L559" title="All 2 branches missed.">        if (schema == null) {</span>
 <span class="nc" id="L560">            return false;</span>
         }
 
         // additionalProperties explicitly set to false
-<span class="pc bpc" id="L564" title="3 of 4 branches missed.">        if (schema.getAdditionalProperties() instanceof Boolean &amp;&amp; Boolean.FALSE.equals(schema.getAdditionalProperties())) {</span>
+<span class="nc bnc" id="L564" title="All 4 branches missed.">        if (schema.getAdditionalProperties() instanceof Boolean &amp;&amp; Boolean.FALSE.equals(schema.getAdditionalProperties())) {</span>
 <span class="nc" id="L565">            return false;</span>
         }
 
-<span class="fc bfc" id="L568" title="All 2 branches covered.">        if (schema instanceof JsonSchema) { // 3.1 spec</span>
-<span class="pc bpc" id="L569" title="1 of 2 branches missed.">            return ((schema.getAdditionalProperties() instanceof JsonSchema) ||</span>
-<span class="pc bpc" id="L570" title="3 of 4 branches missed.">                    (schema.getAdditionalProperties() instanceof Boolean &amp;&amp; (Boolean) schema.getAdditionalProperties()));</span>
+<span class="nc bnc" id="L568" title="All 2 branches missed.">        if (schema instanceof JsonSchema) { // 3.1 spec</span>
+<span class="nc bnc" id="L569" title="All 2 branches missed.">            return ((schema.getAdditionalProperties() instanceof JsonSchema) ||</span>
+<span class="nc bnc" id="L570" title="All 4 branches missed.">                    (schema.getAdditionalProperties() instanceof Boolean &amp;&amp; (Boolean) schema.getAdditionalProperties()));</span>
         } else { // 3.0 or 2.x spec
-<span class="pc bpc" id="L572" title="1 of 2 branches missed.">            return (schema instanceof MapSchema) ||</span>
-<span class="pc bpc" id="L573" title="1 of 2 branches missed.">                    (schema.getAdditionalProperties() instanceof Schema) ||</span>
-<span class="pc bpc" id="L574" title="3 of 4 branches missed.">                    (schema.getAdditionalProperties() instanceof Boolean &amp;&amp; (Boolean) schema.getAdditionalProperties());</span>
+<span class="nc bnc" id="L572" title="All 2 branches missed.">            return (schema instanceof MapSchema) ||</span>
+<span class="nc bnc" id="L573" title="All 2 branches missed.">                    (schema.getAdditionalProperties() instanceof Schema) ||</span>
+<span class="nc bnc" id="L574" title="All 4 branches missed.">                    (schema.getAdditionalProperties() instanceof Boolean &amp;&amp; (Boolean) schema.getAdditionalProperties());</span>
         }
     }
 
@@ -582,10 +582,10 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return true if the specified schema is an Array schema.
      */
     public static boolean isArraySchema(Schema schema) {
-<span class="pc bpc" id="L585" title="1 of 2 branches missed.">        if (schema == null) {</span>
+<span class="nc bnc" id="L585" title="All 2 branches missed.">        if (schema == null) {</span>
 <span class="nc" id="L586">            return false;</span>
         }
-<span class="pc bpc" id="L588" title="1 of 4 branches missed.">        return (schema instanceof ArraySchema) || &quot;array&quot;.equals(getType(schema));</span>
+<span class="nc bnc" id="L588" title="All 4 branches missed.">        return (schema instanceof ArraySchema) || &quot;array&quot;.equals(getType(schema));</span>
     }
 
     /**
@@ -595,12 +595,12 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return item schema.
      */
     public static Schema&lt;?&gt; getSchemaItems(Schema schema) {
-<span class="pc bpc" id="L598" title="1 of 2 branches missed.">        if (!isArraySchema(schema)) {</span>
+<span class="nc bnc" id="L598" title="All 2 branches missed.">        if (!isArraySchema(schema)) {</span>
 <span class="nc" id="L599">            return null;</span>
         }
 
-<span class="fc" id="L602">        Schema&lt;?&gt; items = schema.getItems();</span>
-<span class="pc bpc" id="L603" title="1 of 2 branches missed.">        if (items == null) {</span>
+<span class="nc" id="L602">        Schema&lt;?&gt; items = schema.getItems();</span>
+<span class="nc bnc" id="L603" title="All 2 branches missed.">        if (items == null) {</span>
 <span class="nc bnc" id="L604" title="All 2 branches missed.">            if (schema instanceof JsonSchema) { // 3.1 spec</span>
                 // do nothing as the schema may contain prefixItems only
             } else { // 3.0 spec, default to string
@@ -609,51 +609,51 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
 <span class="nc" id="L609">                schema.setItems(items);</span>
             }
         }
-<span class="fc" id="L612">        return items;</span>
+<span class="nc" id="L612">        return items;</span>
     }
 
     public static boolean isSet(Schema schema) {
-<span class="pc bpc" id="L616" title="2 of 4 branches missed.">        return ModelUtils.isArraySchema(schema) &amp;&amp; Boolean.TRUE.equals(schema.getUniqueItems());</span>
+<span class="nc bnc" id="L616" title="All 4 branches missed.">        return ModelUtils.isArraySchema(schema) &amp;&amp; Boolean.TRUE.equals(schema.getUniqueItems());</span>
     }
 
     public static boolean isStringSchema(Schema schema) {
-<span class="fc bfc" id="L620" title="All 4 branches covered.">        return schema instanceof StringSchema || SchemaTypeUtil.STRING_TYPE.equals(getType(schema));</span>
+<span class="nc bnc" id="L620" title="All 4 branches missed.">        return schema instanceof StringSchema || SchemaTypeUtil.STRING_TYPE.equals(getType(schema));</span>
     }
 
     public static boolean isIntegerSchema(Schema schema) {
-<span class="fc bfc" id="L624" title="All 4 branches covered.">        return schema instanceof IntegerSchema || SchemaTypeUtil.INTEGER_TYPE.equals(getType(schema));</span>
+<span class="nc bnc" id="L624" title="All 4 branches missed.">        return schema instanceof IntegerSchema || SchemaTypeUtil.INTEGER_TYPE.equals(getType(schema));</span>
     }
 
     public static boolean isShortSchema(Schema schema) {
         // format: short (int32)
-<span class="pc bpc" id="L629" title="1 of 2 branches missed.">        return SchemaTypeUtil.INTEGER_TYPE.equals(getType(schema)) // type: integer</span>
-<span class="pc bpc" id="L630" title="1 of 2 branches missed.">                &amp;&amp; SchemaTypeUtil.INTEGER32_FORMAT.equals(schema.getFormat());</span>
+<span class="nc bnc" id="L629" title="All 2 branches missed.">        return SchemaTypeUtil.INTEGER_TYPE.equals(getType(schema)) // type: integer</span>
+<span class="nc bnc" id="L630" title="All 2 branches missed.">                &amp;&amp; SchemaTypeUtil.INTEGER32_FORMAT.equals(schema.getFormat());</span>
     }
 
     public static boolean isUnsignedIntegerSchema(Schema schema) {
-<span class="pc bpc" id="L634" title="1 of 2 branches missed.">        return SchemaTypeUtil.INTEGER_TYPE.equals(getType(schema)) &amp;&amp; // type: integer</span>
-<span class="pc bpc" id="L635" title="1 of 4 branches missed.">                (&quot;int32&quot;.equals(schema.getFormat()) || schema.getFormat() == null) &amp;&amp; // format: int32</span>
-<span class="pc bpc" id="L636" title="3 of 4 branches missed.">                (schema.getExtensions() != null &amp;&amp; (Boolean) schema.getExtensions().getOrDefault(&quot;x-unsigned&quot;, Boolean.FALSE));</span>
+<span class="nc bnc" id="L634" title="All 2 branches missed.">        return SchemaTypeUtil.INTEGER_TYPE.equals(getType(schema)) &amp;&amp; // type: integer</span>
+<span class="nc bnc" id="L635" title="All 4 branches missed.">                (&quot;int32&quot;.equals(schema.getFormat()) || schema.getFormat() == null) &amp;&amp; // format: int32</span>
+<span class="nc bnc" id="L636" title="All 4 branches missed.">                (schema.getExtensions() != null &amp;&amp; (Boolean) schema.getExtensions().getOrDefault(&quot;x-unsigned&quot;, Boolean.FALSE));</span>
     }
 
     public static boolean isLongSchema(Schema schema) {
         // format: long (int64)
-<span class="pc bpc" id="L641" title="1 of 2 branches missed.">        return SchemaTypeUtil.INTEGER_TYPE.equals(getType(schema)) // type: integer</span>
-<span class="fc bfc" id="L642" title="All 2 branches covered.">                &amp;&amp; SchemaTypeUtil.INTEGER64_FORMAT.equals(schema.getFormat());</span>
+<span class="nc bnc" id="L641" title="All 2 branches missed.">        return SchemaTypeUtil.INTEGER_TYPE.equals(getType(schema)) // type: integer</span>
+<span class="nc bnc" id="L642" title="All 2 branches missed.">                &amp;&amp; SchemaTypeUtil.INTEGER64_FORMAT.equals(schema.getFormat());</span>
     }
 
     public static boolean isUnsignedLongSchema(Schema schema) {
-<span class="pc bpc" id="L646" title="1 of 2 branches missed.">        return SchemaTypeUtil.INTEGER_TYPE.equals(getType(schema)) &amp;&amp; // type: integer</span>
-<span class="fc bfc" id="L647" title="All 2 branches covered.">                &quot;int64&quot;.equals(schema.getFormat()) &amp;&amp; // format: int64</span>
-<span class="pc bpc" id="L648" title="3 of 4 branches missed.">                (schema.getExtensions() != null &amp;&amp; (Boolean) schema.getExtensions().getOrDefault(&quot;x-unsigned&quot;, Boolean.FALSE));</span>
+<span class="nc bnc" id="L646" title="All 2 branches missed.">        return SchemaTypeUtil.INTEGER_TYPE.equals(getType(schema)) &amp;&amp; // type: integer</span>
+<span class="nc bnc" id="L647" title="All 2 branches missed.">                &quot;int64&quot;.equals(schema.getFormat()) &amp;&amp; // format: int64</span>
+<span class="nc bnc" id="L648" title="All 4 branches missed.">                (schema.getExtensions() != null &amp;&amp; (Boolean) schema.getExtensions().getOrDefault(&quot;x-unsigned&quot;, Boolean.FALSE));</span>
     }
 
     public static boolean isBooleanSchema(Schema schema) {
-<span class="pc bpc" id="L652" title="1 of 4 branches missed.">        return schema instanceof BooleanSchema || SchemaTypeUtil.BOOLEAN_TYPE.equals(getType(schema));</span>
+<span class="nc bnc" id="L652" title="All 4 branches missed.">        return schema instanceof BooleanSchema || SchemaTypeUtil.BOOLEAN_TYPE.equals(getType(schema));</span>
     }
 
     public static boolean isNumberSchema(Schema schema) {
-<span class="pc bpc" id="L656" title="2 of 4 branches missed.">        return schema instanceof NumberSchema || SchemaTypeUtil.NUMBER_TYPE.equals(getType(schema));</span>
+<span class="nc bnc" id="L656" title="All 4 branches missed.">        return schema instanceof NumberSchema || SchemaTypeUtil.NUMBER_TYPE.equals(getType(schema));</span>
     }
 
     public static boolean isFloatSchema(Schema schema) {
@@ -669,70 +669,70 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
     }
 
     public static boolean isDateSchema(Schema schema) {
-<span class="pc bpc" id="L672" title="1 of 2 branches missed.">        return (schema instanceof DateSchema) ||</span>
+<span class="nc bnc" id="L672" title="All 2 branches missed.">        return (schema instanceof DateSchema) ||</span>
                 // format: date
-<span class="fc bfc" id="L674" title="All 2 branches covered.">                (SchemaTypeUtil.STRING_TYPE.equals(getType(schema))</span>
-<span class="fc bfc" id="L675" title="All 2 branches covered.">                        &amp;&amp; SchemaTypeUtil.DATE_FORMAT.equals(schema.getFormat()));</span>
+<span class="nc bnc" id="L674" title="All 2 branches missed.">                (SchemaTypeUtil.STRING_TYPE.equals(getType(schema))</span>
+<span class="nc bnc" id="L675" title="All 2 branches missed.">                        &amp;&amp; SchemaTypeUtil.DATE_FORMAT.equals(schema.getFormat()));</span>
     }
 
     public static boolean isDateTimeSchema(Schema schema) {
-<span class="pc bpc" id="L679" title="1 of 2 branches missed.">        return (schema instanceof DateTimeSchema) ||</span>
+<span class="nc bnc" id="L679" title="All 2 branches missed.">        return (schema instanceof DateTimeSchema) ||</span>
                 // format: date-time
-<span class="fc bfc" id="L681" title="All 2 branches covered.">                (SchemaTypeUtil.STRING_TYPE.equals(getType(schema))</span>
-<span class="pc bpc" id="L682" title="1 of 2 branches missed.">                        &amp;&amp; SchemaTypeUtil.DATE_TIME_FORMAT.equals(schema.getFormat()));</span>
+<span class="nc bnc" id="L681" title="All 2 branches missed.">                (SchemaTypeUtil.STRING_TYPE.equals(getType(schema))</span>
+<span class="nc bnc" id="L682" title="All 2 branches missed.">                        &amp;&amp; SchemaTypeUtil.DATE_TIME_FORMAT.equals(schema.getFormat()));</span>
     }
 
     public static boolean isPasswordSchema(Schema schema) {
-<span class="pc bpc" id="L686" title="1 of 2 branches missed.">        return (schema instanceof PasswordSchema) ||</span>
+<span class="nc bnc" id="L686" title="All 2 branches missed.">        return (schema instanceof PasswordSchema) ||</span>
                 // double
-<span class="fc bfc" id="L688" title="All 2 branches covered.">                (SchemaTypeUtil.STRING_TYPE.equals(getType(schema))</span>
-<span class="pc bpc" id="L689" title="1 of 2 branches missed.">                        &amp;&amp; SchemaTypeUtil.PASSWORD_FORMAT.equals(schema.getFormat()));</span>
+<span class="nc bnc" id="L688" title="All 2 branches missed.">                (SchemaTypeUtil.STRING_TYPE.equals(getType(schema))</span>
+<span class="nc bnc" id="L689" title="All 2 branches missed.">                        &amp;&amp; SchemaTypeUtil.PASSWORD_FORMAT.equals(schema.getFormat()));</span>
     }
 
     public static boolean isByteArraySchema(Schema schema) {
-<span class="pc bpc" id="L693" title="1 of 2 branches missed.">        return (schema instanceof ByteArraySchema) ||</span>
+<span class="nc bnc" id="L693" title="All 2 branches missed.">        return (schema instanceof ByteArraySchema) ||</span>
                 // format: byte
-<span class="fc bfc" id="L695" title="All 2 branches covered.">                (SchemaTypeUtil.STRING_TYPE.equals(getType(schema))</span>
-<span class="pc bpc" id="L696" title="1 of 2 branches missed.">                        &amp;&amp; SchemaTypeUtil.BYTE_FORMAT.equals(schema.getFormat()));</span>
+<span class="nc bnc" id="L695" title="All 2 branches missed.">                (SchemaTypeUtil.STRING_TYPE.equals(getType(schema))</span>
+<span class="nc bnc" id="L696" title="All 2 branches missed.">                        &amp;&amp; SchemaTypeUtil.BYTE_FORMAT.equals(schema.getFormat()));</span>
     }
 
     public static boolean isBinarySchema(Schema schema) {
-<span class="pc bpc" id="L700" title="1 of 2 branches missed.">        return (schema instanceof BinarySchema) ||</span>
+<span class="nc bnc" id="L700" title="All 2 branches missed.">        return (schema instanceof BinarySchema) ||</span>
                 // format: binary
-<span class="fc bfc" id="L702" title="All 2 branches covered.">                (SchemaTypeUtil.STRING_TYPE.equals(getType(schema))</span>
-<span class="pc bpc" id="L703" title="1 of 2 branches missed.">                        &amp;&amp; SchemaTypeUtil.BINARY_FORMAT.equals(schema.getFormat()));</span>
+<span class="nc bnc" id="L702" title="All 2 branches missed.">                (SchemaTypeUtil.STRING_TYPE.equals(getType(schema))</span>
+<span class="nc bnc" id="L703" title="All 2 branches missed.">                        &amp;&amp; SchemaTypeUtil.BINARY_FORMAT.equals(schema.getFormat()));</span>
     }
 
     public static boolean isFileSchema(Schema schema) {
-<span class="pc bpc" id="L707" title="1 of 2 branches missed.">        return (schema instanceof FileSchema) ||</span>
+<span class="nc bnc" id="L707" title="All 2 branches missed.">        return (schema instanceof FileSchema) ||</span>
                 // file type in oas2 mapped to binary in oas3
-<span class="pc bpc" id="L709" title="1 of 2 branches missed.">                isBinarySchema(schema);</span>
+<span class="nc bnc" id="L709" title="All 2 branches missed.">                isBinarySchema(schema);</span>
     }
 
     public static boolean isUUIDSchema(Schema schema) {
-<span class="pc bpc" id="L713" title="1 of 2 branches missed.">        return (schema instanceof UUIDSchema) ||</span>
+<span class="nc bnc" id="L713" title="All 2 branches missed.">        return (schema instanceof UUIDSchema) ||</span>
                 // format: uuid
-<span class="fc bfc" id="L715" title="All 2 branches covered.">                (SchemaTypeUtil.STRING_TYPE.equals(getType(schema))</span>
-<span class="pc bpc" id="L716" title="1 of 2 branches missed.">                        &amp;&amp; SchemaTypeUtil.UUID_FORMAT.equals(schema.getFormat()));</span>
+<span class="nc bnc" id="L715" title="All 2 branches missed.">                (SchemaTypeUtil.STRING_TYPE.equals(getType(schema))</span>
+<span class="nc bnc" id="L716" title="All 2 branches missed.">                        &amp;&amp; SchemaTypeUtil.UUID_FORMAT.equals(schema.getFormat()));</span>
     }
 
     public static boolean isURISchema(Schema schema) {
         // format: uri
-<span class="fc bfc" id="L721" title="All 2 branches covered.">        return SchemaTypeUtil.STRING_TYPE.equals(getType(schema))</span>
-<span class="pc bpc" id="L722" title="1 of 2 branches missed.">                &amp;&amp; URI_FORMAT.equals(schema.getFormat());</span>
+<span class="nc bnc" id="L721" title="All 2 branches missed.">        return SchemaTypeUtil.STRING_TYPE.equals(getType(schema))</span>
+<span class="nc bnc" id="L722" title="All 2 branches missed.">                &amp;&amp; URI_FORMAT.equals(schema.getFormat());</span>
     }
 
     public static boolean isEmailSchema(Schema schema) {
-<span class="pc bpc" id="L726" title="1 of 2 branches missed.">        return (schema instanceof EmailSchema) ||</span>
+<span class="nc bnc" id="L726" title="All 2 branches missed.">        return (schema instanceof EmailSchema) ||</span>
                 // format: email
-<span class="pc bpc" id="L728" title="1 of 2 branches missed.">                (SchemaTypeUtil.STRING_TYPE.equals(getType(schema))</span>
-<span class="fc bfc" id="L729" title="All 2 branches covered.">                        &amp;&amp; SchemaTypeUtil.EMAIL_FORMAT.equals(schema.getFormat()));</span>
+<span class="nc bnc" id="L728" title="All 2 branches missed.">                (SchemaTypeUtil.STRING_TYPE.equals(getType(schema))</span>
+<span class="nc bnc" id="L729" title="All 2 branches missed.">                        &amp;&amp; SchemaTypeUtil.EMAIL_FORMAT.equals(schema.getFormat()));</span>
     }
 
     public static boolean isDecimalSchema(Schema schema) {
         // format: number
-<span class="fc bfc" id="L734" title="All 2 branches covered.">        return SchemaTypeUtil.STRING_TYPE.equals(getType(schema)) // type: string</span>
-<span class="pc bpc" id="L735" title="1 of 2 branches missed.">                &amp;&amp; &quot;number&quot;.equals(schema.getFormat());</span>
+<span class="nc bnc" id="L734" title="All 2 branches missed.">        return SchemaTypeUtil.STRING_TYPE.equals(getType(schema)) // type: string</span>
+<span class="nc bnc" id="L735" title="All 2 branches missed.">                &amp;&amp; &quot;number&quot;.equals(schema.getFormat());</span>
     }
 
     /**
@@ -767,11 +767,11 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return true if it's a model with at least one properties
      */
     public static boolean isModel(Schema schema) {
-<span class="pc bpc" id="L770" title="1 of 2 branches missed.">        return (schema != null) &amp;&amp;</span>
+<span class="nc bnc" id="L770" title="All 2 branches missed.">        return (schema != null) &amp;&amp;</span>
                 // has properties
-<span class="pc bpc" id="L772" title="2 of 4 branches missed.">                ((null != schema.getProperties() &amp;&amp; !schema.getProperties().isEmpty())</span>
+<span class="nc bnc" id="L772" title="All 4 branches missed.">                ((null != schema.getProperties() &amp;&amp; !schema.getProperties().isEmpty())</span>
                         // composed schema is a model, consider very simple ObjectSchema a model
-<span class="pc bnc" id="L774" title="All 4 branches missed.">                        || isComposedSchema(schema)</span>
+<span class="nc bnc" id="L774" title="All 4 branches missed.">                        || isComposedSchema(schema)</span>
                         || schema instanceof ObjectSchema);
     }
 
@@ -782,12 +782,12 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return true if it's a model with at least one properties
      */
     public static boolean isModelWithPropertiesOnly(Schema schema) {
-<span class="pc bpc" id="L785" title="1 of 2 branches missed.">        return (schema != null) &amp;&amp;</span>
+<span class="nc bnc" id="L785" title="All 2 branches missed.">        return (schema != null) &amp;&amp;</span>
                 // has properties
-<span class="pc bpc" id="L787" title="1 of 4 branches missed.">                (null != schema.getProperties() &amp;&amp; !schema.getProperties().isEmpty()) &amp;&amp;</span>
+<span class="nc bnc" id="L787" title="All 4 branches missed.">                (null != schema.getProperties() &amp;&amp; !schema.getProperties().isEmpty()) &amp;&amp;</span>
                 // no additionalProperties is set
-<span class="pc bpc" id="L789" title="1 of 2 branches missed.">                (schema.getAdditionalProperties() == null ||</span>
-<span class="pc bnc" id="L790" title="All 4 branches missed.">                        (schema.getAdditionalProperties() instanceof Boolean &amp;&amp; !(Boolean) schema.getAdditionalProperties()));</span>
+<span class="nc bnc" id="L789" title="All 2 branches missed.">                (schema.getAdditionalProperties() == null ||</span>
+<span class="nc bnc" id="L790" title="All 4 branches missed.">                        (schema.getAdditionalProperties() instanceof Boolean &amp;&amp; !(Boolean) schema.getAdditionalProperties()));</span>
     }
 
     public static boolean hasValidation(Schema sc) {
@@ -839,39 +839,39 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return true if it's a free-form object
      */
     public static boolean isFreeFormObject(Schema schema) {
-<span class="pc bpc" id="L842" title="1 of 2 branches missed.">        if (schema == null) {</span>
+<span class="nc bnc" id="L842" title="All 2 branches missed.">        if (schema == null) {</span>
             // TODO: Is this message necessary? A null schema is not a free-form object, so the result is correct.
 <span class="nc" id="L844">            once(LOGGER).error(&quot;Schema cannot be null in isFreeFormObject check&quot;);</span>
 <span class="nc" id="L845">            return false;</span>
         }
 
-<span class="fc bfc" id="L848" title="All 2 branches covered.">        if (schema instanceof JsonSchema) { // 3.1 spec</span>
-<span class="pc bpc" id="L849" title="1 of 2 branches missed.">            if (isComposedSchema(schema)) { // composed schema, e.g. allOf, oneOf, anyOf</span>
+<span class="nc bnc" id="L848" title="All 2 branches missed.">        if (schema instanceof JsonSchema) { // 3.1 spec</span>
+<span class="nc bnc" id="L849" title="All 2 branches missed.">            if (isComposedSchema(schema)) { // composed schema, e.g. allOf, oneOf, anyOf</span>
 <span class="nc" id="L850">                return false;</span>
             }
 
-<span class="pc bpc" id="L853" title="1 of 4 branches missed.">            if (schema.getProperties() != null &amp;&amp; !schema.getProperties().isEmpty()) { // has properties</span>
-<span class="fc" id="L854">                return false;</span>
+<span class="nc bnc" id="L853" title="All 4 branches missed.">            if (schema.getProperties() != null &amp;&amp; !schema.getProperties().isEmpty()) { // has properties</span>
+<span class="nc" id="L854">                return false;</span>
             }
 
-<span class="pc bpc" id="L857" title="3 of 4 branches missed.">            if (schema.getAdditionalProperties() instanceof Boolean &amp;&amp; (Boolean) schema.getAdditionalProperties()) {</span>
+<span class="nc bnc" id="L857" title="All 4 branches missed.">            if (schema.getAdditionalProperties() instanceof Boolean &amp;&amp; (Boolean) schema.getAdditionalProperties()) {</span>
 <span class="nc" id="L858">                return true;</span>
-<span class="pc bpc" id="L859" title="1 of 2 branches missed.">            } else if (schema.getAdditionalProperties() instanceof JsonSchema) {</span>
+<span class="nc bnc" id="L859" title="All 2 branches missed.">            } else if (schema.getAdditionalProperties() instanceof JsonSchema) {</span>
 <span class="nc" id="L860">                return true;</span>
-<span class="fc bfc" id="L861" title="All 2 branches covered.">            } else if (schema.getTypes() != null) {</span>
-<span class="pc bpc" id="L862" title="1 of 2 branches missed.">                if (schema.getTypes().size() == 1) { // types = [object]</span>
-<span class="fc" id="L863">                    return SchemaTypeUtil.OBJECT_TYPE.equals(schema.getTypes().iterator().next());</span>
+<span class="nc bnc" id="L861" title="All 2 branches missed.">            } else if (schema.getTypes() != null) {</span>
+<span class="nc bnc" id="L862" title="All 2 branches missed.">                if (schema.getTypes().size() == 1) { // types = [object]</span>
+<span class="nc" id="L863">                    return SchemaTypeUtil.OBJECT_TYPE.equals(schema.getTypes().iterator().next());</span>
                 } else { // has more than 1 type, e.g. types = [integer, string]
 <span class="nc" id="L865">                    return false;</span>
                 }
             }
 
-<span class="fc" id="L869">            return false;</span>
+<span class="nc" id="L869">            return false;</span>
         }
 
         // 3.0.x spec or 2.x spec
         // not free-form if allOf, anyOf, oneOf is not empty
-<span class="pc bpc" id="L874" title="1 of 2 branches missed.">        if (isComposedSchema(schema)) {</span>
+<span class="nc bnc" id="L874" title="All 2 branches missed.">        if (isComposedSchema(schema)) {</span>
 <span class="nc" id="L875">            List&lt;Schema&gt; interfaces = ModelUtils.getInterfaces(schema);</span>
 <span class="nc bnc" id="L876" title="All 4 branches missed.">            if (interfaces != null &amp;&amp; !interfaces.isEmpty()) {</span>
 <span class="nc" id="L877">                return false;</span>
@@ -879,9 +879,9 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
         }
 
         // has at least one property
-<span class="fc bfc" id="L882" title="All 2 branches covered.">        if (&quot;object&quot;.equals(getType(schema))) {</span>
+<span class="nc bnc" id="L882" title="All 2 branches missed.">        if (&quot;object&quot;.equals(getType(schema))) {</span>
             // no properties
-<span class="pc bpc" id="L884" title="2 of 4 branches missed.">            if ((schema.getProperties() == null || schema.getProperties().isEmpty())) {</span>
+<span class="nc bnc" id="L884" title="All 4 branches missed.">            if ((schema.getProperties() == null || schema.getProperties().isEmpty())) {</span>
 <span class="nc" id="L885">                Schema addlProps = ModelUtils.getAdditionalProperties(schema);</span>
 
 <span class="nc bnc" id="L887" title="All 4 branches missed.">                if (schema.getExtensions() != null &amp;&amp; schema.getExtensions().containsKey(freeFormExplicit)) {</span>
@@ -909,7 +909,7 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
             }
         }
 
-<span class="fc" id="L912">        return false;</span>
+<span class="nc" id="L912">        return false;</span>
     }
 
     public static boolean shouldGenerateFreeFormObjectModel(String name, CodegenConfig config) {
@@ -944,29 +944,29 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return schema without '$ref'
      */
     public static Schema getReferencedSchema(OpenAPI openAPI, Schema schema) {
-<span class="pc bpc" id="L947" title="1 of 2 branches missed.">        if (schema == null) {</span>
+<span class="nc bnc" id="L947" title="All 2 branches missed.">        if (schema == null) {</span>
 <span class="nc" id="L948">            return null;</span>
         }
 
-<span class="fc bfc" id="L951" title="All 2 branches covered.">        if (StringUtils.isEmpty(schema.get$ref())) {</span>
-<span class="fc" id="L952">            return schema;</span>
+<span class="nc bnc" id="L951" title="All 2 branches missed.">        if (StringUtils.isEmpty(schema.get$ref())) {</span>
+<span class="nc" id="L952">            return schema;</span>
         }
 
         try {
-<span class="fc" id="L956">            Schema refSchema = getSchemaFromRefToSchemaWithProperties(openAPI, schema.get$ref());</span>
-<span class="pc bpc" id="L957" title="1 of 2 branches missed.">            if (refSchema != null) {</span>
+<span class="nc" id="L956">            Schema refSchema = getSchemaFromRefToSchemaWithProperties(openAPI, schema.get$ref());</span>
+<span class="nc bnc" id="L957" title="All 2 branches missed.">            if (refSchema != null) {</span>
                 // it's ref to schema's properties, #/components/schemas/Pet/properties/category for example
 <span class="nc" id="L959">                return refSchema;</span>
             }
 <span class="nc" id="L961">        } catch (Exception e) {</span>
 <span class="nc" id="L962">            LOGGER.warn(&quot;Failed to parse $ref {}. Please report the issue to openapi-generator GitHub repo.&quot;, schema.get$ref());</span>
-<span class="fc" id="L963">        }</span>
+<span class="nc" id="L963">        }</span>
 
         // a simple ref, e.g. #/components/schemas/Pet
-<span class="fc" id="L966">        String name = getSimpleRef(schema.get$ref());</span>
-<span class="fc" id="L967">        Schema referencedSchema = getSchema(openAPI, name);</span>
-<span class="pc bpc" id="L968" title="1 of 2 branches missed.">        if (referencedSchema != null) {</span>
-<span class="fc" id="L969">            return referencedSchema;</span>
+<span class="nc" id="L966">        String name = getSimpleRef(schema.get$ref());</span>
+<span class="nc" id="L967">        Schema referencedSchema = getSchema(openAPI, name);</span>
+<span class="nc bnc" id="L968" title="All 2 branches missed.">        if (referencedSchema != null) {</span>
+<span class="nc" id="L969">            return referencedSchema;</span>
         }
 
 <span class="nc" id="L972">        return schema;</span>
@@ -980,17 +980,17 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return schema
      */
     public static Schema getSchemaFromRefToSchemaWithProperties(OpenAPI openAPI, String refString) {
-<span class="fc bfc" id="L983" title="All 2 branches covered.">        if (refString == null) {</span>
-<span class="fc" id="L984">            return null;</span>
+<span class="nc bnc" id="L983" title="All 2 branches missed.">        if (refString == null) {</span>
+<span class="nc" id="L984">            return null;</span>
         }
 
-<span class="fc" id="L987">        String[] parts = refString.split(&quot;/&quot;);</span>
+<span class="nc" id="L987">        String[] parts = refString.split(&quot;/&quot;);</span>
         // #/components/schemas/Pet/properties/category
-<span class="pc bpc" id="L989" title="3 of 4 branches missed.">        if (parts.length == 6 &amp;&amp; &quot;properties&quot;.equals(parts[4])) {</span>
+<span class="nc bnc" id="L989" title="All 4 branches missed.">        if (parts.length == 6 &amp;&amp; &quot;properties&quot;.equals(parts[4])) {</span>
 <span class="nc" id="L990">            Schema referencedSchema = getSchema(openAPI, parts[3]); // parts[3] is Pet</span>
 <span class="nc" id="L991">            return (Schema) referencedSchema.getProperties().get(parts[5]); // parts[5] is category</span>
         } else {
-<span class="fc" id="L993">            return null;</span>
+<span class="nc" id="L993">            return null;</span>
         }
     }
 
@@ -1001,25 +1001,25 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return true if $ref to a reference to schema's properties
      */
     public static boolean isRefToSchemaWithProperties(String refString) {
-<span class="fc bfc" id="L1004" title="All 2 branches covered.">        if (refString == null) {</span>
-<span class="fc" id="L1005">            return false;</span>
+<span class="nc bnc" id="L1004" title="All 2 branches missed.">        if (refString == null) {</span>
+<span class="nc" id="L1005">            return false;</span>
         }
 
-<span class="fc" id="L1008">        String[] parts = refString.split(&quot;/&quot;);</span>
+<span class="nc" id="L1008">        String[] parts = refString.split(&quot;/&quot;);</span>
         // #/components/schemas/Pet/properties/category
-<span class="pc bpc" id="L1010" title="3 of 4 branches missed.">        if (parts.length == 6 &amp;&amp; &quot;properties&quot;.equals(parts[4])) {</span>
+<span class="nc bnc" id="L1010" title="All 4 branches missed.">        if (parts.length == 6 &amp;&amp; &quot;properties&quot;.equals(parts[4])) {</span>
 <span class="nc" id="L1011">            return true;</span>
         } else {
-<span class="fc" id="L1013">            return false;</span>
+<span class="nc" id="L1013">            return false;</span>
         }
     }
 
     public static Schema getSchema(OpenAPI openAPI, String name) {
-<span class="pc bpc" id="L1018" title="1 of 2 branches missed.">        if (name == null) {</span>
+<span class="nc bnc" id="L1018" title="All 2 branches missed.">        if (name == null) {</span>
 <span class="nc" id="L1019">            return null;</span>
         }
 
-<span class="fc" id="L1022">        return getSchemas(openAPI).get(name);</span>
+<span class="nc" id="L1022">        return getSchemas(openAPI).get(name);</span>
     }
 
     /**
@@ -1031,8 +1031,8 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return a map of schemas in the OAS document.
      */
     public static Map&lt;String, Schema&gt; getSchemas(OpenAPI openAPI) {
-<span class="pc bpc" id="L1034" title="3 of 6 branches missed.">        if (openAPI != null &amp;&amp; openAPI.getComponents() != null &amp;&amp; openAPI.getComponents().getSchemas() != null) {</span>
-<span class="fc" id="L1035">            return openAPI.getComponents().getSchemas();</span>
+<span class="nc bnc" id="L1034" title="All 6 branches missed.">        if (openAPI != null &amp;&amp; openAPI.getComponents() != null &amp;&amp; openAPI.getComponents().getSchemas() != null) {</span>
+<span class="nc" id="L1035">            return openAPI.getComponents().getSchemas();</span>
         }
 <span class="nc" id="L1037">        return Collections.emptyMap();</span>
     }
@@ -1065,14 +1065,14 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return requestBody without '$ref'
      */
     public static RequestBody getReferencedRequestBody(OpenAPI openAPI, RequestBody requestBody) {
-<span class="pc bpc" id="L1068" title="1 of 4 branches missed.">        if (requestBody != null &amp;&amp; StringUtils.isNotEmpty(requestBody.get$ref())) {</span>
+<span class="nc bnc" id="L1068" title="All 4 branches missed.">        if (requestBody != null &amp;&amp; StringUtils.isNotEmpty(requestBody.get$ref())) {</span>
 <span class="nc" id="L1069">            String name = getSimpleRef(requestBody.get$ref());</span>
 <span class="nc" id="L1070">            RequestBody referencedRequestBody = getRequestBody(openAPI, name);</span>
 <span class="nc bnc" id="L1071" title="All 2 branches missed.">            if (referencedRequestBody != null) {</span>
 <span class="nc" id="L1072">                return referencedRequestBody;</span>
             }
         }
-<span class="fc" id="L1075">        return requestBody;</span>
+<span class="nc" id="L1075">        return requestBody;</span>
     }
 
     public static RequestBody getRequestBody(OpenAPI openAPI, String name) {
@@ -1094,14 +1094,14 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return apiResponse without '$ref'
      */
     public static ApiResponse getReferencedApiResponse(OpenAPI openAPI, ApiResponse apiResponse) {
-<span class="pc bpc" id="L1097" title="2 of 4 branches missed.">        if (apiResponse != null &amp;&amp; StringUtils.isNotEmpty(apiResponse.get$ref())) {</span>
+<span class="nc bnc" id="L1097" title="All 4 branches missed.">        if (apiResponse != null &amp;&amp; StringUtils.isNotEmpty(apiResponse.get$ref())) {</span>
 <span class="nc" id="L1098">            String name = getSimpleRef(apiResponse.get$ref());</span>
 <span class="nc" id="L1099">            ApiResponse referencedApiResponse = getApiResponse(openAPI, name);</span>
 <span class="nc bnc" id="L1100" title="All 2 branches missed.">            if (referencedApiResponse != null) {</span>
 <span class="nc" id="L1101">                return referencedApiResponse;</span>
             }
         }
-<span class="fc" id="L1104">        return apiResponse;</span>
+<span class="nc" id="L1104">        return apiResponse;</span>
     }
 
     public static ApiResponse getApiResponse(OpenAPI openAPI, String name) {
@@ -1119,14 +1119,14 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return parameter without '$ref'
      */
     public static Parameter getReferencedParameter(OpenAPI openAPI, Parameter parameter) {
-<span class="pc bpc" id="L1122" title="2 of 4 branches missed.">        if (parameter != null &amp;&amp; StringUtils.isNotEmpty(parameter.get$ref())) {</span>
+<span class="nc bnc" id="L1122" title="All 4 branches missed.">        if (parameter != null &amp;&amp; StringUtils.isNotEmpty(parameter.get$ref())) {</span>
 <span class="nc" id="L1123">            String name = getSimpleRef(parameter.get$ref());</span>
 <span class="nc" id="L1124">            Parameter referencedParameter = getParameter(openAPI, name);</span>
 <span class="nc bnc" id="L1125" title="All 2 branches missed.">            if (referencedParameter != null) {</span>
 <span class="nc" id="L1126">                return referencedParameter;</span>
             }
         }
-<span class="fc" id="L1129">        return parameter;</span>
+<span class="nc" id="L1129">        return parameter;</span>
     }
 
     public static Parameter getParameter(OpenAPI openAPI, String name) {
@@ -1168,7 +1168,7 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return first schema
      */
     public static Schema getSchemaFromRequestBody(RequestBody requestBody) {
-<span class="fc" id="L1171">        return getSchemaFromContent(requestBody.getContent());</span>
+<span class="nc" id="L1171">        return getSchemaFromContent(requestBody.getContent());</span>
     }
 
     /**
@@ -1179,11 +1179,11 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return firstSchema
      */
     public static Schema getSchemaFromResponse(OpenAPI openAPI, ApiResponse response) {
-<span class="fc" id="L1182">        ApiResponse result = getReferencedApiResponse(openAPI, response);</span>
-<span class="pc bpc" id="L1183" title="1 of 2 branches missed.">        if (result == null) {</span>
+<span class="nc" id="L1182">        ApiResponse result = getReferencedApiResponse(openAPI, response);</span>
+<span class="nc bnc" id="L1183" title="All 2 branches missed.">        if (result == null) {</span>
 <span class="nc" id="L1184">            return null;</span>
         } else {
-<span class="fc" id="L1186">            return getSchemaFromContent(result.getContent());</span>
+<span class="nc" id="L1186">            return getSchemaFromContent(result.getContent());</span>
         }
     }
 
@@ -1206,17 +1206,17 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return the Schema.
      */
     private static Schema getSchemaFromContent(Content content) {
-<span class="pc bpc" id="L1209" title="1 of 4 branches missed.">        if (content == null || content.isEmpty()) {</span>
-<span class="fc" id="L1210">            return null;</span>
+<span class="nc bnc" id="L1209" title="All 4 branches missed.">        if (content == null || content.isEmpty()) {</span>
+<span class="nc" id="L1210">            return null;</span>
         }
-<span class="fc" id="L1212">        Map.Entry&lt;String, MediaType&gt; entry = content.entrySet().iterator().next();</span>
-<span class="fc bfc" id="L1213" title="All 2 branches covered.">        if (content.size() &gt; 1) {</span>
+<span class="nc" id="L1212">        Map.Entry&lt;String, MediaType&gt; entry = content.entrySet().iterator().next();</span>
+<span class="nc bnc" id="L1213" title="All 2 branches missed.">        if (content.size() &gt; 1) {</span>
             // Other content types are currently ignored by codegen. If you see this warning,
             // reorder the OAS spec to put the desired content type first.
-<span class="fc" id="L1216">            once(LOGGER).debug(&quot;Multiple schemas found in the OAS 'content' section, returning only the first one ({})&quot;,</span>
-<span class="fc" id="L1217">                    entry.getKey());</span>
+<span class="nc" id="L1216">            once(LOGGER).debug(&quot;Multiple schemas found in the OAS 'content' section, returning only the first one ({})&quot;,</span>
+<span class="nc" id="L1217">                    entry.getKey());</span>
         }
-<span class="fc" id="L1219">        return entry.getValue().getSchema();</span>
+<span class="nc" id="L1219">        return entry.getValue().getSchema();</span>
     }
 
     /**
@@ -1332,38 +1332,38 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
     public static Schema unaliasSchema(OpenAPI openAPI,
                                        Schema schema,
                                        Map&lt;String, String&gt; schemaMappings) {
-<span class="fc" id="L1335">        Map&lt;String, Schema&gt; allSchemas = getSchemas(openAPI);</span>
-<span class="pc bpc" id="L1336" title="2 of 4 branches missed.">        if (allSchemas == null || allSchemas.isEmpty()) {</span>
+<span class="nc" id="L1335">        Map&lt;String, Schema&gt; allSchemas = getSchemas(openAPI);</span>
+<span class="nc bnc" id="L1336" title="All 4 branches missed.">        if (allSchemas == null || allSchemas.isEmpty()) {</span>
             // skip the warning as the spec can have no model defined
             //LOGGER.warn(&quot;allSchemas cannot be null/empty in unaliasSchema. Returned 'schema'&quot;);
 <span class="nc" id="L1339">            return schema;</span>
         }
 
-<span class="fc bfc" id="L1342" title="All 4 branches covered.">        if (schema != null &amp;&amp; StringUtils.isNotEmpty(schema.get$ref())) {</span>
-<span class="fc" id="L1343">            String simpleRef = ModelUtils.getSimpleRef(schema.get$ref());</span>
-<span class="pc bpc" id="L1344" title="1 of 2 branches missed.">            if (schemaMappings.containsKey(simpleRef)) {</span>
+<span class="nc bnc" id="L1342" title="All 4 branches missed.">        if (schema != null &amp;&amp; StringUtils.isNotEmpty(schema.get$ref())) {</span>
+<span class="nc" id="L1343">            String simpleRef = ModelUtils.getSimpleRef(schema.get$ref());</span>
+<span class="nc bnc" id="L1344" title="All 2 branches missed.">            if (schemaMappings.containsKey(simpleRef)) {</span>
 <span class="nc" id="L1345">                LOGGER.debug(&quot;Schema unaliasing of {} omitted because aliased class is to be mapped to {}&quot;, simpleRef, schemaMappings.get(simpleRef));</span>
 <span class="nc" id="L1346">                return schema;</span>
             }
-<span class="fc" id="L1348">            Schema ref = allSchemas.get(simpleRef);</span>
-<span class="pc bpc" id="L1349" title="1 of 2 branches missed.">            if (ref == null) {</span>
+<span class="nc" id="L1348">            Schema ref = allSchemas.get(simpleRef);</span>
+<span class="nc bnc" id="L1349" title="All 2 branches missed.">            if (ref == null) {</span>
 <span class="nc bnc" id="L1350" title="All 2 branches missed.">                if (!isRefToSchemaWithProperties(schema.get$ref())) {</span>
 <span class="nc" id="L1351">                    once(LOGGER).warn(&quot;{} is not defined&quot;, schema.get$ref());</span>
                 }
 <span class="nc" id="L1353">                return schema;</span>
-<span class="pc bpc" id="L1354" title="3 of 4 branches missed.">            } else if (ref.getEnum() != null &amp;&amp; !ref.getEnum().isEmpty()) {</span>
+<span class="nc bnc" id="L1354" title="All 4 branches missed.">            } else if (ref.getEnum() != null &amp;&amp; !ref.getEnum().isEmpty()) {</span>
                 // top-level enum class
 <span class="nc" id="L1356">                return schema;</span>
-<span class="pc bpc" id="L1357" title="1 of 2 branches missed.">            } else if (isArraySchema(ref)) {</span>
+<span class="nc bnc" id="L1357" title="All 2 branches missed.">            } else if (isArraySchema(ref)) {</span>
 <span class="nc bnc" id="L1358" title="All 2 branches missed.">                if (isGenerateAliasAsModel(ref)) {</span>
 <span class="nc" id="L1359">                    return schema; // generate a model extending array</span>
                 } else {
 <span class="nc" id="L1361">                    return unaliasSchema(openAPI, allSchemas.get(ModelUtils.getSimpleRef(schema.get$ref())),</span>
                             schemaMappings);
                 }
-<span class="pc bpc" id="L1364" title="1 of 2 branches missed.">            } else if (isComposedSchema(ref)) {</span>
+<span class="nc bnc" id="L1364" title="All 2 branches missed.">            } else if (isComposedSchema(ref)) {</span>
 <span class="nc" id="L1365">                return schema;</span>
-<span class="pc bpc" id="L1366" title="1 of 2 branches missed.">            } else if (isMapSchema(ref)) {</span>
+<span class="nc bnc" id="L1366" title="All 2 branches missed.">            } else if (isMapSchema(ref)) {</span>
 <span class="nc bnc" id="L1367" title="All 4 branches missed.">                if (ref.getProperties() != null &amp;&amp; !ref.getProperties().isEmpty()) // has at least one property</span>
 <span class="nc" id="L1368">                    return schema; // treat it as model</span>
                 else {
@@ -1375,12 +1375,12 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
                                 schemaMappings);
                     }
                 }
-<span class="pc bpc" id="L1378" title="1 of 2 branches missed.">            } else if (isObjectSchema(ref)) { // model</span>
-<span class="pc bpc" id="L1379" title="2 of 4 branches missed.">                if (ref.getProperties() != null &amp;&amp; !ref.getProperties().isEmpty()) { // has at least one property</span>
+<span class="nc bnc" id="L1378" title="All 2 branches missed.">            } else if (isObjectSchema(ref)) { // model</span>
+<span class="nc bnc" id="L1379" title="All 4 branches missed.">                if (ref.getProperties() != null &amp;&amp; !ref.getProperties().isEmpty()) { // has at least one property</span>
                     // TODO we may need to check `hasSelfReference(openAPI, ref)` as a special/edge case:
                     // TODO we may also need to revise below to return `ref` instead of schema
                     // which is the last reference to the actual model/object
-<span class="fc" id="L1383">                    return schema;</span>
+<span class="nc" id="L1383">                    return schema;</span>
                 } else { // free form object (type: object)
 <span class="nc" id="L1385">                    return unaliasSchema(openAPI, allSchemas.get(ModelUtils.getSimpleRef(schema.get$ref())),</span>
                             schemaMappings);
@@ -1389,7 +1389,7 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
 <span class="nc" id="L1389">                return unaliasSchema(openAPI, allSchemas.get(ModelUtils.getSimpleRef(schema.get$ref())), schemaMappings);</span>
             }
         }
-<span class="fc" id="L1392">        return schema;</span>
+<span class="nc" id="L1392">        return schema;</span>
     }
 
     /**
@@ -1763,7 +1763,7 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return true if the schema is the 'null' type
      */
     public static boolean isNullType(Schema schema) {
-<span class="fc" id="L1766">        return &quot;null&quot;.equals(getType(schema));</span>
+<span class="nc" id="L1766">        return &quot;null&quot;.equals(getType(schema));</span>
     }
 
     /**
@@ -1779,72 +1779,72 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
         // TODO remove the ref check here, or pass in the spec version
         // openapi 3.1.0 specs allow ref to be adjacent to any keyword
         // openapi 3.0.3 and earlier do not allow adjacent keywords to refs
-<span class="pc bpc" id="L1782" title="1 of 4 branches missed.">        return (schema.get$ref() == null &amp;&amp; getType(schema) == null);</span>
+<span class="nc bnc" id="L1782" title="All 4 branches missed.">        return (schema.get$ref() == null &amp;&amp; getType(schema) == null);</span>
     }
 
     public static void syncValidationProperties(Schema schema, IJsonSchemaValidationProperties target) {
         // TODO move this method to IJsonSchemaValidationProperties
-<span class="pc bpc" id="L1787" title="2 of 4 branches missed.">        if (schema == null ||</span>
+<span class="nc bnc" id="L1787" title="All 4 branches missed.">        if (schema == null ||</span>
                 target == null ||
-<span class="fc bfc" id="L1789" title="All 2 branches covered.">                schema.get$ref() != null)</span>
-<span class="fc" id="L1790">            return;</span>
-<span class="fc" id="L1791">        SchemaValidations.ValidationSetBuilder vSB = new SchemaValidations.ValidationSetBuilder();</span>
+<span class="nc bnc" id="L1789" title="All 2 branches missed.">                schema.get$ref() != null)</span>
+<span class="nc" id="L1790">            return;</span>
+<span class="nc" id="L1791">        SchemaValidations.ValidationSetBuilder vSB = new SchemaValidations.ValidationSetBuilder();</span>
 
-<span class="fc" id="L1793">        Integer minItems = schema.getMinItems();</span>
-<span class="pc bpc" id="L1794" title="1 of 2 branches missed.">        if (minItems != null) vSB.withMinItems();</span>
+<span class="nc" id="L1793">        Integer minItems = schema.getMinItems();</span>
+<span class="nc bnc" id="L1794" title="All 2 branches missed.">        if (minItems != null) vSB.withMinItems();</span>
 
-<span class="fc" id="L1796">        Integer maxItems = schema.getMaxItems();</span>
-<span class="pc bpc" id="L1797" title="1 of 2 branches missed.">        if (maxItems != null) vSB.withMaxItems();</span>
+<span class="nc" id="L1796">        Integer maxItems = schema.getMaxItems();</span>
+<span class="nc bnc" id="L1797" title="All 2 branches missed.">        if (maxItems != null) vSB.withMaxItems();</span>
 
-<span class="fc" id="L1799">        Boolean uniqueItems = schema.getUniqueItems();</span>
-<span class="pc bpc" id="L1800" title="1 of 2 branches missed.">        if (uniqueItems != null) vSB.withUniqueItems();</span>
+<span class="nc" id="L1799">        Boolean uniqueItems = schema.getUniqueItems();</span>
+<span class="nc bnc" id="L1800" title="All 2 branches missed.">        if (uniqueItems != null) vSB.withUniqueItems();</span>
 
-<span class="fc" id="L1802">        Integer minProperties = schema.getMinProperties();</span>
-<span class="pc bpc" id="L1803" title="1 of 2 branches missed.">        if (minProperties != null) vSB.withMinProperties();</span>
+<span class="nc" id="L1802">        Integer minProperties = schema.getMinProperties();</span>
+<span class="nc bnc" id="L1803" title="All 2 branches missed.">        if (minProperties != null) vSB.withMinProperties();</span>
 
-<span class="fc" id="L1805">        Integer maxProperties = schema.getMaxProperties();</span>
-<span class="pc bpc" id="L1806" title="1 of 2 branches missed.">        if (maxProperties != null) vSB.withMaxProperties();</span>
+<span class="nc" id="L1805">        Integer maxProperties = schema.getMaxProperties();</span>
+<span class="nc bnc" id="L1806" title="All 2 branches missed.">        if (maxProperties != null) vSB.withMaxProperties();</span>
 
-<span class="fc" id="L1808">        Integer minLength = schema.getMinLength();</span>
-<span class="fc bfc" id="L1809" title="All 2 branches covered.">        if (minLength != null) vSB.withMinLength();</span>
+<span class="nc" id="L1808">        Integer minLength = schema.getMinLength();</span>
+<span class="nc bnc" id="L1809" title="All 2 branches missed.">        if (minLength != null) vSB.withMinLength();</span>
 
-<span class="fc" id="L1811">        Integer maxLength = schema.getMaxLength();</span>
-<span class="fc bfc" id="L1812" title="All 2 branches covered.">        if (maxLength != null) vSB.withMaxLength();</span>
+<span class="nc" id="L1811">        Integer maxLength = schema.getMaxLength();</span>
+<span class="nc bnc" id="L1812" title="All 2 branches missed.">        if (maxLength != null) vSB.withMaxLength();</span>
 
-<span class="fc" id="L1814">        String pattern = schema.getPattern();</span>
-<span class="pc bpc" id="L1815" title="1 of 2 branches missed.">        if (pattern != null) vSB.withPattern();</span>
+<span class="nc" id="L1814">        String pattern = schema.getPattern();</span>
+<span class="nc bnc" id="L1815" title="All 2 branches missed.">        if (pattern != null) vSB.withPattern();</span>
 
-<span class="fc" id="L1817">        BigDecimal multipleOf = schema.getMultipleOf();</span>
-<span class="pc bpc" id="L1818" title="1 of 2 branches missed.">        if (multipleOf != null) vSB.withMultipleOf();</span>
+<span class="nc" id="L1817">        BigDecimal multipleOf = schema.getMultipleOf();</span>
+<span class="nc bnc" id="L1818" title="All 2 branches missed.">        if (multipleOf != null) vSB.withMultipleOf();</span>
 
-<span class="fc" id="L1820">        BigDecimal minimum = schema.getMinimum();</span>
-<span class="pc bpc" id="L1821" title="1 of 2 branches missed.">        if (minimum != null) vSB.withMinimum();</span>
+<span class="nc" id="L1820">        BigDecimal minimum = schema.getMinimum();</span>
+<span class="nc bnc" id="L1821" title="All 2 branches missed.">        if (minimum != null) vSB.withMinimum();</span>
 
-<span class="fc" id="L1823">        BigDecimal maximum = schema.getMaximum();</span>
-<span class="pc bpc" id="L1824" title="1 of 2 branches missed.">        if (maximum != null) vSB.withMaximum();</span>
+<span class="nc" id="L1823">        BigDecimal maximum = schema.getMaximum();</span>
+<span class="nc bnc" id="L1824" title="All 2 branches missed.">        if (maximum != null) vSB.withMaximum();</span>
 
-<span class="fc" id="L1826">        Boolean exclusiveMinimum = schema.getExclusiveMinimum();</span>
-<span class="pc bpc" id="L1827" title="1 of 2 branches missed.">        if (exclusiveMinimum != null) vSB.withExclusiveMinimum();</span>
+<span class="nc" id="L1826">        Boolean exclusiveMinimum = schema.getExclusiveMinimum();</span>
+<span class="nc bnc" id="L1827" title="All 2 branches missed.">        if (exclusiveMinimum != null) vSB.withExclusiveMinimum();</span>
 
-<span class="fc" id="L1829">        Boolean exclusiveMaximum = schema.getExclusiveMaximum();</span>
-<span class="pc bpc" id="L1830" title="1 of 2 branches missed.">        if (exclusiveMaximum != null) vSB.withExclusiveMaximum();</span>
+<span class="nc" id="L1829">        Boolean exclusiveMaximum = schema.getExclusiveMaximum();</span>
+<span class="nc bnc" id="L1830" title="All 2 branches missed.">        if (exclusiveMaximum != null) vSB.withExclusiveMaximum();</span>
 
-<span class="fc" id="L1832">        LinkedHashSet&lt;String&gt; setValidations = vSB.build();</span>
+<span class="nc" id="L1832">        LinkedHashSet&lt;String&gt; setValidations = vSB.build();</span>
 
-<span class="pc bpc" id="L1834" title="1 of 4 branches missed.">        if (isBooleanSchema(schema) || isNullType(schema)) {</span>
-<span class="fc" id="L1835">            logWarnMessagesForIneffectiveValidations(setValidations, schema, new HashSet&lt;&gt;());</span>
-<span class="fc bfc" id="L1836" title="All 2 branches covered.">        } else if (isArraySchema(schema)) {</span>
-<span class="pc bpc" id="L1837" title="3 of 6 branches missed.">            if (minItems != null || maxItems != null || uniqueItems != null)</span>
+<span class="nc bnc" id="L1834" title="All 4 branches missed.">        if (isBooleanSchema(schema) || isNullType(schema)) {</span>
+<span class="nc" id="L1835">            logWarnMessagesForIneffectiveValidations(setValidations, schema, new HashSet&lt;&gt;());</span>
+<span class="nc bnc" id="L1836" title="All 2 branches missed.">        } else if (isArraySchema(schema)) {</span>
+<span class="nc bnc" id="L1837" title="All 6 branches missed.">            if (minItems != null || maxItems != null || uniqueItems != null)</span>
 <span class="nc" id="L1838">                setArrayValidations(minItems, maxItems, uniqueItems, target);</span>
-<span class="fc" id="L1839">            logWarnMessagesForIneffectiveValidations(new LinkedHashSet(setValidations), schema, SchemaValidations.ARRAY_VALIDATIONS);</span>
-<span class="fc bfc" id="L1840" title="All 2 branches covered.">        } else if (isTypeObjectSchema(schema)) {</span>
-<span class="pc bpc" id="L1841" title="2 of 4 branches missed.">            if (minProperties != null || maxProperties != null)</span>
+<span class="nc" id="L1839">            logWarnMessagesForIneffectiveValidations(new LinkedHashSet(setValidations), schema, SchemaValidations.ARRAY_VALIDATIONS);</span>
+<span class="nc bnc" id="L1840" title="All 2 branches missed.">        } else if (isTypeObjectSchema(schema)) {</span>
+<span class="nc bnc" id="L1841" title="All 4 branches missed.">            if (minProperties != null || maxProperties != null)</span>
 <span class="nc" id="L1842">                setObjectValidations(minProperties, maxProperties, target);</span>
-<span class="fc" id="L1843">            logWarnMessagesForIneffectiveValidations(new LinkedHashSet(setValidations), schema, SchemaValidations.OBJECT_VALIDATIONS);</span>
-<span class="fc bfc" id="L1844" title="All 2 branches covered.">        } else if (isStringSchema(schema)) {</span>
-<span class="pc bpc" id="L1845" title="2 of 6 branches missed.">            if (minLength != null || maxLength != null || pattern != null)</span>
-<span class="fc" id="L1846">                setStringValidations(minLength, maxLength, pattern, target);</span>
-<span class="pc bpc" id="L1847" title="1 of 2 branches missed.">            if (isDecimalSchema(schema)) {</span>
+<span class="nc" id="L1843">            logWarnMessagesForIneffectiveValidations(new LinkedHashSet(setValidations), schema, SchemaValidations.OBJECT_VALIDATIONS);</span>
+<span class="nc bnc" id="L1844" title="All 2 branches missed.">        } else if (isStringSchema(schema)) {</span>
+<span class="nc bnc" id="L1845" title="All 6 branches missed.">            if (minLength != null || maxLength != null || pattern != null)</span>
+<span class="nc" id="L1846">                setStringValidations(minLength, maxLength, pattern, target);</span>
+<span class="nc bnc" id="L1847" title="All 2 branches missed.">            if (isDecimalSchema(schema)) {</span>
 <span class="nc bnc" id="L1848" title="All 10 branches missed.">                if (multipleOf != null || minimum != null || maximum != null || exclusiveMinimum != null || exclusiveMaximum != null)</span>
 <span class="nc" id="L1849">                    setNumericValidations(schema, multipleOf, minimum, maximum, exclusiveMinimum, exclusiveMaximum, target);</span>
 
@@ -1852,12 +1852,12 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
 <span class="nc" id="L1852">                stringAndNumericValidations.addAll(SchemaValidations.NUMERIC_VALIDATIONS);</span>
 <span class="nc" id="L1853">                logWarnMessagesForIneffectiveValidations(new LinkedHashSet(setValidations), schema, stringAndNumericValidations);</span>
 <span class="nc" id="L1854">            } else</span>
-<span class="fc" id="L1855">                logWarnMessagesForIneffectiveValidations(new LinkedHashSet(setValidations), schema, SchemaValidations.STRING_VALIDATIONS);</span>
+<span class="nc" id="L1855">                logWarnMessagesForIneffectiveValidations(new LinkedHashSet(setValidations), schema, SchemaValidations.STRING_VALIDATIONS);</span>
 
-<span class="pc bpc" id="L1857" title="2 of 4 branches missed.">        } else if (isNumberSchema(schema) || isIntegerSchema(schema)) {</span>
-<span class="pc bpc" id="L1858" title="5 of 10 branches missed.">            if (multipleOf != null || minimum != null || maximum != null || exclusiveMinimum != null || exclusiveMaximum != null)</span>
+<span class="nc bnc" id="L1857" title="All 4 branches missed.">        } else if (isNumberSchema(schema) || isIntegerSchema(schema)) {</span>
+<span class="nc bnc" id="L1858" title="All 10 branches missed.">            if (multipleOf != null || minimum != null || maximum != null || exclusiveMinimum != null || exclusiveMaximum != null)</span>
 <span class="nc" id="L1859">                setNumericValidations(schema, multipleOf, minimum, maximum, exclusiveMinimum, exclusiveMaximum, target);</span>
-<span class="fc" id="L1860">            logWarnMessagesForIneffectiveValidations(new LinkedHashSet(setValidations), schema, SchemaValidations.NUMERIC_VALIDATIONS);</span>
+<span class="nc" id="L1860">            logWarnMessagesForIneffectiveValidations(new LinkedHashSet(setValidations), schema, SchemaValidations.NUMERIC_VALIDATIONS);</span>
 <span class="nc bnc" id="L1861" title="All 2 branches missed.">        } else if (isAnyType(schema)) {</span>
             // anyType can have any validations set on it
 <span class="nc" id="L1863">            setArrayValidations(minItems, maxItems, uniqueItems, target);</span>
@@ -1866,9 +1866,9 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
 <span class="nc" id="L1866">            setNumericValidations(schema, multipleOf, minimum, maximum, exclusiveMinimum, exclusiveMaximum, target);</span>
         }
 
-<span class="fc bfc" id="L1869" title="All 2 branches covered.">        if (!setValidations.isEmpty())</span>
-<span class="fc" id="L1870">            target.setHasValidation(true);</span>
-<span class="fc" id="L1871">    }</span>
+<span class="nc bnc" id="L1869" title="All 2 branches missed.">        if (!setValidations.isEmpty())</span>
+<span class="nc" id="L1870">            target.setHasValidation(true);</span>
+<span class="nc" id="L1871">    }</span>
 
     private static void setArrayValidations(Integer minItems, Integer maxItems, Boolean uniqueItems, IJsonSchemaValidationProperties target) {
 <span class="nc bnc" id="L1874" title="All 2 branches missed.">        if (minItems != null) target.setMinItems(minItems);</span>
@@ -1883,10 +1883,10 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
 <span class="nc" id="L1883">    }</span>
 
     private static void setStringValidations(Integer minLength, Integer maxLength, String pattern, IJsonSchemaValidationProperties target) {
-<span class="pc bpc" id="L1886" title="1 of 2 branches missed.">        if (minLength != null) target.setMinLength(minLength);</span>
-<span class="pc bpc" id="L1887" title="1 of 2 branches missed.">        if (maxLength != null) target.setMaxLength(maxLength);</span>
-<span class="pc bpc" id="L1888" title="1 of 2 branches missed.">        if (pattern != null) target.setPattern(pattern);</span>
-<span class="fc" id="L1889">    }</span>
+<span class="nc bnc" id="L1886" title="All 2 branches missed.">        if (minLength != null) target.setMinLength(minLength);</span>
+<span class="nc bnc" id="L1887" title="All 2 branches missed.">        if (maxLength != null) target.setMaxLength(maxLength);</span>
+<span class="nc bnc" id="L1888" title="All 2 branches missed.">        if (pattern != null) target.setPattern(pattern);</span>
+<span class="nc" id="L1889">    }</span>
 
     private static void setNumericValidations(Schema schema, BigDecimal multipleOf, BigDecimal minimum, BigDecimal maximum, Boolean exclusiveMinimum, Boolean exclusiveMaximum, IJsonSchemaValidationProperties target) {
 <span class="nc bnc" id="L1892" title="All 2 branches missed.">        if (multipleOf != null) target.setMultipleOf(multipleOf);</span>
@@ -1909,11 +1909,11 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
 <span class="nc" id="L1909">    }</span>
 
     private static void logWarnMessagesForIneffectiveValidations(Set&lt;String&gt; setValidations, Schema schema, Set&lt;String&gt; effectiveValidations) {
-<span class="fc" id="L1912">        setValidations.removeAll(effectiveValidations);</span>
-<span class="fc" id="L1913">        setValidations.stream().forEach(validation -&gt; {</span>
+<span class="nc" id="L1912">        setValidations.removeAll(effectiveValidations);</span>
+<span class="nc" id="L1913">        setValidations.stream().forEach(validation -&gt; {</span>
 <span class="nc" id="L1914">            LOGGER.warn(&quot;Validation '&quot; + validation + &quot;' has no effect on schema '&quot; + getType(schema) +&quot;'. Ignoring!&quot;);</span>
 <span class="nc" id="L1915">        });</span>
-<span class="fc" id="L1916">    }</span>
+<span class="nc" id="L1916">    }</span>
 
     private static ObjectMapper getRightMapper(String data) {
         ObjectMapper mapper;
@@ -1998,13 +1998,13 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return true if the schema contains allOf but no properties/oneOf/anyOf defined.
      */
     public static boolean isAllOf(Schema schema) {
-<span class="pc bpc" id="L2001" title="5 of 6 branches missed.">        if (hasAllOf(schema) &amp;&amp; (schema.getProperties() == null || schema.getProperties().isEmpty()) &amp;&amp;</span>
+<span class="nc bnc" id="L2001" title="All 6 branches missed.">        if (hasAllOf(schema) &amp;&amp; (schema.getProperties() == null || schema.getProperties().isEmpty()) &amp;&amp;</span>
 <span class="nc bnc" id="L2002" title="All 4 branches missed.">                (schema.getOneOf() == null || schema.getOneOf().isEmpty()) &amp;&amp;</span>
 <span class="nc bnc" id="L2003" title="All 4 branches missed.">                (schema.getAnyOf() == null || schema.getAnyOf().isEmpty())) {</span>
 <span class="nc" id="L2004">            return true;</span>
         }
 
-<span class="fc" id="L2007">        return false;</span>
+<span class="nc" id="L2007">        return false;</span>
     }
 
     /**
@@ -2015,11 +2015,11 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return true if allOf is not empty
      */
     public static boolean hasAllOf(Schema schema) {
-<span class="pc bpc" id="L2018" title="4 of 6 branches missed.">        if (schema != null &amp;&amp; schema.getAllOf() != null &amp;&amp; !schema.getAllOf().isEmpty()) {</span>
+<span class="nc bnc" id="L2018" title="All 6 branches missed.">        if (schema != null &amp;&amp; schema.getAllOf() != null &amp;&amp; !schema.getAllOf().isEmpty()) {</span>
 <span class="nc" id="L2019">            return true;</span>
         }
 
-<span class="fc" id="L2022">        return false;</span>
+<span class="nc" id="L2022">        return false;</span>
     }
 
     /**
@@ -2030,9 +2030,9 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return true if the schema contains allOf but no properties/oneOf/anyOf defined.
      */
     public static boolean isAllOfWithProperties(Schema schema) {
-<span class="pc bpc" id="L2033" title="5 of 6 branches missed.">        return hasAllOf(schema) &amp;&amp; (schema.getProperties() != null &amp;&amp; !schema.getProperties().isEmpty()) &amp;&amp;</span>
+<span class="nc bnc" id="L2033" title="All 6 branches missed.">        return hasAllOf(schema) &amp;&amp; (schema.getProperties() != null &amp;&amp; !schema.getProperties().isEmpty()) &amp;&amp;</span>
 <span class="nc bnc" id="L2034" title="All 4 branches missed.">                (schema.getOneOf() == null || schema.getOneOf().isEmpty()) &amp;&amp;</span>
-<span class="pc bnc" id="L2035" title="All 4 branches missed.">                (schema.getAnyOf() == null || schema.getAnyOf().isEmpty());</span>
+<span class="nc bnc" id="L2035" title="All 4 branches missed.">                (schema.getAnyOf() == null || schema.getAnyOf().isEmpty());</span>
     }
 
     /**
@@ -2043,17 +2043,17 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return true if the schema contains oneOf but no properties/allOf/anyOf defined.
      */
     public static boolean isOneOf(Schema schema) {
-<span class="pc bpc" id="L2046" title="1 of 2 branches missed.">        if (schema == null) {</span>
+<span class="nc bnc" id="L2046" title="All 2 branches missed.">        if (schema == null) {</span>
 <span class="nc" id="L2047">            return false;</span>
         }
 
-<span class="pc bpc" id="L2050" title="5 of 6 branches missed.">        if (hasOneOf(schema) &amp;&amp; (schema.getProperties() == null || schema.getProperties().isEmpty()) &amp;&amp;</span>
+<span class="nc bnc" id="L2050" title="All 6 branches missed.">        if (hasOneOf(schema) &amp;&amp; (schema.getProperties() == null || schema.getProperties().isEmpty()) &amp;&amp;</span>
 <span class="nc bnc" id="L2051" title="All 4 branches missed.">                (schema.getAllOf() == null || schema.getAllOf().isEmpty()) &amp;&amp;</span>
 <span class="nc bnc" id="L2052" title="All 4 branches missed.">                (schema.getAnyOf() == null || schema.getAnyOf().isEmpty())) {</span>
 <span class="nc" id="L2053">            return true;</span>
         }
 
-<span class="fc" id="L2056">        return false;</span>
+<span class="nc" id="L2056">        return false;</span>
     }
 
     /**
@@ -2064,11 +2064,11 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return true if allOf is not empty
      */
     public static boolean hasOneOf(Schema schema) {
-<span class="pc bpc" id="L2067" title="4 of 6 branches missed.">        if (schema != null &amp;&amp; schema.getOneOf() != null &amp;&amp; !schema.getOneOf().isEmpty()) {</span>
+<span class="nc bnc" id="L2067" title="All 6 branches missed.">        if (schema != null &amp;&amp; schema.getOneOf() != null &amp;&amp; !schema.getOneOf().isEmpty()) {</span>
 <span class="nc" id="L2068">            return true;</span>
         }
 
-<span class="fc" id="L2071">        return false;</span>
+<span class="nc" id="L2071">        return false;</span>
     }
 
     /**
@@ -2079,17 +2079,17 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return true if the schema contains oneOf but no properties/allOf/anyOf defined.
      */
     public static boolean isAnyOf(Schema schema) {
-<span class="pc bpc" id="L2082" title="1 of 2 branches missed.">        if (schema == null) {</span>
+<span class="nc bnc" id="L2082" title="All 2 branches missed.">        if (schema == null) {</span>
 <span class="nc" id="L2083">            return false;</span>
         }
 
-<span class="pc bpc" id="L2086" title="5 of 6 branches missed.">        if (hasAnyOf(schema) &amp;&amp; (schema.getProperties() == null || schema.getProperties().isEmpty()) &amp;&amp;</span>
+<span class="nc bnc" id="L2086" title="All 6 branches missed.">        if (hasAnyOf(schema) &amp;&amp; (schema.getProperties() == null || schema.getProperties().isEmpty()) &amp;&amp;</span>
 <span class="nc bnc" id="L2087" title="All 4 branches missed.">                (schema.getAllOf() == null || schema.getAllOf().isEmpty()) &amp;&amp;</span>
 <span class="nc bnc" id="L2088" title="All 4 branches missed.">                (schema.getOneOf() == null || schema.getOneOf().isEmpty())) {</span>
 <span class="nc" id="L2089">            return true;</span>
         }
 
-<span class="fc" id="L2092">        return false;</span>
+<span class="nc" id="L2092">        return false;</span>
     }
 
     /**
@@ -2100,11 +2100,11 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return true if anyOf is not empty
      */
     public static boolean hasAnyOf(Schema schema) {
-<span class="pc bpc" id="L2103" title="4 of 6 branches missed.">        if (schema != null &amp;&amp; schema.getAnyOf() != null &amp;&amp; !schema.getAnyOf().isEmpty()) {</span>
+<span class="nc bnc" id="L2103" title="All 6 branches missed.">        if (schema != null &amp;&amp; schema.getAnyOf() != null &amp;&amp; !schema.getAnyOf().isEmpty()) {</span>
 <span class="nc" id="L2104">            return true;</span>
         }
 
-<span class="fc" id="L2107">        return false;</span>
+<span class="nc" id="L2107">        return false;</span>
     }
 
     /**
@@ -2115,18 +2115,18 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
      * @return schema type
      */
     public static String getType(Schema schema) {
-<span class="pc bpc" id="L2118" title="1 of 2 branches missed.">        if (schema == null) {</span>
+<span class="nc bnc" id="L2118" title="All 2 branches missed.">        if (schema == null) {</span>
 <span class="nc" id="L2119">            return null;</span>
         }
 
-<span class="fc bfc" id="L2122" title="All 2 branches covered.">        if (schema instanceof JsonSchema) {</span>
-<span class="fc bfc" id="L2123" title="All 2 branches covered.">            if (schema.getTypes() != null) {</span>
-<span class="fc" id="L2124">                return String.valueOf(schema.getTypes().iterator().next());</span>
+<span class="nc bnc" id="L2122" title="All 2 branches missed.">        if (schema instanceof JsonSchema) {</span>
+<span class="nc bnc" id="L2123" title="All 2 branches missed.">            if (schema.getTypes() != null) {</span>
+<span class="nc" id="L2124">                return String.valueOf(schema.getTypes().iterator().next());</span>
             } else {
-<span class="fc" id="L2126">                return null;</span>
+<span class="nc" id="L2126">                return null;</span>
             }
         } else {
-<span class="fc" id="L2129">            return schema.getType();</span>
+<span class="nc" id="L2129">            return schema.getType();</span>
         }
     }
 
@@ -2197,36 +2197,36 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
 
     private static final class SchemaValidations {
 
-<span class="fc" id="L2200">        public static Set&lt;String&gt; ARRAY_VALIDATIONS = new ValidationSetBuilder()</span>
-<span class="fc" id="L2201">                .withMinItems()</span>
-<span class="fc" id="L2202">                .withMaxItems()</span>
-<span class="fc" id="L2203">                .withUniqueItems()</span>
-<span class="fc" id="L2204">                .build();</span>
-<span class="fc" id="L2205">        public static Set&lt;String&gt; OBJECT_VALIDATIONS = new ValidationSetBuilder()</span>
-<span class="fc" id="L2206">                .withMinProperties()</span>
-<span class="fc" id="L2207">                .withMaxProperties()</span>
-<span class="fc" id="L2208">                .build();</span>
-<span class="fc" id="L2209">        public static Set&lt;String&gt; STRING_VALIDATIONS = new ValidationSetBuilder()</span>
-<span class="fc" id="L2210">                .withMinLength()</span>
-<span class="fc" id="L2211">                .withMaxLength()</span>
-<span class="fc" id="L2212">                .withPattern()</span>
-<span class="fc" id="L2213">                .build();</span>
-<span class="fc" id="L2214">        public static Set&lt;String&gt; NUMERIC_VALIDATIONS = new ValidationSetBuilder()</span>
-<span class="fc" id="L2215">                .withMultipleOf()</span>
-<span class="fc" id="L2216">                .withMinimum()</span>
-<span class="fc" id="L2217">                .withMaximum()</span>
-<span class="fc" id="L2218">                .withExclusiveMinimum()</span>
-<span class="fc" id="L2219">                .withExclusiveMaximum()</span>
-<span class="fc" id="L2220">                .build();</span>
+<span class="nc" id="L2200">        public static Set&lt;String&gt; ARRAY_VALIDATIONS = new ValidationSetBuilder()</span>
+<span class="nc" id="L2201">                .withMinItems()</span>
+<span class="nc" id="L2202">                .withMaxItems()</span>
+<span class="nc" id="L2203">                .withUniqueItems()</span>
+<span class="nc" id="L2204">                .build();</span>
+<span class="nc" id="L2205">        public static Set&lt;String&gt; OBJECT_VALIDATIONS = new ValidationSetBuilder()</span>
+<span class="nc" id="L2206">                .withMinProperties()</span>
+<span class="nc" id="L2207">                .withMaxProperties()</span>
+<span class="nc" id="L2208">                .build();</span>
+<span class="nc" id="L2209">        public static Set&lt;String&gt; STRING_VALIDATIONS = new ValidationSetBuilder()</span>
+<span class="nc" id="L2210">                .withMinLength()</span>
+<span class="nc" id="L2211">                .withMaxLength()</span>
+<span class="nc" id="L2212">                .withPattern()</span>
+<span class="nc" id="L2213">                .build();</span>
+<span class="nc" id="L2214">        public static Set&lt;String&gt; NUMERIC_VALIDATIONS = new ValidationSetBuilder()</span>
+<span class="nc" id="L2215">                .withMultipleOf()</span>
+<span class="nc" id="L2216">                .withMinimum()</span>
+<span class="nc" id="L2217">                .withMaximum()</span>
+<span class="nc" id="L2218">                .withExclusiveMinimum()</span>
+<span class="nc" id="L2219">                .withExclusiveMaximum()</span>
+<span class="nc" id="L2220">                .build();</span>
 
         public static Set&lt;String&gt; ALL_VALIDATIONS;
 
         static {
-<span class="fc" id="L2225">            ALL_VALIDATIONS = new HashSet&lt;&gt;(ARRAY_VALIDATIONS);</span>
-<span class="fc" id="L2226">            ALL_VALIDATIONS.addAll(OBJECT_VALIDATIONS);</span>
-<span class="fc" id="L2227">            ALL_VALIDATIONS.addAll(STRING_VALIDATIONS);</span>
-<span class="fc" id="L2228">            ALL_VALIDATIONS.addAll(NUMERIC_VALIDATIONS);</span>
-<span class="fc" id="L2229">        }</span>
+<span class="nc" id="L2225">            ALL_VALIDATIONS = new HashSet&lt;&gt;(ARRAY_VALIDATIONS);</span>
+<span class="nc" id="L2226">            ALL_VALIDATIONS.addAll(OBJECT_VALIDATIONS);</span>
+<span class="nc" id="L2227">            ALL_VALIDATIONS.addAll(STRING_VALIDATIONS);</span>
+<span class="nc" id="L2228">            ALL_VALIDATIONS.addAll(NUMERIC_VALIDATIONS);</span>
+<span class="nc" id="L2229">        }</span>
 
 <span class="nc" id="L2231">        SchemaValidations() {</span>
 <span class="nc" id="L2232">        }</span>
@@ -2235,77 +2235,77 @@ import static org.openapitools.codegen.utils.OnceLogger.once;
         public static class ValidationSetBuilder {
             LinkedHashSet&lt;String&gt; validationSet;
 
-<span class="fc" id="L2238">            ValidationSetBuilder() {</span>
-<span class="fc" id="L2239">                this.validationSet = new LinkedHashSet&lt;String&gt;();</span>
-<span class="fc" id="L2240">            }</span>
+<span class="nc" id="L2238">            ValidationSetBuilder() {</span>
+<span class="nc" id="L2239">                this.validationSet = new LinkedHashSet&lt;String&gt;();</span>
+<span class="nc" id="L2240">            }</span>
 
             public ValidationSetBuilder withMinItems() {
-<span class="fc" id="L2243">                this.validationSet.add(&quot;minItems&quot;);</span>
-<span class="fc" id="L2244">                return this;</span>
+<span class="nc" id="L2243">                this.validationSet.add(&quot;minItems&quot;);</span>
+<span class="nc" id="L2244">                return this;</span>
             }
 
             public ValidationSetBuilder withMaxItems() {
-<span class="fc" id="L2248">                this.validationSet.add(&quot;maxItems&quot;);</span>
-<span class="fc" id="L2249">                return this;</span>
+<span class="nc" id="L2248">                this.validationSet.add(&quot;maxItems&quot;);</span>
+<span class="nc" id="L2249">                return this;</span>
             }
 
             public ValidationSetBuilder withUniqueItems() {
-<span class="fc" id="L2253">                this.validationSet.add(&quot;uniqueItems&quot;);</span>
-<span class="fc" id="L2254">                return this;</span>
+<span class="nc" id="L2253">                this.validationSet.add(&quot;uniqueItems&quot;);</span>
+<span class="nc" id="L2254">                return this;</span>
             }
 
             public ValidationSetBuilder withMinProperties() {
-<span class="fc" id="L2258">                this.validationSet.add(&quot;minProperties&quot;);</span>
-<span class="fc" id="L2259">                return this;</span>
+<span class="nc" id="L2258">                this.validationSet.add(&quot;minProperties&quot;);</span>
+<span class="nc" id="L2259">                return this;</span>
             }
 
             public ValidationSetBuilder withMaxProperties() {
-<span class="fc" id="L2263">                this.validationSet.add(&quot;maxProperties&quot;);</span>
-<span class="fc" id="L2264">                return this;</span>
+<span class="nc" id="L2263">                this.validationSet.add(&quot;maxProperties&quot;);</span>
+<span class="nc" id="L2264">                return this;</span>
             }
 
             public ValidationSetBuilder withMinLength() {
-<span class="fc" id="L2268">                this.validationSet.add(&quot;minLength&quot;);</span>
-<span class="fc" id="L2269">                return this;</span>
+<span class="nc" id="L2268">                this.validationSet.add(&quot;minLength&quot;);</span>
+<span class="nc" id="L2269">                return this;</span>
             }
 
             public ValidationSetBuilder withMaxLength() {
-<span class="fc" id="L2273">                this.validationSet.add(&quot;maxLength&quot;);</span>
-<span class="fc" id="L2274">                return this;</span>
+<span class="nc" id="L2273">                this.validationSet.add(&quot;maxLength&quot;);</span>
+<span class="nc" id="L2274">                return this;</span>
             }
 
             public ValidationSetBuilder withPattern() {
-<span class="fc" id="L2278">                this.validationSet.add(&quot;pattern&quot;);</span>
-<span class="fc" id="L2279">                return this;</span>
+<span class="nc" id="L2278">                this.validationSet.add(&quot;pattern&quot;);</span>
+<span class="nc" id="L2279">                return this;</span>
             }
 
             public ValidationSetBuilder withMultipleOf() {
-<span class="fc" id="L2283">                this.validationSet.add(&quot;multipleOf&quot;);</span>
-<span class="fc" id="L2284">                return this;</span>
+<span class="nc" id="L2283">                this.validationSet.add(&quot;multipleOf&quot;);</span>
+<span class="nc" id="L2284">                return this;</span>
             }
 
             public ValidationSetBuilder withMinimum() {
-<span class="fc" id="L2288">                this.validationSet.add(&quot;minimum&quot;);</span>
-<span class="fc" id="L2289">                return this;</span>
+<span class="nc" id="L2288">                this.validationSet.add(&quot;minimum&quot;);</span>
+<span class="nc" id="L2289">                return this;</span>
             }
 
             public ValidationSetBuilder withMaximum() {
-<span class="fc" id="L2293">                this.validationSet.add(&quot;maximum&quot;);</span>
-<span class="fc" id="L2294">                return this;</span>
+<span class="nc" id="L2293">                this.validationSet.add(&quot;maximum&quot;);</span>
+<span class="nc" id="L2294">                return this;</span>
             }
 
             public ValidationSetBuilder withExclusiveMinimum() {
-<span class="fc" id="L2298">                this.validationSet.add(&quot;exclusiveMinimum&quot;);</span>
-<span class="fc" id="L2299">                return this;</span>
+<span class="nc" id="L2298">                this.validationSet.add(&quot;exclusiveMinimum&quot;);</span>
+<span class="nc" id="L2299">                return this;</span>
             }
 
             public ValidationSetBuilder withExclusiveMaximum() {
-<span class="fc" id="L2303">                this.validationSet.add(&quot;exclusiveMaximum&quot;);</span>
-<span class="fc" id="L2304">                return this;</span>
+<span class="nc" id="L2303">                this.validationSet.add(&quot;exclusiveMaximum&quot;);</span>
+<span class="nc" id="L2304">                return this;</span>
             }
 
             public LinkedHashSet&lt;String&gt; build() {
-<span class="fc" id="L2308">                return this.validationSet;</span>
+<span class="nc" id="L2308">                return this.validationSet;</span>
             }
         }
     }

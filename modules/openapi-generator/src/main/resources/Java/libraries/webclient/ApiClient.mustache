@@ -757,26 +757,4 @@ public class ApiClient{{#jsr310}} extends JavaTimeFormatter{{/jsr310}} {
 
         return collectionFormat.collectionToString(values);
     }
-
-    public ResponseSpec requestCreation(
-            HttpMethod httpMethod,
-            String path,
-            Object postBody,
-            Map<String, Object> pathParams,
-            MultiValueMap<String, String> queryParams,
-            String[] accept,
-            String[] contentType
-    ) {
-        final HttpHeaders headerParams = new HttpHeaders();
-        final MultiValueMap<String, String> cookieParams = new LinkedMultiValueMap<String, String>();
-        final MultiValueMap<String, Object> formParams = new LinkedMultiValueMap<String, Object>();
-
-        final List<MediaType> localVarAccept = selectHeaderAccept(accept);
-        final MediaType localVarContentType = selectHeaderContentType(contentType);
-
-        String[] localVarAuthNames = new String[] { "bearer-jwt" };
-
-        ParameterizedTypeReference<ResultString> localVarReturnType = new ParameterizedTypeReference<ResultString>() {};
-        return invokeAPI(path, httpMethod, pathParams, queryParams, postBody, headerParams, cookieParams, formParams, localVarAccept, localVarContentType, localVarAuthNames, localVarReturnType);
-    }
 }

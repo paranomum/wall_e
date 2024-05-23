@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-<span class="fc" id="L27">public class CodegenProperty implements Cloneable, IJsonSchemaValidationProperties {</span>
+<span class="nc" id="L27">public class CodegenProperty implements Cloneable, IJsonSchemaValidationProperties {</span>
     /**
      * The value of the 'type' attribute in the OpenAPI schema.
      * The per-language codegen logic may change to a language-specific type.
@@ -143,7 +143,7 @@ import java.util.Objects;
     public boolean isEmail;
     public boolean isPassword;
     public boolean isNull;
-<span class="fc" id="L146">    public boolean isVoid = false;</span>
+<span class="nc" id="L146">    public boolean isVoid = false;</span>
     /**
      * The type is a free-form object, i.e. it is a map of string to values with no declared properties.
      * A OAS free-form schema may include the 'additionalProperties' attribute, which puts a constraint
@@ -175,10 +175,10 @@ import java.util.Objects;
     // the undeclared properties.
     public CodegenProperty items;
     public CodegenProperty additionalProperties;
-<span class="fc" id="L178">    public List&lt;CodegenProperty&gt; vars = new ArrayList&lt;CodegenProperty&gt;(); // all properties (without parent's properties)</span>
-<span class="fc" id="L179">    public List&lt;CodegenProperty&gt; requiredVars = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L178">    public List&lt;CodegenProperty&gt; vars = new ArrayList&lt;CodegenProperty&gt;(); // all properties (without parent's properties)</span>
+<span class="nc" id="L179">    public List&lt;CodegenProperty&gt; requiredVars = new ArrayList&lt;&gt;();</span>
     public CodegenProperty mostInnerItems;
-<span class="fc" id="L181">    public Map&lt;String, Object&gt; vendorExtensions = new HashMap&lt;String, Object&gt;();</span>
+<span class="nc" id="L181">    public Map&lt;String, Object&gt; vendorExtensions = new HashMap&lt;String, Object&gt;();</span>
     public boolean hasValidation; // true if pattern, maximum, etc are set (only used in the mustache template)
     public boolean isInherited;
     public String discriminatorValue;
@@ -198,17 +198,17 @@ import java.util.Objects;
     private Boolean uniqueItemsBoolean;
 
     // XML
-<span class="fc" id="L201">    public boolean isXmlAttribute = false;</span>
+<span class="nc" id="L201">    public boolean isXmlAttribute = false;</span>
     public String xmlPrefix;
     public String xmlName;
     public String xmlNamespace;
-<span class="fc" id="L205">    public boolean isXmlWrapped = false;</span>
+<span class="nc" id="L205">    public boolean isXmlWrapped = false;</span>
     private boolean additionalPropertiesIsAnyType;
     private boolean hasVars;
     private boolean hasRequired;
     private boolean hasDiscriminatorWithNonEmptyMapping;
-<span class="fc" id="L210">    private CodegenComposedSchemas composedSchemas = null;</span>
-<span class="fc" id="L211">    private boolean hasMultipleTypes = false;</span>
+<span class="nc" id="L210">    private CodegenComposedSchemas composedSchemas = null;</span>
+<span class="nc" id="L211">    private boolean hasMultipleTypes = false;</span>
     private Map&lt;String, CodegenProperty&gt; requiredVarsMap;
     private String ref;
     private boolean schemaIsFromAdditionalProperties;
@@ -240,8 +240,8 @@ import java.util.Objects;
 
     @Override
     public void setFormat(String format) {
-<span class="fc" id="L243">        this.format = format;</span>
-<span class="fc" id="L244">    }</span>
+<span class="nc" id="L243">        this.format = format;</span>
+<span class="nc" id="L244">    }</span>
 
     @Override
     public String getFormat() {
@@ -279,7 +279,7 @@ import java.util.Objects;
 <span class="nc" id="L279">    }</span>
 
     public String getComplexType() {
-<span class="fc" id="L282">        return complexType;</span>
+<span class="nc" id="L282">        return complexType;</span>
     }
 
     public void setComplexType(String complexType) {
@@ -393,7 +393,7 @@ import java.util.Objects;
 <span class="nc" id="L393">    }</span>
 
     public String getBaseType() {
-<span class="fc" id="L396">        return baseType;</span>
+<span class="nc" id="L396">        return baseType;</span>
     }
 
     public void setBaseType(String baseType) {
@@ -440,8 +440,8 @@ import java.util.Objects;
 
     @Override
     public void setSchemaIsFromAdditionalProperties(boolean schemaIsFromAdditionalProperties) {
-<span class="fc" id="L443">        this.schemaIsFromAdditionalProperties = schemaIsFromAdditionalProperties;</span>
-<span class="fc" id="L444">    }</span>
+<span class="nc" id="L443">        this.schemaIsFromAdditionalProperties = schemaIsFromAdditionalProperties;</span>
+<span class="nc" id="L444">    }</span>
 
     @Override
     public Integer getMaxLength() {
@@ -450,8 +450,8 @@ import java.util.Objects;
 
     @Override
     public void setMaxLength(Integer maxLength) {
-<span class="fc" id="L453">        this.maxLength = maxLength;</span>
-<span class="fc" id="L454">    }</span>
+<span class="nc" id="L453">        this.maxLength = maxLength;</span>
+<span class="nc" id="L454">    }</span>
 
     @Override
     public Integer getMinLength() {
@@ -460,8 +460,8 @@ import java.util.Objects;
 
     @Override
     public void setMinLength(Integer minLength) {
-<span class="fc" id="L463">        this.minLength = minLength;</span>
-<span class="fc" id="L464">    }</span>
+<span class="nc" id="L463">        this.minLength = minLength;</span>
+<span class="nc" id="L464">    }</span>
 
     @Override
     public String getPattern() {
@@ -567,7 +567,7 @@ import java.util.Objects;
 
     @Override
     public CodegenProperty getItems() {
-<span class="fc" id="L570">        return items;</span>
+<span class="nc" id="L570">        return items;</span>
     }
 
     @Override
@@ -577,7 +577,7 @@ import java.util.Objects;
 
     @Override
     public CodegenProperty getAdditionalProperties() {
-<span class="fc" id="L580">        return additionalProperties;</span>
+<span class="nc" id="L580">        return additionalProperties;</span>
     }
 
     @Override
@@ -617,7 +617,7 @@ import java.util.Objects;
 
     @Override
     public boolean getIsMap() {
-<span class="fc" id="L620">        return isMap;</span>
+<span class="nc" id="L620">        return isMap;</span>
     }
 
     @Override
@@ -627,13 +627,13 @@ import java.util.Objects;
 
     @Override
     public boolean getIsArray() {
-<span class="fc" id="L630">        return isArray;</span>
+<span class="nc" id="L630">        return isArray;</span>
     }
 
     @Override
     public void setIsArray(boolean isArray) {
-<span class="fc" id="L635">        this.isArray = isArray;</span>
-<span class="fc" id="L636">    }</span>
+<span class="nc" id="L635">        this.isArray = isArray;</span>
+<span class="nc" id="L636">    }</span>
 
     @Override
     public boolean getIsShort() {
@@ -652,8 +652,8 @@ import java.util.Objects;
 
     @Override
     public void setIsBoolean(boolean isBoolean) {
-<span class="fc" id="L655">        this.isBoolean = isBoolean;</span>
-<span class="fc" id="L656">    }</span>
+<span class="nc" id="L655">        this.isBoolean = isBoolean;</span>
+<span class="nc" id="L656">    }</span>
 
     @Override
     public boolean getIsUnboundedInteger() {
@@ -662,8 +662,8 @@ import java.util.Objects;
 
     @Override
     public void setIsUnboundedInteger(boolean isUnboundedInteger) {
-<span class="fc" id="L665">        this.isUnboundedInteger = isUnboundedInteger;</span>
-<span class="fc" id="L666">    }</span>
+<span class="nc" id="L665">        this.isUnboundedInteger = isUnboundedInteger;</span>
+<span class="nc" id="L666">    }</span>
 
     @Override
     public boolean getIsPrimitiveType() {
@@ -676,7 +676,7 @@ import java.util.Objects;
 <span class="nc" id="L676">    }</span>
 
     public Map&lt;String, Object&gt; getVendorExtensions() {
-<span class="fc" id="L679">        return vendorExtensions;</span>
+<span class="nc" id="L679">        return vendorExtensions;</span>
     }
 
     public void setVendorExtensions(Map&lt;String, Object&gt; vendorExtensions) {
@@ -765,18 +765,18 @@ import java.util.Objects;
 
     @Override
     public void setComposedSchemas(CodegenComposedSchemas composedSchemas) {
-<span class="fc" id="L768">        this.composedSchemas = composedSchemas;</span>
-<span class="fc" id="L769">    }</span>
+<span class="nc" id="L768">        this.composedSchemas = composedSchemas;</span>
+<span class="nc" id="L769">    }</span>
 
     @Override
     public CodegenComposedSchemas getComposedSchemas() {
-<span class="fc" id="L773">        return composedSchemas;</span>
+<span class="nc" id="L773">        return composedSchemas;</span>
     }
 
     @Override
     public void setRef(String ref) {
-<span class="fc" id="L778">        this.ref = ref;</span>
-<span class="fc" id="L779">    }</span>
+<span class="nc" id="L778">        this.ref = ref;</span>
+<span class="nc" id="L779">    }</span>
 
     @Override
     public String getRef() {
@@ -786,51 +786,51 @@ import java.util.Objects;
     @Override
     public CodegenProperty clone() {
         try {
-<span class="fc" id="L789">            CodegenProperty cp = (CodegenProperty) super.clone();</span>
-<span class="fc bfc" id="L790" title="All 2 branches covered.">            if (this._enum != null) {</span>
-<span class="fc" id="L791">                cp._enum = new ArrayList&lt;String&gt;(this._enum);</span>
+<span class="nc" id="L789">            CodegenProperty cp = (CodegenProperty) super.clone();</span>
+<span class="nc bnc" id="L790" title="All 2 branches missed.">            if (this._enum != null) {</span>
+<span class="nc" id="L791">                cp._enum = new ArrayList&lt;String&gt;(this._enum);</span>
             }
-<span class="fc bfc" id="L793" title="All 2 branches covered.">            if (this.allowableValues != null) {</span>
-<span class="fc" id="L794">                cp.allowableValues = new HashMap&lt;String, Object&gt;(this.allowableValues);</span>
+<span class="nc bnc" id="L793" title="All 2 branches missed.">            if (this.allowableValues != null) {</span>
+<span class="nc" id="L794">                cp.allowableValues = new HashMap&lt;String, Object&gt;(this.allowableValues);</span>
             }
-<span class="pc bpc" id="L796" title="1 of 2 branches missed.">            if (this.items != null) {</span>
+<span class="nc bnc" id="L796" title="All 2 branches missed.">            if (this.items != null) {</span>
 <span class="nc" id="L797">                cp.items = this.items;</span>
             }
-<span class="pc bpc" id="L799" title="1 of 2 branches missed.">            if (this.additionalProperties != null) {</span>
+<span class="nc bnc" id="L799" title="All 2 branches missed.">            if (this.additionalProperties != null) {</span>
 <span class="nc" id="L800">                cp.additionalProperties = this.additionalProperties;</span>
             }
-<span class="pc bpc" id="L802" title="1 of 2 branches missed.">            if (this.vars != null) {</span>
-<span class="fc" id="L803">                cp.vars = this.vars;</span>
+<span class="nc bnc" id="L802" title="All 2 branches missed.">            if (this.vars != null) {</span>
+<span class="nc" id="L803">                cp.vars = this.vars;</span>
             }
-<span class="pc bpc" id="L805" title="1 of 2 branches missed.">            if (this.requiredVars != null) {</span>
-<span class="fc" id="L806">                cp.requiredVars = this.requiredVars;</span>
+<span class="nc bnc" id="L805" title="All 2 branches missed.">            if (this.requiredVars != null) {</span>
+<span class="nc" id="L806">                cp.requiredVars = this.requiredVars;</span>
             }
-<span class="pc bpc" id="L808" title="1 of 2 branches missed.">            if (this.mostInnerItems != null) {</span>
+<span class="nc bnc" id="L808" title="All 2 branches missed.">            if (this.mostInnerItems != null) {</span>
 <span class="nc" id="L809">                cp.mostInnerItems = this.mostInnerItems;</span>
             }
-<span class="pc bpc" id="L811" title="1 of 2 branches missed.">            if (this.vendorExtensions != null) {</span>
-<span class="fc" id="L812">                cp.vendorExtensions = new HashMap&lt;String, Object&gt;(this.vendorExtensions);</span>
+<span class="nc bnc" id="L811" title="All 2 branches missed.">            if (this.vendorExtensions != null) {</span>
+<span class="nc" id="L812">                cp.vendorExtensions = new HashMap&lt;String, Object&gt;(this.vendorExtensions);</span>
             }
-<span class="pc bpc" id="L814" title="1 of 2 branches missed.">            if (this.composedSchemas != null) {</span>
+<span class="nc bnc" id="L814" title="All 2 branches missed.">            if (this.composedSchemas != null) {</span>
 <span class="nc" id="L815">                cp.composedSchemas = this.composedSchemas;</span>
             }
-<span class="pc bpc" id="L817" title="1 of 2 branches missed.">            if (this.requiredVarsMap != null) {</span>
+<span class="nc bnc" id="L817" title="All 2 branches missed.">            if (this.requiredVarsMap != null) {</span>
 <span class="nc" id="L818">                cp.setRequiredVarsMap(this.requiredVarsMap);</span>
             }
-<span class="fc bfc" id="L820" title="All 2 branches covered.">            if (this.ref != null) {</span>
-<span class="fc" id="L821">                cp.setRef(this.ref);</span>
+<span class="nc bnc" id="L820" title="All 2 branches missed.">            if (this.ref != null) {</span>
+<span class="nc" id="L821">                cp.setRef(this.ref);</span>
             }
-<span class="fc bfc" id="L823" title="All 2 branches covered.">            if (this.format != null) {</span>
-<span class="fc" id="L824">                cp.setFormat(this.format);</span>
+<span class="nc bnc" id="L823" title="All 2 branches missed.">            if (this.format != null) {</span>
+<span class="nc" id="L824">                cp.setFormat(this.format);</span>
             }
-<span class="pc bpc" id="L826" title="1 of 2 branches missed.">            if (this.dependentRequired != null) {</span>
+<span class="nc bnc" id="L826" title="All 2 branches missed.">            if (this.dependentRequired != null) {</span>
 <span class="nc" id="L827">                cp.setDependentRequired(this.dependentRequired);</span>
             }
-<span class="pc bpc" id="L829" title="1 of 2 branches missed.">            if (this.contains != null) {</span>
+<span class="nc bnc" id="L829" title="All 2 branches missed.">            if (this.contains != null) {</span>
 <span class="nc" id="L830">                cp.setContains(this.contains);</span>
             }
 
-<span class="fc" id="L833">            return cp;</span>
+<span class="nc" id="L833">            return cp;</span>
 <span class="nc" id="L834">        } catch (CloneNotSupportedException e) {</span>
 <span class="nc" id="L835">            throw new IllegalStateException(e);</span>
         }
@@ -888,7 +888,7 @@ import java.util.Objects;
 
     @Override
     public List&lt;CodegenProperty&gt; getVars() {
-<span class="fc" id="L891">        return vars;</span>
+<span class="nc" id="L891">        return vars;</span>
     }
 
     @Override
@@ -933,8 +933,8 @@ import java.util.Objects;
 
     @Override
     public void setHasValidation(boolean hasValidation) {
-<span class="fc" id="L936">        this.hasValidation = hasValidation;</span>
-<span class="fc" id="L937">    }</span>
+<span class="nc" id="L936">        this.hasValidation = hasValidation;</span>
+<span class="nc" id="L937">    }</span>
 
     @Override
     public boolean getAdditionalPropertiesIsAnyType() {
@@ -989,8 +989,8 @@ import java.util.Objects;
 
     @Override
     public void setIsString(boolean isString) {
-<span class="fc" id="L992">        this.isString = isString;</span>
-<span class="fc" id="L993">    }</span>
+<span class="nc" id="L992">        this.isString = isString;</span>
+<span class="nc" id="L993">    }</span>
 
     @Override
     public boolean getIsNumber() {
@@ -1126,7 +1126,7 @@ import java.util.Objects;
      * @return true if it's an enum (inline or ref)
      */
     public boolean getIsEnumOrRef() {
-<span class="pc bpc" id="L1129" title="1 of 4 branches missed.">        return isEnum || isEnumRef;</span>
+<span class="nc bnc" id="L1129" title="All 4 branches missed.">        return isEnum || isEnumRef;</span>
     }
 
     @Override

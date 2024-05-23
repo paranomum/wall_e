@@ -35,40 +35,40 @@ import java.util.Map;
 public class JavaResteasyEapServerCodegen extends AbstractJavaJAXRSServerCodegen
         implements JbossFeature, BeanValidationFeatures, SwaggerFeatures {
 
-<span class="fc" id="L38">    protected boolean generateJbossDeploymentDescriptor = true;</span>
-<span class="fc" id="L39">    protected boolean useSwaggerFeature = false;</span>
+<span class="nc" id="L38">    protected boolean generateJbossDeploymentDescriptor = true;</span>
+<span class="nc" id="L39">    protected boolean useSwaggerFeature = false;</span>
 
     public JavaResteasyEapServerCodegen() {
-<span class="fc" id="L42">        super();</span>
+<span class="nc" id="L42">        super();</span>
 
-<span class="fc" id="L44">        modifyFeatureSet(features -&gt; features.includeDocumentationFeatures(DocumentationFeature.Readme));</span>
+<span class="nc" id="L44">        modifyFeatureSet(features -&gt; features.includeDocumentationFeatures(DocumentationFeature.Readme));</span>
 
-<span class="fc" id="L46">        artifactId = &quot;openapi-jaxrs-resteasy-eap-server&quot;;</span>
-<span class="fc" id="L47">        useBeanValidation = true;</span>
-<span class="fc" id="L48">        outputFolder = &quot;generated-code/JavaJaxRS-Resteasy-eap&quot;;</span>
+<span class="nc" id="L46">        artifactId = &quot;openapi-jaxrs-resteasy-eap-server&quot;;</span>
+<span class="nc" id="L47">        useBeanValidation = true;</span>
+<span class="nc" id="L48">        outputFolder = &quot;generated-code/JavaJaxRS-Resteasy-eap&quot;;</span>
 
         // clioOptions default redefinition need to be updated
-<span class="fc" id="L51">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
+<span class="nc" id="L51">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
 
-<span class="fc" id="L53">        apiTemplateFiles.put(&quot;apiServiceImpl.mustache&quot;, &quot;.java&quot;);</span>
-<span class="fc" id="L54">        apiTestTemplateFiles.clear(); // TODO: add test template</span>
+<span class="nc" id="L53">        apiTemplateFiles.put(&quot;apiServiceImpl.mustache&quot;, &quot;.java&quot;);</span>
+<span class="nc" id="L54">        apiTestTemplateFiles.clear(); // TODO: add test template</span>
 
         // clear model and api doc template as AbstractJavaJAXRSServerCodegen
         // does not support auto-generated markdown doc at the moment
         //TODO: add doc templates
-<span class="fc" id="L59">        modelDocTemplateFiles.remove(&quot;model_doc.mustache&quot;);</span>
-<span class="fc" id="L60">        apiDocTemplateFiles.remove(&quot;api_doc.mustache&quot;);</span>
+<span class="nc" id="L59">        modelDocTemplateFiles.remove(&quot;model_doc.mustache&quot;);</span>
+<span class="nc" id="L60">        apiDocTemplateFiles.remove(&quot;api_doc.mustache&quot;);</span>
 
-<span class="fc" id="L62">        embeddedTemplateDir = templateDir = &quot;JavaJaxRS&quot; + File.separator + &quot;resteasy&quot; + File.separator + &quot;eap&quot;;</span>
+<span class="nc" id="L62">        embeddedTemplateDir = templateDir = &quot;JavaJaxRS&quot; + File.separator + &quot;resteasy&quot; + File.separator + &quot;eap&quot;;</span>
 
-<span class="fc" id="L64">        cliOptions.add(CliOption.newBoolean(GENERATE_JBOSS_DEPLOYMENT_DESCRIPTOR, &quot;Generate Jboss Deployment Descriptor&quot;,generateJbossDeploymentDescriptor));</span>
-<span class="fc" id="L65">        cliOptions.add(CliOption.newBoolean(USE_SWAGGER_FEATURE, &quot;Use dynamic Swagger generator&quot;,useSwaggerFeature));</span>
+<span class="nc" id="L64">        cliOptions.add(CliOption.newBoolean(GENERATE_JBOSS_DEPLOYMENT_DESCRIPTOR, &quot;Generate Jboss Deployment Descriptor&quot;,generateJbossDeploymentDescriptor));</span>
+<span class="nc" id="L65">        cliOptions.add(CliOption.newBoolean(USE_SWAGGER_FEATURE, &quot;Use dynamic Swagger generator&quot;,useSwaggerFeature));</span>
 
-<span class="fc" id="L67">    }</span>
+<span class="nc" id="L67">    }</span>
 
     @Override
     public String getName() {
-<span class="fc" id="L71">        return &quot;jaxrs-resteasy-eap&quot;;</span>
+<span class="nc" id="L71">        return &quot;jaxrs-resteasy-eap&quot;;</span>
     }
 
     @Override

@@ -15,11 +15,11 @@ import org.openapitools.codegen.templating.mustache.TrimWhitespaceLambda;
 public class JavaWiremockServerCodegen extends AbstractJavaCodegen implements CodegenConfig {
 
     public CodegenType getTag() {
-<span class="fc" id="L18">        return CodegenType.SERVER;</span>
+<span class="nc" id="L18">        return CodegenType.SERVER;</span>
     }
 
     public String getName() {
-<span class="fc" id="L22">        return &quot;java-wiremock&quot;;</span>
+<span class="nc" id="L22">        return &quot;java-wiremock&quot;;</span>
     }
 
     public String getHelp() {
@@ -27,46 +27,46 @@ public class JavaWiremockServerCodegen extends AbstractJavaCodegen implements Co
     }
 
     public JavaWiremockServerCodegen() {
-<span class="fc" id="L30">        super();</span>
+<span class="nc" id="L30">        super();</span>
 
-<span class="fc" id="L32">        generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
-<span class="fc" id="L33">                .stability(Stability.BETA)</span>
-<span class="fc" id="L34">                .build();</span>
+<span class="nc" id="L32">        generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
+<span class="nc" id="L33">                .stability(Stability.BETA)</span>
+<span class="nc" id="L34">                .build();</span>
 
-<span class="fc" id="L36">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;java&quot;;</span>
-<span class="fc" id="L37">        embeddedTemplateDir = templateDir = &quot;java-wiremock&quot;;</span>
-<span class="fc" id="L38">        invokerPackage = &quot;org.openapitools.mockserver&quot;;</span>
-<span class="fc" id="L39">        artifactId = &quot;openapi-java-mockserver&quot;;</span>
-<span class="fc" id="L40">        apiPackage = &quot;org.openapitools.mockserver.api&quot;;</span>
+<span class="nc" id="L36">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;java&quot;;</span>
+<span class="nc" id="L37">        embeddedTemplateDir = templateDir = &quot;java-wiremock&quot;;</span>
+<span class="nc" id="L38">        invokerPackage = &quot;org.openapitools.mockserver&quot;;</span>
+<span class="nc" id="L39">        artifactId = &quot;openapi-java-mockserver&quot;;</span>
+<span class="nc" id="L40">        apiPackage = &quot;org.openapitools.mockserver.api&quot;;</span>
 
-<span class="fc" id="L42">        apiDocTemplateFiles = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L43">        apiTestTemplateFiles = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L44">        modelDocTemplateFiles = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L45">        modelTemplateFiles = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L42">        apiDocTemplateFiles = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L43">        apiTestTemplateFiles = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L44">        modelDocTemplateFiles = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L45">        modelTemplateFiles = new HashMap&lt;&gt;();</span>
 
-<span class="fc" id="L47">        apiTemplateFiles.clear();</span>
-<span class="fc" id="L48">        apiTemplateFiles.put(&quot;wiremock.mustache&quot;, &quot;MockServer.java&quot;);</span>
+<span class="nc" id="L47">        apiTemplateFiles.clear();</span>
+<span class="nc" id="L48">        apiTemplateFiles.put(&quot;wiremock.mustache&quot;, &quot;MockServer.java&quot;);</span>
 
-<span class="fc" id="L50">        supportingFiles.add(new SupportingFile(&quot;pom.mustache&quot;, &quot;&quot;, &quot;pom.xml&quot;)</span>
-<span class="fc" id="L51">                .doNotOverwrite());</span>
+<span class="nc" id="L50">        supportingFiles.add(new SupportingFile(&quot;pom.mustache&quot;, &quot;&quot;, &quot;pom.xml&quot;)</span>
+<span class="nc" id="L51">                .doNotOverwrite());</span>
 
         // Ensure the OAS 3.x discriminator mappings include any descendent schemas that allOf
         // inherit from self, any oneOf schemas, any anyOf schemas, any x-discriminator-values,
         // and the discriminator mapping schemas in the OAS document.
-<span class="fc" id="L56">        this.setLegacyDiscriminatorBehavior(false);</span>
+<span class="nc" id="L56">        this.setLegacyDiscriminatorBehavior(false);</span>
 
         // add lambda for mustache templates
-<span class="pc" id="L59">        additionalProperties.put(&quot;lambdaRemoveDoubleQuote&quot;, (Mustache.Lambda) (fragment, writer) -&gt; writer</span>
+<span class="nc" id="L59">        additionalProperties.put(&quot;lambdaRemoveDoubleQuote&quot;, (Mustache.Lambda) (fragment, writer) -&gt; writer</span>
 <span class="nc" id="L60">                .write(fragment.execute().replaceAll(&quot;\&quot;&quot;, Matcher.quoteReplacement(&quot;&quot;))));</span>
-<span class="pc" id="L61">        additionalProperties.put(&quot;lambdaEscapeDoubleQuote&quot;, (Mustache.Lambda) (fragment, writer) -&gt; writer</span>
+<span class="nc" id="L61">        additionalProperties.put(&quot;lambdaEscapeDoubleQuote&quot;, (Mustache.Lambda) (fragment, writer) -&gt; writer</span>
 <span class="nc" id="L62">                .write(fragment.execute().replaceAll(&quot;\&quot;&quot;, Matcher.quoteReplacement(&quot;\\\&quot;&quot;))));</span>
-<span class="fc" id="L63">        additionalProperties.put(&quot;lambdaRemoveLineBreak&quot;,</span>
+<span class="nc" id="L63">        additionalProperties.put(&quot;lambdaRemoveLineBreak&quot;,</span>
 <span class="nc" id="L64">                (Mustache.Lambda) (fragment, writer) -&gt; writer.write(fragment.execute().replaceAll(&quot;\\r|\\n&quot;, &quot;&quot;)));</span>
 
-<span class="fc" id="L66">        additionalProperties.put(&quot;lambdaTrimWhitespace&quot;, new TrimWhitespaceLambda());</span>
+<span class="nc" id="L66">        additionalProperties.put(&quot;lambdaTrimWhitespace&quot;, new TrimWhitespaceLambda());</span>
 
-<span class="fc" id="L68">        additionalProperties.put(&quot;lambdaSplitString&quot;, new SplitStringLambda());</span>
-<span class="fc" id="L69">    }</span>
+<span class="nc" id="L68">        additionalProperties.put(&quot;lambdaSplitString&quot;, new SplitStringLambda());</span>
+<span class="nc" id="L69">    }</span>
 
 
 }

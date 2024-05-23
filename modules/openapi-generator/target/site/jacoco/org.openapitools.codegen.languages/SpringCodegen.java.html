@@ -75,7 +75,7 @@ import org.slf4j.LoggerFactory;
 
 public class SpringCodegen extends AbstractJavaCodegen
         implements BeanValidationFeatures, PerformBeanValidationFeatures, OptionalFeatures, SwaggerUIFeatures {
-<span class="fc" id="L78">    private final Logger LOGGER = LoggerFactory.getLogger(SpringCodegen.class);</span>
+<span class="nc" id="L78">    private final Logger LOGGER = LoggerFactory.getLogger(SpringCodegen.class);</span>
     public static final String TITLE = &quot;title&quot;;
     public static final String SERVER_PORT = &quot;serverPort&quot;;
     public static final String CONFIG_PACKAGE = &quot;configPackage&quot;;
@@ -112,169 +112,169 @@ public class SpringCodegen extends AbstractJavaCodegen
     public static final String USE_REQUEST_MAPPING_ON_CONTROLLER = &quot;useRequestMappingOnController&quot;;
     public static final String USE_REQUEST_MAPPING_ON_INTERFACE = &quot;useRequestMappingOnInterface&quot;;
 
-<span class="fc" id="L115">    public enum RequestMappingMode {</span>
-<span class="fc" id="L116">        api_interface(&quot;Generate the @RequestMapping annotation on the generated Api Interface.&quot;),</span>
-<span class="fc" id="L117">        controller(&quot;Generate the @RequestMapping annotation on the generated Api Controller Implementation.&quot;),</span>
-<span class="fc" id="L118">        none(&quot;Do not add a class level @RequestMapping annotation.&quot;);</span>
+<span class="nc" id="L115">    public enum RequestMappingMode {</span>
+<span class="nc" id="L116">        api_interface(&quot;Generate the @RequestMapping annotation on the generated Api Interface.&quot;),</span>
+<span class="nc" id="L117">        controller(&quot;Generate the @RequestMapping annotation on the generated Api Controller Implementation.&quot;),</span>
+<span class="nc" id="L118">        none(&quot;Do not add a class level @RequestMapping annotation.&quot;);</span>
 
         public String getDescription() {
-<span class="fc" id="L121">            return description;</span>
+<span class="nc" id="L121">            return description;</span>
         }
 
         private String description;
 
-<span class="fc" id="L126">        RequestMappingMode(String description) {</span>
-<span class="fc" id="L127">            this.description = description;</span>
-<span class="fc" id="L128">        }</span>
+<span class="nc" id="L126">        RequestMappingMode(String description) {</span>
+<span class="nc" id="L127">            this.description = description;</span>
+<span class="nc" id="L128">        }</span>
     }
 
     public static final String OPEN_BRACE = &quot;{&quot;;
     public static final String CLOSE_BRACE = &quot;}&quot;;
 
-<span class="fc" id="L134">    protected String title = &quot;OpenAPI Spring&quot;;</span>
-<span class="fc" id="L135">    protected String configPackage = &quot;org.openapitools.configuration&quot;;</span>
-<span class="fc" id="L136">    protected String basePackage = &quot;org.openapitools&quot;;</span>
-<span class="fc" id="L137">    protected String resourceFolder = projectFolder + &quot;/resources&quot;;</span>
+<span class="nc" id="L134">    protected String title = &quot;OpenAPI Spring&quot;;</span>
+<span class="nc" id="L135">    protected String configPackage = &quot;org.openapitools.configuration&quot;;</span>
+<span class="nc" id="L136">    protected String basePackage = &quot;org.openapitools&quot;;</span>
+<span class="nc" id="L137">    protected String resourceFolder = projectFolder + &quot;/resources&quot;;</span>
 
-<span class="fc" id="L139">    protected boolean interfaceOnly = false;</span>
-<span class="fc" id="L140">    protected boolean useFeignClientUrl = true;</span>
-<span class="fc" id="L141">    protected boolean delegatePattern = false;</span>
-<span class="fc" id="L142">    protected boolean delegateMethod = false;</span>
-<span class="fc" id="L143">    protected boolean singleContentTypes = false;</span>
-<span class="fc" id="L144">    protected boolean async = false;</span>
-<span class="fc" id="L145">    protected boolean reactive = false;</span>
-<span class="fc" id="L146">    protected boolean sse = false;</span>
-<span class="fc" id="L147">    protected String responseWrapper = &quot;&quot;;</span>
-<span class="fc" id="L148">    protected boolean skipDefaultInterface = false;</span>
-<span class="fc" id="L149">    protected boolean useTags = false;</span>
-<span class="fc" id="L150">    protected boolean useBeanValidation = true;</span>
-<span class="fc" id="L151">    protected boolean performBeanValidation = false;</span>
-<span class="fc" id="L152">    protected boolean apiFirst = false;</span>
-<span class="fc" id="L153">    protected boolean useOptional = false;</span>
-<span class="fc" id="L154">    protected boolean virtualService = false;</span>
-<span class="fc" id="L155">    protected boolean hateoas = false;</span>
-<span class="fc" id="L156">    protected boolean returnSuccessCode = false;</span>
-<span class="fc" id="L157">    protected boolean unhandledException = false;</span>
-<span class="fc" id="L158">    protected boolean useSpringController = false;</span>
-<span class="fc" id="L159">    protected boolean useSwaggerUI = true;</span>
-<span class="fc" id="L160">    protected boolean useResponseEntity = true;</span>
-<span class="fc" id="L161">    protected boolean useEnumCaseInsensitive = false;</span>
-<span class="fc" id="L162">    protected boolean useSpringBoot3 = false;</span>
-<span class="fc" id="L163">    protected boolean generatedConstructorWithRequiredArgs = true;</span>
-<span class="fc" id="L164">    protected RequestMappingMode requestMappingMode = RequestMappingMode.controller;</span>
+<span class="nc" id="L139">    protected boolean interfaceOnly = false;</span>
+<span class="nc" id="L140">    protected boolean useFeignClientUrl = true;</span>
+<span class="nc" id="L141">    protected boolean delegatePattern = false;</span>
+<span class="nc" id="L142">    protected boolean delegateMethod = false;</span>
+<span class="nc" id="L143">    protected boolean singleContentTypes = false;</span>
+<span class="nc" id="L144">    protected boolean async = false;</span>
+<span class="nc" id="L145">    protected boolean reactive = false;</span>
+<span class="nc" id="L146">    protected boolean sse = false;</span>
+<span class="nc" id="L147">    protected String responseWrapper = &quot;&quot;;</span>
+<span class="nc" id="L148">    protected boolean skipDefaultInterface = false;</span>
+<span class="nc" id="L149">    protected boolean useTags = false;</span>
+<span class="nc" id="L150">    protected boolean useBeanValidation = true;</span>
+<span class="nc" id="L151">    protected boolean performBeanValidation = false;</span>
+<span class="nc" id="L152">    protected boolean apiFirst = false;</span>
+<span class="nc" id="L153">    protected boolean useOptional = false;</span>
+<span class="nc" id="L154">    protected boolean virtualService = false;</span>
+<span class="nc" id="L155">    protected boolean hateoas = false;</span>
+<span class="nc" id="L156">    protected boolean returnSuccessCode = false;</span>
+<span class="nc" id="L157">    protected boolean unhandledException = false;</span>
+<span class="nc" id="L158">    protected boolean useSpringController = false;</span>
+<span class="nc" id="L159">    protected boolean useSwaggerUI = true;</span>
+<span class="nc" id="L160">    protected boolean useResponseEntity = true;</span>
+<span class="nc" id="L161">    protected boolean useEnumCaseInsensitive = false;</span>
+<span class="nc" id="L162">    protected boolean useSpringBoot3 = false;</span>
+<span class="nc" id="L163">    protected boolean generatedConstructorWithRequiredArgs = true;</span>
+<span class="nc" id="L164">    protected RequestMappingMode requestMappingMode = RequestMappingMode.controller;</span>
 
     public SpringCodegen() {
-<span class="fc" id="L167">        super();</span>
+<span class="nc" id="L167">        super();</span>
 
-<span class="fc" id="L169">        modifyFeatureSet(features -&gt; features.includeDocumentationFeatures(DocumentationFeature.Readme)</span>
-<span class="fc" id="L170">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON, WireFormatFeature.XML, WireFormatFeature.Custom))</span>
-<span class="fc" id="L171">                .securityFeatures(EnumSet.of(SecurityFeature.OAuth2_Implicit, SecurityFeature.OAuth2_AuthorizationCode,</span>
+<span class="nc" id="L169">        modifyFeatureSet(features -&gt; features.includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="nc" id="L170">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON, WireFormatFeature.XML, WireFormatFeature.Custom))</span>
+<span class="nc" id="L171">                .securityFeatures(EnumSet.of(SecurityFeature.OAuth2_Implicit, SecurityFeature.OAuth2_AuthorizationCode,</span>
                         SecurityFeature.OAuth2_ClientCredentials, SecurityFeature.OAuth2_Password,
                         SecurityFeature.ApiKey, SecurityFeature.BasicAuth))
-<span class="fc" id="L174">                .excludeGlobalFeatures(GlobalFeature.Callbacks, GlobalFeature.LinkObjects,</span>
+<span class="nc" id="L174">                .excludeGlobalFeatures(GlobalFeature.Callbacks, GlobalFeature.LinkObjects,</span>
                         GlobalFeature.ParameterStyling)
-<span class="fc" id="L176">                .includeGlobalFeatures(GlobalFeature.XMLStructureDefinitions)</span>
-<span class="fc" id="L177">                .includeSchemaSupportFeatures(SchemaSupportFeature.Polymorphism)</span>
-<span class="fc" id="L178">                .excludeParameterFeatures(ParameterFeature.Cookie));</span>
+<span class="nc" id="L176">                .includeGlobalFeatures(GlobalFeature.XMLStructureDefinitions)</span>
+<span class="nc" id="L177">                .includeSchemaSupportFeatures(SchemaSupportFeature.Polymorphism)</span>
+<span class="nc" id="L178">                .excludeParameterFeatures(ParameterFeature.Cookie));</span>
 
-<span class="fc" id="L180">        outputFolder = &quot;generated-code/javaSpring&quot;;</span>
-<span class="fc" id="L181">        embeddedTemplateDir = templateDir = &quot;JavaSpring&quot;;</span>
-<span class="fc" id="L182">        apiPackage = &quot;org.openapitools.api&quot;;</span>
-<span class="fc" id="L183">        modelPackage = &quot;org.openapitools.model&quot;;</span>
-<span class="fc" id="L184">        invokerPackage = &quot;org.openapitools.api&quot;;</span>
-<span class="fc" id="L185">        artifactId = &quot;openapi-spring&quot;;</span>
+<span class="nc" id="L180">        outputFolder = &quot;generated-code/javaSpring&quot;;</span>
+<span class="nc" id="L181">        embeddedTemplateDir = templateDir = &quot;JavaSpring&quot;;</span>
+<span class="nc" id="L182">        apiPackage = &quot;org.openapitools.api&quot;;</span>
+<span class="nc" id="L183">        modelPackage = &quot;org.openapitools.model&quot;;</span>
+<span class="nc" id="L184">        invokerPackage = &quot;org.openapitools.api&quot;;</span>
+<span class="nc" id="L185">        artifactId = &quot;openapi-spring&quot;;</span>
 
         // clioOptions default redefinition need to be updated
-<span class="fc" id="L188">        updateOption(CodegenConstants.INVOKER_PACKAGE, this.getInvokerPackage());</span>
-<span class="fc" id="L189">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
-<span class="fc" id="L190">        updateOption(CodegenConstants.API_PACKAGE, apiPackage);</span>
-<span class="fc" id="L191">        updateOption(CodegenConstants.MODEL_PACKAGE, modelPackage);</span>
+<span class="nc" id="L188">        updateOption(CodegenConstants.INVOKER_PACKAGE, this.getInvokerPackage());</span>
+<span class="nc" id="L189">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
+<span class="nc" id="L190">        updateOption(CodegenConstants.API_PACKAGE, apiPackage);</span>
+<span class="nc" id="L191">        updateOption(CodegenConstants.MODEL_PACKAGE, modelPackage);</span>
 
-<span class="fc" id="L193">        apiTestTemplateFiles.clear(); // TODO: add test template</span>
+<span class="nc" id="L193">        apiTestTemplateFiles.clear(); // TODO: add test template</span>
 
         // spring uses the jackson lib
-<span class="fc" id="L196">        additionalProperties.put(JACKSON, &quot;true&quot;);</span>
-<span class="fc" id="L197">        additionalProperties.put(&quot;openbrace&quot;, OPEN_BRACE);</span>
-<span class="fc" id="L198">        additionalProperties.put(&quot;closebrace&quot;, CLOSE_BRACE);</span>
+<span class="nc" id="L196">        additionalProperties.put(JACKSON, &quot;true&quot;);</span>
+<span class="nc" id="L197">        additionalProperties.put(&quot;openbrace&quot;, OPEN_BRACE);</span>
+<span class="nc" id="L198">        additionalProperties.put(&quot;closebrace&quot;, CLOSE_BRACE);</span>
 
-<span class="fc" id="L200">        cliOptions.add(new CliOption(TITLE, &quot;server title name or client service name&quot;).defaultValue(title));</span>
-<span class="fc" id="L201">        cliOptions.add(new CliOption(CONFIG_PACKAGE, &quot;configuration package for generated code&quot;)</span>
-<span class="fc" id="L202">                .defaultValue(this.getConfigPackage()));</span>
-<span class="fc" id="L203">        cliOptions.add(new CliOption(BASE_PACKAGE, &quot;base package (invokerPackage) for generated code&quot;)</span>
-<span class="fc" id="L204">                .defaultValue(this.getBasePackage()));</span>
-<span class="fc" id="L205">        cliOptions.add(CliOption.newBoolean(INTERFACE_ONLY,</span>
+<span class="nc" id="L200">        cliOptions.add(new CliOption(TITLE, &quot;server title name or client service name&quot;).defaultValue(title));</span>
+<span class="nc" id="L201">        cliOptions.add(new CliOption(CONFIG_PACKAGE, &quot;configuration package for generated code&quot;)</span>
+<span class="nc" id="L202">                .defaultValue(this.getConfigPackage()));</span>
+<span class="nc" id="L203">        cliOptions.add(new CliOption(BASE_PACKAGE, &quot;base package (invokerPackage) for generated code&quot;)</span>
+<span class="nc" id="L204">                .defaultValue(this.getBasePackage()));</span>
+<span class="nc" id="L205">        cliOptions.add(CliOption.newBoolean(INTERFACE_ONLY,</span>
                 &quot;Whether to generate only API interface stubs without the server files.&quot;, interfaceOnly));
-<span class="fc" id="L207">        cliOptions.add(CliOption.newBoolean(USE_FEIGN_CLIENT_URL,</span>
+<span class="nc" id="L207">        cliOptions.add(CliOption.newBoolean(USE_FEIGN_CLIENT_URL,</span>
                 &quot;Whether to generate Feign client with url parameter.&quot;, useFeignClientUrl));
-<span class="fc" id="L209">        cliOptions.add(CliOption.newBoolean(DELEGATE_PATTERN,</span>
+<span class="nc" id="L209">        cliOptions.add(CliOption.newBoolean(DELEGATE_PATTERN,</span>
                 &quot;Whether to generate the server files using the delegate pattern&quot;, delegatePattern));
-<span class="fc" id="L211">        cliOptions.add(CliOption.newBoolean(SINGLE_CONTENT_TYPES,</span>
+<span class="nc" id="L211">        cliOptions.add(CliOption.newBoolean(SINGLE_CONTENT_TYPES,</span>
                 &quot;Whether to select only one produces/consumes content-type by operation.&quot;, singleContentTypes));
-<span class="fc" id="L213">        cliOptions.add(CliOption.newBoolean(SKIP_DEFAULT_INTERFACE,</span>
+<span class="nc" id="L213">        cliOptions.add(CliOption.newBoolean(SKIP_DEFAULT_INTERFACE,</span>
                 &quot;Whether to skip generation of default implementations for java8 interfaces&quot;, skipDefaultInterface));
-<span class="fc" id="L215">        cliOptions.add(CliOption.newBoolean(ASYNC, &quot;use async Callable controllers&quot;, async));</span>
-<span class="fc" id="L216">        cliOptions.add(CliOption.newBoolean(REACTIVE, &quot;wrap responses in Mono/Flux Reactor types (spring-boot only)&quot;,</span>
+<span class="nc" id="L215">        cliOptions.add(CliOption.newBoolean(ASYNC, &quot;use async Callable controllers&quot;, async));</span>
+<span class="nc" id="L216">        cliOptions.add(CliOption.newBoolean(REACTIVE, &quot;wrap responses in Mono/Flux Reactor types (spring-boot only)&quot;,</span>
                 reactive));
-<span class="fc" id="L218">        cliOptions.add(new CliOption(RESPONSE_WRAPPER,</span>
+<span class="nc" id="L218">        cliOptions.add(new CliOption(RESPONSE_WRAPPER,</span>
                 &quot;wrap the responses in given type (Future, Callable, CompletableFuture,ListenableFuture, DeferredResult, RxObservable, RxSingle or fully qualified type)&quot;));
-<span class="fc" id="L220">        cliOptions.add(CliOption.newBoolean(VIRTUAL_SERVICE,</span>
+<span class="nc" id="L220">        cliOptions.add(CliOption.newBoolean(VIRTUAL_SERVICE,</span>
                 &quot;Generates the virtual service. For more details refer - https://github.com/virtualansoftware/virtualan/wiki&quot;));
-<span class="fc" id="L222">        cliOptions.add(</span>
-<span class="fc" id="L223">                CliOption.newBoolean(USE_TAGS, &quot;use tags for creating interface and controller classnames&quot;, useTags));</span>
-<span class="fc" id="L224">        cliOptions</span>
-<span class="fc" id="L225">                .add(CliOption.newBoolean(USE_BEANVALIDATION, &quot;Use BeanValidation API annotations&quot;, useBeanValidation));</span>
-<span class="fc" id="L226">        cliOptions.add(CliOption.newBoolean(PERFORM_BEANVALIDATION,</span>
+<span class="nc" id="L222">        cliOptions.add(</span>
+<span class="nc" id="L223">                CliOption.newBoolean(USE_TAGS, &quot;use tags for creating interface and controller classnames&quot;, useTags));</span>
+<span class="nc" id="L224">        cliOptions</span>
+<span class="nc" id="L225">                .add(CliOption.newBoolean(USE_BEANVALIDATION, &quot;Use BeanValidation API annotations&quot;, useBeanValidation));</span>
+<span class="nc" id="L226">        cliOptions.add(CliOption.newBoolean(PERFORM_BEANVALIDATION,</span>
                 &quot;Use Bean Validation Impl. to perform BeanValidation&quot;, performBeanValidation));
-<span class="fc" id="L228">        cliOptions.add(CliOption.newBoolean(API_FIRST,</span>
+<span class="nc" id="L228">        cliOptions.add(CliOption.newBoolean(API_FIRST,</span>
                 &quot;Generate the API from the OAI spec at server compile time (API first approach)&quot;, apiFirst));
-<span class="fc" id="L230">        cliOptions</span>
-<span class="fc" id="L231">                .add(CliOption.newBoolean(USE_OPTIONAL, &quot;Use Optional container for optional parameters&quot;, useOptional));</span>
-<span class="fc" id="L232">        cliOptions.add(</span>
-<span class="fc" id="L233">                CliOption.newBoolean(HATEOAS, &quot;Use Spring HATEOAS library to allow adding HATEOAS links&quot;, hateoas));</span>
-<span class="fc" id="L234">        cliOptions</span>
-<span class="fc" id="L235">                .add(CliOption.newBoolean(RETURN_SUCCESS_CODE, &quot;Generated server returns 2xx code&quot;, returnSuccessCode));</span>
-<span class="fc" id="L236">        cliOptions.add(CliOption.newBoolean(SPRING_CONTROLLER, &quot;Annotate the generated API as a Spring Controller&quot;, useSpringController));</span>
+<span class="nc" id="L230">        cliOptions</span>
+<span class="nc" id="L231">                .add(CliOption.newBoolean(USE_OPTIONAL, &quot;Use Optional container for optional parameters&quot;, useOptional));</span>
+<span class="nc" id="L232">        cliOptions.add(</span>
+<span class="nc" id="L233">                CliOption.newBoolean(HATEOAS, &quot;Use Spring HATEOAS library to allow adding HATEOAS links&quot;, hateoas));</span>
+<span class="nc" id="L234">        cliOptions</span>
+<span class="nc" id="L235">                .add(CliOption.newBoolean(RETURN_SUCCESS_CODE, &quot;Generated server returns 2xx code&quot;, returnSuccessCode));</span>
+<span class="nc" id="L236">        cliOptions.add(CliOption.newBoolean(SPRING_CONTROLLER, &quot;Annotate the generated API as a Spring Controller&quot;, useSpringController));</span>
 
-<span class="fc" id="L238">        CliOption requestMappingOpt = new CliOption(REQUEST_MAPPING_OPTION,</span>
+<span class="nc" id="L238">        CliOption requestMappingOpt = new CliOption(REQUEST_MAPPING_OPTION,</span>
             &quot;Where to generate the class level @RequestMapping annotation.&quot;)
-<span class="fc" id="L240">            .defaultValue(requestMappingMode.name());</span>
-<span class="fc bfc" id="L241" title="All 2 branches covered.">        for (RequestMappingMode mode: RequestMappingMode.values()) {</span>
-<span class="fc" id="L242">            requestMappingOpt.addEnum(mode.name(), mode.getDescription());</span>
+<span class="nc" id="L240">            .defaultValue(requestMappingMode.name());</span>
+<span class="nc bnc" id="L241" title="All 2 branches missed.">        for (RequestMappingMode mode: RequestMappingMode.values()) {</span>
+<span class="nc" id="L242">            requestMappingOpt.addEnum(mode.name(), mode.getDescription());</span>
         }
-<span class="fc" id="L244">        cliOptions.add(requestMappingOpt);</span>
+<span class="nc" id="L244">        cliOptions.add(requestMappingOpt);</span>
 
-<span class="fc" id="L246">        cliOptions.add(CliOption.newBoolean(UNHANDLED_EXCEPTION_HANDLING,</span>
+<span class="nc" id="L246">        cliOptions.add(CliOption.newBoolean(UNHANDLED_EXCEPTION_HANDLING,</span>
                 &quot;Declare operation methods to throw a generic exception and allow unhandled exceptions (useful for Spring `@ControllerAdvice` directives).&quot;,
                 unhandledException));
-<span class="fc" id="L249">        cliOptions.add(CliOption.newBoolean(USE_SWAGGER_UI,</span>
+<span class="nc" id="L249">        cliOptions.add(CliOption.newBoolean(USE_SWAGGER_UI,</span>
             &quot;Open the OpenApi specification in swagger-ui. Will also import and configure needed dependencies&quot;,
             useSwaggerUI));
-<span class="fc" id="L252">        cliOptions.add(CliOption.newBoolean(USE_RESPONSE_ENTITY,</span>
+<span class="nc" id="L252">        cliOptions.add(CliOption.newBoolean(USE_RESPONSE_ENTITY,</span>
                 &quot;Use the `ResponseEntity` type to wrap return values of generated API methods. &quot;
                     + &quot;If disabled, method are annotated using a `@ResponseStatus` annotation, which has the status of the first response declared in the Api definition&quot;,
                 useResponseEntity));
-<span class="fc" id="L256">        cliOptions.add(CliOption.newBoolean(USE_ENUM_CASE_INSENSITIVE,</span>
+<span class="nc" id="L256">        cliOptions.add(CliOption.newBoolean(USE_ENUM_CASE_INSENSITIVE,</span>
                 &quot;Use `equalsIgnoreCase` when String for enum comparison&quot;,
                 useEnumCaseInsensitive));
-<span class="fc" id="L259">        cliOptions.add(CliOption.newBoolean(USE_SPRING_BOOT3,</span>
+<span class="nc" id="L259">        cliOptions.add(CliOption.newBoolean(USE_SPRING_BOOT3,</span>
             &quot;Generate code and provide dependencies for use with Spring Boot 3.x. (Use jakarta instead of javax in imports). Enabling this option will also enable `useJakartaEe`.&quot;,
             useSpringBoot3));
-<span class="fc" id="L262">        cliOptions.add(CliOption.newBoolean(GENERATE_CONSTRUCTOR_WITH_REQUIRED_ARGS,</span>
+<span class="nc" id="L262">        cliOptions.add(CliOption.newBoolean(GENERATE_CONSTRUCTOR_WITH_REQUIRED_ARGS,</span>
             &quot;Whether to generate constructors with required args for models&quot;,
             generatedConstructorWithRequiredArgs));
-<span class="fc" id="L265">        cliOptions.add(new CliOption(RESOURCE_FOLDER, RESOURCE_FOLDER_DESC).defaultValue(this.getResourceFolder()));</span>
+<span class="nc" id="L265">        cliOptions.add(new CliOption(RESOURCE_FOLDER, RESOURCE_FOLDER_DESC).defaultValue(this.getResourceFolder()));</span>
 
-<span class="fc" id="L267">        supportedLibraries.put(SPRING_BOOT, &quot;Spring-boot Server application.&quot;);</span>
-<span class="fc" id="L268">        supportedLibraries.put(SPRING_CLOUD_LIBRARY,</span>
+<span class="nc" id="L267">        supportedLibraries.put(SPRING_BOOT, &quot;Spring-boot Server application.&quot;);</span>
+<span class="nc" id="L268">        supportedLibraries.put(SPRING_CLOUD_LIBRARY,</span>
             &quot;Spring-Cloud-Feign client with Spring-Boot auto-configured settings.&quot;);
-<span class="fc" id="L270">        supportedLibraries.put(SPRING_HTTP_INTERFACE, &quot;Spring 6 HTTP interfaces (testing)&quot;);</span>
-<span class="fc" id="L271">        setLibrary(SPRING_BOOT);</span>
-<span class="fc" id="L272">        final CliOption library = new CliOption(CodegenConstants.LIBRARY, CodegenConstants.LIBRARY_DESC)</span>
-<span class="fc" id="L273">                .defaultValue(SPRING_BOOT);</span>
-<span class="fc" id="L274">        library.setEnum(supportedLibraries);</span>
-<span class="fc" id="L275">        cliOptions.add(library);</span>
+<span class="nc" id="L270">        supportedLibraries.put(SPRING_HTTP_INTERFACE, &quot;Spring 6 HTTP interfaces (testing)&quot;);</span>
+<span class="nc" id="L271">        setLibrary(SPRING_BOOT);</span>
+<span class="nc" id="L272">        final CliOption library = new CliOption(CodegenConstants.LIBRARY, CodegenConstants.LIBRARY_DESC)</span>
+<span class="nc" id="L273">                .defaultValue(SPRING_BOOT);</span>
+<span class="nc" id="L274">        library.setEnum(supportedLibraries);</span>
+<span class="nc" id="L275">        cliOptions.add(library);</span>
 
-<span class="fc" id="L277">    }</span>
+<span class="nc" id="L277">    }</span>
 
     @Override
     public CodegenType getTag() {
@@ -293,25 +293,25 @@ public class SpringCodegen extends AbstractJavaCodegen
 
     @Override
     public DocumentationProvider defaultDocumentationProvider() {
-<span class="pc bpc" id="L296" title="1 of 2 branches missed.">        return isLibrary(SPRING_HTTP_INTERFACE) ? null : DocumentationProvider.SPRINGDOC;</span>
+<span class="nc bnc" id="L296" title="All 2 branches missed.">        return isLibrary(SPRING_HTTP_INTERFACE) ? null : DocumentationProvider.SPRINGDOC;</span>
     }
 
     public List&lt;DocumentationProvider&gt; supportedDocumentationProvider() {
-<span class="fc" id="L300">        List&lt;DocumentationProvider&gt; supportedProviders = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L301">        supportedProviders.add(DocumentationProvider.NONE);</span>
-<span class="fc" id="L302">        supportedProviders.add(DocumentationProvider.SOURCE);</span>
-<span class="fc" id="L303">        supportedProviders.add(DocumentationProvider.SPRINGFOX);</span>
-<span class="fc" id="L304">        supportedProviders.add(DocumentationProvider.SPRINGDOC);</span>
-<span class="fc" id="L305">        return supportedProviders;</span>
+<span class="nc" id="L300">        List&lt;DocumentationProvider&gt; supportedProviders = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L301">        supportedProviders.add(DocumentationProvider.NONE);</span>
+<span class="nc" id="L302">        supportedProviders.add(DocumentationProvider.SOURCE);</span>
+<span class="nc" id="L303">        supportedProviders.add(DocumentationProvider.SPRINGFOX);</span>
+<span class="nc" id="L304">        supportedProviders.add(DocumentationProvider.SPRINGDOC);</span>
+<span class="nc" id="L305">        return supportedProviders;</span>
     }
 
     @Override
     public List&lt;AnnotationLibrary&gt; supportedAnnotationLibraries() {
-<span class="fc" id="L310">        List&lt;AnnotationLibrary&gt; supportedLibraries = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L311">        supportedLibraries.add(AnnotationLibrary.NONE);</span>
-<span class="fc" id="L312">        supportedLibraries.add(AnnotationLibrary.SWAGGER1);</span>
-<span class="fc" id="L313">        supportedLibraries.add(AnnotationLibrary.SWAGGER2);</span>
-<span class="fc" id="L314">        return supportedLibraries;</span>
+<span class="nc" id="L310">        List&lt;AnnotationLibrary&gt; supportedLibraries = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L311">        supportedLibraries.add(AnnotationLibrary.NONE);</span>
+<span class="nc" id="L312">        supportedLibraries.add(AnnotationLibrary.SWAGGER1);</span>
+<span class="nc" id="L313">        supportedLibraries.add(AnnotationLibrary.SWAGGER2);</span>
+<span class="nc" id="L314">        return supportedLibraries;</span>
     }
 
     /**
@@ -1032,7 +1032,7 @@ public class SpringCodegen extends AbstractJavaCodegen
 <span class="nc" id="L1032">    }</span>
 
     public String getConfigPackage() {
-<span class="fc" id="L1035">        return configPackage;</span>
+<span class="nc" id="L1035">        return configPackage;</span>
     }
 
     public boolean isUnhandledException() {
@@ -1044,7 +1044,7 @@ public class SpringCodegen extends AbstractJavaCodegen
 <span class="nc" id="L1044">    }</span>
 
     public String getBasePackage() {
-<span class="fc" id="L1047">        return basePackage;</span>
+<span class="nc" id="L1047">        return basePackage;</span>
     }
 
     public void setInterfaceOnly(boolean interfaceOnly) {
@@ -1386,7 +1386,7 @@ public class SpringCodegen extends AbstractJavaCodegen
 <span class="nc" id="L1386">    }</span>
 
     public String getResourceFolder() {
-<span class="fc" id="L1389">        return resourceFolder;</span>
+<span class="nc" id="L1389">        return resourceFolder;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

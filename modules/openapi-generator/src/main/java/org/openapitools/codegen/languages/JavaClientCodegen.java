@@ -72,7 +72,7 @@ public class JavaClientCodegen extends AbstractJavaCodegen
     public static final String DYNAMIC_OPERATIONS = "dynamicOperations";
     public static final String SUPPORT_STREAMING = "supportStreaming";
     public static final String SUPPORT_URL_QUERY = "supportUrlQuery";
-    public static final String GRADLE_PROPERTIES = "gradleProperties";
+//    public static final String GRADLE_PROPERTIES = "gradleProperties";
     public static final String ERROR_OBJECT_TYPE = "errorObjectType";
 
     public static final String FEIGN = "feign";
@@ -104,7 +104,7 @@ public class JavaClientCodegen extends AbstractJavaCodegen
 
     public static final String GENERATE_CLIENT_AS_BEAN = "generateClientAsBean";
 
-    protected String gradleWrapperPackage = "gradle.wrapper";
+//    protected String gradleWrapperPackage = "gradle.wrapper";
     protected boolean useRxJava = false;
     protected boolean useRxJava2 = false;
     protected boolean useRxJava3 = false;
@@ -129,7 +129,7 @@ public class JavaClientCodegen extends AbstractJavaCodegen
     protected boolean dynamicOperations = false;
     protected boolean supportStreaming = false;
     protected boolean withAWSV4Signature = false;
-    protected String gradleProperties;
+//    protected String gradleProperties;
     protected String errorObjectType;
     protected String authFolder;
     protected String serializationLibrary = null;
@@ -223,7 +223,7 @@ public class JavaClientCodegen extends AbstractJavaCodegen
         cliOptions.add(CliOption.newBoolean(DYNAMIC_OPERATIONS, "Generate operations dynamically at runtime from an OAS", this.dynamicOperations));
         cliOptions.add(CliOption.newBoolean(SUPPORT_STREAMING, "Support streaming endpoint (beta)", this.supportStreaming));
         cliOptions.add(CliOption.newBoolean(CodegenConstants.WITH_AWSV4_SIGNATURE_COMMENT, CodegenConstants.WITH_AWSV4_SIGNATURE_COMMENT_DESC + " (only available for okhttp-gson library)", this.withAWSV4Signature));
-        cliOptions.add(CliOption.newString(GRADLE_PROPERTIES, "Append additional Gradle properties to the gradle.properties file"));
+//        cliOptions.add(CliOption.newString(GRADLE_PROPERTIES, "Append additional Gradle properties to the gradle.properties file"));
         cliOptions.add(CliOption.newString(ERROR_OBJECT_TYPE, "Error Object type. (This option is for okhttp-gson only)"));
         cliOptions.add(CliOption.newString(CONFIG_KEY, "Config key in @RegisterRestClient. Default to none. Only `microprofile` supports this option."));
         cliOptions.add(CliOption.newString(CONFIG_KEY_FROM_CLASS_NAME, "If true, set tag as key in @RegisterRestClient. Default to false. Only `microprofile` supports this option."));
@@ -445,10 +445,10 @@ public class JavaClientCodegen extends AbstractJavaCodegen
         }
         additionalProperties.put(CodegenConstants.WITH_AWSV4_SIGNATURE_COMMENT, withAWSV4Signature);
 
-        if (additionalProperties.containsKey(GRADLE_PROPERTIES)) {
-            this.setGradleProperties(additionalProperties.get(GRADLE_PROPERTIES).toString());
-        }
-        additionalProperties.put(GRADLE_PROPERTIES, gradleProperties);
+//        if (additionalProperties.containsKey(GRADLE_PROPERTIES)) {
+//            this.setGradleProperties(additionalProperties.get(GRADLE_PROPERTIES).toString());
+//        }
+//        additionalProperties.put(GRADLE_PROPERTIES, gradleProperties);
 
         if (additionalProperties.containsKey(ERROR_OBJECT_TYPE)) {
             this.setErrorObjectType(additionalProperties.get(ERROR_OBJECT_TYPE).toString());
@@ -497,10 +497,10 @@ public class JavaClientCodegen extends AbstractJavaCodegen
         //Common files
         supportingFiles.add(new SupportingFile("pom.mustache", "", "pom.xml").doNotOverwrite());
         supportingFiles.add(new SupportingFile("README.mustache", "", "README.md").doNotOverwrite());
-        supportingFiles.add(new SupportingFile("build.gradle.mustache", "", "build.gradle").doNotOverwrite());
+//        supportingFiles.add(new SupportingFile("build.gradle.mustache", "", "build.gradle").doNotOverwrite());
         supportingFiles.add(new SupportingFile("build.sbt.mustache", "", "build.sbt").doNotOverwrite());
-        supportingFiles.add(new SupportingFile("settings.gradle.mustache", "", "settings.gradle").doNotOverwrite());
-        supportingFiles.add(new SupportingFile("gradle.properties.mustache", "", "gradle.properties").doNotOverwrite());
+//        supportingFiles.add(new SupportingFile("settings.gradle.mustache", "", "settings.gradle").doNotOverwrite());
+//        supportingFiles.add(new SupportingFile("gradle.properties.mustache", "", "gradle.properties").doNotOverwrite());
         supportingFiles.add(new SupportingFile("manifest.mustache", projectFolder, "AndroidManifest.xml").doNotOverwrite());
         supportingFiles.add(new SupportingFile("travis.mustache", "", ".travis.yml"));
         supportingFiles.add(new SupportingFile("ApiClient.mustache", invokerFolder, "ApiClient.java"));
@@ -533,12 +533,12 @@ public class JavaClientCodegen extends AbstractJavaCodegen
             }
         }
 
-        supportingFiles.add(new SupportingFile("gradlew.mustache", "", "gradlew"));
-        supportingFiles.add(new SupportingFile("gradlew.bat.mustache", "", "gradlew.bat"));
-        supportingFiles.add(new SupportingFile("gradle-wrapper.properties.mustache",
-                gradleWrapperPackage.replace(".", File.separator), "gradle-wrapper.properties"));
-        supportingFiles.add(new SupportingFile("gradle-wrapper.jar",
-                gradleWrapperPackage.replace(".", File.separator), "gradle-wrapper.jar"));
+//        supportingFiles.add(new SupportingFile("gradlew.mustache", "", "gradlew"));
+//        supportingFiles.add(new SupportingFile("gradlew.bat.mustache", "", "gradlew.bat"));
+//        supportingFiles.add(new SupportingFile("gradle-wrapper.properties.mustache",
+//                gradleWrapperPackage.replace(".", File.separator), "gradle-wrapper.properties"));
+//        supportingFiles.add(new SupportingFile("gradle-wrapper.jar",
+//                gradleWrapperPackage.replace(".", File.separator), "gradle-wrapper.jar"));
         supportingFiles.add(new SupportingFile("git_push.sh.mustache", "", "git_push.sh"));
         supportingFiles.add(new SupportingFile("gitignore.mustache", "", ".gitignore"));
 
@@ -1271,9 +1271,9 @@ public class JavaClientCodegen extends AbstractJavaCodegen
         this.withAWSV4Signature = withAWSV4Signature;
     }
 
-    public void setGradleProperties(final String gradleProperties) {
-        this.gradleProperties = gradleProperties;
-    }
+//    public void setGradleProperties(final String gradleProperties) {
+//        this.gradleProperties = gradleProperties;
+//    }
 
     public void setErrorObjectType(final String errorObjectType) {
         this.errorObjectType = errorObjectType;

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite parallel="classes" name="Failed suite [Surefire suite]" verbose="0">
+  <test thread-count="5" parallel="classes" name="Surefire test(failed)" verbose="0">
+    <classes>
+      <class name="org.openapitools.codegen.cmd.AuthorTemplateTest">
+        <methods>
+          <include name="setUp"/>
+          <include name="smokeTestAuthorTemplateCommand"/>
+        </methods>
+      </class> <!-- org.openapitools.codegen.cmd.AuthorTemplateTest -->
+      <class name="org.openapitools.codegen.cmd.GenerateTest">
+        <methods>
+          <include name="testImportMappingsLong"/>
+          <include name="testNPEWithInvalidSpecFile"/>
+          <include name="testAdditionalPropertiesLong"/>
+          <include name="afterEachTest"/>
+          <include name="testConfigJsonLong"/>
+          <include name="testImportMappingsLongMultiple"/>
+          <include name="testSkipOverwriteLong"/>
+          <include name="testRequiredArgs_ShortArgs"/>
+          <include name="testConfigYamlLong"/>
+          <include name="testAuthUnspecified"/>
+          <include name="testInstantiationTypesLongMultiple"/>
+          <include name="testConfigYamlShort"/>
+          <include name="testSkipOverwriteShort"/>
+          <include name="testInvokerPackage"/>
+          <include name="testLanguageSpecificPrimitives"/>
+          <include name="testVerboseLong"/>
+          <include name="testVerboseShort"/>
+          <include name="beforeEachTest"/>
+          <include name="testApiPackage"/>
+          <include name="testTemplateDirShort"/>
+          <include name="testTypeMappingsLongMultiple"/>
+          <include name="testStrictSpecFalse"/>
+          <include name="testPackageName"/>
+          <include name="testAdditionalPropertiesLongMultiple"/>
+          <include name="testAuthLong"/>
+          <include name="testStrictSpecTrue"/>
+          <include name="testModelPackage"/>
+          <include name="testGroupId"/>
+          <include name="testTypeMappingsLong"/>
+          <include name="testInstantiationTypesLong"/>
+          <include name="testArtifactVersion"/>
+          <include name="testLibrary"/>
+          <include name="testConfigJsonShort"/>
+          <include name="testArtifactId"/>
+          <include name="testRequiredArgs_LongArgs"/>
+          <include name="testTemplateDirLong"/>
+          <include name="testAuthShort"/>
+        </methods>
+      </class> <!-- org.openapitools.codegen.cmd.GenerateTest -->
+      <class name="org.openapitools.codegen.cmd.GenerateBatchTest">
+        <methods>
+          <include name="setUp"/>
+          <include name="testDeserializerWithJsonInclude" invocation-numbers="0 1 2 3 4 5 6 7"/>
+        </methods>
+      </class> <!-- org.openapitools.codegen.cmd.GenerateBatchTest -->
+    </classes>
+  </test> <!-- Surefire test(failed) -->
+</suite> <!-- Failed suite [Surefire suite] -->

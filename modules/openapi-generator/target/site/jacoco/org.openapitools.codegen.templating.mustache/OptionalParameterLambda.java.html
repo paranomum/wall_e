@@ -20,7 +20,6 @@ package org.openapitools.codegen.templating.mustache;
 import com.samskivert.mustache.Mustache;
 import com.samskivert.mustache.Template;
 import org.openapitools.codegen.CodegenConfig;
-import org.openapitools.codegen.languages.AbstractCSharpCodegen;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -39,29 +38,19 @@ import java.io.Writer;
  * &lt;/pre&gt;
  */
 public class OptionalParameterLambda implements Mustache.Lambda {
-<span class="fc" id="L42">    private CodegenConfig generator = null;</span>
+<span class="nc" id="L41">    private CodegenConfig generator = null;</span>
 
-<span class="fc" id="L44">    public OptionalParameterLambda() {}</span>
+<span class="nc" id="L43">    public OptionalParameterLambda() {}</span>
 
     public OptionalParameterLambda generator(final CodegenConfig generator) {
-<span class="fc" id="L47">        this.generator = generator;</span>
-<span class="fc" id="L48">        return this;</span>
+<span class="nc" id="L46">        this.generator = generator;</span>
+<span class="nc" id="L47">        return this;</span>
     }
 
     @Override
     public void execute(Template.Fragment fragment, Writer writer) throws IOException {
-<span class="nc" id="L53">        String text = fragment.execute();</span>
-
-<span class="nc bnc" id="L55" title="All 2 branches missed.">        if (this.generator instanceof AbstractCSharpCodegen){</span>
-<span class="nc" id="L56">            AbstractCSharpCodegen csharpGenerator = (AbstractCSharpCodegen) this.generator;</span>
-<span class="nc bnc" id="L57" title="All 2 branches missed.">            if (csharpGenerator.getNullableReferencesTypes()){</span>
-<span class="nc bnc" id="L58" title="All 2 branches missed.">                text = text.endsWith(&quot;?&quot;)</span>
-<span class="nc" id="L59">                    ? text</span>
-<span class="nc" id="L60">                    : text + &quot;?&quot;;</span>
-            }
-        }
-
-<span class="nc" id="L64">        writer.write(text);</span>
-<span class="nc" id="L65">    }</span>
+<span class="nc" id="L52">        String text = fragment.execute();</span>
+<span class="nc" id="L53">        writer.write(text);</span>
+<span class="nc" id="L54">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

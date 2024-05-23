@@ -31,57 +31,57 @@ import java.util.stream.Stream;
 
 public class JavaVertXWebServerCodegen extends AbstractJavaCodegen {
 
-<span class="fc" id="L34">    protected String resourceFolder = &quot;src/main/resources&quot;;</span>
-<span class="fc" id="L35">    protected String apiVersion = &quot;1.0.0-SNAPSHOT&quot;;</span>
+<span class="nc" id="L34">    protected String resourceFolder = &quot;src/main/resources&quot;;</span>
+<span class="nc" id="L35">    protected String apiVersion = &quot;1.0.0-SNAPSHOT&quot;;</span>
 
     public JavaVertXWebServerCodegen() {
-<span class="fc" id="L38">        super();</span>
+<span class="nc" id="L38">        super();</span>
 
-<span class="fc" id="L40">        generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
-<span class="fc" id="L41">                .stability(Stability.BETA)</span>
-<span class="fc" id="L42">                .build();</span>
+<span class="nc" id="L40">        generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
+<span class="nc" id="L41">                .stability(Stability.BETA)</span>
+<span class="nc" id="L42">                .build();</span>
 
         // set the output folder here
-<span class="fc" id="L45">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;java-vertx-web&quot;;</span>
+<span class="nc" id="L45">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;java-vertx-web&quot;;</span>
 
-<span class="fc" id="L47">        modelTemplateFiles.clear();</span>
-<span class="fc" id="L48">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.java&quot;);</span>
+<span class="nc" id="L47">        modelTemplateFiles.clear();</span>
+<span class="nc" id="L48">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.java&quot;);</span>
 
-<span class="fc" id="L50">        apiTemplateFiles.clear();</span>
-<span class="fc" id="L51">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.java&quot;);</span>
-<span class="fc" id="L52">        apiTemplateFiles.put(&quot;apiImpl.mustache&quot;, &quot;Impl.java&quot;);</span>
-<span class="fc" id="L53">        apiTemplateFiles.put(&quot;apiHandler.mustache&quot;, &quot;Handler.java&quot;);</span>
+<span class="nc" id="L50">        apiTemplateFiles.clear();</span>
+<span class="nc" id="L51">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.java&quot;);</span>
+<span class="nc" id="L52">        apiTemplateFiles.put(&quot;apiImpl.mustache&quot;, &quot;Impl.java&quot;);</span>
+<span class="nc" id="L53">        apiTemplateFiles.put(&quot;apiHandler.mustache&quot;, &quot;Handler.java&quot;);</span>
 
-<span class="fc" id="L55">        embeddedTemplateDir = templateDir = &quot;JavaVertXWebServer&quot;;</span>
+<span class="nc" id="L55">        embeddedTemplateDir = templateDir = &quot;JavaVertXWebServer&quot;;</span>
 
-<span class="fc" id="L57">        invokerPackage = &quot;org.openapitools.vertxweb.server&quot;;</span>
-<span class="fc" id="L58">        apiPackage = invokerPackage + &quot;.api&quot;;</span>
-<span class="fc" id="L59">        modelPackage = invokerPackage + &quot;.model&quot;;</span>
-<span class="fc" id="L60">        artifactId = &quot;openapi-java-vertx-web-server&quot;;</span>
-<span class="fc" id="L61">        artifactVersion = apiVersion;</span>
-<span class="fc" id="L62">        this.setDateLibrary(&quot;java8&quot;);</span>
+<span class="nc" id="L57">        invokerPackage = &quot;org.openapitools.vertxweb.server&quot;;</span>
+<span class="nc" id="L58">        apiPackage = invokerPackage + &quot;.api&quot;;</span>
+<span class="nc" id="L59">        modelPackage = invokerPackage + &quot;.model&quot;;</span>
+<span class="nc" id="L60">        artifactId = &quot;openapi-java-vertx-web-server&quot;;</span>
+<span class="nc" id="L61">        artifactVersion = apiVersion;</span>
+<span class="nc" id="L62">        this.setDateLibrary(&quot;java8&quot;);</span>
 
         // clioOptions default redefinition need to be updated
-<span class="fc" id="L65">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
-<span class="fc" id="L66">        updateOption(CodegenConstants.ARTIFACT_VERSION, this.getArtifactVersion());</span>
-<span class="fc" id="L67">        updateOption(CodegenConstants.API_PACKAGE, apiPackage);</span>
-<span class="fc" id="L68">        updateOption(CodegenConstants.MODEL_PACKAGE, modelPackage);</span>
-<span class="fc" id="L69">        updateOption(CodegenConstants.INVOKER_PACKAGE, invokerPackage);</span>
-<span class="fc" id="L70">        updateOption(DATE_LIBRARY, this.getDateLibrary());</span>
+<span class="nc" id="L65">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
+<span class="nc" id="L66">        updateOption(CodegenConstants.ARTIFACT_VERSION, this.getArtifactVersion());</span>
+<span class="nc" id="L67">        updateOption(CodegenConstants.API_PACKAGE, apiPackage);</span>
+<span class="nc" id="L68">        updateOption(CodegenConstants.MODEL_PACKAGE, modelPackage);</span>
+<span class="nc" id="L69">        updateOption(CodegenConstants.INVOKER_PACKAGE, invokerPackage);</span>
+<span class="nc" id="L70">        updateOption(DATE_LIBRARY, this.getDateLibrary());</span>
 
         // Override type mapping
-<span class="fc" id="L73">        typeMapping.put(&quot;file&quot;, &quot;FileUpload&quot;);</span>
-<span class="fc" id="L74">        typeMapping.put(&quot;UUID&quot;, &quot;String&quot;);</span>
-<span class="fc" id="L75">        typeMapping.put(&quot;date&quot;, &quot;String&quot;);</span>
-<span class="fc" id="L76">        typeMapping.put(&quot;DateTime&quot;, &quot;String&quot;);</span>
-<span class="fc" id="L77">    }</span>
+<span class="nc" id="L73">        typeMapping.put(&quot;file&quot;, &quot;FileUpload&quot;);</span>
+<span class="nc" id="L74">        typeMapping.put(&quot;UUID&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L75">        typeMapping.put(&quot;date&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L76">        typeMapping.put(&quot;DateTime&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L77">    }</span>
 
     public CodegenType getTag() {
-<span class="fc" id="L80">        return CodegenType.SERVER;</span>
+<span class="nc" id="L80">        return CodegenType.SERVER;</span>
     }
 
     public String getName() {
-<span class="fc" id="L84">        return &quot;java-vertx-web&quot;;</span>
+<span class="nc" id="L84">        return &quot;java-vertx-web&quot;;</span>
     }
 
     public String getHelp() {

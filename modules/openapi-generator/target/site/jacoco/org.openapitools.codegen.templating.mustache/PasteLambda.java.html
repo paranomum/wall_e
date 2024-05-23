@@ -42,13 +42,13 @@ public class PasteLambda implements Mustache.Lambda {
     private final Boolean endWithLineBreak;
     private final Boolean clear;
 
-<span class="fc" id="L45">    public PasteLambda(CopyLambda copyLambda, Boolean stripLeading, Boolean stripTrailing, Boolean endWithLineBreak, boolean clear) {</span>
-<span class="fc" id="L46">        this.copyLambda = copyLambda;</span>
-<span class="fc" id="L47">        this.stripLeading = stripLeading;</span>
-<span class="fc" id="L48">        this.stripTrailing = stripTrailing;</span>
-<span class="fc" id="L49">        this.endWithLineBreak = endWithLineBreak;</span>
-<span class="fc" id="L50">        this.clear = clear;</span>
-<span class="fc" id="L51">    }</span>
+<span class="nc" id="L45">    public PasteLambda(CopyLambda copyLambda, Boolean stripLeading, Boolean stripTrailing, Boolean endWithLineBreak, boolean clear) {</span>
+<span class="nc" id="L46">        this.copyLambda = copyLambda;</span>
+<span class="nc" id="L47">        this.stripLeading = stripLeading;</span>
+<span class="nc" id="L48">        this.stripTrailing = stripTrailing;</span>
+<span class="nc" id="L49">        this.endWithLineBreak = endWithLineBreak;</span>
+<span class="nc" id="L50">        this.clear = clear;</span>
+<span class="nc" id="L51">    }</span>
 
     @Override
     public void execute(Fragment fragment, Writer writer) throws IOException {

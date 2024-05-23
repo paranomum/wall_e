@@ -30,13 +30,13 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class ExampleGenerator {
-<span class="fc" id="L33">    private final Logger LOGGER = LoggerFactory.getLogger(ExampleGenerator.class);</span>
+<span class="nc" id="L33">    private final Logger LOGGER = LoggerFactory.getLogger(ExampleGenerator.class);</span>
 
     // TODO: move constants to more appropriate location
     private static final String MIME_TYPE_JSON = &quot;application/json&quot;;
     private static final String MIME_TYPE_XML = &quot;application/xml&quot;;
 
-<span class="fc" id="L39">    protected final SimpleDateFormat dateFormat = new SimpleDateFormat(&quot;yyyy-MM-dd&quot;, Locale.ROOT);</span>
+<span class="nc" id="L39">    protected final SimpleDateFormat dateFormat = new SimpleDateFormat(&quot;yyyy-MM-dd&quot;, Locale.ROOT);</span>
 
     private static final String EXAMPLE = &quot;example&quot;;
     private static final String CONTENT_TYPE = &quot;contentType&quot;;
@@ -51,74 +51,74 @@ public class ExampleGenerator {
     private OpenAPI openAPI;
     private Random random;
 
-<span class="fc" id="L54">    public ExampleGenerator(Map&lt;String, Schema&gt; examples, OpenAPI openAPI) {</span>
-<span class="fc" id="L55">        this.examples = examples;</span>
-<span class="fc" id="L56">        this.openAPI = openAPI;</span>
+<span class="nc" id="L54">    public ExampleGenerator(Map&lt;String, Schema&gt; examples, OpenAPI openAPI) {</span>
+<span class="nc" id="L55">        this.examples = examples;</span>
+<span class="nc" id="L56">        this.openAPI = openAPI;</span>
         // use a fixed seed to make the &quot;random&quot; numbers reproducible.
-<span class="fc" id="L58">        this.random = new Random(&quot;ExampleGenerator&quot;.hashCode());</span>
-<span class="fc" id="L59">        dateFormat.setTimeZone(TimeZone.getTimeZone(&quot;UTC&quot;));</span>
-<span class="fc" id="L60">    }</span>
+<span class="nc" id="L58">        this.random = new Random(&quot;ExampleGenerator&quot;.hashCode());</span>
+<span class="nc" id="L59">        dateFormat.setTimeZone(TimeZone.getTimeZone(&quot;UTC&quot;));</span>
+<span class="nc" id="L60">    }</span>
 
     public List&lt;Map&lt;String, String&gt;&gt; generateFromResponseSchema(String statusCode, Schema responseSchema, Set&lt;String&gt; producesInfo) {
-<span class="fc" id="L63">        List&lt;Map&lt;String, String&gt;&gt; examples = generateFromResponseSchema(responseSchema, producesInfo);</span>
-<span class="pc bpc" id="L64" title="1 of 2 branches missed.">        if (examples == null) {</span>
+<span class="nc" id="L63">        List&lt;Map&lt;String, String&gt;&gt; examples = generateFromResponseSchema(responseSchema, producesInfo);</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">        if (examples == null) {</span>
 <span class="nc" id="L65">            return null;</span>
         }
 
-<span class="fc bfc" id="L68" title="All 2 branches covered.">        for (Map&lt;String, String&gt; example : examples) {</span>
-<span class="fc" id="L69">            example.put(STATUS_CODE, statusCode);</span>
-<span class="fc" id="L70">        }</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">        for (Map&lt;String, String&gt; example : examples) {</span>
+<span class="nc" id="L69">            example.put(STATUS_CODE, statusCode);</span>
+<span class="nc" id="L70">        }</span>
 
-<span class="fc" id="L72">        return examples;</span>
+<span class="nc" id="L72">        return examples;</span>
     }
 
     private List&lt;Map&lt;String, String&gt;&gt; generateFromResponseSchema(Schema responseSchema, Set&lt;String&gt; producesInfo) {
-<span class="pc bpc" id="L76" title="2 of 6 branches missed.">        if (responseSchema.getExample() == null &amp;&amp; StringUtils.isEmpty(responseSchema.get$ref()) &amp;&amp; !ModelUtils.isArraySchema(responseSchema)) {</span>
+<span class="nc bnc" id="L76" title="All 6 branches missed.">        if (responseSchema.getExample() == null &amp;&amp; StringUtils.isEmpty(responseSchema.get$ref()) &amp;&amp; !ModelUtils.isArraySchema(responseSchema)) {</span>
             // no example provided
 <span class="nc" id="L78">            return null;</span>
         }
 
-<span class="pc bpc" id="L81" title="3 of 4 branches missed.">        if (responseSchema.getExample() != null &amp;&amp; !(responseSchema.getExample() instanceof Map)) {</span>
+<span class="nc bnc" id="L81" title="All 4 branches missed.">        if (responseSchema.getExample() != null &amp;&amp; !(responseSchema.getExample() instanceof Map)) {</span>
 <span class="nc" id="L82">            return generate(responseSchema.getExample(), new ArrayList&lt;&gt;(producesInfo));</span>
         }
 
-<span class="fc bfc" id="L85" title="All 2 branches covered.">        if (ModelUtils.isArraySchema(responseSchema)) { // array of schema</span>
-<span class="pc bpc" id="L86" title="1 of 2 branches missed.">            if (ModelUtils.getSchemaItems(responseSchema) != null) { // array of primitive types</span>
-<span class="fc" id="L87">                return generate((Map&lt;String, Object&gt;) responseSchema.getExample(),</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">        if (ModelUtils.isArraySchema(responseSchema)) { // array of schema</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">            if (ModelUtils.getSchemaItems(responseSchema) != null) { // array of primitive types</span>
+<span class="nc" id="L87">                return generate((Map&lt;String, Object&gt;) responseSchema.getExample(),</span>
                         new ArrayList&lt;&gt;(producesInfo), responseSchema);
             } else {
                 // TODO log warning message as such case is not handled at the moment
 <span class="nc" id="L91">                return null;</span>
             }
-<span class="pc bpc" id="L93" title="1 of 2 branches missed.">        } else if (StringUtils.isEmpty(responseSchema.get$ref())) { // primitive type (e.g. integer, string)</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">        } else if (StringUtils.isEmpty(responseSchema.get$ref())) { // primitive type (e.g. integer, string)</span>
 <span class="nc" id="L94">            return generate((Map&lt;String, Object&gt;) responseSchema.getExample(),</span>
                     new ArrayList&lt;String&gt;(producesInfo), responseSchema);
         } else { // model
-<span class="fc" id="L97">            return generate((Map&lt;String, Object&gt;) responseSchema.getExample(),</span>
-<span class="fc" id="L98">                    new ArrayList&lt;String&gt;(producesInfo), ModelUtils.getSimpleRef(responseSchema.get$ref()));</span>
+<span class="nc" id="L97">            return generate((Map&lt;String, Object&gt;) responseSchema.getExample(),</span>
+<span class="nc" id="L98">                    new ArrayList&lt;String&gt;(producesInfo), ModelUtils.getSimpleRef(responseSchema.get$ref()));</span>
         }
     }
 
     public List&lt;Map&lt;String, String&gt;&gt; generate(Map&lt;String, Object&gt; examples, List&lt;String&gt; mediaTypes, Schema property) {
-<span class="fc" id="L103">        LOGGER.debug(&quot;debugging generate in ExampleGenerator&quot;);</span>
-<span class="fc" id="L104">        List&lt;Map&lt;String, String&gt;&gt; output = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L105">        Set&lt;String&gt; processedModels = new HashSet&lt;&gt;();</span>
-<span class="pc bpc" id="L106" title="1 of 2 branches missed.">        if (examples == null) {</span>
-<span class="pc bpc" id="L107" title="1 of 2 branches missed.">            if (mediaTypes == null) {</span>
+<span class="nc" id="L103">        LOGGER.debug(&quot;debugging generate in ExampleGenerator&quot;);</span>
+<span class="nc" id="L104">        List&lt;Map&lt;String, String&gt;&gt; output = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L105">        Set&lt;String&gt; processedModels = new HashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">        if (examples == null) {</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">            if (mediaTypes == null) {</span>
                 // assume application/json for this
 <span class="nc" id="L109">                mediaTypes = Collections.singletonList(MIME_TYPE_JSON); // FIXME: a parameter should not be assigned. Also declare the methods parameters as 'final'.</span>
             }
-<span class="fc bfc" id="L111" title="All 2 branches covered.">            for (String mediaType : mediaTypes) {</span>
-<span class="fc" id="L112">                Map&lt;String, String&gt; kv = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L113">                kv.put(CONTENT_TYPE, mediaType);</span>
-<span class="pc bpc" id="L114" title="4 of 6 branches missed.">                if (property != null &amp;&amp; (mediaType.startsWith(MIME_TYPE_JSON) || mediaType.contains(&quot;*/*&quot;))) {</span>
-<span class="fc" id="L115">                    String example = Json.pretty(resolvePropertyToExample(&quot;&quot;, mediaType, property, processedModels));</span>
-<span class="pc bpc" id="L116" title="1 of 2 branches missed.">                    if (example != null) {</span>
-<span class="fc" id="L117">                        kv.put(EXAMPLE, example);</span>
-<span class="fc" id="L118">                        kv.put(GENERATED_CONTENT_TYPE, MIME_TYPE_JSON);</span>
-<span class="fc" id="L119">                        output.add(kv);</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">            for (String mediaType : mediaTypes) {</span>
+<span class="nc" id="L112">                Map&lt;String, String&gt; kv = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L113">                kv.put(CONTENT_TYPE, mediaType);</span>
+<span class="nc bnc" id="L114" title="All 6 branches missed.">                if (property != null &amp;&amp; (mediaType.startsWith(MIME_TYPE_JSON) || mediaType.contains(&quot;*/*&quot;))) {</span>
+<span class="nc" id="L115">                    String example = Json.pretty(resolvePropertyToExample(&quot;&quot;, mediaType, property, processedModels));</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">                    if (example != null) {</span>
+<span class="nc" id="L117">                        kv.put(EXAMPLE, example);</span>
+<span class="nc" id="L118">                        kv.put(GENERATED_CONTENT_TYPE, MIME_TYPE_JSON);</span>
+<span class="nc" id="L119">                        output.add(kv);</span>
                     }
-<span class="pc bnc" id="L121" title="All 4 branches missed.">                } else if (property != null &amp;&amp; mediaType.startsWith(MIME_TYPE_XML)) {</span>
+<span class="nc bnc" id="L121" title="All 4 branches missed.">                } else if (property != null &amp;&amp; mediaType.startsWith(MIME_TYPE_XML)) {</span>
 <span class="nc" id="L122">                    String example = new XmlExampleGenerator(this.examples).toXml(property);</span>
 <span class="nc bnc" id="L123" title="All 2 branches missed.">                    if (example != null) {</span>
 <span class="nc" id="L124">                        kv.put(EXAMPLE, example);</span>
@@ -126,7 +126,7 @@ public class ExampleGenerator {
 <span class="nc" id="L126">                        output.add(kv);</span>
                     }
                 }
-<span class="fc" id="L129">            }</span>
+<span class="nc" id="L129">            }</span>
         } else {
 <span class="nc bnc" id="L131" title="All 2 branches missed.">            for (Map.Entry&lt;String, Object&gt; entry : examples.entrySet()) {</span>
 <span class="nc" id="L132">                final Map&lt;String, String&gt; kv = new HashMap&lt;&gt;();</span>
@@ -136,49 +136,49 @@ public class ExampleGenerator {
 <span class="nc" id="L136">            }</span>
         }
 
-<span class="pc bpc" id="L139" title="1 of 2 branches missed.">        if (output.size() == 0) {</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">        if (output.size() == 0) {</span>
 <span class="nc" id="L140">            Map&lt;String, String&gt; kv = new HashMap&lt;&gt;();</span>
 <span class="nc" id="L141">            kv.put(OUTPUT, NONE);</span>
 <span class="nc" id="L142">            output.add(kv);</span>
         }
-<span class="fc" id="L144">        return output;</span>
+<span class="nc" id="L144">        return output;</span>
     }
 
     public List&lt;Map&lt;String, String&gt;&gt; generate(Map&lt;String, Object&gt; examples, List&lt;String&gt; mediaTypes, String modelName) {
-<span class="fc" id="L148">        List&lt;Map&lt;String, String&gt;&gt; output = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L149">        Set&lt;String&gt; processedModels = new HashSet&lt;&gt;();</span>
-<span class="pc bpc" id="L150" title="1 of 2 branches missed.">        if (examples == null) {</span>
-<span class="pc bpc" id="L151" title="1 of 2 branches missed.">            if (mediaTypes == null) {</span>
+<span class="nc" id="L148">        List&lt;Map&lt;String, String&gt;&gt; output = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L149">        Set&lt;String&gt; processedModels = new HashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L150" title="All 2 branches missed.">        if (examples == null) {</span>
+<span class="nc bnc" id="L151" title="All 2 branches missed.">            if (mediaTypes == null) {</span>
                 // assume application/json for this
 <span class="nc" id="L153">                mediaTypes = Collections.singletonList(MIME_TYPE_JSON); // FIXME: a parameter should not be assigned. Also declare the methods parameters as 'final'.</span>
             }
-<span class="fc bfc" id="L155" title="All 2 branches covered.">            for (String mediaType : mediaTypes) {</span>
-<span class="fc" id="L156">                Map&lt;String, String&gt; kv = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L157">                kv.put(CONTENT_TYPE, mediaType);</span>
-<span class="pc bpc" id="L158" title="2 of 6 branches missed.">                if (modelName != null &amp;&amp; (mediaType.startsWith(MIME_TYPE_JSON) || mediaType.contains(&quot;*/*&quot;))) {</span>
-<span class="fc" id="L159">                    final Schema schema = this.examples.get(modelName);</span>
-<span class="pc bpc" id="L160" title="1 of 2 branches missed.">                    if (schema != null) {</span>
-<span class="fc" id="L161">                        String example = Json.pretty(resolveModelToExample(modelName, mediaType, schema, processedModels));</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">            for (String mediaType : mediaTypes) {</span>
+<span class="nc" id="L156">                Map&lt;String, String&gt; kv = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L157">                kv.put(CONTENT_TYPE, mediaType);</span>
+<span class="nc bnc" id="L158" title="All 6 branches missed.">                if (modelName != null &amp;&amp; (mediaType.startsWith(MIME_TYPE_JSON) || mediaType.contains(&quot;*/*&quot;))) {</span>
+<span class="nc" id="L159">                    final Schema schema = this.examples.get(modelName);</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">                    if (schema != null) {</span>
+<span class="nc" id="L161">                        String example = Json.pretty(resolveModelToExample(modelName, mediaType, schema, processedModels));</span>
 
-<span class="pc bpc" id="L163" title="1 of 2 branches missed.">                        if (example != null) {</span>
-<span class="fc" id="L164">                            kv.put(EXAMPLE, example);</span>
-<span class="fc" id="L165">                            kv.put(GENERATED_CONTENT_TYPE, MIME_TYPE_JSON);</span>
-<span class="fc" id="L166">                            output.add(kv);</span>
+<span class="nc bnc" id="L163" title="All 2 branches missed.">                        if (example != null) {</span>
+<span class="nc" id="L164">                            kv.put(EXAMPLE, example);</span>
+<span class="nc" id="L165">                            kv.put(GENERATED_CONTENT_TYPE, MIME_TYPE_JSON);</span>
+<span class="nc" id="L166">                            output.add(kv);</span>
                         }
                     }
-<span class="pc bpc" id="L169" title="2 of 4 branches missed.">                } else if (modelName != null &amp;&amp; mediaType.startsWith(MIME_TYPE_XML)) {</span>
-<span class="fc" id="L170">                    final Schema schema = this.examples.get(modelName);</span>
-<span class="fc" id="L171">                    String example = new XmlExampleGenerator(this.examples).toXml(schema, 0, Collections.emptySet());</span>
-<span class="pc bpc" id="L172" title="1 of 2 branches missed.">                    if (example != null) {</span>
-<span class="fc" id="L173">                        kv.put(EXAMPLE, example);</span>
-<span class="fc" id="L174">                        kv.put(GENERATED_CONTENT_TYPE, MIME_TYPE_XML);</span>
-<span class="fc" id="L175">                        output.add(kv);</span>
+<span class="nc bnc" id="L169" title="All 4 branches missed.">                } else if (modelName != null &amp;&amp; mediaType.startsWith(MIME_TYPE_XML)) {</span>
+<span class="nc" id="L170">                    final Schema schema = this.examples.get(modelName);</span>
+<span class="nc" id="L171">                    String example = new XmlExampleGenerator(this.examples).toXml(schema, 0, Collections.emptySet());</span>
+<span class="nc bnc" id="L172" title="All 2 branches missed.">                    if (example != null) {</span>
+<span class="nc" id="L173">                        kv.put(EXAMPLE, example);</span>
+<span class="nc" id="L174">                        kv.put(GENERATED_CONTENT_TYPE, MIME_TYPE_XML);</span>
+<span class="nc" id="L175">                        output.add(kv);</span>
                     }
-<span class="fc" id="L177">                } else {</span>
+<span class="nc" id="L177">                } else {</span>
 <span class="nc" id="L178">                    kv.put(EXAMPLE, &quot;Custom MIME type example not yet supported: &quot; + mediaType);</span>
 <span class="nc" id="L179">                    output.add(kv);</span>
                 }
-<span class="fc" id="L181">            }</span>
+<span class="nc" id="L181">            }</span>
         } else {
 <span class="nc bnc" id="L183" title="All 2 branches missed.">            for (Map.Entry&lt;String, Object&gt; entry : examples.entrySet()) {</span>
 <span class="nc" id="L184">                final Map&lt;String, String&gt; kv = new HashMap&lt;&gt;();</span>
@@ -188,12 +188,12 @@ public class ExampleGenerator {
 <span class="nc" id="L188">            }</span>
         }
 
-<span class="pc bpc" id="L191" title="1 of 2 branches missed.">        if (output.size() == 0) {</span>
+<span class="nc bnc" id="L191" title="All 2 branches missed.">        if (output.size() == 0) {</span>
 <span class="nc" id="L192">            Map&lt;String, String&gt; kv = new HashMap&lt;&gt;();</span>
 <span class="nc" id="L193">            kv.put(OUTPUT, NONE);</span>
 <span class="nc" id="L194">            output.add(kv);</span>
         }
-<span class="fc" id="L196">        return output;</span>
+<span class="nc" id="L196">        return output;</span>
     }
 
     private List&lt;Map&lt;String, String&gt;&gt; generate(Object example, List&lt;String&gt; mediaTypes) {
@@ -226,43 +226,43 @@ public class ExampleGenerator {
     }
 
     private Object resolvePropertyToExample(String propertyName, String mediaType, Schema property, Set&lt;String&gt; processedModels) {
-<span class="pc bpc" id="L229" title="1 of 2 branches missed.">        if (property == null) {</span>
+<span class="nc bnc" id="L229" title="All 2 branches missed.">        if (property == null) {</span>
 <span class="nc" id="L230">            LOGGER.error(&quot;Property schema shouldn't be null. Please report the issue to the openapi-generator team.&quot;);</span>
 <span class="nc" id="L231">            return &quot;&quot;;</span>
         }
-<span class="fc" id="L233">        LOGGER.debug(&quot;Resolving example for property {}...&quot;, property);</span>
-<span class="fc bfc" id="L234" title="All 2 branches covered.">        if (property.getExample() != null) {</span>
-<span class="fc" id="L235">            LOGGER.debug(&quot;Example set in openapi spec, returning example: '{}'&quot;, property.getExample().toString());</span>
+<span class="nc" id="L233">        LOGGER.debug(&quot;Resolving example for property {}...&quot;, property);</span>
+<span class="nc bnc" id="L234" title="All 2 branches missed.">        if (property.getExample() != null) {</span>
+<span class="nc" id="L235">            LOGGER.debug(&quot;Example set in openapi spec, returning example: '{}'&quot;, property.getExample().toString());</span>
             // When a property is of type Date, we want to ensure that we're returning a formatted Date.
             // And not returning the Date object directly.
-<span class="pc bpc" id="L238" title="1 of 2 branches missed.">            if (property.getExample() instanceof Date) {</span>
+<span class="nc bnc" id="L238" title="All 2 branches missed.">            if (property.getExample() instanceof Date) {</span>
 <span class="nc" id="L239">                return dateFormat.format(property.getExample());</span>
             }
-<span class="fc" id="L241">            return property.getExample();</span>
-<span class="fc bfc" id="L242" title="All 2 branches covered.">        } else if (ModelUtils.isBooleanSchema(property)) {</span>
-<span class="fc" id="L243">            Object defaultValue = property.getDefault();</span>
-<span class="pc bpc" id="L244" title="1 of 2 branches missed.">            if (defaultValue != null) {</span>
+<span class="nc" id="L241">            return property.getExample();</span>
+<span class="nc bnc" id="L242" title="All 2 branches missed.">        } else if (ModelUtils.isBooleanSchema(property)) {</span>
+<span class="nc" id="L243">            Object defaultValue = property.getDefault();</span>
+<span class="nc bnc" id="L244" title="All 2 branches missed.">            if (defaultValue != null) {</span>
 <span class="nc" id="L245">                return defaultValue;</span>
             }
-<span class="fc" id="L247">            return Boolean.TRUE;</span>
-<span class="fc bfc" id="L248" title="All 2 branches covered.">        } else if (ModelUtils.isArraySchema(property)) {</span>
-<span class="fc" id="L249">            Schema innerType = ModelUtils.getSchemaItems(property);</span>
-<span class="pc bpc" id="L250" title="1 of 2 branches missed.">            if (innerType != null) {</span>
-<span class="pc bpc" id="L251" title="1 of 2 branches missed.">                int arrayLength = null == property.getMaxItems() ? 2 :  property.getMaxItems();</span>
+<span class="nc" id="L247">            return Boolean.TRUE;</span>
+<span class="nc bnc" id="L248" title="All 2 branches missed.">        } else if (ModelUtils.isArraySchema(property)) {</span>
+<span class="nc" id="L249">            Schema innerType = ModelUtils.getSchemaItems(property);</span>
+<span class="nc bnc" id="L250" title="All 2 branches missed.">            if (innerType != null) {</span>
+<span class="nc bnc" id="L251" title="All 2 branches missed.">                int arrayLength = null == property.getMaxItems() ? 2 :  property.getMaxItems();</span>
                 // avoid memory issues by limiting to max. 5 items
-<span class="fc" id="L253">                arrayLength = Math.min(arrayLength, 5);</span>
-<span class="fc" id="L254">                Object[] objectProperties = new Object[arrayLength];</span>
-<span class="fc" id="L255">                Object objProperty = resolvePropertyToExample(propertyName, mediaType, innerType, processedModels);</span>
-<span class="fc bfc" id="L256" title="All 2 branches covered.">                for (int i = 0; i &lt; arrayLength; i++) {</span>
-<span class="fc" id="L257">                    objectProperties[i] = objProperty;</span>
+<span class="nc" id="L253">                arrayLength = Math.min(arrayLength, 5);</span>
+<span class="nc" id="L254">                Object[] objectProperties = new Object[arrayLength];</span>
+<span class="nc" id="L255">                Object objProperty = resolvePropertyToExample(propertyName, mediaType, innerType, processedModels);</span>
+<span class="nc bnc" id="L256" title="All 2 branches missed.">                for (int i = 0; i &lt; arrayLength; i++) {</span>
+<span class="nc" id="L257">                    objectProperties[i] = objProperty;</span>
                 }
-<span class="fc" id="L259">                return objectProperties;</span>
+<span class="nc" id="L259">                return objectProperties;</span>
             }
-<span class="pc bfc" id="L261" title="All 2 branches covered.">        } else if (ModelUtils.isDateSchema(property)) {</span>
-<span class="fc" id="L262">            return &quot;2000-01-23&quot;;</span>
-<span class="pc bpc" id="L263" title="1 of 2 branches missed.">        } else if (ModelUtils.isDateTimeSchema(property)) {</span>
+<span class="nc bnc" id="L261" title="All 2 branches missed.">        } else if (ModelUtils.isDateSchema(property)) {</span>
+<span class="nc" id="L262">            return &quot;2000-01-23&quot;;</span>
+<span class="nc bnc" id="L263" title="All 2 branches missed.">        } else if (ModelUtils.isDateTimeSchema(property)) {</span>
 <span class="nc" id="L264">            return &quot;2000-01-23T04:56:07.000+00:00&quot;;</span>
-<span class="pc bpc" id="L265" title="1 of 2 branches missed.">        } else if (ModelUtils.isNumberSchema(property)) {</span>
+<span class="nc bnc" id="L265" title="All 2 branches missed.">        } else if (ModelUtils.isNumberSchema(property)) {</span>
 <span class="nc" id="L266">            Double min = getPropertyValue(property.getMinimum());</span>
 <span class="nc" id="L267">            Double max = getPropertyValue(property.getMaximum());</span>
 <span class="nc bnc" id="L268" title="All 2 branches missed.">            if (ModelUtils.isFloatSchema(property)) { // float</span>
@@ -272,17 +272,17 @@ public class ExampleGenerator {
             } else { // no format defined
 <span class="nc" id="L273">                return randomNumber(min, max);</span>
             }
-<span class="pc bpc" id="L275" title="1 of 2 branches missed.">        } else if (ModelUtils.isFileSchema(property)) {</span>
+<span class="nc bnc" id="L275" title="All 2 branches missed.">        } else if (ModelUtils.isFileSchema(property)) {</span>
 <span class="nc" id="L276">            return &quot;&quot;;  // TODO</span>
 
-<span class="fc bfc" id="L278" title="All 2 branches covered.">        } else if (ModelUtils.isIntegerSchema(property)) {</span>
-<span class="fc" id="L279">            Double min = getPropertyValue(property.getMinimum());</span>
-<span class="fc" id="L280">            Double max = getPropertyValue(property.getMaximum());</span>
-<span class="fc bfc" id="L281" title="All 2 branches covered.">            if (ModelUtils.isLongSchema(property)) {</span>
-<span class="fc" id="L282">                return (long) randomNumber(min, max);</span>
+<span class="nc bnc" id="L278" title="All 2 branches missed.">        } else if (ModelUtils.isIntegerSchema(property)) {</span>
+<span class="nc" id="L279">            Double min = getPropertyValue(property.getMinimum());</span>
+<span class="nc" id="L280">            Double max = getPropertyValue(property.getMaximum());</span>
+<span class="nc bnc" id="L281" title="All 2 branches missed.">            if (ModelUtils.isLongSchema(property)) {</span>
+<span class="nc" id="L282">                return (long) randomNumber(min, max);</span>
             }
-<span class="fc" id="L284">            return (int) randomNumber(min, max);</span>
-<span class="pc bpc" id="L285" title="1 of 2 branches missed.">        } else if (ModelUtils.isMapSchema(property)) {</span>
+<span class="nc" id="L284">            return (int) randomNumber(min, max);</span>
+<span class="nc bnc" id="L285" title="All 2 branches missed.">        } else if (ModelUtils.isMapSchema(property)) {</span>
 <span class="nc" id="L286">            Map&lt;String, Object&gt; mp = new HashMap&lt;String, Object&gt;();</span>
 <span class="nc bnc" id="L287" title="All 2 branches missed.">            if (property.getName() != null) {</span>
 <span class="nc" id="L288">                mp.put(property.getName(),</span>
@@ -292,34 +292,34 @@ public class ExampleGenerator {
 <span class="nc" id="L292">                        resolvePropertyToExample(propertyName, mediaType, ModelUtils.getAdditionalProperties(property), processedModels));</span>
             }
 <span class="nc" id="L294">            return mp;</span>
-<span class="pc bpc" id="L295" title="1 of 2 branches missed.">        } else if (ModelUtils.isUUIDSchema(property)) {</span>
+<span class="nc bnc" id="L295" title="All 2 branches missed.">        } else if (ModelUtils.isUUIDSchema(property)) {</span>
 <span class="nc" id="L296">            return &quot;046b6c7f-0b8a-43b9-b35d-6489e6daee91&quot;;</span>
-<span class="pc bpc" id="L297" title="1 of 2 branches missed.">        } else if (ModelUtils.isURISchema(property)) {</span>
+<span class="nc bnc" id="L297" title="All 2 branches missed.">        } else if (ModelUtils.isURISchema(property)) {</span>
 <span class="nc" id="L298">            return &quot;https://openapi-generator.tech&quot;;</span>
-<span class="fc bfc" id="L299" title="All 2 branches covered.">        } else if (ModelUtils.isStringSchema(property)) {</span>
-<span class="fc" id="L300">            LOGGER.debug(&quot;String property&quot;);</span>
-<span class="pc bpc" id="L301" title="1 of 2 branches missed.">            if (property.getDefault() != null) {</span>
+<span class="nc bnc" id="L299" title="All 2 branches missed.">        } else if (ModelUtils.isStringSchema(property)) {</span>
+<span class="nc" id="L300">            LOGGER.debug(&quot;String property&quot;);</span>
+<span class="nc bnc" id="L301" title="All 2 branches missed.">            if (property.getDefault() != null) {</span>
 <span class="nc" id="L302">                return String.valueOf(property.getDefault());</span>
             }
-<span class="fc" id="L304">            List&lt;String&gt; enumValues = property.getEnum();</span>
-<span class="pc bpc" id="L305" title="1 of 4 branches missed.">            if (enumValues != null &amp;&amp; !enumValues.isEmpty()) {</span>
-<span class="fc" id="L306">                LOGGER.debug(&quot;Enum value found: '{}'&quot;, enumValues.get(0));</span>
-<span class="fc" id="L307">                return enumValues.get(0);</span>
+<span class="nc" id="L304">            List&lt;String&gt; enumValues = property.getEnum();</span>
+<span class="nc bnc" id="L305" title="All 4 branches missed.">            if (enumValues != null &amp;&amp; !enumValues.isEmpty()) {</span>
+<span class="nc" id="L306">                LOGGER.debug(&quot;Enum value found: '{}'&quot;, enumValues.get(0));</span>
+<span class="nc" id="L307">                return enumValues.get(0);</span>
             }
-<span class="fc" id="L309">            String format = property.getFormat();</span>
-<span class="pc bpc" id="L310" title="2 of 6 branches missed.">            if (format != null &amp;&amp; (URI.equals(format) || URL.equals(format))) {</span>
+<span class="nc" id="L309">            String format = property.getFormat();</span>
+<span class="nc bnc" id="L310" title="All 6 branches missed.">            if (format != null &amp;&amp; (URI.equals(format) || URL.equals(format))) {</span>
 <span class="nc" id="L311">                LOGGER.debug(&quot;URI or URL format, without default or enum, generating random one.&quot;);</span>
 <span class="nc" id="L312">                return &quot;http://example.com/aeiou&quot;;</span>
             }
-<span class="fc" id="L314">            LOGGER.debug(&quot;No values found, using property name {} as example&quot;, propertyName);</span>
-<span class="fc" id="L315">            return propertyName;</span>
-<span class="pc bpc" id="L316" title="1 of 2 branches missed.">        } else if (!StringUtils.isEmpty(property.get$ref())) { // model</span>
-<span class="fc" id="L317">            String simpleName = ModelUtils.getSimpleRef(property.get$ref());</span>
-<span class="fc" id="L318">            Schema schema = ModelUtils.getSchema(openAPI, simpleName);</span>
-<span class="pc bpc" id="L319" title="1 of 2 branches missed.">            if (schema == null) { // couldn't find the model/schema</span>
+<span class="nc" id="L314">            LOGGER.debug(&quot;No values found, using property name {} as example&quot;, propertyName);</span>
+<span class="nc" id="L315">            return propertyName;</span>
+<span class="nc bnc" id="L316" title="All 2 branches missed.">        } else if (!StringUtils.isEmpty(property.get$ref())) { // model</span>
+<span class="nc" id="L317">            String simpleName = ModelUtils.getSimpleRef(property.get$ref());</span>
+<span class="nc" id="L318">            Schema schema = ModelUtils.getSchema(openAPI, simpleName);</span>
+<span class="nc bnc" id="L319" title="All 2 branches missed.">            if (schema == null) { // couldn't find the model/schema</span>
 <span class="nc" id="L320">                return &quot;{}&quot;;</span>
             }
-<span class="fc" id="L322">            return resolveModelToExample(simpleName, mediaType, schema, processedModels);</span>
+<span class="nc" id="L322">            return resolveModelToExample(simpleName, mediaType, schema, processedModels);</span>
 
 <span class="nc bnc" id="L324" title="All 2 branches missed.">        } else if (ModelUtils.isObjectSchema(property)) {</span>
 <span class="nc" id="L325">            return &quot;{}&quot;;</span>
@@ -329,38 +329,38 @@ public class ExampleGenerator {
     }
 
     private Double getPropertyValue(BigDecimal propertyValue) {
-<span class="pc bpc" id="L332" title="1 of 2 branches missed.">        return propertyValue == null ? null : propertyValue.doubleValue();</span>
+<span class="nc bnc" id="L332" title="All 2 branches missed.">        return propertyValue == null ? null : propertyValue.doubleValue();</span>
     }
 
     private double randomNumber(Double min, Double max) {
-<span class="pc bpc" id="L336" title="3 of 4 branches missed.">        if (min != null &amp;&amp; max != null) {</span>
+<span class="nc bnc" id="L336" title="All 4 branches missed.">        if (min != null &amp;&amp; max != null) {</span>
 <span class="nc" id="L337">            double range = max - min;</span>
 <span class="nc" id="L338">            return random.nextDouble() * range + min;</span>
-<span class="pc bpc" id="L339" title="1 of 2 branches missed.">        } else if (min != null) {</span>
+<span class="nc bnc" id="L339" title="All 2 branches missed.">        } else if (min != null) {</span>
 <span class="nc" id="L340">            return random.nextDouble() + min;</span>
-<span class="pc bpc" id="L341" title="1 of 2 branches missed.">        } else if (max != null) {</span>
+<span class="nc bnc" id="L341" title="All 2 branches missed.">        } else if (max != null) {</span>
 <span class="nc" id="L342">            return random.nextDouble() * max;</span>
         } else {
-<span class="fc" id="L344">            return random.nextDouble() * 10;</span>
+<span class="nc" id="L344">            return random.nextDouble() * 10;</span>
         }
     }
 
     private Object resolveModelToExample(String name, String mediaType, Schema schema, Set&lt;String&gt; processedModels) {
-<span class="pc bpc" id="L349" title="1 of 2 branches missed.">        if (processedModels.contains(name)) {</span>
+<span class="nc bnc" id="L349" title="All 2 branches missed.">        if (processedModels.contains(name)) {</span>
 <span class="nc" id="L350">            return schema.getExample();</span>
         }
 
-<span class="fc" id="L353">        processedModels.add(name);</span>
-<span class="fc" id="L354">        Map&lt;String, Object&gt; values = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L355">        LOGGER.debug(&quot;Resolving model '{}' to example&quot;, name);</span>
-<span class="fc bfc" id="L356" title="All 2 branches covered.">        if (schema.getExample() != null) {</span>
-<span class="fc" id="L357">            LOGGER.debug(&quot;Using example from spec: {}&quot;, schema.getExample());</span>
-<span class="fc" id="L358">            return schema.getExample();</span>
-<span class="pc bpc" id="L359" title="1 of 2 branches missed.">        } else if (schema.getProperties() != null) {</span>
-<span class="fc" id="L360">            LOGGER.debug(&quot;Creating example from model values&quot;);</span>
-<span class="fc" id="L361">            traverseSchemaProperties(mediaType, schema, processedModels, values);</span>
-<span class="fc" id="L362">            schema.setExample(values);</span>
-<span class="fc" id="L363">            return schema.getExample();</span>
+<span class="nc" id="L353">        processedModels.add(name);</span>
+<span class="nc" id="L354">        Map&lt;String, Object&gt; values = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L355">        LOGGER.debug(&quot;Resolving model '{}' to example&quot;, name);</span>
+<span class="nc bnc" id="L356" title="All 2 branches missed.">        if (schema.getExample() != null) {</span>
+<span class="nc" id="L357">            LOGGER.debug(&quot;Using example from spec: {}&quot;, schema.getExample());</span>
+<span class="nc" id="L358">            return schema.getExample();</span>
+<span class="nc bnc" id="L359" title="All 2 branches missed.">        } else if (schema.getProperties() != null) {</span>
+<span class="nc" id="L360">            LOGGER.debug(&quot;Creating example from model values&quot;);</span>
+<span class="nc" id="L361">            traverseSchemaProperties(mediaType, schema, processedModels, values);</span>
+<span class="nc" id="L362">            schema.setExample(values);</span>
+<span class="nc" id="L363">            return schema.getExample();</span>
 <span class="nc bnc" id="L364" title="All 4 branches missed.">        } else if (ModelUtils.isAllOf(schema) || ModelUtils.isAllOfWithProperties(schema)) {</span>
 <span class="nc" id="L365">            LOGGER.debug(&quot;Resolving allOf model '{}' to example&quot;, name);</span>
 <span class="nc" id="L366">            resolveAllOfSchemaProperties(mediaType, schema, processedModels, values);</span>
@@ -386,15 +386,15 @@ public class ExampleGenerator {
     }
 
     private void traverseSchemaProperties(String mediaType, Schema schema, Set&lt;String&gt; processedModels, Map&lt;String, Object&gt; values) {
-<span class="pc bpc" id="L389" title="1 of 2 branches missed.">        if (schema.getProperties() != null) {</span>
-<span class="fc bfc" id="L390" title="All 2 branches covered.">            for (Object propertyName : schema.getProperties().keySet()) {</span>
-<span class="fc" id="L391">                Schema property = (Schema) schema.getProperties().get(propertyName.toString());</span>
-<span class="fc" id="L392">                values.put(propertyName.toString(), resolvePropertyToExample(propertyName.toString(), mediaType, property, processedModels));</span>
-<span class="fc" id="L393">            }</span>
+<span class="nc bnc" id="L389" title="All 2 branches missed.">        if (schema.getProperties() != null) {</span>
+<span class="nc bnc" id="L390" title="All 2 branches missed.">            for (Object propertyName : schema.getProperties().keySet()) {</span>
+<span class="nc" id="L391">                Schema property = (Schema) schema.getProperties().get(propertyName.toString());</span>
+<span class="nc" id="L392">                values.put(propertyName.toString(), resolvePropertyToExample(propertyName.toString(), mediaType, property, processedModels));</span>
+<span class="nc" id="L393">            }</span>
 <span class="nc bnc" id="L394" title="All 4 branches missed.">        } else if (ModelUtils.isAllOf(schema) || ModelUtils.isAllOfWithProperties(schema)) {</span>
 <span class="nc" id="L395">            resolveAllOfSchemaProperties(mediaType, schema, processedModels, values);</span>
         }
-<span class="fc" id="L397">    }</span>
+<span class="nc" id="L397">    }</span>
 
     /**
      * Transverse and resolves all property examples for `allOf` composed schemas into `values` map object

@@ -39,98 +39,98 @@ import java.util.*;
 
 public class InlineModelResolver {
     private OpenAPI openAPI;
-<span class="fc" id="L42">    private Map&lt;String, Schema&gt; addedModels = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L43">    private Map&lt;String, String&gt; generatedSignature = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L44">    private Map&lt;String, String&gt; inlineSchemaNameMapping = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L45">    private Map&lt;String, String&gt; inlineSchemaOptions = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L46">    private Set&lt;String&gt; inlineSchemaNameMappingValues = new HashSet&lt;&gt;();</span>
-<span class="fc" id="L47">    public boolean resolveInlineEnums = false;</span>
-<span class="fc" id="L48">    public boolean skipSchemaReuse = false; // skip reusing inline schema if set to true</span>
-<span class="fc" id="L49">    public Boolean refactorAllOfInlineSchemas = null; // refactor allOf inline schemas into $ref</span>
+<span class="nc" id="L42">    private Map&lt;String, Schema&gt; addedModels = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L43">    private Map&lt;String, String&gt; generatedSignature = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L44">    private Map&lt;String, String&gt; inlineSchemaNameMapping = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L45">    private Map&lt;String, String&gt; inlineSchemaOptions = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L46">    private Set&lt;String&gt; inlineSchemaNameMappingValues = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L47">    public boolean resolveInlineEnums = false;</span>
+<span class="nc" id="L48">    public boolean skipSchemaReuse = false; // skip reusing inline schema if set to true</span>
+<span class="nc" id="L49">    public Boolean refactorAllOfInlineSchemas = null; // refactor allOf inline schemas into $ref</span>
 
     // structure mapper sorts properties alphabetically on write to ensure models are
     // serialized consistently for lookup of existing models
     private static ObjectMapper structureMapper;
 
     // a set to keep track of names generated for inline schemas
-<span class="fc" id="L56">    private Set&lt;String&gt; uniqueNames = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L56">    private Set&lt;String&gt; uniqueNames = new HashSet&lt;&gt;();</span>
 
     static {
-<span class="fc" id="L59">        structureMapper = Json.mapper().copy();</span>
-<span class="fc" id="L60">        structureMapper.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);</span>
-<span class="fc" id="L61">        structureMapper.writer(new DefaultPrettyPrinter());</span>
-<span class="fc" id="L62">    }</span>
+<span class="nc" id="L59">        structureMapper = Json.mapper().copy();</span>
+<span class="nc" id="L60">        structureMapper.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);</span>
+<span class="nc" id="L61">        structureMapper.writer(new DefaultPrettyPrinter());</span>
+<span class="nc" id="L62">    }</span>
 
-<span class="fc" id="L64">    final Logger LOGGER = LoggerFactory.getLogger(InlineModelResolver.class);</span>
+<span class="nc" id="L64">    final Logger LOGGER = LoggerFactory.getLogger(InlineModelResolver.class);</span>
 
-<span class="fc" id="L66">    public InlineModelResolver() {</span>
-<span class="fc" id="L67">        this.inlineSchemaOptions.put(&quot;ARRAY_ITEM_SUFFIX&quot;, &quot;_inner&quot;);</span>
-<span class="fc" id="L68">        this.inlineSchemaOptions.put(&quot;MAP_ITEM_SUFFIX&quot;, &quot;_value&quot;);</span>
-<span class="fc" id="L69">    }</span>
+<span class="nc" id="L66">    public InlineModelResolver() {</span>
+<span class="nc" id="L67">        this.inlineSchemaOptions.put(&quot;ARRAY_ITEM_SUFFIX&quot;, &quot;_inner&quot;);</span>
+<span class="nc" id="L68">        this.inlineSchemaOptions.put(&quot;MAP_ITEM_SUFFIX&quot;, &quot;_value&quot;);</span>
+<span class="nc" id="L69">    }</span>
 
     public void setInlineSchemaNameMapping(Map inlineSchemaNameMapping) {
-<span class="fc" id="L72">        this.inlineSchemaNameMapping = inlineSchemaNameMapping;</span>
-<span class="fc" id="L73">        this.inlineSchemaNameMappingValues = new HashSet&lt;&gt;(inlineSchemaNameMapping.values());</span>
-<span class="fc" id="L74">    }</span>
+<span class="nc" id="L72">        this.inlineSchemaNameMapping = inlineSchemaNameMapping;</span>
+<span class="nc" id="L73">        this.inlineSchemaNameMappingValues = new HashSet&lt;&gt;(inlineSchemaNameMapping.values());</span>
+<span class="nc" id="L74">    }</span>
 
     public void setInlineSchemaOptions(Map inlineSchemaOptions) {
-<span class="fc" id="L77">        this.inlineSchemaOptions.putAll(inlineSchemaOptions);</span>
+<span class="nc" id="L77">        this.inlineSchemaOptions.putAll(inlineSchemaOptions);</span>
 
-<span class="pc bpc" id="L79" title="1 of 2 branches missed.">        if (&quot;true&quot;.equalsIgnoreCase(</span>
-<span class="fc" id="L80">                this.inlineSchemaOptions.getOrDefault(&quot;SKIP_SCHEMA_REUSE&quot;, &quot;false&quot;))) {</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">        if (&quot;true&quot;.equalsIgnoreCase(</span>
+<span class="nc" id="L80">                this.inlineSchemaOptions.getOrDefault(&quot;SKIP_SCHEMA_REUSE&quot;, &quot;false&quot;))) {</span>
 <span class="nc" id="L81">            this.skipSchemaReuse = true;</span>
         }
 
-<span class="pc bpc" id="L84" title="1 of 2 branches missed.">        if (this.inlineSchemaOptions.containsKey(&quot;REFACTOR_ALLOF_INLINE_SCHEMAS&quot;)) {</span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">        if (this.inlineSchemaOptions.containsKey(&quot;REFACTOR_ALLOF_INLINE_SCHEMAS&quot;)) {</span>
 <span class="nc" id="L85">            this.refactorAllOfInlineSchemas = Boolean.valueOf(this.inlineSchemaOptions.get(&quot;REFACTOR_ALLOF_INLINE_SCHEMAS&quot;));</span>
         } else {
             // not set so default to null;
         }
 
-<span class="pc bpc" id="L90" title="1 of 2 branches missed.">        if (this.inlineSchemaOptions.containsKey(&quot;RESOLVE_INLINE_ENUMS&quot;)) {</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">        if (this.inlineSchemaOptions.containsKey(&quot;RESOLVE_INLINE_ENUMS&quot;)) {</span>
 <span class="nc" id="L91">            this.resolveInlineEnums = Boolean.valueOf(this.inlineSchemaOptions.get(&quot;RESOLVE_INLINE_ENUMS&quot;));</span>
         } else {
             // not set so default to null;
         }
-<span class="fc" id="L95">    }</span>
+<span class="nc" id="L95">    }</span>
 
     void flatten(OpenAPI openAPI) {
-<span class="fc" id="L98">        this.openAPI = openAPI;</span>
+<span class="nc" id="L98">        this.openAPI = openAPI;</span>
 
-<span class="pc bpc" id="L100" title="1 of 2 branches missed.">        if (this.openAPI.getComponents() == null) {</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">        if (this.openAPI.getComponents() == null) {</span>
 <span class="nc" id="L101">            this.openAPI.setComponents(new Components());</span>
         }
 
-<span class="pc bpc" id="L104" title="1 of 2 branches missed.">        if (this.openAPI.getComponents().getSchemas() == null) {</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">        if (this.openAPI.getComponents().getSchemas() == null) {</span>
 <span class="nc" id="L105">            this.openAPI.getComponents().setSchemas(new HashMap&lt;String, Schema&gt;());</span>
         }
 
-<span class="fc" id="L108">        flattenPaths();</span>
-<span class="fc" id="L109">        flattenComponents();</span>
-<span class="fc" id="L110">    }</span>
+<span class="nc" id="L108">        flattenPaths();</span>
+<span class="nc" id="L109">        flattenComponents();</span>
+<span class="nc" id="L110">    }</span>
 
     /**
      * Flatten inline models in Paths
      */
     private void flattenPaths() {
-<span class="fc" id="L116">        Paths paths = openAPI.getPaths();</span>
-<span class="pc bpc" id="L117" title="1 of 2 branches missed.">        if (paths == null) {</span>
+<span class="nc" id="L116">        Paths paths = openAPI.getPaths();</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">        if (paths == null) {</span>
 <span class="nc" id="L118">            return;</span>
         }
 
-<span class="fc bfc" id="L121" title="All 2 branches covered.">        for (Map.Entry&lt;String, PathItem&gt; pathsEntry : paths.entrySet()) {</span>
-<span class="fc" id="L122">            PathItem path = pathsEntry.getValue();</span>
-<span class="fc" id="L123">            List&lt;Map.Entry&lt;HttpMethod, Operation&gt;&gt; toFlatten = new ArrayList&lt;&gt;(path.readOperationsMap().entrySet());</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">        for (Map.Entry&lt;String, PathItem&gt; pathsEntry : paths.entrySet()) {</span>
+<span class="nc" id="L122">            PathItem path = pathsEntry.getValue();</span>
+<span class="nc" id="L123">            List&lt;Map.Entry&lt;HttpMethod, Operation&gt;&gt; toFlatten = new ArrayList&lt;&gt;(path.readOperationsMap().entrySet());</span>
 
             // use path name (e.g. /foo/bar) and HTTP verb to come up with a name
             // in case operationId is not defined later in other methods
-<span class="fc" id="L127">            String pathname = pathsEntry.getKey();</span>
+<span class="nc" id="L127">            String pathname = pathsEntry.getKey();</span>
 
             // Include callback operation as well
-<span class="fc bfc" id="L130" title="All 2 branches covered.">            for (Map.Entry&lt;HttpMethod, Operation&gt; operationEntry : new LinkedHashMap&lt;&gt;(path.readOperationsMap()).entrySet()) {</span>
-<span class="fc" id="L131">                Operation operation = operationEntry.getValue();</span>
-<span class="fc" id="L132">                Map&lt;String, Callback&gt; callbacks = operation.getCallbacks();</span>
-<span class="pc bpc" id="L133" title="1 of 2 branches missed.">                if (callbacks != null) {</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">            for (Map.Entry&lt;HttpMethod, Operation&gt; operationEntry : new LinkedHashMap&lt;&gt;(path.readOperationsMap()).entrySet()) {</span>
+<span class="nc" id="L131">                Operation operation = operationEntry.getValue();</span>
+<span class="nc" id="L132">                Map&lt;String, Callback&gt; callbacks = operation.getCallbacks();</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">                if (callbacks != null) {</span>
 <span class="nc bnc" id="L134" title="All 2 branches missed.">                    for (Map.Entry&lt;String, Callback&gt; callbackEntry : callbacks.entrySet()) {</span>
 <span class="nc" id="L135">                        Callback callback = callbackEntry.getValue();</span>
 <span class="nc bnc" id="L136" title="All 2 branches missed.">                        for (Map.Entry&lt;String, PathItem&gt; pathItemEntry : callback.entrySet()) {</span>
@@ -139,32 +139,32 @@ public class InlineModelResolver {
 <span class="nc" id="L139">                        }</span>
 <span class="nc" id="L140">                    }</span>
                 }
-<span class="fc" id="L142">            }</span>
+<span class="nc" id="L142">            }</span>
 
-<span class="fc bfc" id="L144" title="All 2 branches covered.">            for (Map.Entry&lt;HttpMethod, Operation&gt; operationEntry : toFlatten) {</span>
-<span class="fc" id="L145">                Operation operation = operationEntry.getValue();</span>
-<span class="fc" id="L146">                String inlineSchemaName = this.getInlineSchemaName(operationEntry.getKey(), pathname);</span>
-<span class="fc" id="L147">                flattenRequestBody(inlineSchemaName, operation);</span>
-<span class="fc" id="L148">                flattenParameters(inlineSchemaName, operation);</span>
-<span class="fc" id="L149">                flattenResponses(inlineSchemaName, operation);</span>
-<span class="fc" id="L150">            }</span>
-<span class="fc" id="L151">        }</span>
-<span class="fc" id="L152">    }</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">            for (Map.Entry&lt;HttpMethod, Operation&gt; operationEntry : toFlatten) {</span>
+<span class="nc" id="L145">                Operation operation = operationEntry.getValue();</span>
+<span class="nc" id="L146">                String inlineSchemaName = this.getInlineSchemaName(operationEntry.getKey(), pathname);</span>
+<span class="nc" id="L147">                flattenRequestBody(inlineSchemaName, operation);</span>
+<span class="nc" id="L148">                flattenParameters(inlineSchemaName, operation);</span>
+<span class="nc" id="L149">                flattenResponses(inlineSchemaName, operation);</span>
+<span class="nc" id="L150">            }</span>
+<span class="nc" id="L151">        }</span>
+<span class="nc" id="L152">    }</span>
 
     private String getInlineSchemaName(HttpMethod httpVerb, String pathname) {
-<span class="fc" id="L155">        String name = pathname;</span>
-<span class="pc bpc" id="L156" title="1 of 2 branches missed.">        if (httpVerb.equals(HttpMethod.DELETE)) {</span>
+<span class="nc" id="L155">        String name = pathname;</span>
+<span class="nc bnc" id="L156" title="All 2 branches missed.">        if (httpVerb.equals(HttpMethod.DELETE)) {</span>
 <span class="nc" id="L157">            name += &quot;_delete&quot;;</span>
-<span class="fc bfc" id="L158" title="All 2 branches covered.">        } else if (httpVerb.equals(HttpMethod.GET)) {</span>
-<span class="fc" id="L159">            name += &quot;_get&quot;;</span>
-<span class="pc bpc" id="L160" title="1 of 2 branches missed.">        } else if (httpVerb.equals(HttpMethod.HEAD)) {</span>
+<span class="nc bnc" id="L158" title="All 2 branches missed.">        } else if (httpVerb.equals(HttpMethod.GET)) {</span>
+<span class="nc" id="L159">            name += &quot;_get&quot;;</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">        } else if (httpVerb.equals(HttpMethod.HEAD)) {</span>
 <span class="nc" id="L161">            name += &quot;_head&quot;;</span>
-<span class="pc bpc" id="L162" title="1 of 2 branches missed.">        } else if (httpVerb.equals(HttpMethod.OPTIONS)) {</span>
+<span class="nc bnc" id="L162" title="All 2 branches missed.">        } else if (httpVerb.equals(HttpMethod.OPTIONS)) {</span>
 <span class="nc" id="L163">            name += &quot;_options&quot;;</span>
-<span class="fc bfc" id="L164" title="All 2 branches covered.">        } else if (httpVerb.equals(HttpMethod.PATCH)) {</span>
-<span class="fc" id="L165">            name += &quot;_patch&quot;;</span>
-<span class="pc bpc" id="L166" title="1 of 2 branches missed.">        } else if (httpVerb.equals(HttpMethod.POST)) {</span>
-<span class="fc" id="L167">            name += &quot;_post&quot;;</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">        } else if (httpVerb.equals(HttpMethod.PATCH)) {</span>
+<span class="nc" id="L165">            name += &quot;_patch&quot;;</span>
+<span class="nc bnc" id="L166" title="All 2 branches missed.">        } else if (httpVerb.equals(HttpMethod.POST)) {</span>
+<span class="nc" id="L167">            name += &quot;_post&quot;;</span>
 <span class="nc bnc" id="L168" title="All 2 branches missed.">        } else if (httpVerb.equals(HttpMethod.PUT)) {</span>
 <span class="nc" id="L169">            name += &quot;_put&quot;;</span>
 <span class="nc bnc" id="L170" title="All 2 branches missed.">        } else if (httpVerb.equals(HttpMethod.TRACE)) {</span>
@@ -174,7 +174,7 @@ public class InlineModelResolver {
             // throw new RuntimeException(&quot;No HTTP verb found/detected in the inline model
             // resolver&quot;);
         }
-<span class="fc" id="L177">        return name;</span>
+<span class="nc" id="L177">        return name;</span>
     }
 
     /**
@@ -187,7 +187,7 @@ public class InlineModelResolver {
      * @param schema target schema
      */
     private boolean isModelNeeded(Schema schema) {
-<span class="fc" id="L190">        return isModelNeeded(schema, new HashSet&lt;&gt;());</span>
+<span class="nc" id="L190">        return isModelNeeded(schema, new HashSet&lt;&gt;());</span>
     }
 
     /**
@@ -201,22 +201,22 @@ public class InlineModelResolver {
      * @param visitedSchemas Visited schemas
      */
     private boolean isModelNeeded(Schema schema, Set&lt;Schema&gt; visitedSchemas) {
-<span class="pc bpc" id="L204" title="1 of 2 branches missed.">        if (visitedSchemas.contains(schema)) { // circular reference</span>
+<span class="nc bnc" id="L204" title="All 2 branches missed.">        if (visitedSchemas.contains(schema)) { // circular reference</span>
 <span class="nc" id="L205">            return true;</span>
         } else {
-<span class="fc" id="L207">            visitedSchemas.add(schema);</span>
+<span class="nc" id="L207">            visitedSchemas.add(schema);</span>
         }
 
-<span class="pc bpc" id="L210" title="5 of 6 branches missed.">        if (resolveInlineEnums &amp;&amp; schema.getEnum() != null &amp;&amp; schema.getEnum().size() &gt; 0) {</span>
+<span class="nc bnc" id="L210" title="All 6 branches missed.">        if (resolveInlineEnums &amp;&amp; schema.getEnum() != null &amp;&amp; schema.getEnum().size() &gt; 0) {</span>
 <span class="nc" id="L211">            return true;</span>
         }
-<span class="pc bpc" id="L213" title="1 of 4 branches missed.">        if (schema.getType() == null || &quot;object&quot;.equals(schema.getType())) {</span>
+<span class="nc bnc" id="L213" title="All 4 branches missed.">        if (schema.getType() == null || &quot;object&quot;.equals(schema.getType())) {</span>
             // object or undeclared type with properties
-<span class="pc bpc" id="L215" title="3 of 4 branches missed.">            if (schema.getProperties() != null &amp;&amp; schema.getProperties().size() &gt; 0) {</span>
+<span class="nc bnc" id="L215" title="All 4 branches missed.">            if (schema.getProperties() != null &amp;&amp; schema.getProperties().size() &gt; 0) {</span>
 <span class="nc" id="L216">                return true;</span>
             }
         }
-<span class="pc bpc" id="L219" title="1 of 2 branches missed.">        if (ModelUtils.isComposedSchema(schema)) {</span>
+<span class="nc bnc" id="L219" title="All 2 branches missed.">        if (ModelUtils.isComposedSchema(schema)) {</span>
             // allOf, anyOf, oneOf
 <span class="nc bnc" id="L221" title="All 4 branches missed.">            boolean isSingleAllOf = schema.getAllOf() != null &amp;&amp; schema.getAllOf().size() == 1;</span>
 <span class="nc bnc" id="L222" title="All 4 branches missed.">            boolean isReadOnly = schema.getReadOnly() != null &amp;&amp; schema.getReadOnly();</span>
@@ -255,7 +255,7 @@ public class InlineModelResolver {
             }
         }
 
-<span class="fc" id="L258">        return false;</span>
+<span class="nc" id="L258">        return false;</span>
     }
 
     /**
@@ -266,39 +266,39 @@ public class InlineModelResolver {
      * @param modelPrefix model name (usually the prefix of the inline model name)
      */
     private void gatherInlineModels(Schema schema, String modelPrefix) {
-<span class="fc bfc" id="L269" title="All 2 branches covered.">        if (schema.get$ref() != null) {</span>
+<span class="nc bnc" id="L269" title="All 2 branches missed.">        if (schema.get$ref() != null) {</span>
             // if ref already, no inline schemas should be present but check for
             // any to catch OpenAPI violations
-<span class="pc bpc" id="L272" title="2 of 4 branches missed.">            if (isModelNeeded(schema) || &quot;object&quot;.equals(schema.getType()) ||</span>
-<span class="pc bpc" id="L273" title="2 of 4 branches missed.">                    schema.getProperties() != null || schema.getAdditionalProperties() != null ||</span>
-<span class="pc bpc" id="L274" title="1 of 2 branches missed.">                    ModelUtils.isComposedSchema(schema)) {</span>
+<span class="nc bnc" id="L272" title="All 4 branches missed.">            if (isModelNeeded(schema) || &quot;object&quot;.equals(schema.getType()) ||</span>
+<span class="nc bnc" id="L273" title="All 4 branches missed.">                    schema.getProperties() != null || schema.getAdditionalProperties() != null ||</span>
+<span class="nc bnc" id="L274" title="All 2 branches missed.">                    ModelUtils.isComposedSchema(schema)) {</span>
 <span class="nc" id="L275">                LOGGER.error(&quot;Illegal schema found with $ref combined with other properties,&quot; +</span>
 <span class="nc" id="L276">                        &quot; no properties should be defined alongside a $ref:\n &quot; + schema.toString());</span>
             }
-<span class="fc" id="L278">            return;</span>
+<span class="nc" id="L278">            return;</span>
         }
         // Check object models / any type models / composed models for properties,
         // if the schema has a type defined that is not &quot;object&quot; it should not define
         // any properties
-<span class="fc bfc" id="L283" title="All 4 branches covered.">        if (schema.getType() == null || &quot;object&quot;.equals(schema.getType())) {</span>
+<span class="nc bnc" id="L283" title="All 4 branches missed.">        if (schema.getType() == null || &quot;object&quot;.equals(schema.getType())) {</span>
             // Check properties and recurse, each property could be its own inline model
-<span class="fc" id="L285">            Map&lt;String, Schema&gt; props = schema.getProperties();</span>
-<span class="pc bpc" id="L286" title="1 of 2 branches missed.">            if (props != null) {</span>
-<span class="fc bfc" id="L287" title="All 2 branches covered.">                for (String propName : props.keySet()) {</span>
-<span class="fc" id="L288">                    Schema prop = props.get(propName);</span>
+<span class="nc" id="L285">            Map&lt;String, Schema&gt; props = schema.getProperties();</span>
+<span class="nc bnc" id="L286" title="All 2 branches missed.">            if (props != null) {</span>
+<span class="nc bnc" id="L287" title="All 2 branches missed.">                for (String propName : props.keySet()) {</span>
+<span class="nc" id="L288">                    Schema prop = props.get(propName);</span>
 
-<span class="pc bpc" id="L290" title="1 of 2 branches missed.">                    if (prop == null) {</span>
+<span class="nc bnc" id="L290" title="All 2 branches missed.">                    if (prop == null) {</span>
 <span class="nc" id="L291">                        continue;</span>
                     }
 
-<span class="fc" id="L294">                    String schemaName = resolveModelName(prop.getTitle(), modelPrefix + &quot;_&quot; + propName);</span>
+<span class="nc" id="L294">                    String schemaName = resolveModelName(prop.getTitle(), modelPrefix + &quot;_&quot; + propName);</span>
                     // Recurse to create $refs for inner models
-<span class="fc" id="L296">                    gatherInlineModels(prop, schemaName);</span>
-<span class="pc bpc" id="L297" title="1 of 2 branches missed.">                    if (isModelNeeded(prop)) {</span>
+<span class="nc" id="L296">                    gatherInlineModels(prop, schemaName);</span>
+<span class="nc bnc" id="L297" title="All 2 branches missed.">                    if (isModelNeeded(prop)) {</span>
                         // If this schema should be split into its own model, do so
 <span class="nc" id="L299">                        Schema refSchema = this.makeSchemaInComponents(schemaName, prop);</span>
 <span class="nc" id="L300">                        props.put(propName, refSchema);</span>
-<span class="pc bpc" id="L301" title="1 of 2 branches missed.">                    } else if (ModelUtils.isComposedSchema(prop)) {</span>
+<span class="nc bnc" id="L301" title="All 2 branches missed.">                    } else if (ModelUtils.isComposedSchema(prop)) {</span>
 <span class="nc bnc" id="L302" title="All 4 branches missed.">                        if (prop.getAllOf() != null &amp;&amp; prop.getAllOf().size() == 1 &amp;&amp;</span>
 <span class="nc bnc" id="L303" title="All 2 branches missed.">                                !(((Schema) prop.getAllOf().get(0)).getType() == null ||</span>
 <span class="nc bnc" id="L304" title="All 2 branches missed.">                                        &quot;object&quot;.equals(((Schema) prop.getAllOf().get(0)).getType()))) {</span>
@@ -307,10 +307,10 @@ public class InlineModelResolver {
 <span class="nc" id="L307">                            props.put(propName, (Schema) prop.getAllOf().get(0));</span>
                         }
                     }
-<span class="fc" id="L310">                }</span>
+<span class="nc" id="L310">                }</span>
             }
             // Check additionalProperties for inline models
-<span class="pc bpc" id="L313" title="1 of 2 branches missed.">            if (schema.getAdditionalProperties() != null) {</span>
+<span class="nc bnc" id="L313" title="All 2 branches missed.">            if (schema.getAdditionalProperties() != null) {</span>
 <span class="nc bnc" id="L314" title="All 2 branches missed.">                if (schema.getAdditionalProperties() instanceof Schema) {</span>
 <span class="nc" id="L315">                    Schema inner = (Schema) schema.getAdditionalProperties();</span>
 <span class="nc bnc" id="L316" title="All 2 branches missed.">                    if (inner != null) {</span>
@@ -325,12 +325,12 @@ public class InlineModelResolver {
                     }
                 }
             }
-<span class="pc bpc" id="L328" title="1 of 2 branches missed.">        } else if (schema.getProperties() != null) {</span>
+<span class="nc bnc" id="L328" title="All 2 branches missed.">        } else if (schema.getProperties() != null) {</span>
             // If non-object type is specified but also properties
 <span class="nc" id="L330">            LOGGER.error(&quot;Illegal schema found with non-object type combined with properties,&quot; +</span>
 <span class="nc" id="L331">                    &quot; no properties should be defined:\n &quot; + schema.toString());</span>
 <span class="nc" id="L332">            return;</span>
-<span class="pc bpc" id="L333" title="1 of 2 branches missed.">        } else if (schema.getAdditionalProperties() != null) {</span>
+<span class="nc bnc" id="L333" title="All 2 branches missed.">        } else if (schema.getAdditionalProperties() != null) {</span>
             // If non-object type is specified but also additionalProperties
 <span class="nc" id="L335">            LOGGER.error(&quot;Illegal schema found with non-object type combined with&quot; +</span>
                     &quot; additionalProperties, no additionalProperties should be defined:\n &quot; +
@@ -338,29 +338,29 @@ public class InlineModelResolver {
 <span class="nc" id="L338">            return;</span>
         }
         // Check array items
-<span class="fc bfc" id="L341" title="All 2 branches covered.">        if (ModelUtils.isArraySchema(schema)) {</span>
-<span class="fc" id="L342">            Schema items = ModelUtils.getSchemaItems(schema);</span>
-<span class="pc bpc" id="L343" title="3 of 4 branches missed.">            if (items == null &amp;&amp; schema.getPrefixItems() == null) {</span>
+<span class="nc bnc" id="L341" title="All 2 branches missed.">        if (ModelUtils.isArraySchema(schema)) {</span>
+<span class="nc" id="L342">            Schema items = ModelUtils.getSchemaItems(schema);</span>
+<span class="nc bnc" id="L343" title="All 4 branches missed.">            if (items == null &amp;&amp; schema.getPrefixItems() == null) {</span>
 <span class="nc" id="L344">                LOGGER.debug(&quot;Incorrect array schema with no items, prefixItems: {}&quot;, schema.toString());</span>
 <span class="nc" id="L345">                return;</span>
             }
 
-<span class="pc bpc" id="L348" title="1 of 2 branches missed.">            if (items == null) {</span>
+<span class="nc bnc" id="L348" title="All 2 branches missed.">            if (items == null) {</span>
 <span class="nc" id="L349">                LOGGER.debug(&quot;prefixItems in array schema is not supported at the moment: {}&quot;,  schema.toString());</span>
 <span class="nc" id="L350">                return;</span>
             }
-<span class="fc" id="L352">            String schemaName = resolveModelName(items.getTitle(), modelPrefix + this.inlineSchemaOptions.get(&quot;ARRAY_ITEM_SUFFIX&quot;));</span>
+<span class="nc" id="L352">            String schemaName = resolveModelName(items.getTitle(), modelPrefix + this.inlineSchemaOptions.get(&quot;ARRAY_ITEM_SUFFIX&quot;));</span>
 
             // Recurse to create $refs for inner models
-<span class="fc" id="L355">            gatherInlineModels(items, schemaName);</span>
+<span class="nc" id="L355">            gatherInlineModels(items, schemaName);</span>
 
-<span class="pc bpc" id="L357" title="1 of 2 branches missed.">            if (isModelNeeded(items)) {</span>
+<span class="nc bnc" id="L357" title="All 2 branches missed.">            if (isModelNeeded(items)) {</span>
                 // If this schema should be split into its own model, do so
 <span class="nc" id="L359">                schema.setItems(this.makeSchemaInComponents(schemaName, items));</span>
             }
         }
         // Check allOf, anyOf, oneOf for inline models
-<span class="pc bpc" id="L363" title="1 of 2 branches missed.">        if (ModelUtils.isComposedSchema(schema)) {</span>
+<span class="nc bnc" id="L363" title="All 2 branches missed.">        if (ModelUtils.isComposedSchema(schema)) {</span>
 <span class="nc bnc" id="L364" title="All 2 branches missed.">            if (schema.getAllOf() != null) {</span>
 <span class="nc" id="L365">                List&lt;Schema&gt; newAllOf = new ArrayList&lt;Schema&gt;();</span>
 <span class="nc" id="L366">                boolean atLeastOneModel = false;</span>
@@ -432,7 +432,7 @@ public class InlineModelResolver {
             }
         }
         // Check not schema
-<span class="pc bpc" id="L435" title="1 of 2 branches missed.">        if (schema.getNot() != null) {</span>
+<span class="nc bnc" id="L435" title="All 2 branches missed.">        if (schema.getNot() != null) {</span>
 <span class="nc" id="L436">            Schema not = schema.getNot();</span>
 <span class="nc bnc" id="L437" title="All 2 branches missed.">            if (not != null) {</span>
 <span class="nc" id="L438">                String schemaName = resolveModelName(schema.getTitle(), modelPrefix + &quot;_not&quot;);</span>
@@ -444,7 +444,7 @@ public class InlineModelResolver {
                 }
             }
         }
-<span class="fc" id="L447">    }</span>
+<span class="nc" id="L447">    }</span>
 
     /**
      * Flatten inline models in content
@@ -453,29 +453,29 @@ public class InlineModelResolver {
      * @param name    backup name if no title is found
      */
     private void flattenContent(Content content, String name) {
-<span class="pc bpc" id="L456" title="1 of 4 branches missed.">        if (content == null || content.isEmpty()) {</span>
-<span class="fc" id="L457">            return;</span>
+<span class="nc bnc" id="L456" title="All 4 branches missed.">        if (content == null || content.isEmpty()) {</span>
+<span class="nc" id="L457">            return;</span>
         }
 
-<span class="fc bfc" id="L460" title="All 2 branches covered.">        for (String contentType : content.keySet()) {</span>
-<span class="fc" id="L461">            MediaType mediaType = content.get(contentType);</span>
-<span class="pc bpc" id="L462" title="1 of 2 branches missed.">            if (mediaType == null) {</span>
+<span class="nc bnc" id="L460" title="All 2 branches missed.">        for (String contentType : content.keySet()) {</span>
+<span class="nc" id="L461">            MediaType mediaType = content.get(contentType);</span>
+<span class="nc bnc" id="L462" title="All 2 branches missed.">            if (mediaType == null) {</span>
 <span class="nc" id="L463">                continue;</span>
             }
-<span class="fc" id="L465">            Schema schema = mediaType.getSchema();</span>
-<span class="pc bpc" id="L466" title="1 of 2 branches missed.">            if (schema == null) {</span>
+<span class="nc" id="L465">            Schema schema = mediaType.getSchema();</span>
+<span class="nc bnc" id="L466" title="All 2 branches missed.">            if (schema == null) {</span>
 <span class="nc" id="L467">                continue;</span>
             }
-<span class="fc" id="L469">            String schemaName = resolveModelName(schema.getTitle(), name); // name example: testPost_request</span>
+<span class="nc" id="L469">            String schemaName = resolveModelName(schema.getTitle(), name); // name example: testPost_request</span>
             // Recursively gather/make inline models within this schema if any
-<span class="fc" id="L471">            gatherInlineModels(schema, schemaName);</span>
-<span class="pc bpc" id="L472" title="1 of 2 branches missed.">            if (isModelNeeded(schema)) {</span>
+<span class="nc" id="L471">            gatherInlineModels(schema, schemaName);</span>
+<span class="nc bnc" id="L472" title="All 2 branches missed.">            if (isModelNeeded(schema)) {</span>
                 // If this schema should be split into its own model, do so
                 //Schema refSchema = this.makeSchema(schemaName, schema);
 <span class="nc" id="L475">                mediaType.setSchema(this.makeSchemaInComponents(schemaName, schema));</span>
             }
-<span class="fc" id="L477">        }</span>
-<span class="fc" id="L478">    }</span>
+<span class="nc" id="L477">        }</span>
+<span class="nc" id="L478">    }</span>
 
     /**
      * Flatten inline models in RequestBody
@@ -484,13 +484,13 @@ public class InlineModelResolver {
      * @param operation target operation
      */
     private void flattenRequestBody(String modelName, Operation operation) {
-<span class="fc" id="L487">        RequestBody requestBody = operation.getRequestBody();</span>
-<span class="fc bfc" id="L488" title="All 2 branches covered.">        if (requestBody == null) {</span>
-<span class="fc" id="L489">            return;</span>
+<span class="nc" id="L487">        RequestBody requestBody = operation.getRequestBody();</span>
+<span class="nc bnc" id="L488" title="All 2 branches missed.">        if (requestBody == null) {</span>
+<span class="nc" id="L489">            return;</span>
         }
 
         // unalias $ref
-<span class="pc bpc" id="L493" title="1 of 2 branches missed.">        if (requestBody.get$ref() != null) {</span>
+<span class="nc bnc" id="L493" title="All 2 branches missed.">        if (requestBody.get$ref() != null) {</span>
 <span class="nc" id="L494">            String ref = ModelUtils.getSimpleRef(requestBody.get$ref());</span>
 <span class="nc" id="L495">            requestBody = openAPI.getComponents().getRequestBodies().get(ref);</span>
 
@@ -499,9 +499,9 @@ public class InlineModelResolver {
             }
         }
 
-<span class="fc" id="L502">        flattenContent(requestBody.getContent(),</span>
-<span class="pc bpc" id="L503" title="1 of 2 branches missed.">                (operation.getOperationId() == null ? modelName : operation.getOperationId()) + &quot;_request&quot;);</span>
-<span class="fc" id="L504">    }</span>
+<span class="nc" id="L502">        flattenContent(requestBody.getContent(),</span>
+<span class="nc bnc" id="L503" title="All 2 branches missed.">                (operation.getOperationId() == null ? modelName : operation.getOperationId()) + &quot;_request&quot;);</span>
+<span class="nc" id="L504">    }</span>
 
     /**
      * Flatten inline models in parameters
@@ -510,31 +510,31 @@ public class InlineModelResolver {
      * @param operation target operation
      */
     private void flattenParameters(String modelName, Operation operation) {
-<span class="fc" id="L513">        List&lt;Parameter&gt; parameters = operation.getParameters();</span>
-<span class="fc bfc" id="L514" title="All 2 branches covered.">        if (parameters == null) {</span>
-<span class="fc" id="L515">            return;</span>
+<span class="nc" id="L513">        List&lt;Parameter&gt; parameters = operation.getParameters();</span>
+<span class="nc bnc" id="L514" title="All 2 branches missed.">        if (parameters == null) {</span>
+<span class="nc" id="L515">            return;</span>
         }
 
-<span class="fc bfc" id="L518" title="All 2 branches covered.">        for (Parameter parameter : parameters) {</span>
-<span class="pc bpc" id="L519" title="1 of 2 branches missed.">            if (parameter.getSchema() == null) {</span>
+<span class="nc bnc" id="L518" title="All 2 branches missed.">        for (Parameter parameter : parameters) {</span>
+<span class="nc bnc" id="L519" title="All 2 branches missed.">            if (parameter.getSchema() == null) {</span>
 <span class="nc" id="L520">                continue;</span>
             }
 
-<span class="fc" id="L523">            Schema parameterSchema = parameter.getSchema();</span>
+<span class="nc" id="L523">            Schema parameterSchema = parameter.getSchema();</span>
 
-<span class="pc bpc" id="L525" title="1 of 2 branches missed.">            if (parameterSchema == null) {</span>
+<span class="nc bnc" id="L525" title="All 2 branches missed.">            if (parameterSchema == null) {</span>
 <span class="nc" id="L526">                continue;</span>
             }
-<span class="fc" id="L528">            String schemaName = resolveModelName(parameterSchema.getTitle(),</span>
-<span class="pc bpc" id="L529" title="1 of 2 branches missed.">                    (operation.getOperationId() == null ? modelName : operation.getOperationId()) + &quot;_&quot; + parameter.getName() + &quot;_parameter&quot;);</span>
+<span class="nc" id="L528">            String schemaName = resolveModelName(parameterSchema.getTitle(),</span>
+<span class="nc bnc" id="L529" title="All 2 branches missed.">                    (operation.getOperationId() == null ? modelName : operation.getOperationId()) + &quot;_&quot; + parameter.getName() + &quot;_parameter&quot;);</span>
             // Recursively gather/make inline models within this schema if any
-<span class="fc" id="L531">            gatherInlineModels(parameterSchema, schemaName);</span>
-<span class="pc bpc" id="L532" title="1 of 2 branches missed.">            if (isModelNeeded(parameterSchema)) {</span>
+<span class="nc" id="L531">            gatherInlineModels(parameterSchema, schemaName);</span>
+<span class="nc bnc" id="L532" title="All 2 branches missed.">            if (isModelNeeded(parameterSchema)) {</span>
                 // If this schema should be split into its own model, do so
 <span class="nc" id="L534">                parameter.setSchema(this.makeSchemaInComponents(schemaName, parameterSchema));</span>
             }
-<span class="fc" id="L536">        }</span>
-<span class="fc" id="L537">    }</span>
+<span class="nc" id="L536">        }</span>
+<span class="nc" id="L537">    }</span>
 
     /**
      * Flatten inline models in ApiResponses
@@ -543,19 +543,19 @@ public class InlineModelResolver {
      * @param operation target operation
      */
     private void flattenResponses(String modelName, Operation operation) {
-<span class="fc" id="L546">        ApiResponses responses = operation.getResponses();</span>
-<span class="pc bpc" id="L547" title="1 of 2 branches missed.">        if (responses == null) {</span>
+<span class="nc" id="L546">        ApiResponses responses = operation.getResponses();</span>
+<span class="nc bnc" id="L547" title="All 2 branches missed.">        if (responses == null) {</span>
 <span class="nc" id="L548">            return;</span>
         }
 
-<span class="fc bfc" id="L551" title="All 2 branches covered.">        for (Map.Entry&lt;String, ApiResponse&gt; responsesEntry : responses.entrySet()) {</span>
-<span class="fc" id="L552">            String key = responsesEntry.getKey();</span>
-<span class="fc" id="L553">            ApiResponse response = responsesEntry.getValue();</span>
+<span class="nc bnc" id="L551" title="All 2 branches missed.">        for (Map.Entry&lt;String, ApiResponse&gt; responsesEntry : responses.entrySet()) {</span>
+<span class="nc" id="L552">            String key = responsesEntry.getKey();</span>
+<span class="nc" id="L553">            ApiResponse response = responsesEntry.getValue();</span>
 
-<span class="fc" id="L555">            flattenContent(response.getContent(),</span>
-<span class="pc bpc" id="L556" title="1 of 2 branches missed.">                    (operation.getOperationId() == null ? modelName : operation.getOperationId()) + &quot;_&quot; + key + &quot;_response&quot;);</span>
-<span class="fc" id="L557">        }</span>
-<span class="fc" id="L558">    }</span>
+<span class="nc" id="L555">            flattenContent(response.getContent(),</span>
+<span class="nc bnc" id="L556" title="All 2 branches missed.">                    (operation.getOperationId() == null ? modelName : operation.getOperationId()) + &quot;_&quot; + key + &quot;_response&quot;);</span>
+<span class="nc" id="L557">        }</span>
+<span class="nc" id="L558">    }</span>
 
     /**
      * Flattens properties of inline object schemas that belong to a composed schema into a
@@ -632,31 +632,31 @@ public class InlineModelResolver {
      * Flatten inline models in components
      */
     private void flattenComponents() {
-<span class="fc" id="L635">        Map&lt;String, Schema&gt; models = openAPI.getComponents().getSchemas();</span>
-<span class="pc bpc" id="L636" title="1 of 2 branches missed.">        if (models == null) {</span>
+<span class="nc" id="L635">        Map&lt;String, Schema&gt; models = openAPI.getComponents().getSchemas();</span>
+<span class="nc bnc" id="L636" title="All 2 branches missed.">        if (models == null) {</span>
 <span class="nc" id="L637">            return;</span>
         }
 
-<span class="fc" id="L640">        List&lt;String&gt; modelNames = new ArrayList&lt;String&gt;(models.keySet());</span>
-<span class="fc bfc" id="L641" title="All 2 branches covered.">        for (String modelName : modelNames) {</span>
-<span class="fc" id="L642">            Schema model = models.get(modelName);</span>
-<span class="pc bpc" id="L643" title="1 of 2 branches missed.">            if (model == null) {</span>
+<span class="nc" id="L640">        List&lt;String&gt; modelNames = new ArrayList&lt;String&gt;(models.keySet());</span>
+<span class="nc bnc" id="L641" title="All 2 branches missed.">        for (String modelName : modelNames) {</span>
+<span class="nc" id="L642">            Schema model = models.get(modelName);</span>
+<span class="nc bnc" id="L643" title="All 2 branches missed.">            if (model == null) {</span>
 <span class="nc" id="L644">                continue;</span>
             }
-<span class="pc bpc" id="L646" title="1 of 2 branches missed.">            if (ModelUtils.isAnyOf(model)) { // contains anyOf only</span>
+<span class="nc bnc" id="L646" title="All 2 branches missed.">            if (ModelUtils.isAnyOf(model)) { // contains anyOf only</span>
 <span class="nc" id="L647">                gatherInlineModels(model, modelName);</span>
-<span class="pc bpc" id="L648" title="1 of 2 branches missed.">            } else if (ModelUtils.isOneOf(model)) { // contains oneOf only</span>
+<span class="nc bnc" id="L648" title="All 2 branches missed.">            } else if (ModelUtils.isOneOf(model)) { // contains oneOf only</span>
 <span class="nc" id="L649">                gatherInlineModels(model, modelName);</span>
-<span class="pc bpc" id="L650" title="1 of 2 branches missed.">            } else if (ModelUtils.isComposedSchema(model)) {</span>
+<span class="nc bnc" id="L650" title="All 2 branches missed.">            } else if (ModelUtils.isComposedSchema(model)) {</span>
                 // inline child schemas
 <span class="nc bnc" id="L652" title="All 2 branches missed.">                flattenComposedChildren(modelName + &quot;_allOf&quot;, model.getAllOf(), !Boolean.TRUE.equals(this.refactorAllOfInlineSchemas));</span>
 <span class="nc" id="L653">                flattenComposedChildren(modelName + &quot;_anyOf&quot;, model.getAnyOf(), false);</span>
 <span class="nc" id="L654">                flattenComposedChildren(modelName + &quot;_oneOf&quot;, model.getOneOf(), false);</span>
             } else {
-<span class="fc" id="L656">                gatherInlineModels(model, modelName);</span>
+<span class="nc" id="L656">                gatherInlineModels(model, modelName);</span>
             }
-<span class="fc" id="L658">        }</span>
-<span class="fc" id="L659">    }</span>
+<span class="nc" id="L658">        }</span>
+<span class="nc" id="L659">    }</span>
 
     /**
      * This function fix models that are string (mostly enum). Before this fix, the
@@ -692,11 +692,11 @@ public class InlineModelResolver {
      * @return if provided the sanitized {@code title}, else the sanitized {@code key}
      */
     private String resolveModelName(String title, String modelName) {
-<span class="pc bpc" id="L695" title="3 of 4 branches missed.">        if (title == null || &quot;&quot;.equals(sanitizeName(title).replace(&quot;_&quot;, &quot;&quot;))) {</span>
-<span class="pc bpc" id="L696" title="1 of 2 branches missed.">            if (modelName == null) {</span>
+<span class="nc bnc" id="L695" title="All 4 branches missed.">        if (title == null || &quot;&quot;.equals(sanitizeName(title).replace(&quot;_&quot;, &quot;&quot;))) {</span>
+<span class="nc bnc" id="L696" title="All 2 branches missed.">            if (modelName == null) {</span>
 <span class="nc" id="L697">                return uniqueName(&quot;inline_object&quot;);</span>
             }
-<span class="fc" id="L699">            return uniqueName(sanitizeName(modelName));</span>
+<span class="nc" id="L699">            return uniqueName(sanitizeName(modelName));</span>
         } else {
 <span class="nc" id="L701">            return uniqueName(sanitizeName(title));</span>
         }
@@ -736,9 +736,9 @@ public class InlineModelResolver {
      * @param name name to be processed to make sure it's sanitized
      */
     private String sanitizeName(final String name) {
-<span class="fc" id="L739">        return name</span>
-<span class="fc" id="L740">                .replaceAll(&quot;^[0-9]&quot;, &quot;_$0&quot;) // e.g. 12object =&gt; _12object</span>
-<span class="fc" id="L741">                .replaceAll(&quot;[^A-Za-z0-9]&quot;, &quot;_&quot;); // e.g. io.schema.User name =&gt; io_schema_User_name</span>
+<span class="nc" id="L739">        return name</span>
+<span class="nc" id="L740">                .replaceAll(&quot;^[0-9]&quot;, &quot;_$0&quot;) // e.g. 12object =&gt; _12object</span>
+<span class="nc" id="L741">                .replaceAll(&quot;[^A-Za-z0-9]&quot;, &quot;_&quot;); // e.g. io.schema.User name =&gt; io_schema_User_name</span>
     }
 
     /**
@@ -747,15 +747,15 @@ public class InlineModelResolver {
      * @param name name to be processed to make sure it's unique
      */
     private String uniqueName(final String name) {
-<span class="pc bpc" id="L750" title="1 of 2 branches missed.">        if (openAPI.getComponents().getSchemas() == null) { // no schema has been created</span>
+<span class="nc bnc" id="L750" title="All 2 branches missed.">        if (openAPI.getComponents().getSchemas() == null) { // no schema has been created</span>
 <span class="nc" id="L751">            return name;</span>
         }
 
-<span class="fc" id="L754">        String uniqueName = name;</span>
-<span class="fc" id="L755">        int count = 0;</span>
+<span class="nc" id="L754">        String uniqueName = name;</span>
+<span class="nc" id="L755">        int count = 0;</span>
         while (true) {
-<span class="pc bpc" id="L757" title="2 of 4 branches missed.">            if (!openAPI.getComponents().getSchemas().containsKey(uniqueName) &amp;&amp; !uniqueNames.contains(uniqueName)) {</span>
-<span class="fc" id="L758">                return uniqueName;</span>
+<span class="nc bnc" id="L757" title="All 4 branches missed.">            if (!openAPI.getComponents().getSchemas().containsKey(uniqueName) &amp;&amp; !uniqueNames.contains(uniqueName)) {</span>
+<span class="nc" id="L758">                return uniqueName;</span>
             }
 <span class="nc" id="L760">            uniqueName = name + &quot;_&quot; + ++count;</span>
         }

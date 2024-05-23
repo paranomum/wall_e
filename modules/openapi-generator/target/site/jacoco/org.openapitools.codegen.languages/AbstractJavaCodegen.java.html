@@ -67,7 +67,7 @@ import static org.openapitools.codegen.utils.StringUtils.*;
 public abstract class AbstractJavaCodegen extends DefaultCodegen implements CodegenConfig,
         DocumentationProviderFeatures {
 
-<span class="fc" id="L70">    private final Logger LOGGER = LoggerFactory.getLogger(AbstractJavaCodegen.class);</span>
+<span class="nc" id="L70">    private final Logger LOGGER = LoggerFactory.getLogger(AbstractJavaCodegen.class);</span>
     private static final String ARTIFACT_VERSION_DEFAULT_VALUE = &quot;1.0.0&quot;;
 
     public static final String DEFAULT_LIBRARY = &quot;&lt;default&gt;&quot;;
@@ -96,94 +96,94 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
     public static final String DEFAULT_TEST_FOLDER = &quot;${project.build.directory}/generated-test-sources/openapi&quot;;
     public static final String GENERATE_CONSTRUCTOR_WITH_ALL_ARGS = &quot;generateConstructorWithAllArgs&quot;;
 
-<span class="fc" id="L99">    protected String dateLibrary = &quot;java8&quot;;</span>
-<span class="fc" id="L100">    protected boolean supportAsync = false;</span>
-<span class="fc" id="L101">    protected boolean withXml = false;</span>
-<span class="fc" id="L102">    protected String invokerPackage = &quot;org.openapitools&quot;;</span>
-<span class="fc" id="L103">    protected String groupId = &quot;org.openapitools&quot;;</span>
-<span class="fc" id="L104">    protected String artifactId = &quot;openapi-java&quot;;</span>
-<span class="fc" id="L105">    protected String artifactVersion = null;</span>
-<span class="fc" id="L106">    protected String artifactUrl = &quot;https://github.com/openapitools/openapi-generator&quot;;</span>
-<span class="fc" id="L107">    protected String artifactDescription = &quot;OpenAPI Java&quot;;</span>
-<span class="fc" id="L108">    protected String developerName = &quot;OpenAPI-Generator Contributors&quot;;</span>
-<span class="fc" id="L109">    protected String developerEmail = &quot;team@openapitools.org&quot;;</span>
-<span class="fc" id="L110">    protected String developerOrganization = &quot;OpenAPITools.org&quot;;</span>
-<span class="fc" id="L111">    protected String developerOrganizationUrl = &quot;http://openapitools.org&quot;;</span>
-<span class="fc" id="L112">    protected String scmConnection = &quot;scm:git:git@github.com:openapitools/openapi-generator.git&quot;;</span>
-<span class="fc" id="L113">    protected String scmDeveloperConnection = &quot;scm:git:git@github.com:openapitools/openapi-generator.git&quot;;</span>
-<span class="fc" id="L114">    protected String scmUrl = &quot;https://github.com/openapitools/openapi-generator&quot;;</span>
-<span class="fc" id="L115">    protected String licenseName = &quot;Unlicense&quot;;</span>
-<span class="fc" id="L116">    protected String licenseUrl = &quot;http://unlicense.org&quot;;</span>
-<span class="fc" id="L117">    protected String projectFolder = &quot;src/main&quot;;</span>
-<span class="fc" id="L118">    protected String projectTestFolder = &quot;src/test&quot;;</span>
+<span class="nc" id="L99">    protected String dateLibrary = &quot;java8&quot;;</span>
+<span class="nc" id="L100">    protected boolean supportAsync = false;</span>
+<span class="nc" id="L101">    protected boolean withXml = false;</span>
+<span class="nc" id="L102">    protected String invokerPackage = &quot;org.openapitools&quot;;</span>
+<span class="nc" id="L103">    protected String groupId = &quot;org.openapitools&quot;;</span>
+<span class="nc" id="L104">    protected String artifactId = &quot;openapi-java&quot;;</span>
+<span class="nc" id="L105">    protected String artifactVersion = null;</span>
+<span class="nc" id="L106">    protected String artifactUrl = &quot;https://github.com/openapitools/openapi-generator&quot;;</span>
+<span class="nc" id="L107">    protected String artifactDescription = &quot;OpenAPI Java&quot;;</span>
+<span class="nc" id="L108">    protected String developerName = &quot;OpenAPI-Generator Contributors&quot;;</span>
+<span class="nc" id="L109">    protected String developerEmail = &quot;team@openapitools.org&quot;;</span>
+<span class="nc" id="L110">    protected String developerOrganization = &quot;OpenAPITools.org&quot;;</span>
+<span class="nc" id="L111">    protected String developerOrganizationUrl = &quot;http://openapitools.org&quot;;</span>
+<span class="nc" id="L112">    protected String scmConnection = &quot;scm:git:git@github.com:openapitools/openapi-generator.git&quot;;</span>
+<span class="nc" id="L113">    protected String scmDeveloperConnection = &quot;scm:git:git@github.com:openapitools/openapi-generator.git&quot;;</span>
+<span class="nc" id="L114">    protected String scmUrl = &quot;https://github.com/openapitools/openapi-generator&quot;;</span>
+<span class="nc" id="L115">    protected String licenseName = &quot;Unlicense&quot;;</span>
+<span class="nc" id="L116">    protected String licenseUrl = &quot;http://unlicense.org&quot;;</span>
+<span class="nc" id="L117">    protected String projectFolder = &quot;src/main&quot;;</span>
+<span class="nc" id="L118">    protected String projectTestFolder = &quot;src/test&quot;;</span>
     // this must not be OS-specific
-<span class="fc" id="L120">    protected String sourceFolder = projectFolder + &quot;/java&quot;;</span>
-<span class="fc" id="L121">    protected String testFolder = projectTestFolder + &quot;/java&quot;;</span>
-<span class="fc" id="L122">    protected boolean discriminatorCaseSensitive = true; // True if the discriminator value lookup should be case-sensitive.</span>
-<span class="fc" id="L123">    protected Boolean serializableModel = false;</span>
-<span class="fc" id="L124">    protected boolean serializeBigDecimalAsString = false;</span>
-<span class="fc" id="L125">    protected String apiDocPath = &quot;docs/&quot;;</span>
-<span class="fc" id="L126">    protected String modelDocPath = &quot;docs/&quot;;</span>
-<span class="fc" id="L127">    protected boolean disableHtmlEscaping = false;</span>
-<span class="fc" id="L128">    protected String booleanGetterPrefix = &quot;get&quot;;</span>
-<span class="fc" id="L129">    protected boolean ignoreAnyOfInEnum = false;</span>
-<span class="fc" id="L130">    protected String parentGroupId = &quot;&quot;;</span>
-<span class="fc" id="L131">    protected String parentArtifactId = &quot;&quot;;</span>
-<span class="fc" id="L132">    protected String parentVersion = &quot;&quot;;</span>
-<span class="fc" id="L133">    protected boolean parentOverridden = false;</span>
-<span class="fc" id="L134">    protected List&lt;String&gt; additionalModelTypeAnnotations = new LinkedList&lt;&gt;();</span>
-<span class="fc" id="L135">    protected Map&lt;String, Boolean&gt; lombokAnnotations = null;</span>
-<span class="fc" id="L136">    protected List&lt;String&gt; additionalOneOfTypeAnnotations = new LinkedList&lt;&gt;();</span>
-<span class="fc" id="L137">    protected List&lt;String&gt; additionalEnumTypeAnnotations = new LinkedList&lt;&gt;();</span>
-<span class="fc" id="L138">    protected boolean openApiNullable = true;</span>
-<span class="fc" id="L139">    protected String outputTestFolder = &quot;&quot;;</span>
+<span class="nc" id="L120">    protected String sourceFolder = projectFolder + &quot;/java&quot;;</span>
+<span class="nc" id="L121">    protected String testFolder = projectTestFolder + &quot;/java&quot;;</span>
+<span class="nc" id="L122">    protected boolean discriminatorCaseSensitive = true; // True if the discriminator value lookup should be case-sensitive.</span>
+<span class="nc" id="L123">    protected Boolean serializableModel = false;</span>
+<span class="nc" id="L124">    protected boolean serializeBigDecimalAsString = false;</span>
+<span class="nc" id="L125">    protected String apiDocPath = &quot;docs/&quot;;</span>
+<span class="nc" id="L126">    protected String modelDocPath = &quot;docs/&quot;;</span>
+<span class="nc" id="L127">    protected boolean disableHtmlEscaping = false;</span>
+<span class="nc" id="L128">    protected String booleanGetterPrefix = &quot;get&quot;;</span>
+<span class="nc" id="L129">    protected boolean ignoreAnyOfInEnum = false;</span>
+<span class="nc" id="L130">    protected String parentGroupId = &quot;&quot;;</span>
+<span class="nc" id="L131">    protected String parentArtifactId = &quot;&quot;;</span>
+<span class="nc" id="L132">    protected String parentVersion = &quot;&quot;;</span>
+<span class="nc" id="L133">    protected boolean parentOverridden = false;</span>
+<span class="nc" id="L134">    protected List&lt;String&gt; additionalModelTypeAnnotations = new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L135">    protected Map&lt;String, Boolean&gt; lombokAnnotations = null;</span>
+<span class="nc" id="L136">    protected List&lt;String&gt; additionalOneOfTypeAnnotations = new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L137">    protected List&lt;String&gt; additionalEnumTypeAnnotations = new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L138">    protected boolean openApiNullable = true;</span>
+<span class="nc" id="L139">    protected String outputTestFolder = &quot;&quot;;</span>
     protected DocumentationProvider documentationProvider;
     protected AnnotationLibrary annotationLibrary;
-<span class="fc" id="L142">    protected boolean implicitHeaders = false;</span>
-<span class="fc" id="L143">    protected String implicitHeadersRegex = null;</span>
-<span class="fc" id="L144">    protected boolean camelCaseDollarSign = false;</span>
-<span class="fc" id="L145">    protected boolean useJakartaEe = false;</span>
-<span class="fc" id="L146">    protected boolean containerDefaultToNull = false;</span>
-<span class="fc" id="L147">    protected boolean generateConstructorWithAllArgs = false;</span>
-<span class="fc" id="L148">    private Map&lt;String, String&gt; schemaKeyToModelNameCache = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L142">    protected boolean implicitHeaders = false;</span>
+<span class="nc" id="L143">    protected String implicitHeadersRegex = null;</span>
+<span class="nc" id="L144">    protected boolean camelCaseDollarSign = false;</span>
+<span class="nc" id="L145">    protected boolean useJakartaEe = false;</span>
+<span class="nc" id="L146">    protected boolean containerDefaultToNull = false;</span>
+<span class="nc" id="L147">    protected boolean generateConstructorWithAllArgs = false;</span>
+<span class="nc" id="L148">    private Map&lt;String, String&gt; schemaKeyToModelNameCache = new HashMap&lt;&gt;();</span>
 
     public AbstractJavaCodegen() {
-<span class="fc" id="L151">        super();</span>
+<span class="nc" id="L151">        super();</span>
 
-<span class="fc" id="L153">        modifyFeatureSet(features -&gt; features</span>
-<span class="fc" id="L154">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
-<span class="fc" id="L155">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON, WireFormatFeature.XML))</span>
-<span class="fc" id="L156">                .securityFeatures(EnumSet.of(</span>
+<span class="nc" id="L153">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L154">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="nc" id="L155">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON, WireFormatFeature.XML))</span>
+<span class="nc" id="L156">                .securityFeatures(EnumSet.of(</span>
                         SecurityFeature.ApiKey,
                         SecurityFeature.BasicAuth,
                         SecurityFeature.BearerToken,
                         SecurityFeature.OAuth2_Implicit
                 ))
-<span class="fc" id="L162">                .excludeGlobalFeatures(</span>
+<span class="nc" id="L162">                .excludeGlobalFeatures(</span>
                         GlobalFeature.XMLStructureDefinitions,
                         GlobalFeature.Callbacks,
                         GlobalFeature.LinkObjects,
                         GlobalFeature.ParameterStyling
                 )
-<span class="fc" id="L168">                .excludeSchemaSupportFeatures(</span>
+<span class="nc" id="L168">                .excludeSchemaSupportFeatures(</span>
                         SchemaSupportFeature.Polymorphism
                 )
-<span class="fc" id="L171">                .includeClientModificationFeatures(</span>
+<span class="nc" id="L171">                .includeClientModificationFeatures(</span>
                         ClientModificationFeature.BasePath
                 )
         );
 
-<span class="fc" id="L176">        supportsInheritance = true;</span>
-<span class="fc" id="L177">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.java&quot;);</span>
-<span class="fc" id="L178">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.java&quot;);</span>
-<span class="fc" id="L179">        apiTestTemplateFiles.put(&quot;api_test.mustache&quot;, &quot;.java&quot;);</span>
-<span class="fc" id="L180">        modelDocTemplateFiles.put(&quot;model_doc.mustache&quot;, &quot;.md&quot;);</span>
-<span class="fc" id="L181">        apiDocTemplateFiles.put(&quot;api_doc.mustache&quot;, &quot;.md&quot;);</span>
+<span class="nc" id="L176">        supportsInheritance = true;</span>
+<span class="nc" id="L177">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.java&quot;);</span>
+<span class="nc" id="L178">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.java&quot;);</span>
+<span class="nc" id="L179">        apiTestTemplateFiles.put(&quot;api_test.mustache&quot;, &quot;.java&quot;);</span>
+<span class="nc" id="L180">        modelDocTemplateFiles.put(&quot;model_doc.mustache&quot;, &quot;.md&quot;);</span>
+<span class="nc" id="L181">        apiDocTemplateFiles.put(&quot;api_doc.mustache&quot;, &quot;.md&quot;);</span>
 
-<span class="fc" id="L183">        hideGenerationTimestamp = false;</span>
+<span class="nc" id="L183">        hideGenerationTimestamp = false;</span>
 
-<span class="fc" id="L185">        setReservedWordsLowerCase(</span>
-<span class="fc" id="L186">                Arrays.asList(</span>
+<span class="nc" id="L185">        setReservedWordsLowerCase(</span>
+<span class="nc" id="L186">                Arrays.asList(</span>
                         // special words
                         &quot;object&quot;, &quot;list&quot;, &quot;file&quot;,
                         // used as internal variables, can collide with parameter names
@@ -203,7 +203,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
                         &quot;native&quot;, &quot;super&quot;, &quot;while&quot;, &quot;null&quot;, &quot;offsetdatetime&quot;, &quot;localdate&quot;, &quot;localtime&quot;)
         );
 
-<span class="fc" id="L206">        languageSpecificPrimitives = Sets.newHashSet(&quot;String&quot;,</span>
+<span class="nc" id="L206">        languageSpecificPrimitives = Sets.newHashSet(&quot;String&quot;,</span>
                 &quot;boolean&quot;,
                 &quot;Boolean&quot;,
                 &quot;Double&quot;,
@@ -213,106 +213,106 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
                 &quot;Object&quot;,
                 &quot;byte[]&quot;
         );
-<span class="fc" id="L216">        instantiationTypes.put(&quot;array&quot;, &quot;ArrayList&quot;);</span>
-<span class="fc" id="L217">        instantiationTypes.put(&quot;set&quot;, &quot;LinkedHashSet&quot;);</span>
-<span class="fc" id="L218">        instantiationTypes.put(&quot;map&quot;, &quot;HashMap&quot;);</span>
-<span class="fc" id="L219">        typeMapping.put(&quot;date&quot;, &quot;Date&quot;);</span>
-<span class="fc" id="L220">        typeMapping.put(&quot;file&quot;, &quot;File&quot;);</span>
-<span class="fc" id="L221">        typeMapping.put(&quot;AnyType&quot;, &quot;Object&quot;);</span>
+<span class="nc" id="L216">        instantiationTypes.put(&quot;array&quot;, &quot;ArrayList&quot;);</span>
+<span class="nc" id="L217">        instantiationTypes.put(&quot;set&quot;, &quot;LinkedHashSet&quot;);</span>
+<span class="nc" id="L218">        instantiationTypes.put(&quot;map&quot;, &quot;HashMap&quot;);</span>
+<span class="nc" id="L219">        typeMapping.put(&quot;date&quot;, &quot;Date&quot;);</span>
+<span class="nc" id="L220">        typeMapping.put(&quot;file&quot;, &quot;File&quot;);</span>
+<span class="nc" id="L221">        typeMapping.put(&quot;AnyType&quot;, &quot;Object&quot;);</span>
 
-<span class="fc" id="L223">        importMapping.put(&quot;BigDecimal&quot;, &quot;java.math.BigDecimal&quot;);</span>
-<span class="fc" id="L224">        importMapping.put(&quot;UUID&quot;, &quot;java.util.UUID&quot;);</span>
-<span class="fc" id="L225">        importMapping.put(&quot;URI&quot;, &quot;java.net.URI&quot;);</span>
-<span class="fc" id="L226">        importMapping.put(&quot;File&quot;, &quot;java.io.File&quot;);</span>
-<span class="fc" id="L227">        importMapping.put(&quot;Date&quot;, &quot;java.util.Date&quot;);</span>
-<span class="fc" id="L228">        importMapping.put(&quot;Timestamp&quot;, &quot;java.sql.Timestamp&quot;);</span>
-<span class="fc" id="L229">        importMapping.put(&quot;Map&quot;, &quot;java.util.Map&quot;);</span>
-<span class="fc" id="L230">        importMapping.put(&quot;HashMap&quot;, &quot;java.util.HashMap&quot;);</span>
-<span class="fc" id="L231">        importMapping.put(&quot;Array&quot;, &quot;java.util.List&quot;);</span>
-<span class="fc" id="L232">        importMapping.put(&quot;ArrayList&quot;, &quot;java.util.ArrayList&quot;);</span>
-<span class="fc" id="L233">        importMapping.put(&quot;List&quot;, &quot;java.util.*&quot;);</span>
-<span class="fc" id="L234">        importMapping.put(&quot;Set&quot;, &quot;java.util.*&quot;);</span>
-<span class="fc" id="L235">        importMapping.put(&quot;LinkedHashSet&quot;, &quot;java.util.LinkedHashSet&quot;);</span>
-<span class="fc" id="L236">        importMapping.put(&quot;DateTime&quot;, &quot;org.joda.time.*&quot;);</span>
-<span class="fc" id="L237">        importMapping.put(&quot;LocalDateTime&quot;, &quot;org.joda.time.*&quot;);</span>
-<span class="fc" id="L238">        importMapping.put(&quot;LocalDate&quot;, &quot;org.joda.time.*&quot;);</span>
-<span class="fc" id="L239">        importMapping.put(&quot;LocalTime&quot;, &quot;org.joda.time.*&quot;);</span>
+<span class="nc" id="L223">        importMapping.put(&quot;BigDecimal&quot;, &quot;java.math.BigDecimal&quot;);</span>
+<span class="nc" id="L224">        importMapping.put(&quot;UUID&quot;, &quot;java.util.UUID&quot;);</span>
+<span class="nc" id="L225">        importMapping.put(&quot;URI&quot;, &quot;java.net.URI&quot;);</span>
+<span class="nc" id="L226">        importMapping.put(&quot;File&quot;, &quot;java.io.File&quot;);</span>
+<span class="nc" id="L227">        importMapping.put(&quot;Date&quot;, &quot;java.util.Date&quot;);</span>
+<span class="nc" id="L228">        importMapping.put(&quot;Timestamp&quot;, &quot;java.sql.Timestamp&quot;);</span>
+<span class="nc" id="L229">        importMapping.put(&quot;Map&quot;, &quot;java.util.Map&quot;);</span>
+<span class="nc" id="L230">        importMapping.put(&quot;HashMap&quot;, &quot;java.util.HashMap&quot;);</span>
+<span class="nc" id="L231">        importMapping.put(&quot;Array&quot;, &quot;java.util.List&quot;);</span>
+<span class="nc" id="L232">        importMapping.put(&quot;ArrayList&quot;, &quot;java.util.ArrayList&quot;);</span>
+<span class="nc" id="L233">        importMapping.put(&quot;List&quot;, &quot;java.util.*&quot;);</span>
+<span class="nc" id="L234">        importMapping.put(&quot;Set&quot;, &quot;java.util.*&quot;);</span>
+<span class="nc" id="L235">        importMapping.put(&quot;LinkedHashSet&quot;, &quot;java.util.LinkedHashSet&quot;);</span>
+<span class="nc" id="L236">        importMapping.put(&quot;DateTime&quot;, &quot;org.joda.time.*&quot;);</span>
+<span class="nc" id="L237">        importMapping.put(&quot;LocalDateTime&quot;, &quot;org.joda.time.*&quot;);</span>
+<span class="nc" id="L238">        importMapping.put(&quot;LocalDate&quot;, &quot;org.joda.time.*&quot;);</span>
+<span class="nc" id="L239">        importMapping.put(&quot;LocalTime&quot;, &quot;org.joda.time.*&quot;);</span>
 
-<span class="fc" id="L241">        cliOptions.add(new CliOption(CodegenConstants.MODEL_PACKAGE, CodegenConstants.MODEL_PACKAGE_DESC));</span>
-<span class="fc" id="L242">        cliOptions.add(new CliOption(CodegenConstants.API_PACKAGE, CodegenConstants.API_PACKAGE_DESC));</span>
-<span class="fc" id="L243">        cliOptions.add(new CliOption(CodegenConstants.INVOKER_PACKAGE, CodegenConstants.INVOKER_PACKAGE_DESC).defaultValue(this.getInvokerPackage()));</span>
-<span class="fc" id="L244">        cliOptions.add(new CliOption(CodegenConstants.GROUP_ID, CodegenConstants.GROUP_ID_DESC).defaultValue(this.getGroupId()));</span>
-<span class="fc" id="L245">        cliOptions.add(new CliOption(CodegenConstants.ARTIFACT_ID, CodegenConstants.ARTIFACT_ID_DESC).defaultValue(this.getArtifactId()));</span>
-<span class="fc" id="L246">        cliOptions.add(new CliOption(CodegenConstants.ARTIFACT_VERSION, CodegenConstants.ARTIFACT_VERSION_DESC).defaultValue(ARTIFACT_VERSION_DEFAULT_VALUE));</span>
-<span class="fc" id="L247">        cliOptions.add(new CliOption(CodegenConstants.ARTIFACT_URL, CodegenConstants.ARTIFACT_URL_DESC).defaultValue(this.getArtifactUrl()));</span>
-<span class="fc" id="L248">        cliOptions.add(new CliOption(CodegenConstants.ARTIFACT_DESCRIPTION, CodegenConstants.ARTIFACT_DESCRIPTION_DESC).defaultValue(this.getArtifactDescription()));</span>
-<span class="fc" id="L249">        cliOptions.add(new CliOption(CodegenConstants.SCM_CONNECTION, CodegenConstants.SCM_CONNECTION_DESC).defaultValue(this.getScmConnection()));</span>
-<span class="fc" id="L250">        cliOptions.add(new CliOption(CodegenConstants.SCM_DEVELOPER_CONNECTION, CodegenConstants.SCM_DEVELOPER_CONNECTION_DESC).defaultValue(this.getScmDeveloperConnection()));</span>
-<span class="fc" id="L251">        cliOptions.add(new CliOption(CodegenConstants.SCM_URL, CodegenConstants.SCM_URL_DESC).defaultValue(this.getScmUrl()));</span>
-<span class="fc" id="L252">        cliOptions.add(new CliOption(CodegenConstants.DEVELOPER_NAME, CodegenConstants.DEVELOPER_NAME_DESC).defaultValue(this.getDeveloperName()));</span>
-<span class="fc" id="L253">        cliOptions.add(new CliOption(CodegenConstants.DEVELOPER_EMAIL, CodegenConstants.DEVELOPER_EMAIL_DESC).defaultValue(this.getDeveloperEmail()));</span>
-<span class="fc" id="L254">        cliOptions.add(new CliOption(CodegenConstants.DEVELOPER_ORGANIZATION, CodegenConstants.DEVELOPER_ORGANIZATION_DESC).defaultValue(this.getDeveloperOrganization()));</span>
-<span class="fc" id="L255">        cliOptions.add(new CliOption(CodegenConstants.DEVELOPER_ORGANIZATION_URL, CodegenConstants.DEVELOPER_ORGANIZATION_URL_DESC).defaultValue(this.getDeveloperOrganizationUrl()));</span>
-<span class="fc" id="L256">        cliOptions.add(new CliOption(CodegenConstants.LICENSE_NAME, CodegenConstants.LICENSE_NAME_DESC).defaultValue(this.getLicenseName()));</span>
-<span class="fc" id="L257">        cliOptions.add(new CliOption(CodegenConstants.LICENSE_URL, CodegenConstants.LICENSE_URL_DESC).defaultValue(this.getLicenseUrl()));</span>
-<span class="fc" id="L258">        cliOptions.add(new CliOption(CodegenConstants.SOURCE_FOLDER, CodegenConstants.SOURCE_FOLDER_DESC).defaultValue(this.getSourceFolder()));</span>
-<span class="fc" id="L259">        cliOptions.add(CliOption.newBoolean(CodegenConstants.SERIALIZABLE_MODEL, CodegenConstants.SERIALIZABLE_MODEL_DESC, this.getSerializableModel()));</span>
-<span class="fc" id="L260">        cliOptions.add(CliOption.newBoolean(CodegenConstants.SERIALIZE_BIG_DECIMAL_AS_STRING, CodegenConstants.SERIALIZE_BIG_DECIMAL_AS_STRING_DESC, serializeBigDecimalAsString));</span>
-<span class="fc" id="L261">        cliOptions.add(CliOption.newBoolean(DISCRIMINATOR_CASE_SENSITIVE, &quot;Whether the discriminator value lookup should be case-sensitive or not. This option only works for Java API client&quot;, discriminatorCaseSensitive));</span>
-<span class="fc" id="L262">        cliOptions.add(CliOption.newBoolean(CodegenConstants.HIDE_GENERATION_TIMESTAMP, CodegenConstants.HIDE_GENERATION_TIMESTAMP_DESC, this.isHideGenerationTimestamp()));</span>
-<span class="fc" id="L263">        cliOptions.add(CliOption.newBoolean(WITH_XML, &quot;whether to include support for application/xml content type and include XML annotations in the model (works with libraries that provide support for JSON and XML)&quot;));</span>
-<span class="fc" id="L264">        cliOptions.add(CliOption.newBoolean(USE_ONE_OF_INTERFACES, &quot;whether to use a java interface to describe a set of oneOf options, where each option is a class that implements the interface&quot;));</span>
+<span class="nc" id="L241">        cliOptions.add(new CliOption(CodegenConstants.MODEL_PACKAGE, CodegenConstants.MODEL_PACKAGE_DESC));</span>
+<span class="nc" id="L242">        cliOptions.add(new CliOption(CodegenConstants.API_PACKAGE, CodegenConstants.API_PACKAGE_DESC));</span>
+<span class="nc" id="L243">        cliOptions.add(new CliOption(CodegenConstants.INVOKER_PACKAGE, CodegenConstants.INVOKER_PACKAGE_DESC).defaultValue(this.getInvokerPackage()));</span>
+<span class="nc" id="L244">        cliOptions.add(new CliOption(CodegenConstants.GROUP_ID, CodegenConstants.GROUP_ID_DESC).defaultValue(this.getGroupId()));</span>
+<span class="nc" id="L245">        cliOptions.add(new CliOption(CodegenConstants.ARTIFACT_ID, CodegenConstants.ARTIFACT_ID_DESC).defaultValue(this.getArtifactId()));</span>
+<span class="nc" id="L246">        cliOptions.add(new CliOption(CodegenConstants.ARTIFACT_VERSION, CodegenConstants.ARTIFACT_VERSION_DESC).defaultValue(ARTIFACT_VERSION_DEFAULT_VALUE));</span>
+<span class="nc" id="L247">        cliOptions.add(new CliOption(CodegenConstants.ARTIFACT_URL, CodegenConstants.ARTIFACT_URL_DESC).defaultValue(this.getArtifactUrl()));</span>
+<span class="nc" id="L248">        cliOptions.add(new CliOption(CodegenConstants.ARTIFACT_DESCRIPTION, CodegenConstants.ARTIFACT_DESCRIPTION_DESC).defaultValue(this.getArtifactDescription()));</span>
+<span class="nc" id="L249">        cliOptions.add(new CliOption(CodegenConstants.SCM_CONNECTION, CodegenConstants.SCM_CONNECTION_DESC).defaultValue(this.getScmConnection()));</span>
+<span class="nc" id="L250">        cliOptions.add(new CliOption(CodegenConstants.SCM_DEVELOPER_CONNECTION, CodegenConstants.SCM_DEVELOPER_CONNECTION_DESC).defaultValue(this.getScmDeveloperConnection()));</span>
+<span class="nc" id="L251">        cliOptions.add(new CliOption(CodegenConstants.SCM_URL, CodegenConstants.SCM_URL_DESC).defaultValue(this.getScmUrl()));</span>
+<span class="nc" id="L252">        cliOptions.add(new CliOption(CodegenConstants.DEVELOPER_NAME, CodegenConstants.DEVELOPER_NAME_DESC).defaultValue(this.getDeveloperName()));</span>
+<span class="nc" id="L253">        cliOptions.add(new CliOption(CodegenConstants.DEVELOPER_EMAIL, CodegenConstants.DEVELOPER_EMAIL_DESC).defaultValue(this.getDeveloperEmail()));</span>
+<span class="nc" id="L254">        cliOptions.add(new CliOption(CodegenConstants.DEVELOPER_ORGANIZATION, CodegenConstants.DEVELOPER_ORGANIZATION_DESC).defaultValue(this.getDeveloperOrganization()));</span>
+<span class="nc" id="L255">        cliOptions.add(new CliOption(CodegenConstants.DEVELOPER_ORGANIZATION_URL, CodegenConstants.DEVELOPER_ORGANIZATION_URL_DESC).defaultValue(this.getDeveloperOrganizationUrl()));</span>
+<span class="nc" id="L256">        cliOptions.add(new CliOption(CodegenConstants.LICENSE_NAME, CodegenConstants.LICENSE_NAME_DESC).defaultValue(this.getLicenseName()));</span>
+<span class="nc" id="L257">        cliOptions.add(new CliOption(CodegenConstants.LICENSE_URL, CodegenConstants.LICENSE_URL_DESC).defaultValue(this.getLicenseUrl()));</span>
+<span class="nc" id="L258">        cliOptions.add(new CliOption(CodegenConstants.SOURCE_FOLDER, CodegenConstants.SOURCE_FOLDER_DESC).defaultValue(this.getSourceFolder()));</span>
+<span class="nc" id="L259">        cliOptions.add(CliOption.newBoolean(CodegenConstants.SERIALIZABLE_MODEL, CodegenConstants.SERIALIZABLE_MODEL_DESC, this.getSerializableModel()));</span>
+<span class="nc" id="L260">        cliOptions.add(CliOption.newBoolean(CodegenConstants.SERIALIZE_BIG_DECIMAL_AS_STRING, CodegenConstants.SERIALIZE_BIG_DECIMAL_AS_STRING_DESC, serializeBigDecimalAsString));</span>
+<span class="nc" id="L261">        cliOptions.add(CliOption.newBoolean(DISCRIMINATOR_CASE_SENSITIVE, &quot;Whether the discriminator value lookup should be case-sensitive or not. This option only works for Java API client&quot;, discriminatorCaseSensitive));</span>
+<span class="nc" id="L262">        cliOptions.add(CliOption.newBoolean(CodegenConstants.HIDE_GENERATION_TIMESTAMP, CodegenConstants.HIDE_GENERATION_TIMESTAMP_DESC, this.isHideGenerationTimestamp()));</span>
+<span class="nc" id="L263">        cliOptions.add(CliOption.newBoolean(WITH_XML, &quot;whether to include support for application/xml content type and include XML annotations in the model (works with libraries that provide support for JSON and XML)&quot;));</span>
+<span class="nc" id="L264">        cliOptions.add(CliOption.newBoolean(USE_ONE_OF_INTERFACES, &quot;whether to use a java interface to describe a set of oneOf options, where each option is a class that implements the interface&quot;));</span>
 
-<span class="fc" id="L266">        CliOption dateLibrary = new CliOption(DATE_LIBRARY, &quot;Option. Date library to use&quot;).defaultValue(this.getDateLibrary());</span>
-<span class="fc" id="L267">        Map&lt;String, String&gt; dateOptions = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L268">        dateOptions.put(&quot;java8&quot;, &quot;Java 8 native JSR310 (preferred for jdk 1.8+)&quot;);</span>
-<span class="fc" id="L269">        dateOptions.put(&quot;java8-localdatetime&quot;, &quot;Java 8 using LocalDateTime (for legacy app only)&quot;);</span>
-<span class="fc" id="L270">        dateOptions.put(&quot;joda&quot;, &quot;Joda (for legacy app only)&quot;);</span>
-<span class="fc" id="L271">        dateOptions.put(&quot;legacy&quot;, &quot;Legacy java.util.Date&quot;);</span>
-<span class="fc" id="L272">        dateLibrary.setEnum(dateOptions);</span>
-<span class="fc" id="L273">        cliOptions.add(dateLibrary);</span>
+<span class="nc" id="L266">        CliOption dateLibrary = new CliOption(DATE_LIBRARY, &quot;Option. Date library to use&quot;).defaultValue(this.getDateLibrary());</span>
+<span class="nc" id="L267">        Map&lt;String, String&gt; dateOptions = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L268">        dateOptions.put(&quot;java8&quot;, &quot;Java 8 native JSR310 (preferred for jdk 1.8+)&quot;);</span>
+<span class="nc" id="L269">        dateOptions.put(&quot;java8-localdatetime&quot;, &quot;Java 8 using LocalDateTime (for legacy app only)&quot;);</span>
+<span class="nc" id="L270">        dateOptions.put(&quot;joda&quot;, &quot;Joda (for legacy app only)&quot;);</span>
+<span class="nc" id="L271">        dateOptions.put(&quot;legacy&quot;, &quot;Legacy java.util.Date&quot;);</span>
+<span class="nc" id="L272">        dateLibrary.setEnum(dateOptions);</span>
+<span class="nc" id="L273">        cliOptions.add(dateLibrary);</span>
 
-<span class="fc" id="L275">        cliOptions.add(CliOption.newBoolean(DISABLE_HTML_ESCAPING, &quot;Disable HTML escaping of JSON strings when using gson (needed to avoid problems with byte[] fields)&quot;, disableHtmlEscaping));</span>
-<span class="fc" id="L276">        cliOptions.add(CliOption.newString(BOOLEAN_GETTER_PREFIX, &quot;Set booleanGetterPrefix&quot;).defaultValue(this.getBooleanGetterPrefix()));</span>
-<span class="fc" id="L277">        cliOptions.add(CliOption.newBoolean(IGNORE_ANYOF_IN_ENUM, &quot;Ignore anyOf keyword in enum&quot;, ignoreAnyOfInEnum));</span>
-<span class="fc" id="L278">        cliOptions.add(CliOption.newString(ADDITIONAL_ENUM_TYPE_ANNOTATIONS, &quot;Additional annotations for enum type(class level annotations)&quot;));</span>
-<span class="fc" id="L279">        cliOptions.add(CliOption.newString(ADDITIONAL_MODEL_TYPE_ANNOTATIONS, &quot;Additional annotations for model type(class level annotations). List separated by semicolon(;) or new line (Linux or Windows)&quot;));</span>
-<span class="fc" id="L280">        cliOptions.add(CliOption.newString(ADDITIONAL_ONE_OF_TYPE_ANNOTATIONS, &quot;Additional annotations for oneOf interfaces(class level annotations). List separated by semicolon(;) or new line (Linux or Windows)&quot;));</span>
-<span class="fc" id="L281">        cliOptions.add(CliOption.newBoolean(OPENAPI_NULLABLE, &quot;Enable OpenAPI Jackson Nullable library&quot;, this.openApiNullable));</span>
-<span class="fc" id="L282">        cliOptions.add(CliOption.newBoolean(IMPLICIT_HEADERS, &quot;Skip header parameters in the generated API methods using @ApiImplicitParams annotation.&quot;, implicitHeaders));</span>
-<span class="fc" id="L283">        cliOptions.add(CliOption.newString(IMPLICIT_HEADERS_REGEX, &quot;Skip header parameters that matches given regex in the generated API methods using @ApiImplicitParams annotation. Note: this parameter is ignored when implicitHeaders=true&quot;));</span>
-<span class="fc" id="L284">        cliOptions.add(CliOption.newBoolean(CAMEL_CASE_DOLLAR_SIGN, &quot;Fix camelCase when starting with $ sign. when true : $Value when false : $value&quot;));</span>
-<span class="fc" id="L285">        cliOptions.add(CliOption.newBoolean(USE_JAKARTA_EE, &quot;whether to use Jakarta EE namespace instead of javax&quot;));</span>
-<span class="fc" id="L286">        cliOptions.add(CliOption.newBoolean(CONTAINER_DEFAULT_TO_NULL, &quot;Set containers (array, set, map) default to null&quot;));</span>
-<span class="fc" id="L287">        cliOptions.add(CliOption.newBoolean(GENERATE_CONSTRUCTOR_WITH_ALL_ARGS, &quot;whether to generate a constructor for all arguments&quot;).defaultValue(Boolean.FALSE.toString()));</span>
+<span class="nc" id="L275">        cliOptions.add(CliOption.newBoolean(DISABLE_HTML_ESCAPING, &quot;Disable HTML escaping of JSON strings when using gson (needed to avoid problems with byte[] fields)&quot;, disableHtmlEscaping));</span>
+<span class="nc" id="L276">        cliOptions.add(CliOption.newString(BOOLEAN_GETTER_PREFIX, &quot;Set booleanGetterPrefix&quot;).defaultValue(this.getBooleanGetterPrefix()));</span>
+<span class="nc" id="L277">        cliOptions.add(CliOption.newBoolean(IGNORE_ANYOF_IN_ENUM, &quot;Ignore anyOf keyword in enum&quot;, ignoreAnyOfInEnum));</span>
+<span class="nc" id="L278">        cliOptions.add(CliOption.newString(ADDITIONAL_ENUM_TYPE_ANNOTATIONS, &quot;Additional annotations for enum type(class level annotations)&quot;));</span>
+<span class="nc" id="L279">        cliOptions.add(CliOption.newString(ADDITIONAL_MODEL_TYPE_ANNOTATIONS, &quot;Additional annotations for model type(class level annotations). List separated by semicolon(;) or new line (Linux or Windows)&quot;));</span>
+<span class="nc" id="L280">        cliOptions.add(CliOption.newString(ADDITIONAL_ONE_OF_TYPE_ANNOTATIONS, &quot;Additional annotations for oneOf interfaces(class level annotations). List separated by semicolon(;) or new line (Linux or Windows)&quot;));</span>
+<span class="nc" id="L281">        cliOptions.add(CliOption.newBoolean(OPENAPI_NULLABLE, &quot;Enable OpenAPI Jackson Nullable library&quot;, this.openApiNullable));</span>
+<span class="nc" id="L282">        cliOptions.add(CliOption.newBoolean(IMPLICIT_HEADERS, &quot;Skip header parameters in the generated API methods using @ApiImplicitParams annotation.&quot;, implicitHeaders));</span>
+<span class="nc" id="L283">        cliOptions.add(CliOption.newString(IMPLICIT_HEADERS_REGEX, &quot;Skip header parameters that matches given regex in the generated API methods using @ApiImplicitParams annotation. Note: this parameter is ignored when implicitHeaders=true&quot;));</span>
+<span class="nc" id="L284">        cliOptions.add(CliOption.newBoolean(CAMEL_CASE_DOLLAR_SIGN, &quot;Fix camelCase when starting with $ sign. when true : $Value when false : $value&quot;));</span>
+<span class="nc" id="L285">        cliOptions.add(CliOption.newBoolean(USE_JAKARTA_EE, &quot;whether to use Jakarta EE namespace instead of javax&quot;));</span>
+<span class="nc" id="L286">        cliOptions.add(CliOption.newBoolean(CONTAINER_DEFAULT_TO_NULL, &quot;Set containers (array, set, map) default to null&quot;));</span>
+<span class="nc" id="L287">        cliOptions.add(CliOption.newBoolean(GENERATE_CONSTRUCTOR_WITH_ALL_ARGS, &quot;whether to generate a constructor for all arguments&quot;).defaultValue(Boolean.FALSE.toString()));</span>
 
-<span class="fc" id="L289">        cliOptions.add(CliOption.newString(CodegenConstants.PARENT_GROUP_ID, CodegenConstants.PARENT_GROUP_ID_DESC));</span>
-<span class="fc" id="L290">        cliOptions.add(CliOption.newString(CodegenConstants.PARENT_ARTIFACT_ID, CodegenConstants.PARENT_ARTIFACT_ID_DESC));</span>
-<span class="fc" id="L291">        cliOptions.add(CliOption.newString(CodegenConstants.PARENT_VERSION, CodegenConstants.PARENT_VERSION_DESC));</span>
-<span class="fc" id="L292">        CliOption snapShotVersion = CliOption.newString(CodegenConstants.SNAPSHOT_VERSION, CodegenConstants.SNAPSHOT_VERSION_DESC);</span>
-<span class="fc" id="L293">        Map&lt;String, String&gt; snapShotVersionOptions = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L294">        snapShotVersionOptions.put(&quot;true&quot;, &quot;Use a SnapShot Version&quot;);</span>
-<span class="fc" id="L295">        snapShotVersionOptions.put(&quot;false&quot;, &quot;Use a Release Version&quot;);</span>
-<span class="fc" id="L296">        snapShotVersion.setEnum(snapShotVersionOptions);</span>
-<span class="fc" id="L297">        cliOptions.add(snapShotVersion);</span>
-<span class="fc" id="L298">        cliOptions.add(CliOption.newString(TEST_OUTPUT, &quot;Set output folder for models and APIs tests&quot;).defaultValue(DEFAULT_TEST_FOLDER));</span>
+<span class="nc" id="L289">        cliOptions.add(CliOption.newString(CodegenConstants.PARENT_GROUP_ID, CodegenConstants.PARENT_GROUP_ID_DESC));</span>
+<span class="nc" id="L290">        cliOptions.add(CliOption.newString(CodegenConstants.PARENT_ARTIFACT_ID, CodegenConstants.PARENT_ARTIFACT_ID_DESC));</span>
+<span class="nc" id="L291">        cliOptions.add(CliOption.newString(CodegenConstants.PARENT_VERSION, CodegenConstants.PARENT_VERSION_DESC));</span>
+<span class="nc" id="L292">        CliOption snapShotVersion = CliOption.newString(CodegenConstants.SNAPSHOT_VERSION, CodegenConstants.SNAPSHOT_VERSION_DESC);</span>
+<span class="nc" id="L293">        Map&lt;String, String&gt; snapShotVersionOptions = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L294">        snapShotVersionOptions.put(&quot;true&quot;, &quot;Use a SnapShot Version&quot;);</span>
+<span class="nc" id="L295">        snapShotVersionOptions.put(&quot;false&quot;, &quot;Use a Release Version&quot;);</span>
+<span class="nc" id="L296">        snapShotVersion.setEnum(snapShotVersionOptions);</span>
+<span class="nc" id="L297">        cliOptions.add(snapShotVersion);</span>
+<span class="nc" id="L298">        cliOptions.add(CliOption.newString(TEST_OUTPUT, &quot;Set output folder for models and APIs tests&quot;).defaultValue(DEFAULT_TEST_FOLDER));</span>
 
-<span class="fc bfc" id="L300" title="All 2 branches covered.">        if (null != defaultDocumentationProvider()) {</span>
-<span class="fc" id="L301">            CliOption documentationProviderCliOption = new CliOption(DOCUMENTATION_PROVIDER,</span>
+<span class="nc bnc" id="L300" title="All 2 branches missed.">        if (null != defaultDocumentationProvider()) {</span>
+<span class="nc" id="L301">            CliOption documentationProviderCliOption = new CliOption(DOCUMENTATION_PROVIDER,</span>
                     &quot;Select the OpenAPI documentation provider.&quot;)
-<span class="fc" id="L303">                    .defaultValue(defaultDocumentationProvider().toCliOptValue());</span>
-<span class="fc" id="L304">            supportedDocumentationProvider().forEach(dp -&gt;</span>
-<span class="fc" id="L305">                    documentationProviderCliOption.addEnum(dp.toCliOptValue(), dp.getDescription()));</span>
-<span class="fc" id="L306">            cliOptions.add(documentationProviderCliOption);</span>
+<span class="nc" id="L303">                    .defaultValue(defaultDocumentationProvider().toCliOptValue());</span>
+<span class="nc" id="L304">            supportedDocumentationProvider().forEach(dp -&gt;</span>
+<span class="nc" id="L305">                    documentationProviderCliOption.addEnum(dp.toCliOptValue(), dp.getDescription()));</span>
+<span class="nc" id="L306">            cliOptions.add(documentationProviderCliOption);</span>
 
-<span class="fc" id="L308">            CliOption annotationLibraryCliOption = new CliOption(ANNOTATION_LIBRARY,</span>
+<span class="nc" id="L308">            CliOption annotationLibraryCliOption = new CliOption(ANNOTATION_LIBRARY,</span>
                     &quot;Select the complementary documentation annotation library.&quot;)
-<span class="fc" id="L310">                    .defaultValue(defaultDocumentationProvider().getPreferredAnnotationLibrary().toCliOptValue());</span>
-<span class="fc" id="L311">            supportedAnnotationLibraries().forEach(al -&gt;</span>
-<span class="fc" id="L312">                    annotationLibraryCliOption.addEnum(al.toCliOptValue(), al.getDescription()));</span>
-<span class="fc" id="L313">            cliOptions.add(annotationLibraryCliOption);</span>
+<span class="nc" id="L310">                    .defaultValue(defaultDocumentationProvider().getPreferredAnnotationLibrary().toCliOptValue());</span>
+<span class="nc" id="L311">            supportedAnnotationLibraries().forEach(al -&gt;</span>
+<span class="nc" id="L312">                    annotationLibraryCliOption.addEnum(al.toCliOptValue(), al.getDescription()));</span>
+<span class="nc" id="L313">            cliOptions.add(annotationLibraryCliOption);</span>
         }
-<span class="fc" id="L315">    }</span>
+<span class="nc" id="L315">    }</span>
 
     @Override
     public void processOpts() {
@@ -2127,7 +2127,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
     }
 
     public String getInvokerPackage() {
-<span class="fc" id="L2130">        return invokerPackage;</span>
+<span class="nc" id="L2130">        return invokerPackage;</span>
     }
 
     public void setInvokerPackage(String invokerPackage) {
@@ -2135,7 +2135,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
 <span class="nc" id="L2135">    }</span>
 
     public String getGroupId() {
-<span class="fc" id="L2138">        return groupId;</span>
+<span class="nc" id="L2138">        return groupId;</span>
     }
 
     public void setGroupId(String groupId) {
@@ -2143,7 +2143,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
 <span class="nc" id="L2143">    }</span>
 
     public String getArtifactId() {
-<span class="fc" id="L2146">        return artifactId;</span>
+<span class="nc" id="L2146">        return artifactId;</span>
     }
 
     public void setArtifactId(String artifactId) {
@@ -2151,7 +2151,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
 <span class="nc" id="L2151">    }</span>
 
     public String getArtifactVersion() {
-<span class="fc" id="L2154">        return artifactVersion;</span>
+<span class="nc" id="L2154">        return artifactVersion;</span>
     }
 
     public void setArtifactVersion(String artifactVersion) {
@@ -2159,7 +2159,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
 <span class="nc" id="L2159">    }</span>
 
     public String getArtifactUrl() {
-<span class="fc" id="L2162">        return artifactUrl;</span>
+<span class="nc" id="L2162">        return artifactUrl;</span>
     }
 
     public void setArtifactUrl(String artifactUrl) {
@@ -2167,7 +2167,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
 <span class="nc" id="L2167">    }</span>
 
     public String getArtifactDescription() {
-<span class="fc" id="L2170">        return artifactDescription;</span>
+<span class="nc" id="L2170">        return artifactDescription;</span>
     }
 
     public void setArtifactDescription(String artifactDescription) {
@@ -2175,7 +2175,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
 <span class="nc" id="L2175">    }</span>
 
     public String getScmConnection() {
-<span class="fc" id="L2178">        return scmConnection;</span>
+<span class="nc" id="L2178">        return scmConnection;</span>
     }
 
     public void setScmConnection(String scmConnection) {
@@ -2183,7 +2183,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
 <span class="nc" id="L2183">    }</span>
 
     public String getScmDeveloperConnection() {
-<span class="fc" id="L2186">        return scmDeveloperConnection;</span>
+<span class="nc" id="L2186">        return scmDeveloperConnection;</span>
     }
 
     public void setScmDeveloperConnection(String scmDeveloperConnection) {
@@ -2191,7 +2191,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
 <span class="nc" id="L2191">    }</span>
 
     public String getScmUrl() {
-<span class="fc" id="L2194">        return scmUrl;</span>
+<span class="nc" id="L2194">        return scmUrl;</span>
     }
 
     public void setScmUrl(String scmUrl) {
@@ -2199,7 +2199,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
 <span class="nc" id="L2199">    }</span>
 
     public String getDeveloperName() {
-<span class="fc" id="L2202">        return developerName;</span>
+<span class="nc" id="L2202">        return developerName;</span>
     }
 
     public void setDeveloperName(String developerName) {
@@ -2207,7 +2207,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
 <span class="nc" id="L2207">    }</span>
 
     public String getDeveloperEmail() {
-<span class="fc" id="L2210">        return developerEmail;</span>
+<span class="nc" id="L2210">        return developerEmail;</span>
     }
 
     public void setDeveloperEmail(String developerEmail) {
@@ -2215,7 +2215,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
 <span class="nc" id="L2215">    }</span>
 
     public String getDeveloperOrganization() {
-<span class="fc" id="L2218">        return developerOrganization;</span>
+<span class="nc" id="L2218">        return developerOrganization;</span>
     }
 
     public void setDeveloperOrganization(String developerOrganization) {
@@ -2223,7 +2223,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
 <span class="nc" id="L2223">    }</span>
 
     public String getDeveloperOrganizationUrl() {
-<span class="fc" id="L2226">        return developerOrganizationUrl;</span>
+<span class="nc" id="L2226">        return developerOrganizationUrl;</span>
     }
 
     public void setDeveloperOrganizationUrl(String developerOrganizationUrl) {
@@ -2231,7 +2231,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
 <span class="nc" id="L2231">    }</span>
 
     public String getLicenseName() {
-<span class="fc" id="L2234">        return licenseName;</span>
+<span class="nc" id="L2234">        return licenseName;</span>
     }
 
     public void setLicenseName(String licenseName) {
@@ -2239,7 +2239,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
 <span class="nc" id="L2239">    }</span>
 
     public String getLicenseUrl() {
-<span class="fc" id="L2242">        return licenseUrl;</span>
+<span class="nc" id="L2242">        return licenseUrl;</span>
     }
 
     public void setLicenseUrl(String licenseUrl) {
@@ -2247,7 +2247,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
 <span class="nc" id="L2247">    }</span>
 
     public String getSourceFolder() {
-<span class="fc" id="L2250">        return sourceFolder;</span>
+<span class="nc" id="L2250">        return sourceFolder;</span>
     }
 
     public void setSourceFolder(String sourceFolder) {
@@ -2267,7 +2267,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
 <span class="nc" id="L2267">    }</span>
 
     public Boolean getSerializableModel() {
-<span class="fc" id="L2270">        return serializableModel;</span>
+<span class="nc" id="L2270">        return serializableModel;</span>
     }
 
     public void setSerializableModel(Boolean serializableModel) {
@@ -2293,12 +2293,12 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
 <span class="nc" id="L2293">    }</span>
 
     public String getDateLibrary() {
-<span class="fc" id="L2296">        return dateLibrary;</span>
+<span class="nc" id="L2296">        return dateLibrary;</span>
     }
 
     public void setDateLibrary(String library) {
-<span class="fc" id="L2300">        this.dateLibrary = library;</span>
-<span class="fc" id="L2301">    }</span>
+<span class="nc" id="L2300">        this.dateLibrary = library;</span>
+<span class="nc" id="L2301">    }</span>
 
     public void setSupportAsync(boolean enabled) {
 <span class="nc" id="L2304">        this.supportAsync = enabled;</span>
@@ -2309,7 +2309,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
 <span class="nc" id="L2309">    }</span>
 
     public String getBooleanGetterPrefix() {
-<span class="fc" id="L2312">        return booleanGetterPrefix;</span>
+<span class="nc" id="L2312">        return booleanGetterPrefix;</span>
     }
 
     public void setBooleanGetterPrefix(String booleanGetterPrefix) {

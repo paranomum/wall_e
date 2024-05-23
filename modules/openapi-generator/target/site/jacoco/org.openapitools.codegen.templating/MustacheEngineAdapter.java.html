@@ -29,9 +29,9 @@ import java.io.StringReader;
 import java.util.Map;
 
 
-<span class="fc" id="L32">public class MustacheEngineAdapter implements TemplatingEngineAdapter {</span>
+<span class="nc" id="L32">public class MustacheEngineAdapter implements TemplatingEngineAdapter {</span>
 
-<span class="fc" id="L34">    private final Logger LOGGER = LoggerFactory.getLogger(TemplatingEngineAdapter.class);</span>
+<span class="nc" id="L34">    private final Logger LOGGER = LoggerFactory.getLogger(TemplatingEngineAdapter.class);</span>
 
     /**
      * Provides an identifier used to load the adapter. This could be a name, uuid, or any other string.
@@ -40,11 +40,11 @@ import java.util.Map;
      */
     @Override
     public String getIdentifier() {
-<span class="fc" id="L43">        return &quot;mustache&quot;;</span>
+<span class="nc" id="L43">        return &quot;mustache&quot;;</span>
     }
 
-<span class="fc" id="L46">    private final String[] extensions = {&quot;mustache&quot;};</span>
-<span class="fc" id="L47">    Mustache.Compiler compiler = Mustache.compiler();</span>
+<span class="nc" id="L46">    private final String[] extensions = {&quot;mustache&quot;};</span>
+<span class="nc" id="L47">    Mustache.Compiler compiler = Mustache.compiler();</span>
 
     /**
      * Compiles a template into a string
@@ -57,12 +57,12 @@ import java.util.Map;
      */
     @Override
     public String compileTemplate(TemplatingExecutor executor, Map&lt;String, Object&gt; bundle, String templateFile) throws IOException {
-<span class="fc" id="L60">        Template tmpl = compiler</span>
-<span class="pc" id="L61">                .withLoader(name -&gt; findTemplate(executor, name))</span>
-<span class="fc" id="L62">                .defaultValue(&quot;&quot;)</span>
-<span class="fc" id="L63">                .compile(executor.getFullTemplateContents(templateFile));</span>
+<span class="nc" id="L60">        Template tmpl = compiler</span>
+<span class="nc" id="L61">                .withLoader(name -&gt; findTemplate(executor, name))</span>
+<span class="nc" id="L62">                .defaultValue(&quot;&quot;)</span>
+<span class="nc" id="L63">                .compile(executor.getFullTemplateContents(templateFile));</span>
 
-<span class="fc" id="L65">        return tmpl.execute(bundle);</span>
+<span class="nc" id="L65">        return tmpl.execute(bundle);</span>
     }
 
     @SuppressWarnings(&quot;java:S108&quot;) // catch-all is expected, and is later thrown
@@ -80,16 +80,16 @@ import java.util.Map;
     }
 
     public Mustache.Compiler getCompiler() {
-<span class="fc" id="L83">        return compiler;</span>
+<span class="nc" id="L83">        return compiler;</span>
     }
 
     public void setCompiler(Mustache.Compiler compiler) {
-<span class="fc" id="L87">        this.compiler = compiler;</span>
-<span class="fc" id="L88">    }</span>
+<span class="nc" id="L87">        this.compiler = compiler;</span>
+<span class="nc" id="L88">    }</span>
 
     @Override
     public String[] getFileExtensions() {
-<span class="fc" id="L92">        return extensions;</span>
+<span class="nc" id="L92">        return extensions;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

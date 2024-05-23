@@ -22,9 +22,9 @@ import io.swagger.v3.oas.models.tags.Tag;
 
 import java.util.*;
 
-<span class="fc" id="L25">public class CodegenOperation {</span>
-<span class="fc" id="L26">    public final List&lt;CodegenProperty&gt; responseHeaders = new ArrayList&lt;CodegenProperty&gt;();</span>
-<span class="fc" id="L27">    public boolean hasAuthMethods, hasConsumes, hasProduces, hasParams, hasOptionalParams, hasRequiredParams,</span>
+<span class="nc" id="L25">public class CodegenOperation {</span>
+<span class="nc" id="L26">    public final List&lt;CodegenProperty&gt; responseHeaders = new ArrayList&lt;CodegenProperty&gt;();</span>
+<span class="nc" id="L27">    public boolean hasAuthMethods, hasConsumes, hasProduces, hasParams, hasOptionalParams, hasRequiredParams,</span>
             returnTypeIsPrimitive, returnSimpleType, subresourceOperation, isMap,
             isArray, isMultipart, isVoid = false,
             hasVersionHeaders = false, hasVersionQueryParams = false,
@@ -37,30 +37,30 @@ import java.util.*;
             returnContainer, summary, unescapedNotes, notes, baseName, defaultResponse;
     public CodegenDiscriminator discriminator;
     public List&lt;Map&lt;String, String&gt;&gt; consumes, produces, prioritizedContentTypes;
-<span class="fc" id="L40">    public List&lt;CodegenServer&gt; servers = new ArrayList&lt;CodegenServer&gt;();</span>
+<span class="nc" id="L40">    public List&lt;CodegenServer&gt; servers = new ArrayList&lt;CodegenServer&gt;();</span>
     public CodegenParameter bodyParam;
-<span class="fc" id="L42">    public List&lt;CodegenParameter&gt; allParams = new ArrayList&lt;CodegenParameter&gt;();</span>
-<span class="fc" id="L43">    public List&lt;CodegenParameter&gt; bodyParams = new ArrayList&lt;CodegenParameter&gt;();</span>
-<span class="fc" id="L44">    public List&lt;CodegenParameter&gt; pathParams = new ArrayList&lt;CodegenParameter&gt;();</span>
-<span class="fc" id="L45">    public List&lt;CodegenParameter&gt; queryParams = new ArrayList&lt;CodegenParameter&gt;();</span>
-<span class="fc" id="L46">    public List&lt;CodegenParameter&gt; headerParams = new ArrayList&lt;CodegenParameter&gt;();</span>
-<span class="fc" id="L47">    public List&lt;CodegenParameter&gt; implicitHeadersParams = new ArrayList&lt;CodegenParameter&gt;();</span>
-<span class="fc" id="L48">    public List&lt;CodegenParameter&gt; constantParams = new ArrayList&lt;CodegenParameter&gt;();</span>
-<span class="fc" id="L49">    public List&lt;CodegenParameter&gt; formParams = new ArrayList&lt;CodegenParameter&gt;();</span>
-<span class="fc" id="L50">    public List&lt;CodegenParameter&gt; cookieParams = new ArrayList&lt;CodegenParameter&gt;();</span>
-<span class="fc" id="L51">    public List&lt;CodegenParameter&gt; requiredParams = new ArrayList&lt;CodegenParameter&gt;();</span>
-<span class="fc" id="L52">    public List&lt;CodegenParameter&gt; optionalParams = new ArrayList&lt;CodegenParameter&gt;();</span>
-<span class="fc" id="L53">    public List&lt;CodegenParameter&gt; requiredAndNotNullableParams = new ArrayList&lt;CodegenParameter&gt;();</span>
-<span class="fc" id="L54">    public List&lt;CodegenParameter&gt; notNullableParams = new ArrayList&lt;CodegenParameter&gt;();</span>
+<span class="nc" id="L42">    public List&lt;CodegenParameter&gt; allParams = new ArrayList&lt;CodegenParameter&gt;();</span>
+<span class="nc" id="L43">    public List&lt;CodegenParameter&gt; bodyParams = new ArrayList&lt;CodegenParameter&gt;();</span>
+<span class="nc" id="L44">    public List&lt;CodegenParameter&gt; pathParams = new ArrayList&lt;CodegenParameter&gt;();</span>
+<span class="nc" id="L45">    public List&lt;CodegenParameter&gt; queryParams = new ArrayList&lt;CodegenParameter&gt;();</span>
+<span class="nc" id="L46">    public List&lt;CodegenParameter&gt; headerParams = new ArrayList&lt;CodegenParameter&gt;();</span>
+<span class="nc" id="L47">    public List&lt;CodegenParameter&gt; implicitHeadersParams = new ArrayList&lt;CodegenParameter&gt;();</span>
+<span class="nc" id="L48">    public List&lt;CodegenParameter&gt; constantParams = new ArrayList&lt;CodegenParameter&gt;();</span>
+<span class="nc" id="L49">    public List&lt;CodegenParameter&gt; formParams = new ArrayList&lt;CodegenParameter&gt;();</span>
+<span class="nc" id="L50">    public List&lt;CodegenParameter&gt; cookieParams = new ArrayList&lt;CodegenParameter&gt;();</span>
+<span class="nc" id="L51">    public List&lt;CodegenParameter&gt; requiredParams = new ArrayList&lt;CodegenParameter&gt;();</span>
+<span class="nc" id="L52">    public List&lt;CodegenParameter&gt; optionalParams = new ArrayList&lt;CodegenParameter&gt;();</span>
+<span class="nc" id="L53">    public List&lt;CodegenParameter&gt; requiredAndNotNullableParams = new ArrayList&lt;CodegenParameter&gt;();</span>
+<span class="nc" id="L54">    public List&lt;CodegenParameter&gt; notNullableParams = new ArrayList&lt;CodegenParameter&gt;();</span>
     public List&lt;CodegenSecurity&gt; authMethods;
     public List&lt;Tag&gt; tags;
-<span class="fc" id="L57">    public List&lt;CodegenResponse&gt; responses = new ArrayList&lt;CodegenResponse&gt;();</span>
-<span class="fc" id="L58">    public List&lt;CodegenCallback&gt; callbacks = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L59">    public Set&lt;String&gt; imports = new HashSet&lt;String&gt;();</span>
+<span class="nc" id="L57">    public List&lt;CodegenResponse&gt; responses = new ArrayList&lt;CodegenResponse&gt;();</span>
+<span class="nc" id="L58">    public List&lt;CodegenCallback&gt; callbacks = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L59">    public Set&lt;String&gt; imports = new HashSet&lt;String&gt;();</span>
     public List&lt;Map&lt;String, String&gt;&gt; examples;
     public List&lt;Map&lt;String, String&gt;&gt; requestBodyExamples;
     public ExternalDocumentation externalDocs;
-<span class="fc" id="L63">    public Map&lt;String, Object&gt; vendorExtensions = new HashMap&lt;String, Object&gt;();</span>
+<span class="nc" id="L63">    public Map&lt;String, Object&gt; vendorExtensions = new HashMap&lt;String, Object&gt;();</span>
     public String nickname; // legacy support
     public String operationIdOriginal; // for plug-in
     public String operationIdLowerCase; // for markdown documentation
@@ -73,7 +73,7 @@ import java.util.*;
      * @return true if parameter exists, false otherwise
      */
     private static boolean nonEmpty(List&lt;?&gt; params) {
-<span class="pc bpc" id="L76" title="1 of 4 branches missed.">        return params != null &amp;&amp; !params.isEmpty();</span>
+<span class="nc bnc" id="L76" title="All 4 branches missed.">        return params != null &amp;&amp; !params.isEmpty();</span>
     }
 
     private static boolean nonEmpty(Map&lt;?, ?&gt; params) {
@@ -86,7 +86,7 @@ import java.util.*;
      * @return true if body parameter exists, false otherwise
      */
     public boolean getHasBodyParam() {
-<span class="fc" id="L89">        return nonEmpty(bodyParams);</span>
+<span class="nc" id="L89">        return nonEmpty(bodyParams);</span>
     }
 
     /**
@@ -250,7 +250,7 @@ import java.util.*;
      * @return true if act as Restful index method, false otherwise
      */
     public boolean isRestfulIndex() {
-<span class="pc bpc" id="L253" title="1 of 4 branches missed.">        return &quot;GET&quot;.equalsIgnoreCase(httpMethod) &amp;&amp; &quot;&quot;.equals(pathWithoutBaseName());</span>
+<span class="nc bnc" id="L253" title="All 4 branches missed.">        return &quot;GET&quot;.equalsIgnoreCase(httpMethod) &amp;&amp; &quot;&quot;.equals(pathWithoutBaseName());</span>
     }
 
     /**
@@ -259,7 +259,7 @@ import java.util.*;
      * @return true if act as Restful show method, false otherwise
      */
     public boolean isRestfulShow() {
-<span class="pc bpc" id="L262" title="1 of 4 branches missed.">        return &quot;GET&quot;.equalsIgnoreCase(httpMethod) &amp;&amp; isMemberPath();</span>
+<span class="nc bnc" id="L262" title="All 4 branches missed.">        return &quot;GET&quot;.equalsIgnoreCase(httpMethod) &amp;&amp; isMemberPath();</span>
     }
 
     /**
@@ -268,7 +268,7 @@ import java.util.*;
      * @return true if act as Restful create method, false otherwise
      */
     public boolean isRestfulCreate() {
-<span class="pc bpc" id="L271" title="1 of 4 branches missed.">        return &quot;POST&quot;.equalsIgnoreCase(httpMethod) &amp;&amp; &quot;&quot;.equals(pathWithoutBaseName());</span>
+<span class="nc bnc" id="L271" title="All 4 branches missed.">        return &quot;POST&quot;.equalsIgnoreCase(httpMethod) &amp;&amp; &quot;&quot;.equals(pathWithoutBaseName());</span>
     }
 
     /**
@@ -277,7 +277,7 @@ import java.util.*;
      * @return true if act as Restful update method, false otherwise
      */
     public boolean isRestfulUpdate() {
-<span class="pc bpc" id="L280" title="1 of 4 branches missed.">        return Arrays.asList(&quot;PUT&quot;, &quot;PATCH&quot;).contains(httpMethod.toUpperCase(Locale.ROOT)) &amp;&amp; isMemberPath();</span>
+<span class="nc bnc" id="L280" title="All 4 branches missed.">        return Arrays.asList(&quot;PUT&quot;, &quot;PATCH&quot;).contains(httpMethod.toUpperCase(Locale.ROOT)) &amp;&amp; isMemberPath();</span>
     }
 
     /**
@@ -295,7 +295,7 @@ import java.util.*;
      * @return true if act as Restful destroy method, false otherwise
      */
     public boolean isRestfulDestroy() {
-<span class="pc bpc" id="L298" title="3 of 4 branches missed.">        return &quot;DELETE&quot;.equalsIgnoreCase(httpMethod) &amp;&amp; isMemberPath();</span>
+<span class="nc bnc" id="L298" title="All 4 branches missed.">        return &quot;DELETE&quot;.equalsIgnoreCase(httpMethod) &amp;&amp; isMemberPath();</span>
     }
 
     /**
@@ -304,7 +304,7 @@ import java.util.*;
      * @return true if Restful-style, false otherwise
      */
     public boolean isRestful() {
-<span class="pc bpc" id="L307" title="5 of 10 branches missed.">        return isRestfulIndex() || isRestfulShow() || isRestfulCreate() || isRestfulUpdate() || isRestfulDestroy();</span>
+<span class="nc bnc" id="L307" title="All 10 branches missed.">        return isRestfulIndex() || isRestfulShow() || isRestfulCreate() || isRestfulUpdate() || isRestfulDestroy();</span>
     }
 
     /**
@@ -313,7 +313,7 @@ import java.util.*;
      * @return the substring
      */
     private String pathWithoutBaseName() {
-<span class="pc bpc" id="L316" title="1 of 2 branches missed.">        return baseName != null ? path.replace(&quot;/&quot; + baseName.toLowerCase(Locale.ROOT), &quot;&quot;) : path;</span>
+<span class="nc bnc" id="L316" title="All 2 branches missed.">        return baseName != null ? path.replace(&quot;/&quot; + baseName.toLowerCase(Locale.ROOT), &quot;&quot;) : path;</span>
     }
 
     /**
@@ -322,9 +322,9 @@ import java.util.*;
      * @return true if path act as member
      */
     private boolean isMemberPath() {
-<span class="fc bfc" id="L325" title="All 2 branches covered.">        if (pathParams.size() != 1) return false;</span>
-<span class="fc" id="L326">        String id = pathParams.get(0).baseName;</span>
-<span class="fc" id="L327">        return (&quot;/{&quot; + id + &quot;}&quot;).equals(pathWithoutBaseName());</span>
+<span class="nc bnc" id="L325" title="All 2 branches missed.">        if (pathParams.size() != 1) return false;</span>
+<span class="nc" id="L326">        String id = pathParams.get(0).baseName;</span>
+<span class="nc" id="L327">        return (&quot;/{&quot; + id + &quot;}&quot;).equals(pathWithoutBaseName());</span>
     }
 
     @Override

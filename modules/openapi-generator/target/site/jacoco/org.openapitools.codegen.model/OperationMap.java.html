@@ -6,32 +6,32 @@ import java.util.List;
 
 import org.openapitools.codegen.CodegenOperation;
 
-<span class="fc" id="L9">public class OperationMap extends HashMap&lt;String, Object&gt; {</span>
+<span class="nc" id="L9">public class OperationMap extends HashMap&lt;String, Object&gt; {</span>
 
     public void setOperation(CodegenOperation ops) {
 <span class="nc" id="L12">        put(&quot;operation&quot;, Collections.singletonList(ops));</span>
 <span class="nc" id="L13">    }</span>
 
     public void setOperation(List&lt;? extends CodegenOperation&gt; ops) {
-<span class="fc" id="L16">        put(&quot;operation&quot;, ops);</span>
-<span class="fc" id="L17">    }</span>
+<span class="nc" id="L16">        put(&quot;operation&quot;, ops);</span>
+<span class="nc" id="L17">    }</span>
 
     @SuppressWarnings(&quot;unchecked&quot;)
     public List&lt;CodegenOperation&gt; getOperation() {
-<span class="fc" id="L21">        return (List&lt;CodegenOperation&gt;) get(&quot;operation&quot;);</span>
+<span class="nc" id="L21">        return (List&lt;CodegenOperation&gt;) get(&quot;operation&quot;);</span>
     }
 
     public void setClassname(String classname) {
-<span class="fc" id="L25">        put(&quot;classname&quot;, classname);</span>
-<span class="fc" id="L26">    }</span>
+<span class="nc" id="L25">        put(&quot;classname&quot;, classname);</span>
+<span class="nc" id="L26">    }</span>
 
     public String getClassname() {
 <span class="nc" id="L29">        return (String) get(&quot;classname&quot;);</span>
     }
 
     public void setPathPrefix(String pathPrefix) {
-<span class="fc" id="L33">        put(&quot;pathPrefix&quot;, pathPrefix);</span>
-<span class="fc" id="L34">    }</span>
+<span class="nc" id="L33">        put(&quot;pathPrefix&quot;, pathPrefix);</span>
+<span class="nc" id="L34">    }</span>
 
     public String getPathPrefix() {
 <span class="nc" id="L37">        return (String) get(&quot;pathPrefix&quot;);</span>

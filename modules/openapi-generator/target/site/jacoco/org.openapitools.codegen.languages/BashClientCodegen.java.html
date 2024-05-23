@@ -40,22 +40,22 @@ import static org.openapitools.codegen.utils.CamelizeOption.LOWERCASE_FIRST_LETT
 import static org.openapitools.codegen.utils.StringUtils.*;
 
 public class BashClientCodegen extends DefaultCodegen implements CodegenConfig {
-<span class="fc" id="L43">    private final Logger LOGGER = LoggerFactory.getLogger(BashClientCodegen.class);</span>
+<span class="nc" id="L43">    private final Logger LOGGER = LoggerFactory.getLogger(BashClientCodegen.class);</span>
 
-<span class="fc" id="L45">    protected String apiVersion = &quot;1.0.0&quot;;</span>
+<span class="nc" id="L45">    protected String apiVersion = &quot;1.0.0&quot;;</span>
 
     protected String curlOptions;
-<span class="fc" id="L48">    protected boolean processMarkdown = false;</span>
-<span class="fc" id="L49">    protected String scriptName = &quot;client.sh&quot;;</span>
-<span class="fc" id="L50">    protected boolean generateBashCompletion = false;</span>
-<span class="fc" id="L51">    protected boolean generateZshCompletion = false;</span>
+<span class="nc" id="L48">    protected boolean processMarkdown = false;</span>
+<span class="nc" id="L49">    protected String scriptName = &quot;client.sh&quot;;</span>
+<span class="nc" id="L50">    protected boolean generateBashCompletion = false;</span>
+<span class="nc" id="L51">    protected boolean generateZshCompletion = false;</span>
     protected String hostEnvironmentVariable;
     protected String basicAuthEnvironmentVariable;
     protected String apiKeyAuthEnvironmentVariable;
-<span class="fc" id="L55">    protected String apiDocPath = &quot;docs/&quot;;</span>
-<span class="fc" id="L56">    protected String modelDocPath = &quot;docs/&quot;;</span>
+<span class="nc" id="L55">    protected String apiDocPath = &quot;docs/&quot;;</span>
+<span class="nc" id="L56">    protected String modelDocPath = &quot;docs/&quot;;</span>
 
-<span class="fc" id="L58">    protected static int emptyMethodNameCounter = 0;</span>
+<span class="nc" id="L58">    protected static int emptyMethodNameCounter = 0;</span>
 
     public static final String CURL_OPTIONS = &quot;curlOptions&quot;;
     public static final String PROCESS_MARKDOWN = &quot;processMarkdown&quot;;
@@ -78,7 +78,7 @@ public class BashClientCodegen extends DefaultCodegen implements CodegenConfig {
      */
     @Override
     public CodegenType getTag() {
-<span class="fc" id="L81">        return CodegenType.CLIENT;</span>
+<span class="nc" id="L81">        return CodegenType.CLIENT;</span>
     }
 
     /**
@@ -89,7 +89,7 @@ public class BashClientCodegen extends DefaultCodegen implements CodegenConfig {
      */
     @Override
     public String getName() {
-<span class="fc" id="L92">        return &quot;bash&quot;;</span>
+<span class="nc" id="L92">        return &quot;bash&quot;;</span>
     }
 
     /**
@@ -104,35 +104,35 @@ public class BashClientCodegen extends DefaultCodegen implements CodegenConfig {
     }
 
     public BashClientCodegen() {
-<span class="fc" id="L107">        super();</span>
+<span class="nc" id="L107">        super();</span>
 
         // TODO: Bash maintainer review
-<span class="fc" id="L110">        modifyFeatureSet(features -&gt; features</span>
-<span class="fc" id="L111">                .documentationFeatures(EnumSet.of(</span>
+<span class="nc" id="L110">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L111">                .documentationFeatures(EnumSet.of(</span>
                         DocumentationFeature.Readme
                 ))
-<span class="fc" id="L114">                .securityFeatures(EnumSet.of(</span>
+<span class="nc" id="L114">                .securityFeatures(EnumSet.of(</span>
                         SecurityFeature.OAuth2_Implicit,
                         SecurityFeature.BasicAuth,
                         SecurityFeature.BearerToken,
                         SecurityFeature.ApiKey
                 ))
-<span class="fc" id="L120">                .includeParameterFeatures(</span>
+<span class="nc" id="L120">                .includeParameterFeatures(</span>
                         ParameterFeature.Cookie
                 )
-<span class="fc" id="L123">                .includeWireFormatFeatures(</span>
+<span class="nc" id="L123">                .includeWireFormatFeatures(</span>
                         WireFormatFeature.JSON,
                         WireFormatFeature.XML,
                         WireFormatFeature.Custom
                 )
-<span class="fc" id="L128">                .excludeSchemaSupportFeatures(</span>
+<span class="nc" id="L128">                .excludeSchemaSupportFeatures(</span>
                         SchemaSupportFeature.Polymorphism,
                         SchemaSupportFeature.Union
                 )
         );
 
-<span class="fc" id="L134">        setReservedWordsLowerCase(</span>
-<span class="fc" id="L135">                Arrays.asList(</span>
+<span class="nc" id="L134">        setReservedWordsLowerCase(</span>
+<span class="nc" id="L135">                Arrays.asList(</span>
                         &quot;case&quot;,
                         &quot;do&quot;,
                         &quot;done&quot;,
@@ -154,55 +154,55 @@ public class BashClientCodegen extends DefaultCodegen implements CodegenConfig {
         /**
          * Set the output folder here
          */
-<span class="fc" id="L157">        outputFolder = &quot;generated-code/bash&quot;;</span>
+<span class="nc" id="L157">        outputFolder = &quot;generated-code/bash&quot;;</span>
 
         /**
          * No model files.
          */
-<span class="fc" id="L162">        modelTemplateFiles.clear();</span>
+<span class="nc" id="L162">        modelTemplateFiles.clear();</span>
 
 
         /**
          * No API files.
          */
-<span class="fc" id="L168">        apiTemplateFiles.clear();</span>
+<span class="nc" id="L168">        apiTemplateFiles.clear();</span>
 
 
         /**
          * docs files.
          */
-<span class="fc" id="L174">        modelDocTemplateFiles.put(&quot;model_doc.mustache&quot;, &quot;.md&quot;);</span>
-<span class="fc" id="L175">        apiDocTemplateFiles.put(&quot;api_doc.mustache&quot;, &quot;.md&quot;);</span>
+<span class="nc" id="L174">        modelDocTemplateFiles.put(&quot;model_doc.mustache&quot;, &quot;.md&quot;);</span>
+<span class="nc" id="L175">        apiDocTemplateFiles.put(&quot;api_doc.mustache&quot;, &quot;.md&quot;);</span>
 
 
         /**
          * Templates location for client script and bash completion template.
          */
-<span class="fc" id="L181">        embeddedTemplateDir = templateDir = &quot;bash&quot;;</span>
+<span class="nc" id="L181">        embeddedTemplateDir = templateDir = &quot;bash&quot;;</span>
 
 
         /**
          * Allow the user to force the script to always include certain cURL
          * commands
          */
-<span class="fc" id="L188">        cliOptions.add(CliOption.newString(CURL_OPTIONS, &quot;Default cURL options&quot;));</span>
-<span class="fc" id="L189">        cliOptions.add(CliOption.newBoolean(PROCESS_MARKDOWN,</span>
+<span class="nc" id="L188">        cliOptions.add(CliOption.newString(CURL_OPTIONS, &quot;Default cURL options&quot;));</span>
+<span class="nc" id="L189">        cliOptions.add(CliOption.newBoolean(PROCESS_MARKDOWN,</span>
                 &quot;Convert all Markdown Markup into terminal formatting&quot;));
-<span class="fc" id="L191">        cliOptions.add(CliOption.newString(SCRIPT_NAME,</span>
+<span class="nc" id="L191">        cliOptions.add(CliOption.newString(SCRIPT_NAME,</span>
                 &quot;The name of the script that will be generated &quot; +
                         &quot;(e.g. petstore-cli)&quot;));
-<span class="fc" id="L194">        cliOptions.add(CliOption.newBoolean(GENERATE_BASH_COMPLETION,</span>
+<span class="nc" id="L194">        cliOptions.add(CliOption.newBoolean(GENERATE_BASH_COMPLETION,</span>
                 &quot;Whether to generate the Bash completion script&quot;));
-<span class="fc" id="L196">        cliOptions.add(CliOption.newBoolean(GENERATE_ZSH_COMPLETION,</span>
+<span class="nc" id="L196">        cliOptions.add(CliOption.newBoolean(GENERATE_ZSH_COMPLETION,</span>
                 &quot;Whether to generate the Zsh completion script&quot;));
-<span class="fc" id="L198">        cliOptions.add(CliOption.newString(HOST_ENVIRONMENT_VARIABLE_NAME,</span>
+<span class="nc" id="L198">        cliOptions.add(CliOption.newString(HOST_ENVIRONMENT_VARIABLE_NAME,</span>
                 &quot;Name of environment variable where host can be defined &quot; +
                         &quot;(e.g. PETSTORE_HOST='http://api.openapitools.org:8080')&quot;));
-<span class="fc" id="L201">        cliOptions.add(CliOption.newString(BASIC_AUTH_ENVIRONMENT_VARIABLE_NAME,</span>
+<span class="nc" id="L201">        cliOptions.add(CliOption.newString(BASIC_AUTH_ENVIRONMENT_VARIABLE_NAME,</span>
                 &quot;Name of environment variable where username and password &quot;
                         +
                         &quot;can be defined (e.g. PETSTORE_CREDS='username:password')&quot;));
-<span class="fc" id="L205">        cliOptions.add(CliOption.newBoolean(APIKEY_AUTH_ENVIRONMENT_VARIABLE_NAME,</span>
+<span class="nc" id="L205">        cliOptions.add(CliOption.newBoolean(APIKEY_AUTH_ENVIRONMENT_VARIABLE_NAME,</span>
                 &quot;Name of environment variable where API key &quot;
                         +
                         &quot;can be defined (e.g. PETSTORE_APIKEY='kjhasdGASDa5asdASD')&quot;));
@@ -210,8 +210,8 @@ public class BashClientCodegen extends DefaultCodegen implements CodegenConfig {
         /**
          * Bash reserved words.
          */
-<span class="fc" id="L213">        reservedWords = new HashSet&lt;&gt;(</span>
-<span class="fc" id="L214">                Arrays.asList(</span>
+<span class="nc" id="L213">        reservedWords = new HashSet&lt;&gt;(</span>
+<span class="nc" id="L214">                Arrays.asList(</span>
                         &quot;case&quot;,
                         &quot;do&quot;,
                         &quot;done&quot;,
@@ -230,51 +230,51 @@ public class BashClientCodegen extends DefaultCodegen implements CodegenConfig {
                         &quot;while&quot;)
         );
 
-<span class="fc" id="L233">        typeMapping.clear();</span>
-<span class="fc" id="L234">        typeMapping.put(&quot;array&quot;, &quot;array&quot;);</span>
-<span class="fc" id="L235">        typeMapping.put(&quot;map&quot;, &quot;map&quot;);</span>
-<span class="fc" id="L236">        typeMapping.put(&quot;List&quot;, &quot;array&quot;);</span>
-<span class="fc" id="L237">        typeMapping.put(&quot;boolean&quot;, &quot;boolean&quot;);</span>
-<span class="fc" id="L238">        typeMapping.put(&quot;string&quot;, &quot;string&quot;);</span>
-<span class="fc" id="L239">        typeMapping.put(&quot;int&quot;, &quot;integer&quot;);</span>
-<span class="fc" id="L240">        typeMapping.put(&quot;float&quot;, &quot;float&quot;);</span>
-<span class="fc" id="L241">        typeMapping.put(&quot;number&quot;, &quot;integer&quot;);</span>
-<span class="fc" id="L242">        typeMapping.put(&quot;date&quot;, &quot;string&quot;);</span>
-<span class="fc" id="L243">        typeMapping.put(&quot;DateTime&quot;, &quot;string&quot;);</span>
-<span class="fc" id="L244">        typeMapping.put(&quot;long&quot;, &quot;integer&quot;);</span>
-<span class="fc" id="L245">        typeMapping.put(&quot;short&quot;, &quot;integer&quot;);</span>
-<span class="fc" id="L246">        typeMapping.put(&quot;char&quot;, &quot;string&quot;);</span>
-<span class="fc" id="L247">        typeMapping.put(&quot;double&quot;, &quot;float&quot;);</span>
-<span class="fc" id="L248">        typeMapping.put(&quot;object&quot;, &quot;map&quot;);</span>
-<span class="fc" id="L249">        typeMapping.put(&quot;integer&quot;, &quot;integer&quot;);</span>
-<span class="fc" id="L250">        typeMapping.put(&quot;ByteArray&quot;, &quot;string&quot;);</span>
-<span class="fc" id="L251">        typeMapping.put(&quot;file&quot;, &quot;binary&quot;);</span>
-<span class="fc" id="L252">        typeMapping.put(&quot;binary&quot;, &quot;binary&quot;);</span>
-<span class="fc" id="L253">        typeMapping.put(&quot;UUID&quot;, &quot;string&quot;);</span>
-<span class="fc" id="L254">        typeMapping.put(&quot;URI&quot;, &quot;string&quot;);</span>
+<span class="nc" id="L233">        typeMapping.clear();</span>
+<span class="nc" id="L234">        typeMapping.put(&quot;array&quot;, &quot;array&quot;);</span>
+<span class="nc" id="L235">        typeMapping.put(&quot;map&quot;, &quot;map&quot;);</span>
+<span class="nc" id="L236">        typeMapping.put(&quot;List&quot;, &quot;array&quot;);</span>
+<span class="nc" id="L237">        typeMapping.put(&quot;boolean&quot;, &quot;boolean&quot;);</span>
+<span class="nc" id="L238">        typeMapping.put(&quot;string&quot;, &quot;string&quot;);</span>
+<span class="nc" id="L239">        typeMapping.put(&quot;int&quot;, &quot;integer&quot;);</span>
+<span class="nc" id="L240">        typeMapping.put(&quot;float&quot;, &quot;float&quot;);</span>
+<span class="nc" id="L241">        typeMapping.put(&quot;number&quot;, &quot;integer&quot;);</span>
+<span class="nc" id="L242">        typeMapping.put(&quot;date&quot;, &quot;string&quot;);</span>
+<span class="nc" id="L243">        typeMapping.put(&quot;DateTime&quot;, &quot;string&quot;);</span>
+<span class="nc" id="L244">        typeMapping.put(&quot;long&quot;, &quot;integer&quot;);</span>
+<span class="nc" id="L245">        typeMapping.put(&quot;short&quot;, &quot;integer&quot;);</span>
+<span class="nc" id="L246">        typeMapping.put(&quot;char&quot;, &quot;string&quot;);</span>
+<span class="nc" id="L247">        typeMapping.put(&quot;double&quot;, &quot;float&quot;);</span>
+<span class="nc" id="L248">        typeMapping.put(&quot;object&quot;, &quot;map&quot;);</span>
+<span class="nc" id="L249">        typeMapping.put(&quot;integer&quot;, &quot;integer&quot;);</span>
+<span class="nc" id="L250">        typeMapping.put(&quot;ByteArray&quot;, &quot;string&quot;);</span>
+<span class="nc" id="L251">        typeMapping.put(&quot;file&quot;, &quot;binary&quot;);</span>
+<span class="nc" id="L252">        typeMapping.put(&quot;binary&quot;, &quot;binary&quot;);</span>
+<span class="nc" id="L253">        typeMapping.put(&quot;UUID&quot;, &quot;string&quot;);</span>
+<span class="nc" id="L254">        typeMapping.put(&quot;URI&quot;, &quot;string&quot;);</span>
 
         /**
          * Additional Properties.  These values can be passed to the templates and
          * are available in models, apis, and supporting files.
          */
-<span class="fc" id="L260">        additionalProperties.put(&quot;apiVersion&quot;, apiVersion);</span>
+<span class="nc" id="L260">        additionalProperties.put(&quot;apiVersion&quot;, apiVersion);</span>
         // make api and model doc path available in mustache template
-<span class="fc" id="L262">        additionalProperties.put(&quot;apiDocPath&quot;, apiDocPath);</span>
-<span class="fc" id="L263">        additionalProperties.put(&quot;modelDocPath&quot;, modelDocPath);</span>
+<span class="nc" id="L262">        additionalProperties.put(&quot;apiDocPath&quot;, apiDocPath);</span>
+<span class="nc" id="L263">        additionalProperties.put(&quot;modelDocPath&quot;, modelDocPath);</span>
 
         /**
          * Language Specific Primitives.  These types will not trigger imports by
          * the client generator
          */
-<span class="fc" id="L269">        languageSpecificPrimitives.clear();</span>
-<span class="fc" id="L270">        languageSpecificPrimitives.add(&quot;array&quot;);</span>
-<span class="fc" id="L271">        languageSpecificPrimitives.add(&quot;map&quot;);</span>
-<span class="fc" id="L272">        languageSpecificPrimitives.add(&quot;boolean&quot;);</span>
-<span class="fc" id="L273">        languageSpecificPrimitives.add(&quot;integer&quot;);</span>
-<span class="fc" id="L274">        languageSpecificPrimitives.add(&quot;float&quot;);</span>
-<span class="fc" id="L275">        languageSpecificPrimitives.add(&quot;string&quot;);</span>
-<span class="fc" id="L276">        languageSpecificPrimitives.add(&quot;binary&quot;);</span>
-<span class="fc" id="L277">    }</span>
+<span class="nc" id="L269">        languageSpecificPrimitives.clear();</span>
+<span class="nc" id="L270">        languageSpecificPrimitives.add(&quot;array&quot;);</span>
+<span class="nc" id="L271">        languageSpecificPrimitives.add(&quot;map&quot;);</span>
+<span class="nc" id="L272">        languageSpecificPrimitives.add(&quot;boolean&quot;);</span>
+<span class="nc" id="L273">        languageSpecificPrimitives.add(&quot;integer&quot;);</span>
+<span class="nc" id="L274">        languageSpecificPrimitives.add(&quot;float&quot;);</span>
+<span class="nc" id="L275">        languageSpecificPrimitives.add(&quot;string&quot;);</span>
+<span class="nc" id="L276">        languageSpecificPrimitives.add(&quot;binary&quot;);</span>
+<span class="nc" id="L277">    }</span>
 
 
     @Override

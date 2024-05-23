@@ -262,14 +262,14 @@ public class JavaCXFExtServerCodegen extends JavaCXFServerCodegen implements CXF
         }
     }
 
-<span class="fc" id="L265">    private final Logger LOGGER = LoggerFactory.getLogger(JavaCXFExtServerCodegen.class);</span>
+<span class="nc" id="L265">    private final Logger LOGGER = LoggerFactory.getLogger(JavaCXFExtServerCodegen.class);</span>
 
     private static final String INDENT = &quot;        &quot;;
 
     // SimpleDateFormat is not thread-safe, and may not be stored in a static field unless stored by ThreadLocal.
     // It's not enough to add a ThreadLocal at the usage site.
     @SuppressWarnings(&quot;squid:S5164&quot;)
-<span class="fc" id="L272">    private static final ThreadLocal&lt;SimpleDateFormat&gt; ISO8601_DATE_FORMAT = ThreadLocal.withInitial(() -&gt;</span>
+<span class="nc" id="L272">    private static final ThreadLocal&lt;SimpleDateFormat&gt; ISO8601_DATE_FORMAT = ThreadLocal.withInitial(() -&gt;</span>
     {
 <span class="nc" id="L274">        SimpleDateFormat f = new SimpleDateFormat(&quot;yyyy-MM-dd&quot;, Locale.getDefault());</span>
 <span class="nc" id="L275">        f.setTimeZone(TimeZone.getTimeZone(&quot;UTC&quot;));</span>
@@ -279,11 +279,11 @@ public class JavaCXFExtServerCodegen extends JavaCXFServerCodegen implements CXF
     // SimpleDateFormat is not thread-safe, and may not be stored in a static field unless stored by ThreadLocal.
     // It's not enough to add a ThreadLocal at the usage site.
     @SuppressWarnings(&quot;squid:S5164&quot;)
-<span class="fc" id="L282">    private static final ThreadLocal&lt;SimpleDateFormat&gt; ISO8601_DATETIME_FORMAT = ThreadLocal.withInitial(() -&gt;</span>
+<span class="nc" id="L282">    private static final ThreadLocal&lt;SimpleDateFormat&gt; ISO8601_DATETIME_FORMAT = ThreadLocal.withInitial(() -&gt;</span>
     {
-<span class="fc" id="L284">        SimpleDateFormat f = new SimpleDateFormat(&quot;yyyy-MM-dd'T'HH:mm:ss.SSSX&quot;, Locale.getDefault());</span>
-<span class="fc" id="L285">        f.setTimeZone(TimeZone.getTimeZone(&quot;UTC&quot;));</span>
-<span class="fc" id="L286">        return f;</span>
+<span class="nc" id="L284">        SimpleDateFormat f = new SimpleDateFormat(&quot;yyyy-MM-dd'T'HH:mm:ss.SSSX&quot;, Locale.getDefault());</span>
+<span class="nc" id="L285">        f.setTimeZone(TimeZone.getTimeZone(&quot;UTC&quot;));</span>
+<span class="nc" id="L286">        return f;</span>
     });
 
     private static final long MILLIS_PER_DAY = 24 * 60 * 60 * 1000L;
@@ -292,51 +292,51 @@ public class JavaCXFExtServerCodegen extends JavaCXFServerCodegen implements CXF
 
     private static final long MAX_DATE;
 
-<span class="fc" id="L295">    private static final String NL = System.lineSeparator();</span>
+<span class="nc" id="L295">    private static final String NL = System.lineSeparator();</span>
 
-<span class="fc" id="L297">    private static final Collection&lt;String&gt; DATE_TYPES = Arrays.asList(&quot;Date&quot;, &quot;DateTime&quot;, &quot;OffsetDateTime&quot;,</span>
+<span class="nc" id="L297">    private static final Collection&lt;String&gt; DATE_TYPES = Arrays.asList(&quot;Date&quot;, &quot;DateTime&quot;, &quot;OffsetDateTime&quot;,</span>
             &quot;LocalDateTime&quot;, &quot;LocalDate&quot;);
 
     static {
-<span class="fc" id="L301">        long minDate = 0;</span>
-<span class="fc" id="L302">        long maxDate = 0;</span>
+<span class="nc" id="L301">        long minDate = 0;</span>
+<span class="nc" id="L302">        long maxDate = 0;</span>
         try {
 <span class="nc" id="L304">            minDate = ISO8601_DATETIME_FORMAT.get().parse(&quot;1970-01-01T00:00:00Z&quot;).getTime();</span>
 <span class="nc" id="L305">            maxDate = ISO8601_DATETIME_FORMAT.get().parse(&quot;2099-12-31T23:59:59Z&quot;).getTime();</span>
-<span class="fc" id="L306">        } catch (ParseException e) {</span>
+<span class="nc" id="L306">        } catch (ParseException e) {</span>
             // Won't happen with the values provided.
 <span class="nc" id="L308">        }</span>
-<span class="fc" id="L309">        MIN_DATE = minDate;</span>
-<span class="fc" id="L310">        MAX_DATE = maxDate;</span>
-<span class="fc" id="L311">    }</span>
+<span class="nc" id="L309">        MIN_DATE = minDate;</span>
+<span class="nc" id="L310">        MAX_DATE = maxDate;</span>
+<span class="nc" id="L311">    }</span>
 
-<span class="fc" id="L313">    private final Map&lt;String, Generex&gt; REGEX_GENERATORS = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L313">    private final Map&lt;String, Generex&gt; REGEX_GENERATORS = new HashMap&lt;&gt;();</span>
 
-<span class="fc" id="L315">    protected boolean generateOperationBody = false;</span>
+<span class="nc" id="L315">    protected boolean generateOperationBody = false;</span>
 
-<span class="fc" id="L317">    protected boolean loadTestDataFromFile = false;</span>
+<span class="nc" id="L317">    protected boolean loadTestDataFromFile = false;</span>
 
-<span class="fc" id="L319">    protected boolean supportMultipleSpringServices = false;</span>
+<span class="nc" id="L319">    protected boolean supportMultipleSpringServices = false;</span>
 
-<span class="fc" id="L321">    protected JsonCache testDataCache = null;</span>
+<span class="nc" id="L321">    protected JsonCache testDataCache = null;</span>
 
-<span class="fc" id="L323">    protected JsonCache testDataControlCache = null;</span>
+<span class="nc" id="L323">    protected JsonCache testDataControlCache = null;</span>
 
-<span class="fc" id="L325">    protected File testDataFile = null;</span>
+<span class="nc" id="L325">    protected File testDataFile = null;</span>
 
-<span class="fc" id="L327">    protected File testDataControlFile = null;</span>
+<span class="nc" id="L327">    protected File testDataControlFile = null;</span>
 
     public JavaCXFExtServerCodegen() {
-<span class="fc" id="L330">        super();</span>
+<span class="nc" id="L330">        super();</span>
 
-<span class="fc" id="L332">        embeddedTemplateDir = templateDir = JAXRS_TEMPLATE_DIRECTORY_NAME + File.separator + &quot;cxf-ext&quot;;</span>
-<span class="fc" id="L333">        cliOptions.add(CliOption.newBoolean(SUPPORT_MULTIPLE_SPRING_SERVICES,</span>
+<span class="nc" id="L332">        embeddedTemplateDir = templateDir = JAXRS_TEMPLATE_DIRECTORY_NAME + File.separator + &quot;cxf-ext&quot;;</span>
+<span class="nc" id="L333">        cliOptions.add(CliOption.newBoolean(SUPPORT_MULTIPLE_SPRING_SERVICES,</span>
                 &quot;Support generation of Spring services from multiple specifications&quot;));
-<span class="fc" id="L335">        cliOptions.add(CliOption.newBoolean(GENERATE_OPERATION_BODY, &quot;Generate fully functional operation bodies&quot;));</span>
-<span class="fc" id="L336">        cliOptions.add(CliOption.newBoolean(LOAD_TEST_DATA_FROM_FILE, &quot;Load test data from a generated JSON file&quot;));</span>
-<span class="fc" id="L337">        cliOptions.add(CliOption.newString(TEST_DATA_FILE, &quot;JSON file to contain generated test data&quot;));</span>
-<span class="fc" id="L338">        cliOptions.add(CliOption.newString(TEST_DATA_CONTROL_FILE, &quot;JSON file to control test data generation&quot;));</span>
-<span class="fc" id="L339">    }</span>
+<span class="nc" id="L335">        cliOptions.add(CliOption.newBoolean(GENERATE_OPERATION_BODY, &quot;Generate fully functional operation bodies&quot;));</span>
+<span class="nc" id="L336">        cliOptions.add(CliOption.newBoolean(LOAD_TEST_DATA_FROM_FILE, &quot;Load test data from a generated JSON file&quot;));</span>
+<span class="nc" id="L337">        cliOptions.add(CliOption.newString(TEST_DATA_FILE, &quot;JSON file to contain generated test data&quot;));</span>
+<span class="nc" id="L338">        cliOptions.add(CliOption.newString(TEST_DATA_CONTROL_FILE, &quot;JSON file to control test data generation&quot;));</span>
+<span class="nc" id="L339">    }</span>
 
     private void appendArrayValue(StringBuilder buffer, String indent, CodegenOperation op, CodegenVariable var,
                                   String localVar, Collection&lt;String&gt; localVars, Map&lt;String, CodegenModel&gt; models) {
@@ -992,7 +992,7 @@ public class JavaCXFExtServerCodegen extends JavaCXFServerCodegen implements CXF
 
     @Override
     public String getName() {
-<span class="fc" id="L995">        return &quot;jaxrs-cxf-extended&quot;;</span>
+<span class="nc" id="L995">        return &quot;jaxrs-cxf-extended&quot;;</span>
     }
 
     @Override

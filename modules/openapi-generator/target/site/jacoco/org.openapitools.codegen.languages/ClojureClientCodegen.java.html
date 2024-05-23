@@ -40,7 +40,7 @@ import static org.openapitools.codegen.utils.StringUtils.dashize;
 import static org.openapitools.codegen.utils.StringUtils.underscore;
 
 public class ClojureClientCodegen extends DefaultCodegen implements CodegenConfig {
-<span class="fc" id="L43">    private final Logger LOGGER = LoggerFactory.getLogger(ClojureClientCodegen.class);</span>
+<span class="nc" id="L43">    private final Logger LOGGER = LoggerFactory.getLogger(ClojureClientCodegen.class);</span>
     private static final String PROJECT_NAME = &quot;projectName&quot;;
     private static final String PROJECT_DESCRIPTION = &quot;projectDescription&quot;;
     private static final String PROJECT_VERSION = &quot;projectVersion&quot;;
@@ -57,83 +57,83 @@ public class ClojureClientCodegen extends DefaultCodegen implements CodegenConfi
     protected String projectVersion;
     protected String baseNamespace;
     protected Set&lt;String&gt; baseSpecs;
-<span class="fc" id="L60">    protected Set&lt;String&gt; models = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L60">    protected Set&lt;String&gt; models = new HashSet&lt;&gt;();</span>
 
-<span class="fc" id="L62">    protected String sourceFolder = &quot;src&quot;;</span>
+<span class="nc" id="L62">    protected String sourceFolder = &quot;src&quot;;</span>
 
     public ClojureClientCodegen() {
-<span class="fc" id="L65">        super();</span>
+<span class="nc" id="L65">        super();</span>
 
         // TODO: Clojure maintainer review
-<span class="fc" id="L68">        modifyFeatureSet(features -&gt; features</span>
-<span class="fc" id="L69">                .excludeDocumentationFeatures(</span>
+<span class="nc" id="L68">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L69">                .excludeDocumentationFeatures(</span>
                         DocumentationFeature.Readme
                 )
-<span class="fc" id="L72">                .securityFeatures(EnumSet.of(</span>
+<span class="nc" id="L72">                .securityFeatures(EnumSet.of(</span>
                         SecurityFeature.OAuth2_Implicit,
                         SecurityFeature.BasicAuth,
                         SecurityFeature.ApiKey
                 ))
-<span class="fc" id="L77">                .excludeParameterFeatures(</span>
+<span class="nc" id="L77">                .excludeParameterFeatures(</span>
                         ParameterFeature.Cookie
                 )
-<span class="fc" id="L80">                .excludeSchemaSupportFeatures(</span>
+<span class="nc" id="L80">                .excludeSchemaSupportFeatures(</span>
                         SchemaSupportFeature.Polymorphism,
                         SchemaSupportFeature.Union
                 )
         );
 
-<span class="fc" id="L86">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;clojure&quot;;</span>
-<span class="fc" id="L87">        modelTemplateFiles.put(&quot;spec.mustache&quot;, &quot;.clj&quot;);</span>
-<span class="fc" id="L88">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.clj&quot;);</span>
-<span class="fc" id="L89">        embeddedTemplateDir = templateDir = &quot;clojure&quot;;</span>
+<span class="nc" id="L86">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;clojure&quot;;</span>
+<span class="nc" id="L87">        modelTemplateFiles.put(&quot;spec.mustache&quot;, &quot;.clj&quot;);</span>
+<span class="nc" id="L88">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.clj&quot;);</span>
+<span class="nc" id="L89">        embeddedTemplateDir = templateDir = &quot;clojure&quot;;</span>
 
-<span class="fc" id="L91">        cliOptions.add(new CliOption(PROJECT_NAME,</span>
+<span class="nc" id="L91">        cliOptions.add(new CliOption(PROJECT_NAME,</span>
                 &quot;name of the project (Default: generated from info.title or \&quot;openapi-clj-client\&quot;)&quot;));
-<span class="fc" id="L93">        cliOptions.add(new CliOption(PROJECT_DESCRIPTION,</span>
+<span class="nc" id="L93">        cliOptions.add(new CliOption(PROJECT_DESCRIPTION,</span>
                 &quot;description of the project (Default: using info.description or \&quot;Client library of &lt;projectName&gt;\&quot;)&quot;));
-<span class="fc" id="L95">        cliOptions.add(new CliOption(PROJECT_VERSION,</span>
+<span class="nc" id="L95">        cliOptions.add(new CliOption(PROJECT_VERSION,</span>
                 &quot;version of the project (Default: using info.version or \&quot;1.0.0\&quot;)&quot;));
-<span class="fc" id="L97">        cliOptions.add(new CliOption(PROJECT_URL,</span>
+<span class="nc" id="L97">        cliOptions.add(new CliOption(PROJECT_URL,</span>
                 &quot;URL of the project (Default: using info.contact.url or not included in project.clj)&quot;));
-<span class="fc" id="L99">        cliOptions.add(new CliOption(PROJECT_LICENSE_NAME,</span>
+<span class="nc" id="L99">        cliOptions.add(new CliOption(PROJECT_LICENSE_NAME,</span>
                 &quot;name of the license the project uses (Default: using info.license.name or not included in project.clj)&quot;));
-<span class="fc" id="L101">        cliOptions.add(new CliOption(PROJECT_LICENSE_URL,</span>
+<span class="nc" id="L101">        cliOptions.add(new CliOption(PROJECT_LICENSE_URL,</span>
                 &quot;URL of the license the project uses (Default: using info.license.url or not included in project.clj)&quot;));
-<span class="fc" id="L103">        cliOptions.add(new CliOption(BASE_NAMESPACE,</span>
+<span class="nc" id="L103">        cliOptions.add(new CliOption(BASE_NAMESPACE,</span>
                 &quot;the base/top namespace (Default: generated from projectName)&quot;));
 
-<span class="fc" id="L106">        typeMapping.clear();</span>
+<span class="nc" id="L106">        typeMapping.clear();</span>
 
         // We have specs for most of the types:
-<span class="fc" id="L109">        typeMapping.put(&quot;integer&quot;, &quot;int?&quot;);</span>
-<span class="fc" id="L110">        typeMapping.put(&quot;long&quot;, &quot;int?&quot;);</span>
-<span class="fc" id="L111">        typeMapping.put(&quot;short&quot;, &quot;int?&quot;);</span>
-<span class="fc" id="L112">        typeMapping.put(&quot;number&quot;, &quot;float?&quot;);</span>
-<span class="fc" id="L113">        typeMapping.put(&quot;float&quot;, &quot;float?&quot;);</span>
-<span class="fc" id="L114">        typeMapping.put(&quot;double&quot;, &quot;float?&quot;);</span>
-<span class="fc" id="L115">        typeMapping.put(&quot;array&quot;, &quot;list?&quot;);</span>
-<span class="fc" id="L116">        typeMapping.put(&quot;map&quot;, &quot;map?&quot;);</span>
-<span class="fc" id="L117">        typeMapping.put(&quot;boolean&quot;, &quot;boolean?&quot;);</span>
-<span class="fc" id="L118">        typeMapping.put(&quot;string&quot;, &quot;string?&quot;);</span>
-<span class="fc" id="L119">        typeMapping.put(&quot;char&quot;, &quot;char?&quot;);</span>
-<span class="fc" id="L120">        typeMapping.put(&quot;date&quot;, &quot;inst?&quot;);</span>
-<span class="fc" id="L121">        typeMapping.put(&quot;DateTime&quot;, &quot;inst?&quot;);</span>
-<span class="fc" id="L122">        typeMapping.put(&quot;UUID&quot;, &quot;uuid?&quot;);</span>
-<span class="fc" id="L123">        typeMapping.put(&quot;URI&quot;, &quot;string?&quot;);</span>
+<span class="nc" id="L109">        typeMapping.put(&quot;integer&quot;, &quot;int?&quot;);</span>
+<span class="nc" id="L110">        typeMapping.put(&quot;long&quot;, &quot;int?&quot;);</span>
+<span class="nc" id="L111">        typeMapping.put(&quot;short&quot;, &quot;int?&quot;);</span>
+<span class="nc" id="L112">        typeMapping.put(&quot;number&quot;, &quot;float?&quot;);</span>
+<span class="nc" id="L113">        typeMapping.put(&quot;float&quot;, &quot;float?&quot;);</span>
+<span class="nc" id="L114">        typeMapping.put(&quot;double&quot;, &quot;float?&quot;);</span>
+<span class="nc" id="L115">        typeMapping.put(&quot;array&quot;, &quot;list?&quot;);</span>
+<span class="nc" id="L116">        typeMapping.put(&quot;map&quot;, &quot;map?&quot;);</span>
+<span class="nc" id="L117">        typeMapping.put(&quot;boolean&quot;, &quot;boolean?&quot;);</span>
+<span class="nc" id="L118">        typeMapping.put(&quot;string&quot;, &quot;string?&quot;);</span>
+<span class="nc" id="L119">        typeMapping.put(&quot;char&quot;, &quot;char?&quot;);</span>
+<span class="nc" id="L120">        typeMapping.put(&quot;date&quot;, &quot;inst?&quot;);</span>
+<span class="nc" id="L121">        typeMapping.put(&quot;DateTime&quot;, &quot;inst?&quot;);</span>
+<span class="nc" id="L122">        typeMapping.put(&quot;UUID&quot;, &quot;uuid?&quot;);</span>
+<span class="nc" id="L123">        typeMapping.put(&quot;URI&quot;, &quot;string?&quot;);</span>
 
         // But some type mappings are not really worth/meaningful to check for:
-<span class="fc" id="L126">        typeMapping.put(&quot;object&quot;, &quot;any?&quot;); // Like, everything is an object.</span>
-<span class="fc" id="L127">        typeMapping.put(&quot;file&quot;, &quot;any?&quot;);   // We don't really have specs for files,</span>
-<span class="fc" id="L128">        typeMapping.put(&quot;binary&quot;, &quot;any?&quot;); // nor binary.</span>
+<span class="nc" id="L126">        typeMapping.put(&quot;object&quot;, &quot;any?&quot;); // Like, everything is an object.</span>
+<span class="nc" id="L127">        typeMapping.put(&quot;file&quot;, &quot;any?&quot;);   // We don't really have specs for files,</span>
+<span class="nc" id="L128">        typeMapping.put(&quot;binary&quot;, &quot;any?&quot;); // nor binary.</span>
         // And while there is a way to easily check if something is a bytearray,
         // (https://stackoverflow.com/questions/14796964/), it's not possible
         // to conform it yet, so we leave it as is.
-<span class="fc" id="L132">        typeMapping.put(&quot;ByteArray&quot;, &quot;any?&quot;);</span>
+<span class="nc" id="L132">        typeMapping.put(&quot;ByteArray&quot;, &quot;any?&quot;);</span>
 
         // Set of base specs that don't need to be imported
-<span class="fc" id="L135">        baseSpecs = new HashSet&lt;&gt;(</span>
-<span class="fc" id="L136">                Arrays.asList(</span>
+<span class="nc" id="L135">        baseSpecs = new HashSet&lt;&gt;(</span>
+<span class="nc" id="L136">                Arrays.asList(</span>
                         &quot;int?&quot;,
                         &quot;float?&quot;,
                         &quot;list?&quot;,
@@ -146,16 +146,16 @@ public class ClojureClientCodegen extends DefaultCodegen implements CodegenConfi
                         &quot;any?&quot;
                 )
         );
-<span class="fc" id="L149">    }</span>
+<span class="nc" id="L149">    }</span>
 
     @Override
     public CodegenType getTag() {
-<span class="fc" id="L153">        return CodegenType.CLIENT;</span>
+<span class="nc" id="L153">        return CodegenType.CLIENT;</span>
     }
 
     @Override
     public String getName() {
-<span class="fc" id="L158">        return &quot;clojure&quot;;</span>
+<span class="nc" id="L158">        return &quot;clojure&quot;;</span>
     }
 
     @Override

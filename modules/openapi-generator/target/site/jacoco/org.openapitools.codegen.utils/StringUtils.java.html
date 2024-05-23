@@ -40,31 +40,31 @@ import static org.openapitools.codegen.utils.CamelizeOption.UPPERCASE_FIRST_CHAR
     private static Cache&lt;EscapedNameOptions, String&gt; escapedWordsCache;
 
     static {
-<span class="fc" id="L43">        int cacheSize = Integer.parseInt(GlobalSettings.getProperty(NAME_CACHE_SIZE_PROPERTY, &quot;200&quot;));</span>
-<span class="fc" id="L44">        int cacheExpiry = Integer.parseInt(GlobalSettings.getProperty(NAME_CACHE_EXPIRY_PROPERTY, &quot;5&quot;));</span>
-<span class="fc" id="L45">        camelizedWordsCache = Caffeine.newBuilder()</span>
-<span class="fc" id="L46">                .maximumSize(cacheSize)</span>
-<span class="fc" id="L47">                .expireAfterAccess(cacheExpiry, TimeUnit.SECONDS)</span>
-<span class="fc" id="L48">                .ticker(Ticker.systemTicker())</span>
-<span class="fc" id="L49">                .build();</span>
+<span class="nc" id="L43">        int cacheSize = Integer.parseInt(GlobalSettings.getProperty(NAME_CACHE_SIZE_PROPERTY, &quot;200&quot;));</span>
+<span class="nc" id="L44">        int cacheExpiry = Integer.parseInt(GlobalSettings.getProperty(NAME_CACHE_EXPIRY_PROPERTY, &quot;5&quot;));</span>
+<span class="nc" id="L45">        camelizedWordsCache = Caffeine.newBuilder()</span>
+<span class="nc" id="L46">                .maximumSize(cacheSize)</span>
+<span class="nc" id="L47">                .expireAfterAccess(cacheExpiry, TimeUnit.SECONDS)</span>
+<span class="nc" id="L48">                .ticker(Ticker.systemTicker())</span>
+<span class="nc" id="L49">                .build();</span>
 
-<span class="fc" id="L51">        escapedWordsCache = Caffeine.newBuilder()</span>
-<span class="fc" id="L52">                .maximumSize(cacheSize)</span>
-<span class="fc" id="L53">                .expireAfterAccess(cacheExpiry, TimeUnit.SECONDS)</span>
-<span class="fc" id="L54">                .ticker(Ticker.systemTicker())</span>
-<span class="fc" id="L55">                .build();</span>
+<span class="nc" id="L51">        escapedWordsCache = Caffeine.newBuilder()</span>
+<span class="nc" id="L52">                .maximumSize(cacheSize)</span>
+<span class="nc" id="L53">                .expireAfterAccess(cacheExpiry, TimeUnit.SECONDS)</span>
+<span class="nc" id="L54">                .ticker(Ticker.systemTicker())</span>
+<span class="nc" id="L55">                .build();</span>
 
-<span class="fc" id="L57">        underscoreWordsCache = Caffeine.newBuilder()</span>
-<span class="fc" id="L58">                .maximumSize(cacheSize)</span>
-<span class="fc" id="L59">                .expireAfterAccess(cacheExpiry, TimeUnit.SECONDS)</span>
-<span class="fc" id="L60">                .ticker(Ticker.systemTicker())</span>
-<span class="fc" id="L61">                .build();</span>
+<span class="nc" id="L57">        underscoreWordsCache = Caffeine.newBuilder()</span>
+<span class="nc" id="L58">                .maximumSize(cacheSize)</span>
+<span class="nc" id="L59">                .expireAfterAccess(cacheExpiry, TimeUnit.SECONDS)</span>
+<span class="nc" id="L60">                .ticker(Ticker.systemTicker())</span>
+<span class="nc" id="L61">                .build();</span>
     }
 
-<span class="fc" id="L64">    private static Pattern capitalLetterPattern = Pattern.compile(&quot;([A-Z]+)([A-Z][a-z][a-z]+)&quot;);</span>
-<span class="fc" id="L65">    private static Pattern lowercasePattern = Pattern.compile(&quot;([a-z\\d])([A-Z])&quot;);</span>
-<span class="fc" id="L66">    private static Pattern pkgSeparatorPattern = Pattern.compile(&quot;\\.&quot;);</span>
-<span class="fc" id="L67">    private static Pattern dollarPattern = Pattern.compile(&quot;\\$&quot;);</span>
+<span class="nc" id="L64">    private static Pattern capitalLetterPattern = Pattern.compile(&quot;([A-Z]+)([A-Z][a-z][a-z]+)&quot;);</span>
+<span class="nc" id="L65">    private static Pattern lowercasePattern = Pattern.compile(&quot;([a-z\\d])([A-Z])&quot;);</span>
+<span class="nc" id="L66">    private static Pattern pkgSeparatorPattern = Pattern.compile(&quot;\\.&quot;);</span>
+<span class="nc" id="L67">    private static Pattern dollarPattern = Pattern.compile(&quot;\\$&quot;);</span>
 
     /**
      * Underscore the given word.
@@ -75,21 +75,21 @@ import static org.openapitools.codegen.utils.CamelizeOption.UPPERCASE_FIRST_CHAR
      * @return The underscored version of the word
      */
     public static String underscore(final String word) {
-<span class="fc" id="L78">        return underscoreWordsCache.get(word, wordToUnderscore -&gt; {</span>
+<span class="nc" id="L78">        return underscoreWordsCache.get(word, wordToUnderscore -&gt; {</span>
             String result;
-<span class="fc" id="L80">            String replacementPattern = &quot;$1_$2&quot;;</span>
+<span class="nc" id="L80">            String replacementPattern = &quot;$1_$2&quot;;</span>
             // Replace package separator with slash.
-<span class="fc" id="L82">            result = pkgSeparatorPattern.matcher(wordToUnderscore).replaceAll(&quot;/&quot;);</span>
+<span class="nc" id="L82">            result = pkgSeparatorPattern.matcher(wordToUnderscore).replaceAll(&quot;/&quot;);</span>
             // Replace $ with two underscores for inner classes.
-<span class="fc" id="L84">            result = dollarPattern.matcher(result).replaceAll(&quot;__&quot;);</span>
+<span class="nc" id="L84">            result = dollarPattern.matcher(result).replaceAll(&quot;__&quot;);</span>
             // Replace capital letter with _ plus lowercase letter.
-<span class="fc" id="L86">            result = capitalLetterPattern.matcher(result).replaceAll(replacementPattern);</span>
-<span class="fc" id="L87">            result = lowercasePattern.matcher(result).replaceAll(replacementPattern);</span>
-<span class="fc" id="L88">            result = result.replace('-', '_');</span>
+<span class="nc" id="L86">            result = capitalLetterPattern.matcher(result).replaceAll(replacementPattern);</span>
+<span class="nc" id="L87">            result = lowercasePattern.matcher(result).replaceAll(replacementPattern);</span>
+<span class="nc" id="L88">            result = result.replace('-', '_');</span>
             // replace space with underscore
-<span class="fc" id="L90">            result = result.replace(' ', '_');</span>
-<span class="fc" id="L91">            result = result.toLowerCase(Locale.ROOT);</span>
-<span class="fc" id="L92">            return result;</span>
+<span class="nc" id="L90">            result = result.replace(' ', '_');</span>
+<span class="nc" id="L91">            result = result.toLowerCase(Locale.ROOT);</span>
+<span class="nc" id="L92">            return result;</span>
         });
     }
 
@@ -112,15 +112,15 @@ import static org.openapitools.codegen.utils.CamelizeOption.UPPERCASE_FIRST_CHAR
      * @return camelized string
      */
     public static String camelize(String word) {
-<span class="fc" id="L115">        return camelize(word, UPPERCASE_FIRST_CHAR);</span>
+<span class="nc" id="L115">        return camelize(word, UPPERCASE_FIRST_CHAR);</span>
     }
 
-<span class="fc" id="L118">    private static Pattern camelizeSlashPattern = Pattern.compile(&quot;\\/(.?)&quot;);</span>
-<span class="fc" id="L119">    private static Pattern camelizeUppercasePattern = Pattern.compile(&quot;(\\.?)(\\w)([^\\.]*)$&quot;);</span>
-<span class="fc" id="L120">    private static Pattern camelizeUnderscorePattern = Pattern.compile(&quot;(_)(.)&quot;);</span>
-<span class="fc" id="L121">    private static Pattern camelizeHyphenPattern = Pattern.compile(&quot;(-)(.)&quot;);</span>
-<span class="fc" id="L122">    private static Pattern camelizeDollarPattern = Pattern.compile(&quot;\\$&quot;);</span>
-<span class="fc" id="L123">    private static Pattern camelizeSimpleUnderscorePattern = Pattern.compile(&quot;_&quot;);</span>
+<span class="nc" id="L118">    private static Pattern camelizeSlashPattern = Pattern.compile(&quot;\\/(.?)&quot;);</span>
+<span class="nc" id="L119">    private static Pattern camelizeUppercasePattern = Pattern.compile(&quot;(\\.?)(\\w)([^\\.]*)$&quot;);</span>
+<span class="nc" id="L120">    private static Pattern camelizeUnderscorePattern = Pattern.compile(&quot;(_)(.)&quot;);</span>
+<span class="nc" id="L121">    private static Pattern camelizeHyphenPattern = Pattern.compile(&quot;(-)(.)&quot;);</span>
+<span class="nc" id="L122">    private static Pattern camelizeDollarPattern = Pattern.compile(&quot;\\$&quot;);</span>
+<span class="nc" id="L123">    private static Pattern camelizeSimpleUnderscorePattern = Pattern.compile(&quot;_&quot;);</span>
 
     /**
      * Camelize name (parameter, property, method, etc)
@@ -130,89 +130,89 @@ import static org.openapitools.codegen.utils.CamelizeOption.UPPERCASE_FIRST_CHAR
      * @return camelized string
      */
     public static String camelize(final String inputWord, CamelizeOption camelizeOption) {
-<span class="fc" id="L133">        Pair&lt;String, CamelizeOption&gt; key = new ImmutablePair&lt;&gt;(inputWord, camelizeOption);</span>
+<span class="nc" id="L133">        Pair&lt;String, CamelizeOption&gt; key = new ImmutablePair&lt;&gt;(inputWord, camelizeOption);</span>
 
-<span class="fc" id="L135">        return camelizedWordsCache.get(key, pair -&gt; {</span>
-<span class="fc" id="L136">            String word = pair.getKey();</span>
-<span class="fc" id="L137">            CamelizeOption option = pair.getValue();</span>
+<span class="nc" id="L135">        return camelizedWordsCache.get(key, pair -&gt; {</span>
+<span class="nc" id="L136">            String word = pair.getKey();</span>
+<span class="nc" id="L137">            CamelizeOption option = pair.getValue();</span>
             // Replace all slashes with dots (package separator)
-<span class="fc" id="L139">            Matcher m = camelizeSlashPattern.matcher(word);</span>
-<span class="fc bfc" id="L140" title="All 2 branches covered.">            while (m.find()) {</span>
-<span class="fc" id="L141">                word = m.replaceFirst(&quot;.&quot; + m.group(1).replace(&quot;\\&quot;, &quot;\\\\&quot;)/*.toUpperCase()*/);</span>
-<span class="fc" id="L142">                m = camelizeSlashPattern.matcher(word);</span>
+<span class="nc" id="L139">            Matcher m = camelizeSlashPattern.matcher(word);</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">            while (m.find()) {</span>
+<span class="nc" id="L141">                word = m.replaceFirst(&quot;.&quot; + m.group(1).replace(&quot;\\&quot;, &quot;\\\\&quot;)/*.toUpperCase()*/);</span>
+<span class="nc" id="L142">                m = camelizeSlashPattern.matcher(word);</span>
             }
 
             // case out dots
-<span class="fc" id="L146">            String[] parts = word.split(&quot;\\.&quot;);</span>
-<span class="fc" id="L147">            StringBuilder f = new StringBuilder();</span>
-<span class="fc bfc" id="L148" title="All 2 branches covered.">            for (String z : parts) {</span>
-<span class="pc bpc" id="L149" title="1 of 2 branches missed.">                if (z.length() &gt; 0) {</span>
-<span class="fc" id="L150">                    f.append(Character.toUpperCase(z.charAt(0))).append(z.substring(1));</span>
+<span class="nc" id="L146">            String[] parts = word.split(&quot;\\.&quot;);</span>
+<span class="nc" id="L147">            StringBuilder f = new StringBuilder();</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">            for (String z : parts) {</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">                if (z.length() &gt; 0) {</span>
+<span class="nc" id="L150">                    f.append(Character.toUpperCase(z.charAt(0))).append(z.substring(1));</span>
                 }
             }
-<span class="fc" id="L153">            word = f.toString();</span>
+<span class="nc" id="L153">            word = f.toString();</span>
 
-<span class="fc" id="L155">            m = camelizeSlashPattern.matcher(word);</span>
-<span class="pc bpc" id="L156" title="1 of 2 branches missed.">            while (m.find()) {</span>
+<span class="nc" id="L155">            m = camelizeSlashPattern.matcher(word);</span>
+<span class="nc bnc" id="L156" title="All 2 branches missed.">            while (m.find()) {</span>
 <span class="nc" id="L157">                word = m.replaceFirst(Character.toUpperCase(m.group(1).charAt(0)) + m.group(1).substring(1)/*.toUpperCase()*/);</span>
 <span class="nc" id="L158">                m = camelizeSlashPattern.matcher(word);</span>
             }
 
             // Uppercase the class name.
-<span class="fc" id="L162">            m = camelizeUppercasePattern.matcher(word);</span>
-<span class="pc bpc" id="L163" title="1 of 2 branches missed.">            if (m.find()) {</span>
-<span class="fc" id="L164">                String rep = m.group(1) + m.group(2).toUpperCase(Locale.ROOT) + m.group(3);</span>
-<span class="fc" id="L165">                rep = camelizeDollarPattern.matcher(rep).replaceAll(&quot;\\\\\\$&quot;);</span>
-<span class="fc" id="L166">                word = m.replaceAll(rep);</span>
+<span class="nc" id="L162">            m = camelizeUppercasePattern.matcher(word);</span>
+<span class="nc bnc" id="L163" title="All 2 branches missed.">            if (m.find()) {</span>
+<span class="nc" id="L164">                String rep = m.group(1) + m.group(2).toUpperCase(Locale.ROOT) + m.group(3);</span>
+<span class="nc" id="L165">                rep = camelizeDollarPattern.matcher(rep).replaceAll(&quot;\\\\\\$&quot;);</span>
+<span class="nc" id="L166">                word = m.replaceAll(rep);</span>
             }
 
             // Remove all underscores (underscore_case to camelCase)
-<span class="fc" id="L170">            m = camelizeUnderscorePattern.matcher(word);</span>
-<span class="fc bfc" id="L171" title="All 2 branches covered.">            while (m.find()) {</span>
-<span class="fc" id="L172">                String original = m.group(2);</span>
-<span class="fc" id="L173">                String upperCase = original.toUpperCase(Locale.ROOT);</span>
-<span class="fc bfc" id="L174" title="All 2 branches covered.">                if (original.equals(upperCase)) {</span>
-<span class="fc" id="L175">                    word = camelizeSimpleUnderscorePattern.matcher(word).replaceFirst(&quot;&quot;);</span>
+<span class="nc" id="L170">            m = camelizeUnderscorePattern.matcher(word);</span>
+<span class="nc bnc" id="L171" title="All 2 branches missed.">            while (m.find()) {</span>
+<span class="nc" id="L172">                String original = m.group(2);</span>
+<span class="nc" id="L173">                String upperCase = original.toUpperCase(Locale.ROOT);</span>
+<span class="nc bnc" id="L174" title="All 2 branches missed.">                if (original.equals(upperCase)) {</span>
+<span class="nc" id="L175">                    word = camelizeSimpleUnderscorePattern.matcher(word).replaceFirst(&quot;&quot;);</span>
                 } else {
-<span class="fc" id="L177">                    word = m.replaceFirst(upperCase);</span>
+<span class="nc" id="L177">                    word = m.replaceFirst(upperCase);</span>
                 }
-<span class="fc" id="L179">                m = camelizeUnderscorePattern.matcher(word);</span>
-<span class="fc" id="L180">            }</span>
+<span class="nc" id="L179">                m = camelizeUnderscorePattern.matcher(word);</span>
+<span class="nc" id="L180">            }</span>
 
             // Remove all hyphens (hyphen-case to camelCase)
-<span class="fc" id="L183">            m = camelizeHyphenPattern.matcher(word);</span>
-<span class="pc bpc" id="L184" title="1 of 2 branches missed.">            while (m.find()) {</span>
+<span class="nc" id="L183">            m = camelizeHyphenPattern.matcher(word);</span>
+<span class="nc bnc" id="L184" title="All 2 branches missed.">            while (m.find()) {</span>
 <span class="nc" id="L185">                word = m.replaceFirst(m.group(2).toUpperCase(Locale.ROOT));</span>
 <span class="nc" id="L186">                m = camelizeHyphenPattern.matcher(word);</span>
             }
 
-<span class="pc bpc" id="L189" title="1 of 3 branches missed.">            switch (option) {</span>
+<span class="nc bnc" id="L189" title="All 3 branches missed.">            switch (option) {</span>
                 case LOWERCASE_FIRST_LETTER:
-<span class="fc" id="L191">                    word = lowercaseFirstLetter(word);</span>
-<span class="fc" id="L192">                    break;</span>
+<span class="nc" id="L191">                    word = lowercaseFirstLetter(word);</span>
+<span class="nc" id="L192">                    break;</span>
                 case LOWERCASE_FIRST_CHAR:
 <span class="nc" id="L194">                    word = word.substring(0, 1).toLowerCase(Locale.ROOT) + word.substring(1);</span>
                     break;
             }
 
             // remove all underscore
-<span class="fc" id="L199">            word = camelizeSimpleUnderscorePattern.matcher(word).replaceAll(&quot;&quot;);</span>
-<span class="fc" id="L200">            return word;</span>
+<span class="nc" id="L199">            word = camelizeSimpleUnderscorePattern.matcher(word).replaceAll(&quot;&quot;);</span>
+<span class="nc" id="L200">            return word;</span>
         });
     }
 
     private static String lowercaseFirstLetter(String word) {
-<span class="pc bpc" id="L205" title="1 of 2 branches missed.">        if (word.length() &gt; 0) {</span>
-<span class="fc" id="L206">            int i = 0;</span>
-<span class="fc" id="L207">            char charAt = word.charAt(i);</span>
-<span class="pc bpc" id="L208" title="6 of 10 branches missed.">            while (i + 1 &lt; word.length() &amp;&amp; !((charAt &gt;= 'a' &amp;&amp; charAt &lt;= 'z') || (charAt &gt;= 'A' &amp;&amp; charAt &lt;= 'Z'))) {</span>
+<span class="nc bnc" id="L205" title="All 2 branches missed.">        if (word.length() &gt; 0) {</span>
+<span class="nc" id="L206">            int i = 0;</span>
+<span class="nc" id="L207">            char charAt = word.charAt(i);</span>
+<span class="nc bnc" id="L208" title="All 10 branches missed.">            while (i + 1 &lt; word.length() &amp;&amp; !((charAt &gt;= 'a' &amp;&amp; charAt &lt;= 'z') || (charAt &gt;= 'A' &amp;&amp; charAt &lt;= 'Z'))) {</span>
 <span class="nc" id="L209">                i = i + 1;</span>
 <span class="nc" id="L210">                charAt = word.charAt(i);</span>
             }
-<span class="fc" id="L212">            i = i + 1;</span>
-<span class="fc" id="L213">            word = word.substring(0, i).toLowerCase(Locale.ROOT) + word.substring(i);</span>
+<span class="nc" id="L212">            i = i + 1;</span>
+<span class="nc" id="L213">            word = word.substring(0, i).toLowerCase(Locale.ROOT) + word.substring(i);</span>
         }
-<span class="fc" id="L215">        return word;</span>
+<span class="nc" id="L215">        return word;</span>
     }
 
     private static class EscapedNameOptions {

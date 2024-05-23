@@ -30,38 +30,38 @@ import java.util.*;
 
 public class JavaResteasyServerCodegen extends AbstractJavaJAXRSServerCodegen implements JbossFeature {
 
-<span class="fc" id="L33">    protected boolean generateJbossDeploymentDescriptor = true;</span>
+<span class="nc" id="L33">    protected boolean generateJbossDeploymentDescriptor = true;</span>
 
     public JavaResteasyServerCodegen() {
-<span class="fc" id="L36">        super();</span>
+<span class="nc" id="L36">        super();</span>
 
-<span class="fc" id="L38">        modifyFeatureSet(features -&gt; features.includeDocumentationFeatures(DocumentationFeature.Readme));</span>
+<span class="nc" id="L38">        modifyFeatureSet(features -&gt; features.includeDocumentationFeatures(DocumentationFeature.Readme));</span>
 
-<span class="fc" id="L40">        artifactId = &quot;openapi-jaxrs-resteasy-server&quot;;</span>
-<span class="fc" id="L41">        outputFolder = &quot;generated-code/JavaJaxRS-Resteasy&quot;;</span>
+<span class="nc" id="L40">        artifactId = &quot;openapi-jaxrs-resteasy-server&quot;;</span>
+<span class="nc" id="L41">        outputFolder = &quot;generated-code/JavaJaxRS-Resteasy&quot;;</span>
 
         // clioOptions default redefinition need to be updated
-<span class="fc" id="L44">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
+<span class="nc" id="L44">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
 
-<span class="fc" id="L46">        apiTemplateFiles.put(&quot;apiService.mustache&quot;, &quot;.java&quot;);</span>
-<span class="fc" id="L47">        apiTemplateFiles.put(&quot;apiServiceImpl.mustache&quot;, &quot;.java&quot;);</span>
-<span class="fc" id="L48">        apiTestTemplateFiles.clear(); // TODO: add test template</span>
+<span class="nc" id="L46">        apiTemplateFiles.put(&quot;apiService.mustache&quot;, &quot;.java&quot;);</span>
+<span class="nc" id="L47">        apiTemplateFiles.put(&quot;apiServiceImpl.mustache&quot;, &quot;.java&quot;);</span>
+<span class="nc" id="L48">        apiTestTemplateFiles.clear(); // TODO: add test template</span>
 
         // clear model and api doc template as AbstractJavaJAXRSServerCodegen
         // does not support auto-generated markdown doc at the moment
         //TODO: add doc templates
-<span class="fc" id="L53">        modelDocTemplateFiles.remove(&quot;model_doc.mustache&quot;);</span>
-<span class="fc" id="L54">        apiDocTemplateFiles.remove(&quot;api_doc.mustache&quot;);</span>
+<span class="nc" id="L53">        modelDocTemplateFiles.remove(&quot;model_doc.mustache&quot;);</span>
+<span class="nc" id="L54">        apiDocTemplateFiles.remove(&quot;api_doc.mustache&quot;);</span>
 
-<span class="fc" id="L56">        embeddedTemplateDir = templateDir = &quot;JavaJaxRS&quot; + File.separator + &quot;resteasy&quot;;</span>
+<span class="nc" id="L56">        embeddedTemplateDir = templateDir = &quot;JavaJaxRS&quot; + File.separator + &quot;resteasy&quot;;</span>
 
-<span class="fc" id="L58">        cliOptions.add(</span>
-<span class="fc" id="L59">                CliOption.newBoolean(GENERATE_JBOSS_DEPLOYMENT_DESCRIPTOR, &quot;Generate Jboss Deployment Descriptor&quot;));</span>
-<span class="fc" id="L60">    }</span>
+<span class="nc" id="L58">        cliOptions.add(</span>
+<span class="nc" id="L59">                CliOption.newBoolean(GENERATE_JBOSS_DEPLOYMENT_DESCRIPTOR, &quot;Generate Jboss Deployment Descriptor&quot;));</span>
+<span class="nc" id="L60">    }</span>
 
     @Override
     public String getName() {
-<span class="fc" id="L64">        return &quot;jaxrs-resteasy&quot;;</span>
+<span class="nc" id="L64">        return &quot;jaxrs-resteasy&quot;;</span>
     }
 
     @Override

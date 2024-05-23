@@ -23,7 +23,7 @@ import java.lang.reflect.InvocationTargetException;
     @SuppressWarnings(&quot;unchecked&quot;)
     public static &lt;T&gt; T newInstance(CodegenModelType type) {
         try {
-<span class="fc" id="L26">            return (T) type.getDefaultImplementation().getDeclaredConstructor().newInstance();</span>
+<span class="nc" id="L26">            return (T) type.getDefaultImplementation().getDeclaredConstructor().newInstance();</span>
 <span class="nc" id="L27">        } catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {</span>
 <span class="nc" id="L28">            throw new RuntimeException(e);</span>
         }

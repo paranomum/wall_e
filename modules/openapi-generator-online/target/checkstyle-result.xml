@@ -1,63 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <checkstyle version="8.19">
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/configuration/HomeController.java">
-<error line="23" severity="warning" message="First sentence of Javadoc is missing an ending period." source="com.puppycrawl.tools.checkstyle.checks.javadoc.SummaryJavadocCheck"/>
-</file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/configuration/ParameterAllowableValuesPlugin.java">
-<error line="39" severity="warning" message="switch without &quot;default&quot; clause." source="com.puppycrawl.tools.checkstyle.checks.coding.MissingSwitchDefaultCheck"/>
-<error line="42" severity="warning" message="Line is longer than 100 characters (found 112)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="46" severity="warning" message="Line is longer than 100 characters (found 112)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-</file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/configuration/OpenAPIDocumentationConfig.java">
-<error line="31" severity="warning" message="Wrong lexicographical order for &apos;org.apache.commons.lang3.StringUtils&apos; import. Should be before &apos;springfox.documentation.swagger2.annotations.EnableSwagger2&apos;." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
-<error line="32" severity="warning" message="Wrong lexicographical order for &apos;org.slf4j.Logger&apos; import. Should be before &apos;springfox.documentation.swagger2.annotations.EnableSwagger2&apos;." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
-<error line="33" severity="warning" message="Wrong lexicographical order for &apos;org.slf4j.LoggerFactory&apos; import. Should be before &apos;springfox.documentation.swagger2.annotations.EnableSwagger2&apos;." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
-<error line="41" severity="warning" message="Wrong lexicographical order for &apos;java.util.HashSet&apos; import. Should be before &apos;java.util.Set&apos;." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
-<error line="46" severity="warning" message="Abbreviation in name &apos;OpenAPIDocumentationConfig&apos; must contain no more than &apos;2&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
-<error line="47" severity="warning" message="Abbreviation in name &apos;LOGGER&apos; must contain no more than &apos;2&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
-<error line="47" column="26" severity="warning" message="Member name &apos;LOGGER&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.MemberNameCheck"/>
-<error line="72" column="5" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocMethodCheck"/>
-<error line="73" column="41" severity="warning" message="WhitespaceAround: &apos;{&apos; is not preceded with whitespace." source="com.puppycrawl.tools.checkstyle.checks.whitespace.WhitespaceAroundCheck"/>
-<error line="76" severity="warning" message="Line is longer than 100 characters (found 101)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="89" severity="warning" message="Abbreviation in name &apos;hostURI&apos; must contain no more than &apos;2&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
-<error line="102" column="15" severity="warning" message="WhitespaceAround: &apos;catch&apos; is not followed by whitespace. Empty blocks may only be represented as {} when not part of a multi-block statement (4.1.3)" source="com.puppycrawl.tools.checkstyle.checks.whitespace.WhitespaceAroundCheck"/>
-<error line="102" column="40" severity="warning" message="Catch parameter name &apos;e&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.CatchParameterNameCheck"/>
-<error line="103" severity="warning" message="Line is longer than 100 characters (found 113)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-</file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/OpenAPI2SpringBoot.java">
-<error line="31" severity="warning" message="Line is longer than 100 characters (found 155)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="32" severity="warning" message="Abbreviation in name &apos;OpenAPI2SpringBoot&apos; must contain no more than &apos;2&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
-<error line="55" column="5" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocMethodCheck"/>
-</file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/RFC3339DateFormat.java">
-<error line="31" severity="warning" message="Abbreviation in name &apos;RFC3339DateFormat&apos; must contain no more than &apos;2&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
-<error line="33" severity="warning" message="&apos;member def modifier&apos; has incorrect indentation level 2, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="34" severity="warning" message="&apos;member def modifier&apos; has incorrect indentation level 2, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="35" severity="warning" message="&apos;member def modifier&apos; has incorrect indentation level 2, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="36" severity="warning" message="&apos;.&apos; has incorrect indentation level 6, expected level should be 10." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="37" severity="warning" message="&apos;.&apos; has incorrect indentation level 6, expected level should be 10." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="39" severity="warning" message="&apos;method def modifier&apos; has incorrect indentation level 2, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="41" severity="warning" message="&apos;method def&apos; child has incorrect indentation level 4, expected level should be 8." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="42" severity="warning" message="&apos;method def&apos; child has incorrect indentation level 4, expected level should be 8." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="43" severity="warning" message="&apos;method def&apos; child has incorrect indentation level 4, expected level should be 8." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="44" severity="warning" message="&apos;method def rcurly&apos; has incorrect indentation level 2, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="46" severity="warning" message="&apos;method def modifier&apos; has incorrect indentation level 2, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="48" severity="warning" message="&apos;method def&apos; child has incorrect indentation level 4, expected level should be 8." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="49" severity="warning" message="&apos;method def rcurly&apos; has incorrect indentation level 2, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-</file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/model/ApiResponse.java">
-<error line="36" column="5" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocMethodCheck"/>
-</file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/model/GeneratorInput.java">
-<error line="29" severity="warning" message="Abbreviation in name &apos;openAPIUrl&apos; must contain no more than &apos;2&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
-<error line="57" severity="warning" message="Abbreviation in name &apos;getOpenAPIUrl&apos; must contain no more than &apos;2&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
-<error line="61" severity="warning" message="Abbreviation in name &apos;setOpenAPIUrl&apos; must contain no more than &apos;2&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
-</file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/model/Generated.java">
-</file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/model/ResponseCode.java">
-</file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/api/GenApi.java">
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/api/GenApi.java">
 <error line="23" severity="warning" message="&apos;package&apos; should be separated from previous statement." source="com.puppycrawl.tools.checkstyle.checks.whitespace.EmptyLineSeparatorCheck"/>
 <error line="25" severity="warning" message="Using the &apos;.*&apos; form of import should be avoided - io.swagger.annotations.*." source="com.puppycrawl.tools.checkstyle.checks.imports.AvoidStarImportCheck"/>
 <error line="38" severity="warning" message="Wrong lexicographical order for &apos;java.util.List&apos; import. Should be before &apos;javax.validation.Valid&apos;." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
@@ -108,18 +51,12 @@
 <error line="108" column="176" severity="warning" message="WhitespaceAround: &apos;=&apos; is not preceded with whitespace." source="com.puppycrawl.tools.checkstyle.checks.whitespace.WhitespaceAroundCheck"/>
 <error line="110" severity="warning" message="Line is longer than 100 characters (found 126)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
 </file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/api/ApiUtil.java">
-<error line="23" severity="warning" message="Wrong lexicographical order for &apos;java.io.IOException&apos; import. Should be before &apos;javax.servlet.http.HttpServletResponse&apos;." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
-<error line="26" severity="warning" message="Line is longer than 100 characters (found 101)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="26" column="5" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocMethodCheck"/>
-<error line="30" column="30" severity="warning" message="Catch parameter name &apos;e&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.CatchParameterNameCheck"/>
-</file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/api/GenApiController.java">
-</file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/api/ApiOriginFilter.java">
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/api/ApiOriginFilter.java">
 <error line="22" severity="warning" message="Using the &apos;.*&apos; form of import should be avoided - javax.servlet.*." source="com.puppycrawl.tools.checkstyle.checks.imports.AvoidStarImportCheck"/>
 </file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/api/GenApiDelegate.java">
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/api/GenApiController.java">
+</file>
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/api/GenApiDelegate.java">
 <error line="44" severity="warning" message="Summary javadoc is missing." source="com.puppycrawl.tools.checkstyle.checks.javadoc.SummaryJavadocCheck"/>
 <error line="61" severity="warning" message="Summary javadoc is missing." source="com.puppycrawl.tools.checkstyle.checks.javadoc.SummaryJavadocCheck"/>
 <error line="71" severity="warning" message="Summary javadoc is missing." source="com.puppycrawl.tools.checkstyle.checks.javadoc.SummaryJavadocCheck"/>
@@ -136,23 +73,18 @@
 <error line="122" severity="warning" message="Line is longer than 100 characters (found 162)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
 <error line="131" severity="warning" message="Summary javadoc is missing." source="com.puppycrawl.tools.checkstyle.checks.javadoc.SummaryJavadocCheck"/>
 </file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/service/ZipUtil.java">
-<error line="55" severity="warning" message="&apos;try resource&apos; has incorrect indentation level 13, expected level should be 16." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="89" severity="warning" message="&apos;try resource&apos; has incorrect indentation level 17, expected level should be 20." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="115" severity="warning" message="&apos;try resource&apos; has incorrect indentation level 13, expected level should be 16." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/api/ApiUtil.java">
+<error line="23" severity="warning" message="Wrong lexicographical order for &apos;java.io.IOException&apos; import. Should be before &apos;javax.servlet.http.HttpServletResponse&apos;." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
+<error line="26" severity="warning" message="Line is longer than 100 characters (found 101)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="26" column="5" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocMethodCheck"/>
+<error line="30" column="30" severity="warning" message="Catch parameter name &apos;e&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.CatchParameterNameCheck"/>
 </file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/service/GenApiService.java">
-<error line="48" severity="warning" message="Using the &apos;.*&apos; form of import should be avoided - java.util.*." source="com.puppycrawl.tools.checkstyle.checks.imports.AvoidStarImportCheck"/>
-<error line="82" column="19" severity="warning" message="Local variable name &apos;g&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.LocalVariableNameCheck"/>
-<error line="91" column="40" severity="warning" message="Catch parameter name &apos;e&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.CatchParameterNameCheck"/>
-<error line="93" column="30" severity="warning" message="Catch parameter name &apos;e&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.CatchParameterNameCheck"/>
-<error line="94" severity="warning" message="Line is longer than 100 characters (found 115)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="98" column="30" severity="warning" message="Catch parameter name &apos;e&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.CatchParameterNameCheck"/>
-<error line="112" severity="warning" message="Line is longer than 100 characters (found 104)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="150" severity="warning" message="Line is longer than 100 characters (found 116)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="172" column="23" severity="warning" message="Local variable name &apos;g&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.LocalVariableNameCheck"/>
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/OpenAPI2SpringBoot.java">
+<error line="31" severity="warning" message="Line is longer than 100 characters (found 155)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="32" severity="warning" message="Abbreviation in name &apos;OpenAPI2SpringBoot&apos; must contain no more than &apos;2&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
+<error line="55" column="5" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocMethodCheck"/>
 </file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/service/Generator.java">
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/service/Generator.java">
 <error line="47" column="5" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocMethodCheck"/>
 <error line="51" column="28" severity="warning" message="Catch parameter name &apos;e&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.CatchParameterNameCheck"/>
 <error line="52" severity="warning" message="Line is longer than 100 characters (found 131)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
@@ -170,8 +102,76 @@
 <error line="177" severity="warning" message="Line is longer than 100 characters (found 118)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
 <error line="187" column="28" severity="warning" message="Catch parameter name &apos;e&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.CatchParameterNameCheck"/>
 </file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-online/src/main/resources/version.properties">
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/service/ZipUtil.java">
+<error line="55" severity="warning" message="&apos;try resource&apos; has incorrect indentation level 13, expected level should be 16." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="89" severity="warning" message="&apos;try resource&apos; has incorrect indentation level 17, expected level should be 20." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="115" severity="warning" message="&apos;try resource&apos; has incorrect indentation level 13, expected level should be 16." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
 </file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-online/src/main/resources/application.properties">
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/service/GenApiService.java">
+<error line="48" severity="warning" message="Using the &apos;.*&apos; form of import should be avoided - java.util.*." source="com.puppycrawl.tools.checkstyle.checks.imports.AvoidStarImportCheck"/>
+<error line="82" column="19" severity="warning" message="Local variable name &apos;g&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.LocalVariableNameCheck"/>
+<error line="91" column="40" severity="warning" message="Catch parameter name &apos;e&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.CatchParameterNameCheck"/>
+<error line="93" column="30" severity="warning" message="Catch parameter name &apos;e&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.CatchParameterNameCheck"/>
+<error line="94" severity="warning" message="Line is longer than 100 characters (found 115)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="98" column="30" severity="warning" message="Catch parameter name &apos;e&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.CatchParameterNameCheck"/>
+<error line="112" severity="warning" message="Line is longer than 100 characters (found 104)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="150" severity="warning" message="Line is longer than 100 characters (found 116)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="172" column="23" severity="warning" message="Local variable name &apos;g&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.LocalVariableNameCheck"/>
+</file>
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/RFC3339DateFormat.java">
+<error line="31" severity="warning" message="Abbreviation in name &apos;RFC3339DateFormat&apos; must contain no more than &apos;2&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
+<error line="33" severity="warning" message="&apos;member def modifier&apos; has incorrect indentation level 2, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="34" severity="warning" message="&apos;member def modifier&apos; has incorrect indentation level 2, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="35" severity="warning" message="&apos;member def modifier&apos; has incorrect indentation level 2, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="36" severity="warning" message="&apos;.&apos; has incorrect indentation level 6, expected level should be 10." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="37" severity="warning" message="&apos;.&apos; has incorrect indentation level 6, expected level should be 10." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="39" severity="warning" message="&apos;method def modifier&apos; has incorrect indentation level 2, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="41" severity="warning" message="&apos;method def&apos; child has incorrect indentation level 4, expected level should be 8." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="42" severity="warning" message="&apos;method def&apos; child has incorrect indentation level 4, expected level should be 8." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="43" severity="warning" message="&apos;method def&apos; child has incorrect indentation level 4, expected level should be 8." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="44" severity="warning" message="&apos;method def rcurly&apos; has incorrect indentation level 2, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="46" severity="warning" message="&apos;method def modifier&apos; has incorrect indentation level 2, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="48" severity="warning" message="&apos;method def&apos; child has incorrect indentation level 4, expected level should be 8." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="49" severity="warning" message="&apos;method def rcurly&apos; has incorrect indentation level 2, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+</file>
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/configuration/OpenAPIDocumentationConfig.java">
+<error line="31" severity="warning" message="Wrong lexicographical order for &apos;org.apache.commons.lang3.StringUtils&apos; import. Should be before &apos;springfox.documentation.swagger2.annotations.EnableSwagger2&apos;." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
+<error line="32" severity="warning" message="Wrong lexicographical order for &apos;org.slf4j.Logger&apos; import. Should be before &apos;springfox.documentation.swagger2.annotations.EnableSwagger2&apos;." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
+<error line="33" severity="warning" message="Wrong lexicographical order for &apos;org.slf4j.LoggerFactory&apos; import. Should be before &apos;springfox.documentation.swagger2.annotations.EnableSwagger2&apos;." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
+<error line="41" severity="warning" message="Wrong lexicographical order for &apos;java.util.HashSet&apos; import. Should be before &apos;java.util.Set&apos;." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
+<error line="46" severity="warning" message="Abbreviation in name &apos;OpenAPIDocumentationConfig&apos; must contain no more than &apos;2&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
+<error line="47" severity="warning" message="Abbreviation in name &apos;LOGGER&apos; must contain no more than &apos;2&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
+<error line="47" column="26" severity="warning" message="Member name &apos;LOGGER&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.MemberNameCheck"/>
+<error line="72" column="5" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocMethodCheck"/>
+<error line="73" column="41" severity="warning" message="WhitespaceAround: &apos;{&apos; is not preceded with whitespace." source="com.puppycrawl.tools.checkstyle.checks.whitespace.WhitespaceAroundCheck"/>
+<error line="76" severity="warning" message="Line is longer than 100 characters (found 101)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="89" severity="warning" message="Abbreviation in name &apos;hostURI&apos; must contain no more than &apos;2&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
+<error line="102" column="15" severity="warning" message="WhitespaceAround: &apos;catch&apos; is not followed by whitespace. Empty blocks may only be represented as {} when not part of a multi-block statement (4.1.3)" source="com.puppycrawl.tools.checkstyle.checks.whitespace.WhitespaceAroundCheck"/>
+<error line="102" column="40" severity="warning" message="Catch parameter name &apos;e&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.CatchParameterNameCheck"/>
+<error line="103" severity="warning" message="Line is longer than 100 characters (found 113)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+</file>
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/configuration/HomeController.java">
+<error line="23" severity="warning" message="First sentence of Javadoc is missing an ending period." source="com.puppycrawl.tools.checkstyle.checks.javadoc.SummaryJavadocCheck"/>
+</file>
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/configuration/ParameterAllowableValuesPlugin.java">
+<error line="39" severity="warning" message="switch without &quot;default&quot; clause." source="com.puppycrawl.tools.checkstyle.checks.coding.MissingSwitchDefaultCheck"/>
+<error line="42" severity="warning" message="Line is longer than 100 characters (found 112)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="46" severity="warning" message="Line is longer than 100 characters (found 112)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+</file>
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/model/GeneratorInput.java">
+<error line="29" severity="warning" message="Abbreviation in name &apos;openAPIUrl&apos; must contain no more than &apos;2&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
+<error line="57" severity="warning" message="Abbreviation in name &apos;getOpenAPIUrl&apos; must contain no more than &apos;2&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
+<error line="61" severity="warning" message="Abbreviation in name &apos;setOpenAPIUrl&apos; must contain no more than &apos;2&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
+</file>
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/model/ApiResponse.java">
+<error line="36" column="5" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocMethodCheck"/>
+</file>
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/model/Generated.java">
+</file>
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-online/src/main/java/org/openapitools/codegen/online/model/ResponseCode.java">
+</file>
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-online/src/main/resources/version.properties">
+</file>
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-online/src/main/resources/application.properties">
 </file>
 </checkstyle>

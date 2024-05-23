@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <checkstyle version="8.19">
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-maven-plugin/src/main/java/org/openapitools/codegen/plugin/CodeGenMojo.java">
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-maven-plugin/src/main/java/org/openapitools/codegen/plugin/CodeGenMojo.java">
 <error line="21" severity="warning" message="Using the &apos;.*&apos; form of import should be avoided - org.openapitools.codegen.config.CodegenConfiguratorUtils.*." source="com.puppycrawl.tools.checkstyle.checks.imports.AvoidStarImportCheck"/>
 <error line="23" severity="warning" message="Import statement for &apos;io.swagger.v3.core.util.Json&apos; is in the wrong order. Should be in the &apos;THIRD_PARTY_PACKAGE&apos; group, expecting group &apos;SPECIAL_IMPORTS&apos; on this line." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
 <error line="24" severity="warning" message="Import statement for &apos;io.swagger.v3.core.util.Yaml&apos; is in the wrong order. Should be in the &apos;THIRD_PARTY_PACKAGE&apos; group, expecting group &apos;SPECIAL_IMPORTS&apos; on this line." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
@@ -197,7 +197,7 @@
 <error line="1162" column="36" severity="warning" message="Catch parameter name &apos;e&apos; must match pattern &apos;^[a-z][a-z0-9][a-zA-Z0-9]*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.CatchParameterNameCheck"/>
 <error line="1163" severity="warning" message="Line is longer than 100 characters (found 144)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
 </file>
-<file name="/Users/admin/Desktop/openapi-generator/modules/openapi-generator-maven-plugin/target/generated-sources/plugin/org/openapitools/openapi_generator_maven_plugin/HelpMojo.java">
+<file name="/home/runner/work/openapi-generator/openapi-generator/modules/openapi-generator-maven-plugin/target/generated-sources/plugin/org/openapitools/openapi_generator_maven_plugin/HelpMojo.java">
 <error line="1" column="9" severity="warning" message="Package name &apos;org.openapitools.openapi_generator_maven_plugin&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>
 <error line="17" severity="warning" message="Wrong lexicographical order for &apos;java.io.IOException&apos; import. Should be before &apos;javax.xml.parsers.ParserConfigurationException&apos;." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
 <error line="18" severity="warning" message="Wrong lexicographical order for &apos;java.io.InputStream&apos; import. Should be before &apos;javax.xml.parsers.ParserConfigurationException&apos;." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>

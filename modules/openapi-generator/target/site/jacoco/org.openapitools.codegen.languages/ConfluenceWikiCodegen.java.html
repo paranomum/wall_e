@@ -32,72 +32,72 @@ import java.util.*;
 
 public class ConfluenceWikiCodegen extends DefaultCodegen implements CodegenConfig {
     private static final String ALL_OPERATIONS = &quot;&quot;;
-<span class="fc" id="L35">    protected String invokerPackage = &quot;org.openapitools.client&quot;;</span>
-<span class="fc" id="L36">    protected String groupId = &quot;org.openapitools&quot;;</span>
-<span class="fc" id="L37">    protected String artifactId = &quot;openapi-client&quot;;</span>
-<span class="fc" id="L38">    protected String artifactVersion = &quot;1.0.0&quot;;</span>
+<span class="nc" id="L35">    protected String invokerPackage = &quot;org.openapitools.client&quot;;</span>
+<span class="nc" id="L36">    protected String groupId = &quot;org.openapitools&quot;;</span>
+<span class="nc" id="L37">    protected String artifactId = &quot;openapi-client&quot;;</span>
+<span class="nc" id="L38">    protected String artifactVersion = &quot;1.0.0&quot;;</span>
 
     public ConfluenceWikiCodegen() {
-<span class="fc" id="L41">        super();</span>
+<span class="nc" id="L41">        super();</span>
 
         // TODO: ConfluenceWiki maintainer review
-<span class="fc" id="L44">        modifyFeatureSet(features -&gt; features</span>
-<span class="fc" id="L45">                .documentationFeatures(EnumSet.noneOf(DocumentationFeature.class))</span>
-<span class="fc" id="L46">                .securityFeatures(EnumSet.noneOf(SecurityFeature.class))</span>
-<span class="fc" id="L47">                .excludeParameterFeatures(ParameterFeature.Cookie)</span>
-<span class="fc" id="L48">                .includeWireFormatFeatures(</span>
+<span class="nc" id="L44">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L45">                .documentationFeatures(EnumSet.noneOf(DocumentationFeature.class))</span>
+<span class="nc" id="L46">                .securityFeatures(EnumSet.noneOf(SecurityFeature.class))</span>
+<span class="nc" id="L47">                .excludeParameterFeatures(ParameterFeature.Cookie)</span>
+<span class="nc" id="L48">                .includeWireFormatFeatures(</span>
                         WireFormatFeature.JSON,
                         WireFormatFeature.XML,
                         WireFormatFeature.Custom
                 )
-<span class="fc" id="L53">                .excludeSchemaSupportFeatures(</span>
+<span class="nc" id="L53">                .excludeSchemaSupportFeatures(</span>
                         SchemaSupportFeature.Polymorphism,
                         SchemaSupportFeature.Union
                 )
         );
 
-<span class="fc" id="L59">        outputFolder = &quot;docs&quot;;</span>
-<span class="fc" id="L60">        embeddedTemplateDir = templateDir = &quot;confluenceWikiDocs&quot;;</span>
+<span class="nc" id="L59">        outputFolder = &quot;docs&quot;;</span>
+<span class="nc" id="L60">        embeddedTemplateDir = templateDir = &quot;confluenceWikiDocs&quot;;</span>
 
-<span class="fc" id="L62">        defaultIncludes = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L62">        defaultIncludes = new HashSet&lt;&gt;();</span>
 
-<span class="fc" id="L64">        cliOptions.add(new CliOption(&quot;appName&quot;, &quot;short name of the application&quot;));</span>
-<span class="fc" id="L65">        cliOptions.add(new CliOption(&quot;appDescription&quot;, &quot;description of the application&quot;));</span>
-<span class="fc" id="L66">        cliOptions.add(new CliOption(&quot;infoUrl&quot;, &quot;a URL where users can get more information about the application&quot;));</span>
-<span class="fc" id="L67">        cliOptions.add(new CliOption(&quot;infoEmail&quot;, &quot;an email address to contact for inquiries about the application&quot;));</span>
-<span class="fc" id="L68">        cliOptions.add(new CliOption(&quot;licenseInfo&quot;, &quot;a short description of the license&quot;));</span>
-<span class="fc" id="L69">        cliOptions.add(new CliOption(&quot;licenseUrl&quot;, &quot;a URL pointing to the full license&quot;));</span>
-<span class="fc" id="L70">        cliOptions.add(new CliOption(CodegenConstants.INVOKER_PACKAGE, CodegenConstants.INVOKER_PACKAGE_DESC));</span>
-<span class="fc" id="L71">        cliOptions.add(new CliOption(CodegenConstants.GROUP_ID, CodegenConstants.GROUP_ID_DESC));</span>
-<span class="fc" id="L72">        cliOptions.add(new CliOption(CodegenConstants.ARTIFACT_ID, CodegenConstants.ARTIFACT_ID_DESC));</span>
-<span class="fc" id="L73">        cliOptions.add(new CliOption(CodegenConstants.ARTIFACT_VERSION, CodegenConstants.ARTIFACT_VERSION_DESC));</span>
+<span class="nc" id="L64">        cliOptions.add(new CliOption(&quot;appName&quot;, &quot;short name of the application&quot;));</span>
+<span class="nc" id="L65">        cliOptions.add(new CliOption(&quot;appDescription&quot;, &quot;description of the application&quot;));</span>
+<span class="nc" id="L66">        cliOptions.add(new CliOption(&quot;infoUrl&quot;, &quot;a URL where users can get more information about the application&quot;));</span>
+<span class="nc" id="L67">        cliOptions.add(new CliOption(&quot;infoEmail&quot;, &quot;an email address to contact for inquiries about the application&quot;));</span>
+<span class="nc" id="L68">        cliOptions.add(new CliOption(&quot;licenseInfo&quot;, &quot;a short description of the license&quot;));</span>
+<span class="nc" id="L69">        cliOptions.add(new CliOption(&quot;licenseUrl&quot;, &quot;a URL pointing to the full license&quot;));</span>
+<span class="nc" id="L70">        cliOptions.add(new CliOption(CodegenConstants.INVOKER_PACKAGE, CodegenConstants.INVOKER_PACKAGE_DESC));</span>
+<span class="nc" id="L71">        cliOptions.add(new CliOption(CodegenConstants.GROUP_ID, CodegenConstants.GROUP_ID_DESC));</span>
+<span class="nc" id="L72">        cliOptions.add(new CliOption(CodegenConstants.ARTIFACT_ID, CodegenConstants.ARTIFACT_ID_DESC));</span>
+<span class="nc" id="L73">        cliOptions.add(new CliOption(CodegenConstants.ARTIFACT_VERSION, CodegenConstants.ARTIFACT_VERSION_DESC));</span>
 
-<span class="fc" id="L75">        additionalProperties.put(&quot;appName&quot;, &quot;OpenAPI Sample&quot;);</span>
-<span class="fc" id="L76">        additionalProperties.put(&quot;appDescription&quot;, &quot;A sample OpenAPI server&quot;);</span>
-<span class="fc" id="L77">        additionalProperties.put(&quot;infoUrl&quot;, &quot;https://openapi-generator.tech&quot;);</span>
-<span class="fc" id="L78">        additionalProperties.put(&quot;infoEmail&quot;, &quot;team@openapitools.org&quot;);</span>
-<span class="fc" id="L79">        additionalProperties.put(&quot;licenseInfo&quot;, &quot;All rights reserved&quot;);</span>
-<span class="fc" id="L80">        additionalProperties.put(&quot;licenseUrl&quot;, &quot;http://apache.org/licenses/LICENSE-2.0.html&quot;);</span>
-<span class="fc" id="L81">        additionalProperties.put(CodegenConstants.INVOKER_PACKAGE, invokerPackage);</span>
-<span class="fc" id="L82">        additionalProperties.put(CodegenConstants.GROUP_ID, groupId);</span>
-<span class="fc" id="L83">        additionalProperties.put(CodegenConstants.ARTIFACT_ID, artifactId);</span>
-<span class="fc" id="L84">        additionalProperties.put(CodegenConstants.ARTIFACT_VERSION, artifactVersion);</span>
+<span class="nc" id="L75">        additionalProperties.put(&quot;appName&quot;, &quot;OpenAPI Sample&quot;);</span>
+<span class="nc" id="L76">        additionalProperties.put(&quot;appDescription&quot;, &quot;A sample OpenAPI server&quot;);</span>
+<span class="nc" id="L77">        additionalProperties.put(&quot;infoUrl&quot;, &quot;https://openapi-generator.tech&quot;);</span>
+<span class="nc" id="L78">        additionalProperties.put(&quot;infoEmail&quot;, &quot;team@openapitools.org&quot;);</span>
+<span class="nc" id="L79">        additionalProperties.put(&quot;licenseInfo&quot;, &quot;All rights reserved&quot;);</span>
+<span class="nc" id="L80">        additionalProperties.put(&quot;licenseUrl&quot;, &quot;http://apache.org/licenses/LICENSE-2.0.html&quot;);</span>
+<span class="nc" id="L81">        additionalProperties.put(CodegenConstants.INVOKER_PACKAGE, invokerPackage);</span>
+<span class="nc" id="L82">        additionalProperties.put(CodegenConstants.GROUP_ID, groupId);</span>
+<span class="nc" id="L83">        additionalProperties.put(CodegenConstants.ARTIFACT_ID, artifactId);</span>
+<span class="nc" id="L84">        additionalProperties.put(CodegenConstants.ARTIFACT_VERSION, artifactVersion);</span>
 
-<span class="fc" id="L86">        supportingFiles.add(new SupportingFile(&quot;index.mustache&quot;, &quot;&quot;, &quot;confluence-markup.txt&quot;));</span>
-<span class="fc" id="L87">        reservedWords = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L86">        supportingFiles.add(new SupportingFile(&quot;index.mustache&quot;, &quot;&quot;, &quot;confluence-markup.txt&quot;));</span>
+<span class="nc" id="L87">        reservedWords = new HashSet&lt;&gt;();</span>
 
-<span class="fc" id="L89">        languageSpecificPrimitives = new HashSet&lt;&gt;();</span>
-<span class="fc" id="L90">        importMapping = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L91">    }</span>
+<span class="nc" id="L89">        languageSpecificPrimitives = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L90">        importMapping = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L91">    }</span>
 
     @Override
     public CodegenType getTag() {
-<span class="fc" id="L95">        return CodegenType.DOCUMENTATION;</span>
+<span class="nc" id="L95">        return CodegenType.DOCUMENTATION;</span>
     }
 
     @Override
     public String getName() {
-<span class="fc" id="L100">        return &quot;cwiki&quot;;</span>
+<span class="nc" id="L100">        return &quot;cwiki&quot;;</span>
     }
 
     @Override

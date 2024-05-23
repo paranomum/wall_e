@@ -65,7 +65,7 @@ public abstract class JavaHelidonCommonCodegen extends AbstractJavaCodegen
     private static final String VALIDATION_ARTIFACT_PREFIX_KEY = &quot;x-helidon-validationArtifactPrefix&quot;;
     private static final String VALIDATION_ARTIFACT_PREFIX_JAVAX = &quot;&quot;;
     private static final String VALIDATION_ARTIFACT_PREFIX_JAKARTA = MICROPROFILE_ROOT_PACKAGE_JAKARTA + &quot;.&quot;;
-<span class="fc" id="L68">    private static final Map&lt;String, String&gt; EXAMPLE_RETURN_VALUES = new HashMap&lt;String, String&gt;();</span>
+<span class="nc" id="L68">    private static final Map&lt;String, String&gt; EXAMPLE_RETURN_VALUES = new HashMap&lt;String, String&gt;();</span>
 
     // for generated doc
     static final String MICROPROFILE_ROOT_PACKAGE_DEFAULT =
@@ -90,19 +90,19 @@ public abstract class JavaHelidonCommonCodegen extends AbstractJavaCodegen
     private String rootJavaEEDepPrefix;
 
     public JavaHelidonCommonCodegen() {
-<span class="fc" id="L93">        super();</span>
+<span class="nc" id="L93">        super();</span>
 
-<span class="fc" id="L95">        EXAMPLE_RETURN_VALUES.put(&quot;set&quot;, &quot;Set&quot;);</span>
-<span class="fc" id="L96">        EXAMPLE_RETURN_VALUES.put(&quot;array&quot;, &quot;List&quot;);</span>
-<span class="fc" id="L97">        EXAMPLE_RETURN_VALUES.put(&quot;map&quot;, &quot;Map&quot;);</span>
+<span class="nc" id="L95">        EXAMPLE_RETURN_VALUES.put(&quot;set&quot;, &quot;Set&quot;);</span>
+<span class="nc" id="L96">        EXAMPLE_RETURN_VALUES.put(&quot;array&quot;, &quot;List&quot;);</span>
+<span class="nc" id="L97">        EXAMPLE_RETURN_VALUES.put(&quot;map&quot;, &quot;Map&quot;);</span>
 
-<span class="fc" id="L99">        cliOptions.add(new CliOption(HELIDON_VERSION, HELIDON_VERSION_DESC)</span>
-<span class="fc" id="L100">                .defaultValue(DEFAULT_HELIDON_VERSION));</span>
-<span class="fc" id="L101">        cliOptions.add(new CliOption(MICROPROFILE_ROOT_PACKAGE, MICROPROFILE_ROOT_PACKAGE_DESC)</span>
-<span class="fc" id="L102">                .defaultValue(MICROPROFILE_ROOT_PACKAGE_DEFAULT));</span>
-<span class="fc" id="L103">        cliOptions.add(new CliOption(FULL_PROJECT, FULL_PROJECT_DESC)</span>
-<span class="fc" id="L104">                .defaultValue(&quot;&quot;));     // depends on project state</span>
-<span class="fc" id="L105">    }</span>
+<span class="nc" id="L99">        cliOptions.add(new CliOption(HELIDON_VERSION, HELIDON_VERSION_DESC)</span>
+<span class="nc" id="L100">                .defaultValue(DEFAULT_HELIDON_VERSION));</span>
+<span class="nc" id="L101">        cliOptions.add(new CliOption(MICROPROFILE_ROOT_PACKAGE, MICROPROFILE_ROOT_PACKAGE_DESC)</span>
+<span class="nc" id="L102">                .defaultValue(MICROPROFILE_ROOT_PACKAGE_DEFAULT));</span>
+<span class="nc" id="L103">        cliOptions.add(new CliOption(FULL_PROJECT, FULL_PROJECT_DESC)</span>
+<span class="nc" id="L104">                .defaultValue(&quot;&quot;));     // depends on project state</span>
+<span class="nc" id="L105">    }</span>
 
     @Override
     public void processOpts() {
@@ -151,7 +151,7 @@ public abstract class JavaHelidonCommonCodegen extends AbstractJavaCodegen
      * called during construction but only on leaf classes.
      */
     protected void removeUnusedOptions() {
-<span class="fc" id="L154">        removeCliOptions(SCM_CONNECTION,</span>
+<span class="nc" id="L154">        removeCliOptions(SCM_CONNECTION,</span>
                 SCM_DEVELOPER_CONNECTION,
                 SCM_URL,
                 DEVELOPER_NAME,
@@ -162,7 +162,7 @@ public abstract class JavaHelidonCommonCodegen extends AbstractJavaCodegen
                 PARENT_VERSION,
                 PARENT_GROUP_ID,
                 DISABLE_HTML_ESCAPING);
-<span class="fc" id="L165">    }</span>
+<span class="nc" id="L165">    }</span>
 
     /**
      * Determine whether to generate or overwrite files depending on fullProject property.
@@ -272,12 +272,12 @@ public abstract class JavaHelidonCommonCodegen extends AbstractJavaCodegen
     }
 
     protected void removeCliOptions(String... opt) {
-<span class="fc" id="L275">        List&lt;String&gt; opts = Arrays.asList(opt);</span>
-<span class="fc" id="L276">        Set&lt;CliOption&gt; forRemoval = cliOptions.stream()</span>
-<span class="fc" id="L277">                .filter(cliOption -&gt; opts.contains(cliOption.getOpt()))</span>
-<span class="fc" id="L278">                .collect(Collectors.toSet());</span>
-<span class="fc" id="L279">        forRemoval.forEach(cliOptions::remove);</span>
-<span class="fc" id="L280">    }</span>
+<span class="nc" id="L275">        List&lt;String&gt; opts = Arrays.asList(opt);</span>
+<span class="nc" id="L276">        Set&lt;CliOption&gt; forRemoval = cliOptions.stream()</span>
+<span class="nc" id="L277">                .filter(cliOption -&gt; opts.contains(cliOption.getOpt()))</span>
+<span class="nc" id="L278">                .collect(Collectors.toSet());</span>
+<span class="nc" id="L279">        forRemoval.forEach(cliOptions::remove);</span>
+<span class="nc" id="L280">    }</span>
 
     private String chooseExampleReturnTypeValue(CodegenOperation op) {
 

@@ -11,14 +11,14 @@ import java.net.URL;
  * Locates generator-agnostic templates from a common built-in location.
  */
 public class CommonTemplateContentLocator implements TemplatePathLocator {
-<span class="pc" id="L14">    private String resourceLocation = &quot;_common&quot;;</span>
+<span class="nc" id="L14">    private String resourceLocation = &quot;_common&quot;;</span>
 
     /**
      * Constructs a new instance of {@link CommonTemplateContentLocator} defaulting to _common resource location.
      */
-<span class="fc" id="L19">    public CommonTemplateContentLocator() {</span>
+<span class="nc" id="L19">    public CommonTemplateContentLocator() {</span>
 
-<span class="fc" id="L21">    }</span>
+<span class="nc" id="L21">    }</span>
 
     /**
      * Constructs a new instance of {@link CommonTemplateContentLocator} for a targeted common location.
@@ -37,12 +37,12 @@ public class CommonTemplateContentLocator implements TemplatePathLocator {
      */
     @Override
     public String getFullTemplatePath(String relativeTemplateFile) {
-<span class="pc bpc" id="L40" title="1 of 2 branches missed.">        if (StringUtils.isNotEmpty(relativeTemplateFile)) {</span>
-<span class="fc" id="L41">            String loc = this.resourceLocation + File.separator + relativeTemplateFile;</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">        if (StringUtils.isNotEmpty(relativeTemplateFile)) {</span>
+<span class="nc" id="L41">            String loc = this.resourceLocation + File.separator + relativeTemplateFile;</span>
 
-<span class="fc" id="L43">            URL url = this.getClass().getClassLoader().getResource(TemplateManager.getCPResourcePath(loc));</span>
-<span class="pc bpc" id="L44" title="1 of 2 branches missed.">            if (url != null) {</span>
-<span class="fc" id="L45">                return loc;</span>
+<span class="nc" id="L43">            URL url = this.getClass().getClassLoader().getResource(TemplateManager.getCPResourcePath(loc));</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">            if (url != null) {</span>
+<span class="nc" id="L45">                return loc;</span>
             }
         }
 <span class="nc" id="L48">        return null;</span>

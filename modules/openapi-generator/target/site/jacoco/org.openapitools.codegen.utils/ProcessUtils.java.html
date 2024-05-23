@@ -54,14 +54,14 @@ import java.util.Map;
      * @return True if at least one operation has HTTP basic security scheme defined
      */
     public static boolean hasHttpBasicMethods(List&lt;CodegenSecurity&gt; authMethods) {
-<span class="pc bpc" id="L57" title="2 of 4 branches missed.">        if (authMethods != null &amp;&amp; !authMethods.isEmpty()) {</span>
-<span class="fc bfc" id="L58" title="All 2 branches covered.">            for (CodegenSecurity cs : authMethods) {</span>
-<span class="fc bfc" id="L59" title="All 2 branches covered.">                if (Boolean.TRUE.equals(cs.isBasicBasic)) {</span>
-<span class="fc" id="L60">                    return true;</span>
+<span class="nc bnc" id="L57" title="All 4 branches missed.">        if (authMethods != null &amp;&amp; !authMethods.isEmpty()) {</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">            for (CodegenSecurity cs : authMethods) {</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">                if (Boolean.TRUE.equals(cs.isBasicBasic)) {</span>
+<span class="nc" id="L60">                    return true;</span>
                 }
-<span class="fc" id="L62">            }</span>
+<span class="nc" id="L62">            }</span>
         }
-<span class="fc" id="L64">        return false;</span>
+<span class="nc" id="L64">        return false;</span>
     }
 
     /**
@@ -71,15 +71,15 @@ import java.util.Map;
      * @return A list of OAS Codegen security objects
      */
     public static List&lt;CodegenSecurity&gt; getHttpBasicMethods(List&lt;CodegenSecurity&gt; authMethods) {
-<span class="fc" id="L74">        List&lt;CodegenSecurity&gt; httpBasicMethods = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L74">        List&lt;CodegenSecurity&gt; httpBasicMethods = new ArrayList&lt;&gt;();</span>
 
-<span class="fc bfc" id="L76" title="All 2 branches covered.">        for (CodegenSecurity cs : authMethods) {</span>
-<span class="fc bfc" id="L77" title="All 2 branches covered.">            if (Boolean.TRUE.equals(cs.isBasicBasic)) {</span>
-<span class="fc" id="L78">                httpBasicMethods.add(cs);</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        for (CodegenSecurity cs : authMethods) {</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">            if (Boolean.TRUE.equals(cs.isBasicBasic)) {</span>
+<span class="nc" id="L78">                httpBasicMethods.add(cs);</span>
             }
-<span class="fc" id="L80">        }</span>
+<span class="nc" id="L80">        }</span>
 
-<span class="fc" id="L82">        return httpBasicMethods;</span>
+<span class="nc" id="L82">        return httpBasicMethods;</span>
     }
 
     /**
@@ -89,14 +89,14 @@ import java.util.Map;
      * @return True if at least one operation has API key security scheme defined
      */
     public static boolean hasApiKeyMethods(List&lt;CodegenSecurity&gt; authMethods) {
-<span class="pc bpc" id="L92" title="2 of 4 branches missed.">        if (authMethods != null &amp;&amp; !authMethods.isEmpty()) {</span>
-<span class="fc bfc" id="L93" title="All 2 branches covered.">            for (CodegenSecurity cs : authMethods) {</span>
-<span class="fc bfc" id="L94" title="All 2 branches covered.">                if (Boolean.TRUE.equals(cs.isApiKey)) {</span>
-<span class="fc" id="L95">                    return true;</span>
+<span class="nc bnc" id="L92" title="All 4 branches missed.">        if (authMethods != null &amp;&amp; !authMethods.isEmpty()) {</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">            for (CodegenSecurity cs : authMethods) {</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">                if (Boolean.TRUE.equals(cs.isApiKey)) {</span>
+<span class="nc" id="L95">                    return true;</span>
                 }
-<span class="fc" id="L97">            }</span>
+<span class="nc" id="L97">            }</span>
         }
-<span class="fc" id="L99">        return false;</span>
+<span class="nc" id="L99">        return false;</span>
     }
 
     /**
@@ -106,15 +106,15 @@ import java.util.Map;
      * @return A list of OAS Codegen security objects
      */
     public static List&lt;CodegenSecurity&gt; getApiKeyMethods(List&lt;CodegenSecurity&gt; authMethods) {
-<span class="fc" id="L109">        List&lt;CodegenSecurity&gt; apiKeyMethods = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L109">        List&lt;CodegenSecurity&gt; apiKeyMethods = new ArrayList&lt;&gt;();</span>
 
-<span class="fc bfc" id="L111" title="All 2 branches covered.">        for (CodegenSecurity cs : authMethods) {</span>
-<span class="fc bfc" id="L112" title="All 2 branches covered.">            if (Boolean.TRUE.equals(cs.isApiKey)) {</span>
-<span class="fc" id="L113">                apiKeyMethods.add(cs);</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">        for (CodegenSecurity cs : authMethods) {</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">            if (Boolean.TRUE.equals(cs.isApiKey)) {</span>
+<span class="nc" id="L113">                apiKeyMethods.add(cs);</span>
             }
-<span class="fc" id="L115">        }</span>
+<span class="nc" id="L115">        }</span>
 
-<span class="fc" id="L117">        return apiKeyMethods;</span>
+<span class="nc" id="L117">        return apiKeyMethods;</span>
     }
 
     /**
@@ -126,14 +126,14 @@ import java.util.Map;
      * @return True if at least one operation has HTTP signature security scheme defined
      */
     public static boolean hasHttpSignatureMethods(List&lt;CodegenSecurity&gt; authMethods) {
-<span class="pc bpc" id="L129" title="2 of 4 branches missed.">        if (authMethods != null &amp;&amp; !authMethods.isEmpty()) {</span>
-<span class="fc bfc" id="L130" title="All 2 branches covered.">            for (CodegenSecurity cs : authMethods) {</span>
-<span class="pc bpc" id="L131" title="1 of 2 branches missed.">                if (Boolean.TRUE.equals(cs.isHttpSignature)) {</span>
+<span class="nc bnc" id="L129" title="All 4 branches missed.">        if (authMethods != null &amp;&amp; !authMethods.isEmpty()) {</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">            for (CodegenSecurity cs : authMethods) {</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">                if (Boolean.TRUE.equals(cs.isHttpSignature)) {</span>
 <span class="nc" id="L132">                    return true;</span>
                 }
-<span class="fc" id="L134">            }</span>
+<span class="nc" id="L134">            }</span>
         }
-<span class="fc" id="L136">        return false;</span>
+<span class="nc" id="L136">        return false;</span>
     }
 
     /**
@@ -161,14 +161,14 @@ import java.util.Map;
      * @return True if at least one operation has HTTP bearer security scheme defined
      */
     public static boolean hasHttpBearerMethods(List&lt;CodegenSecurity&gt; authMethods) {
-<span class="pc bpc" id="L164" title="2 of 4 branches missed.">        if (authMethods != null &amp;&amp; !authMethods.isEmpty()) {</span>
-<span class="fc bfc" id="L165" title="All 2 branches covered.">            for (CodegenSecurity cs : authMethods) {</span>
-<span class="fc bfc" id="L166" title="All 2 branches covered.">                if (Boolean.TRUE.equals(cs.isBasicBearer)) {</span>
-<span class="fc" id="L167">                    return true;</span>
+<span class="nc bnc" id="L164" title="All 4 branches missed.">        if (authMethods != null &amp;&amp; !authMethods.isEmpty()) {</span>
+<span class="nc bnc" id="L165" title="All 2 branches missed.">            for (CodegenSecurity cs : authMethods) {</span>
+<span class="nc bnc" id="L166" title="All 2 branches missed.">                if (Boolean.TRUE.equals(cs.isBasicBearer)) {</span>
+<span class="nc" id="L167">                    return true;</span>
                 }
-<span class="fc" id="L169">            }</span>
+<span class="nc" id="L169">            }</span>
         }
-<span class="fc" id="L171">        return false;</span>
+<span class="nc" id="L171">        return false;</span>
     }
 
     /**
@@ -178,15 +178,15 @@ import java.util.Map;
      * @return A list of Bearer Codegen security objects
      */
     public static List&lt;CodegenSecurity&gt; getHttpBearerMethods(List&lt;CodegenSecurity&gt; authMethods) {
-<span class="fc" id="L181">        List&lt;CodegenSecurity&gt; httpBearerMethods = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L181">        List&lt;CodegenSecurity&gt; httpBearerMethods = new ArrayList&lt;&gt;();</span>
 
-<span class="fc bfc" id="L183" title="All 2 branches covered.">        for (CodegenSecurity cs : authMethods) {</span>
-<span class="fc bfc" id="L184" title="All 2 branches covered.">            if (Boolean.TRUE.equals(cs.isBasicBearer)) {</span>
-<span class="fc" id="L185">                httpBearerMethods.add(cs);</span>
+<span class="nc bnc" id="L183" title="All 2 branches missed.">        for (CodegenSecurity cs : authMethods) {</span>
+<span class="nc bnc" id="L184" title="All 2 branches missed.">            if (Boolean.TRUE.equals(cs.isBasicBearer)) {</span>
+<span class="nc" id="L185">                httpBearerMethods.add(cs);</span>
             }
-<span class="fc" id="L187">        }</span>
+<span class="nc" id="L187">        }</span>
 
-<span class="fc" id="L189">        return httpBearerMethods;</span>
+<span class="nc" id="L189">        return httpBearerMethods;</span>
     }
 
     /**
@@ -196,12 +196,12 @@ import java.util.Map;
      * @return True if at least one operation has OAuth security scheme defined
      */
     public static boolean hasOAuthMethods(List&lt;CodegenSecurity&gt; authMethods) {
-<span class="fc bfc" id="L199" title="All 2 branches covered.">        for (CodegenSecurity cs : authMethods) {</span>
-<span class="pc bpc" id="L200" title="1 of 2 branches missed.">            if (Boolean.TRUE.equals(cs.isOAuth)) {</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">        for (CodegenSecurity cs : authMethods) {</span>
+<span class="nc bnc" id="L200" title="All 2 branches missed.">            if (Boolean.TRUE.equals(cs.isOAuth)) {</span>
 <span class="nc" id="L201">                return true;</span>
             }
-<span class="fc" id="L203">        }</span>
-<span class="fc" id="L204">        return false;</span>
+<span class="nc" id="L203">        }</span>
+<span class="nc" id="L204">        return false;</span>
     }
 
     /**
@@ -287,13 +287,13 @@ import java.util.Map;
      */
     public static boolean hasOpenIdConnectMethods(List&lt;CodegenSecurity&gt; authMethods) {
 
-<span class="fc bfc" id="L290" title="All 2 branches covered.">        for (CodegenSecurity cs : authMethods) {</span>
-<span class="pc bpc" id="L291" title="1 of 2 branches missed.">            if (Boolean.TRUE.equals(cs.isOpenId)) {</span>
+<span class="nc bnc" id="L290" title="All 2 branches missed.">        for (CodegenSecurity cs : authMethods) {</span>
+<span class="nc bnc" id="L291" title="All 2 branches missed.">            if (Boolean.TRUE.equals(cs.isOpenId)) {</span>
 <span class="nc" id="L292">                return true;</span>
             }
-<span class="fc" id="L294">        }</span>
+<span class="nc" id="L294">        }</span>
 
-<span class="fc" id="L296">        return false;</span>
+<span class="nc" id="L296">        return false;</span>
     }
 
 

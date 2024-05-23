@@ -47,60 +47,60 @@ public class JavaPKMSTServerCodegen extends AbstractJavaCodegen {
     public static final String EUREKA_URI = &quot;eurekaUri&quot;;
     public static final String ZIPKIN_URI = &quot;zipkinUri&quot;;
     public static final String SPRINGADMIN_URI = &quot;springBootAdminUri&quot;;
-<span class="fc" id="L50">    protected String basePackage = &quot;com.prokarma.pkmst&quot;;</span>
-<span class="fc" id="L51">    protected String serviceName = &quot;Pkmst&quot;;</span>
-<span class="fc" id="L52">    protected String configPackage = &quot;com.prokarma.pkmst.config&quot;;</span>
+<span class="nc" id="L50">    protected String basePackage = &quot;com.prokarma.pkmst&quot;;</span>
+<span class="nc" id="L51">    protected String serviceName = &quot;Pkmst&quot;;</span>
+<span class="nc" id="L52">    protected String configPackage = &quot;com.prokarma.pkmst.config&quot;;</span>
     protected String title;
     protected String eurekaUri;
     protected String zipkinUri;
     protected String springBootAdminUri;
 
     public JavaPKMSTServerCodegen() {
-<span class="fc" id="L59">        super();</span>
+<span class="nc" id="L59">        super();</span>
 
-<span class="fc" id="L61">        modifyFeatureSet(features -&gt; features.includeDocumentationFeatures(DocumentationFeature.Readme));</span>
+<span class="nc" id="L61">        modifyFeatureSet(features -&gt; features.includeDocumentationFeatures(DocumentationFeature.Readme));</span>
 
-<span class="fc" id="L63">        groupId = &quot;com.prokarma&quot;;</span>
-<span class="fc" id="L64">        artifactId = &quot;pkmst-microservice&quot;;</span>
-<span class="fc" id="L65">        embeddedTemplateDir = templateDir = &quot;java-pkmst&quot;;</span>
-<span class="fc" id="L66">        apiPackage = &quot;com.prokarma.pkmst.controller&quot;;</span>
-<span class="fc" id="L67">        modelPackage = &quot;com.prokarma.pkmst.model&quot;;</span>
-<span class="fc" id="L68">        invokerPackage = &quot;com.prokarma.pkmst.controller&quot;;</span>
+<span class="nc" id="L63">        groupId = &quot;com.prokarma&quot;;</span>
+<span class="nc" id="L64">        artifactId = &quot;pkmst-microservice&quot;;</span>
+<span class="nc" id="L65">        embeddedTemplateDir = templateDir = &quot;java-pkmst&quot;;</span>
+<span class="nc" id="L66">        apiPackage = &quot;com.prokarma.pkmst.controller&quot;;</span>
+<span class="nc" id="L67">        modelPackage = &quot;com.prokarma.pkmst.model&quot;;</span>
+<span class="nc" id="L68">        invokerPackage = &quot;com.prokarma.pkmst.controller&quot;;</span>
 
         // clioOptions default redefinition need to be updated
-<span class="fc" id="L71">        updateOption(CodegenConstants.GROUP_ID, this.getGroupId());</span>
-<span class="fc" id="L72">        updateOption(CodegenConstants.INVOKER_PACKAGE, this.getInvokerPackage());</span>
-<span class="fc" id="L73">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
-<span class="fc" id="L74">        updateOption(CodegenConstants.API_PACKAGE, apiPackage);</span>
-<span class="fc" id="L75">        updateOption(CodegenConstants.MODEL_PACKAGE, modelPackage);</span>
+<span class="nc" id="L71">        updateOption(CodegenConstants.GROUP_ID, this.getGroupId());</span>
+<span class="nc" id="L72">        updateOption(CodegenConstants.INVOKER_PACKAGE, this.getInvokerPackage());</span>
+<span class="nc" id="L73">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
+<span class="nc" id="L74">        updateOption(CodegenConstants.API_PACKAGE, apiPackage);</span>
+<span class="nc" id="L75">        updateOption(CodegenConstants.MODEL_PACKAGE, modelPackage);</span>
 
-<span class="fc" id="L77">        additionalProperties.put(JACKSON, &quot;true&quot;);</span>
+<span class="nc" id="L77">        additionalProperties.put(JACKSON, &quot;true&quot;);</span>
 
-<span class="fc" id="L79">        this.cliOptions.add(new CliOption(&quot;basePackage&quot;, &quot;base package for java source code&quot;));</span>
-<span class="fc" id="L80">        this.cliOptions.add(new CliOption(&quot;serviceName&quot;, &quot;Service Name&quot;));</span>
-<span class="fc" id="L81">        this.cliOptions.add(new CliOption(TITLE, &quot;server title name or client service name&quot;));</span>
-<span class="fc" id="L82">        this.cliOptions.add(new CliOption(&quot;eurekaUri&quot;, &quot;Eureka URI&quot;));</span>
-<span class="fc" id="L83">        this.cliOptions.add(new CliOption(&quot;zipkinUri&quot;, &quot;Zipkin URI&quot;));</span>
-<span class="fc" id="L84">        this.cliOptions.add(new CliOption(&quot;springBootAdminUri&quot;, &quot;Spring-Boot URI&quot;));</span>
+<span class="nc" id="L79">        this.cliOptions.add(new CliOption(&quot;basePackage&quot;, &quot;base package for java source code&quot;));</span>
+<span class="nc" id="L80">        this.cliOptions.add(new CliOption(&quot;serviceName&quot;, &quot;Service Name&quot;));</span>
+<span class="nc" id="L81">        this.cliOptions.add(new CliOption(TITLE, &quot;server title name or client service name&quot;));</span>
+<span class="nc" id="L82">        this.cliOptions.add(new CliOption(&quot;eurekaUri&quot;, &quot;Eureka URI&quot;));</span>
+<span class="nc" id="L83">        this.cliOptions.add(new CliOption(&quot;zipkinUri&quot;, &quot;Zipkin URI&quot;));</span>
+<span class="nc" id="L84">        this.cliOptions.add(new CliOption(&quot;springBootAdminUri&quot;, &quot;Spring-Boot URI&quot;));</span>
         // Middleware config
-<span class="fc" id="L86">        this.cliOptions.add(new CliOption(&quot;pkmstInterceptor&quot;, &quot;PKMST Interceptor&quot;));</span>
+<span class="nc" id="L86">        this.cliOptions.add(new CliOption(&quot;pkmstInterceptor&quot;, &quot;PKMST Interceptor&quot;));</span>
 
-<span class="fc" id="L88">        this.apiTestTemplateFiles.put(&quot;api_test.mustache&quot;, &quot;.java&quot;);</span>
+<span class="nc" id="L88">        this.apiTestTemplateFiles.put(&quot;api_test.mustache&quot;, &quot;.java&quot;);</span>
 
-<span class="pc bpc" id="L90" title="1 of 2 branches missed.">        if (&quot;.md&quot;.equals(this.modelDocTemplateFiles.get(&quot;model_doc.mustache&quot;))) {</span>
-<span class="fc" id="L91">            this.modelDocTemplateFiles.remove(&quot;model_doc.mustache&quot;);</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">        if (&quot;.md&quot;.equals(this.modelDocTemplateFiles.get(&quot;model_doc.mustache&quot;))) {</span>
+<span class="nc" id="L91">            this.modelDocTemplateFiles.remove(&quot;model_doc.mustache&quot;);</span>
         }
-<span class="pc bpc" id="L93" title="1 of 2 branches missed.">        if (&quot;.md&quot;.equals(this.apiDocTemplateFiles.get(&quot;api_doc.mustache&quot;))) {</span>
-<span class="fc" id="L94">            this.apiDocTemplateFiles.remove(&quot;api_doc.mustache&quot;);</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">        if (&quot;.md&quot;.equals(this.apiDocTemplateFiles.get(&quot;api_doc.mustache&quot;))) {</span>
+<span class="nc" id="L94">            this.apiDocTemplateFiles.remove(&quot;api_doc.mustache&quot;);</span>
         }
-<span class="fc" id="L96">    }</span>
+<span class="nc" id="L96">    }</span>
 
     public CodegenType getTag() {
-<span class="fc" id="L99">        return CodegenType.SERVER;</span>
+<span class="nc" id="L99">        return CodegenType.SERVER;</span>
     }
 
     public String getName() {
-<span class="fc" id="L103">        return &quot;java-pkmst&quot;;</span>
+<span class="nc" id="L103">        return &quot;java-pkmst&quot;;</span>
     }
 
     public String getHelp() {

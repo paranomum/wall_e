@@ -40,76 +40,76 @@ import org.openapitools.codegen.model.OperationsMap;
 public class GroovyClientCodegen extends AbstractJavaCodegen {
 
     public GroovyClientCodegen() {
-<span class="fc" id="L43">        super();</span>
+<span class="nc" id="L43">        super();</span>
 
-<span class="fc" id="L45">        modifyFeatureSet(features -&gt; features</span>
-<span class="fc" id="L46">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
-<span class="fc" id="L47">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON))</span>
-<span class="fc" id="L48">                .securityFeatures(EnumSet.noneOf(SecurityFeature.class))</span>
-<span class="fc" id="L49">                .excludeGlobalFeatures(</span>
+<span class="nc" id="L45">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L46">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="nc" id="L47">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON))</span>
+<span class="nc" id="L48">                .securityFeatures(EnumSet.noneOf(SecurityFeature.class))</span>
+<span class="nc" id="L49">                .excludeGlobalFeatures(</span>
                         GlobalFeature.XMLStructureDefinitions,
                         GlobalFeature.Callbacks,
                         GlobalFeature.LinkObjects,
                         GlobalFeature.ParameterStyling
                 )
-<span class="fc" id="L55">                .excludeSchemaSupportFeatures(</span>
+<span class="nc" id="L55">                .excludeSchemaSupportFeatures(</span>
                         SchemaSupportFeature.Polymorphism
                 )
-<span class="fc" id="L58">                .excludeParameterFeatures(</span>
+<span class="nc" id="L58">                .excludeParameterFeatures(</span>
                         ParameterFeature.Cookie
                 )
-<span class="fc" id="L61">                .includeClientModificationFeatures(</span>
+<span class="nc" id="L61">                .includeClientModificationFeatures(</span>
                         ClientModificationFeature.BasePath
                 )
         );
 
         // avoid importing the following as models
-<span class="fc" id="L67">        languageSpecificPrimitives.add(&quot;Date&quot;);</span>
-<span class="fc" id="L68">        languageSpecificPrimitives.add(&quot;ArrayList&quot;);</span>
-<span class="fc" id="L69">        languageSpecificPrimitives.add(&quot;File&quot;);</span>
-<span class="fc" id="L70">        languageSpecificPrimitives.add(&quot;Map&quot;);</span>
-<span class="fc" id="L71">        languageSpecificPrimitives.add(&quot;List&quot;);</span>
+<span class="nc" id="L67">        languageSpecificPrimitives.add(&quot;Date&quot;);</span>
+<span class="nc" id="L68">        languageSpecificPrimitives.add(&quot;ArrayList&quot;);</span>
+<span class="nc" id="L69">        languageSpecificPrimitives.add(&quot;File&quot;);</span>
+<span class="nc" id="L70">        languageSpecificPrimitives.add(&quot;Map&quot;);</span>
+<span class="nc" id="L71">        languageSpecificPrimitives.add(&quot;List&quot;);</span>
 
         // this must not be OS-specific
-<span class="fc" id="L74">        sourceFolder = projectFolder + &quot;/groovy&quot;;</span>
-<span class="fc" id="L75">        outputFolder = &quot;generated-code/groovy&quot;;</span>
-<span class="fc" id="L76">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.groovy&quot;);</span>
-<span class="fc" id="L77">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.groovy&quot;);</span>
-<span class="fc" id="L78">        apiTestTemplateFiles.clear(); // TODO: add test template</span>
-<span class="fc" id="L79">        embeddedTemplateDir = templateDir = &quot;Groovy&quot;;</span>
+<span class="nc" id="L74">        sourceFolder = projectFolder + &quot;/groovy&quot;;</span>
+<span class="nc" id="L75">        outputFolder = &quot;generated-code/groovy&quot;;</span>
+<span class="nc" id="L76">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.groovy&quot;);</span>
+<span class="nc" id="L77">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.groovy&quot;);</span>
+<span class="nc" id="L78">        apiTestTemplateFiles.clear(); // TODO: add test template</span>
+<span class="nc" id="L79">        embeddedTemplateDir = templateDir = &quot;Groovy&quot;;</span>
 
         // clear model and api doc template as this codegen
         // does not support auto-generated markdown doc at the moment
         //TODO: add doc templates
-<span class="fc" id="L84">        modelDocTemplateFiles.remove(&quot;model_doc.mustache&quot;);</span>
-<span class="fc" id="L85">        apiDocTemplateFiles.remove(&quot;api_doc.mustache&quot;);</span>
+<span class="nc" id="L84">        modelDocTemplateFiles.remove(&quot;model_doc.mustache&quot;);</span>
+<span class="nc" id="L85">        apiDocTemplateFiles.remove(&quot;api_doc.mustache&quot;);</span>
 
-<span class="fc" id="L87">        apiPackage = &quot;org.openapitools.api&quot;;</span>
-<span class="fc" id="L88">        modelPackage = &quot;org.openapitools.model&quot;;</span>
-<span class="fc" id="L89">        invokerPackage = &quot;org.openapitools.api&quot;;</span>
-<span class="fc" id="L90">        artifactId = &quot;openapi-groovy&quot;;</span>
-<span class="fc" id="L91">        dateLibrary = &quot;legacy&quot;; //TODO: add joda support to groovy</span>
+<span class="nc" id="L87">        apiPackage = &quot;org.openapitools.api&quot;;</span>
+<span class="nc" id="L88">        modelPackage = &quot;org.openapitools.model&quot;;</span>
+<span class="nc" id="L89">        invokerPackage = &quot;org.openapitools.api&quot;;</span>
+<span class="nc" id="L90">        artifactId = &quot;openapi-groovy&quot;;</span>
+<span class="nc" id="L91">        dateLibrary = &quot;legacy&quot;; //TODO: add joda support to groovy</span>
 
         // cliOptions default redefinition need to be updated
-<span class="fc" id="L94">        updateOption(CodegenConstants.SOURCE_FOLDER, this.getSourceFolder());</span>
-<span class="fc" id="L95">        updateOption(CodegenConstants.INVOKER_PACKAGE, this.getInvokerPackage());</span>
-<span class="fc" id="L96">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
-<span class="fc" id="L97">        updateOption(CodegenConstants.API_PACKAGE, apiPackage);</span>
-<span class="fc" id="L98">        updateOption(CodegenConstants.MODEL_PACKAGE, modelPackage);</span>
-<span class="fc" id="L99">        updateOption(DATE_LIBRARY, this.getDateLibrary());</span>
-<span class="fc" id="L100">        removeOption(CodegenConstants.ARTIFACT_URL);</span>
-<span class="fc" id="L101">        removeOption(CodegenConstants.ARTIFACT_DESCRIPTION);</span>
+<span class="nc" id="L94">        updateOption(CodegenConstants.SOURCE_FOLDER, this.getSourceFolder());</span>
+<span class="nc" id="L95">        updateOption(CodegenConstants.INVOKER_PACKAGE, this.getInvokerPackage());</span>
+<span class="nc" id="L96">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
+<span class="nc" id="L97">        updateOption(CodegenConstants.API_PACKAGE, apiPackage);</span>
+<span class="nc" id="L98">        updateOption(CodegenConstants.MODEL_PACKAGE, modelPackage);</span>
+<span class="nc" id="L99">        updateOption(DATE_LIBRARY, this.getDateLibrary());</span>
+<span class="nc" id="L100">        removeOption(CodegenConstants.ARTIFACT_URL);</span>
+<span class="nc" id="L101">        removeOption(CodegenConstants.ARTIFACT_DESCRIPTION);</span>
 
-<span class="fc" id="L103">    }</span>
+<span class="nc" id="L103">    }</span>
 
     @Override
     public CodegenType getTag() {
-<span class="fc" id="L107">        return CodegenType.CLIENT;</span>
+<span class="nc" id="L107">        return CodegenType.CLIENT;</span>
     }
 
     @Override
     public String getName() {
-<span class="fc" id="L112">        return &quot;groovy&quot;;</span>
+<span class="nc" id="L112">        return &quot;groovy&quot;;</span>
     }
 
     @Override

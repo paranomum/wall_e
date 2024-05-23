@@ -31,15 +31,15 @@ import java.util.StringJoiner;
  * times according to their target use.
  */
 public class SupportingFile extends TemplateDefinition {
-<span class="fc" id="L34">    private boolean canOverwrite = true;</span>
+<span class="nc" id="L34">    private boolean canOverwrite = true;</span>
 
     public SupportingFile(String templateFile, String destinationFilename) {
-<span class="fc" id="L37">        this(templateFile, &quot;&quot;, destinationFilename);</span>
-<span class="fc" id="L38">    }</span>
+<span class="nc" id="L37">        this(templateFile, &quot;&quot;, destinationFilename);</span>
+<span class="nc" id="L38">    }</span>
 
     public SupportingFile(String templateFile, String folder, String destinationFilename) {
-<span class="fc" id="L41">        super(templateFile, folder, destinationFilename);</span>
-<span class="fc" id="L42">    }</span>
+<span class="nc" id="L41">        super(templateFile, folder, destinationFilename);</span>
+<span class="nc" id="L42">    }</span>
 
     /**
      * Identifies this instance as referring to a supporting file which should not overwrite a file of the same name.
@@ -47,8 +47,8 @@ public class SupportingFile extends TemplateDefinition {
      * @return This object, for chaining.
      */
     public SupportingFile doNotOverwrite() {
-<span class="fc" id="L50">        canOverwrite = false;</span>
-<span class="fc" id="L51">        return this;</span>
+<span class="nc" id="L50">        canOverwrite = false;</span>
+<span class="nc" id="L51">        return this;</span>
     }
 
     /**

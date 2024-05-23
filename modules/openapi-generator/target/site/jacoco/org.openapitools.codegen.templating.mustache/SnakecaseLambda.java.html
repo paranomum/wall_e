@@ -37,7 +37,7 @@ import static org.openapitools.codegen.utils.StringUtils.underscore;
  * {{#snakecase}}{{summary}}{{/snakecase}}
  * &lt;/pre&gt;
  */
-<span class="fc" id="L40">public class SnakecaseLambda implements Mustache.Lambda {</span>
+<span class="nc" id="L40">public class SnakecaseLambda implements Mustache.Lambda {</span>
     @Override
     public void execute(Template.Fragment fragment, Writer writer) throws IOException {
 <span class="nc" id="L43">        writer.write(underscore(fragment.execute()));</span>

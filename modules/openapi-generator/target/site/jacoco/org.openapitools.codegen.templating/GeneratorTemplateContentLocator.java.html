@@ -19,9 +19,9 @@ public class GeneratorTemplateContentLocator implements TemplatePathLocator {
      *
      * @param codegenConfig A generator's configuration used for determining template file location.
      */
-<span class="fc" id="L22">    public GeneratorTemplateContentLocator(CodegenConfig codegenConfig) {</span>
-<span class="fc" id="L23">        this.codegenConfig = codegenConfig;</span>
-<span class="fc" id="L24">    }</span>
+<span class="nc" id="L22">    public GeneratorTemplateContentLocator(CodegenConfig codegenConfig) {</span>
+<span class="nc" id="L23">        this.codegenConfig = codegenConfig;</span>
+<span class="nc" id="L24">    }</span>
 
     private String buildLibraryFilePath(String dir, String library, String file) {
 <span class="nc" id="L27">        return Paths.get(dir, &quot;libraries&quot;, library, file).normalize().toString();</span>
@@ -35,11 +35,11 @@ public class GeneratorTemplateContentLocator implements TemplatePathLocator {
      * @return true if file is an embedded resource, false if it does not exist
      */
     public boolean embeddedTemplateExists(String name) {
-<span class="fc" id="L38">        return classpathTemplateExists(name);</span>
+<span class="nc" id="L38">        return classpathTemplateExists(name);</span>
     }
 
     private boolean classpathTemplateExists(String name) {
-<span class="fc bfc" id="L42" title="All 2 branches covered.">        return this.getClass().getClassLoader().getResource(TemplateManager.getCPResourcePath(name)) != null;</span>
+<span class="nc bnc" id="L42" title="All 2 branches missed.">        return this.getClass().getClassLoader().getResource(TemplateManager.getCPResourcePath(name)) != null;</span>
     }
 
     /**
@@ -58,11 +58,11 @@ public class GeneratorTemplateContentLocator implements TemplatePathLocator {
      */
     @Override
     public String getFullTemplatePath(String relativeTemplateFile) {
-<span class="fc" id="L61">        CodegenConfig config = this.codegenConfig;</span>
+<span class="nc" id="L61">        CodegenConfig config = this.codegenConfig;</span>
 
         //check the supplied template library folder for the file
-<span class="fc" id="L64">        final String library = config.getLibrary();</span>
-<span class="pc bpc" id="L65" title="1 of 2 branches missed.">        if (StringUtils.isNotEmpty(library)) {</span>
+<span class="nc" id="L64">        final String library = config.getLibrary();</span>
+<span class="nc bnc" id="L65" title="All 2 branches missed.">        if (StringUtils.isNotEmpty(library)) {</span>
             //look for the file in the library subfolder of the supplied template
 <span class="nc" id="L67">            final String libTemplateFile = buildLibraryFilePath(config.templateDir(), library, relativeTemplateFile);</span>
             // looks for user-defined file or classpath
@@ -74,15 +74,15 @@ public class GeneratorTemplateContentLocator implements TemplatePathLocator {
 
         // check the supplied template main folder for the file
         // File.separator is necessary here as the file load is OS-specific
-<span class="fc" id="L77">        final String template = config.templateDir() + File.separator + relativeTemplateFile;</span>
+<span class="nc" id="L77">        final String template = config.templateDir() + File.separator + relativeTemplateFile;</span>
         // looks for user-defined file or classpath
         // supports template dir which refers to local file system or custom path in classpath as defined by templateDir
-<span class="pc bpc" id="L80" title="1 of 4 branches missed.">        if (new File(template).exists() || classpathTemplateExists(template)) {</span>
-<span class="fc" id="L81">            return template;</span>
+<span class="nc bnc" id="L80" title="All 4 branches missed.">        if (new File(template).exists() || classpathTemplateExists(template)) {</span>
+<span class="nc" id="L81">            return template;</span>
         }
 
         //try the embedded template library folder next
-<span class="pc bpc" id="L85" title="1 of 2 branches missed.">        if (StringUtils.isNotEmpty(library)) {</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">        if (StringUtils.isNotEmpty(library)) {</span>
 <span class="nc" id="L86">            final String embeddedLibTemplateFile = buildLibraryFilePath(config.embeddedTemplateDir(), library, relativeTemplateFile);</span>
             // *only* looks for those files in classpath as defined by embeddedTemplateDir
 <span class="nc bnc" id="L88" title="All 2 branches missed.">            if (embeddedTemplateExists(embeddedLibTemplateFile)) {</span>
@@ -92,13 +92,13 @@ public class GeneratorTemplateContentLocator implements TemplatePathLocator {
         }
 
         // Fall back to the template file for generator root directory embedded/packaged in the JAR file...
-<span class="fc" id="L95">        String loc = config.embeddedTemplateDir() + File.separator + relativeTemplateFile;</span>
+<span class="nc" id="L95">        String loc = config.embeddedTemplateDir() + File.separator + relativeTemplateFile;</span>
         // *only* looks for those files in classpath as defined by embeddedTemplateDir
-<span class="pc bpc" id="L97" title="1 of 2 branches missed.">        if (embeddedTemplateExists(loc)) {</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        if (embeddedTemplateExists(loc)) {</span>
 <span class="nc" id="L98">            return loc;</span>
         }
 
-<span class="fc" id="L101">        return null;</span>
+<span class="nc" id="L101">        return null;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

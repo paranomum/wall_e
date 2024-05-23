@@ -33,21 +33,21 @@ public class CliOption {
     private Map&lt;String, String&gt; enumValues;
 
     public CliOption(String opt, String description) {
-<span class="fc" id="L36">        this(opt, description, SchemaTypeUtil.STRING_TYPE);</span>
-<span class="fc" id="L37">    }</span>
+<span class="nc" id="L36">        this(opt, description, SchemaTypeUtil.STRING_TYPE);</span>
+<span class="nc" id="L37">    }</span>
 
-<span class="fc" id="L39">    public CliOption(String opt, String description, String type) {</span>
-<span class="fc" id="L40">        this.opt = opt;</span>
-<span class="fc" id="L41">        this.description = description;</span>
-<span class="fc" id="L42">        this.type = type;</span>
-<span class="fc" id="L43">    }</span>
+<span class="nc" id="L39">    public CliOption(String opt, String description, String type) {</span>
+<span class="nc" id="L40">        this.opt = opt;</span>
+<span class="nc" id="L41">        this.description = description;</span>
+<span class="nc" id="L42">        this.type = type;</span>
+<span class="nc" id="L43">    }</span>
 
     public String getOpt() {
-<span class="fc" id="L46">        return opt;</span>
+<span class="nc" id="L46">        return opt;</span>
     }
 
     public String getDescription() {
-<span class="fc" id="L50">        return description;</span>
+<span class="nc" id="L50">        return description;</span>
     }
 
     public void setDescription(String description) {
@@ -59,51 +59,51 @@ public class CliOption {
     }
 
     public void setType(String type) {
-<span class="fc" id="L62">        this.type = type;</span>
-<span class="fc" id="L63">    }</span>
+<span class="nc" id="L62">        this.type = type;</span>
+<span class="nc" id="L63">    }</span>
 
     public String getDefault() {
-<span class="fc" id="L66">        return defaultValue;</span>
+<span class="nc" id="L66">        return defaultValue;</span>
     }
 
     public void setDefault(String defaultValue) {
-<span class="fc" id="L70">        this.defaultValue = defaultValue;</span>
-<span class="fc" id="L71">    }</span>
+<span class="nc" id="L70">        this.defaultValue = defaultValue;</span>
+<span class="nc" id="L71">    }</span>
 
     public CliOption defaultValue(String defaultValue) {
-<span class="fc" id="L74">        this.defaultValue = defaultValue;</span>
-<span class="fc" id="L75">        return this;</span>
+<span class="nc" id="L74">        this.defaultValue = defaultValue;</span>
+<span class="nc" id="L75">        return this;</span>
     }
 
     public String getOptValue() {
-<span class="fc" id="L79">        return this.optValue;</span>
+<span class="nc" id="L79">        return this.optValue;</span>
     }
 
     public void setOptValue(String optValue) {
-<span class="pc bpc" id="L83" title="2 of 4 branches missed.">        if (this.enumValues!=null &amp;&amp; this.enumValues.containsKey(optValue)) {</span>
-<span class="fc" id="L84">            this.optValue = optValue;</span>
+<span class="nc bnc" id="L83" title="All 4 branches missed.">        if (this.enumValues!=null &amp;&amp; this.enumValues.containsKey(optValue)) {</span>
+<span class="nc" id="L84">            this.optValue = optValue;</span>
         } else {
 <span class="nc" id="L86">            this.optValue = null;</span>
         }
-<span class="fc" id="L88">    }</span>
+<span class="nc" id="L88">    }</span>
 
     public CliOption addEnum(String value, String description) {
-<span class="fc bfc" id="L91" title="All 2 branches covered.">        if (this.enumValues == null) {</span>
-<span class="fc" id="L92">            this.enumValues = new LinkedHashMap&lt;String, String&gt;();</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">        if (this.enumValues == null) {</span>
+<span class="nc" id="L92">            this.enumValues = new LinkedHashMap&lt;String, String&gt;();</span>
         }
-<span class="pc bpc" id="L94" title="1 of 2 branches missed.">        if (!enumValues.containsKey(value)) {</span>
-<span class="fc" id="L95">            enumValues.put(value, description);</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">        if (!enumValues.containsKey(value)) {</span>
+<span class="nc" id="L95">            enumValues.put(value, description);</span>
         }
-<span class="fc" id="L97">        return this;</span>
+<span class="nc" id="L97">        return this;</span>
     }
 
     public Map&lt;String, String&gt; getEnum() {
-<span class="fc" id="L101">        return enumValues;</span>
+<span class="nc" id="L101">        return enumValues;</span>
     }
 
     public void setEnum(Map&lt;String, String&gt; enumValues) {
-<span class="fc" id="L105">        this.enumValues = enumValues;</span>
-<span class="fc" id="L106">    }</span>
+<span class="nc" id="L105">        this.enumValues = enumValues;</span>
+<span class="nc" id="L106">    }</span>
 
     /**
      * Create new boolean command line option with a default of false
@@ -113,7 +113,7 @@ public class CliOption {
      * @return the CliOption created
      */
     public static CliOption newBoolean(String opt, String description) {
-<span class="fc" id="L116">        return newBoolean(opt, description, false);</span>
+<span class="nc" id="L116">        return newBoolean(opt, description, false);</span>
     }
 
     /**
@@ -125,11 +125,11 @@ public class CliOption {
      * @return the CliOption created
      */
     public static CliOption newBoolean(String opt, String description, boolean defaultValue) {
-<span class="fc" id="L128">        return new CliOption(opt, description, SchemaTypeUtil.BOOLEAN_TYPE).defaultValue(String.valueOf(defaultValue));</span>
+<span class="nc" id="L128">        return new CliOption(opt, description, SchemaTypeUtil.BOOLEAN_TYPE).defaultValue(String.valueOf(defaultValue));</span>
     }
 
     public static CliOption newString(String opt, String description) {
-<span class="fc" id="L132">        return new CliOption(opt, description, SchemaTypeUtil.STRING_TYPE);</span>
+<span class="nc" id="L132">        return new CliOption(opt, description, SchemaTypeUtil.STRING_TYPE);</span>
     }
 
     @JsonIgnore
@@ -148,20 +148,20 @@ public class CliOption {
 
     @Override
     public boolean equals(Object o) {
-<span class="fc bfc" id="L151" title="All 2 branches covered.">        if (this == o) return true;</span>
-<span class="pc bpc" id="L152" title="2 of 4 branches missed.">        if (o == null || getClass() != o.getClass()) return false;</span>
-<span class="fc" id="L153">        CliOption cliOption = (CliOption) o;</span>
-<span class="pc bpc" id="L154" title="1 of 2 branches missed.">        return Objects.equals(opt, cliOption.opt) &amp;&amp;</span>
+<span class="nc bnc" id="L151" title="All 2 branches missed.">        if (this == o) return true;</span>
+<span class="nc bnc" id="L152" title="All 4 branches missed.">        if (o == null || getClass() != o.getClass()) return false;</span>
+<span class="nc" id="L153">        CliOption cliOption = (CliOption) o;</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">        return Objects.equals(opt, cliOption.opt) &amp;&amp;</span>
 <span class="nc bnc" id="L155" title="All 2 branches missed.">                Objects.equals(description, cliOption.description) &amp;&amp;</span>
 <span class="nc bnc" id="L156" title="All 2 branches missed.">                Objects.equals(type, cliOption.type) &amp;&amp;</span>
 <span class="nc bnc" id="L157" title="All 2 branches missed.">                Objects.equals(defaultValue, cliOption.defaultValue) &amp;&amp;</span>
 <span class="nc bnc" id="L158" title="All 2 branches missed.">                Objects.equals(optValue, cliOption.optValue) &amp;&amp;</span>
-<span class="pc bnc" id="L159" title="All 2 branches missed.">                Objects.equals(enumValues, cliOption.enumValues);</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">                Objects.equals(enumValues, cliOption.enumValues);</span>
     }
 
     @Override
     public int hashCode() {
-<span class="fc" id="L164">        return Objects.hash(opt, description, type, defaultValue, optValue, enumValues);</span>
+<span class="nc" id="L164">        return Objects.hash(opt, description, type, defaultValue, optValue, enumValues);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

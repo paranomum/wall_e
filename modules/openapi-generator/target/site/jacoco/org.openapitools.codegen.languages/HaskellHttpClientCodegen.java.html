@@ -49,19 +49,19 @@ import static org.openapitools.codegen.utils.StringUtils.camelize;
 import static org.openapitools.codegen.utils.StringUtils.underscore;
 
 public class HaskellHttpClientCodegen extends DefaultCodegen implements CodegenConfig {
-<span class="fc" id="L52">    private final Logger LOGGER = LoggerFactory.getLogger(HaskellHttpClientCodegen.class);</span>
+<span class="nc" id="L52">    private final Logger LOGGER = LoggerFactory.getLogger(HaskellHttpClientCodegen.class);</span>
 
     // source folder where to write the files
-<span class="fc" id="L55">    protected String sourceFolder = &quot;lib&quot;;</span>
+<span class="nc" id="L55">    protected String sourceFolder = &quot;lib&quot;;</span>
 
-<span class="fc" id="L57">    protected String defaultDateFormat = &quot;%Y-%m-%d&quot;;</span>
-<span class="fc" id="L58">    protected String defaultCabalVersion = &quot;0.1.0.0&quot;;</span>
-<span class="fc" id="L59">    protected String modulePath = null;</span>
-<span class="fc" id="L60">    protected String defaultQueryExtraUnreserved = null;</span>
+<span class="nc" id="L57">    protected String defaultDateFormat = &quot;%Y-%m-%d&quot;;</span>
+<span class="nc" id="L58">    protected String defaultCabalVersion = &quot;0.1.0.0&quot;;</span>
+<span class="nc" id="L59">    protected String modulePath = null;</span>
+<span class="nc" id="L60">    protected String defaultQueryExtraUnreserved = null;</span>
 
-<span class="fc" id="L62">    protected Boolean useKatip = true;</span>
-<span class="fc" id="L63">    protected Boolean allowNonUniqueOperationIds = false;</span>
-<span class="fc" id="L64">    protected Boolean genEnums = true;</span>
+<span class="nc" id="L62">    protected Boolean useKatip = true;</span>
+<span class="nc" id="L63">    protected Boolean allowNonUniqueOperationIds = false;</span>
+<span class="nc" id="L64">    protected Boolean genEnums = true;</span>
 
     // CLI PROPS
     public static final String PROP_ALLOW_FROMJSON_NULLS = &quot;allowFromJsonNulls&quot;;
@@ -89,7 +89,7 @@ public class HaskellHttpClientCodegen extends DefaultCodegen implements CodegenC
     // protected String MODEL_IMPORTS = &quot;modelImports&quot;;
     // protected String MODEL_EXTENSIONS = &quot;modelExtensions&quot;;
 
-<span class="fc" id="L92">    private static final Pattern LEADING_UNDERSCORE = Pattern.compile(&quot;^_+&quot;);</span>
+<span class="nc" id="L92">    private static final Pattern LEADING_UNDERSCORE = Pattern.compile(&quot;^_+&quot;);</span>
 
     static final String MEDIA_TYPE = &quot;mediaType&quot;;
     static final String MIME_NO_CONTENT = &quot;MimeNoContent&quot;;
@@ -138,21 +138,21 @@ public class HaskellHttpClientCodegen extends DefaultCodegen implements CodegenC
     static final String X_USE_KATIP = &quot;x-useKatip&quot;;
     static final String X_ALLOW_NONUNIQUE_OPERATION_IDS = &quot;x-allowNonUniqueOperationIds&quot;;
 
-<span class="fc" id="L141">    protected ArrayList&lt;Map&lt;String, String&gt;&gt; unknownMimeTypes = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L142">    protected Map&lt;String, Map&lt;String, Object&gt;&gt; uniqueParamNameTypes = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L143">    protected Map&lt;String, Set&lt;String&gt;&gt; modelMimeTypes = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L144">    protected Map&lt;String, String&gt; knownMimeDataTypes = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L145">    protected Set&lt;String&gt; typeNames = new HashSet&lt;&gt;();</span>
-<span class="fc" id="L146">    protected Set&lt;String&gt; modelTypeNames = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L141">    protected ArrayList&lt;Map&lt;String, String&gt;&gt; unknownMimeTypes = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L142">    protected Map&lt;String, Map&lt;String, Object&gt;&gt; uniqueParamNameTypes = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L143">    protected Map&lt;String, Set&lt;String&gt;&gt; modelMimeTypes = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L144">    protected Map&lt;String, String&gt; knownMimeDataTypes = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L145">    protected Set&lt;String&gt; typeNames = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L146">    protected Set&lt;String&gt; modelTypeNames = new HashSet&lt;&gt;();</span>
 
-<span class="fc" id="L148">    final private static Pattern CONTAINS_JSON_MIME_PATTERN = Pattern.compile(&quot;(?i)application/.*json(;.*)?&quot;);</span>
+<span class="nc" id="L148">    final private static Pattern CONTAINS_JSON_MIME_PATTERN = Pattern.compile(&quot;(?i)application/.*json(;.*)?&quot;);</span>
 
     public CodegenType getTag() {
-<span class="fc" id="L151">        return CodegenType.CLIENT;</span>
+<span class="nc" id="L151">        return CodegenType.CLIENT;</span>
     }
 
     public String getName() {
-<span class="fc" id="L155">        return &quot;haskell-http-client&quot;;</span>
+<span class="nc" id="L155">        return &quot;haskell-http-client&quot;;</span>
     }
 
     public String getHelp() {
@@ -160,60 +160,60 @@ public class HaskellHttpClientCodegen extends DefaultCodegen implements CodegenC
     }
 
     public HaskellHttpClientCodegen() {
-<span class="fc" id="L163">        super();</span>
+<span class="nc" id="L163">        super();</span>
 
-<span class="fc" id="L165">        modifyFeatureSet(features -&gt; features</span>
-<span class="fc" id="L166">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
-<span class="fc" id="L167">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON, WireFormatFeature.XML))</span>
-<span class="fc" id="L168">                .securityFeatures(EnumSet.of(</span>
+<span class="nc" id="L165">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L166">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="nc" id="L167">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON, WireFormatFeature.XML))</span>
+<span class="nc" id="L168">                .securityFeatures(EnumSet.of(</span>
                         SecurityFeature.ApiKey,
                         SecurityFeature.BasicAuth,
                         SecurityFeature.OAuth2_Implicit
                 ))
-<span class="fc" id="L173">                .excludeGlobalFeatures(</span>
+<span class="nc" id="L173">                .excludeGlobalFeatures(</span>
                         GlobalFeature.XMLStructureDefinitions,
                         GlobalFeature.Callbacks,
                         GlobalFeature.LinkObjects,
                         GlobalFeature.ParameterStyling
                 )
-<span class="fc" id="L179">                .excludeSchemaSupportFeatures(</span>
+<span class="nc" id="L179">                .excludeSchemaSupportFeatures(</span>
                         SchemaSupportFeature.Polymorphism
                 )
-<span class="fc" id="L182">                .excludeParameterFeatures(</span>
+<span class="nc" id="L182">                .excludeParameterFeatures(</span>
                         ParameterFeature.Cookie
                 )
-<span class="fc" id="L185">                .includeClientModificationFeatures(</span>
+<span class="nc" id="L185">                .includeClientModificationFeatures(</span>
                         ClientModificationFeature.BasePath,
                         ClientModificationFeature.UserAgent
                 )
         );
 
-<span class="fc" id="L191">        this.prependFormOrBodyParameters = true;</span>
+<span class="nc" id="L191">        this.prependFormOrBodyParameters = true;</span>
 
         // override the mapping to keep the original mapping in Haskell
-<span class="fc" id="L194">        specialCharReplacements.put(&quot;-&quot;, &quot;Dash&quot;);</span>
-<span class="fc" id="L195">        specialCharReplacements.put(&quot;&gt;&quot;, &quot;GreaterThan&quot;);</span>
-<span class="fc" id="L196">        specialCharReplacements.put(&quot;&lt;&quot;, &quot;LessThan&quot;);</span>
+<span class="nc" id="L194">        specialCharReplacements.put(&quot;-&quot;, &quot;Dash&quot;);</span>
+<span class="nc" id="L195">        specialCharReplacements.put(&quot;&gt;&quot;, &quot;GreaterThan&quot;);</span>
+<span class="nc" id="L196">        specialCharReplacements.put(&quot;&lt;&quot;, &quot;LessThan&quot;);</span>
 
         // backslash and double quote need double the escapement for both Java and Haskell
-<span class="fc" id="L199">        specialCharReplacements.remove(&quot;\\&quot;);</span>
-<span class="fc" id="L200">        specialCharReplacements.remove(&quot;\&quot;&quot;);</span>
-<span class="fc" id="L201">        specialCharReplacements.put(&quot;\\\\&quot;, &quot;Back_Slash&quot;);</span>
-<span class="fc" id="L202">        specialCharReplacements.put(&quot;\\\&quot;&quot;, &quot;Double_Quote&quot;);</span>
+<span class="nc" id="L199">        specialCharReplacements.remove(&quot;\\&quot;);</span>
+<span class="nc" id="L200">        specialCharReplacements.remove(&quot;\&quot;&quot;);</span>
+<span class="nc" id="L201">        specialCharReplacements.put(&quot;\\\\&quot;, &quot;Back_Slash&quot;);</span>
+<span class="nc" id="L202">        specialCharReplacements.put(&quot;\\\&quot;&quot;, &quot;Double_Quote&quot;);</span>
 
         // set the output folder here
-<span class="fc" id="L205">        outputFolder = &quot;generated-code/haskell-http-client&quot;;</span>
+<span class="nc" id="L205">        outputFolder = &quot;generated-code/haskell-http-client&quot;;</span>
 
-<span class="fc" id="L207">        embeddedTemplateDir = templateDir = &quot;haskell-http-client&quot;;</span>
-<span class="fc" id="L208">        apiPackage = &quot;API&quot;;</span>
+<span class="nc" id="L207">        embeddedTemplateDir = templateDir = &quot;haskell-http-client&quot;;</span>
+<span class="nc" id="L208">        apiPackage = &quot;API&quot;;</span>
         //modelPackage = &quot;Model&quot;;
 
         // default HIDE_GENERATION_TIMESTAMP to true
-<span class="fc" id="L212">        hideGenerationTimestamp = Boolean.TRUE;</span>
+<span class="nc" id="L212">        hideGenerationTimestamp = Boolean.TRUE;</span>
 
         // Haskell keywords and reserved function names, taken mostly from https://wiki.haskell.org/Keywords
-<span class="fc" id="L215">        setReservedWordsLowerCase(</span>
-<span class="fc" id="L216">                Arrays.asList(</span>
+<span class="nc" id="L215">        setReservedWordsLowerCase(</span>
+<span class="nc" id="L216">                Arrays.asList(</span>
                         // Keywords
                         &quot;as&quot;, &quot;case&quot;, &quot;of&quot;,
                         &quot;class&quot;, &quot;data&quot;, &quot;family&quot;,
@@ -229,20 +229,20 @@ public class HaskellHttpClientCodegen extends DefaultCodegen implements CodegenC
                 )
         );
 
-<span class="fc" id="L232">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;));</span>
-<span class="fc" id="L233">        supportingFiles.add(new SupportingFile(&quot;stack.mustache&quot;, &quot;&quot;, &quot;stack.yaml&quot;));</span>
-<span class="fc" id="L234">        supportingFiles.add(new SupportingFile(&quot;Setup.mustache&quot;, &quot;&quot;, &quot;Setup.hs&quot;));</span>
-<span class="fc" id="L235">        supportingFiles.add(new SupportingFile(&quot;gitignore.mustache&quot;, &quot;&quot;, &quot;.gitignore&quot;));</span>
-<span class="fc" id="L236">        supportingFiles.add(new SupportingFile(&quot;.travis.yml&quot;, &quot;&quot;, &quot;.travis.yml&quot;));</span>
-<span class="fc" id="L237">        supportingFiles.add(new SupportingFile(&quot;git_push.sh.mustache&quot;, &quot;&quot;, &quot;git_push.sh&quot;));</span>
+<span class="nc" id="L232">        supportingFiles.add(new SupportingFile(&quot;README.mustache&quot;, &quot;&quot;, &quot;README.md&quot;));</span>
+<span class="nc" id="L233">        supportingFiles.add(new SupportingFile(&quot;stack.mustache&quot;, &quot;&quot;, &quot;stack.yaml&quot;));</span>
+<span class="nc" id="L234">        supportingFiles.add(new SupportingFile(&quot;Setup.mustache&quot;, &quot;&quot;, &quot;Setup.hs&quot;));</span>
+<span class="nc" id="L235">        supportingFiles.add(new SupportingFile(&quot;gitignore.mustache&quot;, &quot;&quot;, &quot;.gitignore&quot;));</span>
+<span class="nc" id="L236">        supportingFiles.add(new SupportingFile(&quot;.travis.yml&quot;, &quot;&quot;, &quot;.travis.yml&quot;));</span>
+<span class="nc" id="L237">        supportingFiles.add(new SupportingFile(&quot;git_push.sh.mustache&quot;, &quot;&quot;, &quot;git_push.sh&quot;));</span>
 
-<span class="fc" id="L239">        supportingFiles.add(new SupportingFile(&quot;tests/ApproxEq.mustache&quot;, &quot;tests&quot;, &quot;ApproxEq.hs&quot;));</span>
-<span class="fc" id="L240">        supportingFiles.add(new SupportingFile(&quot;tests/Instances.mustache&quot;, &quot;tests&quot;, &quot;Instances.hs&quot;));</span>
-<span class="fc" id="L241">        supportingFiles.add(new SupportingFile(&quot;tests/PropMime.mustache&quot;, &quot;tests&quot;, &quot;PropMime.hs&quot;));</span>
-<span class="fc" id="L242">        supportingFiles.add(new SupportingFile(&quot;tests/Test.mustache&quot;, &quot;tests&quot;, &quot;Test.hs&quot;));</span>
+<span class="nc" id="L239">        supportingFiles.add(new SupportingFile(&quot;tests/ApproxEq.mustache&quot;, &quot;tests&quot;, &quot;ApproxEq.hs&quot;));</span>
+<span class="nc" id="L240">        supportingFiles.add(new SupportingFile(&quot;tests/Instances.mustache&quot;, &quot;tests&quot;, &quot;Instances.hs&quot;));</span>
+<span class="nc" id="L241">        supportingFiles.add(new SupportingFile(&quot;tests/PropMime.mustache&quot;, &quot;tests&quot;, &quot;PropMime.hs&quot;));</span>
+<span class="nc" id="L242">        supportingFiles.add(new SupportingFile(&quot;tests/Test.mustache&quot;, &quot;tests&quot;, &quot;Test.hs&quot;));</span>
 
-<span class="fc" id="L244">        languageSpecificPrimitives = new HashSet&lt;&gt;(</span>
-<span class="fc" id="L245">                Arrays.asList(</span>
+<span class="nc" id="L244">        languageSpecificPrimitives = new HashSet&lt;&gt;(</span>
+<span class="nc" id="L245">                Arrays.asList(</span>
                         &quot;Bool&quot;,
                         &quot;String&quot;,
                         &quot;Int&quot;,
@@ -256,74 +256,74 @@ public class HaskellHttpClientCodegen extends DefaultCodegen implements CodegenC
                 )
         );
 
-<span class="fc" id="L259">        typeMapping.clear();</span>
+<span class="nc" id="L259">        typeMapping.clear();</span>
         // prim
-<span class="fc" id="L261">        typeMapping.put(&quot;boolean&quot;, &quot;Bool&quot;);</span>
-<span class="fc" id="L262">        typeMapping.put(&quot;int&quot;, &quot;Int&quot;);</span>
-<span class="fc" id="L263">        typeMapping.put(&quot;long&quot;, &quot;Integer&quot;);</span>
-<span class="fc" id="L264">        typeMapping.put(&quot;short&quot;, &quot;Int&quot;);</span>
-<span class="fc" id="L265">        typeMapping.put(&quot;char&quot;, &quot;Char&quot;);</span>
-<span class="fc" id="L266">        typeMapping.put(&quot;float&quot;, &quot;Float&quot;);</span>
-<span class="fc" id="L267">        typeMapping.put(&quot;double&quot;, &quot;Double&quot;);</span>
-<span class="fc" id="L268">        typeMapping.put(&quot;number&quot;, &quot;Double&quot;);</span>
-<span class="fc" id="L269">        typeMapping.put(&quot;decimal&quot;, &quot;Double&quot;);</span>
-<span class="fc" id="L270">        typeMapping.put(&quot;integer&quot;, &quot;Int&quot;);</span>
-<span class="fc" id="L271">        typeMapping.put(&quot;file&quot;, &quot;FilePath&quot;);</span>
+<span class="nc" id="L261">        typeMapping.put(&quot;boolean&quot;, &quot;Bool&quot;);</span>
+<span class="nc" id="L262">        typeMapping.put(&quot;int&quot;, &quot;Int&quot;);</span>
+<span class="nc" id="L263">        typeMapping.put(&quot;long&quot;, &quot;Integer&quot;);</span>
+<span class="nc" id="L264">        typeMapping.put(&quot;short&quot;, &quot;Int&quot;);</span>
+<span class="nc" id="L265">        typeMapping.put(&quot;char&quot;, &quot;Char&quot;);</span>
+<span class="nc" id="L266">        typeMapping.put(&quot;float&quot;, &quot;Float&quot;);</span>
+<span class="nc" id="L267">        typeMapping.put(&quot;double&quot;, &quot;Double&quot;);</span>
+<span class="nc" id="L268">        typeMapping.put(&quot;number&quot;, &quot;Double&quot;);</span>
+<span class="nc" id="L269">        typeMapping.put(&quot;decimal&quot;, &quot;Double&quot;);</span>
+<span class="nc" id="L270">        typeMapping.put(&quot;integer&quot;, &quot;Int&quot;);</span>
+<span class="nc" id="L271">        typeMapping.put(&quot;file&quot;, &quot;FilePath&quot;);</span>
         // lib
-<span class="fc" id="L273">        typeMapping.put(&quot;string&quot;, &quot;Text&quot;);</span>
-<span class="fc" id="L274">        typeMapping.put(&quot;UUID&quot;, &quot;Text&quot;);</span>
-<span class="fc" id="L275">        typeMapping.put(&quot;URI&quot;, &quot;Text&quot;);</span>
-<span class="fc" id="L276">        typeMapping.put(&quot;any&quot;, &quot;A.Value&quot;);</span>
-<span class="fc" id="L277">        typeMapping.put(&quot;set&quot;, &quot;Set.Set&quot;);</span>
+<span class="nc" id="L273">        typeMapping.put(&quot;string&quot;, &quot;Text&quot;);</span>
+<span class="nc" id="L274">        typeMapping.put(&quot;UUID&quot;, &quot;Text&quot;);</span>
+<span class="nc" id="L275">        typeMapping.put(&quot;URI&quot;, &quot;Text&quot;);</span>
+<span class="nc" id="L276">        typeMapping.put(&quot;any&quot;, &quot;A.Value&quot;);</span>
+<span class="nc" id="L277">        typeMapping.put(&quot;set&quot;, &quot;Set.Set&quot;);</span>
         // newtype
-<span class="fc" id="L279">        typeMapping.put(&quot;binary&quot;, &quot;Binary&quot;);</span>
-<span class="fc" id="L280">        typeMapping.put(&quot;ByteArray&quot;, &quot;ByteArray&quot;);</span>
-<span class="fc" id="L281">        typeMapping.put(&quot;date&quot;, &quot;Date&quot;);</span>
-<span class="fc" id="L282">        typeMapping.put(&quot;DateTime&quot;, &quot;DateTime&quot;);</span>
+<span class="nc" id="L279">        typeMapping.put(&quot;binary&quot;, &quot;Binary&quot;);</span>
+<span class="nc" id="L280">        typeMapping.put(&quot;ByteArray&quot;, &quot;ByteArray&quot;);</span>
+<span class="nc" id="L281">        typeMapping.put(&quot;date&quot;, &quot;Date&quot;);</span>
+<span class="nc" id="L282">        typeMapping.put(&quot;DateTime&quot;, &quot;DateTime&quot;);</span>
 
-<span class="fc" id="L284">        knownMimeDataTypes.put(&quot;application/json&quot;, &quot;MimeJSON&quot;);</span>
-<span class="fc" id="L285">        knownMimeDataTypes.put(&quot;application/xml&quot;, &quot;MimeXML&quot;);</span>
-<span class="fc" id="L286">        knownMimeDataTypes.put(&quot;application/x-www-form-urlencoded&quot;, &quot;MimeFormUrlEncoded&quot;);</span>
-<span class="fc" id="L287">        knownMimeDataTypes.put(&quot;application/octet-stream&quot;, &quot;MimeOctetStream&quot;);</span>
-<span class="fc" id="L288">        knownMimeDataTypes.put(&quot;multipart/form-data&quot;, &quot;MimeMultipartFormData&quot;);</span>
-<span class="fc" id="L289">        knownMimeDataTypes.put(&quot;text/plain&quot;, &quot;MimePlainText&quot;);</span>
-<span class="fc" id="L290">        knownMimeDataTypes.put(&quot;*/*&quot;, MIME_ANY);</span>
+<span class="nc" id="L284">        knownMimeDataTypes.put(&quot;application/json&quot;, &quot;MimeJSON&quot;);</span>
+<span class="nc" id="L285">        knownMimeDataTypes.put(&quot;application/xml&quot;, &quot;MimeXML&quot;);</span>
+<span class="nc" id="L286">        knownMimeDataTypes.put(&quot;application/x-www-form-urlencoded&quot;, &quot;MimeFormUrlEncoded&quot;);</span>
+<span class="nc" id="L287">        knownMimeDataTypes.put(&quot;application/octet-stream&quot;, &quot;MimeOctetStream&quot;);</span>
+<span class="nc" id="L288">        knownMimeDataTypes.put(&quot;multipart/form-data&quot;, &quot;MimeMultipartFormData&quot;);</span>
+<span class="nc" id="L289">        knownMimeDataTypes.put(&quot;text/plain&quot;, &quot;MimePlainText&quot;);</span>
+<span class="nc" id="L290">        knownMimeDataTypes.put(&quot;*/*&quot;, MIME_ANY);</span>
 
-<span class="fc" id="L292">        importMapping.clear();</span>
+<span class="nc" id="L292">        importMapping.clear();</span>
 
         //cliOptions.add(CliOption.newString(CodegenConstants.MODEL_PACKAGE, CodegenConstants.MODEL_PACKAGE_DESC));
         //cliOptions.add(CliOption.newString(CodegenConstants.API_PACKAGE, CodegenConstants.API_PACKAGE_DESC));
 
-<span class="fc" id="L297">        cliOptions.add(CliOption.newString(PROP_CABAL_PACKAGE, &quot;Set the cabal package name, which consists of one or more alphanumeric words separated by hyphens&quot;));</span>
-<span class="fc" id="L298">        cliOptions.add(CliOption.newString(PROP_CABAL_VERSION, &quot;Set the cabal version number, consisting of a sequence of one or more integers separated by dots&quot;));</span>
-<span class="fc" id="L299">        cliOptions.add(CliOption.newString(PROP_BASE_MODULE, &quot;Set the base module namespace&quot;));</span>
-<span class="fc" id="L300">        cliOptions.add(CliOption.newString(PROP_REQUEST_TYPE, &quot;Set the name of the type used to generate requests&quot;));</span>
-<span class="fc" id="L301">        cliOptions.add(CliOption.newString(PROP_CONFIG_TYPE, &quot;Set the name of the type used for configuration&quot;));</span>
+<span class="nc" id="L297">        cliOptions.add(CliOption.newString(PROP_CABAL_PACKAGE, &quot;Set the cabal package name, which consists of one or more alphanumeric words separated by hyphens&quot;));</span>
+<span class="nc" id="L298">        cliOptions.add(CliOption.newString(PROP_CABAL_VERSION, &quot;Set the cabal version number, consisting of a sequence of one or more integers separated by dots&quot;));</span>
+<span class="nc" id="L299">        cliOptions.add(CliOption.newString(PROP_BASE_MODULE, &quot;Set the base module namespace&quot;));</span>
+<span class="nc" id="L300">        cliOptions.add(CliOption.newString(PROP_REQUEST_TYPE, &quot;Set the name of the type used to generate requests&quot;));</span>
+<span class="nc" id="L301">        cliOptions.add(CliOption.newString(PROP_CONFIG_TYPE, &quot;Set the name of the type used for configuration&quot;));</span>
 
-<span class="fc" id="L303">        cliOptions.add(CliOption.newBoolean(PROP_ALLOW_FROMJSON_NULLS, &quot;allow JSON Null during model decoding from JSON&quot;).defaultValue(Boolean.TRUE.toString()));</span>
-<span class="fc" id="L304">        cliOptions.add(CliOption.newBoolean(PROP_ALLOW_TOJSON_NULLS, &quot;allow emitting JSON Null during model encoding to JSON&quot;).defaultValue(Boolean.FALSE.toString()));</span>
-<span class="fc" id="L305">        cliOptions.add(CliOption.newBoolean(PROP_ALLOW_NONUNIQUE_OPERATION_IDS, &quot;allow different API modules to contain the same operationId. Each API must be imported qualified&quot;).defaultValue(Boolean.FALSE.toString()));</span>
-<span class="fc" id="L306">        cliOptions.add(CliOption.newBoolean(PROP_GENERATE_LENSES, &quot;Generate Lens optics for Models&quot;).defaultValue(Boolean.TRUE.toString()));</span>
-<span class="fc" id="L307">        cliOptions.add(CliOption.newBoolean(PROP_GENERATE_MODEL_CONSTRUCTORS, &quot;Generate smart constructors (only supply required fields) for models&quot;).defaultValue(Boolean.TRUE.toString()));</span>
-<span class="fc" id="L308">        cliOptions.add(CliOption.newBoolean(PROP_GENERATE_ENUMS, &quot;Generate specific datatypes for OpenAPI enums&quot;).defaultValue(Boolean.TRUE.toString()));</span>
-<span class="fc" id="L309">        cliOptions.add(CliOption.newBoolean(PROP_GENERATE_FORM_URLENCODED_INSTANCES, &quot;Generate FromForm/ToForm instances for models that are used by operations that produce or consume application/x-www-form-urlencoded&quot;).defaultValue(Boolean.TRUE.toString()));</span>
-<span class="fc" id="L310">        cliOptions.add(CliOption.newBoolean(PROP_INLINE_MIME_TYPES, &quot;Inline (hardcode) the content-type and accept parameters on operations, when there is only 1 option&quot;).defaultValue(Boolean.TRUE.toString()));</span>
+<span class="nc" id="L303">        cliOptions.add(CliOption.newBoolean(PROP_ALLOW_FROMJSON_NULLS, &quot;allow JSON Null during model decoding from JSON&quot;).defaultValue(Boolean.TRUE.toString()));</span>
+<span class="nc" id="L304">        cliOptions.add(CliOption.newBoolean(PROP_ALLOW_TOJSON_NULLS, &quot;allow emitting JSON Null during model encoding to JSON&quot;).defaultValue(Boolean.FALSE.toString()));</span>
+<span class="nc" id="L305">        cliOptions.add(CliOption.newBoolean(PROP_ALLOW_NONUNIQUE_OPERATION_IDS, &quot;allow different API modules to contain the same operationId. Each API must be imported qualified&quot;).defaultValue(Boolean.FALSE.toString()));</span>
+<span class="nc" id="L306">        cliOptions.add(CliOption.newBoolean(PROP_GENERATE_LENSES, &quot;Generate Lens optics for Models&quot;).defaultValue(Boolean.TRUE.toString()));</span>
+<span class="nc" id="L307">        cliOptions.add(CliOption.newBoolean(PROP_GENERATE_MODEL_CONSTRUCTORS, &quot;Generate smart constructors (only supply required fields) for models&quot;).defaultValue(Boolean.TRUE.toString()));</span>
+<span class="nc" id="L308">        cliOptions.add(CliOption.newBoolean(PROP_GENERATE_ENUMS, &quot;Generate specific datatypes for OpenAPI enums&quot;).defaultValue(Boolean.TRUE.toString()));</span>
+<span class="nc" id="L309">        cliOptions.add(CliOption.newBoolean(PROP_GENERATE_FORM_URLENCODED_INSTANCES, &quot;Generate FromForm/ToForm instances for models that are used by operations that produce or consume application/x-www-form-urlencoded&quot;).defaultValue(Boolean.TRUE.toString()));</span>
+<span class="nc" id="L310">        cliOptions.add(CliOption.newBoolean(PROP_INLINE_MIME_TYPES, &quot;Inline (hardcode) the content-type and accept parameters on operations, when there is only 1 option&quot;).defaultValue(Boolean.TRUE.toString()));</span>
 
 
-<span class="fc" id="L313">        cliOptions.add(CliOption.newString(PROP_MODEL_DERIVING, &quot;Additional classes to include in the deriving() clause of Models&quot;));</span>
-<span class="fc" id="L314">        cliOptions.add(CliOption.newBoolean(PROP_STRICT_FIELDS, &quot;Add strictness annotations to all model fields&quot;).defaultValue((Boolean.TRUE.toString())));</span>
-<span class="fc" id="L315">        cliOptions.add(CliOption.newBoolean(PROP_USE_KATIP, &quot;Sets the default value for the UseKatip cabal flag. If true, the katip package provides logging instead of monad-logger&quot;).defaultValue((Boolean.TRUE.toString())));</span>
+<span class="nc" id="L313">        cliOptions.add(CliOption.newString(PROP_MODEL_DERIVING, &quot;Additional classes to include in the deriving() clause of Models&quot;));</span>
+<span class="nc" id="L314">        cliOptions.add(CliOption.newBoolean(PROP_STRICT_FIELDS, &quot;Add strictness annotations to all model fields&quot;).defaultValue((Boolean.TRUE.toString())));</span>
+<span class="nc" id="L315">        cliOptions.add(CliOption.newBoolean(PROP_USE_KATIP, &quot;Sets the default value for the UseKatip cabal flag. If true, the katip package provides logging instead of monad-logger&quot;).defaultValue((Boolean.TRUE.toString())));</span>
 
-<span class="fc" id="L317">        cliOptions.add(CliOption.newString(PROP_DATETIME_FORMAT, &quot;format string used to parse/render a datetime&quot;));</span>
-<span class="fc" id="L318">        cliOptions.add(CliOption.newString(PROP_DATETIME_PARSE_FORMAT, &quot;overrides the format string used to parse a datetime&quot;));</span>
-<span class="fc" id="L319">        cliOptions.add(CliOption.newString(PROP_DATE_FORMAT, &quot;format string used to parse/render a date&quot;).defaultValue(defaultDateFormat));</span>
-<span class="fc" id="L320">        cliOptions.add(CliOption.newString(PROP_QUERY_EXTRA_UNRESERVED, &quot;Configures additional querystring characters which must not be URI encoded, e.g. '+' or ':'&quot;));</span>
+<span class="nc" id="L317">        cliOptions.add(CliOption.newString(PROP_DATETIME_FORMAT, &quot;format string used to parse/render a datetime&quot;));</span>
+<span class="nc" id="L318">        cliOptions.add(CliOption.newString(PROP_DATETIME_PARSE_FORMAT, &quot;overrides the format string used to parse a datetime&quot;));</span>
+<span class="nc" id="L319">        cliOptions.add(CliOption.newString(PROP_DATE_FORMAT, &quot;format string used to parse/render a date&quot;).defaultValue(defaultDateFormat));</span>
+<span class="nc" id="L320">        cliOptions.add(CliOption.newString(PROP_QUERY_EXTRA_UNRESERVED, &quot;Configures additional querystring characters which must not be URI encoded, e.g. '+' or ':'&quot;));</span>
 
-<span class="fc" id="L322">        cliOptions.add(CliOption.newString(PROP_CUSTOM_TEST_INSTANCE_MODULE, &quot;test module used to provide typeclass instances for types not known by the generator&quot;));</span>
+<span class="nc" id="L322">        cliOptions.add(CliOption.newString(PROP_CUSTOM_TEST_INSTANCE_MODULE, &quot;test module used to provide typeclass instances for types not known by the generator&quot;));</span>
 
-<span class="fc" id="L324">        cliOptions.add(CliOption.newBoolean(CodegenConstants.HIDE_GENERATION_TIMESTAMP, CodegenConstants.HIDE_GENERATION_TIMESTAMP_DESC).defaultValue(Boolean.TRUE.toString()));</span>
+<span class="nc" id="L324">        cliOptions.add(CliOption.newBoolean(CodegenConstants.HIDE_GENERATION_TIMESTAMP, CodegenConstants.HIDE_GENERATION_TIMESTAMP_DESC).defaultValue(Boolean.TRUE.toString()));</span>
 
-<span class="fc" id="L326">    }</span>
+<span class="nc" id="L326">    }</span>
 
     public void setAllowNonUniqueOperationIds(Boolean value) {
 <span class="nc" id="L329">        additionalProperties.put(X_ALLOW_NONUNIQUE_OPERATION_IDS, value);</span>

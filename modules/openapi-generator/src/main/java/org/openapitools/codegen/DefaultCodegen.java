@@ -51,9 +51,6 @@ import org.openapitools.codegen.CodegenDiscriminator.MappedModel;
 import org.openapitools.codegen.api.TemplatingEngineAdapter;
 import org.openapitools.codegen.config.GlobalSettings;
 import org.openapitools.codegen.examples.ExampleGenerator;
-import org.openapitools.codegen.languages.PhpNextgenClientCodegen;
-import org.openapitools.codegen.languages.RustAxumServerCodegen;
-import org.openapitools.codegen.languages.RustServerCodegen;
 import org.openapitools.codegen.meta.FeatureSet;
 import org.openapitools.codegen.meta.GeneratorMetadata;
 import org.openapitools.codegen.meta.Stability;
@@ -4743,7 +4740,7 @@ public class DefaultCodegen implements CodegenConfig {
                 contentType = contentType.toLowerCase(Locale.ROOT);
             }
             if (contentType != null &&
-                    ((!(this instanceof RustAxumServerCodegen) && contentType.startsWith("application/x-www-form-urlencoded")) ||
+                    ((contentType.startsWith("application/x-www-form-urlencoded")) ||
                             contentType.startsWith("multipart"))) {
                 // process form parameters
                 formParams = fromRequestBodyToFormParameters(requestBody, imports);
@@ -5272,11 +5269,7 @@ public class DefaultCodegen implements CodegenConfig {
             parameterSchema = unaliasSchema(parameter.getSchema());
             parameterModelName = getParameterDataType(parameter, parameterSchema);
             CodegenProperty prop;
-            if (this instanceof RustServerCodegen) {
-                // for rust server, we need to do somethings special as it uses
-                // $ref (e.g. #components/schemas/Pet) to determine whether it's a model
-                prop = fromProperty(parameter.getName(), parameterSchema, false);
-            } else if (getUseInlineModelResolver()) {
+            if (getUseInlineModelResolver()) {
                 prop = fromProperty(parameter.getName(), getReferencedSchemaWhenNotEnum(parameterSchema), false);
             } else {
                 prop = fromProperty(parameter.getName(), parameterSchema, false);
@@ -5323,7 +5316,7 @@ public class DefaultCodegen implements CodegenConfig {
             return codegenParameter;
         }
 
-        if (getUseInlineModelResolver() && !(this instanceof RustServerCodegen)) {
+        if (getUseInlineModelResolver()) {
             // for rust server, we cannot run the following as it uses
             // $ref (e.g. #components/schemas/Pet) to determine whether it's a model
             parameterSchema = getReferencedSchemaWhenNotEnum(parameterSchema);
@@ -7299,10 +7292,8 @@ public class DefaultCodegen implements CodegenConfig {
             codegenParameter.baseType = arrayInnerProperty.dataType;
             // TODO we need to fix array of item (with default value) generator by generator
             // https://github.com/OpenAPITools/openapi-generator/pull/16654/ is a good reference
-            if (!(this instanceof PhpNextgenClientCodegen)) {
-                // no need to set default value here as it was set earlier
-                codegenParameter.defaultValue = arrayInnerProperty.getDefaultValue();
-            }
+            // no need to set default value here as it was set earlier
+            codegenParameter.defaultValue = arrayInnerProperty.getDefaultValue();
             if (codegenParameter.items.isFile) {
                 codegenParameter.isFile = true;
                 codegenParameter.dataFormat = codegenParameter.items.dataFormat;

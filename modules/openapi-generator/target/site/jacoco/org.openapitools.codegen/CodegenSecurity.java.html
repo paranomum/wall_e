@@ -36,7 +36,7 @@ public class CodegenSecurity {
     // https://datatracker.ietf.org/doc/draft-cavage-http-signatures/
     public Boolean isBasicBasic, isBasicBearer, isHttpSignature;
     public String bearerFormat;
-<span class="fc" id="L39">    public Map&lt;String, Object&gt; vendorExtensions = new HashMap&lt;String, Object&gt;();</span>
+<span class="nc" id="L39">    public Map&lt;String, Object&gt; vendorExtensions = new HashMap&lt;String, Object&gt;();</span>
     // ApiKey specific
     public String keyParamName;
     public Boolean isKeyInQuery, isKeyInHeader, isKeyInCookie;
@@ -49,57 +49,57 @@ public class CodegenSecurity {
     // OpenId specific
     public String openIdConnectUrl;
 
-<span class="fc" id="L52">    public CodegenSecurity () {</span>
-<span class="fc" id="L53">    }</span>
+<span class="nc" id="L52">    public CodegenSecurity () {</span>
+<span class="nc" id="L53">    }</span>
 
-<span class="fc" id="L55">    public CodegenSecurity (CodegenSecurity original) {</span>
-<span class="fc" id="L56">        this.name = original.name;</span>
-<span class="fc" id="L57">        this.description = original.description;</span>
-<span class="fc" id="L58">        this.type = original.type;</span>
-<span class="fc" id="L59">        this.scheme = original.scheme;</span>
-<span class="fc" id="L60">        this.isBasic = original.isBasic;</span>
-<span class="fc" id="L61">        this.isBasicBasic = original.isBasicBasic;</span>
-<span class="fc" id="L62">        this.isHttpSignature = original.isHttpSignature;</span>
-<span class="fc" id="L63">        this.bearerFormat = original.bearerFormat;</span>
-<span class="fc" id="L64">        this.isBasicBearer = original.isBasicBearer;</span>
-<span class="fc" id="L65">        this.isApiKey = original.isApiKey;</span>
-<span class="fc" id="L66">        this.isOAuth = original.isOAuth;</span>
-<span class="fc" id="L67">        this.isOpenId = original.isOpenId;</span>
-<span class="fc" id="L68">        this.keyParamName = original.keyParamName;</span>
-<span class="fc" id="L69">        this.isCode = original.isCode;</span>
-<span class="fc" id="L70">        this.isImplicit = original.isImplicit;</span>
-<span class="fc" id="L71">        this.isApplication = original.isApplication;</span>
-<span class="fc" id="L72">        this.isPassword = original.isPassword;</span>
-<span class="fc" id="L73">        this.isKeyInCookie = original.isKeyInCookie;</span>
-<span class="fc" id="L74">        this.isKeyInHeader = original.isKeyInHeader;</span>
-<span class="fc" id="L75">        this.isKeyInQuery = original.isKeyInQuery;</span>
-<span class="fc" id="L76">        this.flow = original.flow;</span>
-<span class="fc" id="L77">        this.tokenUrl = original.tokenUrl;</span>
-<span class="fc" id="L78">        this.authorizationUrl = original.authorizationUrl;</span>
-<span class="fc" id="L79">        this.refreshUrl = original.refreshUrl;</span>
-<span class="fc" id="L80">        this.openIdConnectUrl = original.openIdConnectUrl;</span>
+<span class="nc" id="L55">    public CodegenSecurity (CodegenSecurity original) {</span>
+<span class="nc" id="L56">        this.name = original.name;</span>
+<span class="nc" id="L57">        this.description = original.description;</span>
+<span class="nc" id="L58">        this.type = original.type;</span>
+<span class="nc" id="L59">        this.scheme = original.scheme;</span>
+<span class="nc" id="L60">        this.isBasic = original.isBasic;</span>
+<span class="nc" id="L61">        this.isBasicBasic = original.isBasicBasic;</span>
+<span class="nc" id="L62">        this.isHttpSignature = original.isHttpSignature;</span>
+<span class="nc" id="L63">        this.bearerFormat = original.bearerFormat;</span>
+<span class="nc" id="L64">        this.isBasicBearer = original.isBasicBearer;</span>
+<span class="nc" id="L65">        this.isApiKey = original.isApiKey;</span>
+<span class="nc" id="L66">        this.isOAuth = original.isOAuth;</span>
+<span class="nc" id="L67">        this.isOpenId = original.isOpenId;</span>
+<span class="nc" id="L68">        this.keyParamName = original.keyParamName;</span>
+<span class="nc" id="L69">        this.isCode = original.isCode;</span>
+<span class="nc" id="L70">        this.isImplicit = original.isImplicit;</span>
+<span class="nc" id="L71">        this.isApplication = original.isApplication;</span>
+<span class="nc" id="L72">        this.isPassword = original.isPassword;</span>
+<span class="nc" id="L73">        this.isKeyInCookie = original.isKeyInCookie;</span>
+<span class="nc" id="L74">        this.isKeyInHeader = original.isKeyInHeader;</span>
+<span class="nc" id="L75">        this.isKeyInQuery = original.isKeyInQuery;</span>
+<span class="nc" id="L76">        this.flow = original.flow;</span>
+<span class="nc" id="L77">        this.tokenUrl = original.tokenUrl;</span>
+<span class="nc" id="L78">        this.authorizationUrl = original.authorizationUrl;</span>
+<span class="nc" id="L79">        this.refreshUrl = original.refreshUrl;</span>
+<span class="nc" id="L80">        this.openIdConnectUrl = original.openIdConnectUrl;</span>
 
         // It is not possible to deep copy the extensions, as we have no idea what types they are.
         // So the filtered method *will* refer to the original extensions, if any.
-<span class="pc bpc" id="L84" title="1 of 2 branches missed.">        this.vendorExtensions = original.vendorExtensions == null ? null : new HashMap&lt;String, Object&gt;(original.vendorExtensions);</span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">        this.vendorExtensions = original.vendorExtensions == null ? null : new HashMap&lt;String, Object&gt;(original.vendorExtensions);</span>
 
         // It is not possible to deep copy the extensions, as we have no idea what type their values are.
         // So the filtered method *will* refer to the original scopes, if any.
-<span class="pc bpc" id="L88" title="1 of 2 branches missed.">        this.scopes = original.scopes == null ? null : new ArrayList&lt;Map&lt;String, Object&gt;&gt;(original.scopes);</span>
-<span class="fc" id="L89">    }</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">        this.scopes = original.scopes == null ? null : new ArrayList&lt;Map&lt;String, Object&gt;&gt;(original.scopes);</span>
+<span class="nc" id="L89">    }</span>
 
     // Return a copy of the security object, filtering out any scopes from the passed-in list.
     public CodegenSecurity filterByScopeNames(List&lt;String&gt; filterScopes) {
-<span class="fc" id="L93">        CodegenSecurity filteredSecurity = new CodegenSecurity(this);</span>
+<span class="nc" id="L93">        CodegenSecurity filteredSecurity = new CodegenSecurity(this);</span>
 
         // Since OAS 3.1.0, security scheme types other than &quot;oauth2&quot; and &quot;openIdConnect&quot; may have a list of role names
         // which are required for the execution, but are not otherwise defined or exchanged in-band.
         // In such cases, no filtering is performed.
-<span class="pc bpc" id="L98" title="2 of 4 branches missed.">        if (!(Boolean.TRUE.equals(isOAuth) || Boolean.TRUE.equals(isOpenId))) {</span>
-<span class="fc" id="L99">            filteredSecurity.scopes = filterScopes.stream()</span>
-<span class="pc" id="L100">                .map(s -&gt; new HashMap&lt;String, Object&gt;(Map.of(&quot;scope&quot;, s)))</span>
-<span class="fc" id="L101">                .collect(Collectors.toList());</span>
-<span class="fc" id="L102">            return filteredSecurity;</span>
+<span class="nc bnc" id="L98" title="All 4 branches missed.">        if (!(Boolean.TRUE.equals(isOAuth) || Boolean.TRUE.equals(isOpenId))) {</span>
+<span class="nc" id="L99">            filteredSecurity.scopes = filterScopes.stream()</span>
+<span class="nc" id="L100">                .map(s -&gt; new HashMap&lt;String, Object&gt;(Map.of(&quot;scope&quot;, s)))</span>
+<span class="nc" id="L101">                .collect(Collectors.toList());</span>
+<span class="nc" id="L102">            return filteredSecurity;</span>
         }
 
 <span class="nc bnc" id="L105" title="All 2 branches missed.">        if (scopes == null) {</span>

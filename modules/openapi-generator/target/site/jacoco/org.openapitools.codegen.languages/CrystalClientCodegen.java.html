@@ -46,24 +46,24 @@ import static org.openapitools.codegen.utils.StringUtils.camelize;
 import static org.openapitools.codegen.utils.StringUtils.underscore;
 
 public class CrystalClientCodegen extends DefaultCodegen {
-<span class="fc" id="L49">    private final Logger LOGGER = LoggerFactory.getLogger(CrystalClientCodegen.class);</span>
+<span class="nc" id="L49">    private final Logger LOGGER = LoggerFactory.getLogger(CrystalClientCodegen.class);</span>
     private static final String NUMERIC_ENUM_PREFIX = &quot;N&quot;;
-<span class="fc" id="L51">    protected static int emptyMethodNameCounter = 0;</span>
+<span class="nc" id="L51">    protected static int emptyMethodNameCounter = 0;</span>
 
-<span class="fc" id="L53">    protected String shardName = &quot;openapi_client&quot;;</span>
-<span class="fc" id="L54">    protected String moduleName = &quot;OpenAPIClient&quot;;</span>
-<span class="fc" id="L55">    protected String shardVersion = &quot;1.0.0&quot;;</span>
-<span class="fc" id="L56">    protected String specFolder = &quot;spec&quot;;</span>
-<span class="fc" id="L57">    protected String srcFolder = &quot;src&quot;;</span>
-<span class="fc" id="L58">    protected String shardLicense = &quot;unlicense&quot;;</span>
-<span class="fc" id="L59">    protected String shardHomepage = &quot;https://openapitools.org&quot;;</span>
-<span class="fc" id="L60">    protected String shardSummary = &quot;A Crystal SDK for the REST API&quot;;</span>
-<span class="fc" id="L61">    protected String shardDescription = &quot;This shard maps to a REST API&quot;;</span>
-<span class="fc" id="L62">    protected String shardAuthor = &quot;&quot;;</span>
-<span class="fc" id="L63">    protected String shardAuthorEmail = &quot;&quot;;</span>
-<span class="fc" id="L64">    protected String apiDocPath = &quot;docs/&quot;;</span>
-<span class="fc" id="L65">    protected String modelDocPath = &quot;docs/&quot;;</span>
-<span class="fc" id="L66">    protected List&lt;String&gt; primitiveTypes = new ArrayList&lt;String&gt;();</span>
+<span class="nc" id="L53">    protected String shardName = &quot;openapi_client&quot;;</span>
+<span class="nc" id="L54">    protected String moduleName = &quot;OpenAPIClient&quot;;</span>
+<span class="nc" id="L55">    protected String shardVersion = &quot;1.0.0&quot;;</span>
+<span class="nc" id="L56">    protected String specFolder = &quot;spec&quot;;</span>
+<span class="nc" id="L57">    protected String srcFolder = &quot;src&quot;;</span>
+<span class="nc" id="L58">    protected String shardLicense = &quot;unlicense&quot;;</span>
+<span class="nc" id="L59">    protected String shardHomepage = &quot;https://openapitools.org&quot;;</span>
+<span class="nc" id="L60">    protected String shardSummary = &quot;A Crystal SDK for the REST API&quot;;</span>
+<span class="nc" id="L61">    protected String shardDescription = &quot;This shard maps to a REST API&quot;;</span>
+<span class="nc" id="L62">    protected String shardAuthor = &quot;&quot;;</span>
+<span class="nc" id="L63">    protected String shardAuthorEmail = &quot;&quot;;</span>
+<span class="nc" id="L64">    protected String apiDocPath = &quot;docs/&quot;;</span>
+<span class="nc" id="L65">    protected String modelDocPath = &quot;docs/&quot;;</span>
+<span class="nc" id="L66">    protected List&lt;String&gt; primitiveTypes = new ArrayList&lt;String&gt;();</span>
 
     public static final String SHARD_NAME = &quot;shardName&quot;;
     public static final String MODULE_NAME = &quot;moduleName&quot;;
@@ -76,63 +76,63 @@ public class CrystalClientCodegen extends DefaultCodegen {
     public static final String SHARD_AUTHOR_EMAIL = &quot;shardAuthorEmail&quot;;
 
     public CrystalClientCodegen() {
-<span class="fc" id="L79">        super();</span>
+<span class="nc" id="L79">        super();</span>
 
-<span class="fc" id="L81">        modifyFeatureSet(features -&gt; features</span>
-<span class="fc" id="L82">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
-<span class="fc" id="L83">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON, WireFormatFeature.XML, WireFormatFeature.Custom))</span>
-<span class="fc" id="L84">                .securityFeatures(EnumSet.of(</span>
+<span class="nc" id="L81">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L82">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="nc" id="L83">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON, WireFormatFeature.XML, WireFormatFeature.Custom))</span>
+<span class="nc" id="L84">                .securityFeatures(EnumSet.of(</span>
                         SecurityFeature.BasicAuth,
                         SecurityFeature.BearerToken,
                         SecurityFeature.ApiKey,
                         SecurityFeature.OAuth2_Implicit))
-<span class="fc" id="L89">                .excludeGlobalFeatures(</span>
+<span class="nc" id="L89">                .excludeGlobalFeatures(</span>
                         GlobalFeature.XMLStructureDefinitions,
                         GlobalFeature.Callbacks,
                         GlobalFeature.LinkObjects,
                         GlobalFeature.ParameterStyling,
                         GlobalFeature.ParameterizedServer,
                         GlobalFeature.MultiServer)
-<span class="fc" id="L96">                .includeSchemaSupportFeatures(</span>
+<span class="nc" id="L96">                .includeSchemaSupportFeatures(</span>
                         SchemaSupportFeature.Polymorphism)
-<span class="fc" id="L98">                .excludeParameterFeatures(</span>
+<span class="nc" id="L98">                .excludeParameterFeatures(</span>
                         ParameterFeature.Cookie)
-<span class="fc" id="L100">                .includeClientModificationFeatures(</span>
+<span class="nc" id="L100">                .includeClientModificationFeatures(</span>
                         ClientModificationFeature.BasePath,
                         ClientModificationFeature.UserAgent));
 
-<span class="fc" id="L104">        generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
-<span class="fc" id="L105">                .stability(Stability.BETA)</span>
-<span class="fc" id="L106">                .build();</span>
+<span class="nc" id="L104">        generatorMetadata = GeneratorMetadata.newBuilder(generatorMetadata)</span>
+<span class="nc" id="L105">                .stability(Stability.BETA)</span>
+<span class="nc" id="L106">                .build();</span>
 
-<span class="fc" id="L108">        supportsInheritance = true;</span>
+<span class="nc" id="L108">        supportsInheritance = true;</span>
 
         // clear import mapping (from default generator) as crystal does not use it
         // at the moment
-<span class="fc" id="L112">        importMapping.clear();</span>
+<span class="nc" id="L112">        importMapping.clear();</span>
 
-<span class="fc" id="L114">        embeddedTemplateDir = templateDir = &quot;crystal&quot;;</span>
-<span class="fc" id="L115">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;crystal&quot;;</span>
+<span class="nc" id="L114">        embeddedTemplateDir = templateDir = &quot;crystal&quot;;</span>
+<span class="nc" id="L115">        outputFolder = &quot;generated-code&quot; + File.separator + &quot;crystal&quot;;</span>
 
-<span class="fc" id="L117">        modelPackage = &quot;models&quot;;</span>
-<span class="fc" id="L118">        apiPackage = &quot;api&quot;;</span>
-<span class="fc" id="L119">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.cr&quot;);</span>
-<span class="fc" id="L120">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.cr&quot;);</span>
+<span class="nc" id="L117">        modelPackage = &quot;models&quot;;</span>
+<span class="nc" id="L118">        apiPackage = &quot;api&quot;;</span>
+<span class="nc" id="L119">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.cr&quot;);</span>
+<span class="nc" id="L120">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.cr&quot;);</span>
 
-<span class="fc" id="L122">        modelTestTemplateFiles.put(&quot;model_test.mustache&quot;, &quot;.cr&quot;);</span>
-<span class="fc" id="L123">        apiTestTemplateFiles.put(&quot;api_test.mustache&quot;, &quot;.cr&quot;);</span>
+<span class="nc" id="L122">        modelTestTemplateFiles.put(&quot;model_test.mustache&quot;, &quot;.cr&quot;);</span>
+<span class="nc" id="L123">        apiTestTemplateFiles.put(&quot;api_test.mustache&quot;, &quot;.cr&quot;);</span>
 
         // TODO support auto-generated doc
         // modelDocTemplateFiles.put(&quot;model_doc.mustache&quot;, &quot;.md&quot;);
         // apiDocTemplateFiles.put(&quot;api_doc.mustache&quot;, &quot;.md&quot;);
 
         // default HIDE_GENERATION_TIMESTAMP to true
-<span class="fc" id="L130">        hideGenerationTimestamp = Boolean.TRUE;</span>
+<span class="nc" id="L130">        hideGenerationTimestamp = Boolean.TRUE;</span>
 
         // reserved word. Ref:
         // https://github.com/crystal-lang/crystal/wiki/Crystal-for-Rubyists#available-keywords
-<span class="fc" id="L134">        reservedWords = new HashSet&lt;&gt;(</span>
-<span class="fc" id="L135">                Arrays.asList(</span>
+<span class="nc" id="L134">        reservedWords = new HashSet&lt;&gt;(</span>
+<span class="nc" id="L135">                Arrays.asList(</span>
                         &quot;abstract&quot;, &quot;annotation&quot;, &quot;do&quot;, &quot;if&quot;, &quot;nil?&quot;, &quot;select&quot;, &quot;union&quot;,
                         &quot;alias&quot;, &quot;else&quot;, &quot;in&quot;, &quot;of&quot;, &quot;self&quot;, &quot;unless&quot;,
                         &quot;as&quot;, &quot;elsif&quot;, &quot;include&quot;, &quot;out&quot;, &quot;sizeof&quot;, &quot;until&quot;,
@@ -144,73 +144,73 @@ public class CrystalClientCodegen extends DefaultCodegen {
                         &quot;class&quot;, &quot;for&quot;, &quot;next&quot;, &quot;responds_to?&quot;, &quot;typeof&quot;,
                         &quot;def&quot;, &quot;fun&quot;, &quot;nil&quot;, &quot;return&quot;, &quot;uninitialized&quot;));
 
-<span class="fc" id="L147">        languageSpecificPrimitives.clear();</span>
-<span class="fc" id="L148">        languageSpecificPrimitives.add(&quot;String&quot;);</span>
-<span class="fc" id="L149">        languageSpecificPrimitives.add(&quot;Boolean&quot;);</span>
-<span class="fc" id="L150">        languageSpecificPrimitives.add(&quot;Integer&quot;);</span>
-<span class="fc" id="L151">        languageSpecificPrimitives.add(&quot;Float&quot;);</span>
-<span class="fc" id="L152">        languageSpecificPrimitives.add(&quot;Date&quot;);</span>
-<span class="fc" id="L153">        languageSpecificPrimitives.add(&quot;Time&quot;);</span>
-<span class="fc" id="L154">        languageSpecificPrimitives.add(&quot;Array&quot;);</span>
-<span class="fc" id="L155">        languageSpecificPrimitives.add(&quot;Hash&quot;);</span>
-<span class="fc" id="L156">        languageSpecificPrimitives.add(&quot;::File&quot;);</span>
-<span class="fc" id="L157">        languageSpecificPrimitives.add(&quot;Object&quot;);</span>
+<span class="nc" id="L147">        languageSpecificPrimitives.clear();</span>
+<span class="nc" id="L148">        languageSpecificPrimitives.add(&quot;String&quot;);</span>
+<span class="nc" id="L149">        languageSpecificPrimitives.add(&quot;Boolean&quot;);</span>
+<span class="nc" id="L150">        languageSpecificPrimitives.add(&quot;Integer&quot;);</span>
+<span class="nc" id="L151">        languageSpecificPrimitives.add(&quot;Float&quot;);</span>
+<span class="nc" id="L152">        languageSpecificPrimitives.add(&quot;Date&quot;);</span>
+<span class="nc" id="L153">        languageSpecificPrimitives.add(&quot;Time&quot;);</span>
+<span class="nc" id="L154">        languageSpecificPrimitives.add(&quot;Array&quot;);</span>
+<span class="nc" id="L155">        languageSpecificPrimitives.add(&quot;Hash&quot;);</span>
+<span class="nc" id="L156">        languageSpecificPrimitives.add(&quot;::File&quot;);</span>
+<span class="nc" id="L157">        languageSpecificPrimitives.add(&quot;Object&quot;);</span>
 
-<span class="fc" id="L159">        typeMapping.clear();</span>
-<span class="fc" id="L160">        typeMapping.put(&quot;string&quot;, &quot;String&quot;);</span>
-<span class="fc" id="L161">        typeMapping.put(&quot;boolean&quot;, &quot;Bool&quot;);</span>
-<span class="fc" id="L162">        typeMapping.put(&quot;char&quot;, &quot;Char&quot;);</span>
-<span class="fc" id="L163">        typeMapping.put(&quot;int&quot;, &quot;Int32&quot;);</span>
-<span class="fc" id="L164">        typeMapping.put(&quot;integer&quot;, &quot;Int32&quot;);</span>
-<span class="fc" id="L165">        typeMapping.put(&quot;long&quot;, &quot;Int64&quot;);</span>
-<span class="fc" id="L166">        typeMapping.put(&quot;short&quot;, &quot;Int32&quot;);</span>
-<span class="fc" id="L167">        typeMapping.put(&quot;float&quot;, &quot;Float32&quot;);</span>
-<span class="fc" id="L168">        typeMapping.put(&quot;double&quot;, &quot;Float64&quot;);</span>
-<span class="fc" id="L169">        typeMapping.put(&quot;number&quot;, &quot;Float64&quot;);</span>
-<span class="fc" id="L170">        typeMapping.put(&quot;decimal&quot;, &quot;BigDecimal&quot;);</span>
-<span class="fc" id="L171">        typeMapping.put(&quot;date&quot;, &quot;Time&quot;);</span>
-<span class="fc" id="L172">        typeMapping.put(&quot;DateTime&quot;, &quot;Time&quot;);</span>
-<span class="fc" id="L173">        typeMapping.put(&quot;array&quot;, &quot;Array&quot;);</span>
-<span class="fc" id="L174">        typeMapping.put(&quot;List&quot;, &quot;Array&quot;);</span>
-<span class="fc" id="L175">        typeMapping.put(&quot;set&quot;, &quot;Set&quot;);</span>
-<span class="fc" id="L176">        typeMapping.put(&quot;map&quot;, &quot;Hash&quot;);</span>
-<span class="fc" id="L177">        typeMapping.put(&quot;object&quot;, &quot;Object&quot;);</span>
-<span class="fc" id="L178">        typeMapping.put(&quot;AnyType&quot;, &quot;Object&quot;);</span>
-<span class="fc" id="L179">        typeMapping.put(&quot;file&quot;, &quot;::File&quot;);</span>
-<span class="fc" id="L180">        typeMapping.put(&quot;binary&quot;, &quot;String&quot;);</span>
-<span class="fc" id="L181">        typeMapping.put(&quot;ByteArray&quot;, &quot;String&quot;);</span>
-<span class="fc" id="L182">        typeMapping.put(&quot;UUID&quot;, &quot;String&quot;);</span>
-<span class="fc" id="L183">        typeMapping.put(&quot;URI&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L159">        typeMapping.clear();</span>
+<span class="nc" id="L160">        typeMapping.put(&quot;string&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L161">        typeMapping.put(&quot;boolean&quot;, &quot;Bool&quot;);</span>
+<span class="nc" id="L162">        typeMapping.put(&quot;char&quot;, &quot;Char&quot;);</span>
+<span class="nc" id="L163">        typeMapping.put(&quot;int&quot;, &quot;Int32&quot;);</span>
+<span class="nc" id="L164">        typeMapping.put(&quot;integer&quot;, &quot;Int32&quot;);</span>
+<span class="nc" id="L165">        typeMapping.put(&quot;long&quot;, &quot;Int64&quot;);</span>
+<span class="nc" id="L166">        typeMapping.put(&quot;short&quot;, &quot;Int32&quot;);</span>
+<span class="nc" id="L167">        typeMapping.put(&quot;float&quot;, &quot;Float32&quot;);</span>
+<span class="nc" id="L168">        typeMapping.put(&quot;double&quot;, &quot;Float64&quot;);</span>
+<span class="nc" id="L169">        typeMapping.put(&quot;number&quot;, &quot;Float64&quot;);</span>
+<span class="nc" id="L170">        typeMapping.put(&quot;decimal&quot;, &quot;BigDecimal&quot;);</span>
+<span class="nc" id="L171">        typeMapping.put(&quot;date&quot;, &quot;Time&quot;);</span>
+<span class="nc" id="L172">        typeMapping.put(&quot;DateTime&quot;, &quot;Time&quot;);</span>
+<span class="nc" id="L173">        typeMapping.put(&quot;array&quot;, &quot;Array&quot;);</span>
+<span class="nc" id="L174">        typeMapping.put(&quot;List&quot;, &quot;Array&quot;);</span>
+<span class="nc" id="L175">        typeMapping.put(&quot;set&quot;, &quot;Set&quot;);</span>
+<span class="nc" id="L176">        typeMapping.put(&quot;map&quot;, &quot;Hash&quot;);</span>
+<span class="nc" id="L177">        typeMapping.put(&quot;object&quot;, &quot;Object&quot;);</span>
+<span class="nc" id="L178">        typeMapping.put(&quot;AnyType&quot;, &quot;Object&quot;);</span>
+<span class="nc" id="L179">        typeMapping.put(&quot;file&quot;, &quot;::File&quot;);</span>
+<span class="nc" id="L180">        typeMapping.put(&quot;binary&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L181">        typeMapping.put(&quot;ByteArray&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L182">        typeMapping.put(&quot;UUID&quot;, &quot;String&quot;);</span>
+<span class="nc" id="L183">        typeMapping.put(&quot;URI&quot;, &quot;String&quot;);</span>
 
-<span class="fc" id="L185">        instantiationTypes.put(&quot;map&quot;, &quot;Hash&quot;);</span>
-<span class="fc" id="L186">        instantiationTypes.put(&quot;array&quot;, &quot;Array&quot;);</span>
-<span class="fc" id="L187">        instantiationTypes.put(&quot;set&quot;, &quot;Set&quot;);</span>
-<span class="fc" id="L188">        primitiveTypes = new ArrayList&lt;String&gt;(typeMapping.values());</span>
+<span class="nc" id="L185">        instantiationTypes.put(&quot;map&quot;, &quot;Hash&quot;);</span>
+<span class="nc" id="L186">        instantiationTypes.put(&quot;array&quot;, &quot;Array&quot;);</span>
+<span class="nc" id="L187">        instantiationTypes.put(&quot;set&quot;, &quot;Set&quot;);</span>
+<span class="nc" id="L188">        primitiveTypes = new ArrayList&lt;String&gt;(typeMapping.values());</span>
 
         // remove modelPackage and apiPackage added by default
-<span class="pc bpc" id="L191" title="1 of 2 branches missed.">        cliOptions.removeIf(opt -&gt; CodegenConstants.MODEL_PACKAGE.equals(opt.getOpt()) ||</span>
-<span class="pc bpc" id="L192" title="1 of 2 branches missed.">                CodegenConstants.API_PACKAGE.equals(opt.getOpt()));</span>
+<span class="nc bnc" id="L191" title="All 2 branches missed.">        cliOptions.removeIf(opt -&gt; CodegenConstants.MODEL_PACKAGE.equals(opt.getOpt()) ||</span>
+<span class="nc bnc" id="L192" title="All 2 branches missed.">                CodegenConstants.API_PACKAGE.equals(opt.getOpt()));</span>
 
-<span class="fc" id="L194">        cliOptions.add(new CliOption(SHARD_NAME, &quot;shard name (e.g. twitter_client&quot;).defaultValue(&quot;openapi_client&quot;));</span>
+<span class="nc" id="L194">        cliOptions.add(new CliOption(SHARD_NAME, &quot;shard name (e.g. twitter_client&quot;).defaultValue(&quot;openapi_client&quot;));</span>
 
-<span class="fc" id="L196">        cliOptions.add(new CliOption(MODULE_NAME, &quot;module name (e.g. TwitterClient&quot;).defaultValue(&quot;OpenAPIClient&quot;));</span>
+<span class="nc" id="L196">        cliOptions.add(new CliOption(MODULE_NAME, &quot;module name (e.g. TwitterClient&quot;).defaultValue(&quot;OpenAPIClient&quot;));</span>
 
-<span class="fc" id="L198">        cliOptions.add(new CliOption(SHARD_VERSION, &quot;shard version.&quot;).defaultValue(&quot;1.0.0&quot;));</span>
+<span class="nc" id="L198">        cliOptions.add(new CliOption(SHARD_VERSION, &quot;shard version.&quot;).defaultValue(&quot;1.0.0&quot;));</span>
 
-<span class="fc" id="L200">        cliOptions.add(new CliOption(SHARD_LICENSE, &quot;shard license.&quot;).defaultValue(&quot;unlicense&quot;));</span>
+<span class="nc" id="L200">        cliOptions.add(new CliOption(SHARD_LICENSE, &quot;shard license.&quot;).defaultValue(&quot;unlicense&quot;));</span>
 
-<span class="fc" id="L202">        cliOptions.add(new CliOption(SHARD_HOMEPAGE, &quot;shard homepage.&quot;).defaultValue(&quot;http://org.openapitools&quot;));</span>
+<span class="nc" id="L202">        cliOptions.add(new CliOption(SHARD_HOMEPAGE, &quot;shard homepage.&quot;).defaultValue(&quot;http://org.openapitools&quot;));</span>
 
-<span class="fc" id="L204">        cliOptions.add(</span>
-<span class="fc" id="L205">                new CliOption(SHARD_DESCRIPTION, &quot;shard description.&quot;).defaultValue(&quot;This shard maps to a REST API&quot;));</span>
+<span class="nc" id="L204">        cliOptions.add(</span>
+<span class="nc" id="L205">                new CliOption(SHARD_DESCRIPTION, &quot;shard description.&quot;).defaultValue(&quot;This shard maps to a REST API&quot;));</span>
 
-<span class="fc" id="L207">        cliOptions.add(new CliOption(SHARD_AUTHOR, &quot;shard author (only one is supported).&quot;));</span>
+<span class="nc" id="L207">        cliOptions.add(new CliOption(SHARD_AUTHOR, &quot;shard author (only one is supported).&quot;));</span>
 
-<span class="fc" id="L209">        cliOptions.add(new CliOption(SHARD_AUTHOR_EMAIL, &quot;shard author email (only one is supported).&quot;));</span>
+<span class="nc" id="L209">        cliOptions.add(new CliOption(SHARD_AUTHOR_EMAIL, &quot;shard author email (only one is supported).&quot;));</span>
 
-<span class="fc" id="L211">        cliOptions.add(new CliOption(CodegenConstants.HIDE_GENERATION_TIMESTAMP,</span>
-<span class="fc" id="L212">                CodegenConstants.HIDE_GENERATION_TIMESTAMP_DESC).defaultValue(Boolean.TRUE.toString()));</span>
-<span class="fc" id="L213">    }</span>
+<span class="nc" id="L211">        cliOptions.add(new CliOption(CodegenConstants.HIDE_GENERATION_TIMESTAMP,</span>
+<span class="nc" id="L212">                CodegenConstants.HIDE_GENERATION_TIMESTAMP_DESC).defaultValue(Boolean.TRUE.toString()));</span>
+<span class="nc" id="L213">    }</span>
 
     @Override
     public void processOpts() {
@@ -297,12 +297,12 @@ public class CrystalClientCodegen extends DefaultCodegen {
 
     @Override
     public CodegenType getTag() {
-<span class="fc" id="L300">        return CodegenType.CLIENT;</span>
+<span class="nc" id="L300">        return CodegenType.CLIENT;</span>
     }
 
     @Override
     public String getName() {
-<span class="fc" id="L305">        return &quot;crystal&quot;;</span>
+<span class="nc" id="L305">        return &quot;crystal&quot;;</span>
     }
 
     @Override

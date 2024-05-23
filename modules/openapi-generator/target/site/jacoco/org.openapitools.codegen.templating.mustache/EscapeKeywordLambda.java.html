@@ -40,9 +40,9 @@ import java.util.function.UnaryOperator;
 public class EscapeKeywordLambda implements Mustache.Lambda {
     private UnaryOperator&lt;String&gt; callback;
 
-<span class="fc" id="L43">    public EscapeKeywordLambda(final UnaryOperator&lt;String&gt; callback) {</span>
-<span class="fc" id="L44">        this.callback = callback;</span>
-<span class="fc" id="L45">    }</span>
+<span class="nc" id="L43">    public EscapeKeywordLambda(final UnaryOperator&lt;String&gt; callback) {</span>
+<span class="nc" id="L44">        this.callback = callback;</span>
+<span class="nc" id="L45">    }</span>
 
     @Override
     public void execute(Template.Fragment fragment, Writer writer) throws IOException {

@@ -25,15 +25,15 @@ import java.util.EnumSet;
 
 public class GraphQLSchemaCodegen extends AbstractGraphQLCodegen implements CodegenConfig {
 
-<span class="fc" id="L28">    private final Logger LOGGER = LoggerFactory.getLogger(GraphQLSchemaCodegen.class);</span>
+<span class="nc" id="L28">    private final Logger LOGGER = LoggerFactory.getLogger(GraphQLSchemaCodegen.class);</span>
 
     @Override
     public CodegenType getTag() {
-<span class="fc" id="L32">        return CodegenType.SCHEMA;</span>
+<span class="nc" id="L32">        return CodegenType.SCHEMA;</span>
     }
 
     public String getName() {
-<span class="fc" id="L36">        return &quot;graphql-schema&quot;;</span>
+<span class="nc" id="L36">        return &quot;graphql-schema&quot;;</span>
     }
 
     public String getHelp() {
@@ -41,45 +41,45 @@ public class GraphQLSchemaCodegen extends AbstractGraphQLCodegen implements Code
     }
 
     public GraphQLSchemaCodegen() {
-<span class="fc" id="L44">        super();</span>
+<span class="nc" id="L44">        super();</span>
 
-<span class="fc" id="L46">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L46">        modifyFeatureSet(features -&gt; features</span>
 //                .includeDocumentationFeatures(DocumentationFeature.Readme)
-<span class="fc" id="L48">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON))</span>
-<span class="fc" id="L49">                .securityFeatures(EnumSet.noneOf(</span>
+<span class="nc" id="L48">                .wireFormatFeatures(EnumSet.of(WireFormatFeature.JSON))</span>
+<span class="nc" id="L49">                .securityFeatures(EnumSet.noneOf(</span>
                         SecurityFeature.class
                 ))
-<span class="fc" id="L52">                .excludeGlobalFeatures(</span>
+<span class="nc" id="L52">                .excludeGlobalFeatures(</span>
                         GlobalFeature.XMLStructureDefinitions,
                         GlobalFeature.Callbacks,
                         GlobalFeature.LinkObjects,
                         GlobalFeature.ParameterStyling
                 )
-<span class="fc" id="L58">                .excludeSchemaSupportFeatures(</span>
+<span class="nc" id="L58">                .excludeSchemaSupportFeatures(</span>
                         SchemaSupportFeature.Polymorphism
                 )
         );
 
-<span class="fc" id="L63">        outputFolder = &quot;generated-code/graphql-schema&quot;;</span>
-<span class="fc" id="L64">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.graphql&quot;);</span>
-<span class="fc" id="L65">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.graphql&quot;);</span>
-<span class="fc" id="L66">        embeddedTemplateDir = templateDir = &quot;graphql-schema&quot;;</span>
-<span class="fc" id="L67">        hideGenerationTimestamp = Boolean.TRUE;</span>
+<span class="nc" id="L63">        outputFolder = &quot;generated-code/graphql-schema&quot;;</span>
+<span class="nc" id="L64">        modelTemplateFiles.put(&quot;model.mustache&quot;, &quot;.graphql&quot;);</span>
+<span class="nc" id="L65">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.graphql&quot;);</span>
+<span class="nc" id="L66">        embeddedTemplateDir = templateDir = &quot;graphql-schema&quot;;</span>
+<span class="nc" id="L67">        hideGenerationTimestamp = Boolean.TRUE;</span>
 
 
-<span class="fc" id="L70">        modelDocTemplateFiles.put(&quot;model_doc.mustache&quot;, &quot;.md&quot;);</span>
-<span class="fc" id="L71">        apiDocTemplateFiles.put(&quot;api_doc.mustache&quot;, &quot;.md&quot;);</span>
+<span class="nc" id="L70">        modelDocTemplateFiles.put(&quot;model_doc.mustache&quot;, &quot;.md&quot;);</span>
+<span class="nc" id="L71">        apiDocTemplateFiles.put(&quot;api_doc.mustache&quot;, &quot;.md&quot;);</span>
 
 
-<span class="fc" id="L74">        cliOptions.clear();</span>
-<span class="fc" id="L75">        cliOptions.add(new CliOption(CodegenConstants.PACKAGE_NAME, &quot;GraphQL package name (convention: lowercase).&quot;)</span>
-<span class="fc" id="L76">                .defaultValue(&quot;openapi2graphql&quot;));</span>
-<span class="fc" id="L77">        cliOptions.add(new CliOption(CodegenConstants.PACKAGE_VERSION, &quot;GraphQL package version.&quot;)</span>
-<span class="fc" id="L78">                .defaultValue(&quot;1.0.0&quot;));</span>
-<span class="fc" id="L79">        cliOptions.add(new CliOption(CodegenConstants.HIDE_GENERATION_TIMESTAMP, CodegenConstants.HIDE_GENERATION_TIMESTAMP_DESC)</span>
-<span class="fc" id="L80">                .defaultValue(Boolean.TRUE.toString()));</span>
+<span class="nc" id="L74">        cliOptions.clear();</span>
+<span class="nc" id="L75">        cliOptions.add(new CliOption(CodegenConstants.PACKAGE_NAME, &quot;GraphQL package name (convention: lowercase).&quot;)</span>
+<span class="nc" id="L76">                .defaultValue(&quot;openapi2graphql&quot;));</span>
+<span class="nc" id="L77">        cliOptions.add(new CliOption(CodegenConstants.PACKAGE_VERSION, &quot;GraphQL package version.&quot;)</span>
+<span class="nc" id="L78">                .defaultValue(&quot;1.0.0&quot;));</span>
+<span class="nc" id="L79">        cliOptions.add(new CliOption(CodegenConstants.HIDE_GENERATION_TIMESTAMP, CodegenConstants.HIDE_GENERATION_TIMESTAMP_DESC)</span>
+<span class="nc" id="L80">                .defaultValue(Boolean.TRUE.toString()));</span>
 
-<span class="fc" id="L82">    }</span>
+<span class="nc" id="L82">    }</span>
 
     @Override
     public void processOpts() {

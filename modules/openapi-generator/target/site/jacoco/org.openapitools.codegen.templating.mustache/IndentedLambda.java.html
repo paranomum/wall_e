@@ -52,8 +52,8 @@ public class IndentedLambda implements Mustache.Lambda {
      * Constructs a new instance of {@link IndentedLambda}, with an indent count of 4 spaces
      */
     public IndentedLambda() {
-<span class="fc" id="L55">        this(4, &quot; &quot;, null, false, false);</span>
-<span class="fc" id="L56">    }</span>
+<span class="nc" id="L55">        this(4, &quot; &quot;, null, false, false);</span>
+<span class="nc" id="L56">    }</span>
 
     /**
      * Constructs a new instance of {@link IndentedLambda}, with customized indent count and intention character
@@ -63,8 +63,8 @@ public class IndentedLambda implements Mustache.Lambda {
      * @param indentFirstLine    Whether to indent the first line or not. Usually this is handled by the template already.
      */
     public IndentedLambda(int prefixSpaceCount, String indentionCharacter, boolean indentFirstLine, boolean skipEmptyLines) {
-<span class="fc" id="L66">        this(prefixSpaceCount, Character.codePointAt(indentionCharacter, 0), null, indentFirstLine, skipEmptyLines);</span>
-<span class="fc" id="L67">    }</span>
+<span class="nc" id="L66">        this(prefixSpaceCount, Character.codePointAt(indentionCharacter, 0), null, indentFirstLine, skipEmptyLines);</span>
+<span class="nc" id="L67">    }</span>
 
     /**
      * Constructs a new instance of {@link IndentedLambda}, with customized indent count and intention character
@@ -75,8 +75,8 @@ public class IndentedLambda implements Mustache.Lambda {
      * @param indentFirstLine    Whether to indent the first line or not. Usually this is handled by the template already.
      */
     public IndentedLambda(int prefixSpaceCount, String indentionCharacter, String prefix, boolean indentFirstLine, boolean skipEmptyLines) {
-<span class="fc" id="L78">        this(prefixSpaceCount, Character.codePointAt(indentionCharacter, 0), prefix, indentFirstLine, skipEmptyLines);</span>
-<span class="fc" id="L79">    }</span>
+<span class="nc" id="L78">        this(prefixSpaceCount, Character.codePointAt(indentionCharacter, 0), prefix, indentFirstLine, skipEmptyLines);</span>
+<span class="nc" id="L79">    }</span>
 
     /**
      * Constructs a new instance of {@link IndentedLambda}
@@ -86,21 +86,21 @@ public class IndentedLambda implements Mustache.Lambda {
      * @param prefix             An optional prefix to prepend before the line (useful for multi-line comments).
      * @param indentFirstLine    Whether to indent the first line or not. Usually this is handled by the template already.
      */
-<span class="fc" id="L89">    private IndentedLambda(int prefixSpaceCount, int indentionCodePoint, String prefix, boolean indentFirstLine, boolean skipEmptyLines) {</span>
-<span class="pc bpc" id="L90" title="1 of 2 branches missed.">        if (prefixSpaceCount &lt;= 0) {</span>
+<span class="nc" id="L89">    private IndentedLambda(int prefixSpaceCount, int indentionCodePoint, String prefix, boolean indentFirstLine, boolean skipEmptyLines) {</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">        if (prefixSpaceCount &lt;= 0) {</span>
 <span class="nc" id="L91">            throw new IllegalArgumentException(&quot;prefixSpaceCount must be greater than 0&quot;);</span>
         }
 
-<span class="pc bpc" id="L94" title="1 of 2 branches missed.">        if (!Character.isValidCodePoint(indentionCodePoint)) {</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">        if (!Character.isValidCodePoint(indentionCodePoint)) {</span>
 <span class="nc" id="L95">            throw new IllegalArgumentException(&quot;indentionCodePoint is an invalid code point &quot;);</span>
         }
 
-<span class="fc" id="L98">        this.prefixSpaceCount = prefixSpaceCount;</span>
-<span class="fc" id="L99">        this.spaceCode = indentionCodePoint;</span>
-<span class="fc" id="L100">        this.prefix = prefix;</span>
-<span class="fc" id="L101">        this.indentFirstLine = indentFirstLine;</span>
-<span class="fc" id="L102">        this.skipEmptyLines = skipEmptyLines;</span>
-<span class="fc" id="L103">    }</span>
+<span class="nc" id="L98">        this.prefixSpaceCount = prefixSpaceCount;</span>
+<span class="nc" id="L99">        this.spaceCode = indentionCodePoint;</span>
+<span class="nc" id="L100">        this.prefix = prefix;</span>
+<span class="nc" id="L101">        this.indentFirstLine = indentFirstLine;</span>
+<span class="nc" id="L102">        this.skipEmptyLines = skipEmptyLines;</span>
+<span class="nc" id="L103">    }</span>
 
     @Override
     public void execute(Template.Fragment fragment, Writer writer) throws IOException {

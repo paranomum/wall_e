@@ -34,12 +34,12 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
  */
 public class CodegenIgnoreProcessor {
 
-<span class="pc" id="L37">    private final Logger LOGGER = LoggerFactory.getLogger(CodegenIgnoreProcessor.class);</span>
+<span class="nc" id="L37">    private final Logger LOGGER = LoggerFactory.getLogger(CodegenIgnoreProcessor.class);</span>
 
-<span class="pc" id="L39">    private File ignoreFile = null;</span>
+<span class="nc" id="L39">    private File ignoreFile = null;</span>
 
-<span class="pc" id="L41">    private List&lt;Rule&gt; exclusionRules = new ArrayList&lt;&gt;();</span>
-<span class="pc" id="L42">    private List&lt;Rule&gt; inclusionRules = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L41">    private List&lt;Rule&gt; exclusionRules = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L42">    private List&lt;Rule&gt; inclusionRules = new ArrayList&lt;&gt;();</span>
 
     /**
      * Loads the default ignore file (.openapi-generator-ignore) from the specified path.
@@ -47,8 +47,8 @@ public class CodegenIgnoreProcessor {
      * @param baseDirectory The base directory of the files to be processed. This contains the ignore file.
      */
     public CodegenIgnoreProcessor(final String baseDirectory) {
-<span class="fc" id="L50">        this(baseDirectory, &quot;.openapi-generator-ignore&quot;);</span>
-<span class="fc" id="L51">    }</span>
+<span class="nc" id="L50">        this(baseDirectory, &quot;.openapi-generator-ignore&quot;);</span>
+<span class="nc" id="L51">    }</span>
 
     /**
      * Loads the specified ignore file by name ([ignoreFile]) from the specified path.
@@ -57,15 +57,15 @@ public class CodegenIgnoreProcessor {
      * @param ignoreFile    The file containing ignore patterns.
      */
     @SuppressWarnings(&quot;WeakerAccess&quot;)
-<span class="fc" id="L60">    public CodegenIgnoreProcessor(final String baseDirectory, final String ignoreFile) {</span>
-<span class="fc" id="L61">        final File directory = new File(baseDirectory);</span>
-<span class="fc" id="L62">        final File targetIgnoreFile = new File(directory, ignoreFile);</span>
-<span class="pc bpc" id="L63" title="2 of 4 branches missed.">        if (directory.exists() &amp;&amp; directory.isDirectory()) {</span>
-<span class="fc" id="L64">            loadFromFile(targetIgnoreFile);</span>
+<span class="nc" id="L60">    public CodegenIgnoreProcessor(final String baseDirectory, final String ignoreFile) {</span>
+<span class="nc" id="L61">        final File directory = new File(baseDirectory);</span>
+<span class="nc" id="L62">        final File targetIgnoreFile = new File(directory, ignoreFile);</span>
+<span class="nc bnc" id="L63" title="All 4 branches missed.">        if (directory.exists() &amp;&amp; directory.isDirectory()) {</span>
+<span class="nc" id="L64">            loadFromFile(targetIgnoreFile);</span>
         } else {
 <span class="nc" id="L66">            LOGGER.info(&quot;Output directory ({}) does not exist, or is inaccessible. No file (.openapi-generator-ignore) will be evaluated.&quot;, baseDirectory);</span>
         }
-<span class="fc" id="L68">    }</span>
+<span class="nc" id="L68">    }</span>
 
     /**
      * Constructs an instance of {@link CodegenIgnoreProcessor} from an ignore file defined by {@code targetIgnoreFile}.
@@ -77,16 +77,16 @@ public class CodegenIgnoreProcessor {
 <span class="nc" id="L77">    }</span>
 
     private void loadFromFile(File targetIgnoreFile) {
-<span class="pc bpc" id="L80" title="3 of 4 branches missed.">        if (targetIgnoreFile.exists() &amp;&amp; targetIgnoreFile.isFile()) {</span>
+<span class="nc bnc" id="L80" title="All 4 branches missed.">        if (targetIgnoreFile.exists() &amp;&amp; targetIgnoreFile.isFile()) {</span>
             try {
 <span class="nc" id="L82">                loadCodegenRules(targetIgnoreFile);</span>
 <span class="nc" id="L83">                this.ignoreFile = targetIgnoreFile;</span>
 <span class="nc" id="L84">            } catch (IOException e) {</span>
 <span class="nc" id="L85">                LOGGER.error(String.format(Locale.ROOT, &quot;Could not process %s.&quot;, targetIgnoreFile.getName()), e.getMessage());</span>
 <span class="nc" id="L86">            }</span>
-<span class="pc bpc" id="L87" title="1 of 2 branches missed.">        } else if (!&quot;.swagger-codegen-ignore&quot;.equals(targetIgnoreFile.getName())) {</span>
-<span class="fc" id="L88">            final File legacyIgnoreFile = new File(targetIgnoreFile.getParentFile(), &quot;.swagger-codegen-ignore&quot;);</span>
-<span class="pc bpc" id="L89" title="3 of 4 branches missed.">            if (legacyIgnoreFile.exists() &amp;&amp; legacyIgnoreFile.isFile()) {</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        } else if (!&quot;.swagger-codegen-ignore&quot;.equals(targetIgnoreFile.getName())) {</span>
+<span class="nc" id="L88">            final File legacyIgnoreFile = new File(targetIgnoreFile.getParentFile(), &quot;.swagger-codegen-ignore&quot;);</span>
+<span class="nc bnc" id="L89" title="All 4 branches missed.">            if (legacyIgnoreFile.exists() &amp;&amp; legacyIgnoreFile.isFile()) {</span>
 <span class="nc" id="L90">                LOGGER.info(String.format(Locale.ROOT, &quot;Legacy support: '%s' file renamed to '%s'.&quot;, legacyIgnoreFile.getName(), targetIgnoreFile.getName()));</span>
                 try {
 <span class="nc" id="L92">                    Files.move(legacyIgnoreFile.toPath(), targetIgnoreFile.toPath(), REPLACE_EXISTING);</span>
@@ -96,13 +96,13 @@ public class CodegenIgnoreProcessor {
 <span class="nc" id="L96">                }</span>
             } else {
                 // log info message
-<span class="fc" id="L99">                LOGGER.info(String.format(Locale.ROOT, &quot;No %s file found.&quot;, targetIgnoreFile.getName()));</span>
+<span class="nc" id="L99">                LOGGER.info(String.format(Locale.ROOT, &quot;No %s file found.&quot;, targetIgnoreFile.getName()));</span>
             }
-<span class="fc" id="L101">        } else {</span>
+<span class="nc" id="L101">        } else {</span>
             // log info message
 <span class="nc" id="L103">            LOGGER.info(String.format(Locale.ROOT, &quot;No %s file found.&quot;, targetIgnoreFile.getName()));</span>
         }
-<span class="fc" id="L105">    }</span>
+<span class="nc" id="L105">    }</span>
 
     void loadCodegenRules(final File codegenIgnore) throws IOException {
 <span class="nc" id="L108">        try (FileInputStream fileInputStream = new FileInputStream(codegenIgnore);</span>
@@ -140,7 +140,7 @@ public class CodegenIgnoreProcessor {
      * @return {@code false} if file matches any pattern in the ignore file (disallowed), otherwise {@code true} (allowed).
      */
     public boolean allowsFile(final File targetFile) {
-<span class="pc bpc" id="L143" title="1 of 2 branches missed.">        if(this.ignoreFile == null) return true;</span>
+<span class="nc bnc" id="L143" title="All 2 branches missed.">        if(this.ignoreFile == null) return true;</span>
 
 <span class="nc" id="L145">        File file = new File(this.ignoreFile.getAbsoluteFile().getParentFile().toURI().relativize(targetFile.toURI()).getPath());</span>
 <span class="nc" id="L146">        boolean directoryExcluded = false;</span>

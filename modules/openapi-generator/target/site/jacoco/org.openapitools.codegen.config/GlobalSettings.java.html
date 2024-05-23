@@ -36,37 +36,37 @@ import java.util.Properties;
  */
 <span class="nc" id="L37">public class GlobalSettings {</span>
 
-<span class="fc" id="L39">    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalSettings.class);</span>
+<span class="nc" id="L39">    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalSettings.class);</span>
 
-<span class="fc" id="L41">    private static ThreadLocal&lt;Properties&gt; properties = new InheritableThreadLocal&lt;Properties&gt;() {</span>
+<span class="nc" id="L41">    private static ThreadLocal&lt;Properties&gt; properties = new InheritableThreadLocal&lt;Properties&gt;() {</span>
         @Override
         protected Properties initialValue() {
             // avoid using System.getProperties().clone() which is broken in Gradle - see https://github.com/gradle/gradle/issues/17344
-<span class="fc" id="L45">            Properties copy = new Properties();</span>
-<span class="fc" id="L46">            copy.putAll(System.getProperties());</span>
-<span class="fc" id="L47">            return copy;</span>
+<span class="nc" id="L45">            Properties copy = new Properties();</span>
+<span class="nc" id="L46">            copy.putAll(System.getProperties());</span>
+<span class="nc" id="L47">            return copy;</span>
         };
     };
 
     public static String getProperty(String key, String defaultValue) {
-<span class="fc" id="L52">        return properties.get().getProperty(key, defaultValue);</span>
+<span class="nc" id="L52">        return properties.get().getProperty(key, defaultValue);</span>
     }
 
     public static String getProperty(String key) {
-<span class="fc" id="L56">        return properties.get().getProperty(key);</span>
+<span class="nc" id="L56">        return properties.get().getProperty(key);</span>
     }
 
     public static void setProperty(String key, String value) {
-<span class="fc" id="L60">        properties.get().setProperty(key, value);</span>
-<span class="fc" id="L61">    }</span>
+<span class="nc" id="L60">        properties.get().setProperty(key, value);</span>
+<span class="nc" id="L61">    }</span>
 
     public static void clearProperty(String key) {
 <span class="nc" id="L64">        properties.get().remove(key);</span>
 <span class="nc" id="L65">    }</span>
 
     public static void reset() {
-<span class="fc" id="L68">        properties.remove();</span>
-<span class="fc" id="L69">    }</span>
+<span class="nc" id="L68">        properties.remove();</span>
+<span class="nc" id="L69">    }</span>
 
     public static void log() {
 <span class="nc" id="L72">        StringWriter stringWriter = new StringWriter();</span>

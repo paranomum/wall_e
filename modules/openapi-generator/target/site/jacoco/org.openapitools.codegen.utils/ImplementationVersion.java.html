@@ -20,14 +20,14 @@ package org.openapitools.codegen.utils;
 <span class="nc" id="L20">public class ImplementationVersion {</span>
     public static String read() {
         // Assumes this version is required at runtime. This could be modified to use a properties file like the CLI.
-<span class="fc" id="L23">        String compiledVersion = ImplementationVersion.class.getPackage().getImplementationVersion();</span>
-<span class="pc bpc" id="L24" title="1 of 2 branches missed.">        if (compiledVersion != null) {</span>
+<span class="nc" id="L23">        String compiledVersion = ImplementationVersion.class.getPackage().getImplementationVersion();</span>
+<span class="nc bnc" id="L24" title="All 2 branches missed.">        if (compiledVersion != null) {</span>
 <span class="nc" id="L25">            return compiledVersion;</span>
         }
 
         // When running non-JARed class within an IDE the implementation version is not available, so we provide a means
         // to set it externally via a system property so that generated artefacts contain the correct version.
-<span class="fc" id="L30">        return System.getProperty(&quot;openapitools.implementation.version&quot;, &quot;unset&quot;);</span>
+<span class="nc" id="L30">        return System.getProperty(&quot;openapitools.implementation.version&quot;, &quot;unset&quot;);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

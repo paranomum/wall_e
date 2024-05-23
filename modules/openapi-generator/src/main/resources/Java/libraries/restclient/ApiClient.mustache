@@ -53,7 +53,7 @@ import {{invokerPackage}}.auth.ApiKeyAuth;
 import {{invokerPackage}}.auth.OAuth;
 {{/hasOAuthMethods}}
 
-{{>generatedAnnotation}}
+
 public class ApiClient{{#jsr310}} extends JavaTimeFormatter{{/jsr310}} {
     public enum CollectionFormat {
         CSV(","), TSV("\t"), SSV(" "), PIPES("|"), MULTI(null);

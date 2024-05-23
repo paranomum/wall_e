@@ -28,7 +28,7 @@ import org.apache.commons.lang3.StringUtils;
  * CodegenModel represents a schema object in a OpenAPI document.
  */
 @JsonIgnoreProperties({&quot;parentModel&quot;, &quot;interfaceModels&quot;})
-<span class="fc" id="L31">public class CodegenModel implements IJsonSchemaValidationProperties {</span>
+<span class="nc" id="L31">public class CodegenModel implements IJsonSchemaValidationProperties {</span>
     // The parent model name from the schemas. The parent is determined by inspecting the allOf, anyOf and
     // oneOf attributes in the OAS. First codegen inspects 'allOf', then 'anyOf', then 'oneOf'.
     // If there are multiple object references in the attribute ('allOf', 'anyOf', 'oneOf'), and one of the
@@ -47,9 +47,9 @@ import org.apache.commons.lang3.StringUtils;
     public List&lt;CodegenModel&gt; children;
 
     // anyOf, oneOf, allOf
-<span class="fc" id="L50">    public Set&lt;String&gt; anyOf = new TreeSet&lt;&gt;();</span>
-<span class="fc" id="L51">    public Set&lt;String&gt; oneOf = new TreeSet&lt;&gt;();</span>
-<span class="fc" id="L52">    public Set&lt;String&gt; allOf = new TreeSet&lt;&gt;();</span>
+<span class="nc" id="L50">    public Set&lt;String&gt; anyOf = new TreeSet&lt;&gt;();</span>
+<span class="nc" id="L51">    public Set&lt;String&gt; oneOf = new TreeSet&lt;&gt;();</span>
+<span class="nc" id="L52">    public Set&lt;String&gt; allOf = new TreeSet&lt;&gt;();</span>
 
     // The schema name as written in the OpenAPI document
     // If it's a reserved word, it will be escaped.
@@ -72,22 +72,22 @@ import org.apache.commons.lang3.StringUtils;
     public boolean isString, isInteger, isLong, isNumber, isNumeric, isFloat, isDouble, isDate, isDateTime,
             isDecimal, isShort, isUnboundedInteger, isPrimitiveType, isBoolean, isFreeFormObject;
     private boolean additionalPropertiesIsAnyType;
-<span class="fc" id="L75">    public List&lt;CodegenProperty&gt; vars = new ArrayList&lt;&gt;(); // all properties (without parent's properties)</span>
-<span class="fc" id="L76">    public List&lt;CodegenProperty&gt; allVars = new ArrayList&lt;&gt;(); // all properties (with parent's properties)</span>
-<span class="fc" id="L77">    public List&lt;CodegenProperty&gt; requiredVars = new ArrayList&lt;&gt;(); // a list of required properties</span>
-<span class="fc" id="L78">    public List&lt;CodegenProperty&gt; optionalVars = new ArrayList&lt;&gt;(); // a list of optional properties</span>
-<span class="fc" id="L79">    public List&lt;CodegenProperty&gt; readOnlyVars = new ArrayList&lt;&gt;(); // a list of read-only properties</span>
-<span class="fc" id="L80">    public List&lt;CodegenProperty&gt; readWriteVars = new ArrayList&lt;&gt;(); // a list of properties for read, write</span>
-<span class="fc" id="L81">    public List&lt;CodegenProperty&gt; parentVars = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L82">    public List&lt;CodegenProperty&gt; parentRequiredVars = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L83">    public List&lt;CodegenProperty&gt; nonNullableVars = new ArrayList&lt;&gt;(); // a list of non-nullable properties</span>
+<span class="nc" id="L75">    public List&lt;CodegenProperty&gt; vars = new ArrayList&lt;&gt;(); // all properties (without parent's properties)</span>
+<span class="nc" id="L76">    public List&lt;CodegenProperty&gt; allVars = new ArrayList&lt;&gt;(); // all properties (with parent's properties)</span>
+<span class="nc" id="L77">    public List&lt;CodegenProperty&gt; requiredVars = new ArrayList&lt;&gt;(); // a list of required properties</span>
+<span class="nc" id="L78">    public List&lt;CodegenProperty&gt; optionalVars = new ArrayList&lt;&gt;(); // a list of optional properties</span>
+<span class="nc" id="L79">    public List&lt;CodegenProperty&gt; readOnlyVars = new ArrayList&lt;&gt;(); // a list of read-only properties</span>
+<span class="nc" id="L80">    public List&lt;CodegenProperty&gt; readWriteVars = new ArrayList&lt;&gt;(); // a list of properties for read, write</span>
+<span class="nc" id="L81">    public List&lt;CodegenProperty&gt; parentVars = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L82">    public List&lt;CodegenProperty&gt; parentRequiredVars = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L83">    public List&lt;CodegenProperty&gt; nonNullableVars = new ArrayList&lt;&gt;(); // a list of non-nullable properties</span>
     public Map&lt;String, Object&gt; allowableValues;
 
     // Sorted sets of required parameters.
-<span class="fc" id="L87">    public Set&lt;String&gt; mandatory = new TreeSet&lt;&gt;(); // without parent's required properties</span>
-<span class="fc" id="L88">    public Set&lt;String&gt; allMandatory = new TreeSet&lt;&gt;(); // with parent's required properties</span>
+<span class="nc" id="L87">    public Set&lt;String&gt; mandatory = new TreeSet&lt;&gt;(); // without parent's required properties</span>
+<span class="nc" id="L88">    public Set&lt;String&gt; allMandatory = new TreeSet&lt;&gt;(); // with parent's required properties</span>
 
-<span class="fc" id="L90">    public Set&lt;String&gt; imports = new TreeSet&lt;&gt;();</span>
+<span class="nc" id="L90">    public Set&lt;String&gt; imports = new TreeSet&lt;&gt;();</span>
     public boolean hasVars, emptyVars, hasMoreModels, hasEnums, isEnum, hasValidation;
     /**
      * Indicates the OAS schema specifies &quot;nullable: true&quot;.
@@ -105,7 +105,7 @@ import org.apache.commons.lang3.StringUtils;
     public boolean hasChildren;
     public boolean isMap;
     public boolean isNull;
-<span class="fc" id="L108">    public boolean isVoid = false;</span>
+<span class="nc" id="L108">    public boolean isVoid = false;</span>
     /**
      * Indicates the OAS schema specifies &quot;deprecated: true&quot;.
      */
@@ -117,13 +117,13 @@ import org.apache.commons.lang3.StringUtils;
     /**
      * Indicates the all properties of the type are read-only.
      */
-<span class="fc" id="L120">    public boolean hasOnlyReadOnly = true;</span>
+<span class="nc" id="L120">    public boolean hasOnlyReadOnly = true;</span>
     public ExternalDocumentation externalDocumentation;
 
-<span class="fc" id="L123">    public Map&lt;String, Object&gt; vendorExtensions = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L123">    public Map&lt;String, Object&gt; vendorExtensions = new HashMap&lt;&gt;();</span>
     private CodegenComposedSchemas composedSchemas;
-<span class="fc" id="L125">    private boolean hasMultipleTypes = false;</span>
-<span class="fc" id="L126">    public HashMap&lt;String, SchemaTestCase&gt; testCases = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L125">    private boolean hasMultipleTypes = false;</span>
+<span class="nc" id="L126">    public HashMap&lt;String, SchemaTestCase&gt; testCases = new HashMap&lt;&gt;();</span>
     private boolean schemaIsFromAdditionalProperties;
     private boolean isBooleanSchemaTrue;
     private boolean isBooleanSchemaFalse;
@@ -246,8 +246,8 @@ import org.apache.commons.lang3.StringUtils;
 
     @Override
     public void setFormat(String format) {
-<span class="fc" id="L249">        this.format = format;</span>
-<span class="fc" id="L250">    }</span>
+<span class="nc" id="L249">        this.format = format;</span>
+<span class="nc" id="L250">    }</span>
 
     @Override
     public String getRef() {
@@ -286,7 +286,7 @@ import org.apache.commons.lang3.StringUtils;
 <span class="nc" id="L286">    }</span>
 
     public List&lt;CodegenProperty&gt; getAllVars() {
-<span class="fc" id="L289">        return allVars;</span>
+<span class="nc" id="L289">        return allVars;</span>
     }
 
     public void setAllVars(List&lt;CodegenProperty&gt; allVars) {
@@ -428,11 +428,11 @@ import org.apache.commons.lang3.StringUtils;
     }
 
     public void setDiscriminator(CodegenDiscriminator discriminator) {
-<span class="fc" id="L431">        this.discriminator = discriminator;</span>
-<span class="pc bpc" id="L432" title="3 of 4 branches missed.">        if (discriminator != null &amp;&amp; !discriminator.getMappedModels().isEmpty()) {</span>
+<span class="nc" id="L431">        this.discriminator = discriminator;</span>
+<span class="nc bnc" id="L432" title="All 4 branches missed.">        if (discriminator != null &amp;&amp; !discriminator.getMappedModels().isEmpty()) {</span>
 <span class="nc" id="L433">            this.hasDiscriminatorWithNonEmptyMapping = true;</span>
         }
-<span class="fc" id="L435">    }</span>
+<span class="nc" id="L435">    }</span>
 
     /**
      * Returns the name of the discriminator property for this schema in the OpenAPI document.
@@ -471,7 +471,7 @@ import org.apache.commons.lang3.StringUtils;
 <span class="nc" id="L471">    }</span>
 
     public List&lt;String&gt; getInterfaces() {
-<span class="fc" id="L474">        return interfaces;</span>
+<span class="nc" id="L474">        return interfaces;</span>
     }
 
     public void setInterfaces(List&lt;String&gt; interfaces) {
@@ -520,7 +520,7 @@ import org.apache.commons.lang3.StringUtils;
 <span class="nc" id="L520">    }</span>
 
     public String getParent() {
-<span class="fc" id="L523">        return parent;</span>
+<span class="nc" id="L523">        return parent;</span>
     }
 
     public void setParent(String parent) {
@@ -708,8 +708,8 @@ import org.apache.commons.lang3.StringUtils;
 
     @Override
     public void setIsModel(boolean isModel) {
-<span class="fc" id="L711">        this.isModel = isModel;</span>
-<span class="fc" id="L712">    }</span>
+<span class="nc" id="L711">        this.isModel = isModel;</span>
+<span class="nc" id="L712">    }</span>
 
     @Override
     public boolean getIsDate() {
@@ -829,7 +829,7 @@ import org.apache.commons.lang3.StringUtils;
 
     @Override
     public List&lt;CodegenProperty&gt; getRequiredVars() {
-<span class="fc" id="L832">        return requiredVars;</span>
+<span class="nc" id="L832">        return requiredVars;</span>
     }
 
     @Override
@@ -855,7 +855,7 @@ import org.apache.commons.lang3.StringUtils;
 
     @Override
     public List&lt;CodegenProperty&gt; getVars() {
-<span class="fc" id="L858">        return vars;</span>
+<span class="nc" id="L858">        return vars;</span>
     }
 
     @Override
@@ -864,7 +864,7 @@ import org.apache.commons.lang3.StringUtils;
 <span class="nc" id="L864">    }</span>
 
     public Map&lt;String, Object&gt; getVendorExtensions() {
-<span class="fc" id="L867">        return vendorExtensions;</span>
+<span class="nc" id="L867">        return vendorExtensions;</span>
     }
 
     public void setVendorExtensions(Map&lt;String, Object&gt; vendorExtensions) {
@@ -932,8 +932,8 @@ import org.apache.commons.lang3.StringUtils;
 
     @Override
     public void setHasVars(boolean hasVars) {
-<span class="fc" id="L935">        this.hasVars = hasVars;</span>
-<span class="fc" id="L936">    }</span>
+<span class="nc" id="L935">        this.hasVars = hasVars;</span>
+<span class="nc" id="L936">    }</span>
 
     @Override
     public boolean getHasRequired() {
@@ -942,8 +942,8 @@ import org.apache.commons.lang3.StringUtils;
 
     @Override
     public void setHasRequired(boolean hasRequired) {
-<span class="fc" id="L945">        this.hasRequired = hasRequired;</span>
-<span class="fc" id="L946">    }</span>
+<span class="nc" id="L945">        this.hasRequired = hasRequired;</span>
+<span class="nc" id="L946">    }</span>
 
     @Override
     public boolean getHasDiscriminatorWithNonEmptyMapping() {
@@ -1005,12 +1005,12 @@ import org.apache.commons.lang3.StringUtils;
 
     @Override
     public void setComposedSchemas(CodegenComposedSchemas composedSchemas) {
-<span class="fc" id="L1008">        this.composedSchemas = composedSchemas;</span>
-<span class="fc" id="L1009">    }</span>
+<span class="nc" id="L1008">        this.composedSchemas = composedSchemas;</span>
+<span class="nc" id="L1009">    }</span>
 
     @Override
     public CodegenComposedSchemas getComposedSchemas() {
-<span class="fc" id="L1013">        return composedSchemas;</span>
+<span class="nc" id="L1013">        return composedSchemas;</span>
     }
 
     @Override
@@ -1384,64 +1384,64 @@ import org.apache.commons.lang3.StringUtils;
 <span class="nc" id="L1384">    public Map&lt;String, CodegenProperty&gt; getRequiredVarsMap() { return requiredVarsMap; }</span>
 
     @Override
-<span class="fc" id="L1387">    public void setRequiredVarsMap(Map&lt;String, CodegenProperty&gt; requiredVarsMap) { this.requiredVarsMap=requiredVarsMap; }</span>
+<span class="nc" id="L1387">    public void setRequiredVarsMap(Map&lt;String, CodegenProperty&gt; requiredVarsMap) { this.requiredVarsMap=requiredVarsMap; }</span>
 
     /**
      * Remove duplicated properties in all variable list
      */
     public void removeAllDuplicatedProperty() {
         // remove duplicated properties
-<span class="fc" id="L1394">        vars = removeDuplicatedProperty(vars);</span>
-<span class="fc" id="L1395">        optionalVars = removeDuplicatedProperty(optionalVars);</span>
-<span class="fc" id="L1396">        requiredVars = removeDuplicatedProperty(requiredVars);</span>
-<span class="fc" id="L1397">        parentVars = removeDuplicatedProperty(parentVars);</span>
-<span class="fc" id="L1398">        allVars = removeDuplicatedProperty(allVars);</span>
-<span class="fc" id="L1399">        nonNullableVars = removeDuplicatedProperty(nonNullableVars);</span>
-<span class="fc" id="L1400">        readOnlyVars = removeDuplicatedProperty(readOnlyVars);</span>
-<span class="fc" id="L1401">        readWriteVars = removeDuplicatedProperty(readWriteVars);</span>
-<span class="fc" id="L1402">    }</span>
+<span class="nc" id="L1394">        vars = removeDuplicatedProperty(vars);</span>
+<span class="nc" id="L1395">        optionalVars = removeDuplicatedProperty(optionalVars);</span>
+<span class="nc" id="L1396">        requiredVars = removeDuplicatedProperty(requiredVars);</span>
+<span class="nc" id="L1397">        parentVars = removeDuplicatedProperty(parentVars);</span>
+<span class="nc" id="L1398">        allVars = removeDuplicatedProperty(allVars);</span>
+<span class="nc" id="L1399">        nonNullableVars = removeDuplicatedProperty(nonNullableVars);</span>
+<span class="nc" id="L1400">        readOnlyVars = removeDuplicatedProperty(readOnlyVars);</span>
+<span class="nc" id="L1401">        readWriteVars = removeDuplicatedProperty(readWriteVars);</span>
+<span class="nc" id="L1402">    }</span>
 
     private List&lt;CodegenProperty&gt; removeDuplicatedProperty(List&lt;CodegenProperty&gt; vars) {
         // clone the list first
-<span class="fc" id="L1406">        List&lt;CodegenProperty&gt; newList = new ArrayList&lt;&gt;();</span>
-<span class="fc bfc" id="L1407" title="All 2 branches covered.">        for (CodegenProperty cp : vars) {</span>
-<span class="fc" id="L1408">            newList.add(cp.clone());</span>
-<span class="fc" id="L1409">        }</span>
+<span class="nc" id="L1406">        List&lt;CodegenProperty&gt; newList = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L1407" title="All 2 branches missed.">        for (CodegenProperty cp : vars) {</span>
+<span class="nc" id="L1408">            newList.add(cp.clone());</span>
+<span class="nc" id="L1409">        }</span>
 
-<span class="fc" id="L1411">        Set&lt;String&gt; propertyNames = new TreeSet&lt;&gt;();</span>
-<span class="fc" id="L1412">        Set&lt;String&gt; duplicatedNames = new TreeSet&lt;&gt;();</span>
+<span class="nc" id="L1411">        Set&lt;String&gt; propertyNames = new TreeSet&lt;&gt;();</span>
+<span class="nc" id="L1412">        Set&lt;String&gt; duplicatedNames = new TreeSet&lt;&gt;();</span>
 
-<span class="fc" id="L1414">        ListIterator&lt;CodegenProperty&gt; iterator = newList.listIterator();</span>
-<span class="fc bfc" id="L1415" title="All 2 branches covered.">        while (iterator.hasNext()) {</span>
-<span class="fc" id="L1416">            CodegenProperty element = iterator.next();</span>
+<span class="nc" id="L1414">        ListIterator&lt;CodegenProperty&gt; iterator = newList.listIterator();</span>
+<span class="nc bnc" id="L1415" title="All 2 branches missed.">        while (iterator.hasNext()) {</span>
+<span class="nc" id="L1416">            CodegenProperty element = iterator.next();</span>
 
-<span class="pc bpc" id="L1418" title="1 of 2 branches missed.">            if (propertyNames.contains(element.baseName)) {</span>
+<span class="nc bnc" id="L1418" title="All 2 branches missed.">            if (propertyNames.contains(element.baseName)) {</span>
 <span class="nc" id="L1419">                duplicatedNames.add(element.baseName);</span>
 <span class="nc" id="L1420">                iterator.remove();</span>
             } else {
-<span class="fc" id="L1422">                propertyNames.add(element.baseName);</span>
+<span class="nc" id="L1422">                propertyNames.add(element.baseName);</span>
             }
-<span class="fc" id="L1424">        }</span>
+<span class="nc" id="L1424">        }</span>
 
-<span class="fc" id="L1426">        return newList;</span>
+<span class="nc" id="L1426">        return newList;</span>
     }
 
     /**
      * Remove self reference import
      */
     public void removeSelfReferenceImport() {
-<span class="fc bfc" id="L1433" title="All 2 branches covered.">        for (CodegenProperty cp : allVars) {</span>
-<span class="pc bpc" id="L1434" title="1 of 2 branches missed.">            if (cp == null) {</span>
+<span class="nc bnc" id="L1433" title="All 2 branches missed.">        for (CodegenProperty cp : allVars) {</span>
+<span class="nc bnc" id="L1434" title="All 2 branches missed.">            if (cp == null) {</span>
                 // TODO cp shouldn't be null. Show a warning message instead
             } else {
                 // detect self import
-<span class="pc bpc" id="L1438" title="4 of 6 branches missed.">                if (this.classname.equalsIgnoreCase(cp.dataType) ||</span>
+<span class="nc bnc" id="L1438" title="All 6 branches missed.">                if (this.classname.equalsIgnoreCase(cp.dataType) ||</span>
 <span class="nc bnc" id="L1439" title="All 2 branches missed.">                        (cp.isContainer &amp;&amp; cp.items != null &amp;&amp; this.classname.equalsIgnoreCase(cp.items.dataType))) {</span>
 <span class="nc" id="L1440">                    this.imports.remove(this.classname); // remove self import</span>
 <span class="nc" id="L1441">                    cp.isSelfReference = true;</span>
                 }
             }
-<span class="fc" id="L1444">        }</span>
-<span class="fc" id="L1445">    }</span>
+<span class="nc" id="L1444">        }</span>
+<span class="nc" id="L1445">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

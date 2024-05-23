@@ -31,26 +31,26 @@ import java.util.Locale;
 import java.util.UUID;
 
 public class EiffelClientCodegen extends AbstractEiffelCodegen {
-<span class="fc" id="L34">    private final Logger LOGGER = LoggerFactory.getLogger(EiffelClientCodegen.class);</span>
+<span class="nc" id="L34">    private final Logger LOGGER = LoggerFactory.getLogger(EiffelClientCodegen.class);</span>
 
-<span class="fc" id="L36">    protected String libraryTarget = &quot;openapi_eiffel_client&quot;;</span>
-<span class="fc" id="L37">    protected String packageName = &quot;Eiffel&quot;;</span>
-<span class="fc" id="L38">    protected String packageVersion = &quot;1.0.0&quot;;</span>
-<span class="fc" id="L39">    protected String apiDocPath = &quot;docs&quot;;</span>
-<span class="fc" id="L40">    protected String modelDocPath = &quot;docs&quot;;</span>
-<span class="fc" id="L41">    protected String modelPath = &quot;domain&quot;;</span>
+<span class="nc" id="L36">    protected String libraryTarget = &quot;openapi_eiffel_client&quot;;</span>
+<span class="nc" id="L37">    protected String packageName = &quot;Eiffel&quot;;</span>
+<span class="nc" id="L38">    protected String packageVersion = &quot;1.0.0&quot;;</span>
+<span class="nc" id="L39">    protected String apiDocPath = &quot;docs&quot;;</span>
+<span class="nc" id="L40">    protected String modelDocPath = &quot;docs&quot;;</span>
+<span class="nc" id="L41">    protected String modelPath = &quot;domain&quot;;</span>
 
     protected UUID uuid;
     protected UUID uuidTest;
 
     @Override
     public CodegenType getTag() {
-<span class="fc" id="L48">        return CodegenType.CLIENT;</span>
+<span class="nc" id="L48">        return CodegenType.CLIENT;</span>
     }
 
     @Override
     public String getName() {
-<span class="fc" id="L53">        return &quot;eiffel&quot;;</span>
+<span class="nc" id="L53">        return &quot;eiffel&quot;;</span>
     }
 
     @Override
@@ -59,46 +59,46 @@ public class EiffelClientCodegen extends AbstractEiffelCodegen {
     }
 
     public EiffelClientCodegen() {
-<span class="fc" id="L62">        super();</span>
+<span class="nc" id="L62">        super();</span>
 
-<span class="fc" id="L64">        modifyFeatureSet(features -&gt; features</span>
-<span class="fc" id="L65">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
-<span class="fc" id="L66">                .securityFeatures(EnumSet.of(</span>
+<span class="nc" id="L64">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L65">                .includeDocumentationFeatures(DocumentationFeature.Readme)</span>
+<span class="nc" id="L66">                .securityFeatures(EnumSet.of(</span>
                         SecurityFeature.OAuth2_Implicit,
                         SecurityFeature.BasicAuth,
                         SecurityFeature.ApiKey
                 ))
-<span class="fc" id="L71">                .excludeGlobalFeatures(</span>
+<span class="nc" id="L71">                .excludeGlobalFeatures(</span>
                         GlobalFeature.XMLStructureDefinitions,
                         GlobalFeature.Callbacks,
                         GlobalFeature.LinkObjects,
                         GlobalFeature.ParameterStyling
                 )
-<span class="fc" id="L77">                .includeSchemaSupportFeatures(</span>
+<span class="nc" id="L77">                .includeSchemaSupportFeatures(</span>
                         SchemaSupportFeature.Polymorphism
                 )
-<span class="fc" id="L80">                .excludeParameterFeatures(</span>
+<span class="nc" id="L80">                .excludeParameterFeatures(</span>
                         ParameterFeature.Cookie
                 )
-<span class="fc" id="L83">                .includeClientModificationFeatures(</span>
+<span class="nc" id="L83">                .includeClientModificationFeatures(</span>
                         ClientModificationFeature.BasePath,
                         ClientModificationFeature.UserAgent
                 )
         );
 
-<span class="fc" id="L89">        uuid = UUID.randomUUID();</span>
-<span class="fc" id="L90">        uuidTest = UUID.randomUUID();</span>
-<span class="fc" id="L91">        outputFolder = &quot;generated-code/Eiffel&quot;;</span>
-<span class="fc" id="L92">        modelDocTemplateFiles.put(&quot;model_doc.mustache&quot;, &quot;.md&quot;);</span>
-<span class="fc" id="L93">        modelTemplateFiles.put(&quot;model_generic.mustache&quot;, &quot;.e&quot;);</span>
-<span class="fc" id="L94">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.e&quot;);</span>
-<span class="fc" id="L95">        apiTestTemplateFiles.put(&quot;test/api_test.mustache&quot;, &quot;.e&quot;);</span>
-<span class="fc" id="L96">        apiDocTemplateFiles.put(&quot;api_doc.mustache&quot;, &quot;.md&quot;);</span>
-<span class="fc" id="L97">        embeddedTemplateDir = templateDir = &quot;Eiffel&quot;;</span>
+<span class="nc" id="L89">        uuid = UUID.randomUUID();</span>
+<span class="nc" id="L90">        uuidTest = UUID.randomUUID();</span>
+<span class="nc" id="L91">        outputFolder = &quot;generated-code/Eiffel&quot;;</span>
+<span class="nc" id="L92">        modelDocTemplateFiles.put(&quot;model_doc.mustache&quot;, &quot;.md&quot;);</span>
+<span class="nc" id="L93">        modelTemplateFiles.put(&quot;model_generic.mustache&quot;, &quot;.e&quot;);</span>
+<span class="nc" id="L94">        apiTemplateFiles.put(&quot;api.mustache&quot;, &quot;.e&quot;);</span>
+<span class="nc" id="L95">        apiTestTemplateFiles.put(&quot;test/api_test.mustache&quot;, &quot;.e&quot;);</span>
+<span class="nc" id="L96">        apiDocTemplateFiles.put(&quot;api_doc.mustache&quot;, &quot;.md&quot;);</span>
+<span class="nc" id="L97">        embeddedTemplateDir = templateDir = &quot;Eiffel&quot;;</span>
 
         // default HIDE_GENERATION_TIMESTAMP to true
-<span class="fc" id="L100">        hideGenerationTimestamp = true;</span>
-<span class="fc" id="L101">    }</span>
+<span class="nc" id="L100">        hideGenerationTimestamp = true;</span>
+<span class="nc" id="L101">    }</span>
 
     @Override
     public void processOpts() {

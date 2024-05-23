@@ -50,54 +50,54 @@ public abstract class AbstractJavaJAXRSServerCodegen extends AbstractJavaCodegen
     protected static final String SCHEMA_TYPE_ARRAY = &quot;org.eclipse.microprofile.openapi.annotations.enums.SchemaType.ARRAY&quot;;
     protected static final Map&lt;String,String&gt; ARRAY_OF_MICROPROFILE_OPEN_API_SCHEMA_TYPES;
     static {
-<span class="fc" id="L53">        final Map&lt;String, String&gt; schemaTypes = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L54">        schemaTypes.put(&quot;integer&quot;, &quot;org.eclipse.microprofile.openapi.annotations.enums.SchemaType.INTEGER&quot;);</span>
-<span class="fc" id="L55">        schemaTypes.put(&quot;number&quot;, &quot;org.eclipse.microprofile.openapi.annotations.enums.SchemaType.NUMBER&quot;);</span>
-<span class="fc" id="L56">        schemaTypes.put(&quot;boolean&quot;, &quot;org.eclipse.microprofile.openapi.annotations.enums.SchemaType.BOOLEAN&quot;);</span>
-<span class="fc" id="L57">        schemaTypes.put(&quot;string&quot;, &quot;org.eclipse.microprofile.openapi.annotations.enums.SchemaType.STRING&quot;);</span>
-<span class="fc" id="L58">        schemaTypes.put(&quot;object&quot;, &quot;org.eclipse.microprofile.openapi.annotations.enums.SchemaType.OBJECT&quot;);</span>
-<span class="fc" id="L59">        schemaTypes.put(&quot;array&quot;, &quot;org.eclipse.microprofile.openapi.annotations.enums.SchemaType.ARRAY&quot;);</span>
-<span class="fc" id="L60">        ARRAY_OF_MICROPROFILE_OPEN_API_SCHEMA_TYPES = Collections.unmodifiableMap(schemaTypes);</span>
-<span class="fc" id="L61">    }</span>
+<span class="nc" id="L53">        final Map&lt;String, String&gt; schemaTypes = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L54">        schemaTypes.put(&quot;integer&quot;, &quot;org.eclipse.microprofile.openapi.annotations.enums.SchemaType.INTEGER&quot;);</span>
+<span class="nc" id="L55">        schemaTypes.put(&quot;number&quot;, &quot;org.eclipse.microprofile.openapi.annotations.enums.SchemaType.NUMBER&quot;);</span>
+<span class="nc" id="L56">        schemaTypes.put(&quot;boolean&quot;, &quot;org.eclipse.microprofile.openapi.annotations.enums.SchemaType.BOOLEAN&quot;);</span>
+<span class="nc" id="L57">        schemaTypes.put(&quot;string&quot;, &quot;org.eclipse.microprofile.openapi.annotations.enums.SchemaType.STRING&quot;);</span>
+<span class="nc" id="L58">        schemaTypes.put(&quot;object&quot;, &quot;org.eclipse.microprofile.openapi.annotations.enums.SchemaType.OBJECT&quot;);</span>
+<span class="nc" id="L59">        schemaTypes.put(&quot;array&quot;, &quot;org.eclipse.microprofile.openapi.annotations.enums.SchemaType.ARRAY&quot;);</span>
+<span class="nc" id="L60">        ARRAY_OF_MICROPROFILE_OPEN_API_SCHEMA_TYPES = Collections.unmodifiableMap(schemaTypes);</span>
+<span class="nc" id="L61">    }</span>
 
-<span class="fc" id="L63">    protected String implFolder = &quot;src/main/java&quot;;</span>
-<span class="fc" id="L64">    protected String testResourcesFolder = &quot;src/test/resources&quot;;</span>
-<span class="fc" id="L65">    protected String title = &quot;OpenAPI Server&quot;;</span>
-<span class="fc" id="L66">    protected String serverPort = &quot;8080&quot;;</span>
+<span class="nc" id="L63">    protected String implFolder = &quot;src/main/java&quot;;</span>
+<span class="nc" id="L64">    protected String testResourcesFolder = &quot;src/test/resources&quot;;</span>
+<span class="nc" id="L65">    protected String title = &quot;OpenAPI Server&quot;;</span>
+<span class="nc" id="L66">    protected String serverPort = &quot;8080&quot;;</span>
 
-<span class="fc" id="L68">    protected boolean useBeanValidation = true;</span>
-<span class="fc" id="L69">    protected boolean useTags = false;</span>
+<span class="nc" id="L68">    protected boolean useBeanValidation = true;</span>
+<span class="nc" id="L69">    protected boolean useTags = false;</span>
 
-<span class="fc" id="L71">    private final Logger LOGGER = LoggerFactory.getLogger(AbstractJavaJAXRSServerCodegen.class);</span>
+<span class="nc" id="L71">    private final Logger LOGGER = LoggerFactory.getLogger(AbstractJavaJAXRSServerCodegen.class);</span>
 
     public AbstractJavaJAXRSServerCodegen() {
-<span class="fc" id="L74">        super();</span>
+<span class="nc" id="L74">        super();</span>
 
-<span class="fc" id="L76">        sourceFolder = &quot;src/gen/java&quot;;</span>
-<span class="fc" id="L77">        invokerPackage = &quot;org.openapitools.api&quot;;</span>
-<span class="fc" id="L78">        artifactId = &quot;openapi-jaxrs-server&quot;;</span>
-<span class="fc" id="L79">        dateLibrary = &quot;legacy&quot;; //TODO: add joda support to all jax-rs</span>
-<span class="fc" id="L80">        apiPackage = &quot;org.openapitools.api&quot;;</span>
-<span class="fc" id="L81">        modelPackage = &quot;org.openapitools.model&quot;;</span>
+<span class="nc" id="L76">        sourceFolder = &quot;src/gen/java&quot;;</span>
+<span class="nc" id="L77">        invokerPackage = &quot;org.openapitools.api&quot;;</span>
+<span class="nc" id="L78">        artifactId = &quot;openapi-jaxrs-server&quot;;</span>
+<span class="nc" id="L79">        dateLibrary = &quot;legacy&quot;; //TODO: add joda support to all jax-rs</span>
+<span class="nc" id="L80">        apiPackage = &quot;org.openapitools.api&quot;;</span>
+<span class="nc" id="L81">        modelPackage = &quot;org.openapitools.model&quot;;</span>
 
         // clioOptions default redefinition need to be updated
-<span class="fc" id="L84">        updateOption(CodegenConstants.INVOKER_PACKAGE, this.getInvokerPackage());</span>
-<span class="fc" id="L85">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
-<span class="fc" id="L86">        updateOption(CodegenConstants.API_PACKAGE, apiPackage);</span>
-<span class="fc" id="L87">        updateOption(CodegenConstants.MODEL_PACKAGE, modelPackage);</span>
-<span class="fc" id="L88">        updateOption(DATE_LIBRARY, this.getDateLibrary());</span>
-<span class="fc" id="L89">        updateOption(CodegenConstants.SOURCE_FOLDER, this.getSourceFolder());</span>
+<span class="nc" id="L84">        updateOption(CodegenConstants.INVOKER_PACKAGE, this.getInvokerPackage());</span>
+<span class="nc" id="L85">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
+<span class="nc" id="L86">        updateOption(CodegenConstants.API_PACKAGE, apiPackage);</span>
+<span class="nc" id="L87">        updateOption(CodegenConstants.MODEL_PACKAGE, modelPackage);</span>
+<span class="nc" id="L88">        updateOption(DATE_LIBRARY, this.getDateLibrary());</span>
+<span class="nc" id="L89">        updateOption(CodegenConstants.SOURCE_FOLDER, this.getSourceFolder());</span>
 
-<span class="fc" id="L91">        additionalProperties.put(&quot;title&quot;, title);</span>
+<span class="nc" id="L91">        additionalProperties.put(&quot;title&quot;, title);</span>
         // java inflector uses the jackson lib
-<span class="fc" id="L93">        additionalProperties.put(JACKSON, &quot;true&quot;);</span>
+<span class="nc" id="L93">        additionalProperties.put(JACKSON, &quot;true&quot;);</span>
 
-<span class="fc" id="L95">        cliOptions.add(new CliOption(CodegenConstants.IMPL_FOLDER, CodegenConstants.IMPL_FOLDER_DESC).defaultValue(implFolder));</span>
-<span class="fc" id="L96">        cliOptions.add(new CliOption(&quot;title&quot;, &quot;a title describing the application&quot;).defaultValue(title));</span>
-<span class="fc" id="L97">        cliOptions.add(CliOption.newBoolean(USE_BEANVALIDATION, &quot;Use BeanValidation API annotations&quot;,useBeanValidation));</span>
-<span class="fc" id="L98">        cliOptions.add(new CliOption(SERVER_PORT, &quot;The port on which the server should be started&quot;).defaultValue(serverPort));</span>
-<span class="fc" id="L99">        cliOptions.add(CliOption.newBoolean(USE_TAGS, &quot;use tags for creating interface and controller classnames&quot;));</span>
-<span class="fc" id="L100">    }</span>
+<span class="nc" id="L95">        cliOptions.add(new CliOption(CodegenConstants.IMPL_FOLDER, CodegenConstants.IMPL_FOLDER_DESC).defaultValue(implFolder));</span>
+<span class="nc" id="L96">        cliOptions.add(new CliOption(&quot;title&quot;, &quot;a title describing the application&quot;).defaultValue(title));</span>
+<span class="nc" id="L97">        cliOptions.add(CliOption.newBoolean(USE_BEANVALIDATION, &quot;Use BeanValidation API annotations&quot;,useBeanValidation));</span>
+<span class="nc" id="L98">        cliOptions.add(new CliOption(SERVER_PORT, &quot;The port on which the server should be started&quot;).defaultValue(serverPort));</span>
+<span class="nc" id="L99">        cliOptions.add(CliOption.newBoolean(USE_TAGS, &quot;use tags for creating interface and controller classnames&quot;));</span>
+<span class="nc" id="L100">    }</span>
 
 
     // ===============
@@ -106,7 +106,7 @@ public abstract class AbstractJavaJAXRSServerCodegen extends AbstractJavaCodegen
 
     @Override
     public CodegenType getTag() {
-<span class="fc" id="L109">        return CodegenType.SERVER;</span>
+<span class="nc" id="L109">        return CodegenType.SERVER;</span>
     }
 
     @Override

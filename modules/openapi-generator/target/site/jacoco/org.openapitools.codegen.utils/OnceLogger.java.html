@@ -46,55 +46,55 @@ public class OnceLogger extends LoggerWrapper {
      * The fully qualified class name of the &lt;b&gt;logger instance&lt;/b&gt;,
      * typically the logger class, logger bridge or a logger wrapper.
      */
-<span class="fc" id="L49">    private static final String FQCN = OnceLogger.class.getName();</span>
+<span class="nc" id="L49">    private static final String FQCN = OnceLogger.class.getName();</span>
 
     /**
      * Gets the marker instance. This can be used by supported log implementations to filter/manage logs coming from
      * this implementation differently than others (i.e. make them stand out since they're to be logged once).
      */
-<span class="fc" id="L55">    private static final Marker MARKER = MarkerFactory.getMarker(&quot;ONCE&quot;);</span>
+<span class="nc" id="L55">    private static final Marker MARKER = MarkerFactory.getMarker(&quot;ONCE&quot;);</span>
 
     /**
      * The allowed size of the cache.
      */
-<span class="fc" id="L60">    private static int maxCacheSize = Integer.parseInt(GlobalSettings.getProperty(CACHE_SIZE_PROPERTY, &quot;200&quot;));</span>
+<span class="nc" id="L60">    private static int maxCacheSize = Integer.parseInt(GlobalSettings.getProperty(CACHE_SIZE_PROPERTY, &quot;200&quot;));</span>
 
     /**
      * The millis to expire a cached log message.
      */
-<span class="fc" id="L65">    private static int expireMillis = Integer.parseInt(GlobalSettings.getProperty(EXPIRY_PROPERTY, &quot;2000&quot;));</span>
+<span class="nc" id="L65">    private static int expireMillis = Integer.parseInt(GlobalSettings.getProperty(EXPIRY_PROPERTY, &quot;2000&quot;));</span>
 
     /**
      * The number of allowed repetitions.
      */
-<span class="fc" id="L70">    private static int maxRepetitions = 1;</span>
+<span class="nc" id="L70">    private static int maxRepetitions = 1;</span>
 
     OnceLogger(Logger logger) {
-<span class="fc" id="L73">        this(logger, FQCN);</span>
-<span class="fc" id="L74">    }</span>
+<span class="nc" id="L73">        this(logger, FQCN);</span>
+<span class="nc" id="L74">    }</span>
 
     OnceLogger(Logger logger, String fqcn) {
-<span class="fc" id="L77">        super(logger, fqcn);</span>
-<span class="fc" id="L78">    }</span>
+<span class="nc" id="L77">        super(logger, fqcn);</span>
+<span class="nc" id="L78">    }</span>
 
     static {
-<span class="fc" id="L81">        caffeineCache(Ticker.systemTicker(), expireMillis);</span>
-<span class="fc" id="L82">    }</span>
+<span class="nc" id="L81">        caffeineCache(Ticker.systemTicker(), expireMillis);</span>
+<span class="nc" id="L82">    }</span>
 
     static void caffeineCache(Ticker ticker, int expireMillis) {
         // Initializes a cache which holds an atomic counter of log message instances.
         // The intent is to debounce log messages such that they occur at most [maxRepetitions] per [expireMillis].
-<span class="fc" id="L87">        messageCountCache = Caffeine.newBuilder()</span>
-<span class="fc" id="L88">                .maximumSize(maxCacheSize)</span>
-<span class="fc" id="L89">                .expireAfterWrite(expireMillis, TimeUnit.MILLISECONDS)</span>
-<span class="fc" id="L90">                .ticker(ticker)</span>
-<span class="fc" id="L91">                .build();</span>
-<span class="fc" id="L92">    }</span>
+<span class="nc" id="L87">        messageCountCache = Caffeine.newBuilder()</span>
+<span class="nc" id="L88">                .maximumSize(maxCacheSize)</span>
+<span class="nc" id="L89">                .expireAfterWrite(expireMillis, TimeUnit.MILLISECONDS)</span>
+<span class="nc" id="L90">                .ticker(ticker)</span>
+<span class="nc" id="L91">                .build();</span>
+<span class="nc" id="L92">    }</span>
 
     public static Logger once(Logger logger) {
         try {
-<span class="pc bpc" id="L96" title="1 of 2 branches missed.">            if (Boolean.parseBoolean(GlobalSettings.getProperty(ENABLE_ONCE_LOGGER_PROPERTY, &quot;true&quot;))) {</span>
-<span class="fc" id="L97">                return new OnceLogger(logger);</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">            if (Boolean.parseBoolean(GlobalSettings.getProperty(ENABLE_ONCE_LOGGER_PROPERTY, &quot;true&quot;))) {</span>
+<span class="nc" id="L97">                return new OnceLogger(logger);</span>
             }
 <span class="nc" id="L99">        } catch (Exception ex) {</span>
 <span class="nc" id="L100">            logger.warn(&quot;Unable to wrap logger instance in OnceLogger. Falling back to non-decorated implementation, which may be noisy.&quot;);</span>

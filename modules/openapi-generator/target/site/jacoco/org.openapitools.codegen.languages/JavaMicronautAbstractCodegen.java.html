@@ -53,9 +53,9 @@ public abstract class JavaMicronautAbstractCodegen extends AbstractJavaCodegen i
     public static final String OPT_GENERATE_SWAGGER_ANNOTATIONS_TRUE = &quot;true&quot;;
     public static final String OPT_GENERATE_SWAGGER_ANNOTATIONS_FALSE = &quot;false&quot;;
     public static final String OPT_GENERATE_OPERATION_ONLY_FOR_FIRST_TAG = &quot;generateOperationOnlyForFirstTag&quot;;
-<span class="fc" id="L56">    public enum SERIALIZATION_LIBRARY_TYPE {jackson, micronaut_serde_jackson}</span>
+<span class="nc" id="L56">    public enum SERIALIZATION_LIBRARY_TYPE {jackson, micronaut_serde_jackson}</span>
 
-<span class="fc" id="L58">    protected final Logger LOGGER = LoggerFactory.getLogger(JavaMicronautAbstractCodegen.class);</span>
+<span class="nc" id="L58">    protected final Logger LOGGER = LoggerFactory.getLogger(JavaMicronautAbstractCodegen.class);</span>
 
     protected String title;
     protected boolean useBeanValidation;
@@ -63,14 +63,14 @@ public abstract class JavaMicronautAbstractCodegen extends AbstractJavaCodegen i
     protected boolean visitable;
     protected String buildTool;
     protected String testTool;
-<span class="fc" id="L66">    protected boolean requiredPropertiesInConstructor = true;</span>
+<span class="nc" id="L66">    protected boolean requiredPropertiesInConstructor = true;</span>
     protected String micronautVersion;
     protected boolean reactive;
     protected boolean wrapInHttpResponse;
     protected String appName;
     protected String generateSwaggerAnnotations;
     protected boolean generateOperationOnlyForFirstTag;
-<span class="fc" id="L73">    protected String serializationLibrary = SERIALIZATION_LIBRARY_TYPE.jackson.name();</span>
+<span class="nc" id="L73">    protected String serializationLibrary = SERIALIZATION_LIBRARY_TYPE.jackson.name();</span>
 
     public static final String CONTENT_TYPE_APPLICATION_FORM_URLENCODED = &quot;application/x-www-form-urlencoded&quot;;
     public static final String CONTENT_TYPE_APPLICATION_JSON = &quot;application/json&quot;;
@@ -81,39 +81,39 @@ public abstract class JavaMicronautAbstractCodegen extends AbstractJavaCodegen i
     public static final String OFFSET_DATETIME_FORMAT = DATETIME_FORMAT + &quot;XXXX&quot;;
 
     public JavaMicronautAbstractCodegen() {
-<span class="fc" id="L84">        super();</span>
+<span class="nc" id="L84">        super();</span>
 
         // Set all the fields
-<span class="fc" id="L87">        useBeanValidation = true;</span>
-<span class="fc" id="L88">        useOptional = false;</span>
-<span class="fc" id="L89">        visitable = false;</span>
-<span class="fc" id="L90">        buildTool = OPT_BUILD_ALL;</span>
-<span class="fc" id="L91">        testTool = OPT_TEST_JUNIT;</span>
-<span class="fc bfc" id="L92" title="All 2 branches covered.">        outputFolder = this instanceof JavaMicronautClientCodegen ?</span>
-<span class="fc" id="L93">                &quot;generated-code/java-micronaut-client&quot; : &quot;generated-code/java-micronaut&quot;;</span>
-<span class="fc" id="L94">        apiPackage = &quot;org.openapitools.api&quot;;</span>
-<span class="fc" id="L95">        modelPackage = &quot;org.openapitools.model&quot;;</span>
-<span class="fc" id="L96">        invokerPackage = &quot;org.openapitools&quot;;</span>
-<span class="fc bfc" id="L97" title="All 2 branches covered.">        artifactId = this instanceof JavaMicronautClientCodegen ?</span>
-<span class="fc" id="L98">                &quot;openapi-micronaut-client&quot; : &quot;openapi-micronaut&quot;;</span>
-<span class="fc" id="L99">        embeddedTemplateDir = templateDir = &quot;java-micronaut&quot;;</span>
-<span class="fc" id="L100">        apiDocPath = &quot;docs/apis&quot;;</span>
-<span class="fc" id="L101">        modelDocPath = &quot;docs/models&quot;;</span>
-<span class="fc" id="L102">        dateLibrary = OPT_DATE_LIBRARY_JAVA8;</span>
-<span class="fc" id="L103">        micronautVersion = &quot;3.4.3&quot;;</span>
-<span class="fc" id="L104">        reactive = true;</span>
-<span class="fc" id="L105">        wrapInHttpResponse = false;</span>
-<span class="fc" id="L106">        appName = artifactId;</span>
-<span class="fc bfc" id="L107" title="All 2 branches covered.">        generateSwaggerAnnotations = this instanceof JavaMicronautClientCodegen ?</span>
-<span class="fc" id="L108">                OPT_GENERATE_SWAGGER_ANNOTATIONS_FALSE : OPT_GENERATE_SWAGGER_ANNOTATIONS_SWAGGER_2;</span>
-<span class="fc" id="L109">        generateOperationOnlyForFirstTag = this instanceof JavaMicronautServerCodegen;</span>
+<span class="nc" id="L87">        useBeanValidation = true;</span>
+<span class="nc" id="L88">        useOptional = false;</span>
+<span class="nc" id="L89">        visitable = false;</span>
+<span class="nc" id="L90">        buildTool = OPT_BUILD_ALL;</span>
+<span class="nc" id="L91">        testTool = OPT_TEST_JUNIT;</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">        outputFolder = this instanceof JavaMicronautClientCodegen ?</span>
+<span class="nc" id="L93">                &quot;generated-code/java-micronaut-client&quot; : &quot;generated-code/java-micronaut&quot;;</span>
+<span class="nc" id="L94">        apiPackage = &quot;org.openapitools.api&quot;;</span>
+<span class="nc" id="L95">        modelPackage = &quot;org.openapitools.model&quot;;</span>
+<span class="nc" id="L96">        invokerPackage = &quot;org.openapitools&quot;;</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        artifactId = this instanceof JavaMicronautClientCodegen ?</span>
+<span class="nc" id="L98">                &quot;openapi-micronaut-client&quot; : &quot;openapi-micronaut&quot;;</span>
+<span class="nc" id="L99">        embeddedTemplateDir = templateDir = &quot;java-micronaut&quot;;</span>
+<span class="nc" id="L100">        apiDocPath = &quot;docs/apis&quot;;</span>
+<span class="nc" id="L101">        modelDocPath = &quot;docs/models&quot;;</span>
+<span class="nc" id="L102">        dateLibrary = OPT_DATE_LIBRARY_JAVA8;</span>
+<span class="nc" id="L103">        micronautVersion = &quot;3.4.3&quot;;</span>
+<span class="nc" id="L104">        reactive = true;</span>
+<span class="nc" id="L105">        wrapInHttpResponse = false;</span>
+<span class="nc" id="L106">        appName = artifactId;</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">        generateSwaggerAnnotations = this instanceof JavaMicronautClientCodegen ?</span>
+<span class="nc" id="L108">                OPT_GENERATE_SWAGGER_ANNOTATIONS_FALSE : OPT_GENERATE_SWAGGER_ANNOTATIONS_SWAGGER_2;</span>
+<span class="nc" id="L109">        generateOperationOnlyForFirstTag = this instanceof JavaMicronautServerCodegen;</span>
 
         // Set implemented features for user information
-<span class="fc" id="L112">        modifyFeatureSet(features -&gt; features</span>
-<span class="fc" id="L113">                .includeDocumentationFeatures(</span>
+<span class="nc" id="L112">        modifyFeatureSet(features -&gt; features</span>
+<span class="nc" id="L113">                .includeDocumentationFeatures(</span>
                         DocumentationFeature.Readme
                 )
-<span class="fc" id="L116">                .securityFeatures(EnumSet.of(</span>
+<span class="nc" id="L116">                .securityFeatures(EnumSet.of(</span>
                         SecurityFeature.ApiKey,
                         SecurityFeature.BasicAuth,
                         SecurityFeature.OAuth2_Implicit,
@@ -125,77 +125,77 @@ public abstract class JavaMicronautAbstractCodegen extends AbstractJavaCodegen i
         );
 
         // Set additional properties
-<span class="fc" id="L128">        additionalProperties.put(&quot;openbrace&quot;, &quot;{&quot;);</span>
-<span class="fc" id="L129">        additionalProperties.put(&quot;closebrace&quot;, &quot;}&quot;);</span>
+<span class="nc" id="L128">        additionalProperties.put(&quot;openbrace&quot;, &quot;{&quot;);</span>
+<span class="nc" id="L129">        additionalProperties.put(&quot;closebrace&quot;, &quot;}&quot;);</span>
 
         // Set client options that will be presented to user
-<span class="fc" id="L132">        updateOption(INVOKER_PACKAGE, this.getInvokerPackage());</span>
-<span class="fc" id="L133">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
-<span class="fc" id="L134">        updateOption(CodegenConstants.API_PACKAGE, apiPackage);</span>
-<span class="fc" id="L135">        updateOption(CodegenConstants.MODEL_PACKAGE, modelPackage);</span>
+<span class="nc" id="L132">        updateOption(INVOKER_PACKAGE, this.getInvokerPackage());</span>
+<span class="nc" id="L133">        updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());</span>
+<span class="nc" id="L134">        updateOption(CodegenConstants.API_PACKAGE, apiPackage);</span>
+<span class="nc" id="L135">        updateOption(CodegenConstants.MODEL_PACKAGE, modelPackage);</span>
 
-<span class="fc" id="L137">        cliOptions.add(new CliOption(OPT_TITLE, &quot;Client service name&quot;).defaultValue(title));</span>
-<span class="fc" id="L138">        cliOptions.add(new CliOption(OPT_MICRONAUT_VERSION, &quot;Micronaut version, only &gt;=3.0.0 versions are supported&quot;).defaultValue(micronautVersion));</span>
-<span class="fc" id="L139">        cliOptions.add(new CliOption(OPT_APPLICATION_NAME, &quot;Micronaut application name (Defaults to the &quot; + CodegenConstants.ARTIFACT_ID + &quot; value)&quot;).defaultValue(appName));</span>
-<span class="fc" id="L140">        cliOptions.add(CliOption.newBoolean(USE_BEANVALIDATION, &quot;Use BeanValidation API annotations&quot;, useBeanValidation));</span>
-<span class="fc" id="L141">        cliOptions.add(CliOption.newBoolean(USE_OPTIONAL, &quot;Use Optional container for optional parameters&quot;, useOptional));</span>
-<span class="fc" id="L142">        cliOptions.add(CliOption.newBoolean(OPT_VISITABLE, &quot;Generate visitor for subtypes with a discriminator&quot;, visitable));</span>
-<span class="fc" id="L143">        cliOptions.add(CliOption.newBoolean(OPT_REQUIRED_PROPERTIES_IN_CONSTRUCTOR, &quot;Allow only to create models with all the required properties provided in constructor&quot;, requiredPropertiesInConstructor));</span>
-<span class="fc" id="L144">        cliOptions.add(CliOption.newBoolean(OPT_REACTIVE, &quot;Make the responses use Reactor Mono as wrapper&quot;, reactive));</span>
-<span class="fc" id="L145">        cliOptions.add(CliOption.newBoolean(OPT_WRAP_IN_HTTP_RESPONSE, &quot;Wrap the response in HttpResponse object&quot;, wrapInHttpResponse));</span>
-<span class="fc" id="L146">        cliOptions.add(CliOption.newBoolean(OPT_GENERATE_OPERATION_ONLY_FOR_FIRST_TAG, &quot;When false, the operation method will be duplicated in each of the tags if multiple tags are assigned to this operation. &quot; +</span>
+<span class="nc" id="L137">        cliOptions.add(new CliOption(OPT_TITLE, &quot;Client service name&quot;).defaultValue(title));</span>
+<span class="nc" id="L138">        cliOptions.add(new CliOption(OPT_MICRONAUT_VERSION, &quot;Micronaut version, only &gt;=3.0.0 versions are supported&quot;).defaultValue(micronautVersion));</span>
+<span class="nc" id="L139">        cliOptions.add(new CliOption(OPT_APPLICATION_NAME, &quot;Micronaut application name (Defaults to the &quot; + CodegenConstants.ARTIFACT_ID + &quot; value)&quot;).defaultValue(appName));</span>
+<span class="nc" id="L140">        cliOptions.add(CliOption.newBoolean(USE_BEANVALIDATION, &quot;Use BeanValidation API annotations&quot;, useBeanValidation));</span>
+<span class="nc" id="L141">        cliOptions.add(CliOption.newBoolean(USE_OPTIONAL, &quot;Use Optional container for optional parameters&quot;, useOptional));</span>
+<span class="nc" id="L142">        cliOptions.add(CliOption.newBoolean(OPT_VISITABLE, &quot;Generate visitor for subtypes with a discriminator&quot;, visitable));</span>
+<span class="nc" id="L143">        cliOptions.add(CliOption.newBoolean(OPT_REQUIRED_PROPERTIES_IN_CONSTRUCTOR, &quot;Allow only to create models with all the required properties provided in constructor&quot;, requiredPropertiesInConstructor));</span>
+<span class="nc" id="L144">        cliOptions.add(CliOption.newBoolean(OPT_REACTIVE, &quot;Make the responses use Reactor Mono as wrapper&quot;, reactive));</span>
+<span class="nc" id="L145">        cliOptions.add(CliOption.newBoolean(OPT_WRAP_IN_HTTP_RESPONSE, &quot;Wrap the response in HttpResponse object&quot;, wrapInHttpResponse));</span>
+<span class="nc" id="L146">        cliOptions.add(CliOption.newBoolean(OPT_GENERATE_OPERATION_ONLY_FOR_FIRST_TAG, &quot;When false, the operation method will be duplicated in each of the tags if multiple tags are assigned to this operation. &quot; +</span>
                 &quot;If true, each operation will be generated only once in the first assigned tag.&quot;, generateOperationOnlyForFirstTag));
 
-<span class="fc" id="L149">        CliOption buildToolOption = new CliOption(OPT_BUILD, &quot;Specify for which build tool to generate files&quot;).defaultValue(buildTool);</span>
-<span class="fc" id="L150">        Map&lt;String, String&gt; buildToolOptionMap = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L151">        buildToolOptionMap.put(OPT_BUILD_GRADLE, &quot;Gradle configuration is generated for the project&quot;);</span>
-<span class="fc" id="L152">        buildToolOptionMap.put(OPT_BUILD_MAVEN, &quot;Maven configuration is generated for the project&quot;);</span>
-<span class="fc" id="L153">        buildToolOptionMap.put(OPT_BUILD_ALL, &quot;Both Gradle and Maven configurations are generated&quot;);</span>
-<span class="fc" id="L154">        buildToolOption.setEnum(buildToolOptionMap);</span>
-<span class="fc" id="L155">        cliOptions.add(buildToolOption);</span>
+<span class="nc" id="L149">        CliOption buildToolOption = new CliOption(OPT_BUILD, &quot;Specify for which build tool to generate files&quot;).defaultValue(buildTool);</span>
+<span class="nc" id="L150">        Map&lt;String, String&gt; buildToolOptionMap = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L151">        buildToolOptionMap.put(OPT_BUILD_GRADLE, &quot;Gradle configuration is generated for the project&quot;);</span>
+<span class="nc" id="L152">        buildToolOptionMap.put(OPT_BUILD_MAVEN, &quot;Maven configuration is generated for the project&quot;);</span>
+<span class="nc" id="L153">        buildToolOptionMap.put(OPT_BUILD_ALL, &quot;Both Gradle and Maven configurations are generated&quot;);</span>
+<span class="nc" id="L154">        buildToolOption.setEnum(buildToolOptionMap);</span>
+<span class="nc" id="L155">        cliOptions.add(buildToolOption);</span>
 
-<span class="fc" id="L157">        CliOption testToolOption = new CliOption(OPT_TEST, &quot;Specify which test tool to generate files for&quot;).defaultValue(testTool);</span>
-<span class="fc" id="L158">        Map&lt;String, String&gt; testToolOptionMap = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L159">        testToolOptionMap.put(OPT_TEST_JUNIT, &quot;Use JUnit as test tool&quot;);</span>
-<span class="fc" id="L160">        testToolOptionMap.put(OPT_TEST_SPOCK, &quot;Use Spock as test tool&quot;);</span>
-<span class="fc" id="L161">        testToolOption.setEnum(testToolOptionMap);</span>
-<span class="fc" id="L162">        cliOptions.add(testToolOption);</span>
+<span class="nc" id="L157">        CliOption testToolOption = new CliOption(OPT_TEST, &quot;Specify which test tool to generate files for&quot;).defaultValue(testTool);</span>
+<span class="nc" id="L158">        Map&lt;String, String&gt; testToolOptionMap = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L159">        testToolOptionMap.put(OPT_TEST_JUNIT, &quot;Use JUnit as test tool&quot;);</span>
+<span class="nc" id="L160">        testToolOptionMap.put(OPT_TEST_SPOCK, &quot;Use Spock as test tool&quot;);</span>
+<span class="nc" id="L161">        testToolOption.setEnum(testToolOptionMap);</span>
+<span class="nc" id="L162">        cliOptions.add(testToolOption);</span>
 
-<span class="fc" id="L164">        CliOption generateSwaggerAnnotationsOption = new CliOption(OPT_GENERATE_SWAGGER_ANNOTATIONS, &quot;Specify if you want to generate swagger annotations and which version&quot;).defaultValue(generateSwaggerAnnotations);</span>
-<span class="fc" id="L165">        Map&lt;String, String&gt; generateSwaggerAnnotationsOptionMap = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L166">        generateSwaggerAnnotationsOptionMap.put(OPT_GENERATE_SWAGGER_ANNOTATIONS_SWAGGER_1, &quot;Use io.swagger:swagger-annotations for annotating operations and schemas&quot;);</span>
-<span class="fc" id="L167">        generateSwaggerAnnotationsOptionMap.put(OPT_GENERATE_SWAGGER_ANNOTATIONS_SWAGGER_2, &quot;Use io.swagger.core.v3:swagger-annotations for annotating operations and schemas&quot;);</span>
-<span class="fc" id="L168">        generateSwaggerAnnotationsOptionMap.put(OPT_GENERATE_SWAGGER_ANNOTATIONS_TRUE, &quot;Equivalent to \&quot;&quot; + OPT_GENERATE_SWAGGER_ANNOTATIONS_SWAGGER_2 + &quot;\&quot;&quot;);</span>
-<span class="fc" id="L169">        generateSwaggerAnnotationsOptionMap.put(OPT_GENERATE_SWAGGER_ANNOTATIONS_FALSE, &quot;Do not generate swagger annotations&quot;);</span>
-<span class="fc" id="L170">        generateSwaggerAnnotationsOption.setEnum(generateSwaggerAnnotationsOptionMap);</span>
-<span class="fc" id="L171">        cliOptions.add(generateSwaggerAnnotationsOption);</span>
+<span class="nc" id="L164">        CliOption generateSwaggerAnnotationsOption = new CliOption(OPT_GENERATE_SWAGGER_ANNOTATIONS, &quot;Specify if you want to generate swagger annotations and which version&quot;).defaultValue(generateSwaggerAnnotations);</span>
+<span class="nc" id="L165">        Map&lt;String, String&gt; generateSwaggerAnnotationsOptionMap = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L166">        generateSwaggerAnnotationsOptionMap.put(OPT_GENERATE_SWAGGER_ANNOTATIONS_SWAGGER_1, &quot;Use io.swagger:swagger-annotations for annotating operations and schemas&quot;);</span>
+<span class="nc" id="L167">        generateSwaggerAnnotationsOptionMap.put(OPT_GENERATE_SWAGGER_ANNOTATIONS_SWAGGER_2, &quot;Use io.swagger.core.v3:swagger-annotations for annotating operations and schemas&quot;);</span>
+<span class="nc" id="L168">        generateSwaggerAnnotationsOptionMap.put(OPT_GENERATE_SWAGGER_ANNOTATIONS_TRUE, &quot;Equivalent to \&quot;&quot; + OPT_GENERATE_SWAGGER_ANNOTATIONS_SWAGGER_2 + &quot;\&quot;&quot;);</span>
+<span class="nc" id="L169">        generateSwaggerAnnotationsOptionMap.put(OPT_GENERATE_SWAGGER_ANNOTATIONS_FALSE, &quot;Do not generate swagger annotations&quot;);</span>
+<span class="nc" id="L170">        generateSwaggerAnnotationsOption.setEnum(generateSwaggerAnnotationsOptionMap);</span>
+<span class="nc" id="L171">        cliOptions.add(generateSwaggerAnnotationsOption);</span>
 
-<span class="fc" id="L173">        cliOptions.add(new CliOption(OPT_DATE_FORMAT, &quot;Specify the format pattern of date as a string&quot;));</span>
-<span class="fc" id="L174">        cliOptions.add(new CliOption(OPT_DATETIME_FORMAT, &quot;Specify the format pattern of date-time as a string&quot;));</span>
+<span class="nc" id="L173">        cliOptions.add(new CliOption(OPT_DATE_FORMAT, &quot;Specify the format pattern of date as a string&quot;));</span>
+<span class="nc" id="L174">        cliOptions.add(new CliOption(OPT_DATETIME_FORMAT, &quot;Specify the format pattern of date-time as a string&quot;));</span>
 
         // Modify the DATE_LIBRARY option to only have supported values
-<span class="fc" id="L177">        cliOptions.stream().filter(o -&gt; o.getOpt().equals(DATE_LIBRARY)).findFirst().ifPresent(opt -&gt; {</span>
-<span class="fc" id="L178">            Map&lt;String, String&gt; valuesEnum = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L179">            valuesEnum.put(OPT_DATE_LIBRARY_JAVA8, opt.getEnum().get(OPT_DATE_LIBRARY_JAVA8));</span>
-<span class="fc" id="L180">            valuesEnum.put(OPT_DATE_LIBRARY_JAVA8_LOCAL_DATETIME, opt.getEnum().get(OPT_DATE_LIBRARY_JAVA8_LOCAL_DATETIME));</span>
-<span class="fc" id="L181">            opt.setEnum(valuesEnum);</span>
-<span class="fc" id="L182">        });</span>
+<span class="nc" id="L177">        cliOptions.stream().filter(o -&gt; o.getOpt().equals(DATE_LIBRARY)).findFirst().ifPresent(opt -&gt; {</span>
+<span class="nc" id="L178">            Map&lt;String, String&gt; valuesEnum = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L179">            valuesEnum.put(OPT_DATE_LIBRARY_JAVA8, opt.getEnum().get(OPT_DATE_LIBRARY_JAVA8));</span>
+<span class="nc" id="L180">            valuesEnum.put(OPT_DATE_LIBRARY_JAVA8_LOCAL_DATETIME, opt.getEnum().get(OPT_DATE_LIBRARY_JAVA8_LOCAL_DATETIME));</span>
+<span class="nc" id="L181">            opt.setEnum(valuesEnum);</span>
+<span class="nc" id="L182">        });</span>
 
-<span class="fc" id="L184">        final CliOption serializationLibraryOpt = CliOption.newString(CodegenConstants.SERIALIZATION_LIBRARY, &quot;Serialization library for model&quot;);</span>
-<span class="fc" id="L185">        serializationLibraryOpt.defaultValue(SERIALIZATION_LIBRARY_TYPE.jackson.name());</span>
-<span class="fc" id="L186">        Map&lt;String, String&gt; serializationLibraryOptions = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L187">        serializationLibraryOptions.put(SERIALIZATION_LIBRARY_TYPE.jackson.name(), &quot;Jackson as serialization library&quot;);</span>
-<span class="fc" id="L188">        serializationLibraryOptions.put(SERIALIZATION_LIBRARY_TYPE.micronaut_serde_jackson.name(), &quot;Use micronaut-serialization with Jackson annotations&quot;);</span>
-<span class="fc" id="L189">        serializationLibraryOpt.setEnum(serializationLibraryOptions);</span>
-<span class="fc" id="L190">        cliOptions.add(serializationLibraryOpt);</span>
+<span class="nc" id="L184">        final CliOption serializationLibraryOpt = CliOption.newString(CodegenConstants.SERIALIZATION_LIBRARY, &quot;Serialization library for model&quot;);</span>
+<span class="nc" id="L185">        serializationLibraryOpt.defaultValue(SERIALIZATION_LIBRARY_TYPE.jackson.name());</span>
+<span class="nc" id="L186">        Map&lt;String, String&gt; serializationLibraryOptions = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L187">        serializationLibraryOptions.put(SERIALIZATION_LIBRARY_TYPE.jackson.name(), &quot;Jackson as serialization library&quot;);</span>
+<span class="nc" id="L188">        serializationLibraryOptions.put(SERIALIZATION_LIBRARY_TYPE.micronaut_serde_jackson.name(), &quot;Use micronaut-serialization with Jackson annotations&quot;);</span>
+<span class="nc" id="L189">        serializationLibraryOpt.setEnum(serializationLibraryOptions);</span>
+<span class="nc" id="L190">        cliOptions.add(serializationLibraryOpt);</span>
 
         // Add reserved words
-<span class="fc" id="L193">        String[] reservedWordsArray = {</span>
+<span class="nc" id="L193">        String[] reservedWordsArray = {</span>
                 &quot;client&quot;, &quot;format&quot;, &quot;queryvalue&quot;, &quot;queryparam&quot;, &quot;pathvariable&quot;, &quot;header&quot;, &quot;cookie&quot;,
                 &quot;authorization&quot;, &quot;body&quot;, &quot;application&quot;
         };
-<span class="fc" id="L197">        reservedWords.addAll(Arrays.asList(reservedWordsArray));</span>
-<span class="fc" id="L198">    }</span>
+<span class="nc" id="L197">        reservedWords.addAll(Arrays.asList(reservedWordsArray));</span>
+<span class="nc" id="L198">    }</span>
 
     @Override
     public void processOpts() {
@@ -714,8 +714,8 @@ public abstract class JavaMicronautAbstractCodegen extends AbstractJavaCodegen i
 
     @Override
     protected ImmutableMap.Builder&lt;String, Mustache.Lambda&gt; addMustacheLambdas() {
-<span class="fc" id="L717">        return super.addMustacheLambdas()</span>
-<span class="fc" id="L718">            .put(&quot;replaceDotsWithUnderscore&quot;, new ReplaceDotsWithUnderscoreLambda());</span>
+<span class="nc" id="L717">        return super.addMustacheLambdas()</span>
+<span class="nc" id="L718">            .put(&quot;replaceDotsWithUnderscore&quot;, new ReplaceDotsWithUnderscoreLambda());</span>
     }
 
     private static class ReplaceDotsWithUnderscoreLambda implements Mustache.Lambda {

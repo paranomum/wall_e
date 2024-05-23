@@ -45,8 +45,8 @@ public class TitlecaseLambda implements Mustache.Lambda  {
      * in a space delimited string to title-case.
      */
     public TitlecaseLambda() {
-<span class="fc" id="L48">        this(&quot; &quot;);</span>
-<span class="fc" id="L49">    }</span>
+<span class="nc" id="L48">        this(&quot; &quot;);</span>
+<span class="nc" id="L49">    }</span>
 
     /**
      * Constructs a new instance of {@link TitlecaseLambda}, splitting on the specified
@@ -56,9 +56,9 @@ public class TitlecaseLambda implements Mustache.Lambda  {
      *
      * @param delimiter Provided to allow an override for the default space delimiter.
      */
-<span class="fc" id="L59">    public TitlecaseLambda(String delimiter) {</span>
-<span class="fc" id="L60">        this.delimiter = delimiter;</span>
-<span class="fc" id="L61">    }</span>
+<span class="nc" id="L59">    public TitlecaseLambda(String delimiter) {</span>
+<span class="nc" id="L60">        this.delimiter = delimiter;</span>
+<span class="nc" id="L61">    }</span>
 
     private String titleCase(final String input) {
 <span class="nc bnc" id="L64" title="All 4 branches missed.">        if(input == null || &quot;&quot;.equals(input)){</span>

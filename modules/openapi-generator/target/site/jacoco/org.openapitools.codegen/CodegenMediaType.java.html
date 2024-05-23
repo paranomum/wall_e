@@ -10,23 +10,23 @@ import java.util.Objects;
 public class CodegenMediaType {
     private CodegenProperty schema;
     private LinkedHashMap&lt;String, CodegenEncoding&gt; encoding;
-<span class="fc" id="L13">    private HashMap&lt;String, SchemaTestCase&gt; testCases = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L14">    private Map&lt;String, Example&gt; examples = null;</span>
-<span class="fc" id="L15">    private Object example = null;</span>
-<span class="fc" id="L16">    public Map&lt;String, Object&gt; vendorExtensions = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L13">    private HashMap&lt;String, SchemaTestCase&gt; testCases = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L14">    private Map&lt;String, Example&gt; examples = null;</span>
+<span class="nc" id="L15">    private Object example = null;</span>
+<span class="nc" id="L16">    public Map&lt;String, Object&gt; vendorExtensions = new HashMap&lt;&gt;();</span>
 
-<span class="fc" id="L18">    public CodegenMediaType(CodegenProperty schema, LinkedHashMap&lt;String, CodegenEncoding&gt; encoding, HashMap&lt;String, SchemaTestCase&gt; testCases) {</span>
-<span class="fc" id="L19">        this.schema = schema;</span>
-<span class="fc" id="L20">        this.encoding = encoding;</span>
-<span class="pc bpc" id="L21" title="1 of 2 branches missed.">        if (testCases != null) {</span>
+<span class="nc" id="L18">    public CodegenMediaType(CodegenProperty schema, LinkedHashMap&lt;String, CodegenEncoding&gt; encoding, HashMap&lt;String, SchemaTestCase&gt; testCases) {</span>
+<span class="nc" id="L19">        this.schema = schema;</span>
+<span class="nc" id="L20">        this.encoding = encoding;</span>
+<span class="nc bnc" id="L21" title="All 2 branches missed.">        if (testCases != null) {</span>
 <span class="nc" id="L22">            this.testCases = testCases;</span>
         }
-<span class="fc" id="L24">    }</span>
+<span class="nc" id="L24">    }</span>
 
     public CodegenMediaType(CodegenProperty schema, LinkedHashMap&lt;String, CodegenEncoding&gt; encoding, HashMap&lt;String, SchemaTestCase&gt; testCases, Map&lt;String, Example&gt; examples) {
-<span class="fc" id="L27">        this(schema, encoding, testCases);</span>
-<span class="fc" id="L28">        this.examples = examples;</span>
-<span class="fc" id="L29">    }</span>
+<span class="nc" id="L27">        this(schema, encoding, testCases);</span>
+<span class="nc" id="L28">        this.examples = examples;</span>
+<span class="nc" id="L29">    }</span>
 
     public CodegenMediaType(CodegenProperty schema, LinkedHashMap&lt;String, CodegenEncoding&gt; encoding, HashMap&lt;String, SchemaTestCase&gt; testCases, Object example) {
 <span class="nc" id="L32">        this(schema, encoding, testCases);</span>
@@ -44,7 +44,7 @@ public class CodegenMediaType {
 <span class="nc" id="L44">    public HashMap&lt;String, SchemaTestCase&gt; getTestCases() { return testCases; }</span>
 
     public Map&lt;String, Example&gt; getExamples() {
-<span class="fc" id="L47">        return examples;</span>
+<span class="nc" id="L47">        return examples;</span>
     }
 
     public Object getExample() {

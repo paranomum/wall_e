@@ -28,92 +28,92 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 public class XmlExampleGenerator {
-<span class="fc" id="L31">    protected final Logger LOGGER = LoggerFactory.getLogger(XmlExampleGenerator.class);</span>
-<span class="fc" id="L32">    public static String NEWLINE = &quot;\n&quot;;</span>
-<span class="fc" id="L33">    public static String TAG_START = &quot;&lt;&quot;;</span>
-<span class="fc" id="L34">    public static String CLOSE_TAG = &quot;&gt;&quot;;</span>
-<span class="fc" id="L35">    public static String TAG_END = &quot;&lt;/&quot;;</span>
-<span class="fc" id="L36">    private static String EMPTY = &quot;&quot;;</span>
+<span class="nc" id="L31">    protected final Logger LOGGER = LoggerFactory.getLogger(XmlExampleGenerator.class);</span>
+<span class="nc" id="L32">    public static String NEWLINE = &quot;\n&quot;;</span>
+<span class="nc" id="L33">    public static String TAG_START = &quot;&lt;&quot;;</span>
+<span class="nc" id="L34">    public static String CLOSE_TAG = &quot;&gt;&quot;;</span>
+<span class="nc" id="L35">    public static String TAG_END = &quot;&lt;/&quot;;</span>
+<span class="nc" id="L36">    private static String EMPTY = &quot;&quot;;</span>
     protected Map&lt;String, Schema&gt; examples;
 
-<span class="fc" id="L39">    public XmlExampleGenerator(Map&lt;String, Schema&gt; examples) {</span>
-<span class="fc" id="L40">        this.examples = examples;</span>
-<span class="pc bpc" id="L41" title="1 of 2 branches missed.">        if (examples == null) {</span>
+<span class="nc" id="L39">    public XmlExampleGenerator(Map&lt;String, Schema&gt; examples) {</span>
+<span class="nc" id="L40">        this.examples = examples;</span>
+<span class="nc bnc" id="L41" title="All 2 branches missed.">        if (examples == null) {</span>
 <span class="nc" id="L42">            this.examples = new HashMap&lt;String, Schema&gt;();</span>
         }
-<span class="fc" id="L44">    }</span>
+<span class="nc" id="L44">    }</span>
 
     public String toXml(Schema schema) {
 <span class="nc" id="L47">        return toXml(null, schema, 0, Collections.emptySet());</span>
     }
 
     protected String toXml(Schema schema, int indent, Collection&lt;String&gt; path) {
-<span class="pc bpc" id="L51" title="1 of 2 branches missed.">        if (schema == null) return &quot;&quot;;</span>
-<span class="pc bpc" id="L52" title="1 of 2 branches missed.">        if (StringUtils.isNotEmpty(schema.get$ref())) {</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">        if (schema == null) return &quot;&quot;;</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">        if (StringUtils.isNotEmpty(schema.get$ref())) {</span>
 <span class="nc" id="L53">            Schema actualSchema = examples.get(schema.get$ref());</span>
 <span class="nc bnc" id="L54" title="All 2 branches missed.">            if (actualSchema != null) {</span>
 <span class="nc" id="L55">                return modelImplToXml(actualSchema, indent, path);</span>
             }
         }
-<span class="fc" id="L58">        return modelImplToXml(schema, indent, path);</span>
+<span class="nc" id="L58">        return modelImplToXml(schema, indent, path);</span>
     }
 
     protected String modelImplToXml(Schema schema, int indent, Collection&lt;String&gt; path) {
-<span class="fc" id="L62">        final String modelName = schema.getName();</span>
-<span class="pc bpc" id="L63" title="1 of 2 branches missed.">        if (path.contains(modelName)) {</span>
+<span class="nc" id="L62">        final String modelName = schema.getName();</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">        if (path.contains(modelName)) {</span>
 <span class="nc" id="L64">            return EMPTY;</span>
         }
-<span class="fc" id="L66">        final Set&lt;String&gt; selfPath = new HashSet&lt;String&gt;(path);</span>
-<span class="fc" id="L67">        selfPath.add(modelName);</span>
+<span class="nc" id="L66">        final Set&lt;String&gt; selfPath = new HashSet&lt;String&gt;(path);</span>
+<span class="nc" id="L67">        selfPath.add(modelName);</span>
 
-<span class="fc" id="L69">        StringBuilder sb = new StringBuilder();</span>
+<span class="nc" id="L69">        StringBuilder sb = new StringBuilder();</span>
         // attributes
-<span class="fc" id="L71">        Map&lt;String, Schema&gt; attributes = new LinkedHashMap&lt;String, Schema&gt;();</span>
-<span class="fc" id="L72">        Map&lt;String, Schema&gt; elements = new LinkedHashMap&lt;String, Schema&gt;();</span>
+<span class="nc" id="L71">        Map&lt;String, Schema&gt; attributes = new LinkedHashMap&lt;String, Schema&gt;();</span>
+<span class="nc" id="L72">        Map&lt;String, Schema&gt; elements = new LinkedHashMap&lt;String, Schema&gt;();</span>
 
-<span class="fc" id="L74">        String name = modelName;</span>
-<span class="fc" id="L75">        XML xml = schema.getXml();</span>
-<span class="pc bpc" id="L76" title="1 of 2 branches missed.">        if (xml != null) {</span>
+<span class="nc" id="L74">        String name = modelName;</span>
+<span class="nc" id="L75">        XML xml = schema.getXml();</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        if (xml != null) {</span>
 <span class="nc bnc" id="L77" title="All 2 branches missed.">            if (xml.getName() != null) {</span>
 <span class="nc" id="L78">                name = xml.getName();</span>
             }
         }
         // TODO: map objects will not enter this block
-<span class="fc" id="L82">        Map&lt;String, Schema&gt; properties = schema.getProperties();</span>
-<span class="pc bpc" id="L83" title="2 of 4 branches missed.">        if (properties != null &amp;&amp; !properties.isEmpty()) {</span>
-<span class="fc bfc" id="L84" title="All 2 branches covered.">            for (Map.Entry&lt;String, Schema&gt; propertiesEntry : properties.entrySet()) {</span>
-<span class="fc" id="L85">                String pName = propertiesEntry.getKey();</span>
-<span class="fc" id="L86">                Schema property = propertiesEntry.getValue();</span>
-<span class="pc bpc" id="L87" title="6 of 8 branches missed.">                if (property != null &amp;&amp; property.getXml() != null &amp;&amp; property.getXml().getAttribute() != null &amp;&amp; property.getXml().getAttribute()) {</span>
+<span class="nc" id="L82">        Map&lt;String, Schema&gt; properties = schema.getProperties();</span>
+<span class="nc bnc" id="L83" title="All 4 branches missed.">        if (properties != null &amp;&amp; !properties.isEmpty()) {</span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">            for (Map.Entry&lt;String, Schema&gt; propertiesEntry : properties.entrySet()) {</span>
+<span class="nc" id="L85">                String pName = propertiesEntry.getKey();</span>
+<span class="nc" id="L86">                Schema property = propertiesEntry.getValue();</span>
+<span class="nc bnc" id="L87" title="All 8 branches missed.">                if (property != null &amp;&amp; property.getXml() != null &amp;&amp; property.getXml().getAttribute() != null &amp;&amp; property.getXml().getAttribute()) {</span>
 <span class="nc" id="L88">                    attributes.put(pName, property);</span>
                 } else {
-<span class="fc" id="L90">                    elements.put(pName, property);</span>
+<span class="nc" id="L90">                    elements.put(pName, property);</span>
                 }
-<span class="fc" id="L92">            }</span>
+<span class="nc" id="L92">            }</span>
         }
 
-<span class="fc" id="L95">        sb.append(indent(indent)).append(TAG_START);</span>
-<span class="fc" id="L96">        sb.append(name);</span>
-<span class="pc bpc" id="L97" title="1 of 2 branches missed.">        for (Map.Entry&lt;String, Schema&gt; attributesEntry : attributes.entrySet()) {</span>
+<span class="nc" id="L95">        sb.append(indent(indent)).append(TAG_START);</span>
+<span class="nc" id="L96">        sb.append(name);</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        for (Map.Entry&lt;String, Schema&gt; attributesEntry : attributes.entrySet()) {</span>
 <span class="nc" id="L98">            String pName = attributesEntry.getKey();</span>
 <span class="nc" id="L99">            Schema s = attributesEntry.getValue();</span>
 <span class="nc" id="L100">            sb.append(&quot; &quot;).append(pName).append(&quot;=&quot;).append(quote(toXml(null, s, 0, selfPath)));</span>
 <span class="nc" id="L101">        }</span>
-<span class="fc" id="L102">        sb.append(CLOSE_TAG);</span>
-<span class="fc" id="L103">        sb.append(NEWLINE);</span>
-<span class="fc bfc" id="L104" title="All 2 branches covered.">        for (Map.Entry&lt;String, Schema&gt; elementsEntry : elements.entrySet()) {</span>
-<span class="fc" id="L105">            String pName = elementsEntry.getKey();</span>
-<span class="fc" id="L106">            Schema s = elementsEntry.getValue();</span>
-<span class="fc" id="L107">            final String asXml = toXml(pName, s, indent + 1, selfPath);</span>
-<span class="pc bpc" id="L108" title="1 of 2 branches missed.">            if (StringUtils.isEmpty(asXml)) {</span>
+<span class="nc" id="L102">        sb.append(CLOSE_TAG);</span>
+<span class="nc" id="L103">        sb.append(NEWLINE);</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">        for (Map.Entry&lt;String, Schema&gt; elementsEntry : elements.entrySet()) {</span>
+<span class="nc" id="L105">            String pName = elementsEntry.getKey();</span>
+<span class="nc" id="L106">            Schema s = elementsEntry.getValue();</span>
+<span class="nc" id="L107">            final String asXml = toXml(pName, s, indent + 1, selfPath);</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">            if (StringUtils.isEmpty(asXml)) {</span>
 <span class="nc" id="L109">                continue;</span>
             }
-<span class="fc" id="L111">            sb.append(asXml);</span>
-<span class="fc" id="L112">            sb.append(NEWLINE);</span>
-<span class="fc" id="L113">        }</span>
-<span class="fc" id="L114">        sb.append(indent(indent)).append(TAG_END).append(name).append(CLOSE_TAG);</span>
+<span class="nc" id="L111">            sb.append(asXml);</span>
+<span class="nc" id="L112">            sb.append(NEWLINE);</span>
+<span class="nc" id="L113">        }</span>
+<span class="nc" id="L114">        sb.append(indent(indent)).append(TAG_END).append(name).append(CLOSE_TAG);</span>
 
-<span class="fc" id="L116">        return sb.toString();</span>
+<span class="nc" id="L116">        return sb.toString();</span>
     }
 
     @SuppressWarnings(&quot;static-method&quot;)
@@ -122,12 +122,12 @@ public class XmlExampleGenerator {
     }
 
     protected String toXml(String name, Schema schema, int indent, Collection&lt;String&gt; path) {
-<span class="pc bpc" id="L125" title="1 of 2 branches missed.">        if (schema == null) {</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">        if (schema == null) {</span>
 <span class="nc" id="L126">            return &quot;&quot;;</span>
         }
-<span class="fc" id="L128">        StringBuilder sb = new StringBuilder();</span>
+<span class="nc" id="L128">        StringBuilder sb = new StringBuilder();</span>
 
-<span class="pc bpc" id="L130" title="1 of 2 branches missed.">        if (ModelUtils.isArraySchema(schema)) {</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">        if (ModelUtils.isArraySchema(schema)) {</span>
 <span class="nc" id="L131">            Schema inner = ModelUtils.getSchemaItems(schema);</span>
 <span class="nc" id="L132">            boolean wrapped = false;</span>
 <span class="nc bnc" id="L133" title="All 6 branches missed.">            if (schema.getXml() != null &amp;&amp; schema.getXml().getWrapped() != null &amp;&amp; schema.getXml().getWrapped()) {</span>
@@ -152,23 +152,23 @@ public class XmlExampleGenerator {
 <span class="nc" id="L152">            } else {</span>
 <span class="nc" id="L153">                sb.append(toXml(name, inner, indent, path));</span>
             }
-<span class="pc bpc" id="L155" title="1 of 2 branches missed.">        } else if (StringUtils.isNotEmpty(schema.get$ref())) {</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">        } else if (StringUtils.isNotEmpty(schema.get$ref())) {</span>
 <span class="nc" id="L156">            Schema actualSchema = examples.get(schema.get$ref());</span>
 <span class="nc bnc" id="L157" title="All 2 branches missed.">            if (actualSchema == null) {</span>
 <span class="nc" id="L158">                actualSchema = examples.get(ModelUtils.getSimpleRef(schema.get$ref()));</span>
             }
 <span class="nc" id="L160">            sb.append(toXml(actualSchema, indent, path));</span>
 <span class="nc" id="L161">        } else {</span>
-<span class="pc bpc" id="L162" title="1 of 2 branches missed.">            if (name != null) {</span>
-<span class="fc" id="L163">                sb.append(indent(indent));</span>
-<span class="fc" id="L164">                sb.append(openTag(name));</span>
+<span class="nc bnc" id="L162" title="All 2 branches missed.">            if (name != null) {</span>
+<span class="nc" id="L163">                sb.append(indent(indent));</span>
+<span class="nc" id="L164">                sb.append(openTag(name));</span>
             }
-<span class="fc" id="L166">            sb.append(getExample(schema));</span>
-<span class="pc bpc" id="L167" title="1 of 2 branches missed.">            if (name != null) {</span>
-<span class="fc" id="L168">                sb.append(closeTag(name));</span>
+<span class="nc" id="L166">            sb.append(getExample(schema));</span>
+<span class="nc bnc" id="L167" title="All 2 branches missed.">            if (name != null) {</span>
+<span class="nc" id="L168">                sb.append(closeTag(name));</span>
             }
         }
-<span class="fc" id="L171">        return sb.toString();</span>
+<span class="nc" id="L171">        return sb.toString();</span>
     }
 
     /**
@@ -180,34 +180,34 @@ public class XmlExampleGenerator {
      * @return Example String
      */
     protected String getExample(Schema schema) {
-<span class="fc bfc" id="L183" title="All 2 branches covered.">        if (schema.getExample() != null) {</span>
-<span class="fc" id="L184">            return schema.getExample().toString();</span>
-<span class="pc bpc" id="L185" title="1 of 2 branches missed.">        } else if (ModelUtils.isDateTimeSchema(schema)) {</span>
+<span class="nc bnc" id="L183" title="All 2 branches missed.">        if (schema.getExample() != null) {</span>
+<span class="nc" id="L184">            return schema.getExample().toString();</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">        } else if (ModelUtils.isDateTimeSchema(schema)) {</span>
 <span class="nc" id="L186">            return &quot;2000-01-23T04:56:07.000Z&quot;;</span>
-<span class="fc bfc" id="L187" title="All 2 branches covered.">        } else if (ModelUtils.isDateSchema(schema)) {</span>
-<span class="fc" id="L188">            return &quot;2000-01-23&quot;;</span>
-<span class="fc bfc" id="L189" title="All 2 branches covered.">        } else if (ModelUtils.isBooleanSchema(schema)) {</span>
-<span class="fc" id="L190">            return &quot;true&quot;;</span>
-<span class="pc bpc" id="L191" title="1 of 2 branches missed.">        } else if (ModelUtils.isNumberSchema(schema)) {</span>
+<span class="nc bnc" id="L187" title="All 2 branches missed.">        } else if (ModelUtils.isDateSchema(schema)) {</span>
+<span class="nc" id="L188">            return &quot;2000-01-23&quot;;</span>
+<span class="nc bnc" id="L189" title="All 2 branches missed.">        } else if (ModelUtils.isBooleanSchema(schema)) {</span>
+<span class="nc" id="L190">            return &quot;true&quot;;</span>
+<span class="nc bnc" id="L191" title="All 2 branches missed.">        } else if (ModelUtils.isNumberSchema(schema)) {</span>
 <span class="nc bnc" id="L192" title="All 2 branches missed.">            if (ModelUtils.isFloatSchema(schema)) { // float</span>
 <span class="nc" id="L193">                return &quot;1.3579&quot;;</span>
             } else { // double
 <span class="nc" id="L195">                return &quot;3.149&quot;;</span>
             }
-<span class="pc bpc" id="L197" title="1 of 2 branches missed.">        } else if (ModelUtils.isPasswordSchema(schema)) {</span>
+<span class="nc bnc" id="L197" title="All 2 branches missed.">        } else if (ModelUtils.isPasswordSchema(schema)) {</span>
 <span class="nc" id="L198">            return &quot;********&quot;;</span>
-<span class="pc bpc" id="L199" title="1 of 2 branches missed.">        } else if (ModelUtils.isUUIDSchema(schema)) {</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">        } else if (ModelUtils.isUUIDSchema(schema)) {</span>
 <span class="nc" id="L200">            return &quot;046b6c7f-0b8a-43b9-b35d-6489e6daee91&quot;;</span>
-<span class="pc bpc" id="L201" title="1 of 2 branches missed.">        } else if (ModelUtils.isURISchema(schema)) {</span>
+<span class="nc bnc" id="L201" title="All 2 branches missed.">        } else if (ModelUtils.isURISchema(schema)) {</span>
 <span class="nc" id="L202">            return &quot;https://openapi-generator.tech&quot;;</span>
             // do these last in case the specific types above are derived from these classes
-<span class="fc bfc" id="L204" title="All 2 branches covered.">        } else if (ModelUtils.isStringSchema(schema)) {</span>
-<span class="fc" id="L205">            return &quot;aeiou&quot;;</span>
-<span class="pc bpc" id="L206" title="1 of 2 branches missed.">        } else if (ModelUtils.isIntegerSchema(schema)) {</span>
-<span class="pc bpc" id="L207" title="1 of 2 branches missed.">            if (ModelUtils.isLongSchema(schema)) { // long</span>
+<span class="nc bnc" id="L204" title="All 2 branches missed.">        } else if (ModelUtils.isStringSchema(schema)) {</span>
+<span class="nc" id="L205">            return &quot;aeiou&quot;;</span>
+<span class="nc bnc" id="L206" title="All 2 branches missed.">        } else if (ModelUtils.isIntegerSchema(schema)) {</span>
+<span class="nc bnc" id="L207" title="All 2 branches missed.">            if (ModelUtils.isLongSchema(schema)) { // long</span>
 <span class="nc" id="L208">                return &quot;123456789&quot;;</span>
             } else { //integer
-<span class="fc" id="L210">                return &quot;123&quot;;</span>
+<span class="nc" id="L210">                return &quot;123&quot;;</span>
             }
         } else {
 <span class="nc" id="L213">            LOGGER.debug(&quot;default example value not implemented for {}. Default to UNDEFINED_EXAMPLE_VALUE&quot;, schema);</span>
@@ -217,21 +217,21 @@ public class XmlExampleGenerator {
 
     @SuppressWarnings(&quot;static-method&quot;)
     protected String openTag(String name) {
-<span class="fc" id="L220">        return &quot;&lt;&quot; + name + &quot;&gt;&quot;;</span>
+<span class="nc" id="L220">        return &quot;&lt;&quot; + name + &quot;&gt;&quot;;</span>
     }
 
     @SuppressWarnings(&quot;static-method&quot;)
     protected String closeTag(String name) {
-<span class="fc" id="L225">        return &quot;&lt;/&quot; + name + &quot;&gt;&quot;;</span>
+<span class="nc" id="L225">        return &quot;&lt;/&quot; + name + &quot;&gt;&quot;;</span>
     }
 
     @SuppressWarnings(&quot;static-method&quot;)
     protected String indent(int indent) {
-<span class="fc" id="L230">        StringBuffer sb = new StringBuffer();</span>
-<span class="fc bfc" id="L231" title="All 2 branches covered.">        for (int i = 0; i &lt; indent; i++) {</span>
-<span class="fc" id="L232">            sb.append(&quot;  &quot;);</span>
+<span class="nc" id="L230">        StringBuffer sb = new StringBuffer();</span>
+<span class="nc bnc" id="L231" title="All 2 branches missed.">        for (int i = 0; i &lt; indent; i++) {</span>
+<span class="nc" id="L232">            sb.append(&quot;  &quot;);</span>
         }
-<span class="fc" id="L234">        return sb.toString();</span>
+<span class="nc" id="L234">        return sb.toString();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
