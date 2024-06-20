@@ -277,12 +277,12 @@ public class GenerateTest {
         verify(configurator).addLanguageSpecificPrimitive("world");
     }
 
-//    @Test
-//    public void testLibrary() {
-//        final String value = "feign";
-//        setupAndRunGenericTest("--library", value);
-//        verify(configurator).setLibrary(value);
-//    }
+    @Test
+    public void testLibrary() {
+        final String value = "webclient";
+        setupAndRunGenericTest("--library", value);
+        verify(configurator).setLibrary(value);
+    }
 
     @Test
     public void testModelPackage() {
