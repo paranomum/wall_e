@@ -217,7 +217,7 @@ public class TemplateManager implements TemplatingExecutor, TemplateProcessor {
             try {
                 tempFile = writeToFileRaw(tempFilename, contents);
                 if (!filesEqual(tempFile, outputFile)) {
-                    LOGGER.info("writing file {}", filename);
+                    LOGGER.info("azazazaza writing file {}", filename);
                     Files.move(tempFile.toPath(), outputFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                     tempFile = null;
                 } else {
@@ -233,7 +233,7 @@ public class TemplateManager implements TemplatingExecutor, TemplateProcessor {
                 }
             }
         } else {
-            LOGGER.info("writing file {}", filename);
+            LOGGER.info("kekekekeke writing file {}", filename);
             outputFile = writeToFileRaw(filename, contents);
         }
 
