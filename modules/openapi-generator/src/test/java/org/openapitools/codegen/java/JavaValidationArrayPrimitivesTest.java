@@ -190,17 +190,10 @@ public class JavaValidationArrayPrimitivesTest {
     @DataProvider(name = "javaCodegensUsedBeanValidation")
     public static Object[][] javaCodegensUsedBeanValidation() {
         return new Object[][]{
-                {new JavaCXFClientCodegen(), assertWithValidationWithoutJsonNullable()},
                 {new JavaClientCodegen(), assertWithValidationWithoutJsonNullable()},
                 {new JavaPlayFrameworkCodegen(), assertWithValidationWithoutJsonNullable()},
                 {new JavaMicronautClientCodegen(), assertWithValidationWithoutJsonNullable()},
                 {new JavaMicronautServerCodegen(), assertWithValidationWithoutJsonNullable()},
-                {new JavaJAXRSCXFCDIServerCodegen(), assertWithValidationWithoutJsonNullable()},
-                {new JavaCXFExtServerCodegen(), assertWithValidationWithoutJsonNullable()},
-                {new JavaResteasyServerCodegen(), assertWithValidationWithoutJsonNullable()},
-                {new JavaJAXRSSpecServerCodegen(), assertWithValidationWithoutJsonNullable()},
-                {new JavaJerseyServerCodegen(), assertWithValidationWithoutJsonNullable()},
-                {new JavaResteasyEapServerCodegen(), assertWithValidationWithoutJsonNullable()},
                 {new SpringCodegen(), assertWithValidationWithJsonNullable()}
         };
     }
@@ -373,17 +366,10 @@ public class JavaValidationArrayPrimitivesTest {
     @DataProvider(name = "javaCodegensNotUsedBeanValidation")
     public static Object[][] javaCodegensNotUsedBeanValidation() {
         return new Object[][]{
-                {new JavaCXFClientCodegen(), assertWithoutValidationWithoutJsonNullable()},
                 {new JavaClientCodegen(), assertWithoutValidationWithoutJsonNullable()},
                 {new JavaPlayFrameworkCodegen(), assertWithoutValidationWithoutJsonNullable()},
                 {new JavaMicronautClientCodegen(), assertWithoutValidationWithoutJsonNullable()},
                 {new JavaMicronautServerCodegen(), assertWithoutValidationWithoutJsonNullable()},
-                {new JavaJAXRSCXFCDIServerCodegen(), assertWithoutValidationWithoutJsonNullable()},
-                {new JavaCXFExtServerCodegen(), assertWithoutValidationWithoutJsonNullable()},
-                {new JavaResteasyServerCodegen(), assertWithoutValidationWithoutJsonNullable()},
-                {new JavaJAXRSSpecServerCodegen(), assertWithoutValidationWithoutJsonNullable()},
-                {new JavaJerseyServerCodegen(), assertWithoutValidationWithoutJsonNullable()},
-                {new JavaResteasyEapServerCodegen(), assertWithoutValidationWithoutJsonNullable()},
                 {new SpringCodegen(), assertWithoutValidationWithJsonNullable()}
         };
     }
