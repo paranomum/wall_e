@@ -78,17 +78,23 @@ public interface CodegenConfig {
 
     String modelFileFolder();
 
+    String enumFileFolder();
+
     String modelTestFileFolder();
 
     String modelDocFileFolder();
 
     String modelPackage();
 
+    String enumPackage();
+
     String toApiName(String name);
 
     String toApiVarName(String name);
 
     String toModelName(String name);
+
+//    String toEnumName(String name);
 
     String toParamName(String name);
 
@@ -166,6 +172,8 @@ public interface CodegenConfig {
 
     Map<String, String> modelTemplateFiles();
 
+    Map<String, String> enumTemplateFiles();
+
     Map<String, String> apiTestTemplateFiles();
 
     Map<String, String> modelTestTemplateFiles();
@@ -194,6 +202,8 @@ public interface CodegenConfig {
 
     String toModelFilename(String name);
 
+    String toEnumFilename(String name);
+
     String toApiTestFilename(String name);
 
     String toModelTestFilename(String name);
@@ -202,15 +212,23 @@ public interface CodegenConfig {
 
     String toModelDocFilename(String name);
 
+//    String toEnumDocFilename(String name);
+
     String toModelImport(String name);
 
+//    String toEnumImport(String name);
+
     Map<String, String> toModelImportMap(String name);
+
+//    Map<String, String> toEnumImportMap(String name);
 
     String toApiImport(String name);
 
     void addOperationToGroup(String tag, String resourcePath, Operation operation, CodegenOperation co, Map<String, List<CodegenOperation>> operations);
 
     Map<String, ModelsMap> updateAllModels(Map<String, ModelsMap> objs);
+
+    Map<String, ModelsMap> getEnumModels(Map<String, ModelsMap> objs);
 
     void postProcess();
 
@@ -233,6 +251,10 @@ public interface CodegenConfig {
     String modelFilename(String templateName, String modelName);
 
     String modelFilename(String templateName, String modelName, String outputDir);
+
+    String enumFilename(String templateName, String modelName);
+
+    String enumFilename(String templateName, String modelName, String outputDir);
 
     String apiFilename(String templateName, String tag);
 

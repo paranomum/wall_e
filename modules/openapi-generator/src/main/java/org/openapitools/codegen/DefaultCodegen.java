@@ -80,6 +80,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.openapitools.codegen.CodegenConstants.UNSUPPORTED_V310_SPEC_MSG;
+import static org.openapitools.codegen.languages.JavaClientCodegen.WEBCLIENT;
 import static org.openapitools.codegen.utils.CamelizeOption.LOWERCASE_FIRST_LETTER;
 import static org.openapitools.codegen.utils.OnceLogger.once;
 import static org.openapitools.codegen.utils.StringUtils.*;
@@ -181,8 +182,9 @@ public class DefaultCodegen implements CodegenConfig {
     protected Map<String, String> operationIdNameMapping = new HashMap<>();
     // a map to store the rules in OpenAPI Normalizer
     protected Map<String, String> openapiNormalizer = new HashMap<>();
-    protected String modelPackage = "", apiPackage = "", fileSuffix;
+    protected String modelPackage = "", enumPackage = "" ,apiPackage = "", fileSuffix;
     protected String modelNamePrefix = "", modelNameSuffix = "";
+    protected String enumNamePrefix = "", enumNameSuffix = "";
     protected String apiNamePrefix = "", apiNameSuffix = "Api";
     protected String testPackage = "";
     protected String filesMetadataFilename = "FILES";
@@ -335,6 +337,10 @@ public class DefaultCodegen implements CodegenConfig {
             this.setModelPackage((String) additionalProperties.get(CodegenConstants.MODEL_PACKAGE));
         }
 
+        if (additionalProperties.containsKey(CodegenConstants.ENUM_PACKAGE)) {
+            this.setEnumPackage((String) additionalProperties.get(CodegenConstants.ENUM_PACKAGE));
+        }
+
         if (additionalProperties.containsKey(CodegenConstants.API_PACKAGE)) {
             this.setApiPackage((String) additionalProperties.get(CodegenConstants.API_PACKAGE));
         }
@@ -384,6 +390,14 @@ public class DefaultCodegen implements CodegenConfig {
 
         if (additionalProperties.containsKey(CodegenConstants.MODEL_NAME_SUFFIX)) {
             this.setModelNameSuffix((String) additionalProperties.get(CodegenConstants.MODEL_NAME_SUFFIX));
+        }
+
+        if (additionalProperties.containsKey(CodegenConstants.ENUM_NAME_PREFIX)) {
+            this.setEnumNamePrefix((String) additionalProperties.get(CodegenConstants.ENUM_NAME_PREFIX));
+        }
+
+        if (additionalProperties.containsKey(CodegenConstants.ENUM_NAME_SUFFIX)) {
+            this.setEnumNameSuffix((String) additionalProperties.get(CodegenConstants.ENUM_NAME_SUFFIX));
         }
 
         if (additionalProperties.containsKey(CodegenConstants.REMOVE_OPERATION_ID_PREFIX)) {
@@ -494,6 +508,8 @@ public class DefaultCodegen implements CodegenConfig {
     @Override
     @SuppressWarnings("static-method")
     public Map<String, ModelsMap> postProcessAllModels(Map<String, ModelsMap> objs) {
+        Map<String, Map<String, Object>> enumNameToEnumToValue = new HashMap<>();
+
         for (Map.Entry<String, ModelsMap> entry : objs.entrySet()) {
             CodegenModel model = ModelUtils.getModelByName(entry.getKey(), objs);
 
@@ -698,6 +714,11 @@ public class DefaultCodegen implements CodegenConfig {
         }
         setCircularReferences(allModels);
 
+        return objs;
+    }
+
+    @Override
+    public Map<String, ModelsMap> getEnumModels(Map<String, ModelsMap> objs) {
         return objs;
     }
 
@@ -1303,6 +1324,11 @@ public class DefaultCodegen implements CodegenConfig {
     }
 
     @Override
+    public String enumPackage() {
+        return enumPackage;
+    }
+
+    @Override
     public String apiPackage() {
         return apiPackage;
     }
@@ -1362,6 +1388,11 @@ public class DefaultCodegen implements CodegenConfig {
     }
 
     @Override
+    public Map<String, String> enumTemplateFiles() {
+        return enumTemplateFiles;
+    }
+
+    @Override
     public String apiFileFolder() {
         return outputFolder + File.separator + apiPackage().replace('.', File.separatorChar);
     }
@@ -1369,6 +1400,11 @@ public class DefaultCodegen implements CodegenConfig {
     @Override
     public String modelFileFolder() {
         return outputFolder + File.separator + modelPackage().replace('.', File.separatorChar);
+    }
+
+    @Override
+    public String enumFileFolder() {
+        return outputFolder + File.separator + enumPackage().replace('.', File.separatorChar);
     }
 
     @Override
@@ -1467,6 +1503,10 @@ public class DefaultCodegen implements CodegenConfig {
         this.modelPackage = modelPackage;
     }
 
+    public void setEnumPackage(String enumPackage) {
+        this.enumPackage = enumPackage;
+    }
+
     public String getModelNamePrefix() {
         return modelNamePrefix;
     }
@@ -1481,6 +1521,22 @@ public class DefaultCodegen implements CodegenConfig {
 
     public void setModelNameSuffix(String modelNameSuffix) {
         this.modelNameSuffix = modelNameSuffix;
+    }
+
+    public String getEnumNamePrefix() {
+        return enumNamePrefix;
+    }
+
+    public void setEnumNamePrefix(String enumNamePrefix) {
+        this.enumNamePrefix = enumNamePrefix;
+    }
+
+    public String getEnumNameSuffix() {
+        return enumNameSuffix;
+    }
+
+    public void setEnumNameSuffix(String enumNameSuffix) {
+        this.enumNameSuffix = enumNameSuffix;
     }
 
     public String getApiNameSuffix() {
@@ -1638,6 +1694,17 @@ public class DefaultCodegen implements CodegenConfig {
     @Override
     public String toModelFilename(String name) {
         return camelize(name);
+    }
+
+    /**
+     * Return the capitalized file name of the model
+     *
+     * @param name the model name
+     * @return the file name of the model
+     */
+    @Override
+    public String toEnumFilename(String name) {
+        return name.contains("enum") || name.contains("Enum") ? camelize(name) : camelize(name) + "Enum";
     }
 
     /**
@@ -6204,10 +6271,25 @@ public class DefaultCodegen implements CodegenConfig {
         return modelFileFolder() + File.separator + toModelFilename(modelName) + suffix;
     }
 
+    //TODO check how to configure suffix
     @Override
     public String modelFilename(String templateName, String modelName, String outputDir) {
         String suffix = modelTemplateFiles().get(templateName);
         return outputDir + File.separator + toModelFilename(modelName) + suffix;
+    }
+
+    @Override
+    public String enumFilename(String templateName, String modelName) {
+//        String suffix = enumTemplateFiles().get(templateName);
+        String suffix = modelTemplateFiles().get(templateName);
+        return enumFileFolder() + File.separator + toEnumFilename(modelName) + suffix;
+    }
+
+    @Override
+    public String enumFilename(String templateName, String modelName, String outputDir) {
+//        String suffix = enumTemplateFiles().get(templateName);
+        String suffix = modelTemplateFiles().get(templateName);
+        return outputDir + File.separator + toEnumFilename(modelName) + suffix;
     }
 
     /**

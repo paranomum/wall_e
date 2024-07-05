@@ -88,6 +88,7 @@ public class CodegenResponse implements IJsonSchemaValidationProperties {
     private boolean hasValidation;
     private boolean additionalPropertiesIsAnyType;
     private boolean hasVars;
+    private boolean hasEnums;
     private boolean hasRequired;
     private boolean hasDiscriminatorWithNonEmptyMapping;
     private CodegenComposedSchemas composedSchemas;
@@ -889,4 +890,12 @@ public class CodegenResponse implements IJsonSchemaValidationProperties {
 
     @Override
     public void setIsEnum(boolean isEnum) {}
+
+    @Override
+    public boolean getHasEnums() {
+        return hasEnums;
+    }
+
+    @Override
+    public void setHasEnums(boolean hasEnums) {}
 }

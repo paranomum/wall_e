@@ -19,6 +19,7 @@ package org.openapitools.codegen.languages;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.github.fge.jsonschema.library.Library;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import com.samskivert.mustache.Mustache;
@@ -60,6 +61,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static org.openapitools.codegen.languages.JavaClientCodegen.WEBCLIENT;
 import static org.openapitools.codegen.utils.CamelizeOption.*;
 import static org.openapitools.codegen.utils.OnceLogger.once;
 import static org.openapitools.codegen.utils.StringUtils.*;
@@ -147,6 +149,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
     protected boolean generateConstructorWithAllArgs = false;
     private Map<String, String> schemaKeyToModelNameCache = new HashMap<>();
 
+    //TODO refactor cliOptions to add enums
     public AbstractJavaCodegen() {
         super();
 
@@ -177,7 +180,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
         modelTemplateFiles.put("model.mustache", ".java");
         apiTemplateFiles.put("api.mustache", ".java");
         apiTestTemplateFiles.put("api_test.mustache", ".java");
-        enumTemplateFiles.put("Java/enum.mustache", ".java");
+        enumTemplateFiles.put("modelEnum.mustache", ".java");
 //        modelDocTemplateFiles.put("model_doc.mustache", ".md");
 //        apiDocTemplateFiles.put("api_doc.mustache", ".md");
 
@@ -240,6 +243,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
         importMapping.put("LocalTime", "org.joda.time.*");
 
         cliOptions.add(new CliOption(CodegenConstants.MODEL_PACKAGE, CodegenConstants.MODEL_PACKAGE_DESC));
+        cliOptions.add(new CliOption(CodegenConstants.ENUM_PACKAGE, CodegenConstants.ENUM_PACKAGE_DESC));
         cliOptions.add(new CliOption(CodegenConstants.API_PACKAGE, CodegenConstants.API_PACKAGE_DESC));
         cliOptions.add(new CliOption(CodegenConstants.INVOKER_PACKAGE, CodegenConstants.INVOKER_PACKAGE_DESC).defaultValue(this.getInvokerPackage()));
         cliOptions.add(new CliOption(CodegenConstants.GROUP_ID, CodegenConstants.GROUP_ID_DESC).defaultValue(this.getGroupId()));
@@ -422,6 +426,10 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
 
         if (!additionalProperties.containsKey(CodegenConstants.MODEL_PACKAGE)) {
             additionalProperties.put(CodegenConstants.MODEL_PACKAGE, modelPackage);
+        }
+
+        if (!additionalProperties.containsKey(CodegenConstants.ENUM_PACKAGE)) {
+            additionalProperties.put(CodegenConstants.ENUM_PACKAGE, enumPackage);
         }
 
         if (!additionalProperties.containsKey(CodegenConstants.API_PACKAGE)) {
@@ -702,6 +710,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
      **/
     @Override
     public Map<String, ModelsMap> postProcessAllModels(Map<String, ModelsMap> objs) {
+        Map<String, CodegenEnum> enumParsed = combineEnums(objs);
         objs = super.postProcessAllModels(objs);
         objs = super.updateAllModels(objs);
 
@@ -736,6 +745,9 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
             the generation of all arg constructors
          ps: This code was specific to SpringCodeGen and now is available to all java generators.
         */
+
+        //TODO delete there all enums and place import or just place imports
+        // maybe i can just place imports and that's all cuz of the templates
         for (ModelsMap modelsAttrs : objs.values()) {
             for (ModelMap mo : modelsAttrs.getModels()) {
                 CodegenModel codegenModel = mo.getModel();
@@ -753,7 +765,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
                             final CodegenProperty parentVar = property.clone();
                             parentVar.isInherited = true;
                             LOGGER.info("adding parent variable {} to {}", property.name, codegenModel.name);
-                            codegenModel.parentVars.add(parentVar);
+                            boolean added = codegenModel.parentVars.add(parentVar);
                             Set<String> imports = parentVar.getImports(true, this.importBaseType, generatorMetadata.getFeatureSet()).stream().filter(Objects::nonNull).collect(Collectors.toSet());
                             for (String imp : imports) {
                                 // Avoid dupes
@@ -798,10 +810,16 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
             }
         }
 
+        //generate enums if library is webClient
+
         return objs;
     }
 
-    private List<CodegenModel> getParentModelList(CodegenModel codegenModel) {
+    Map<String, CodegenEnum> combineEnums(Map <String, ModelsMap> objs){
+        return null;
+    }
+
+    List<CodegenModel> getParentModelList(CodegenModel codegenModel) {
         CodegenModel parentCodegenModel = codegenModel.parentModel;
         List<CodegenModel> parentModelList = new ArrayList<>();
         while (parentCodegenModel != null) {
@@ -835,6 +853,11 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
         this.setModelPackage(sanitizePackageName(modelPackage));
         if (additionalProperties.containsKey(CodegenConstants.MODEL_PACKAGE)) {
             this.additionalProperties.put(CodegenConstants.MODEL_PACKAGE, modelPackage);
+        }
+
+        this.setEnumPackage(sanitizePackageName(enumPackage));
+        if (additionalProperties.containsKey(CodegenConstants.ENUM_PACKAGE)) {
+            this.additionalProperties.put(CodegenConstants.ENUM_PACKAGE, enumPackage);
         }
 
         this.setInvokerPackage(sanitizePackageName(invokerPackage));

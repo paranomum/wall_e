@@ -157,6 +157,7 @@ public class CodegenProperty implements Cloneable, IJsonSchemaValidationProperti
     public boolean isAnyType;
     public boolean isArray;
     public boolean isMap;
+    public boolean hasEnums;
     public boolean isEnum; // true if the enum is defined inline
     public boolean isInnerEnum; // Enums declared inline will be located inside the generic model, changing how the enum is referenced in some cases.
     public boolean isEnumRef; // true if it's a reference to an enum
@@ -324,9 +325,6 @@ public class CodegenProperty implements Cloneable, IJsonSchemaValidationProperti
         return dataType;
     }
 
-    /**
-     * @deprecated use {@link #setDataType()} instead.
-     */
     @Deprecated
     public void setDatatype(String datatype) {
         this.dataType = datatype;
@@ -1135,6 +1133,22 @@ public class CodegenProperty implements Cloneable, IJsonSchemaValidationProperti
     }
 
     @Override
+    public void setHasEnums(boolean hasEnums) {
+        this.hasEnums = hasEnums;
+    }
+
+    /**
+     * Return true if it's an enum (inline or ref)
+     *
+     * @return true if it's an enum (inline or ref)
+     */
+
+    @Override
+    public boolean getHasEnums() {
+        return hasEnums;
+    }
+
+    @Override
     public void setIsEnum(boolean isEnum) {
         this.isEnum = isEnum;
     }
@@ -1296,6 +1310,7 @@ public class CodegenProperty implements Cloneable, IJsonSchemaValidationProperti
                 isArray == that.isArray &&
                 isMap == that.isMap &&
                 isEnum == that.isEnum &&
+                hasEnums == that.hasEnums &&
                 isInnerEnum == that.isInnerEnum &&
                 isEnumRef == that.isEnumRef &&
                 isAnyType == that.isAnyType &&

@@ -17,11 +17,14 @@
 
 package org.openapitools.codegen.languages;
 
+import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.Schema;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.openapitools.codegen.*;
+import org.openapitools.codegen.config.GlobalSettings;
 import org.openapitools.codegen.languages.features.BeanValidationFeatures;
 import org.openapitools.codegen.languages.features.GzipFeatures;
 import org.openapitools.codegen.languages.features.PerformBeanValidationFeatures;
@@ -33,19 +36,23 @@ import org.openapitools.codegen.model.ModelsMap;
 import org.openapitools.codegen.model.OperationMap;
 import org.openapitools.codegen.model.OperationsMap;
 import org.openapitools.codegen.templating.mustache.CaseFormatLambda;
+import org.openapitools.codegen.utils.ModelUtils;
 import org.openapitools.codegen.utils.ProcessUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.CaseFormat.LOWER_CAMEL;
 import static com.google.common.base.CaseFormat.UPPER_UNDERSCORE;
 import static java.util.Collections.sort;
 import static org.openapitools.codegen.utils.CamelizeOption.LOWERCASE_FIRST_LETTER;
+import static org.openapitools.codegen.utils.OnceLogger.once;
 import static org.openapitools.codegen.utils.StringUtils.camelize;
 
 public class JavaClientCodegen extends AbstractJavaCodegen
@@ -185,7 +192,8 @@ public class JavaClientCodegen extends AbstractJavaCodegen
         invokerPackage = "org.openapitools.client";
         artifactId = "openapi-java-client";
         apiPackage = "org.openapitools.client.api";
-        modelPackage = "org.openapitools.client.model";
+        modelPackage = "org.openapitools.client.dto";
+        enumPackage = "org.openapitools.client.model";
         rootJavaEEPackage = MICROPROFILE_REST_CLIENT_DEFAULT_ROOT_PACKAGE;
 
         // cliOptions default redefinition need to be updated
@@ -193,6 +201,7 @@ public class JavaClientCodegen extends AbstractJavaCodegen
         updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());
         updateOption(CodegenConstants.API_PACKAGE, apiPackage);
         updateOption(CodegenConstants.MODEL_PACKAGE, modelPackage);
+        updateOption(CodegenConstants.ENUM_PACKAGE, enumPackage);
 
         modelTestTemplateFiles.put("model_test.mustache", ".java");
 
@@ -284,12 +293,7 @@ public class JavaClientCodegen extends AbstractJavaCodegen
 
     @Override
     public void processOpts() {
-//        if (WEBCLIENT.equals(getLibrary()) || NATIVE.equals(getLibrary()) || RESTCLIENT.equals(getLibrary())) {
-            dateLibrary = "java8";
-//        }
-//        else if (MICROPROFILE.equals(getLibrary())) {
-//            dateLibrary = "legacy";
-//        }
+        dateLibrary = "java8";
         super.processOpts();
 
         if (additionalProperties.containsKey(CodegenConstants.USE_ONEOF_DISCRIMINATOR_LOOKUP)) {
@@ -297,24 +301,6 @@ public class JavaClientCodegen extends AbstractJavaCodegen
         } else {
             additionalProperties.put(CodegenConstants.USE_ONEOF_DISCRIMINATOR_LOOKUP, useOneOfDiscriminatorLookup);
         }
-
-        // RxJava
-//        if (additionalProperties.containsKey(USE_RX_JAVA2) && additionalProperties.containsKey(USE_RX_JAVA3)) {
-//            LOGGER.warn("You specified all RxJava versions 2 and 3 but they are mutually exclusive. Defaulting to v3.");
-//            this.setUseRxJava3(Boolean.parseBoolean(additionalProperties.get(USE_RX_JAVA3).toString()));
-//        } else {
-//            if (additionalProperties.containsKey(USE_RX_JAVA2) && additionalProperties.containsKey(USE_RX_JAVA3)) {
-//                LOGGER.warn("You specified both RxJava versions 2 and 3 but they are mutually exclusive. Defaulting to v3.");
-//                this.setUseRxJava3(Boolean.parseBoolean(additionalProperties.get(USE_RX_JAVA3).toString()));
-//            } else {
-//                if (additionalProperties.containsKey(USE_RX_JAVA2)) {
-//                    this.setUseRxJava2(Boolean.parseBoolean(additionalProperties.get(USE_RX_JAVA2).toString()));
-//                }
-//                if (additionalProperties.containsKey(USE_RX_JAVA3)) {
-//                    this.setUseRxJava3(Boolean.parseBoolean(additionalProperties.get(USE_RX_JAVA3).toString()));
-//                }
-//            }
-//        }
 
         if (additionalProperties.containsKey(CodegenConstants.USE_SINGLE_REQUEST_PARAMETER)) {
             this.setUseSingleRequestParameter(convertPropertyToBoolean(CodegenConstants.USE_SINGLE_REQUEST_PARAMETER));
@@ -467,6 +453,7 @@ public class JavaClientCodegen extends AbstractJavaCodegen
         final String invokerFolder = (sourceFolder + '/' + invokerPackage).replace(".", "/");
         final String apiFolder = (sourceFolder + '/' + apiPackage).replace(".", "/");
         final String modelsFolder = (sourceFolder + File.separator + modelPackage().replace('.', File.separatorChar)).replace('/', File.separatorChar);
+        final String enumsFolder = (sourceFolder + File.separator + enumPackage().replace('.', File.separatorChar)).replace('/', File.separatorChar);
         authFolder = (sourceFolder + '/' + invokerPackage + ".auth").replace(".", "/");
 
         //Common files
@@ -711,9 +698,47 @@ public class JavaClientCodegen extends AbstractJavaCodegen
     @Override
     public ModelsMap postProcessModelsEnum(ModelsMap objs) {
         objs = super.postProcessModelsEnum(objs);
+
+        Map<String, Map<String, Object>> enumNameToEnumToValue = new HashMap<>();
+
+        //process enums if there any
+        for (ModelMap map : objs.getModels()) {
+            if (map.getModel().hasEnums) {
+                for (CodegenProperty property: map.getModel().getVars()) {
+                    if (property.isEnum) {
+                        Map<String, Object> enumToValue = new HashMap<>();
+                        if (enumNameToEnumToValue.containsKey(property.baseName)) {
+                            enumToValue.putAll(enumNameToEnumToValue.get(property.baseName));
+                        }
+                        if (!property.allowableValues.containsKey("enumVars")) {
+                            for (String _enum : property._enum) {
+                                enumToValue.putIfAbsent(_enum, "_");
+                            }
+                        } else {
+                            List<Map<String, Object>> enums = (List<Map<String, Object>>) property.allowableValues.get("enumVars");
+                            for (Map<String, Object> values : enums) {
+                                enumToValue.putIfAbsent(values.get("name").toString(), values.get("value"));
+                                if (enumToValue.containsKey(values.get("name").toString())) {
+                                    enumToValue.replace(values.get("name").toString(), values.get("value"));
+                                }
+                            }
+                        }
+                        enumNameToEnumToValue.putIfAbsent(property.baseName, enumToValue);
+                        enumNameToEnumToValue.replace(property.baseName, enumToValue);
+                    }
+                }
+            }
+        }
+
+//        add enums to  model!
+        if (!enumNameToEnumToValue.keySet().isEmpty())
+            objs.setEnumVars(enumNameToEnumToValue);
+
         //Needed import for Gson based libraries
+        //ADD IMPORTS HERE
+        List<Map<String, String>> imports = objs.getImports();
+
         if (additionalProperties.containsKey(SERIALIZATION_LIBRARY_GSON)) {
-            List<Map<String, String>> imports = objs.getImports();
             for (ModelMap mo : objs.getModels()) {
                 CodegenModel cm = mo.getModel();
                 // for enum model
@@ -732,6 +757,7 @@ public class JavaClientCodegen extends AbstractJavaCodegen
     @Override
     public ModelsMap postProcessModels(ModelsMap objs) {
         objs = super.postProcessModels(objs);
+
         List<ModelMap> models = objs.getModels();
 
         if (additionalProperties.containsKey(SERIALIZATION_LIBRARY_JACKSON)) {
@@ -779,6 +805,8 @@ public class JavaClientCodegen extends AbstractJavaCodegen
         }
 
         // add implements for serializable/parcelable to all models
+        // import enums here...
+        // after generation..
         for (ModelMap mo : models) {
             CodegenModel cm = mo.getModel();
 
@@ -789,6 +817,48 @@ public class JavaClientCodegen extends AbstractJavaCodegen
         }
 
         return objs;
+    }
+
+    @Override
+    Map<String, CodegenEnum> combineEnums(Map <String, ModelsMap> objs){
+        Map <String, CodegenEnum> enums = new HashMap<>();
+        Map<String, Map<String, Object>> enumNameToEnumToValue = new HashMap<>();
+
+        for (String key : objs.keySet()) {
+            if (objs.get(key).getEnumVars() != null) {
+
+                Map<String, Map<String, Object>> enumVars = objs.get(key).getEnumVars();
+
+                for (String enumName : enumVars.keySet()) {
+                    if (enumNameToEnumToValue.containsKey(enumName)) {
+                        Map<String, Object> enumToValue = new HashMap<>(enumNameToEnumToValue.get(enumName));
+                        for(String enumKey : enumNameToEnumToValue.get(enumName).keySet()) {
+                            enumToValue.putIfAbsent(enumKey, enumNameToEnumToValue.get(enumName).get(enumKey));
+                        }
+                        enumNameToEnumToValue.replace(enumName, enumToValue);
+                    }
+                    enumNameToEnumToValue.putIfAbsent(enumName, enumVars.get(enumName));
+                }
+            }
+        }
+
+        //to dto to generate + imports
+        // DTO:
+        //      classname - enumNameToEnumToValue.key
+        //      additionalEnumTypeAnnotations
+        //      datatypeWithEnum
+        //      allowableValues -> enumVars -> enumToValue (name, isString, value)
+        //      enumDescription
+        //      name - enumToValue
+        //      value - enumToValue
+        //      dataType - String
+        //      jackson
+        //      isString
+        //      useEnumCaseInsensitive
+        //      isNullable
+        //      enumUnknownDefaultCase
+
+        return enums;
     }
 
     @Override
@@ -804,31 +874,12 @@ public class JavaClientCodegen extends AbstractJavaCodegen
         this.useOneOfDiscriminatorLookup = useOneOfDiscriminatorLookup;
     }
 
-    public boolean getUseOneOfDiscriminatorLookup() {
-        return this.useOneOfDiscriminatorLookup;
-    }
-
     private boolean getUseSingleRequestParameter() {
         return useSingleRequestParameter;
     }
 
     private void setUseSingleRequestParameter(boolean useSingleRequestParameter) {
         this.useSingleRequestParameter = useSingleRequestParameter;
-    }
-
-    public void setUseRxJava(boolean useRxJava) {
-        this.useRxJava = useRxJava;
-        doNotUseRx = false;
-    }
-
-    public void setUseRxJava2(boolean useRxJava2) {
-        this.useRxJava2 = useRxJava2;
-        doNotUseRx = false;
-    }
-
-    public void setUseRxJava3(boolean useRxJava3) {
-        this.useRxJava3 = useRxJava3;
-        doNotUseRx = false;
     }
 
     public void setDoNotUseRx(boolean doNotUseRx) {
@@ -879,10 +930,6 @@ public class JavaClientCodegen extends AbstractJavaCodegen
         this.useReflectionEqualsHashCode = useReflectionEqualsHashCode;
     }
 
-    public void setCaseInsensitiveResponseHeaders(final Boolean caseInsensitiveResponseHeaders) {
-        this.caseInsensitiveResponseHeaders = caseInsensitiveResponseHeaders;
-    }
-
     public void setUseAbstractionForFiles(boolean useAbstractionForFiles) {
         this.useAbstractionForFiles = useAbstractionForFiles;
     }
@@ -898,10 +945,6 @@ public class JavaClientCodegen extends AbstractJavaCodegen
     public void setWithAWSV4Signature(boolean withAWSV4Signature) {
         this.withAWSV4Signature = withAWSV4Signature;
     }
-
-//    public void setGradleProperties(final String gradleProperties) {
-//        this.gradleProperties = gradleProperties;
-//    }
 
     public void setErrorObjectType(final String errorObjectType) {
         this.errorObjectType = errorObjectType;

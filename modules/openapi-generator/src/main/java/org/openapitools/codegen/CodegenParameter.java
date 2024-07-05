@@ -68,6 +68,7 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
     private CodegenProperty schema;
     private boolean additionalPropertiesIsAnyType;
     private boolean hasVars;
+    private boolean hasEnums;
 
     /**
      * Determines whether this parameter is mandatory. If the parameter is in "path",
@@ -1124,6 +1125,16 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
     @Override
     public void setIsEnum(boolean isEnum) {
         this.isEnum = isEnum;
+    }
+
+    @Override
+    public boolean getHasEnums() {
+        return hasEnums;
+    }
+
+    @Override
+    public void setHasEnums(boolean hasEnums) {
+        this.hasEnums = hasEnums;
     }
 }
 

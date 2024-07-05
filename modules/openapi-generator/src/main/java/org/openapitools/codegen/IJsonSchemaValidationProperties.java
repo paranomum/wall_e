@@ -264,6 +264,10 @@ public interface IJsonSchemaValidationProperties {
 
     boolean getIsEnum();
 
+    void setHasEnums(boolean hasEnums);
+
+    boolean getHasEnums();
+
     /**
      * Syncs all the schema's type properties into the IJsonSchemaValidationProperties instance
      * for now this only supports types without format information

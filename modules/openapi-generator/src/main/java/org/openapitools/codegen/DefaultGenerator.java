@@ -81,6 +81,7 @@ public class DefaultGenerator implements Generator {
     protected CodegenIgnoreProcessor ignoreProcessor;
     private Boolean generateApis = null;
     private Boolean generateModels = null;
+    private Boolean generateEnums = null;
     private Boolean generateSupportingFiles = null;
     private Boolean generateWebhooks = null;
     private Boolean generateApiTests = null;
@@ -206,18 +207,23 @@ public class DefaultGenerator implements Generator {
         // NOTE: Boolean.TRUE is required below rather than `true` because of JVM boxing constraints and type inference.
         generateApis = GlobalSettings.getProperty(CodegenConstants.APIS) != null ? Boolean.TRUE : getGeneratorPropertyDefaultSwitch(CodegenConstants.APIS, null);
         generateModels = GlobalSettings.getProperty(CodegenConstants.MODELS) != null ? Boolean.TRUE : getGeneratorPropertyDefaultSwitch(CodegenConstants.MODELS, null);
+        generateEnums = GlobalSettings.getProperty(CodegenConstants.ENUMS) != null ? Boolean.TRUE : getGeneratorPropertyDefaultSwitch(CodegenConstants.ENUMS, null);
         generateSupportingFiles = GlobalSettings.getProperty(CodegenConstants.SUPPORTING_FILES) != null ? Boolean.TRUE : getGeneratorPropertyDefaultSwitch(CodegenConstants.SUPPORTING_FILES, null);
         generateWebhooks = GlobalSettings.getProperty(CodegenConstants.WEBHOOKS) != null ? Boolean.TRUE : getGeneratorPropertyDefaultSwitch(CodegenConstants.WEBHOOKS, null);
 
-        if (generateApis == null && generateModels == null && generateSupportingFiles == null && generateWebhooks == null) {
+        LOGGER.info("generateModels - {}, generateEnums - {}", generateModels, generateEnums);
+        if (generateApis == null && generateModels == null && generateEnums == null && generateSupportingFiles == null && generateWebhooks == null) {
             // no specifics are set, generate everything
-            generateApis = generateModels = generateSupportingFiles = generateWebhooks = true;
+            generateApis = generateModels = generateEnums = generateSupportingFiles = generateWebhooks = true;
         } else {
             if (generateApis == null) {
                 generateApis = false;
             }
             if (generateModels == null) {
                 generateModels = false;
+            }
+            if (generateEnums == null) {
+                generateEnums = false;
             }
             if (generateSupportingFiles == null) {
                 generateSupportingFiles = false;
@@ -242,6 +248,7 @@ public class DefaultGenerator implements Generator {
 
         config.additionalProperties().put(CodegenConstants.GENERATE_APIS, generateApis);
         config.additionalProperties().put(CodegenConstants.GENERATE_MODELS, generateModels);
+        config.additionalProperties().put(CodegenConstants.GENERATE_ENUMS, generateEnums);
         config.additionalProperties().put(CodegenConstants.GENERATE_WEBHOOKS, generateWebhooks);
 
         if (!generateApiTests && !generateModelTests) {
@@ -442,6 +449,30 @@ public class DefaultGenerator implements Generator {
         }
     }
 
+    private void generateEnum(List<File> files, Map<String, Object> enums, String enumName) throws IOException {
+        for (String templateName : config.enumTemplateFiles().keySet()) {
+            File written;
+            if (config.templateOutputDirs().containsKey(templateName)) {
+                String outputDir = config.getOutputDir() + File.separator + config.templateOutputDirs().get(templateName);
+                String filename = config.enumFilename(templateName, enumName, outputDir);
+                written = processTemplateToFile(enums, templateName, filename, generateEnums, CodegenConstants.ENUMS, outputDir);
+            } else {
+                String filename = config.enumFilename(templateName, enumName);
+                //processTemplateFiles - json -> file like data with template + data, converts data to naming + path and other things
+                //needs another method for enum, but logic id the same
+                //enums -> imports
+                //enums generates before or after models?
+                written = processTemplateToFile(enums, templateName, filename, generateEnums, CodegenConstants.ENUMS);
+            }
+            if (written != null) {
+                files.add(written);
+                if (config.isEnablePostProcessFile() && !dryRun) {
+                    config.postProcessFile(written, "enum");
+                }
+            }
+        }
+    }
+
     void generateModels(List<File> files, List<ModelMap> allModels, List<String> unusedModels) {
         if (!generateModels) {
             // TODO: Process these anyway and add to dryRun info
@@ -461,7 +492,8 @@ public class DefaultGenerator implements Generator {
             modelsToGenerate = new HashSet<>(Arrays.asList(modelNames.split(",")));
         }
 
-        Set<String> modelKeys = schemas.keySet();
+        Set<String> modelKeys = schemas.keySet(); // dto names / file names
+
         if (modelsToGenerate != null && !modelsToGenerate.isEmpty()) {
             Set<String> updatedKeys = new HashSet<>();
             for (String m : modelKeys) {
@@ -590,7 +622,6 @@ public class DefaultGenerator implements Generator {
             LOGGER.info("############ Model info ############");
             Json.prettyPrint(allModels);
         }
-
     }
 
     @SuppressWarnings("unchecked")
@@ -1226,12 +1257,15 @@ public class DefaultGenerator implements Generator {
         List<String> filteredSchemas = ModelUtils.getSchemasUsedOnlyInFormParam(openAPI);
         List<ModelMap> allModels = new ArrayList<>();
         generateModels(files, allModels, filteredSchemas);
+
         // apis
         List<OperationsMap> allOperations = new ArrayList<>();
         generateApis(files, allOperations, allModels);
+
         // webhooks
         List<WebhooksMap> allWebhooks = new ArrayList<>();
         generateWebhooks(files, allWebhooks, allModels);
+
         // supporting files
         Map<String, Object> bundle = buildSupportFileBundle(allOperations, allModels, allWebhooks);
         generateSupportingFiles(files, bundle);
@@ -1342,6 +1376,9 @@ public class DefaultGenerator implements Generator {
                             case Model:
                                 config.modelTemplateFiles().put(templateFile, templateExt);
                                 break;
+                            case Enum:
+                                config.enumTemplateFiles().put(templateFile, templateExt);
+                                break;
                             case APIDocs:
                                 config.apiDocTemplateFiles().put(templateFile, templateExt);
                                 break;
@@ -1376,6 +1413,7 @@ public class DefaultGenerator implements Generator {
                 if (!absoluteTarget.startsWith(outDir)) {
                     throw new RuntimeException(String.format(Locale.ROOT, "Target files must be generated within the output directory; absoluteTarget=%s outDir=%s", absoluteTarget, outDir));
                 }
+                //writes to file, writes from parsed json from swagger
                 return this.templateProcessor.write(templateData, templateName, target);
             } else {
                 this.templateProcessor.skip(target.toPath(), String.format(Locale.ROOT, "Skipped by %s options supplied by user.", skippedByOption));
@@ -1668,6 +1706,7 @@ public class DefaultGenerator implements Generator {
         return result;
     }
 
+    // TODO ANALYZE
     private ModelsMap processModels(CodegenConfig config, Map<String, Schema> definitions) {
         ModelsMap objs = new ModelsMap();
         objs.put("package", config.modelPackage());
@@ -1680,7 +1719,9 @@ public class DefaultGenerator implements Generator {
                 LOGGER.warn("Schema {} cannot be null in processModels", key);
                 continue;
             }
-            CodegenModel cm = config.fromModel(key, schema);
+
+            CodegenModel cm = config.fromModel(key, schema); //has enum. _enum != null; isEnum = true, isInnerEnum = true
+
             ModelMap mo = new ModelMap();
             mo.setModel(cm);
             mo.put("importPath", config.toModelImport(cm.classname));
