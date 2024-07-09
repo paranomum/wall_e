@@ -27,6 +27,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.Map;
 
 import static org.openapitools.codegen.utils.StringUtils.camelize;
 
@@ -146,6 +147,11 @@ public class AvroSchemaCodegen extends DefaultCodegen implements CodegenConfig {
     public String escapeQuotationMark(String input) {
         // do nothing as it's a schema conversion
         return input;
+    }
+
+    @Override
+    public Map<String, CodegenEnum> combineEnums(Map<String, ModelsMap> objs) {
+        return null;
     }
 
 }

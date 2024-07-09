@@ -21,6 +21,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.commons.io.FileUtils;
 import org.openapitools.codegen.*;
 import org.openapitools.codegen.meta.features.*;
+import org.openapitools.codegen.model.ModelsMap;
 import org.openapitools.codegen.serializer.SerializerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.EnumSet;
+import java.util.Map;
 
 public class OpenAPIGenerator extends DefaultCodegen implements CodegenConfig {
     public static final String OUTPUT_NAME = "outputFileName";
@@ -109,4 +111,9 @@ public class OpenAPIGenerator extends DefaultCodegen implements CodegenConfig {
 
     @Override
     public GeneratorLanguage generatorLanguage() { return null; }
+
+    @Override
+    public Map<String, CodegenEnum> combineEnums(Map<String, ModelsMap> objs) {
+        return null;
+    }
 }

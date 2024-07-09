@@ -19,7 +19,6 @@ package org.openapitools.codegen.languages;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.github.fge.jsonschema.library.Library;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import com.samskivert.mustache.Mustache;
@@ -40,10 +39,7 @@ import org.openapitools.codegen.*;
 import org.openapitools.codegen.languages.features.BeanValidationFeatures;
 import org.openapitools.codegen.languages.features.DocumentationProviderFeatures;
 import org.openapitools.codegen.meta.features.*;
-import org.openapitools.codegen.model.ModelMap;
-import org.openapitools.codegen.model.ModelsMap;
-import org.openapitools.codegen.model.OperationMap;
-import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.model.*;
 import org.openapitools.codegen.utils.CamelizeOption;
 import org.openapitools.codegen.utils.ModelUtils;
 import org.slf4j.Logger;
@@ -61,7 +57,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static org.openapitools.codegen.languages.JavaClientCodegen.WEBCLIENT;
 import static org.openapitools.codegen.utils.CamelizeOption.*;
 import static org.openapitools.codegen.utils.OnceLogger.once;
 import static org.openapitools.codegen.utils.StringUtils.*;
@@ -710,7 +705,6 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
      **/
     @Override
     public Map<String, ModelsMap> postProcessAllModels(Map<String, ModelsMap> objs) {
-        Map<String, CodegenEnum> enumParsed = combineEnums(objs);
         objs = super.postProcessAllModels(objs);
         objs = super.updateAllModels(objs);
 
@@ -815,7 +809,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
         return objs;
     }
 
-    Map<String, CodegenEnum> combineEnums(Map <String, ModelsMap> objs){
+    public Map<String, CodegenEnum> combineEnums(Map<String, ModelsMap> objs) {
         return null;
     }
 
@@ -900,6 +894,11 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
     @Override
     public String modelFileFolder() {
         return (outputFolder + File.separator + sourceFolder + File.separator + modelPackage().replace('.', File.separatorChar)).replace('/', File.separatorChar);
+    }
+
+    @Override
+    public String enumFileFolder() {
+        return (outputFolder + File.separator + sourceFolder + File.separator + enumPackage().replace('.', File.separatorChar)).replace('/', File.separatorChar);
     }
 
     @Override

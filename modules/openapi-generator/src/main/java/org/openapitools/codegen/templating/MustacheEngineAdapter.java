@@ -65,6 +65,15 @@ public class MustacheEngineAdapter implements TemplatingEngineAdapter {
         return tmpl.execute(bundle);
     }
 
+    public String compileEnumTemplate(TemplatingExecutor executor, Object bundle, String templateFile) throws IOException {
+        Template tmpl = compiler
+                .withLoader(name -> findTemplate(executor, name))
+                .defaultValue("")
+                .compile(executor.getFullTemplateContents(templateFile));
+
+        return tmpl.execute(bundle);
+    }
+
     @SuppressWarnings("java:S108") // catch-all is expected, and is later thrown
     public Reader findTemplate(TemplatingExecutor generator, String name) {
         for (String extension : extensions) {

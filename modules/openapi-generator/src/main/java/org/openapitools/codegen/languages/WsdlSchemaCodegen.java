@@ -384,4 +384,9 @@ public class WsdlSchemaCodegen extends DefaultCodegen implements CodegenConfig {
     public GeneratorLanguage generatorLanguage() { 
         return GeneratorLanguage.WSDL; 
     }
+
+    @Override
+    public Map<String, CodegenEnum> combineEnums(Map<String, ModelsMap> objs) {
+        return null;
+    }
 }

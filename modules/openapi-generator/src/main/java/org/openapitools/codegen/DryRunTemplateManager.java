@@ -79,6 +79,11 @@ public class DryRunTemplateManager implements TemplateProcessor {
     }
 
     @Override
+    public File writeEnum(Object data, String template, File target) throws IOException {
+        return null;
+    }
+
+    @Override
     public void ignore(Path path, String context) {
         dryRunStatusMap.put(path.toString(),
                 new DryRunStatus(

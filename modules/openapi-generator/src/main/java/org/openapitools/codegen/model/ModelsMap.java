@@ -1,5 +1,7 @@
 package org.openapitools.codegen.model;
 
+import org.openapitools.codegen.CodegenProperty;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,15 +32,6 @@ public class ModelsMap extends HashMap<String, Object> {
     @SuppressWarnings("unchecked")
     public List<Map<String, String>> getImportsOrEmpty() {
         return (List<Map<String, String>>) getOrDefault("imports", new ArrayList<>());
-    }
-
-    public void setEnumVars(Map<String, Map<String, Object>> enumVars) {
-        put("enumVars", enumVars);
-    }
-
-    @SuppressWarnings("unchecked")
-    public Map<String, Map<String, Object>> getEnumVars() {
-        return (Map<String, Map<String, Object>>) get("enumVars");
     }
 
 }

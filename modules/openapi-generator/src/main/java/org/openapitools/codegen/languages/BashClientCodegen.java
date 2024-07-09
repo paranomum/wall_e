@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.servers.Server;
@@ -30,6 +29,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.openapitools.codegen.*;
 import org.openapitools.codegen.meta.features.*;
+import org.openapitools.codegen.model.ModelsMap;
 import org.openapitools.codegen.utils.ModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -830,4 +830,9 @@ public class BashClientCodegen extends DefaultCodegen implements CodegenConfig {
 
     @Override
     public GeneratorLanguage generatorLanguage() { return GeneratorLanguage.BASH; }
+
+    @Override
+    public Map<String, CodegenEnum> combineEnums(Map<String, ModelsMap> objs) {
+        return null;
+    }
 }

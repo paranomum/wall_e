@@ -43,6 +43,7 @@ import org.openapitools.codegen.ignore.CodegenIgnoreProcessor;
 import org.openapitools.codegen.meta.GeneratorMetadata;
 import org.openapitools.codegen.meta.Stability;
 import org.openapitools.codegen.model.*;
+import org.openapitools.codegen.model.EnumMap;
 import org.openapitools.codegen.serializer.SerializerUtils;
 import org.openapitools.codegen.templating.CommonTemplateContentLocator;
 import org.openapitools.codegen.templating.GeneratorTemplateContentLocator;
@@ -449,20 +450,17 @@ public class DefaultGenerator implements Generator {
         }
     }
 
-    private void generateEnum(List<File> files, Map<String, Object> enums, String enumName) throws IOException {
+    public void generateEnum(List<File> files, CodegenEnum enums, String enumName) throws IOException {
         for (String templateName : config.enumTemplateFiles().keySet()) {
             File written;
             if (config.templateOutputDirs().containsKey(templateName)) {
                 String outputDir = config.getOutputDir() + File.separator + config.templateOutputDirs().get(templateName);
                 String filename = config.enumFilename(templateName, enumName, outputDir);
-                written = processTemplateToFile(enums, templateName, filename, generateEnums, CodegenConstants.ENUMS, outputDir);
+                written = processTemplateToFileEnum(enums, templateName, filename, generateEnums, CodegenConstants.ENUMS, outputDir);
             } else {
                 String filename = config.enumFilename(templateName, enumName);
-                //processTemplateFiles - json -> file like data with template + data, converts data to naming + path and other things
-                //needs another method for enum, but logic id the same
-                //enums -> imports
-                //enums generates before or after models?
-                written = processTemplateToFile(enums, templateName, filename, generateEnums, CodegenConstants.ENUMS);
+                LOGGER.info("ENUM FILE NAME - {}", filename);
+                written = processTemplateToFileEnum(enums, templateName, filename, generateEnums, CodegenConstants.ENUMS);
             }
             if (written != null) {
                 files.add(written);
@@ -507,6 +505,7 @@ public class DefaultGenerator implements Generator {
 
         // store all processed models
         Map<String, ModelsMap> allProcessedModels = new TreeMap<>((o1, o2) -> ObjectUtils.compare(config.toModelName(o1), config.toModelName(o2)));
+        Map<String, CodegenEnum> allProcessedEnums = null;
 
         Boolean skipFormModel = GlobalSettings.getProperty(CodegenConstants.SKIP_FORM_MODEL) != null ?
                 Boolean.valueOf(GlobalSettings.getProperty(CodegenConstants.SKIP_FORM_MODEL)) :
@@ -580,6 +579,18 @@ public class DefaultGenerator implements Generator {
 
         // post process all processed models
         allProcessedModels = config.postProcessAllModels(allProcessedModels);
+
+        if (config.generatorLanguage() == GeneratorLanguage.JAVA) {
+            allProcessedEnums = config.combineEnums(allProcessedModels);
+            for (String key : allProcessedEnums.keySet()) {
+                try {
+                    generateEnum(files, allProcessedEnums.get(key), key);
+                    //addImport (get all needed dto (Set String), where to import)
+                } catch (Exception e) {
+                    throw new RuntimeException("Could not generate enum '" + key + "'", e);
+                }
+            }
+        }
 
         // generate files based on processed models
         for (String modelName : allProcessedModels.keySet()) {
@@ -1415,6 +1426,32 @@ public class DefaultGenerator implements Generator {
                 }
                 //writes to file, writes from parsed json from swagger
                 return this.templateProcessor.write(templateData, templateName, target);
+            } else {
+                this.templateProcessor.skip(target.toPath(), String.format(Locale.ROOT, "Skipped by %s options supplied by user.", skippedByOption));
+                return null;
+            }
+        } else {
+            this.templateProcessor.ignore(target.toPath(), "Ignored by rule in ignore file.");
+            return null;
+        }
+    }
+
+    protected File processTemplateToFileEnum(Object templateData, String templateName, String outputFilename, boolean shouldGenerate, String skippedByOption) throws IOException {
+        return processTemplateToFileEnum(templateData, templateName, outputFilename, shouldGenerate, skippedByOption, this.config.getOutputDir());
+    }
+
+    private File processTemplateToFileEnum(Object templateData, String templateName, String outputFilename, boolean shouldGenerate, String skippedByOption, String intendedOutputDir) throws IOException {
+        String adjustedOutputFilename = outputFilename.replaceAll("//", "/").replace('/', File.separatorChar);
+        File target = new File(adjustedOutputFilename);
+        if (ignoreProcessor.allowsFile(target)) {
+            if (shouldGenerate) {
+                Path outDir = java.nio.file.Paths.get(intendedOutputDir).toAbsolutePath();
+                Path absoluteTarget = target.toPath().toAbsolutePath();
+                if (!absoluteTarget.startsWith(outDir)) {
+                    throw new RuntimeException(String.format(Locale.ROOT, "Target files must be generated within the output directory; absoluteTarget=%s outDir=%s", absoluteTarget, outDir));
+                }
+                //writes to file, writes from parsed json from swagger
+                return this.templateProcessor.writeEnum(templateData, templateName, target);
             } else {
                 this.templateProcessor.skip(target.toPath(), String.format(Locale.ROOT, "Skipped by %s options supplied by user.", skippedByOption));
                 return null;

@@ -27,8 +27,10 @@ import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import org.openapitools.codegen.meta.features.*;
+import org.openapitools.codegen.model.ModelsMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -368,6 +370,11 @@ public class AsciidocDocumentationCodegen extends DefaultCodegen implements Code
             LOGGER.debug("snippets: " + ": " + this.includeSnippetMarkupLambda.resetCounter());
         }
         super.processOpenAPI(openAPI);
+    }
+
+    @Override
+    public Map<String, CodegenEnum> combineEnums(Map<String, ModelsMap> objs) {
+        return null;
     }
 
 }

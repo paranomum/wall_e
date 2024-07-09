@@ -3,10 +3,12 @@ package org.openapitools.codegen.languages;
 import org.openapitools.codegen.*;
 import org.openapitools.codegen.meta.GeneratorMetadata;
 import org.openapitools.codegen.meta.Stability;
+import org.openapitools.codegen.model.ModelsMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.Map;
 
 import static org.openapitools.codegen.utils.StringUtils.escape;
 
@@ -121,6 +123,11 @@ public class MarkdownDocumentationCodegen extends DefaultCodegen implements Code
     public String escapeQuotationMark(String input) {
         // do nothing as the output is just doc
         return input;
+    }
+
+    @Override
+    public Map<String, CodegenEnum> combineEnums(Map<String, ModelsMap> objs) {
+        return null;
     }
 
 }

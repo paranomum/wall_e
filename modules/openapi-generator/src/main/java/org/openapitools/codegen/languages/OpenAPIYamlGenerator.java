@@ -20,6 +20,7 @@ package org.openapitools.codegen.languages;
 import com.google.common.collect.ImmutableMap;
 import org.openapitools.codegen.*;
 import org.openapitools.codegen.meta.features.*;
+import org.openapitools.codegen.model.ModelsMap;
 import org.openapitools.codegen.templating.mustache.OnChangeLambda;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,4 +123,9 @@ public class OpenAPIYamlGenerator extends DefaultCodegen implements CodegenConfi
 
     @Override
     public GeneratorLanguage generatorLanguage() { return null; }
+
+    @Override
+    public Map<String, CodegenEnum> combineEnums(Map<String, ModelsMap> objs) {
+        return null;
+    }
 }

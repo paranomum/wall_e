@@ -19,9 +19,7 @@ package org.openapitools.codegen.languages;
 
 import org.openapitools.codegen.*;
 import org.openapitools.codegen.meta.features.*;
-import org.openapitools.codegen.model.ModelMap;
-import org.openapitools.codegen.model.OperationMap;
-import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,5 +129,10 @@ public class Apache2ConfigCodegen extends DefaultCodegen implements CodegenConfi
         }
         operations.setOperation(newOpList);
         return objs;
+    }
+
+    @Override
+    public Map<String, CodegenEnum> combineEnums(Map<String, ModelsMap> objs) {
+        return null;
     }
 }

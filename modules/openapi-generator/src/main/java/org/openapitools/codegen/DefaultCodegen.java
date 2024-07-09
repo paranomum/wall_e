@@ -17,7 +17,6 @@
 
 package org.openapitools.codegen;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Ticker;
@@ -26,7 +25,6 @@ import com.google.common.collect.ImmutableMap;
 import com.samskivert.mustache.Mustache;
 import com.samskivert.mustache.Mustache.Compiler;
 import com.samskivert.mustache.Mustache.Lambda;
-import io.swagger.v3.core.util.AnnotationsUtils;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -62,7 +60,6 @@ import org.openapitools.codegen.model.WebhooksMap;
 import org.openapitools.codegen.serializer.SerializerUtils;
 import org.openapitools.codegen.templating.MustacheEngineAdapter;
 import org.openapitools.codegen.templating.mustache.*;
-import org.openapitools.codegen.utils.CamelizeOption;
 import org.openapitools.codegen.utils.ModelUtils;
 import org.openapitools.codegen.utils.OneOfImplementorAdditionalData;
 import org.slf4j.Logger;
@@ -80,7 +77,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.openapitools.codegen.CodegenConstants.UNSUPPORTED_V310_SPEC_MSG;
-import static org.openapitools.codegen.languages.JavaClientCodegen.WEBCLIENT;
 import static org.openapitools.codegen.utils.CamelizeOption.LOWERCASE_FIRST_LETTER;
 import static org.openapitools.codegen.utils.OnceLogger.once;
 import static org.openapitools.codegen.utils.StringUtils.*;
@@ -508,7 +504,6 @@ public class DefaultCodegen implements CodegenConfig {
     @Override
     @SuppressWarnings("static-method")
     public Map<String, ModelsMap> postProcessAllModels(Map<String, ModelsMap> objs) {
-        Map<String, Map<String, Object>> enumNameToEnumToValue = new HashMap<>();
 
         for (Map.Entry<String, ModelsMap> entry : objs.entrySet()) {
             CodegenModel model = ModelUtils.getModelByName(entry.getKey(), objs);
@@ -1218,6 +1213,11 @@ public class DefaultCodegen implements CodegenConfig {
         // later we'll make this method abstract to make sure
         // code generator implements this method
         return input;
+    }
+
+
+    public Map<String, CodegenEnum> combineEnums(Map<String, ModelsMap> objs) {
+        return null;
     }
 
     /**
@@ -6279,16 +6279,18 @@ public class DefaultCodegen implements CodegenConfig {
     }
 
     @Override
-    public String enumFilename(String templateName, String modelName) {
-//        String suffix = enumTemplateFiles().get(templateName);
-        String suffix = modelTemplateFiles().get(templateName);
-        return enumFileFolder() + File.separator + toEnumFilename(modelName) + suffix;
+    public String enumFilename(String templateName, String enumName) {
+        String suffix = enumTemplateFiles().get(templateName);
+        LOGGER.info("enumFileFolder - {}", enumFileFolder());
+        LOGGER.info("File.separator - {}", File.separator);
+        LOGGER.info("toEnumFilename(enumName) - {}", toEnumFilename(enumName));
+        LOGGER.info("suffix - {}", suffix);
+        return enumFileFolder() + File.separator + toEnumFilename(enumName) + suffix;
     }
 
     @Override
     public String enumFilename(String templateName, String modelName, String outputDir) {
-//        String suffix = enumTemplateFiles().get(templateName);
-        String suffix = modelTemplateFiles().get(templateName);
+        String suffix = enumTemplateFiles().get(templateName);
         return outputDir + File.separator + toEnumFilename(modelName) + suffix;
     }
 

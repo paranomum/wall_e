@@ -17,7 +17,6 @@
 
 package org.openapitools.codegen;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 
 import java.util.*;
@@ -68,7 +67,7 @@ public class CodegenEnum implements IJsonSchemaValidationProperties {
     public boolean isString, isInteger, isLong, isNumber, isNumeric, isFloat, isDouble, isDate, isDateTime,
             isDecimal, isShort, isUnboundedInteger, isPrimitiveType, isBoolean, isFreeFormObject;
     private boolean additionalPropertiesIsAnyType;
-    public List<CodegenProperty> vars = new ArrayList<>(); // all properties (without parent's properties)
+    public CodegenProperty var; // all properties (without parent's properties)
     public List<CodegenProperty> allVars = new ArrayList<>(); // all properties (with parent's properties)
     public List<CodegenProperty> requiredVars = new ArrayList<>(); // a list of required properties
     public List<CodegenProperty> optionalVars = new ArrayList<>(); // a list of optional properties
@@ -76,6 +75,11 @@ public class CodegenEnum implements IJsonSchemaValidationProperties {
     public List<CodegenProperty> readWriteVars = new ArrayList<>(); // a list of properties for read, write
     public List<CodegenProperty> nonNullableVars = new ArrayList<>(); // a list of non-nullable properties
     public Map<String, Object> allowableValues;
+    public Set<EnumProperty> enumVars = new HashSet<>();
+    public String datatypeWithEnum;
+    public List<String> additionalEnumTypeAnnotations;
+    public boolean useEnumCaseInsensitive;
+    public boolean enumUnknownDefaultCase;
 
     // Sorted sets of required parameters.
     public Set<String> mandatory = new TreeSet<>(); // without parent's required properties
@@ -262,6 +266,15 @@ public class CodegenEnum implements IJsonSchemaValidationProperties {
         this.schemaIsFromAdditionalProperties = schemaIsFromAdditionalProperties;
     }
 
+    @Override
+    public List<CodegenProperty> getVars(){
+        return null;
+    }
+
+    @Override
+    public void setVars(List<CodegenProperty> vars){
+    }
+
     public Set<String> getAllMandatory() {
         return allMandatory;
     }
@@ -292,6 +305,14 @@ public class CodegenEnum implements IJsonSchemaValidationProperties {
 
     public void setNonNullableVars(List<CodegenProperty> nonNullableVars) {
         this.nonNullableVars = nonNullableVars;
+    }
+
+    public Set<EnumProperty> getEnumVars() {
+        return enumVars;
+    }
+
+    public void setEnumVars(Set<EnumProperty> enumVars) {
+        this.enumVars = enumVars;
     }
 
     public Map<String, Object> getAllowableValues() {
@@ -814,14 +835,12 @@ public class CodegenEnum implements IJsonSchemaValidationProperties {
         this.unescapedDescription = unescapedDescription;
     }
 
-    @Override
-    public List<CodegenProperty> getVars() {
-        return vars;
+    public CodegenProperty getVar() {
+        return var;
     }
 
-    @Override
-    public void setVars(List<CodegenProperty> vars) {
-        this.vars = vars;
+    public void setVar(CodegenProperty vars) {
+        this.var = vars;
     }
 
     public Map<String, Object> getVendorExtensions() {
@@ -1148,7 +1167,7 @@ public class CodegenEnum implements IJsonSchemaValidationProperties {
                 Objects.equals(discriminator, that.discriminator) &&
                 Objects.equals(defaultValue, that.defaultValue) &&
                 Objects.equals(arrayModelType, that.arrayModelType) &&
-                Objects.equals(vars, that.vars) &&
+                Objects.equals(var, that.var) &&
                 Objects.equals(allVars, that.allVars) &&
                 Objects.equals(nonNullableVars, that.nonNullableVars) &&
                 Objects.equals(requiredVars, that.requiredVars) &&
@@ -1166,6 +1185,7 @@ public class CodegenEnum implements IJsonSchemaValidationProperties {
                 Objects.equals(getMaxProperties(), that.getMaxProperties()) &&
                 Objects.equals(getMinProperties(), that.getMinProperties()) &&
                 Objects.equals(getMaxItems(), that.getMaxItems()) &&
+                Objects.equals(getEnumVars(), that.getEnumVars()) &&
                 Objects.equals(getMinItems(), that.getMinItems()) &&
                 Objects.equals(getMaxLength(), that.getMaxLength()) &&
                 Objects.equals(getMinLength(), that.getMinLength()) &&
@@ -1186,6 +1206,7 @@ public class CodegenEnum implements IJsonSchemaValidationProperties {
                 getXmlName(), getClassFilename(), getUnescapedDescription(), getDiscriminator(), getDefaultValue(),
                 getArrayModelType(), isAlias, isString, isInteger, isLong, isNumber, isNumeric, isFloat, isDouble,
                 isDate, isDateTime, isNull, hasValidation, isShort, isUnboundedInteger, isBoolean,
+                getEnumVars(),
                 getVars(), getAllVars(), getNonNullableVars(), getRequiredVars(), getOptionalVars(), getReadOnlyVars(), getReadWriteVars(),
                 getAllowableValues(), getMandatory(), getAllMandatory(), getImports(), hasVars,
                 isEmptyVars(), hasMoreModels, hasEnums, isEnum, isNullable, hasRequired, hasOptional, isArray,
@@ -1238,7 +1259,8 @@ public class CodegenEnum implements IJsonSchemaValidationProperties {
         sb.append(", isDouble=").append(isDouble);
         sb.append(", isDate=").append(isDate);
         sb.append(", isDateTime=").append(isDateTime);
-        sb.append(", vars=").append(vars);
+        sb.append(", var=").append(var);
+        sb.append(", enumVars=").append(enumVars);
         sb.append(", allVars=").append(allVars);
         sb.append(", nonNullableVars=").append(nonNullableVars);
         sb.append(", requiredVars=").append(requiredVars);
@@ -1355,7 +1377,6 @@ public class CodegenEnum implements IJsonSchemaValidationProperties {
      */
     public void removeAllDuplicatedProperty() {
         // remove duplicated properties
-        vars = removeDuplicatedProperty(vars);
         optionalVars = removeDuplicatedProperty(optionalVars);
         requiredVars = removeDuplicatedProperty(requiredVars);
         allVars = removeDuplicatedProperty(allVars);

@@ -20,6 +20,7 @@ import org.openapitools.codegen.*;
 import org.openapitools.codegen.meta.GeneratorMetadata;
 import org.openapitools.codegen.meta.Stability;
 import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -217,4 +218,9 @@ public class PlantumlDocumentationCodegen extends DefaultCodegen implements Code
 
     @Override
     public GeneratorLanguage generatorLanguage() { return null; }
+
+    @Override
+    public Map<String, CodegenEnum> combineEnums(Map<String, ModelsMap> objs) {
+        return null;
+    }
 }

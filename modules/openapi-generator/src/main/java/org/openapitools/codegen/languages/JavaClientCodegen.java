@@ -17,42 +17,26 @@
 
 package org.openapitools.codegen.languages;
 
-import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.Schema;
 import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.openapitools.codegen.*;
-import org.openapitools.codegen.config.GlobalSettings;
 import org.openapitools.codegen.languages.features.BeanValidationFeatures;
 import org.openapitools.codegen.languages.features.GzipFeatures;
 import org.openapitools.codegen.languages.features.PerformBeanValidationFeatures;
 import org.openapitools.codegen.meta.features.DocumentationFeature;
 import org.openapitools.codegen.meta.features.GlobalFeature;
 import org.openapitools.codegen.meta.features.SecurityFeature;
-import org.openapitools.codegen.model.ModelMap;
-import org.openapitools.codegen.model.ModelsMap;
-import org.openapitools.codegen.model.OperationMap;
-import org.openapitools.codegen.model.OperationsMap;
-import org.openapitools.codegen.templating.mustache.CaseFormatLambda;
-import org.openapitools.codegen.utils.ModelUtils;
+import org.openapitools.codegen.model.*;
 import org.openapitools.codegen.utils.ProcessUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
-import static com.google.common.base.CaseFormat.LOWER_CAMEL;
-import static com.google.common.base.CaseFormat.UPPER_UNDERSCORE;
 import static java.util.Collections.sort;
-import static org.openapitools.codegen.utils.CamelizeOption.LOWERCASE_FIRST_LETTER;
-import static org.openapitools.codegen.utils.OnceLogger.once;
 import static org.openapitools.codegen.utils.StringUtils.camelize;
 
 public class JavaClientCodegen extends AbstractJavaCodegen
@@ -699,41 +683,6 @@ public class JavaClientCodegen extends AbstractJavaCodegen
     public ModelsMap postProcessModelsEnum(ModelsMap objs) {
         objs = super.postProcessModelsEnum(objs);
 
-        Map<String, Map<String, Object>> enumNameToEnumToValue = new HashMap<>();
-
-        //process enums if there any
-        for (ModelMap map : objs.getModels()) {
-            if (map.getModel().hasEnums) {
-                for (CodegenProperty property: map.getModel().getVars()) {
-                    if (property.isEnum) {
-                        Map<String, Object> enumToValue = new HashMap<>();
-                        if (enumNameToEnumToValue.containsKey(property.baseName)) {
-                            enumToValue.putAll(enumNameToEnumToValue.get(property.baseName));
-                        }
-                        if (!property.allowableValues.containsKey("enumVars")) {
-                            for (String _enum : property._enum) {
-                                enumToValue.putIfAbsent(_enum, "_");
-                            }
-                        } else {
-                            List<Map<String, Object>> enums = (List<Map<String, Object>>) property.allowableValues.get("enumVars");
-                            for (Map<String, Object> values : enums) {
-                                enumToValue.putIfAbsent(values.get("name").toString(), values.get("value"));
-                                if (enumToValue.containsKey(values.get("name").toString())) {
-                                    enumToValue.replace(values.get("name").toString(), values.get("value"));
-                                }
-                            }
-                        }
-                        enumNameToEnumToValue.putIfAbsent(property.baseName, enumToValue);
-                        enumNameToEnumToValue.replace(property.baseName, enumToValue);
-                    }
-                }
-            }
-        }
-
-//        add enums to  model!
-        if (!enumNameToEnumToValue.keySet().isEmpty())
-            objs.setEnumVars(enumNameToEnumToValue);
-
         //Needed import for Gson based libraries
         //ADD IMPORTS HERE
         List<Map<String, String>> imports = objs.getImports();
@@ -804,9 +753,6 @@ public class JavaClientCodegen extends AbstractJavaCodegen
             }
         }
 
-        // add implements for serializable/parcelable to all models
-        // import enums here...
-        // after generation..
         for (ModelMap mo : models) {
             CodegenModel cm = mo.getModel();
 
@@ -820,47 +766,75 @@ public class JavaClientCodegen extends AbstractJavaCodegen
     }
 
     @Override
-    Map<String, CodegenEnum> combineEnums(Map <String, ModelsMap> objs){
-        Map <String, CodegenEnum> enums = new HashMap<>();
-        Map<String, Map<String, Object>> enumNameToEnumToValue = new HashMap<>();
+    public Map<String, CodegenEnum> combineEnums(Map<String, ModelsMap> objs) {
+        Map<String, CodegenEnum> enums = new HashMap<>();
 
         for (String key : objs.keySet()) {
-            if (objs.get(key).getEnumVars() != null) {
-
-                Map<String, Map<String, Object>> enumVars = objs.get(key).getEnumVars();
-
-                for (String enumName : enumVars.keySet()) {
-                    if (enumNameToEnumToValue.containsKey(enumName)) {
-                        Map<String, Object> enumToValue = new HashMap<>(enumNameToEnumToValue.get(enumName));
-                        for(String enumKey : enumNameToEnumToValue.get(enumName).keySet()) {
-                            enumToValue.putIfAbsent(enumKey, enumNameToEnumToValue.get(enumName).get(enumKey));
+            for (ModelMap modelMap : objs.get(key).getModels()) {
+                CodegenModel m = modelMap.getModel();
+                if (m.hasEnums) {
+                    for (CodegenProperty var : m.getVars()) {
+                        if (var.isEnum) {
+                            LOGGER.info("\n\n\n\n");
+                            LOGGER.info("getDependentRequired in model - {}", var.getDependentRequired());
+                            LOGGER.info("additionalPropertiesIsAnyType in model - {}", var.getAdditionalPropertiesIsAnyType());
+                            LOGGER.info("getAdditionalProperties in model - {}", var.getAdditionalProperties());
+                            LOGGER.info("\n\n\n\n");
+                            CodegenEnum ce = new CodegenEnum();
+                            ce.classname = var.enumName;
+                            ce.hasEnums = true;
+                            ce.enumVars = parseAllowableValues(var.allowableValues.get("enumVars"));
+                            ce.description = var.description;
+                            ce.dataType = var.dataType;
+                            ce.var = var;
+                            ce.additionalEnumTypeAnnotations = (List<String>) modelMap.get(ADDITIONAL_ENUM_TYPE_ANNOTATIONS);
+                            ce.useEnumCaseInsensitive = false;
+                            ce.isNullable = var.isNullable;
+                            ce.enumUnknownDefaultCase = parseEnumValues(var.allowableValues);
+                            if (enums.containsKey(var.name)){
+                                enums.replace(var.name, combineToEnum(enums.get(var.name), ce));
+                            }
+                            enums.putIfAbsent(var.name, ce);
                         }
-                        enumNameToEnumToValue.replace(enumName, enumToValue);
                     }
-                    enumNameToEnumToValue.putIfAbsent(enumName, enumVars.get(enumName));
                 }
             }
         }
 
-        //to dto to generate + imports
-        // DTO:
-        //      classname - enumNameToEnumToValue.key
-        //      additionalEnumTypeAnnotations
-        //      datatypeWithEnum
-        //      allowableValues -> enumVars -> enumToValue (name, isString, value)
-        //      enumDescription
-        //      name - enumToValue
-        //      value - enumToValue
-        //      dataType - String
-        //      jackson
-        //      isString
-        //      useEnumCaseInsensitive
-        //      isNullable
-        //      enumUnknownDefaultCase
-
         return enums;
     }
 
+    private CodegenEnum combineToEnum(CodegenEnum old, CodegenEnum last) {
+        old.enumVars.addAll(last.enumVars);
+        if (last.enumUnknownDefaultCase) {
+            old.enumUnknownDefaultCase = true;
+        }
+        return old;
+    }
+
+    private boolean parseEnumValues(Map<String, Object> allowableValues) {
+        return false;
+    }
+
+    private Set<EnumProperty> parseAllowableValues(Object objs) {
+        List<Map<String, Object>> allowableValues = (List<Map<String, Object>>) objs;
+        Set<EnumProperty> enumProperties = new HashSet<>();
+
+        for(Map<String, Object> enumToValue : allowableValues) {
+            EnumProperty enumProperty = new EnumProperty();
+            enumProperty.name = enumToValue.get("name").toString();
+            enumProperty.value = enumToValue.get("value").toString();
+            enumProperty.enumUnknownDefaultCase = false;
+            enumProperty.isString = true;
+            enumProperty.isNullable = false;
+            if (enumProperty.name.equals("unknown_default_open_api"))
+                enumProperty.enumUnknownDefaultCase = true;
+            enumProperties.add(enumProperty);
+        }
+
+        return enumProperties;
+    }
+    
     @Override
     protected boolean isConstructorWithAllArgsAllowed(CodegenModel codegenModel) {
         // implementation detail: allVars is not reliable if openapiNormalizer.REFACTOR_ALLOF_WITH_PROPERTIES_ONLY is disabled

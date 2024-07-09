@@ -18,11 +18,11 @@ public class EnumMap extends HashMap<String, Object>{
     }
 
     public void setEnum(CodegenEnum _enum) {
-        put("_enum", _enum);
+        put("enum", _enum);
     }
 
     public CodegenEnum getEnum() {
-        return (CodegenEnum) get("_enum");
+        return (CodegenEnum) get("enum");
     }
 
     /**

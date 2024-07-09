@@ -177,6 +177,30 @@ public class TemplateManager implements TemplatingExecutor, TemplateProcessor {
         }
     }
 
+    //writes data to files
+    @Override
+    public File writeEnum(Object data, String template, File target) throws IOException {
+        if (this.engineAdapter.handlesFile(template)) {
+            LOGGER.info("engineAdapter.handlesFile");
+            // Only pass files with valid endings through template engine
+            String templateContent = this.engineAdapter.compileEnumTemplate(this, data, template);
+            return writeToFile(target.getPath(), templateContent);
+        } else {
+            // Do a straight copy of the file if not listed as supported by the template engine.
+            InputStream is;
+            try {
+                // look up the file using the same template resolution logic the adapters would use.
+                String fullTemplatePath = getFullTemplateFile(template);
+                is = getInputStream(fullTemplatePath);
+            } catch (TemplateNotFoundException ex) {
+                LOGGER.info("engineAdapter exception");
+                is = new FileInputStream(Paths.get(template).toFile());
+            }
+            LOGGER.info("engineAdapter writes To file");
+            return writeToFile(target.getAbsolutePath(), IOUtils.toByteArray(is));
+        }
+    }
+
     @Override
     public void ignore(Path path, String context) {
         LOGGER.info("Ignored {} ({})", path, context);
@@ -218,7 +242,7 @@ public class TemplateManager implements TemplatingExecutor, TemplateProcessor {
             try {
                 tempFile = writeToFileRaw(tempFilename, contents);
                 if (!filesEqual(tempFile, outputFile)) {
-                    LOGGER.info("azazazaza writing file {}", filename);
+                    LOGGER.info("writing file {}", filename);
                     Files.move(tempFile.toPath(), outputFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                     tempFile = null;
                 } else {
@@ -234,6 +258,7 @@ public class TemplateManager implements TemplatingExecutor, TemplateProcessor {
                 }
             }
         } else {
+            LOGGER.info("writing file {}", filename);
             outputFile = writeToFileRaw(filename, contents);
         }
 

@@ -27,10 +27,7 @@ import io.swagger.v3.oas.models.servers.ServerVariable;
 import org.openapitools.codegen.api.TemplatingEngineAdapter;
 import org.openapitools.codegen.meta.FeatureSet;
 import org.openapitools.codegen.meta.GeneratorMetadata;
-import org.openapitools.codegen.model.ModelMap;
-import org.openapitools.codegen.model.ModelsMap;
-import org.openapitools.codegen.model.OperationsMap;
-import org.openapitools.codegen.model.WebhooksMap;
+import org.openapitools.codegen.model.*;
 
 import java.io.File;
 import java.util.List;
@@ -383,5 +380,7 @@ public interface CodegenConfig {
     boolean getUseOpenapiNormalizer();
 
     Set<String> getOpenapiGeneratorIgnoreList();
+
+    Map<String, CodegenEnum> combineEnums(Map<String, ModelsMap> objs);
 
 }

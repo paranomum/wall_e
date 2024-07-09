@@ -21,6 +21,8 @@ public interface TemplateProcessor {
      */
     File write(Map<String, Object> data, String template, File target) throws IOException;
 
+    File writeEnum(Object data, String template, File target) throws IOException;
+
     /**
      * Write bytes to a file
      *

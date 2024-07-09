@@ -1,16 +1,11 @@
 package org.openapitools.codegen.languages;
 
 import org.openapitools.codegen.*;
-import io.swagger.models.properties.ArrayProperty;
-import io.swagger.models.properties.MapProperty;
-import io.swagger.models.properties.Property;
-import io.swagger.models.parameters.Parameter;
 
 import java.io.File;
 import java.util.*;
 
-import org.apache.commons.lang3.StringUtils;
-
+import org.openapitools.codegen.model.ModelsMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,5 +37,10 @@ public class JavaConfigCodegen extends DefaultCodegen implements CodegenConfig {
         modelPackage = "Models";
         supportingFiles.add(new SupportingFile("README.mustache", "", "README.md"));
         // TODO: Fill this out.
+    }
+
+    @Override
+    public Map<String, CodegenEnum> combineEnums(Map<String, ModelsMap> objs) {
+        return null;
     }
 }

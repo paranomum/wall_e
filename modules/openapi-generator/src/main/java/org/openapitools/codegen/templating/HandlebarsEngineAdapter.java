@@ -35,6 +35,7 @@ import org.openapitools.codegen.api.TemplatingExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.AccessibleObject;
 import java.util.Arrays;
@@ -52,11 +53,18 @@ public class HandlebarsEngineAdapter extends AbstractTemplatingEngineAdapter {
     private boolean infiniteLoops = false;
     private boolean prettyPrint = false;
 
+    @Override
+    public String compileEnumTemplate(TemplatingExecutor executor, Object bundle, String templateFile) throws IOException {
+        return "";
+    }
+
     /**
      * Provides an identifier used to load the adapter. This could be a name, uuid, or any other string.
      *
      * @return A string identifier.
      */
+
+
     @Override
     public String getIdentifier() {
         return "handlebars";
