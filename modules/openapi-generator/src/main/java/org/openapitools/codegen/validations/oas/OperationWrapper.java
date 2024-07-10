@@ -10,8 +10,8 @@ import io.swagger.v3.oas.models.OpenAPI;
  */
 public class OperationWrapper {
     OpenAPI specification;
-    private Operation operation;
-    private PathItem.HttpMethod httpMethod;
+    private final Operation operation;
+    private final PathItem.HttpMethod httpMethod;
 
     /**
      * Constructs a new instance of {@link OperationWrapper}

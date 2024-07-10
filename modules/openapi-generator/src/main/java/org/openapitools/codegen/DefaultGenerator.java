@@ -43,7 +43,6 @@ import org.openapitools.codegen.ignore.CodegenIgnoreProcessor;
 import org.openapitools.codegen.meta.GeneratorMetadata;
 import org.openapitools.codegen.meta.Stability;
 import org.openapitools.codegen.model.*;
-import org.openapitools.codegen.model.EnumMap;
 import org.openapitools.codegen.serializer.SerializerUtils;
 import org.openapitools.codegen.templating.CommonTemplateContentLocator;
 import org.openapitools.codegen.templating.GeneratorTemplateContentLocator;
@@ -93,12 +92,12 @@ public class DefaultGenerator implements Generator {
     private String basePath;
     private String basePathWithoutHost;
     private String contextPath;
-    private Map<String, String> generatorPropertyDefaults = new HashMap<>();
+    private final Map<String, String> generatorPropertyDefaults = new HashMap<>();
     protected TemplateProcessor templateProcessor = null;
 
     private List<TemplateDefinition> userDefinedTemplates = new ArrayList<>();
-    private String generatorCheck = "spring";
-    private String templateCheck = "apiController.mustache";
+    private final String generatorCheck = "spring";
+    private final String templateCheck = "apiController.mustache";
 
 
     public DefaultGenerator() {
@@ -450,17 +449,17 @@ public class DefaultGenerator implements Generator {
         }
     }
 
-    public void generateEnum(List<File> files, CodegenEnum enums, String enumName) throws IOException {
+    public void generateEnum(List<File> files, Object enums, String enumName) throws IOException {
         for (String templateName : config.enumTemplateFiles().keySet()) {
             File written;
             if (config.templateOutputDirs().containsKey(templateName)) {
                 String outputDir = config.getOutputDir() + File.separator + config.templateOutputDirs().get(templateName);
                 String filename = config.enumFilename(templateName, enumName, outputDir);
-                written = processTemplateToFileEnum(enums, templateName, filename, generateEnums, CodegenConstants.ENUMS, outputDir);
+                written = processTemplateToFile(enums, templateName, filename, generateEnums, CodegenConstants.ENUMS, outputDir);
             } else {
                 String filename = config.enumFilename(templateName, enumName);
                 LOGGER.info("ENUM FILE NAME - {}", filename);
-                written = processTemplateToFileEnum(enums, templateName, filename, generateEnums, CodegenConstants.ENUMS);
+                written = processTemplateToFile(enums, templateName, filename, generateEnums, CodegenConstants.ENUMS);
             }
             if (written != null) {
                 files.add(written);
@@ -1410,11 +1409,11 @@ public class DefaultGenerator implements Generator {
         }
     }
 
-    protected File processTemplateToFile(Map<String, Object> templateData, String templateName, String outputFilename, boolean shouldGenerate, String skippedByOption) throws IOException {
+    protected File processTemplateToFile(Object templateData, String templateName, String outputFilename, boolean shouldGenerate, String skippedByOption) throws IOException {
         return processTemplateToFile(templateData, templateName, outputFilename, shouldGenerate, skippedByOption, this.config.getOutputDir());
     }
 
-    private File processTemplateToFile(Map<String, Object> templateData, String templateName, String outputFilename, boolean shouldGenerate, String skippedByOption, String intendedOutputDir) throws IOException {
+    private File processTemplateToFile(Object templateData, String templateName, String outputFilename, boolean shouldGenerate, String skippedByOption, String intendedOutputDir) throws IOException {
         String adjustedOutputFilename = outputFilename.replaceAll("//", "/").replace('/', File.separatorChar);
         File target = new File(adjustedOutputFilename);
         if (ignoreProcessor.allowsFile(target)) {
@@ -1426,32 +1425,6 @@ public class DefaultGenerator implements Generator {
                 }
                 //writes to file, writes from parsed json from swagger
                 return this.templateProcessor.write(templateData, templateName, target);
-            } else {
-                this.templateProcessor.skip(target.toPath(), String.format(Locale.ROOT, "Skipped by %s options supplied by user.", skippedByOption));
-                return null;
-            }
-        } else {
-            this.templateProcessor.ignore(target.toPath(), "Ignored by rule in ignore file.");
-            return null;
-        }
-    }
-
-    protected File processTemplateToFileEnum(Object templateData, String templateName, String outputFilename, boolean shouldGenerate, String skippedByOption) throws IOException {
-        return processTemplateToFileEnum(templateData, templateName, outputFilename, shouldGenerate, skippedByOption, this.config.getOutputDir());
-    }
-
-    private File processTemplateToFileEnum(Object templateData, String templateName, String outputFilename, boolean shouldGenerate, String skippedByOption, String intendedOutputDir) throws IOException {
-        String adjustedOutputFilename = outputFilename.replaceAll("//", "/").replace('/', File.separatorChar);
-        File target = new File(adjustedOutputFilename);
-        if (ignoreProcessor.allowsFile(target)) {
-            if (shouldGenerate) {
-                Path outDir = java.nio.file.Paths.get(intendedOutputDir).toAbsolutePath();
-                Path absoluteTarget = target.toPath().toAbsolutePath();
-                if (!absoluteTarget.startsWith(outDir)) {
-                    throw new RuntimeException(String.format(Locale.ROOT, "Target files must be generated within the output directory; absoluteTarget=%s outDir=%s", absoluteTarget, outDir));
-                }
-                //writes to file, writes from parsed json from swagger
-                return this.templateProcessor.writeEnum(templateData, templateName, target);
             } else {
                 this.templateProcessor.skip(target.toPath(), String.format(Locale.ROOT, "Skipped by %s options supplied by user.", skippedByOption));
                 return null;

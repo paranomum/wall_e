@@ -16,7 +16,7 @@ import java.util.*;
  * A validator which evaluates an OpenAPI 3.x specification document
  */
 public class OpenApiEvaluator implements Validator<OpenAPI> {
-    private RuleConfiguration ruleConfiguration;
+    private final RuleConfiguration ruleConfiguration;
 
     /**
      * Constructs a new instance of {@link OpenApiEvaluator} with applied rules.

@@ -123,7 +123,7 @@ public class JavaClientCodegen extends AbstractJavaCodegen
     protected boolean useEnumCaseInsensitive = false;
 
     protected int maxAttemptsForRetry = 1;
-    protected long waitTimeMillis = 10l;
+    protected long waitTimeMillis = 10L;
 
     private static class MpRestClientVersion {
         public final String rootPackage;
@@ -598,9 +598,7 @@ public class JavaClientCodegen extends AbstractJavaCodegen
     private static boolean isMultipartType(List<Map<String, String>> consumes) {
         Map<String, String> firstType = consumes.get(0);
         if (firstType != null) {
-            if ("multipart/form-data".equals(firstType.get(MEDIA_TYPE))) {
-                return true;
-            }
+            return "multipart/form-data".equals(firstType.get(MEDIA_TYPE));
         }
         return false;
     }
@@ -657,10 +655,8 @@ public class JavaClientCodegen extends AbstractJavaCodegen
     public CodegenModel fromModel(String name, Schema model) {
         CodegenModel codegenModel = super.fromModel(name, model);
         if (MICROPROFILE.equals(getLibrary())) {
-            if (codegenModel.imports.contains("ApiModel")) {
-                // Remove io.swagger.annotations.ApiModel import
-                codegenModel.imports.remove("ApiModel");
-            }
+            // Remove io.swagger.annotations.ApiModel import
+            codegenModel.imports.remove("ApiModel");
         }
 
         // TODO: inverse logic. Do not add the imports unconditionally in the first place.
@@ -775,22 +771,28 @@ public class JavaClientCodegen extends AbstractJavaCodegen
                 if (m.hasEnums) {
                     for (CodegenProperty var : m.getVars()) {
                         if (var.isEnum) {
-                            LOGGER.info("\n\n\n\n");
-                            LOGGER.info("getDependentRequired in model - {}", var.getDependentRequired());
-                            LOGGER.info("additionalPropertiesIsAnyType in model - {}", var.getAdditionalPropertiesIsAnyType());
-                            LOGGER.info("getAdditionalProperties in model - {}", var.getAdditionalProperties());
-                            LOGGER.info("\n\n\n\n");
                             CodegenEnum ce = new CodegenEnum();
                             ce.classname = var.enumName;
+                            ce.name = var.name;
+                            ce.filePackage = enumPackage;
                             ce.hasEnums = true;
                             ce.enumVars = parseAllowableValues(var.allowableValues.get("enumVars"));
                             ce.description = var.description;
                             ce.dataType = var.dataType;
-                            ce.var = var;
                             ce.additionalEnumTypeAnnotations = (List<String>) modelMap.get(ADDITIONAL_ENUM_TYPE_ANNOTATIONS);
                             ce.useEnumCaseInsensitive = false;
                             ce.isNullable = var.isNullable;
                             ce.enumUnknownDefaultCase = parseEnumValues(var.allowableValues);
+                            if (additionalProperties.containsKey(SERIALIZATION_LIBRARY_JACKSON)) {
+                                ce.jackson = true;
+                            }
+                            if (additionalProperties.containsKey(SERIALIZATION_LIBRARY_GSON)) {
+                                ce.gson = true;
+                            }
+                            if (additionalProperties.containsKey(SERIALIZATION_LIBRARY_JSONB)) {
+                                ce.jsonb = true;
+                            }
+                            ce.isUri = false;
                             if (enums.containsKey(var.name)){
                                 enums.replace(var.name, combineToEnum(enums.get(var.name), ce));
                             }
@@ -826,6 +828,7 @@ public class JavaClientCodegen extends AbstractJavaCodegen
             enumProperty.value = enumToValue.get("value").toString();
             enumProperty.enumUnknownDefaultCase = false;
             enumProperty.isString = true;
+            enumProperty.withXml = false;
             enumProperty.isNullable = false;
             if (enumProperty.name.equals("unknown_default_open_api"))
                 enumProperty.enumUnknownDefaultCase = true;

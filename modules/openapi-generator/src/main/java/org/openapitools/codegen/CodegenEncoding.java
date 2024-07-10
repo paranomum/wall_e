@@ -6,11 +6,11 @@ import java.util.Map;
 import java.util.Objects;
 
 public class CodegenEncoding {
-    private String contentType;
-    private List<CodegenParameter> headers;
-    private String style;
-    private boolean explode;
-    private boolean allowReserved;
+    private final String contentType;
+    private final List<CodegenParameter> headers;
+    private final String style;
+    private final boolean explode;
+    private final boolean allowReserved;
     public Map<String, Object> vendorExtensions = new HashMap<>();
 
     public CodegenEncoding(String contentType, List<CodegenParameter> headers, String style, boolean explode, boolean allowReserved) {
@@ -46,15 +46,14 @@ public class CodegenEncoding {
     }
 
     public String toString() {
-        final StringBuilder sb = new StringBuilder("CodegenEncoding{");
-        sb.append("contentType=").append(contentType);
-        sb.append(", headers=").append(headers);
-        sb.append(", style=").append(style);
-        sb.append(", explode=").append(explode);
-        sb.append(", allowReserved=").append(allowReserved);
-        sb.append(", vendorExtensions=").append(vendorExtensions);
-        sb.append('}');
-        return sb.toString();
+        String sb = "CodegenEncoding{" + "contentType=" + contentType +
+                ", headers=" + headers +
+                ", style=" + style +
+                ", explode=" + explode +
+                ", allowReserved=" + allowReserved +
+                ", vendorExtensions=" + vendorExtensions +
+                '}';
+        return sb;
     }
 
     public boolean equals(Object o) {

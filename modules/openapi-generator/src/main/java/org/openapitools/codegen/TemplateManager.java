@@ -158,7 +158,7 @@ public class TemplateManager implements TemplatingExecutor, TemplateProcessor {
      */
     @Override
     //writes data to files
-    public File write(Map<String, Object> data, String template, File target) throws IOException {
+    public File write(Object data, String template, File target) throws IOException {
         if (this.engineAdapter.handlesFile(template)) {
             // Only pass files with valid endings through template engine
             String templateContent = this.engineAdapter.compileTemplate(this, data, template);
@@ -173,30 +173,6 @@ public class TemplateManager implements TemplatingExecutor, TemplateProcessor {
             } catch (TemplateNotFoundException ex) {
                 is = new FileInputStream(Paths.get(template).toFile());
             }
-            return writeToFile(target.getAbsolutePath(), IOUtils.toByteArray(is));
-        }
-    }
-
-    //writes data to files
-    @Override
-    public File writeEnum(Object data, String template, File target) throws IOException {
-        if (this.engineAdapter.handlesFile(template)) {
-            LOGGER.info("engineAdapter.handlesFile");
-            // Only pass files with valid endings through template engine
-            String templateContent = this.engineAdapter.compileEnumTemplate(this, data, template);
-            return writeToFile(target.getPath(), templateContent);
-        } else {
-            // Do a straight copy of the file if not listed as supported by the template engine.
-            InputStream is;
-            try {
-                // look up the file using the same template resolution logic the adapters would use.
-                String fullTemplatePath = getFullTemplateFile(template);
-                is = getInputStream(fullTemplatePath);
-            } catch (TemplateNotFoundException ex) {
-                LOGGER.info("engineAdapter exception");
-                is = new FileInputStream(Paths.get(template).toFile());
-            }
-            LOGGER.info("engineAdapter writes To file");
             return writeToFile(target.getAbsolutePath(), IOUtils.toByteArray(is));
         }
     }

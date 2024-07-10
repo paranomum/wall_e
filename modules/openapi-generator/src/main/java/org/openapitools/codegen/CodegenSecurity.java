@@ -169,35 +169,34 @@ public class CodegenSecurity {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("CodegenSecurity{");
-        sb.append("name='").append(name).append('\'');
-        sb.append("description='").append(description).append('\'');
-        sb.append(", type='").append(type).append('\'');
-        sb.append(", scheme='").append(scheme).append('\'');
-        sb.append(", isBasic=").append(isBasic);
-        sb.append(", isOAuth=").append(isOAuth);
-        sb.append(", isOpenIdConnect=").append(isOpenId);
-        sb.append(", isApiKey=").append(isApiKey);
-        sb.append(", isBasicBasic=").append(isBasicBasic);
-        sb.append(", isHttpSignature=").append(isHttpSignature);
-        sb.append(", isBasicBearer=").append(isBasicBearer);
-        sb.append(", bearerFormat='").append(bearerFormat).append('\'');
-        sb.append(", vendorExtensions=").append(vendorExtensions);
-        sb.append(", keyParamName='").append(keyParamName).append('\'');
-        sb.append(", isKeyInQuery=").append(isKeyInQuery);
-        sb.append(", isKeyInHeader=").append(isKeyInHeader);
-        sb.append(", isKeyInCookie=").append(isKeyInCookie);
-        sb.append(", flow='").append(flow).append('\'');
-        sb.append(", authorizationUrl='").append(authorizationUrl).append('\'');
-        sb.append(", tokenUrl='").append(tokenUrl).append('\'');
-        sb.append(", refreshUrl='").append(refreshUrl).append('\'');
-        sb.append(", scopes=").append(scopes);
-        sb.append(", isCode=").append(isCode);
-        sb.append(", isPassword=").append(isPassword);
-        sb.append(", isApplication=").append(isApplication);
-        sb.append(", isImplicit=").append(isImplicit);
-        sb.append(", openIdConnectUrl=").append(openIdConnectUrl);
-        sb.append('}');
-        return sb.toString();
+        String sb = "CodegenSecurity{" + "name='" + name + '\'' +
+                "description='" + description + '\'' +
+                ", type='" + type + '\'' +
+                ", scheme='" + scheme + '\'' +
+                ", isBasic=" + isBasic +
+                ", isOAuth=" + isOAuth +
+                ", isOpenIdConnect=" + isOpenId +
+                ", isApiKey=" + isApiKey +
+                ", isBasicBasic=" + isBasicBasic +
+                ", isHttpSignature=" + isHttpSignature +
+                ", isBasicBearer=" + isBasicBearer +
+                ", bearerFormat='" + bearerFormat + '\'' +
+                ", vendorExtensions=" + vendorExtensions +
+                ", keyParamName='" + keyParamName + '\'' +
+                ", isKeyInQuery=" + isKeyInQuery +
+                ", isKeyInHeader=" + isKeyInHeader +
+                ", isKeyInCookie=" + isKeyInCookie +
+                ", flow='" + flow + '\'' +
+                ", authorizationUrl='" + authorizationUrl + '\'' +
+                ", tokenUrl='" + tokenUrl + '\'' +
+                ", refreshUrl='" + refreshUrl + '\'' +
+                ", scopes=" + scopes +
+                ", isCode=" + isCode +
+                ", isPassword=" + isPassword +
+                ", isApplication=" + isApplication +
+                ", isImplicit=" + isImplicit +
+                ", openIdConnectUrl=" + openIdConnectUrl +
+                '}';
+        return sb;
     }
 }

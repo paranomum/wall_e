@@ -275,9 +275,9 @@ public interface CodegenConfig {
 
     void setSkipOperationExample(boolean skipOperationExample);
 
-    public boolean isHideGenerationTimestamp();
+    boolean isHideGenerationTimestamp();
 
-    public void setHideGenerationTimestamp(boolean hideGenerationTimestamp);
+    void setHideGenerationTimestamp(boolean hideGenerationTimestamp);
 
     Map<String, String> supportedLibraries();
 
@@ -343,9 +343,9 @@ public interface CodegenConfig {
 
     TemplatingEngineAdapter getTemplatingEngine();
 
-    public boolean isEnableMinimalUpdate();
+    boolean isEnableMinimalUpdate();
 
-    public void setEnableMinimalUpdate(boolean isEnableMinimalUpdate);
+    void setEnableMinimalUpdate(boolean isEnableMinimalUpdate);
 
     boolean isStrictSpecBehavior();
 

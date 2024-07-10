@@ -53,11 +53,6 @@ public class HandlebarsEngineAdapter extends AbstractTemplatingEngineAdapter {
     private boolean infiniteLoops = false;
     private boolean prettyPrint = false;
 
-    @Override
-    public String compileEnumTemplate(TemplatingExecutor executor, Object bundle, String templateFile) throws IOException {
-        return "";
-    }
-
     /**
      * Provides an identifier used to load the adapter. This could be a name, uuid, or any other string.
      *
@@ -71,7 +66,7 @@ public class HandlebarsEngineAdapter extends AbstractTemplatingEngineAdapter {
     }
 
     public String compileTemplate(TemplatingExecutor executor,
-                                  Map<String, Object> bundle, String templateFile) throws IOException {
+                                  Object bundle, String templateFile) throws IOException {
         TemplateLoader loader = new AbstractTemplateLoader() {
             @Override
             public TemplateSource sourceAt(String location) {
@@ -93,10 +88,7 @@ public class HandlebarsEngineAdapter extends AbstractTemplatingEngineAdapter {
             boolean isValidField(
                     FieldWrapper fw) {
                 if (fw instanceof AccessibleObject) {
-                    if (isUseSetAccessible(fw)) {
-                        return true;
-                    }
-                    return false;
+                    return isUseSetAccessible(fw);
                 }
                 return true;
             }
@@ -107,7 +99,7 @@ public class HandlebarsEngineAdapter extends AbstractTemplatingEngineAdapter {
                 .resolver(
                         MapValueResolver.INSTANCE,
                         JavaBeanValueResolver.INSTANCE,
-                        MY_FIELD_VALUE_RESOLVER.INSTANCE,
+                        FieldValueResolver.INSTANCE,
                         MethodValueResolver.INSTANCE)
                 .build();
 

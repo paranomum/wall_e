@@ -31,13 +31,13 @@ public class StringUtils {
 
     // A cache of camelized words. The camelize() method is invoked many times with the same
     // arguments, this cache is used to optimized performance.
-    private static Cache<Pair<String, CamelizeOption>, String> camelizedWordsCache;
+    private static final Cache<Pair<String, CamelizeOption>, String> camelizedWordsCache;
 
     // A cache of underscored words, used to optimize the performance of the underscore() method.
-    private static Cache<String, String> underscoreWordsCache;
+    private static final Cache<String, String> underscoreWordsCache;
 
     // A cache of escaped words, used to optimize the performance of the escape() method.
-    private static Cache<EscapedNameOptions, String> escapedWordsCache;
+    private static final Cache<EscapedNameOptions, String> escapedWordsCache;
 
     static {
         int cacheSize = Integer.parseInt(GlobalSettings.getProperty(NAME_CACHE_SIZE_PROPERTY, "200"));
@@ -61,10 +61,10 @@ public class StringUtils {
                 .build();
     }
 
-    private static Pattern capitalLetterPattern = Pattern.compile("([A-Z]+)([A-Z][a-z][a-z]+)");
-    private static Pattern lowercasePattern = Pattern.compile("([a-z\\d])([A-Z])");
-    private static Pattern pkgSeparatorPattern = Pattern.compile("\\.");
-    private static Pattern dollarPattern = Pattern.compile("\\$");
+    private static final Pattern capitalLetterPattern = Pattern.compile("([A-Z]+)([A-Z][a-z][a-z]+)");
+    private static final Pattern lowercasePattern = Pattern.compile("([a-z\\d])([A-Z])");
+    private static final Pattern pkgSeparatorPattern = Pattern.compile("\\.");
+    private static final Pattern dollarPattern = Pattern.compile("\\$");
 
     /**
      * Underscore the given word.
@@ -115,12 +115,12 @@ public class StringUtils {
         return camelize(word, UPPERCASE_FIRST_CHAR);
     }
 
-    private static Pattern camelizeSlashPattern = Pattern.compile("\\/(.?)");
-    private static Pattern camelizeUppercasePattern = Pattern.compile("(\\.?)(\\w)([^\\.]*)$");
-    private static Pattern camelizeUnderscorePattern = Pattern.compile("(_)(.)");
-    private static Pattern camelizeHyphenPattern = Pattern.compile("(-)(.)");
-    private static Pattern camelizeDollarPattern = Pattern.compile("\\$");
-    private static Pattern camelizeSimpleUnderscorePattern = Pattern.compile("_");
+    private static final Pattern camelizeSlashPattern = Pattern.compile("\\/(.?)");
+    private static final Pattern camelizeUppercasePattern = Pattern.compile("(\\.?)(\\w)([^\\.]*)$");
+    private static final Pattern camelizeUnderscorePattern = Pattern.compile("(_)(.)");
+    private static final Pattern camelizeHyphenPattern = Pattern.compile("(-)(.)");
+    private static final Pattern camelizeDollarPattern = Pattern.compile("\\$");
+    private static final Pattern camelizeSimpleUnderscorePattern = Pattern.compile("_");
 
     /**
      * Camelize name (parameter, property, method, etc)
@@ -231,10 +231,10 @@ public class StringUtils {
             }
         }
 
-        private String name;
-        private String appendToReplacement;
-        private Set<String> specialChars;
-        private List<String> charactersToAllow;
+        private final String name;
+        private final String appendToReplacement;
+        private final Set<String> specialChars;
+        private final List<String> charactersToAllow;
 
         @Override
         public boolean equals(Object o) {

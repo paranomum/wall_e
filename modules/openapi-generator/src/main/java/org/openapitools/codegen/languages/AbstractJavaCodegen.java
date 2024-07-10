@@ -142,7 +142,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
     protected boolean useJakartaEe = false;
     protected boolean containerDefaultToNull = false;
     protected boolean generateConstructorWithAllArgs = false;
-    private Map<String, String> schemaKeyToModelNameCache = new HashMap<>();
+    private final Map<String, String> schemaKeyToModelNameCache = new HashMap<>();
 
     //TODO refactor cliOptions to add enums
     public AbstractJavaCodegen() {
@@ -740,8 +740,6 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
          ps: This code was specific to SpringCodeGen and now is available to all java generators.
         */
 
-        //TODO delete there all enums and place import or just place imports
-        // maybe i can just place imports and that's all cuz of the templates
         for (ModelsMap modelsAttrs : objs.values()) {
             for (ModelMap mo : modelsAttrs.getModels()) {
                 CodegenModel codegenModel = mo.getModel();
@@ -749,6 +747,15 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
                 Map<String, CodegenProperty> propertyHash = new HashMap<>(codegenModel.vars.size());
                 for (final CodegenProperty property : codegenModel.vars) {
                     propertyHash.put(property.name, property);
+                    if(property.isEnum) {
+                        codegenModel.imports.add(property.enumName);
+                        Map<String, String> importsEnum = new HashMap<>();
+                        importsEnum.put("import", enumPackage + "." + property.enumName); // toEnumFilename(enumName)
+                        List<Map<String, String>> imports = modelsAttrs.getImports();
+                        imports.add(importsEnum);
+                        modelsAttrs.setImports(imports);
+                        LOGGER.info(importsEnum.get("import"));
+                    }
                 }
                 List<CodegenModel> parentModelList = getParentModelList(codegenModel);
                 for (CodegenModel parentCodegenModel: parentModelList) {
@@ -781,6 +788,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
                         Map<String,String> toAdd = new HashMap<>();
                         toAdd.put("import", qimp);
                         modelsAttrs.getImports().add(toAdd);
+                        LOGGER.info(qimp);
                     }
                 }
             }
@@ -1420,7 +1428,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
                         return null;
                     }
                 } else if (schema.getDefault() instanceof UUID) {
-                    return "UUID.fromString(\"" + String.valueOf(schema.getDefault()) + "\")";
+                    return "UUID.fromString(\"" + schema.getDefault() + "\")";
                 } else {
                     _default = String.valueOf(schema.getDefault());
                 }
@@ -1881,7 +1889,6 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
             }
         }
 
-        // add x-implements for serializable to all models
         for (ModelMap mo : objs.getModels()) {
             CodegenModel cm = mo.getModel();
             if (this.serializableModel) {
@@ -2012,7 +2019,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
                                     .flatMap(schema -> ((Schema) schema).getAnyOf().stream())
                                     .filter(schema -> Objects.nonNull(((Schema) schema).getEnum()))
                                     .findFirst()
-                                    .orElse((Schema) s)));
+                                    .orElse(s)));
         }
     }
 

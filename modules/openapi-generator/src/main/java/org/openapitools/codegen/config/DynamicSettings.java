@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class DynamicSettings {
     @JsonAnySetter
-    private Map<String, Object> dynamicProperties = new HashMap<>();
+    private final Map<String, Object> dynamicProperties = new HashMap<>();
 
     @JsonUnwrapped
     @JsonDeserialize(builder = GeneratorSettings.Builder.class)

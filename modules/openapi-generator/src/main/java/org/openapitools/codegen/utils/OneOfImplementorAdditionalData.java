@@ -43,10 +43,10 @@ import org.slf4j.LoggerFactory;
  *   needs to be added to `One` and `Two` because of the above point)
  */
 public class OneOfImplementorAdditionalData {
-    private String implementorName;
-    private List<String> additionalInterfaces = new ArrayList<String>();
-    private List<CodegenProperty> additionalProps = new ArrayList<CodegenProperty>();
-    private List<Map<String, String>> additionalImports = new ArrayList<Map<String, String>>();
+    private final String implementorName;
+    private final List<String> additionalInterfaces = new ArrayList<String>();
+    private final List<CodegenProperty> additionalProps = new ArrayList<CodegenProperty>();
+    private final List<Map<String, String>> additionalImports = new ArrayList<Map<String, String>>();
     private final Logger LOGGER = LoggerFactory.getLogger(OneOfImplementorAdditionalData.class);
 
     public OneOfImplementorAdditionalData(String implementorName) {

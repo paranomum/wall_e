@@ -64,10 +64,7 @@ public interface TemplatingEngineAdapter {
      * @return the processed template result
      * @throws IOException an error occurred in the template processing
      */
-    String compileTemplate(TemplatingExecutor executor, Map<String, Object> bundle,
-                           String templateFile) throws IOException;
-
-    String compileEnumTemplate(TemplatingExecutor executor, Object bundle,
+    String compileTemplate(TemplatingExecutor executor, Object bundle,
                            String templateFile) throws IOException;
 
     /**

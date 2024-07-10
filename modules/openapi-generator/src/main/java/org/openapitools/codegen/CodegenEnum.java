@@ -26,66 +26,33 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * CodegenEnum represents a schema object in a OpenAPI document.
  */
-public class CodegenEnum implements IJsonSchemaValidationProperties {
-    // The parent model name from the schemas. The parent is determined by inspecting the allOf, anyOf and
-    // oneOf attributes in the OAS. First codegen inspects 'allOf', then 'anyOf', then 'oneOf'.
-    // If there are multiple object references in the attribute ('allOf', 'anyOf', 'oneOf'), and one of the
-    // object is a discriminator, that object is set as the parent. If no discriminator is specified,
-    // codegen returns the first one in the list, i.e. there is no obvious parent in the OpenAPI specification.
-    // When possible, the mustache templates should use 'allParents' to handle multiple parents.
-    public String parent, parentSchema;
-    public List<String> interfaces;
-    // The list of parent model name from the schemas. In order of preference, the parent is obtained
-    // from the 'allOf' attribute, then 'anyOf', and finally 'oneOf'.
-    public List<String> allParents;
+public class CodegenEnum {
 
-    // References to parent and interface CodegenModels. Only set when code generator supports inheritance.
-
-    // anyOf, oneOf, allOf
-    public Set<String> anyOf = new TreeSet<>();
-    public Set<String> oneOf = new TreeSet<>();
-    public Set<String> allOf = new TreeSet<>();
-
-    // The schema name as written in the OpenAPI document
-    // If it's a reserved word, it will be escaped.
     public String name;
-    // The original schema name as written in the OpenAPI document.
-    public String schemaName;
-    // The language-specific name of the class that implements this schema.
-    // The name of the class is derived from the OpenAPI schema name with formatting rules applied.
-    // The classname is derived from the OpenAPI schema name, with sanitization and escaping rules applied.
+
     public String classname;
-    // The value of the 'title' attribute in the OpenAPI document.
-    public String title;
-    public String description, classVarName, modelJson, dataType, xmlPrefix, xmlNamespace, xmlName;
+
     public String classFilename; // store the class file name, mainly used for import
-    public String unescapedDescription;
-    public CodegenDiscriminator discriminator;
-    public String defaultValue;
-    public String arrayModelType;
-    public boolean isAlias; // Is this effectively an alias of another simple type
+    public String filePackage;
+
+//    public List<String> importTo; // where to import enums (classFileName);
+
+    public String description, dataType;
+
     public boolean isString, isInteger, isLong, isNumber, isNumeric, isFloat, isDouble, isDate, isDateTime,
             isDecimal, isShort, isUnboundedInteger, isPrimitiveType, isBoolean, isFreeFormObject;
     private boolean additionalPropertiesIsAnyType;
-    public CodegenProperty var; // all properties (without parent's properties)
-    public List<CodegenProperty> allVars = new ArrayList<>(); // all properties (with parent's properties)
-    public List<CodegenProperty> requiredVars = new ArrayList<>(); // a list of required properties
-    public List<CodegenProperty> optionalVars = new ArrayList<>(); // a list of optional properties
-    public List<CodegenProperty> readOnlyVars = new ArrayList<>(); // a list of read-only properties
-    public List<CodegenProperty> readWriteVars = new ArrayList<>(); // a list of properties for read, write
-    public List<CodegenProperty> nonNullableVars = new ArrayList<>(); // a list of non-nullable properties
-    public Map<String, Object> allowableValues;
+    public boolean isUri = false;
+
     public Set<EnumProperty> enumVars = new HashSet<>();
     public String datatypeWithEnum;
     public List<String> additionalEnumTypeAnnotations;
     public boolean useEnumCaseInsensitive;
     public boolean enumUnknownDefaultCase;
+    public boolean jackson = false;
+    public boolean gson = false;
+    public boolean jsonb = false;
 
-    // Sorted sets of required parameters.
-    public Set<String> mandatory = new TreeSet<>(); // without parent's required properties
-    public Set<String> allMandatory = new TreeSet<>(); // with parent's required properties
-
-    public Set<String> imports = new TreeSet<>();
     public boolean hasVars, emptyVars, hasMoreModels, hasEnums, isEnum, hasValidation;
     /**
      * Indicates the OAS schema specifies "nullable: true".
@@ -95,15 +62,6 @@ public class CodegenEnum implements IJsonSchemaValidationProperties {
      * Indicates the type has at least one required property.
      */
     public boolean hasRequired;
-    /**
-     * Indicates the type has at least one optional property.
-     */
-    public boolean hasOptional;
-    public boolean isArray;
-    public boolean hasChildren;
-    public boolean isMap;
-    public boolean isNull;
-    public boolean isVoid = false;
     /**
      * Indicates the OAS schema specifies "deprecated: true".
      */
@@ -121,191 +79,16 @@ public class CodegenEnum implements IJsonSchemaValidationProperties {
     public Map<String, Object> vendorExtensions = new HashMap<>();
     private CodegenComposedSchemas composedSchemas;
     private boolean hasMultipleTypes = false;
-    public HashMap<String, SchemaTestCase> testCases = new HashMap<>();
-    private boolean schemaIsFromAdditionalProperties;
-    private boolean isBooleanSchemaTrue;
-    private boolean isBooleanSchemaFalse;
     private String format;
-    private LinkedHashMap<String, List<String>> dependentRequired;
-    private CodegenProperty contains;
 
-    /**
-     * The type of the value for the additionalProperties keyword in the OAS document.
-     * Used in map like objects, including composed schemas.
-     *
-     * In most programming languages, the additional (undeclared) properties are stored
-     * in a map data structure, such as HashMap in Java, map in golang, or a dict in Python.
-     * There are multiple ways to implement the additionalProperties keyword, depending
-     * on the programming language and mustache template.
-     * One way is to use class inheritance. For example in the generated Java code, the
-     * generated model class may extend from HashMap to store the additional properties.
-     * In that case 'CodegenEnum.parent' is set to represent the class hierarchy.
-     * Another way is to use CodegenEnum.additionalPropertiesType. A code generator
-     * such as Python does not use class inheritance to model additional properties.
-     *
-     * For example, in the OAS schema below, the schema has a declared 'id' property
-     * and additional, undeclared properties of type 'integer' are allowed.
-     *
-     * type: object
-     * properties:
-     *   id:
-     *     type: integer
-     * additionalProperties:
-     *   type: integer
-     *
-     */
-    public String additionalPropertiesType;
-
-    /**
-     * True if additionalProperties is set to true (boolean value), any type, free form object, etc
-     *
-     * TODO: we may rename this to isAdditionalPropertiesEnabled or something
-     * else to avoid confusions
-     */
-    public boolean isAdditionalPropertiesTrue;
-
-    private Integer maxProperties;
-    private Integer minProperties;
-    private boolean uniqueItems;
-    private Boolean uniqueItemsBoolean;
-    private Integer maxItems;
-    private Integer minItems;
-    private Integer maxLength;
-    private Integer minLength;
-    private boolean exclusiveMinimum;
-    private boolean exclusiveMaximum;
-    private String minimum;
-    private String maximum;
-    private String pattern;
-    private Number multipleOf;
-    private CodegenProperty items;
-    private CodegenProperty additionalProperties;
-    private boolean isModel;
-    private boolean hasDiscriminatorWithNonEmptyMapping;
-    private boolean isAnyType;
-    private boolean isUuid;
-    private boolean isUri;
-    private Map<String, CodegenProperty> requiredVarsMap;
-    private String ref;
-
-    public String getAdditionalPropertiesType() {
-        return additionalPropertiesType;
-    }
-
-    public void setAdditionalPropertiesType(String additionalPropertiesType) {
-        this.additionalPropertiesType = additionalPropertiesType;
-    }
-
-    @Override
-    public CodegenProperty getContains() {
-        return contains;
-    }
-
-    @Override
-    public void setContains(CodegenProperty contains) {
-        this.contains = contains;
-    }
-
-    @Override
-    public LinkedHashMap<String, List<String>> getDependentRequired() {
-        return dependentRequired;
-    }
-
-    @Override
-    public void setDependentRequired(LinkedHashMap<String, List<String>> dependentRequired) {
-        this.dependentRequired = dependentRequired;
-    }
-
-    @Override
-    public boolean getIsBooleanSchemaTrue() {
-        return isBooleanSchemaTrue;
-    }
-
-    @Override
-    public void setIsBooleanSchemaTrue(boolean isBooleanSchemaTrue) {
-        this.isBooleanSchemaTrue = isBooleanSchemaTrue;
-    }
-
-    @Override
-    public boolean getIsBooleanSchemaFalse() {
-        return isBooleanSchemaFalse;
-    }
-
-    @Override
-    public void setIsBooleanSchemaFalse(boolean isBooleanSchemaFalse) {
-        this.isBooleanSchemaFalse = isBooleanSchemaFalse;
-    }
-
-    @Override
     public String getFormat() {
         return format;
     }
 
-    @Override
     public void setFormat(String format) {
         this.format = format;
     }
 
-    @Override
-    public String getRef() {
-        return ref;
-    }
-
-    @Override
-    public void setRef(String ref) {
-        this.ref = ref;
-    }
-
-    @Override
-    public boolean getSchemaIsFromAdditionalProperties() {
-        return schemaIsFromAdditionalProperties;
-    }
-
-    @Override
-    public void setSchemaIsFromAdditionalProperties(boolean schemaIsFromAdditionalProperties) {
-        this.schemaIsFromAdditionalProperties = schemaIsFromAdditionalProperties;
-    }
-
-    @Override
-    public List<CodegenProperty> getVars(){
-        return null;
-    }
-
-    @Override
-    public void setVars(List<CodegenProperty> vars){
-    }
-
-    public Set<String> getAllMandatory() {
-        return allMandatory;
-    }
-
-    public void setAllMandatory(Set<String> allMandatory) {
-        this.allMandatory = allMandatory;
-    }
-
-    public List<String> getAllParents() {
-        return allParents;
-    }
-
-    public void setAllParents(List<String> allParents) {
-        this.allParents = allParents;
-    }
-
-    public List<CodegenProperty> getAllVars() {
-        return allVars;
-    }
-
-    public void setAllVars(List<CodegenProperty> allVars) {
-        this.allVars = allVars;
-    }
-
-    public List<CodegenProperty> getNonNullableVars() {
-        return nonNullableVars;
-    }
-
-    public void setNonNullableVars(List<CodegenProperty> nonNullableVars) {
-        this.nonNullableVars = nonNullableVars;
-    }
 
     public Set<EnumProperty> getEnumVars() {
         return enumVars;
@@ -313,22 +96,6 @@ public class CodegenEnum implements IJsonSchemaValidationProperties {
 
     public void setEnumVars(Set<EnumProperty> enumVars) {
         this.enumVars = enumVars;
-    }
-
-    public Map<String, Object> getAllowableValues() {
-        return allowableValues;
-    }
-
-    public void setAllowableValues(Map<String, Object> allowableValues) {
-        this.allowableValues = allowableValues;
-    }
-
-    public String getArrayModelType() {
-        return arrayModelType;
-    }
-
-    public void setArrayModelType(String arrayModelType) {
-        this.arrayModelType = arrayModelType;
     }
 
     public String getClassFilename() {
@@ -339,12 +106,12 @@ public class CodegenEnum implements IJsonSchemaValidationProperties {
         this.classFilename = classFilename;
     }
 
-    public String getClassVarName() {
-        return classVarName;
+    public String getFilePackage() {
+        return filePackage;
     }
 
-    public void setClassVarName(String classVarName) {
-        this.classVarName = classVarName;
+    public void setFilePackage(String filePackage) {
+        this.filePackage = filePackage;
     }
 
     /**
@@ -374,12 +141,12 @@ public class CodegenEnum implements IJsonSchemaValidationProperties {
         this.dataType = dataType;
     }
 
-    public String getDefaultValue() {
-        return defaultValue;
+    public String getDatatypeWithEnum() {
+        return datatypeWithEnum;
     }
 
-    public void setDefaultValue(String defaultValue) {
-        this.defaultValue = defaultValue;
+    public void setDatatypeWithEnum(String datatypeWithEnum) {
+        this.datatypeWithEnum = datatypeWithEnum;
     }
 
     public String getDescription() {
@@ -390,106 +157,12 @@ public class CodegenEnum implements IJsonSchemaValidationProperties {
         this.description = description;
     }
 
-    /**
-     * Returns the discriminator for this schema object, or null if no discriminator has been specified.
-     *
-     * The list of all possible schema discriminator mapping values is obtained
-     * from explicit discriminator mapping values in the OpenAPI document, and from
-     * inherited discriminators through oneOf, allOf, anyOf.
-     * For example, a discriminator may be defined in a 'Pet' schema as shown below.
-     * The Dog and Cat schemas inherit the discriminator through the allOf reference.
-     * In the 'Pet' schema, the supported discriminator mapping values for the
-     * 'objectType' properties are 'Dog' and 'Cat'.
-     * The allowed discriminator mapping value for the Dog schema is 'Dog'.
-     * The allowed discriminator mapping value for the Cat schema is 'Dog'.
-     *
-     * Pet:
-     *   type: object
-     *   discriminator:
-     *     propertyName: objectType
-     *   required:
-     *     - objectType
-     *   properties:
-     *     objectType:
-     *     type: string
-     * Dog:
-     *   allOf:
-     *   - $ref: '#/components/schemas/Pet'
-     *   - type: object
-     *     properties:
-     *       p1:
-     *         type: string
-     * Cat:
-     *   allOf:
-     *   - $ref: '#/components/schemas/Pet'
-     *   - type: object
-     *     properties:
-     *       p2:
-     *         type: string
-     *
-     * @return the discriminator.
-     */
-    public CodegenDiscriminator getDiscriminator() {
-        return discriminator;
-    }
-
-    public void setDiscriminator(CodegenDiscriminator discriminator) {
-        this.discriminator = discriminator;
-        if (discriminator != null && !discriminator.getMappedModels().isEmpty()) {
-            this.hasDiscriminatorWithNonEmptyMapping = true;
-        }
-    }
-
-    /**
-     * Returns the name of the discriminator property for this schema in the OpenAPI document.
-     * In the OpenAPI document, the discriminator may be specified in the local schema or
-     * it may be inherited, such as through a 'allOf' schema which references another schema
-     * that has a discriminator, recursively.
-     *
-     * @return the name of the discriminator property.
-     */
-    public String getDiscriminatorName() {
-        return discriminator == null ? null : discriminator.getPropertyName();
-    }
-
     public ExternalDocumentation getExternalDocumentation() {
         return externalDocumentation;
     }
 
     public void setExternalDocumentation(ExternalDocumentation externalDocumentation) {
         this.externalDocumentation = externalDocumentation;
-    }
-
-    public Set<String> getImports() {
-        return imports;
-    }
-
-    public void setImports(Set<String> imports) {
-        this.imports = imports;
-    }
-
-    public List<String> getInterfaces() {
-        return interfaces;
-    }
-
-    public void setInterfaces(List<String> interfaces) {
-        this.interfaces = interfaces;
-    }
-
-    public Set<String> getMandatory() {
-        return mandatory;
-    }
-
-    public void setMandatory(Set<String> mandatory) {
-        this.mandatory = mandatory;
-    }
-
-    public String getModelJson() {
-        return modelJson;
-    }
-
-    public void setModelJson(String modelJson) {
-        this.modelJson = modelJson;
     }
 
     public String getName() {
@@ -500,347 +173,68 @@ public class CodegenEnum implements IJsonSchemaValidationProperties {
         this.name = name;
     }
 
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
-
-
-    public List<CodegenProperty> getOptionalVars() {
-        return optionalVars;
-    }
-
-    public void setOptionalVars(List<CodegenProperty> optionalVars) {
-        this.optionalVars = optionalVars;
-    }
-
-    public String getParent() {
-        return parent;
-    }
-
-    public void setParent(String parent) {
-        this.parent = parent;
-    }
-
-    public String getParentSchema() {
-        return parentSchema;
-    }
-
-    public void setParentSchema(String parentSchema) {
-        this.parentSchema = parentSchema;
-    }
-
-    @Override
-    public String getPattern() {
-        return pattern;
-    }
-
-    @Override
-    public void setPattern(String pattern) {
-        this.pattern = pattern;
-    }
-
-    @Override
-    public String getMaximum() {
-        return maximum;
-    }
-
-    @Override
-    public void setMaximum(String maximum) {
-        this.maximum = maximum;
-    }
-
-    @Override
-    public String getMinimum() {
-        return minimum;
-    }
-
-    @Override
-    public void setMinimum(String minimum) {
-        this.minimum = minimum;
-    }
-
-    @Override
-    public boolean getExclusiveMaximum() {
-        return exclusiveMaximum;
-    }
-
-    @Override
-    public void setExclusiveMaximum(boolean exclusiveMaximum) {
-        this.exclusiveMaximum = exclusiveMaximum;
-    }
-
-    @Override
-    public boolean getExclusiveMinimum() {
-        return exclusiveMinimum;
-    }
-
-    @Override
-    public void setExclusiveMinimum(boolean exclusiveMinimum) {
-        this.exclusiveMinimum = exclusiveMinimum;
-    }
-
-    @Override
-    public Integer getMinLength() {
-        return minLength;
-    }
-
-    @Override
-    public void setMinLength(Integer minLength) {
-        this.minLength = minLength;
-    }
-
-    @Override
-    public Integer getMaxLength() {
-        return maxLength;
-    }
-
-    @Override
-    public void setMaxLength(Integer maxLength) {
-        this.maxLength = maxLength;
-    }
-
-    @Override
-    public Integer getMinItems() {
-        return minItems;
-    }
-
-    @Override
-    public void setMinItems(Integer minItems) {
-        this.minItems = minItems;
-    }
-
-    @Override
-    public Integer getMaxItems() {
-        return maxItems;
-    }
-
-    @Override
-    public void setMaxItems(Integer maxItems) {
-        this.maxItems = maxItems;
-    }
-
-    @Override
-    public boolean getUniqueItems() {
-        return uniqueItems;
-    }
-
-    @Override
-    public void setUniqueItems(boolean uniqueItems) {
-        this.uniqueItems = uniqueItems;
-    }
-
-    @Override
-    public Boolean getUniqueItemsBoolean() {
-        return uniqueItemsBoolean;
-    }
-
-    @Override
-    public void setUniqueItemsBoolean(Boolean uniqueItemsBoolean) {
-        this.uniqueItemsBoolean = uniqueItemsBoolean;
-    }
-
-    @Override
-    public Integer getMinProperties() {
-        return minProperties;
-    }
-
-    @Override
-    public void setMinProperties(Integer minProperties) {
-        this.minProperties = minProperties;
-    }
-
-    @Override
-    public Integer getMaxProperties() {
-        return maxProperties;
-    }
-
-    @Override
-    public void setMaxProperties(Integer maxProperties) {
-        this.maxProperties = maxProperties;
-    }
-
-    @Override
-    public Number getMultipleOf() {
-        return multipleOf;
-    }
-
-    @Override
-    public void setMultipleOf(Number multipleOf) {
-        this.multipleOf = multipleOf;
-    }
-
-    @Override
-    public CodegenProperty getItems() {
-        return items;
-    }
-
-    @Override
-    public void setItems(CodegenProperty items) {
-        this.items = items;
-    }
-
-    @Override
-    public boolean getIsModel() {
-        return isModel;
-    }
-
-    @Override
-    public void setIsModel(boolean isModel) {
-        this.isModel = isModel;
-    }
-
-    @Override
     public boolean getIsDate() {
         return isDate;
     }
 
-    @Override
     public void setIsDate(boolean isDate) {
         this.isDate = isDate;
     }
 
-    @Override
     public boolean getIsDateTime() {
         return isDateTime;
     }
 
-    @Override
     public void setIsDateTime(boolean isDateTime) {
         this.isDateTime = isDateTime;
     }
 
-    @Override
-    public boolean getIsMap() {
-        return isMap;
-    }
-
-    @Override
-    public void setIsMap(boolean isMap) {
-        this.isMap = isMap;
-    }
-
-    @Override
-    public boolean getIsArray() {
-        return isArray;
-    }
-
-    @Override
-    public void setIsArray(boolean isArray) {
-        this.isArray = isArray;
-    }
-
-    @Override
     public boolean getIsShort() {
         return isShort;
     }
 
-    @Override
     public void setIsShort(boolean isShort) {
         this.isShort = isShort;
     }
 
-    @Override
     public boolean getIsBoolean() {
         return isBoolean;
     }
 
-    @Override
     public void setIsBoolean(boolean isBoolean) {
         this.isBoolean = isBoolean;
     }
 
-    @Override
     public boolean getIsUnboundedInteger() {
         return isUnboundedInteger;
     }
 
-    @Override
     public void setIsUnboundedInteger(boolean isUnboundedInteger) {
         this.isUnboundedInteger = isUnboundedInteger;
     }
 
-    @Override
     public boolean getIsPrimitiveType() {
         return isPrimitiveType;
     }
 
-    @Override
     public void setIsPrimitiveType(boolean isPrimitiveType) {
         this.isPrimitiveType = isPrimitiveType;
     }
 
-    @Override
-    public CodegenProperty getAdditionalProperties() {
-        return additionalProperties;
+    public boolean getIsUri() {
+        return isUri;
     }
 
-    @Override
-    public void setAdditionalProperties(CodegenProperty additionalProperties) {
-        this.additionalProperties = additionalProperties;
+    public void setIsUri(boolean isUri) {
+        this.isUri = isUri;
     }
 
-    @Override
     public boolean getHasValidation() {
         return hasValidation;
     }
 
-    @Override
     public void setHasValidation(boolean hasValidation) {
         this.hasValidation = hasValidation;
-    }
-
-    public List<CodegenProperty> getReadOnlyVars() {
-        return readOnlyVars;
-    }
-
-    public void setReadOnlyVars(List<CodegenProperty> readOnlyVars) {
-        this.readOnlyVars = readOnlyVars;
-    }
-
-    public List<CodegenProperty> getReadWriteVars() {
-        return readWriteVars;
-    }
-
-    public void setReadWriteVars(List<CodegenProperty> readWriteVars) {
-        this.readWriteVars = readWriteVars;
-    }
-
-    @Override
-    public List<CodegenProperty> getRequiredVars() {
-        return requiredVars;
-    }
-
-    @Override
-    public void setRequiredVars(List<CodegenProperty> requiredVars) {
-        this.requiredVars = requiredVars;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getUnescapedDescription() {
-        return unescapedDescription;
-    }
-
-    public void setUnescapedDescription(String unescapedDescription) {
-        this.unescapedDescription = unescapedDescription;
-    }
-
-    public CodegenProperty getVar() {
-        return var;
-    }
-
-    public void setVar(CodegenProperty vars) {
-        this.var = vars;
     }
 
     public Map<String, Object> getVendorExtensions() {
@@ -851,251 +245,144 @@ public class CodegenEnum implements IJsonSchemaValidationProperties {
         this.vendorExtensions = vendorExtensions;
     }
 
-    public String getXmlName() {
-        return xmlName;
-    }
-
-    public void setXmlName(String xmlName) {
-        this.xmlName = xmlName;
-    }
-
-    public String getXmlNamespace() {
-        return xmlNamespace;
-    }
-
-    public void setXmlNamespace(String xmlNamespace) {
-        this.xmlNamespace = xmlNamespace;
-    }
-
-    public String getXmlPrefix() {
-        return xmlPrefix;
-    }
-
-    public void setXmlPrefix(String xmlPrefix) {
-        this.xmlPrefix = xmlPrefix;
-    }
-
-    @Override
-    public boolean getIsNull() {
-        return isNull;
-    }
-
-    @Override
-    public void setIsNull(boolean isNull) {
-        this.isNull = isNull;
-    }
-
-    @Override
-    public boolean getIsVoid() {
-        return isVoid;
-    }
-
-    @Override
-    public void setIsVoid(boolean isVoid) {
-        this.isVoid = isVoid;
-    }
-
-    @Override
     public boolean getAdditionalPropertiesIsAnyType() {
         return additionalPropertiesIsAnyType;
     }
 
-    @Override
     public void setAdditionalPropertiesIsAnyType(boolean additionalPropertiesIsAnyType) {
         this.additionalPropertiesIsAnyType = additionalPropertiesIsAnyType;
     }
 
-    @Override
     public boolean getHasVars() {
         return this.hasVars;
     }
 
-    @Override
     public void setHasVars(boolean hasVars) {
         this.hasVars = hasVars;
     }
 
-    @Override
     public boolean getHasRequired() {
         return this.hasRequired;
     }
 
-    @Override
     public void setHasRequired(boolean hasRequired) {
         this.hasRequired = hasRequired;
     }
 
-    @Override
-    public boolean getHasDiscriminatorWithNonEmptyMapping() {
-        return hasDiscriminatorWithNonEmptyMapping;
-    }
-
-    @Override
-    public void setHasDiscriminatorWithNonEmptyMapping(boolean hasDiscriminatorWithNonEmptyMapping) {
-        this.hasDiscriminatorWithNonEmptyMapping = hasDiscriminatorWithNonEmptyMapping;
-    }
-
-    @Override
     public boolean getIsString() {
         return isString;
     }
 
-    @Override
     public void setIsString(boolean isString) {
         this.isString = isString;
     }
 
-    @Override
     public boolean getIsNumber() {
         return isNumber;
     }
 
-    @Override
     public void setIsNumber(boolean isNumber) {
         this.isNumber = isNumber;
     }
 
-    @Override
-    public boolean getIsAnyType() {
-        return isAnyType;
-    }
-
-    @Override
-    public void setIsAnyType(boolean isAnyType) {
-        this.isAnyType = isAnyType;
-    }
-
-    @Override
     public boolean getIsFreeFormObject() {
         return isFreeFormObject;
     }
 
-    @Override
     public void setIsFreeFormObject(boolean isFreeFormObject) {
         this.isFreeFormObject = isFreeFormObject;
     }
 
-    public boolean getIsUuid() { return isUuid; }
-
-    public void setIsUuid(boolean isUuid) { this.isUuid = isUuid; }
-
-    public boolean getIsUri() { return isUri; }
-
-    public void setIsUri(boolean isUri) { this.isUri = isUri; }
-
-    @Override
     public void setComposedSchemas(CodegenComposedSchemas composedSchemas) {
         this.composedSchemas = composedSchemas;
     }
 
-    @Override
     public CodegenComposedSchemas getComposedSchemas() {
         return composedSchemas;
     }
 
-    @Override
     public boolean getHasMultipleTypes() {
         return hasMultipleTypes;
     }
 
-    @Override
     public void setHasMultipleTypes(boolean hasMultipleTypes) {
         this.hasMultipleTypes = hasMultipleTypes;
     }
 
-    @Override
     public boolean getIsFloat() {
         return isFloat;
     }
 
-    @Override
     public void setIsFloat(boolean isFloat) {
         this.isFloat = isFloat;
     }
 
-    @Override
     public boolean getIsDouble() {
         return isDouble;
     }
 
-    @Override
     public void setIsDouble(boolean isDouble) {
         this.isDouble = isDouble;
     }
 
-    @Override
     public boolean getIsInteger() {
         return isInteger;
     }
 
-    @Override
     public void setIsInteger(boolean isInteger) {
         this.isInteger = isInteger;
     }
 
-    @Override
     public boolean getIsLong() {
         return isLong;
     }
 
-    @Override
     public void setIsLong(boolean isLong) {
         this.isLong = isLong;
     }
 
-    @Override
     public boolean getIsBinary() {
         return false;
     }
 
-    @Override
     public void setIsBinary(boolean isBinary) {}
 
-    @Override
     public boolean getIsByteArray() {
         return false;
     }
 
-    @Override
     public void setIsByteArray(boolean isByteArray) {}
 
-    @Override
     public boolean getIsDecimal() {
         return isDecimal;
     }
 
-    @Override
     public void setIsDecimal(boolean isDecimal) {
         this.isDecimal = isDecimal;
     }
 
-    @Override
     public boolean getIsEnum() {
         return isEnum;
     }
 
-    @Override
     public void setIsEnum(boolean isEnum) {
         this.isEnum = isEnum;
     }
 
-    @Override
     public boolean getHasEnums() {
         return hasEnums;
     }
 
-    @Override
     public void setHasEnums(boolean hasEnums) {
         this.hasEnums = hasEnums;
     }
 
 
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof CodegenEnum)) return false;
         CodegenEnum that = (CodegenEnum) o;
-        return isAlias == that.isAlias &&
+        return
                 isString == that.isString &&
                 isInteger == that.isInteger &&
                 isShort == that.isShort &&
@@ -1115,243 +402,82 @@ public class CodegenEnum implements IJsonSchemaValidationProperties {
                 isEnum == that.isEnum &&
                 isNullable == that.isNullable &&
                 hasRequired == that.hasRequired &&
-                hasOptional == that.hasOptional &&
-                isArray == that.isArray &&
-                hasChildren == that.hasChildren &&
-                isMap == that.isMap &&
                 isDeprecated == that.isDeprecated &&
                 hasReadOnly == that.hasReadOnly &&
                 hasOnlyReadOnly == that.hasOnlyReadOnly &&
-                isNull == that.isNull &&
                 hasValidation == that.hasValidation &&
                 isDecimal == that.isDecimal &&
+                        isUri == that.isUri &&
                 hasMultipleTypes == that.getHasMultipleTypes() &&
-                hasDiscriminatorWithNonEmptyMapping == that.getHasDiscriminatorWithNonEmptyMapping() &&
-                isUuid == that.getIsUuid() &&
-                isUri == that.getIsUri() &&
-                isBooleanSchemaTrue == that.getIsBooleanSchemaTrue() &&
-                isBooleanSchemaFalse == that.getIsBooleanSchemaFalse() &&
-                getSchemaIsFromAdditionalProperties() == that.getSchemaIsFromAdditionalProperties() &&
-                getIsAnyType() == that.getIsAnyType() &&
-                getAdditionalPropertiesIsAnyType() == that.getAdditionalPropertiesIsAnyType() &&
-                getUniqueItems() == that.getUniqueItems() &&
-                getExclusiveMinimum() == that.getExclusiveMinimum() &&
-                getExclusiveMaximum() == that.getExclusiveMaximum() &&
-                Objects.equals(contains, that.getContains()) &&
-                Objects.equals(dependentRequired, that.getDependentRequired()) &&
+                        Objects.equals(datatypeWithEnum, that.datatypeWithEnum) &&
                 Objects.equals(format, that.getFormat()) &&
-                Objects.equals(uniqueItemsBoolean, that.getUniqueItemsBoolean()) &&
-                Objects.equals(ref, that.getRef()) &&
-                Objects.equals(requiredVarsMap, that.getRequiredVarsMap()) &&
+                Objects.equals(filePackage, that.filePackage) &&
                 Objects.equals(composedSchemas, that.composedSchemas) &&
-                Objects.equals(parent, that.parent) &&
-                Objects.equals(parentSchema, that.parentSchema) &&
-                Objects.equals(interfaces, that.interfaces) &&
-                Objects.equals(allParents, that.allParents) &&
-                Objects.equals(anyOf, that.anyOf) &&
-                Objects.equals(oneOf, that.oneOf) &&
-                Objects.equals(allOf, that.allOf) &&
                 Objects.equals(name, that.name) &&
-                Objects.equals(schemaName, that.schemaName) &&
                 Objects.equals(classname, that.classname) &&
-                Objects.equals(title, that.title) &&
                 Objects.equals(description, that.description) &&
-                Objects.equals(classVarName, that.classVarName) &&
-                Objects.equals(modelJson, that.modelJson) &&
                 Objects.equals(dataType, that.dataType) &&
-                Objects.equals(xmlPrefix, that.xmlPrefix) &&
-                Objects.equals(xmlNamespace, that.xmlNamespace) &&
-                Objects.equals(xmlName, that.xmlName) &&
                 Objects.equals(classFilename, that.classFilename) &&
-                Objects.equals(unescapedDescription, that.unescapedDescription) &&
-                Objects.equals(discriminator, that.discriminator) &&
-                Objects.equals(defaultValue, that.defaultValue) &&
-                Objects.equals(arrayModelType, that.arrayModelType) &&
-                Objects.equals(var, that.var) &&
-                Objects.equals(allVars, that.allVars) &&
-                Objects.equals(nonNullableVars, that.nonNullableVars) &&
-                Objects.equals(requiredVars, that.requiredVars) &&
-                Objects.equals(optionalVars, that.optionalVars) &&
-                Objects.equals(readOnlyVars, that.readOnlyVars) &&
-                Objects.equals(readWriteVars, that.readWriteVars) &&
-                Objects.equals(allowableValues, that.allowableValues) &&
-                Objects.equals(mandatory, that.mandatory) &&
-                Objects.equals(allMandatory, that.allMandatory) &&
-                Objects.equals(imports, that.imports) &&
                 Objects.equals(externalDocumentation, that.externalDocumentation) &&
-                Objects.equals(vendorExtensions, that.vendorExtensions) &&
-                Objects.equals(additionalPropertiesType, that.additionalPropertiesType) &&
-                Objects.equals(isAdditionalPropertiesTrue, that.isAdditionalPropertiesTrue) &&
-                Objects.equals(getMaxProperties(), that.getMaxProperties()) &&
-                Objects.equals(getMinProperties(), that.getMinProperties()) &&
-                Objects.equals(getMaxItems(), that.getMaxItems()) &&
-                Objects.equals(getEnumVars(), that.getEnumVars()) &&
-                Objects.equals(getMinItems(), that.getMinItems()) &&
-                Objects.equals(getMaxLength(), that.getMaxLength()) &&
-                Objects.equals(getMinLength(), that.getMinLength()) &&
-                Objects.equals(getMinimum(), that.getMinimum()) &&
-                Objects.equals(getMaximum(), that.getMaximum()) &&
-                Objects.equals(getPattern(), that.getPattern()) &&
-                Objects.equals(getItems(), that.getItems()) &&
-                Objects.equals(getAdditionalProperties(), that.getAdditionalProperties()) &&
-                Objects.equals(getIsModel(), that.getIsModel()) &&
-                Objects.equals(getMultipleOf(), that.getMultipleOf());
+                Objects.equals(vendorExtensions, that.vendorExtensions);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(getParent(), getParentSchema(), getInterfaces(), getAllParents(), anyOf, oneOf, allOf,
-                getName(), getSchemaName(), getClassname(), getTitle(),
-                getDescription(), getClassVarName(), getModelJson(), getDataType(), getXmlPrefix(), getXmlNamespace(),
-                getXmlName(), getClassFilename(), getUnescapedDescription(), getDiscriminator(), getDefaultValue(),
-                getArrayModelType(), isAlias, isString, isInteger, isLong, isNumber, isNumeric, isFloat, isDouble,
-                isDate, isDateTime, isNull, hasValidation, isShort, isUnboundedInteger, isBoolean,
-                getEnumVars(),
-                getVars(), getAllVars(), getNonNullableVars(), getRequiredVars(), getOptionalVars(), getReadOnlyVars(), getReadWriteVars(),
-                getAllowableValues(), getMandatory(), getAllMandatory(), getImports(), hasVars,
-                isEmptyVars(), hasMoreModels, hasEnums, isEnum, isNullable, hasRequired, hasOptional, isArray,
-                hasChildren, isMap, isDeprecated, hasReadOnly, hasOnlyReadOnly, getExternalDocumentation(), getVendorExtensions(),
-                getAdditionalPropertiesType(), getMaxProperties(), getMinProperties(), getUniqueItems(), getMaxItems(),
-                getMinItems(), getMaxLength(), getMinLength(), getExclusiveMinimum(), getExclusiveMaximum(), getMinimum(),
-                getMaximum(), getPattern(), getMultipleOf(), getItems(), getAdditionalProperties(), getIsModel(),
-                getAdditionalPropertiesIsAnyType(), hasDiscriminatorWithNonEmptyMapping,
-                isAnyType, getComposedSchemas(), hasMultipleTypes, isDecimal, isUuid, isUri, requiredVarsMap, ref,
-                uniqueItemsBoolean, schemaIsFromAdditionalProperties, isBooleanSchemaTrue, isBooleanSchemaFalse,
-                format, dependentRequired, contains);
+        return Objects.hash(
+                getName(), getClassname(),
+                getDescription(), getDataType(), getClassFilename(), getFilePackage(), isString, isInteger, isLong, isNumber, isNumeric,
+                isFloat, isDouble,
+                isDate, isDateTime, hasValidation, isShort, isUnboundedInteger, isBoolean, isUri,
+                getEnumVars(), hasVars, getDatatypeWithEnum(),
+                isEmptyVars(), hasMoreModels, hasEnums, isEnum, isNullable, hasRequired,
+                isDeprecated, hasReadOnly, hasOnlyReadOnly, getExternalDocumentation(), getVendorExtensions(),
+                getAdditionalPropertiesIsAnyType(), getComposedSchemas(), hasMultipleTypes, isDecimal,
+                format);
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("CodegenEnum{");
-        sb.append("name='").append(name).append('\'');
-        sb.append(", schemaName='").append(schemaName).append('\'');
-        sb.append(", parent='").append(parent).append('\'');
-        sb.append(", parentSchema='").append(parentSchema).append('\'');
-        sb.append(", interfaces=").append(interfaces);
-        sb.append(", allParents=").append(allParents);
-        sb.append(", anyOf=").append(anyOf);
-        sb.append(", oneOf=").append(oneOf);
-        sb.append(", allOf=").append(allOf);
-        sb.append(", classname='").append(classname).append('\'');
-        sb.append(", title='").append(title).append('\'');
-        sb.append(", description='").append(description).append('\'');
-        sb.append(", classVarName='").append(classVarName).append('\'');
-        sb.append(", modelJson='").append(modelJson).append('\'');
-        sb.append(", dataType='").append(dataType).append('\'');
-        sb.append(", xmlPrefix='").append(xmlPrefix).append('\'');
-        sb.append(", xmlNamespace='").append(xmlNamespace).append('\'');
-        sb.append(", xmlName='").append(xmlName).append('\'');
-        sb.append(", classFilename='").append(classFilename).append('\'');
-        sb.append(", unescapedDescription='").append(unescapedDescription).append('\'');
-        sb.append(", discriminator=").append(discriminator);
-        sb.append(", defaultValue='").append(defaultValue).append('\'');
-        sb.append(", arrayModelType='").append(arrayModelType).append('\'');
-        sb.append(", isAlias=").append(isAlias);
-        sb.append(", isString=").append(isString);
-        sb.append(", isInteger=").append(isInteger);
-        sb.append(", isShort=").append(isShort);
-        sb.append(", isLong=").append(isLong);
-        sb.append(", isUnboundedInteger=").append(isUnboundedInteger);
-        sb.append(", isBoolean=").append(isBoolean);
-        sb.append(", isNumber=").append(isNumber);
-        sb.append(", isNumeric=").append(isNumeric);
-        sb.append(", isFloat=").append(isFloat);
-        sb.append(", isDouble=").append(isDouble);
-        sb.append(", isDate=").append(isDate);
-        sb.append(", isDateTime=").append(isDateTime);
-        sb.append(", var=").append(var);
-        sb.append(", enumVars=").append(enumVars);
-        sb.append(", allVars=").append(allVars);
-        sb.append(", nonNullableVars=").append(nonNullableVars);
-        sb.append(", requiredVars=").append(requiredVars);
-        sb.append(", optionalVars=").append(optionalVars);
-        sb.append(", readOnlyVars=").append(readOnlyVars);
-        sb.append(", readWriteVars=").append(readWriteVars);
-        sb.append(", allowableValues=").append(allowableValues);
-        sb.append(", mandatory=").append(mandatory);
-        sb.append(", allMandatory=").append(allMandatory);
-        sb.append(", imports=").append(imports);
-        sb.append(", hasVars=").append(hasVars);
-        sb.append(", emptyVars=").append(emptyVars);
-        sb.append(", hasMoreModels=").append(hasMoreModels);
-        sb.append(", hasEnums=").append(hasEnums);
-        sb.append(", isEnum=").append(isEnum);
-        sb.append(", isNullable=").append(isNullable);
-        sb.append(", hasRequired=").append(hasRequired);
-        sb.append(", hasOptional=").append(hasOptional);
-        sb.append(", isArray=").append(isArray);
-        sb.append(", hasChildren=").append(hasChildren);
-        sb.append(", isMap=").append(isMap);
-        sb.append(", isDeprecated=").append(isDeprecated);
-        sb.append(", hasReadOnly=").append(hasReadOnly);
-        sb.append(", hasOnlyReadOnly=").append(hasOnlyReadOnly);
-        sb.append(", externalDocumentation=").append(externalDocumentation);
-        sb.append(", vendorExtensions=").append(vendorExtensions);
-        sb.append(", additionalPropertiesType='").append(additionalPropertiesType).append('\'');
-        sb.append(", isAdditionalPropertiesTrue='").append(isAdditionalPropertiesTrue).append('\'');
-        sb.append(", maxProperties=").append(maxProperties);
-        sb.append(", minProperties=").append(minProperties);
-        sb.append(", uniqueItems=").append(uniqueItems);
-        sb.append(", uniqueItemsBoolean=").append(uniqueItemsBoolean);
-        sb.append(", maxItems=").append(maxItems);
-        sb.append(", minItems=").append(minItems);
-        sb.append(", maxLength=").append(maxLength);
-        sb.append(", minLength=").append(minLength);
-        sb.append(", exclusiveMinimum=").append(exclusiveMinimum);
-        sb.append(", exclusiveMaximum=").append(exclusiveMaximum);
-        sb.append(", minimum='").append(minimum).append('\'');
-        sb.append(", maximum='").append(maximum).append('\'');
-        sb.append(", pattern='").append(pattern).append('\'');
-        sb.append(", multipleOf='").append(multipleOf).append('\'');
-        sb.append(", items='").append(items).append('\'');
-        sb.append(", additionalProperties='").append(additionalProperties).append('\'');
-        sb.append(", isModel='").append(isModel).append('\'');
-        sb.append(", isNull='").append(isNull);
-        sb.append(", hasValidation='").append(hasValidation);
-        sb.append(", getAdditionalPropertiesIsAnyType=").append(getAdditionalPropertiesIsAnyType());
-        sb.append(", getHasDiscriminatorWithNonEmptyMapping=").append(hasDiscriminatorWithNonEmptyMapping);
-        sb.append(", getIsAnyType=").append(getIsAnyType());
-        sb.append(", composedSchemas=").append(composedSchemas);
-        sb.append(", hasMultipleTypes=").append(hasMultipleTypes);
-        sb.append(", isDecimal=").append(isDecimal);
-        sb.append(", isUUID=").append(isUuid);
-        sb.append(", isURI=").append(isUri);
-        sb.append(", requiredVarsMap=").append(requiredVarsMap);
-        sb.append(", ref=").append(ref);
-        sb.append(", schemaIsFromAdditionalProperties=").append(schemaIsFromAdditionalProperties);
-        sb.append(", isBooleanSchemaTrue=").append(isBooleanSchemaTrue);
-        sb.append(", isBooleanSchemaFalse=").append(isBooleanSchemaFalse);
-        sb.append(", format=").append(format);
-        sb.append(", dependentRequired=").append(dependentRequired);
-        sb.append(", contains=").append(contains);
-        sb.append('}');
-        return sb.toString();
-    }
-
-    /*
-     * To clean up mapped models if needed and add mapped models to imports
-     *
-     * @param cleanUpMappedModels Clean up mapped models if set to true
-     */
-    public void addDiscriminatorMappedModelsImports(boolean cleanUpMappedModels) {
-        if (discriminator == null || discriminator.getMappedModels() == null) {
-            return;
-        }
-
-        if (cleanUpMappedModels && !this.hasChildren && // no child
-                (this.oneOf == null || this.oneOf.isEmpty()) && // not oneOf
-                (this.anyOf == null || this.anyOf.isEmpty())) { // not anyOf
-            //clear the mapping
-            discriminator.setMappedModels(null);
-            return;
-        }
-
-        // import child schemas defined in mapped models
-        for (CodegenDiscriminator.MappedModel mm : discriminator.getMappedModels()) {
-            if (!"".equals(mm.getModelName())) {
-                imports.add(mm.getModelName());
-            }
-        }
+        String sb = "CodegenEnum{" + "name='" + name + '\'' +
+                ", classname='" + classname + '\'' +
+                ", description='" + description + '\'' +
+                ", dataType='" + dataType + '\'' +
+                ", datatypeWithEnum='" + datatypeWithEnum + '\'' +
+                ", classFilename='" + classFilename + '\'' +
+                ", filePackage='" + filePackage + '\'' +
+                ", isString=" + isString +
+                ", isInteger=" + isInteger +
+                ", isShort=" + isShort +
+                ", isLong=" + isLong +
+                ", isUnboundedInteger=" + isUnboundedInteger +
+                ", isBoolean=" + isBoolean +
+                ", isNumber=" + isNumber +
+                ", isNumeric=" + isNumeric +
+                ", isFloat=" + isFloat +
+                ", isDouble=" + isDouble +
+                ", isDate=" + isDate +
+                ", isDateTime=" + isDateTime +
+                ", enumVars=" + enumVars +
+                ", hasVars=" + hasVars +
+                ", emptyVars=" + emptyVars +
+                ", hasMoreModels=" + hasMoreModels +
+                ", hasEnums=" + hasEnums +
+                ", isEnum=" + isEnum +
+                ", isNullable=" + isNullable +
+                ", hasRequired=" + hasRequired +
+                ", isDeprecated=" + isDeprecated +
+                ", hasReadOnly=" + hasReadOnly +
+                ", hasOnlyReadOnly=" + hasOnlyReadOnly +
+                ", externalDocumentation=" + externalDocumentation +
+                ", vendorExtensions=" + vendorExtensions +
+                ", hasValidation='" + hasValidation +
+                ", getAdditionalPropertiesIsAnyType=" + getAdditionalPropertiesIsAnyType() +
+                ", composedSchemas=" + composedSchemas +
+                ", hasMultipleTypes=" + hasMultipleTypes +
+                ", hasMultipleTypes=" + hasMultipleTypes +
+                ", isDecimal=" + isDecimal +
+                ", isUri=" + isUri +
+                ", format=" + format +
+                '}';
+        return sb;
     }
 
     public boolean isEmptyVars() {
@@ -1362,69 +488,4 @@ public class CodegenEnum implements IJsonSchemaValidationProperties {
         this.emptyVars = emptyVars;
     }
 
-    public boolean getHasItems() {
-        return this.items != null;
-    }
-
-    @Override
-    public Map<String, CodegenProperty> getRequiredVarsMap() { return requiredVarsMap; }
-
-    @Override
-    public void setRequiredVarsMap(Map<String, CodegenProperty> requiredVarsMap) { this.requiredVarsMap=requiredVarsMap; }
-
-    /**
-     * Remove duplicated properties in all variable list
-     */
-    public void removeAllDuplicatedProperty() {
-        // remove duplicated properties
-        optionalVars = removeDuplicatedProperty(optionalVars);
-        requiredVars = removeDuplicatedProperty(requiredVars);
-        allVars = removeDuplicatedProperty(allVars);
-        nonNullableVars = removeDuplicatedProperty(nonNullableVars);
-        readOnlyVars = removeDuplicatedProperty(readOnlyVars);
-        readWriteVars = removeDuplicatedProperty(readWriteVars);
-    }
-
-    private List<CodegenProperty> removeDuplicatedProperty(List<CodegenProperty> vars) {
-        // clone the list first
-        List<CodegenProperty> newList = new ArrayList<>();
-        for (CodegenProperty cp : vars) {
-            newList.add(cp.clone());
-        }
-
-        Set<String> propertyNames = new TreeSet<>();
-        Set<String> duplicatedNames = new TreeSet<>();
-
-        ListIterator<CodegenProperty> iterator = newList.listIterator();
-        while (iterator.hasNext()) {
-            CodegenProperty element = iterator.next();
-
-            if (propertyNames.contains(element.baseName)) {
-                duplicatedNames.add(element.baseName);
-                iterator.remove();
-            } else {
-                propertyNames.add(element.baseName);
-            }
-        }
-
-        return newList;
-    }
-
-    /**
-     * Remove self reference import
-     */
-    public void removeSelfReferenceImport() {
-        for (CodegenProperty cp : allVars) {
-            if (cp == null) {
-                // TODO cp shouldn't be null. Show a warning message instead
-            } else {
-                // detect self import
-                if (this.classname.equalsIgnoreCase(cp.dataType) ||
-                        (cp.isContainer && cp.items != null && this.classname.equalsIgnoreCase(cp.items.dataType))) {
-                    this.imports.remove(this.classname); // remove self import
-                    cp.isSelfReference = true;
-                }
-            }
-        }
-    }
 }

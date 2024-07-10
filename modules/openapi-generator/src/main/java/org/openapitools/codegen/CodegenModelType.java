@@ -28,7 +28,7 @@ public enum CodegenModelType {
 
     private final Class<?> defaultImplementation;
 
-    private CodegenModelType(Class<?> defaultImplementation) {
+    CodegenModelType(Class<?> defaultImplementation) {
         this.defaultImplementation = defaultImplementation;
     }
 

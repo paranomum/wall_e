@@ -46,7 +46,7 @@ public class DryRunTemplateManager implements TemplateProcessor {
      * @return The actual file
      */
     @Override
-    public File write(Map<String, Object> data, String template, File target) throws IOException {
+    public File write(Object data, String template, File target) throws IOException {
         return writeToFile(target.getAbsolutePath(), "dummy".getBytes(StandardCharsets.UTF_8));
     }
 
@@ -76,11 +76,6 @@ public class DryRunTemplateManager implements TemplateProcessor {
         dryRunStatusMap.put(filename, status);
 
         return outputFile;
-    }
-
-    @Override
-    public File writeEnum(Object data, String template, File target) throws IOException {
-        return null;
     }
 
     @Override

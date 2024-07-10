@@ -64,13 +64,12 @@ public class CodegenComposedSchemas {
     }
 
     public String toString() {
-        final StringBuilder sb = new StringBuilder("CodegenComposedSchemas{");
-        sb.append("oneOf=").append(oneOf);
-        sb.append(", anyOf=").append(anyOf);
-        sb.append(", allOf=").append(allOf);
-        sb.append(", not=").append(not);
-        sb.append('}');
-        return sb.toString();
+        String sb = "CodegenComposedSchemas{" + "oneOf=" + oneOf +
+                ", anyOf=" + anyOf +
+                ", allOf=" + allOf +
+                ", not=" + not +
+                '}';
+        return sb;
     }
 
     public boolean equals(Object o) {

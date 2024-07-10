@@ -8,7 +8,7 @@ import io.swagger.v3.oas.models.OpenAPI;
  */
 public class SchemaWrapper {
     OpenAPI specification;
-    private Schema schema;
+    private final Schema schema;
 
     /**
      * Constructs a new instance of {@link SchemaWrapper}

@@ -455,10 +455,9 @@ public class JavaPlayFrameworkCodegen extends AbstractJavaCodegen implements Bea
         @Override
         public String toString() {
             String superString = super.toString();
-            final StringBuilder sb = new StringBuilder(superString);
-            sb.append(", jwksUrl='").append(jwksUrl).append('\'');
-            sb.append(", tokenIntrospectUrl='").append(tokenIntrospectUrl).append('\'');
-            return sb.toString();
+            String sb = superString + ", jwksUrl='" + jwksUrl + '\'' +
+                    ", tokenIntrospectUrl='" + tokenIntrospectUrl + '\'';
+            return sb;
         }
 
     }

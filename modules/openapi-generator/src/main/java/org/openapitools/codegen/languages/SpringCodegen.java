@@ -121,7 +121,7 @@ public class SpringCodegen extends AbstractJavaCodegen
             return description;
         }
 
-        private String description;
+        private final String description;
 
         RequestMappingMode(String description) {
             this.description = description;
@@ -829,7 +829,7 @@ public class SpringCodegen extends AbstractJavaCodegen
                             }
                             if (operation.getTags().size() > 0) {
                                 final String tag = operation.getTags().get(0);
-                                operation.setTags(Arrays.asList(tag));
+                                operation.setTags(Collections.singletonList(tag));
                             }
                             operation.addExtension("x-tags", tags);
                         }

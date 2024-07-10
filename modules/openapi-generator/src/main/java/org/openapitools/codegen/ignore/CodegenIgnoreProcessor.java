@@ -38,8 +38,8 @@ public class CodegenIgnoreProcessor {
 
     private File ignoreFile = null;
 
-    private List<Rule> exclusionRules = new ArrayList<>();
-    private List<Rule> inclusionRules = new ArrayList<>();
+    private final List<Rule> exclusionRules = new ArrayList<>();
+    private final List<Rule> inclusionRules = new ArrayList<>();
 
     /**
      * Loads the default ignore file (.openapi-generator-ignore) from the specified path.

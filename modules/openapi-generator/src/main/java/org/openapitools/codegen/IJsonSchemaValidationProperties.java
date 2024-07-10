@@ -282,44 +282,31 @@ public interface IJsonSchemaValidationProperties {
             setIsArray(true);
         } else if (ModelUtils.isFileSchema(p) && !ModelUtils.isStringSchema(p)) {
             // swagger v2 only, type file
-            ;
         } else if (ModelUtils.isStringSchema(p)) {
             setIsString(true);
             if (ModelUtils.isByteArraySchema(p)) {
-                ;
             } else if (ModelUtils.isBinarySchema(p)) {
                 // openapi v3 way of representing binary + file data
                 // for backward compatibility with 2.x file type
                 setIsString(false);
             } else if (ModelUtils.isUUIDSchema(p)) {
                 // keep isString to true to make it backward compatible
-                ;
             } else if (ModelUtils.isURISchema(p)) {
-                ;
             } else if (ModelUtils.isEmailSchema(p)) {
-                ;
             } else if (ModelUtils.isPasswordSchema(p)) {
-                ;
             } else if (ModelUtils.isDateSchema(p)) {
-                ;
             } else if (ModelUtils.isDateTimeSchema(p)) {
-                ;
             } else if (ModelUtils.isDecimalSchema(p)) { // type: string, format: number
-                ;
             }
         } else if (ModelUtils.isNumberSchema(p)) {
             if (ModelUtils.isFloatSchema(p)) { // float
-                ;
             } else if (ModelUtils.isDoubleSchema(p)) { // double
-                ;
             } else { // type is number and without format
                 setIsNumber(true);
             }
         } else if (ModelUtils.isIntegerSchema(p)) { // integer type
             if (ModelUtils.isLongSchema(p)) { // int64/long format
-                ;
             } else if (ModelUtils.isShortSchema(p)) { // int32/short format
-                ;
             } else { // unbounded integer
                 setIsUnboundedInteger(true);
             }
@@ -380,7 +367,7 @@ public interface IJsonSchemaValidationProperties {
                 anyOfs = composed.getAnyOf();
             }
             if (composed.getNot() != null && featureSet.getSchemaSupportFeatures().contains(SchemaSupportFeature.not)) {
-                nots = Arrays.asList(composed.getNot());
+                nots = Collections.singletonList(composed.getNot());
             }
             Stream<CodegenProperty> innerTypes = Stream.of(
                             allOfs.stream(), anyOfs.stream(), oneOfs.stream(), nots.stream())

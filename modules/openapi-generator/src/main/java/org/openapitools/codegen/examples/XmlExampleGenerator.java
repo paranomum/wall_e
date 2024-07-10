@@ -33,7 +33,7 @@ public class XmlExampleGenerator {
     public static String TAG_START = "<";
     public static String CLOSE_TAG = ">";
     public static String TAG_END = "</";
-    private static String EMPTY = "";
+    private static final String EMPTY = "";
     protected Map<String, Schema> examples;
 
     public XmlExampleGenerator(Map<String, Schema> examples) {
@@ -129,10 +129,7 @@ public class XmlExampleGenerator {
 
         if (ModelUtils.isArraySchema(schema)) {
             Schema inner = ModelUtils.getSchemaItems(schema);
-            boolean wrapped = false;
-            if (schema.getXml() != null && schema.getXml().getWrapped() != null && schema.getXml().getWrapped()) {
-                wrapped = true;
-            }
+            boolean wrapped = schema.getXml() != null && schema.getXml().getWrapped() != null && schema.getXml().getWrapped();
             if (wrapped) {
                 String prefix = EMPTY;
                 if (name != null) {

@@ -37,7 +37,7 @@ public enum GeneratorLanguage {
 
     private final String label;
 
-    private GeneratorLanguage(String label) {
+    GeneratorLanguage(String label) {
         this.label = label;
     }
 

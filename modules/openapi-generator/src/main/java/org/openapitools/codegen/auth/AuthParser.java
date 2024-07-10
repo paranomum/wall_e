@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,11 +41,7 @@ public class AuthParser {
             for (String part : parts) {
                 String[] kvPair = part.split(":");
                 if (kvPair.length == 2) {
-                    try {
-                        auths.add(new AuthorizationValue(URLDecoder.decode(kvPair[0], "UTF-8"), URLDecoder.decode(kvPair[1], "UTF-8"), "header"));
-                    } catch (UnsupportedEncodingException e) {
-                        LOGGER.warn(e.getMessage());
-                    }
+                    auths.add(new AuthorizationValue(URLDecoder.decode(kvPair[0], StandardCharsets.UTF_8), URLDecoder.decode(kvPair[1], StandardCharsets.UTF_8), "header"));
                 }
             }
         }
@@ -59,9 +56,9 @@ public class AuthParser {
                     if (b.toString().length() > 0) {
                         b.append(",");
                     }
-                    b.append(URLEncoder.encode(v.getKeyName(), "UTF-8"))
+                    b.append(URLEncoder.encode(v.getKeyName(), StandardCharsets.UTF_8))
                             .append(":")
-                            .append(URLEncoder.encode(v.getValue(), "UTF-8"));
+                            .append(URLEncoder.encode(v.getValue(), StandardCharsets.UTF_8));
                 } catch (Exception e) {
                     // continue
                     LOGGER.error(e.getMessage(), e);

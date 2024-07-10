@@ -5,7 +5,7 @@ package org.openapitools.codegen.validations.oas;
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class RuleConfiguration {
-    private static String propertyPrefix = "openapi.generator.rule";
+    private static final String propertyPrefix = "openapi.generator.rule";
     private boolean enableRecommendations = defaultedBoolean(propertyPrefix + ".recommendations", true);
     private boolean enableApacheNginxUnderscoreRecommendation = defaultedBoolean(propertyPrefix + ".apache-nginx-underscore", true);
     private boolean enableOneOfWithPropertiesRecommendation = defaultedBoolean(propertyPrefix + ".oneof-properties-ambiguity", true);

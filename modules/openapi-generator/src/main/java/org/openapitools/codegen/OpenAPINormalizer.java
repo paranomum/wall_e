@@ -34,11 +34,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class OpenAPINormalizer {
-    private OpenAPI openAPI;
+    private final OpenAPI openAPI;
     private Map<String, String> inputRules = new HashMap<>();
-    private Map<String, Boolean> rules = new HashMap<>();
+    private final Map<String, Boolean> rules = new HashMap<>();
 
-    private TreeSet<String> anyTypeTreeSet = new TreeSet<>();
+    private final TreeSet<String> anyTypeTreeSet = new TreeSet<>();
 
     final Logger LOGGER = LoggerFactory.getLogger(OpenAPINormalizer.class);
 
@@ -849,9 +849,9 @@ public class OpenAPINormalizer {
         // find the string schema (enum)
         if (s0 instanceof StringSchema && s1 instanceof StringSchema) {
             if (((StringSchema) s0).getEnum() != null) { // s0 is enum, s1 is string
-                result = (StringSchema) s0;
+                result = s0;
             } else if (((StringSchema) s1).getEnum() != null) { // s1 is enum, s0 is string
-                result = (StringSchema) s1;
+                result = s1;
             } else { // both are string
                 result = schema;
             }
@@ -916,9 +916,7 @@ public class OpenAPINormalizer {
         // convert referenced enum of null only to `nullable:true`
         Schema referencedSchema = ModelUtils.getReferencedSchema(openAPI, schema);
         if (referencedSchema.getEnum() != null && referencedSchema.getEnum().size() == 1) {
-            if ("null".equals(String.valueOf(referencedSchema.getEnum().get(0)))) {
-                return true;
-            }
+            return "null".equals(String.valueOf(referencedSchema.getEnum().get(0)));
         }
 
         return false;
@@ -972,9 +970,9 @@ public class OpenAPINormalizer {
                 // if only one element left, simplify to just the element (schema)
                 if (oneOfSchemas.size() == 1) {
                     if (Boolean.TRUE.equals(schema.getNullable())) { // retain nullable setting
-                        ((Schema) oneOfSchemas.get(0)).setNullable(true);
+                        oneOfSchemas.get(0).setNullable(true);
                     }
-                    return (Schema) oneOfSchemas.get(0);
+                    return oneOfSchemas.get(0);
                 }
             }
         }
@@ -1104,9 +1102,9 @@ public class OpenAPINormalizer {
             // if only one element left, simplify to just the element (schema)
             if (anyOfSchemas.size() == 1) {
                 if (Boolean.TRUE.equals(schema.getNullable())) { // retain nullable setting
-                    ((Schema) anyOfSchemas.get(0)).setNullable(true);
+                    anyOfSchemas.get(0).setNullable(true);
                 }
-                return (Schema) anyOfSchemas.get(0);
+                return anyOfSchemas.get(0);
             }
         }
 

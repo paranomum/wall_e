@@ -8,7 +8,7 @@ import java.util.Locale;
  * Holds details about a file's write status for display via the --dry-run option of CLI
  */
 class DryRunStatus {
-    private Path path;
+    private final Path path;
     private State state;
     private String reason;
 

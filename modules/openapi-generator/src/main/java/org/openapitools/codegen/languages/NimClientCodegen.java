@@ -341,11 +341,7 @@ public class NimClientCodegen extends DefaultCodegen implements CodegenConfig {
             return false;
         } else if (languageSpecificPrimitives.contains(type)) {
             return false;
-        } else if (typeMapping.containsKey(type) && languageSpecificPrimitives.contains(typeMapping.get(type))) {
-            return false;
-        }
-
-        return true;
+        } else return !typeMapping.containsKey(type) || !languageSpecificPrimitives.contains(typeMapping.get(type));
     }
 
     @Override

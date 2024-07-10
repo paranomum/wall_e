@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.Objects;
 
 public class CodegenMediaType {
-    private CodegenProperty schema;
-    private LinkedHashMap<String, CodegenEncoding> encoding;
+    private final CodegenProperty schema;
+    private final LinkedHashMap<String, CodegenEncoding> encoding;
     private HashMap<String, SchemaTestCase> testCases = new HashMap<>();
     private Map<String, Example> examples = null;
     private Object example = null;
@@ -56,12 +56,11 @@ public class CodegenMediaType {
     }
 
     public String toString() {
-        final StringBuilder sb = new StringBuilder("CodegenMediaType{");
-        sb.append("schema=").append(schema);
-        sb.append(", encoding=").append(encoding);
-        sb.append(", vendorExtensions=").append(vendorExtensions);
-        sb.append('}');
-        return sb.toString();
+        String sb = "CodegenMediaType{" + "schema=" + schema +
+                ", encoding=" + encoding +
+                ", vendorExtensions=" + vendorExtensions +
+                '}';
+        return sb;
     }
 
     public boolean equals(Object o) {
