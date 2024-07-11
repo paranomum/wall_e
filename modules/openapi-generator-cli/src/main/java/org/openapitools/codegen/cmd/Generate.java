@@ -393,6 +393,9 @@ public class Generate extends OpenApiGeneratorCommand {
         if (isNotEmpty(generatorName)) {
             configurator.setGeneratorName(generatorName);
         }
+        else {
+            configurator.setGeneratorName(DEFAULT_GENERATOR_NAME);
+        }
 
         if (isNotEmpty(output)) {
             configurator.setOutputDir(output);

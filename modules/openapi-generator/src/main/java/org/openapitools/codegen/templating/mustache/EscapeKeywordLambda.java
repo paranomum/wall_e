@@ -38,7 +38,7 @@ import java.util.function.UnaryOperator;
  * </pre>
  */
 public class EscapeKeywordLambda implements Mustache.Lambda {
-    private UnaryOperator<String> callback;
+    private final UnaryOperator<String> callback;
 
     public EscapeKeywordLambda(final UnaryOperator<String> callback) {
         this.callback = callback;

@@ -83,7 +83,7 @@ public class CodegenConfigurator {
     private Map<String, String> serverVariables = new HashMap<>();
     private String auth;
 
-    private List<TemplateDefinition> userDefinedTemplates = new ArrayList<>();
+    private final List<TemplateDefinition> userDefinedTemplates = new ArrayList<>();
 
     public CodegenConfigurator() {
 
@@ -176,7 +176,7 @@ public class CodegenConfigurator {
     private static DynamicSettings readDynamicSettings(String configFile, Module... modules) {
         ObjectMapper mapper;
 
-        if (FilenameUtils.isExtension(configFile.toLowerCase(Locale.ROOT), new String[]{"yml", "yaml"})) {
+        if (FilenameUtils.isExtension(configFile.toLowerCase(Locale.ROOT), "yml", "yaml")) {
             mapper = Yaml.mapper().copy();
         } else {
             mapper = Json.mapper().copy();

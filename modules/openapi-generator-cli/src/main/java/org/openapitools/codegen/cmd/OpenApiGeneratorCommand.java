@@ -7,6 +7,10 @@ import javax.inject.Inject;
 
 @SuppressWarnings({"java:S106"})
 public abstract class OpenApiGeneratorCommand implements Runnable {
+
+    public final String DEFAULT_GENERATOR_NAME = "java";
+//    public final String DEFAULT_API_PACKAGE = "";
+
     @Inject
     public GlobalOptions globalOptions = new GlobalOptions();
 

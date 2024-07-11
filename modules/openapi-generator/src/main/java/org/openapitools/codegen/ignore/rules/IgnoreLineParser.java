@@ -33,7 +33,7 @@ public class IgnoreLineParser {
         ROOTED_MARKER("/"),
         COMMENT(null);
 
-        private String pattern;
+        private final String pattern;
 
         Token(String pattern) {
             this.pattern = pattern;

@@ -1100,6 +1100,17 @@ public class CodegenModel implements IJsonSchemaValidationProperties {
     }
 
     @Override
+    public boolean getHasEnums() {
+        return hasEnums;
+    }
+
+    @Override
+    public void setHasEnums(boolean hasEnums) {
+        this.hasEnums = hasEnums;
+    }
+
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof CodegenModel)) return false;
@@ -1233,113 +1244,112 @@ public class CodegenModel implements IJsonSchemaValidationProperties {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("CodegenModel{");
-        sb.append("name='").append(name).append('\'');
-        sb.append(", schemaName='").append(schemaName).append('\'');
-        sb.append(", parent='").append(parent).append('\'');
-        sb.append(", parentSchema='").append(parentSchema).append('\'');
-        sb.append(", interfaces=").append(interfaces);
-        sb.append(", interfaceModels=").append(interfaceModels !=null ? interfaceModels.size() : "[]");
-        sb.append(", allParents=").append(allParents);
-        sb.append(", parentModel=").append(parentModel);
-        sb.append(", children=").append(children != null ? children.size() : "[]");
-        sb.append(", anyOf=").append(anyOf);
-        sb.append(", oneOf=").append(oneOf);
-        sb.append(", allOf=").append(allOf);
-        sb.append(", classname='").append(classname).append('\'');
-        sb.append(", title='").append(title).append('\'');
-        sb.append(", description='").append(description).append('\'');
-        sb.append(", classVarName='").append(classVarName).append('\'');
-        sb.append(", modelJson='").append(modelJson).append('\'');
-        sb.append(", dataType='").append(dataType).append('\'');
-        sb.append(", xmlPrefix='").append(xmlPrefix).append('\'');
-        sb.append(", xmlNamespace='").append(xmlNamespace).append('\'');
-        sb.append(", xmlName='").append(xmlName).append('\'');
-        sb.append(", classFilename='").append(classFilename).append('\'');
-        sb.append(", unescapedDescription='").append(unescapedDescription).append('\'');
-        sb.append(", discriminator=").append(discriminator);
-        sb.append(", defaultValue='").append(defaultValue).append('\'');
-        sb.append(", arrayModelType='").append(arrayModelType).append('\'');
-        sb.append(", isAlias=").append(isAlias);
-        sb.append(", isString=").append(isString);
-        sb.append(", isInteger=").append(isInteger);
-        sb.append(", isShort=").append(isShort);
-        sb.append(", isLong=").append(isLong);
-        sb.append(", isUnboundedInteger=").append(isUnboundedInteger);
-        sb.append(", isBoolean=").append(isBoolean);
-        sb.append(", isNumber=").append(isNumber);
-        sb.append(", isNumeric=").append(isNumeric);
-        sb.append(", isFloat=").append(isFloat);
-        sb.append(", isDouble=").append(isDouble);
-        sb.append(", isDate=").append(isDate);
-        sb.append(", isDateTime=").append(isDateTime);
-        sb.append(", vars=").append(vars);
-        sb.append(", allVars=").append(allVars);
-        sb.append(", nonNullableVars=").append(nonNullableVars);
-        sb.append(", requiredVars=").append(requiredVars);
-        sb.append(", optionalVars=").append(optionalVars);
-        sb.append(", readOnlyVars=").append(readOnlyVars);
-        sb.append(", readWriteVars=").append(readWriteVars);
-        sb.append(", parentVars=").append(parentVars);
-        sb.append(", allowableValues=").append(allowableValues);
-        sb.append(", mandatory=").append(mandatory);
-        sb.append(", allMandatory=").append(allMandatory);
-        sb.append(", imports=").append(imports);
-        sb.append(", hasVars=").append(hasVars);
-        sb.append(", emptyVars=").append(emptyVars);
-        sb.append(", hasMoreModels=").append(hasMoreModels);
-        sb.append(", hasEnums=").append(hasEnums);
-        sb.append(", isEnum=").append(isEnum);
-        sb.append(", isNullable=").append(isNullable);
-        sb.append(", hasRequired=").append(hasRequired);
-        sb.append(", hasOptional=").append(hasOptional);
-        sb.append(", isArray=").append(isArray);
-        sb.append(", hasChildren=").append(hasChildren);
-        sb.append(", isMap=").append(isMap);
-        sb.append(", isDeprecated=").append(isDeprecated);
-        sb.append(", hasReadOnly=").append(hasReadOnly);
-        sb.append(", hasOnlyReadOnly=").append(hasOnlyReadOnly);
-        sb.append(", externalDocumentation=").append(externalDocumentation);
-        sb.append(", vendorExtensions=").append(vendorExtensions);
-        sb.append(", additionalPropertiesType='").append(additionalPropertiesType).append('\'');
-        sb.append(", isAdditionalPropertiesTrue='").append(isAdditionalPropertiesTrue).append('\'');
-        sb.append(", maxProperties=").append(maxProperties);
-        sb.append(", minProperties=").append(minProperties);
-        sb.append(", uniqueItems=").append(uniqueItems);
-        sb.append(", uniqueItemsBoolean=").append(uniqueItemsBoolean);
-        sb.append(", maxItems=").append(maxItems);
-        sb.append(", minItems=").append(minItems);
-        sb.append(", maxLength=").append(maxLength);
-        sb.append(", minLength=").append(minLength);
-        sb.append(", exclusiveMinimum=").append(exclusiveMinimum);
-        sb.append(", exclusiveMaximum=").append(exclusiveMaximum);
-        sb.append(", minimum='").append(minimum).append('\'');
-        sb.append(", maximum='").append(maximum).append('\'');
-        sb.append(", pattern='").append(pattern).append('\'');
-        sb.append(", multipleOf='").append(multipleOf).append('\'');
-        sb.append(", items='").append(items).append('\'');
-        sb.append(", additionalProperties='").append(additionalProperties).append('\'');
-        sb.append(", isModel='").append(isModel).append('\'');
-        sb.append(", isNull='").append(isNull);
-        sb.append(", hasValidation='").append(hasValidation);
-        sb.append(", getAdditionalPropertiesIsAnyType=").append(getAdditionalPropertiesIsAnyType());
-        sb.append(", getHasDiscriminatorWithNonEmptyMapping=").append(hasDiscriminatorWithNonEmptyMapping);
-        sb.append(", getIsAnyType=").append(getIsAnyType());
-        sb.append(", composedSchemas=").append(composedSchemas);
-        sb.append(", hasMultipleTypes=").append(hasMultipleTypes);
-        sb.append(", isDecimal=").append(isDecimal);
-        sb.append(", isUUID=").append(isUuid);
-        sb.append(", isURI=").append(isUri);
-        sb.append(", requiredVarsMap=").append(requiredVarsMap);
-        sb.append(", ref=").append(ref);
-        sb.append(", schemaIsFromAdditionalProperties=").append(schemaIsFromAdditionalProperties);
-        sb.append(", isBooleanSchemaTrue=").append(isBooleanSchemaTrue);
-        sb.append(", isBooleanSchemaFalse=").append(isBooleanSchemaFalse);
-        sb.append(", format=").append(format);
-        sb.append(", dependentRequired=").append(dependentRequired);
-        sb.append(", contains=").append(contains);
-        sb.append('}');
-        return sb.toString();
+        String sb = "CodegenModel{" + "name='" + name + '\'' +
+                ", schemaName='" + schemaName + '\'' +
+                ", parent='" + parent + '\'' +
+                ", parentSchema='" + parentSchema + '\'' +
+                ", interfaces=" + interfaces +
+                ", interfaceModels=" + (interfaceModels != null ? interfaceModels.size() : "[]") +
+                ", allParents=" + allParents +
+                ", parentModel=" + parentModel +
+                ", children=" + (children != null ? children.size() : "[]") +
+                ", anyOf=" + anyOf +
+                ", oneOf=" + oneOf +
+                ", allOf=" + allOf +
+                ", classname='" + classname + '\'' +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", classVarName='" + classVarName + '\'' +
+                ", modelJson='" + modelJson + '\'' +
+                ", dataType='" + dataType + '\'' +
+                ", xmlPrefix='" + xmlPrefix + '\'' +
+                ", xmlNamespace='" + xmlNamespace + '\'' +
+                ", xmlName='" + xmlName + '\'' +
+                ", classFilename='" + classFilename + '\'' +
+                ", unescapedDescription='" + unescapedDescription + '\'' +
+                ", discriminator=" + discriminator +
+                ", defaultValue='" + defaultValue + '\'' +
+                ", arrayModelType='" + arrayModelType + '\'' +
+                ", isAlias=" + isAlias +
+                ", isString=" + isString +
+                ", isInteger=" + isInteger +
+                ", isShort=" + isShort +
+                ", isLong=" + isLong +
+                ", isUnboundedInteger=" + isUnboundedInteger +
+                ", isBoolean=" + isBoolean +
+                ", isNumber=" + isNumber +
+                ", isNumeric=" + isNumeric +
+                ", isFloat=" + isFloat +
+                ", isDouble=" + isDouble +
+                ", isDate=" + isDate +
+                ", isDateTime=" + isDateTime +
+                ", vars=" + vars +
+                ", allVars=" + allVars +
+                ", nonNullableVars=" + nonNullableVars +
+                ", requiredVars=" + requiredVars +
+                ", optionalVars=" + optionalVars +
+                ", readOnlyVars=" + readOnlyVars +
+                ", readWriteVars=" + readWriteVars +
+                ", parentVars=" + parentVars +
+                ", allowableValues=" + allowableValues +
+                ", mandatory=" + mandatory +
+                ", allMandatory=" + allMandatory +
+                ", imports=" + imports +
+                ", hasVars=" + hasVars +
+                ", emptyVars=" + emptyVars +
+                ", hasMoreModels=" + hasMoreModels +
+                ", hasEnums=" + hasEnums +
+                ", isEnum=" + isEnum +
+                ", isNullable=" + isNullable +
+                ", hasRequired=" + hasRequired +
+                ", hasOptional=" + hasOptional +
+                ", isArray=" + isArray +
+                ", hasChildren=" + hasChildren +
+                ", isMap=" + isMap +
+                ", isDeprecated=" + isDeprecated +
+                ", hasReadOnly=" + hasReadOnly +
+                ", hasOnlyReadOnly=" + hasOnlyReadOnly +
+                ", externalDocumentation=" + externalDocumentation +
+                ", vendorExtensions=" + vendorExtensions +
+                ", additionalPropertiesType='" + additionalPropertiesType + '\'' +
+                ", isAdditionalPropertiesTrue='" + isAdditionalPropertiesTrue + '\'' +
+                ", maxProperties=" + maxProperties +
+                ", minProperties=" + minProperties +
+                ", uniqueItems=" + uniqueItems +
+                ", uniqueItemsBoolean=" + uniqueItemsBoolean +
+                ", maxItems=" + maxItems +
+                ", minItems=" + minItems +
+                ", maxLength=" + maxLength +
+                ", minLength=" + minLength +
+                ", exclusiveMinimum=" + exclusiveMinimum +
+                ", exclusiveMaximum=" + exclusiveMaximum +
+                ", minimum='" + minimum + '\'' +
+                ", maximum='" + maximum + '\'' +
+                ", pattern='" + pattern + '\'' +
+                ", multipleOf='" + multipleOf + '\'' +
+                ", items='" + items + '\'' +
+                ", additionalProperties='" + additionalProperties + '\'' +
+                ", isModel='" + isModel + '\'' +
+                ", isNull='" + isNull +
+                ", hasValidation='" + hasValidation +
+                ", getAdditionalPropertiesIsAnyType=" + getAdditionalPropertiesIsAnyType() +
+                ", getHasDiscriminatorWithNonEmptyMapping=" + hasDiscriminatorWithNonEmptyMapping +
+                ", getIsAnyType=" + getIsAnyType() +
+                ", composedSchemas=" + composedSchemas +
+                ", hasMultipleTypes=" + hasMultipleTypes +
+                ", isDecimal=" + isDecimal +
+                ", isUUID=" + isUuid +
+                ", isURI=" + isUri +
+                ", requiredVarsMap=" + requiredVarsMap +
+                ", ref=" + ref +
+                ", schemaIsFromAdditionalProperties=" + schemaIsFromAdditionalProperties +
+                ", isBooleanSchemaTrue=" + isBooleanSchemaTrue +
+                ", isBooleanSchemaFalse=" + isBooleanSchemaFalse +
+                ", format=" + format +
+                ", dependentRequired=" + dependentRequired +
+                ", contains=" + contains +
+                '}';
+        return sb;
     }
 
     /*

@@ -16,7 +16,6 @@
 
 package org.openapitools.codegen.languages;
 
-import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import org.openapitools.codegen.*;
@@ -342,11 +341,7 @@ public class NimClientCodegen extends DefaultCodegen implements CodegenConfig {
             return false;
         } else if (languageSpecificPrimitives.contains(type)) {
             return false;
-        } else if (typeMapping.containsKey(type) && languageSpecificPrimitives.contains(typeMapping.get(type))) {
-            return false;
-        }
-
-        return true;
+        } else return !typeMapping.containsKey(type) || !languageSpecificPrimitives.contains(typeMapping.get(type));
     }
 
     @Override
@@ -370,6 +365,11 @@ public class NimClientCodegen extends DefaultCodegen implements CodegenConfig {
         } else {
             return name;
         }
+    }
+
+    @Override
+    public Map<String, CodegenEnum> combineEnums(Map<String, ModelsMap> objs) {
+        return null;
     }
 
     @Override

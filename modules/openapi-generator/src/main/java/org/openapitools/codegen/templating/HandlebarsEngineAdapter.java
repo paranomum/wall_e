@@ -35,6 +35,7 @@ import org.openapitools.codegen.api.TemplatingExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.AccessibleObject;
 import java.util.Arrays;
@@ -57,13 +58,15 @@ public class HandlebarsEngineAdapter extends AbstractTemplatingEngineAdapter {
      *
      * @return A string identifier.
      */
+
+
     @Override
     public String getIdentifier() {
         return "handlebars";
     }
 
     public String compileTemplate(TemplatingExecutor executor,
-                                  Map<String, Object> bundle, String templateFile) throws IOException {
+                                  Object bundle, String templateFile) throws IOException {
         TemplateLoader loader = new AbstractTemplateLoader() {
             @Override
             public TemplateSource sourceAt(String location) {
@@ -85,10 +88,7 @@ public class HandlebarsEngineAdapter extends AbstractTemplatingEngineAdapter {
             boolean isValidField(
                     FieldWrapper fw) {
                 if (fw instanceof AccessibleObject) {
-                    if (isUseSetAccessible(fw)) {
-                        return true;
-                    }
-                    return false;
+                    return isUseSetAccessible(fw);
                 }
                 return true;
             }
@@ -99,7 +99,7 @@ public class HandlebarsEngineAdapter extends AbstractTemplatingEngineAdapter {
                 .resolver(
                         MapValueResolver.INSTANCE,
                         JavaBeanValueResolver.INSTANCE,
-                        MY_FIELD_VALUE_RESOLVER.INSTANCE,
+                        FieldValueResolver.INSTANCE,
                         MethodValueResolver.INSTANCE)
                 .build();
 

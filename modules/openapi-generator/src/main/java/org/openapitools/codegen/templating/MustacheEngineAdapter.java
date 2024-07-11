@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.util.Map;
 
 
 public class MustacheEngineAdapter implements TemplatingEngineAdapter {
@@ -56,7 +55,7 @@ public class MustacheEngineAdapter implements TemplatingEngineAdapter {
      * @throws IOException an error occurred in the template processing
      */
     @Override
-    public String compileTemplate(TemplatingExecutor executor, Map<String, Object> bundle, String templateFile) throws IOException {
+    public String compileTemplate(TemplatingExecutor executor, Object bundle, String templateFile) throws IOException {
         Template tmpl = compiler
                 .withLoader(name -> findTemplate(executor, name))
                 .defaultValue("")

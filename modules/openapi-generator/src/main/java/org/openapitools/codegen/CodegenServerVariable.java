@@ -34,14 +34,13 @@ public class CodegenServerVariable {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("CodegenServerVariable{");
-        sb.append("name='").append(name).append('\'');
-        sb.append(", defaultValue='").append(defaultValue).append('\'');
-        sb.append(", description='").append(description).append('\'');
-        sb.append(", enumValues=").append(enumValues);
-        sb.append(", value='").append(value).append('\'');
-        sb.append(", vendorExtensions=").append(vendorExtensions);
-        sb.append('}');
-        return sb.toString();
+        String sb = "CodegenServerVariable{" + "name='" + name + '\'' +
+                ", defaultValue='" + defaultValue + '\'' +
+                ", description='" + description + '\'' +
+                ", enumValues=" + enumValues +
+                ", value='" + value + '\'' +
+                ", vendorExtensions=" + vendorExtensions +
+                '}';
+        return sb;
     }
 }

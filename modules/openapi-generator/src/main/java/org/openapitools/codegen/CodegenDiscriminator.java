@@ -20,6 +20,7 @@ public class CodegenDiscriminator {
     private String propertyType;
     private Map<String, String> mapping;
     private boolean isEnum;
+    private boolean hasEnums;
 
     // mappedModels is populated differently if legacyDiscriminatorBehavior is
     // True or False. When:
@@ -96,6 +97,14 @@ public class CodegenDiscriminator {
         this.isEnum = isEnum;
     }
 
+    public boolean getHasEnums() {
+        return hasEnums;
+    }
+
+    public void setHasEnums(boolean hasEnums) {
+        this.hasEnums = hasEnums;
+    }
+    
     public Map<String, Object> getVendorExtensions() {
         return vendorExtensions;
     }
@@ -209,13 +218,12 @@ public class CodegenDiscriminator {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("CodegenDiscriminator{");
-        sb.append("propertyName='").append(propertyName).append('\'');
-        sb.append(", propertyBaseName='").append(propertyBaseName).append('\'');
-        sb.append(", mapping=").append(mapping);
-        sb.append(", mappedModels=").append(mappedModels);
-        sb.append(", vendorExtensions=").append(vendorExtensions);
-        sb.append('}');
-        return sb.toString();
+        String sb = "CodegenDiscriminator{" + "propertyName='" + propertyName + '\'' +
+                ", propertyBaseName='" + propertyBaseName + '\'' +
+                ", mapping=" + mapping +
+                ", mappedModels=" + mappedModels +
+                ", vendorExtensions=" + vendorExtensions +
+                '}';
+        return sb;
     }
 }

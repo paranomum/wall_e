@@ -8,7 +8,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
  */
 public class SecuritySchemeWrapper {
     OpenAPI specification;
-    private SecurityScheme securityScheme;
+    private final SecurityScheme securityScheme;
 
     /**
      * Constructs a new instance of {@link SecuritySchemeWrapper}

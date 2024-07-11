@@ -17,7 +17,6 @@
 
 package org.openapitools.codegen;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Ticker;
@@ -26,7 +25,6 @@ import com.google.common.collect.ImmutableMap;
 import com.samskivert.mustache.Mustache;
 import com.samskivert.mustache.Mustache.Compiler;
 import com.samskivert.mustache.Mustache.Lambda;
-import io.swagger.v3.core.util.AnnotationsUtils;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -51,9 +49,6 @@ import org.openapitools.codegen.CodegenDiscriminator.MappedModel;
 import org.openapitools.codegen.api.TemplatingEngineAdapter;
 import org.openapitools.codegen.config.GlobalSettings;
 import org.openapitools.codegen.examples.ExampleGenerator;
-import org.openapitools.codegen.languages.PhpNextgenClientCodegen;
-import org.openapitools.codegen.languages.RustAxumServerCodegen;
-import org.openapitools.codegen.languages.RustServerCodegen;
 import org.openapitools.codegen.meta.FeatureSet;
 import org.openapitools.codegen.meta.GeneratorMetadata;
 import org.openapitools.codegen.meta.Stability;
@@ -65,7 +60,6 @@ import org.openapitools.codegen.model.WebhooksMap;
 import org.openapitools.codegen.serializer.SerializerUtils;
 import org.openapitools.codegen.templating.MustacheEngineAdapter;
 import org.openapitools.codegen.templating.mustache.*;
-import org.openapitools.codegen.utils.CamelizeOption;
 import org.openapitools.codegen.utils.ModelUtils;
 import org.openapitools.codegen.utils.OneOfImplementorAdditionalData;
 import org.slf4j.Logger;
@@ -184,8 +178,9 @@ public class DefaultCodegen implements CodegenConfig {
     protected Map<String, String> operationIdNameMapping = new HashMap<>();
     // a map to store the rules in OpenAPI Normalizer
     protected Map<String, String> openapiNormalizer = new HashMap<>();
-    protected String modelPackage = "", apiPackage = "", fileSuffix;
+    protected String modelPackage = "", enumPackage = "" ,apiPackage = "", fileSuffix;
     protected String modelNamePrefix = "", modelNameSuffix = "";
+    protected String enumNamePrefix = "", enumNameSuffix = "";
     protected String apiNamePrefix = "", apiNameSuffix = "Api";
     protected String testPackage = "";
     protected String filesMetadataFilename = "FILES";
@@ -196,6 +191,7 @@ public class DefaultCodegen implements CodegenConfig {
     */
     protected Map<String, String> apiTemplateFiles = new HashMap<>();
     protected Map<String, String> modelTemplateFiles = new HashMap<>();
+    protected Map<String, String> enumTemplateFiles = new HashMap<>();
     protected Map<String, String> apiTestTemplateFiles = new HashMap<>();
     protected Map<String, String> modelTestTemplateFiles = new HashMap<>();
     protected Map<String, String> apiDocTemplateFiles = new HashMap<>();
@@ -337,6 +333,10 @@ public class DefaultCodegen implements CodegenConfig {
             this.setModelPackage((String) additionalProperties.get(CodegenConstants.MODEL_PACKAGE));
         }
 
+        if (additionalProperties.containsKey(CodegenConstants.ENUM_PACKAGE)) {
+            this.setEnumPackage((String) additionalProperties.get(CodegenConstants.ENUM_PACKAGE));
+        }
+
         if (additionalProperties.containsKey(CodegenConstants.API_PACKAGE)) {
             this.setApiPackage((String) additionalProperties.get(CodegenConstants.API_PACKAGE));
         }
@@ -386,6 +386,14 @@ public class DefaultCodegen implements CodegenConfig {
 
         if (additionalProperties.containsKey(CodegenConstants.MODEL_NAME_SUFFIX)) {
             this.setModelNameSuffix((String) additionalProperties.get(CodegenConstants.MODEL_NAME_SUFFIX));
+        }
+
+        if (additionalProperties.containsKey(CodegenConstants.ENUM_NAME_PREFIX)) {
+            this.setEnumNamePrefix((String) additionalProperties.get(CodegenConstants.ENUM_NAME_PREFIX));
+        }
+
+        if (additionalProperties.containsKey(CodegenConstants.ENUM_NAME_SUFFIX)) {
+            this.setEnumNameSuffix((String) additionalProperties.get(CodegenConstants.ENUM_NAME_SUFFIX));
         }
 
         if (additionalProperties.containsKey(CodegenConstants.REMOVE_OPERATION_ID_PREFIX)) {
@@ -496,6 +504,7 @@ public class DefaultCodegen implements CodegenConfig {
     @Override
     @SuppressWarnings("static-method")
     public Map<String, ModelsMap> postProcessAllModels(Map<String, ModelsMap> objs) {
+
         for (Map.Entry<String, ModelsMap> entry : objs.entrySet()) {
             CodegenModel model = ModelUtils.getModelByName(entry.getKey(), objs);
 
@@ -593,9 +602,7 @@ public class DefaultCodegen implements CodegenConfig {
     }
 
     private boolean codegenPropertyIsNew(CodegenModel model, CodegenProperty property) {
-        return model.parentModel == null
-                ? false
-                : model.parentModel.allVars.stream().anyMatch(p -> p.name.equals(property.name) && (p.dataType.equals(property.dataType) == false || p.datatypeWithEnum.equals(property.datatypeWithEnum) == false));
+        return model.parentModel != null && model.parentModel.allVars.stream().anyMatch(p -> p.name.equals(property.name) && (!p.dataType.equals(property.dataType) || !p.datatypeWithEnum.equals(property.datatypeWithEnum)));
     }
 
     /**
@@ -700,6 +707,11 @@ public class DefaultCodegen implements CodegenConfig {
         }
         setCircularReferences(allModels);
 
+        return objs;
+    }
+
+    @Override
+    public Map<String, ModelsMap> getEnumModels(Map<String, ModelsMap> objs) {
         return objs;
     }
 
@@ -1099,7 +1111,7 @@ public class DefaultCodegen implements CodegenConfig {
                     }
                 } else if (ModelUtils.isMapSchema(s)) {
                     Schema addProps = ModelUtils.getAdditionalProperties(s);
-                    if (addProps != null && ModelUtils.isComposedSchema(addProps)) {
+                    if (ModelUtils.isComposedSchema(addProps)) {
                         addOneOfNameExtension(addProps, nOneOf);
                         addOneOfInterfaceModel(addProps, nOneOf);
                     }
@@ -1199,6 +1211,11 @@ public class DefaultCodegen implements CodegenConfig {
         // later we'll make this method abstract to make sure
         // code generator implements this method
         return input;
+    }
+
+
+    public Map<String, CodegenEnum> combineEnums(Map<String, ModelsMap> objs) {
+        return null;
     }
 
     /**
@@ -1305,6 +1322,11 @@ public class DefaultCodegen implements CodegenConfig {
     }
 
     @Override
+    public String enumPackage() {
+        return enumPackage;
+    }
+
+    @Override
     public String apiPackage() {
         return apiPackage;
     }
@@ -1364,6 +1386,11 @@ public class DefaultCodegen implements CodegenConfig {
     }
 
     @Override
+    public Map<String, String> enumTemplateFiles() {
+        return enumTemplateFiles;
+    }
+
+    @Override
     public String apiFileFolder() {
         return outputFolder + File.separator + apiPackage().replace('.', File.separatorChar);
     }
@@ -1371,6 +1398,11 @@ public class DefaultCodegen implements CodegenConfig {
     @Override
     public String modelFileFolder() {
         return outputFolder + File.separator + modelPackage().replace('.', File.separatorChar);
+    }
+
+    @Override
+    public String enumFileFolder() {
+        return outputFolder + File.separator + enumPackage().replace('.', File.separatorChar);
     }
 
     @Override
@@ -1469,6 +1501,10 @@ public class DefaultCodegen implements CodegenConfig {
         this.modelPackage = modelPackage;
     }
 
+    public void setEnumPackage(String enumPackage) {
+        this.enumPackage = enumPackage;
+    }
+
     public String getModelNamePrefix() {
         return modelNamePrefix;
     }
@@ -1483,6 +1519,22 @@ public class DefaultCodegen implements CodegenConfig {
 
     public void setModelNameSuffix(String modelNameSuffix) {
         this.modelNameSuffix = modelNameSuffix;
+    }
+
+    public String getEnumNamePrefix() {
+        return enumNamePrefix;
+    }
+
+    public void setEnumNamePrefix(String enumNamePrefix) {
+        this.enumNamePrefix = enumNamePrefix;
+    }
+
+    public String getEnumNameSuffix() {
+        return enumNameSuffix;
+    }
+
+    public void setEnumNameSuffix(String enumNameSuffix) {
+        this.enumNameSuffix = enumNameSuffix;
     }
 
     public String getApiNameSuffix() {
@@ -1640,6 +1692,17 @@ public class DefaultCodegen implements CodegenConfig {
     @Override
     public String toModelFilename(String name) {
         return camelize(name);
+    }
+
+    /**
+     * Return the capitalized file name of the model
+     *
+     * @param name the model name
+     * @return the file name of the model
+     */
+    @Override
+    public String toEnumFilename(String name) {
+        return name.contains("enum") || name.contains("Enum") ? camelize(name) : camelize(name) + "Enum";
     }
 
     /**
@@ -2720,10 +2783,10 @@ public class DefaultCodegen implements CodegenConfig {
             this.schemaIsFromAdditionalProperties = schemaIsFromAdditionalProperties;
         }
 
-        private String name;
-        private Schema schema;
-        private boolean required;
-        private boolean schemaIsFromAdditionalProperties;
+        private final String name;
+        private final Schema schema;
+        private final boolean required;
+        private final boolean schemaIsFromAdditionalProperties;
 
         @Override
         public boolean equals(Object o) {
@@ -3040,7 +3103,7 @@ public class DefaultCodegen implements CodegenConfig {
         }
         LinkedHashMap<String, LinkedHashMap<String, Object>> testNameToTesCase = (LinkedHashMap<String, LinkedHashMap<String, Object>>) schemaNameToTestCases.get(schemaName);
         for (Entry<String, LinkedHashMap<String, Object>> entry : testNameToTesCase.entrySet()) {
-            LinkedHashMap<String, Object> testExample = (LinkedHashMap<String, Object>) entry.getValue();
+            LinkedHashMap<String, Object> testExample = entry.getValue();
             String nameInSnakeCase = toTestCaseName(entry.getKey());
             Object data = processTestExampleData(testExample.get("data"));
             SchemaTestCase testCase = new SchemaTestCase(
@@ -3537,7 +3600,7 @@ public class DefaultCodegen implements CodegenConfig {
                 }
                 CodegenProperty df = discriminatorFound(composedSchemaName, sc, discPropName, new TreeSet<String>());
                 String modelName = ModelUtils.getSimpleRef(ref);
-                if (df == null || !df.isString || df.required != true) {
+                if (df == null || !df.isString || !df.required) {
                     String msgSuffix = "";
                     if (df == null) {
                         msgSuffix += discPropName + " is missing from the schema, define it as required and type string";
@@ -3545,7 +3608,7 @@ public class DefaultCodegen implements CodegenConfig {
                         if (!df.isString) {
                             msgSuffix += "invalid type for " + discPropName + ", set it to string";
                         }
-                        if (df.required != true) {
+                        if (!df.required) {
                             String spacer = "";
                             if (msgSuffix.length() != 0) {
                                 spacer = ". ";
@@ -3697,7 +3760,7 @@ public class DefaultCodegen implements CodegenConfig {
                     }
                 }
 
-                if (matched == false) {
+                if (!matched) {
                     uniqueDescendants.add(otherDescendant);
                 }
             }
@@ -4743,7 +4806,7 @@ public class DefaultCodegen implements CodegenConfig {
                 contentType = contentType.toLowerCase(Locale.ROOT);
             }
             if (contentType != null &&
-                    ((!(this instanceof RustAxumServerCodegen) && contentType.startsWith("application/x-www-form-urlencoded")) ||
+                    ((contentType.startsWith("application/x-www-form-urlencoded")) ||
                             contentType.startsWith("multipart"))) {
                 // process form parameters
                 formParams = fromRequestBodyToFormParameters(requestBody, imports);
@@ -5272,11 +5335,7 @@ public class DefaultCodegen implements CodegenConfig {
             parameterSchema = unaliasSchema(parameter.getSchema());
             parameterModelName = getParameterDataType(parameter, parameterSchema);
             CodegenProperty prop;
-            if (this instanceof RustServerCodegen) {
-                // for rust server, we need to do somethings special as it uses
-                // $ref (e.g. #components/schemas/Pet) to determine whether it's a model
-                prop = fromProperty(parameter.getName(), parameterSchema, false);
-            } else if (getUseInlineModelResolver()) {
+            if (getUseInlineModelResolver()) {
                 prop = fromProperty(parameter.getName(), getReferencedSchemaWhenNotEnum(parameterSchema), false);
             } else {
                 prop = fromProperty(parameter.getName(), parameterSchema, false);
@@ -5323,7 +5382,7 @@ public class DefaultCodegen implements CodegenConfig {
             return codegenParameter;
         }
 
-        if (getUseInlineModelResolver() && !(this instanceof RustServerCodegen)) {
+        if (getUseInlineModelResolver()) {
             // for rust server, we cannot run the following as it uses
             // $ref (e.g. #components/schemas/Pet) to determine whether it's a model
             parameterSchema = getReferencedSchemaWhenNotEnum(parameterSchema);
@@ -6030,7 +6089,7 @@ public class DefaultCodegen implements CodegenConfig {
             } else {
                 final CodegenProperty cp;
 
-                if (cm != null && cm.allVars == vars && varsMap.keySet().contains(key)) {
+                if (cm != null && cm.allVars == vars && varsMap.containsKey(key)) {
                     // when updating allVars, reuse the codegen property from the child model if it's already present
                     // the goal is to avoid issues when the property is defined in both child, parent but the
                     // definition is not identical, e.g. required vs optional, integer vs string
@@ -6089,7 +6148,6 @@ public class DefaultCodegen implements CodegenConfig {
                 }
             }
         }
-        return;
     }
 
     /**
@@ -6210,10 +6268,23 @@ public class DefaultCodegen implements CodegenConfig {
         return modelFileFolder() + File.separator + toModelFilename(modelName) + suffix;
     }
 
+    //TODO check how to configure suffix
     @Override
     public String modelFilename(String templateName, String modelName, String outputDir) {
         String suffix = modelTemplateFiles().get(templateName);
         return outputDir + File.separator + toModelFilename(modelName) + suffix;
+    }
+
+    @Override
+    public String enumFilename(String templateName, String enumName) {
+        String suffix = enumTemplateFiles().get(templateName);
+        return enumFileFolder() + File.separator + toEnumFilename(enumName) + suffix;
+    }
+
+    @Override
+    public String enumFilename(String templateName, String modelName, String outputDir) {
+        String suffix = enumTemplateFiles().get(templateName);
+        return outputDir + File.separator + toEnumFilename(modelName) + suffix;
     }
 
     /**
@@ -7299,10 +7370,8 @@ public class DefaultCodegen implements CodegenConfig {
             codegenParameter.baseType = arrayInnerProperty.dataType;
             // TODO we need to fix array of item (with default value) generator by generator
             // https://github.com/OpenAPITools/openapi-generator/pull/16654/ is a good reference
-            if (!(this instanceof PhpNextgenClientCodegen)) {
-                // no need to set default value here as it was set earlier
-                codegenParameter.defaultValue = arrayInnerProperty.getDefaultValue();
-            }
+            // no need to set default value here as it was set earlier
+            codegenParameter.defaultValue = arrayInnerProperty.getDefaultValue();
             if (codegenParameter.items.isFile) {
                 codegenParameter.isFile = true;
                 codegenParameter.dataFormat = codegenParameter.items.dataFormat;
@@ -7705,8 +7774,8 @@ public class DefaultCodegen implements CodegenConfig {
                             enc.getContentType(),
                             headers,
                             enc.getStyle().toString(),
-                            enc.getExplode() == null ? false : enc.getExplode().booleanValue(),
-                            enc.getAllowReserved() == null ? false : enc.getAllowReserved().booleanValue()
+                            enc.getExplode() != null && enc.getExplode().booleanValue(),
+                            enc.getAllowReserved() != null && enc.getAllowReserved().booleanValue()
                     );
 
                     if (enc.getExtensions() != null) {
@@ -7933,7 +8002,7 @@ public class DefaultCodegen implements CodegenConfig {
                         break;
                     }
                 }
-                if (found == false) {
+                if (!found) {
                     LOGGER.warn("Property {} is not processed correctly (missing from getVars). Maybe it's a const (not yet supported) in openapi v3.1 spec.", requiredPropertyName);
                     continue;
                 }

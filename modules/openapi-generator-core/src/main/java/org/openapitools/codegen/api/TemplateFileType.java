@@ -9,6 +9,7 @@ import java.util.StringJoiner;
 public enum TemplateFileType {
     API(Constants.APIS),
     Model(Constants.MODELS),
+    Enum(Constants.ENUMS),
     APIDocs(Constants.API_DOCS),
     ModelDocs(Constants.MODEL_DOCS),
     APITests(Constants.API_TESTS),
@@ -52,6 +53,7 @@ public enum TemplateFileType {
     public static class Constants {
         public static final String APIS = "apis";
         public static final String MODELS = "models";
+        public static final String ENUMS = "enums";
         public static final String SUPPORTING_FILES = "supportingFiles";
         public static final String MODEL_TESTS = "modelTests";
         public static final String MODEL_DOCS = "modelDocs";

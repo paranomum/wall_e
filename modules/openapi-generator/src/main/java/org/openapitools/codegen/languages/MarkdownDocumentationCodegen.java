@@ -3,10 +3,12 @@ package org.openapitools.codegen.languages;
 import org.openapitools.codegen.*;
 import org.openapitools.codegen.meta.GeneratorMetadata;
 import org.openapitools.codegen.meta.Stability;
+import org.openapitools.codegen.model.ModelsMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.Map;
 
 import static org.openapitools.codegen.utils.StringUtils.escape;
 
@@ -92,7 +94,7 @@ public class MarkdownDocumentationCodegen extends DefaultCodegen implements Code
     public String toParamName(String name) {
         if (reservedWords.contains(name)) {
             return escapeReservedWord(name);
-        } else if (((CharSequence) name).chars().anyMatch(character -> specialCharReplacements.keySet().contains(String.valueOf((char) character)))) {
+        } else if (((CharSequence) name).chars().anyMatch(character -> specialCharReplacements.containsKey(String.valueOf((char) character)))) {
             return escape(name, specialCharReplacements, null, null);
         }
         return name;
@@ -121,6 +123,11 @@ public class MarkdownDocumentationCodegen extends DefaultCodegen implements Code
     public String escapeQuotationMark(String input) {
         // do nothing as the output is just doc
         return input;
+    }
+
+    @Override
+    public Map<String, CodegenEnum> combineEnums(Map<String, ModelsMap> objs) {
+        return null;
     }
 
 }

@@ -157,7 +157,8 @@ public class TemplateManager implements TemplatingExecutor, TemplateProcessor {
      * @return The actual file
      */
     @Override
-    public File write(Map<String, Object> data, String template, File target) throws IOException {
+    //writes data to files
+    public File write(Object data, String template, File target) throws IOException {
         if (this.engineAdapter.handlesFile(template)) {
             // Only pass files with valid endings through template engine
             String templateContent = this.engineAdapter.compileTemplate(this, data, template);
@@ -240,6 +241,7 @@ public class TemplateManager implements TemplatingExecutor, TemplateProcessor {
         return outputFile;
     }
 
+    //writing generated data
     private File writeToFileRaw(String filename, byte[] contents) throws IOException {
         // Use Paths.get here to normalize path (for Windows file separator, space escaping on Linux/Mac, etc)
         File output = Paths.get(filename).toFile();

@@ -50,6 +50,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -394,11 +395,7 @@ public class ModelUtils {
             return null;
         }
 
-        try {
-            ref = URLDecoder.decode(ref, "UTF-8");
-        } catch (UnsupportedEncodingException ignored) {
-            once(LOGGER).warn("Found UnsupportedEncodingException: {}", ref);
-        }
+        ref = URLDecoder.decode(ref, StandardCharsets.UTF_8);
 
         // see https://tools.ietf.org/html/rfc6901#section-3
         // Because the characters '~' (%x7E) and '/' (%x2F) have special meanings in
@@ -485,11 +482,7 @@ public class ModelUtils {
         }
 
         // has allOf
-        if (schema.getAllOf() != null) {
-            return true;
-        }
-
-        return false;
+        return schema.getAllOf() != null;
     }
 
     /**
@@ -1007,11 +1000,7 @@ public class ModelUtils {
 
         String[] parts = refString.split("/");
         // #/components/schemas/Pet/properties/category
-        if (parts.length == 6 && "properties".equals(parts[4])) {
-            return true;
-        } else {
-            return false;
-        }
+        return parts.length == 6 && "properties".equals(parts[4]);
     }
 
     public static Schema getSchema(OpenAPI openAPI, String name) {
@@ -1480,8 +1469,8 @@ public class ModelUtils {
 
         Map<String, List<Entry<String, Schema>>> groupedByParent = allSchemas.entrySet().stream()
                 .filter(entry -> isComposedSchema(entry.getValue()))
-                .filter(entry -> getParentName((Schema) entry.getValue(), allSchemas) != null)
-                .collect(Collectors.groupingBy(entry -> getParentName((Schema) entry.getValue(), allSchemas)));
+                .filter(entry -> getParentName(entry.getValue(), allSchemas) != null)
+                .collect(Collectors.groupingBy(entry -> getParentName(entry.getValue(), allSchemas)));
 
         return groupedByParent.entrySet().stream()
                 .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue().stream().map(e -> e.getKey()).collect(Collectors.toList())));
@@ -1998,13 +1987,9 @@ public class ModelUtils {
      * @return true if the schema contains allOf but no properties/oneOf/anyOf defined.
      */
     public static boolean isAllOf(Schema schema) {
-        if (hasAllOf(schema) && (schema.getProperties() == null || schema.getProperties().isEmpty()) &&
+        return hasAllOf(schema) && (schema.getProperties() == null || schema.getProperties().isEmpty()) &&
                 (schema.getOneOf() == null || schema.getOneOf().isEmpty()) &&
-                (schema.getAnyOf() == null || schema.getAnyOf().isEmpty())) {
-            return true;
-        }
-
-        return false;
+                (schema.getAnyOf() == null || schema.getAnyOf().isEmpty());
     }
 
     /**
@@ -2015,11 +2000,7 @@ public class ModelUtils {
      * @return true if allOf is not empty
      */
     public static boolean hasAllOf(Schema schema) {
-        if (schema != null && schema.getAllOf() != null && !schema.getAllOf().isEmpty()) {
-            return true;
-        }
-
-        return false;
+        return schema != null && schema.getAllOf() != null && !schema.getAllOf().isEmpty();
     }
 
     /**
@@ -2047,13 +2028,9 @@ public class ModelUtils {
             return false;
         }
 
-        if (hasOneOf(schema) && (schema.getProperties() == null || schema.getProperties().isEmpty()) &&
+        return hasOneOf(schema) && (schema.getProperties() == null || schema.getProperties().isEmpty()) &&
                 (schema.getAllOf() == null || schema.getAllOf().isEmpty()) &&
-                (schema.getAnyOf() == null || schema.getAnyOf().isEmpty())) {
-            return true;
-        }
-
-        return false;
+                (schema.getAnyOf() == null || schema.getAnyOf().isEmpty());
     }
 
     /**
@@ -2064,11 +2041,7 @@ public class ModelUtils {
      * @return true if allOf is not empty
      */
     public static boolean hasOneOf(Schema schema) {
-        if (schema != null && schema.getOneOf() != null && !schema.getOneOf().isEmpty()) {
-            return true;
-        }
-
-        return false;
+        return schema != null && schema.getOneOf() != null && !schema.getOneOf().isEmpty();
     }
 
     /**
@@ -2083,13 +2056,9 @@ public class ModelUtils {
             return false;
         }
 
-        if (hasAnyOf(schema) && (schema.getProperties() == null || schema.getProperties().isEmpty()) &&
+        return hasAnyOf(schema) && (schema.getProperties() == null || schema.getProperties().isEmpty()) &&
                 (schema.getAllOf() == null || schema.getAllOf().isEmpty()) &&
-                (schema.getOneOf() == null || schema.getOneOf().isEmpty())) {
-            return true;
-        }
-
-        return false;
+                (schema.getOneOf() == null || schema.getOneOf().isEmpty());
     }
 
     /**
@@ -2100,11 +2069,7 @@ public class ModelUtils {
      * @return true if anyOf is not empty
      */
     public static boolean hasAnyOf(Schema schema) {
-        if (schema != null && schema.getAnyOf() != null && !schema.getAnyOf().isEmpty()) {
-            return true;
-        }
-
-        return false;
+        return schema != null && schema.getAnyOf() != null && !schema.getAnyOf().isEmpty();
     }
 
     /**
@@ -2137,17 +2102,13 @@ public class ModelUtils {
      * @return true if allOf is not empty
      */
     public static boolean hasCommonAttributesDefined(Schema schema) {
-        if (schema.getNullable() != null || schema.getDefault() != null ||
+        return schema.getNullable() != null || schema.getDefault() != null ||
                 schema.getMinimum() != null || schema.getMaximum() != null ||
                 schema.getExclusiveMaximum() != null || schema.getExclusiveMinimum() != null ||
                 schema.getMinLength() != null || schema.getMaxLength() != null ||
                 schema.getMinItems() != null || schema.getMaxItems() != null ||
                 schema.getReadOnly() != null || schema.getWriteOnly() != null ||
-                schema.getPattern() != null) {
-            return true;
-        }
-
-        return false;
+                schema.getPattern() != null;
     }
 
     /**
@@ -2162,11 +2123,7 @@ public class ModelUtils {
         }
 
         // if x-parent is set
-        if (isExtensionParent(schema)) {
-            return true;
-        }
-
-        return false;
+        return isExtensionParent(schema);
     }
 
     /**

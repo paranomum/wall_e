@@ -48,8 +48,8 @@ public class ExampleGenerator {
     private static final String STATUS_CODE = "statusCode";
 
     protected Map<String, Schema> examples;
-    private OpenAPI openAPI;
-    private Random random;
+    private final OpenAPI openAPI;
+    private final Random random;
 
     public ExampleGenerator(Map<String, Schema> examples, OpenAPI openAPI) {
         this.examples = examples;
@@ -307,7 +307,7 @@ public class ExampleGenerator {
                 return enumValues.get(0);
             }
             String format = property.getFormat();
-            if (format != null && (URI.equals(format) || URL.equals(format))) {
+            if ((URI.equals(format) || URL.equals(format))) {
                 LOGGER.debug("URI or URL format, without default or enum, generating random one.");
                 return "http://example.com/aeiou";
             }

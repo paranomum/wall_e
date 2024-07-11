@@ -38,14 +38,14 @@ public class GlobalSettings {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalSettings.class);
 
-    private static ThreadLocal<Properties> properties = new InheritableThreadLocal<Properties>() {
+    private static final ThreadLocal<Properties> properties = new InheritableThreadLocal<Properties>() {
         @Override
         protected Properties initialValue() {
             // avoid using System.getProperties().clone() which is broken in Gradle - see https://github.com/gradle/gradle/issues/17344
             Properties copy = new Properties();
             copy.putAll(System.getProperties());
             return copy;
-        };
+        }
     };
 
     public static String getProperty(String key, String defaultValue) {

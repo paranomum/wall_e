@@ -39,10 +39,10 @@ import java.util.*;
 
 public class InlineModelResolver {
     private OpenAPI openAPI;
-    private Map<String, Schema> addedModels = new HashMap<>();
-    private Map<String, String> generatedSignature = new HashMap<>();
+    private final Map<String, Schema> addedModels = new HashMap<>();
+    private final Map<String, String> generatedSignature = new HashMap<>();
     private Map<String, String> inlineSchemaNameMapping = new HashMap<>();
-    private Map<String, String> inlineSchemaOptions = new HashMap<>();
+    private final Map<String, String> inlineSchemaOptions = new HashMap<>();
     private Set<String> inlineSchemaNameMappingValues = new HashSet<>();
     public boolean resolveInlineEnums = false;
     public boolean skipSchemaReuse = false; // skip reusing inline schema if set to true
@@ -50,10 +50,10 @@ public class InlineModelResolver {
 
     // structure mapper sorts properties alphabetically on write to ensure models are
     // serialized consistently for lookup of existing models
-    private static ObjectMapper structureMapper;
+    private static final ObjectMapper structureMapper;
 
     // a set to keep track of names generated for inline schemas
-    private Set<String> uniqueNames = new HashSet<>();
+    private final Set<String> uniqueNames = new HashSet<>();
 
     static {
         structureMapper = Json.mapper().copy();
@@ -250,9 +250,7 @@ public class InlineModelResolver {
             if (schema.getAnyOf() != null && !schema.getAnyOf().isEmpty()) {
                 return true;
             }
-            if (schema.getOneOf() != null && !schema.getOneOf().isEmpty()) {
-                return true;
-            }
+            return schema.getOneOf() != null && !schema.getOneOf().isEmpty();
         }
 
         return false;
@@ -273,7 +271,7 @@ public class InlineModelResolver {
                     schema.getProperties() != null || schema.getAdditionalProperties() != null ||
                     ModelUtils.isComposedSchema(schema)) {
                 LOGGER.error("Illegal schema found with $ref combined with other properties," +
-                        " no properties should be defined alongside a $ref:\n " + schema.toString());
+                        " no properties should be defined alongside a $ref:\n " + schema);
             }
             return;
         }
@@ -328,25 +326,25 @@ public class InlineModelResolver {
         } else if (schema.getProperties() != null) {
             // If non-object type is specified but also properties
             LOGGER.error("Illegal schema found with non-object type combined with properties," +
-                    " no properties should be defined:\n " + schema.toString());
+                    " no properties should be defined:\n " + schema);
             return;
         } else if (schema.getAdditionalProperties() != null) {
             // If non-object type is specified but also additionalProperties
             LOGGER.error("Illegal schema found with non-object type combined with" +
                     " additionalProperties, no additionalProperties should be defined:\n " +
-                    schema.toString());
+                    schema);
             return;
         }
         // Check array items
         if (ModelUtils.isArraySchema(schema)) {
             Schema items = ModelUtils.getSchemaItems(schema);
             if (items == null && schema.getPrefixItems() == null) {
-                LOGGER.debug("Incorrect array schema with no items, prefixItems: {}", schema.toString());
+                LOGGER.debug("Incorrect array schema with no items, prefixItems: {}", schema);
                 return;
             }
 
             if (items == null) {
-                LOGGER.debug("prefixItems in array schema is not supported at the moment: {}",  schema.toString());
+                LOGGER.debug("prefixItems in array schema is not supported at the moment: {}", schema);
                 return;
             }
             String schemaName = resolveModelName(items.getTitle(), modelPrefix + this.inlineSchemaOptions.get("ARRAY_ITEM_SUFFIX"));

@@ -39,10 +39,7 @@ import org.openapitools.codegen.*;
 import org.openapitools.codegen.languages.features.BeanValidationFeatures;
 import org.openapitools.codegen.languages.features.DocumentationProviderFeatures;
 import org.openapitools.codegen.meta.features.*;
-import org.openapitools.codegen.model.ModelMap;
-import org.openapitools.codegen.model.ModelsMap;
-import org.openapitools.codegen.model.OperationMap;
-import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.model.*;
 import org.openapitools.codegen.utils.CamelizeOption;
 import org.openapitools.codegen.utils.ModelUtils;
 import org.slf4j.Logger;
@@ -145,8 +142,9 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
     protected boolean useJakartaEe = false;
     protected boolean containerDefaultToNull = false;
     protected boolean generateConstructorWithAllArgs = false;
-    private Map<String, String> schemaKeyToModelNameCache = new HashMap<>();
+    private final Map<String, String> schemaKeyToModelNameCache = new HashMap<>();
 
+    //TODO refactor cliOptions to add enums
     public AbstractJavaCodegen() {
         super();
 
@@ -177,8 +175,9 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
         modelTemplateFiles.put("model.mustache", ".java");
         apiTemplateFiles.put("api.mustache", ".java");
         apiTestTemplateFiles.put("api_test.mustache", ".java");
-        modelDocTemplateFiles.put("model_doc.mustache", ".md");
-        apiDocTemplateFiles.put("api_doc.mustache", ".md");
+        enumTemplateFiles.put("modelEnum.mustache", ".java");
+//        modelDocTemplateFiles.put("model_doc.mustache", ".md");
+//        apiDocTemplateFiles.put("api_doc.mustache", ".md");
 
         hideGenerationTimestamp = false;
 
@@ -239,6 +238,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
         importMapping.put("LocalTime", "org.joda.time.*");
 
         cliOptions.add(new CliOption(CodegenConstants.MODEL_PACKAGE, CodegenConstants.MODEL_PACKAGE_DESC));
+        cliOptions.add(new CliOption(CodegenConstants.ENUM_PACKAGE, CodegenConstants.ENUM_PACKAGE_DESC));
         cliOptions.add(new CliOption(CodegenConstants.API_PACKAGE, CodegenConstants.API_PACKAGE_DESC));
         cliOptions.add(new CliOption(CodegenConstants.INVOKER_PACKAGE, CodegenConstants.INVOKER_PACKAGE_DESC).defaultValue(this.getInvokerPackage()));
         cliOptions.add(new CliOption(CodegenConstants.GROUP_ID, CodegenConstants.GROUP_ID_DESC).defaultValue(this.getGroupId()));
@@ -421,6 +421,10 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
 
         if (!additionalProperties.containsKey(CodegenConstants.MODEL_PACKAGE)) {
             additionalProperties.put(CodegenConstants.MODEL_PACKAGE, modelPackage);
+        }
+
+        if (!additionalProperties.containsKey(CodegenConstants.ENUM_PACKAGE)) {
+            additionalProperties.put(CodegenConstants.ENUM_PACKAGE, enumPackage);
         }
 
         if (!additionalProperties.containsKey(CodegenConstants.API_PACKAGE)) {
@@ -735,6 +739,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
             the generation of all arg constructors
          ps: This code was specific to SpringCodeGen and now is available to all java generators.
         */
+
         for (ModelsMap modelsAttrs : objs.values()) {
             for (ModelMap mo : modelsAttrs.getModels()) {
                 CodegenModel codegenModel = mo.getModel();
@@ -742,6 +747,15 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
                 Map<String, CodegenProperty> propertyHash = new HashMap<>(codegenModel.vars.size());
                 for (final CodegenProperty property : codegenModel.vars) {
                     propertyHash.put(property.name, property);
+                    if(property.isEnum) {
+                        codegenModel.imports.add(property.enumName);
+                        Map<String, String> importsEnum = new HashMap<>();
+                        importsEnum.put("import", enumPackage + "." + property.enumName); // toEnumFilename(enumName)
+                        List<Map<String, String>> imports = modelsAttrs.getImports();
+                        imports.add(importsEnum);
+                        modelsAttrs.setImports(imports);
+                        LOGGER.info(importsEnum.get("import"));
+                    }
                 }
                 List<CodegenModel> parentModelList = getParentModelList(codegenModel);
                 for (CodegenModel parentCodegenModel: parentModelList) {
@@ -752,7 +766,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
                             final CodegenProperty parentVar = property.clone();
                             parentVar.isInherited = true;
                             LOGGER.info("adding parent variable {} to {}", property.name, codegenModel.name);
-                            codegenModel.parentVars.add(parentVar);
+                            boolean added = codegenModel.parentVars.add(parentVar);
                             Set<String> imports = parentVar.getImports(true, this.importBaseType, generatorMetadata.getFeatureSet()).stream().filter(Objects::nonNull).collect(Collectors.toSet());
                             for (String imp : imports) {
                                 // Avoid dupes
@@ -774,6 +788,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
                         Map<String,String> toAdd = new HashMap<>();
                         toAdd.put("import", qimp);
                         modelsAttrs.getImports().add(toAdd);
+                        LOGGER.info(qimp);
                     }
                 }
             }
@@ -797,10 +812,16 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
             }
         }
 
+        //generate enums if library is webClient
+
         return objs;
     }
 
-    private List<CodegenModel> getParentModelList(CodegenModel codegenModel) {
+    public Map<String, CodegenEnum> combineEnums(Map<String, ModelsMap> objs) {
+        return null;
+    }
+
+    List<CodegenModel> getParentModelList(CodegenModel codegenModel) {
         CodegenModel parentCodegenModel = codegenModel.parentModel;
         List<CodegenModel> parentModelList = new ArrayList<>();
         while (parentCodegenModel != null) {
@@ -834,6 +855,11 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
         this.setModelPackage(sanitizePackageName(modelPackage));
         if (additionalProperties.containsKey(CodegenConstants.MODEL_PACKAGE)) {
             this.additionalProperties.put(CodegenConstants.MODEL_PACKAGE, modelPackage);
+        }
+
+        this.setEnumPackage(sanitizePackageName(enumPackage));
+        if (additionalProperties.containsKey(CodegenConstants.ENUM_PACKAGE)) {
+            this.additionalProperties.put(CodegenConstants.ENUM_PACKAGE, enumPackage);
         }
 
         this.setInvokerPackage(sanitizePackageName(invokerPackage));
@@ -876,6 +902,11 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
     @Override
     public String modelFileFolder() {
         return (outputFolder + File.separator + sourceFolder + File.separator + modelPackage().replace('.', File.separatorChar)).replace('/', File.separatorChar);
+    }
+
+    @Override
+    public String enumFileFolder() {
+        return (outputFolder + File.separator + sourceFolder + File.separator + enumPackage().replace('.', File.separatorChar)).replace('/', File.separatorChar);
     }
 
     @Override
@@ -1397,7 +1428,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
                         return null;
                     }
                 } else if (schema.getDefault() instanceof UUID) {
-                    return "UUID.fromString(\"" + String.valueOf(schema.getDefault()) + "\")";
+                    return "UUID.fromString(\"" + schema.getDefault() + "\")";
                 } else {
                     _default = String.valueOf(schema.getDefault());
                 }
@@ -1858,7 +1889,6 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
             }
         }
 
-        // add x-implements for serializable to all models
         for (ModelMap mo : objs.getModels()) {
             CodegenModel cm = mo.getModel();
             if (this.serializableModel) {
@@ -1989,7 +2019,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
                                     .flatMap(schema -> ((Schema) schema).getAnyOf().stream())
                                     .filter(schema -> Objects.nonNull(((Schema) schema).getEnum()))
                                     .findFirst()
-                                    .orElse((Schema) s)));
+                                    .orElse(s)));
         }
     }
 

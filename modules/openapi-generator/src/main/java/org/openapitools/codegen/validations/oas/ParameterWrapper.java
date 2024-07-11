@@ -8,7 +8,7 @@ import io.swagger.v3.oas.models.OpenAPI;
  */
 public class ParameterWrapper {
     OpenAPI specification;
-    private Parameter parameter;
+    private final Parameter parameter;
 
     /**
      * Constructs a new instance of {@link ParameterWrapper}

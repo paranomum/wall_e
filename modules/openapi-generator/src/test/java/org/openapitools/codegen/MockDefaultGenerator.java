@@ -62,17 +62,17 @@ public class MockDefaultGenerator extends DefaultGenerator {
     }
 
     public static class WrittenTemplateBasedFile {
-        private Map<String, Object> templateData;
+        private Object templateData;
         private String templateName;
         private String outputFilename;
 
-        public WrittenTemplateBasedFile(Map<String, Object> templateData, String templateName, String outputFilename) {
+        public WrittenTemplateBasedFile(Object templateData, String templateName, String outputFilename) {
             this.templateData = templateData;
             this.templateName = templateName;
             this.outputFilename = outputFilename;
         }
 
-        public Map<String, Object> getTemplateData() {
+        public Object getTemplateData() {
             return templateData;
         }
 
@@ -103,7 +103,7 @@ public class MockDefaultGenerator extends DefaultGenerator {
         }
 
         @Override
-        public File write(Map<String, Object> data, String template, File target) throws IOException {
+        public File write(Object data, String template, File target) throws IOException {
             String filename = normalizePath(target.toPath().normalize().toString());
             templateBasedFiles.add(new WrittenTemplateBasedFile(data, template, filename));
 
