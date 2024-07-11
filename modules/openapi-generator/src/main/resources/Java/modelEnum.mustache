@@ -1,4 +1,4 @@
-package {{filePackage}}
+package {{filePackage}};
 
 {{#jackson}}
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -45,7 +45,7 @@ import java.net.URI;
     }
 
     {{#jackson}}
-        @JsonValue
+    @JsonValue
     {{/jackson}}
     public {{{dataType}}} getValue() {
     return value;
