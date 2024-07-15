@@ -458,7 +458,6 @@ public class DefaultGenerator implements Generator {
                 written = processTemplateToFile(enums, templateName, filename, generateEnums, CodegenConstants.ENUMS, outputDir);
             } else {
                 String filename = config.enumFilename(templateName, enumName);
-                LOGGER.info("ENUM FILE NAME - {}", filename);
                 written = processTemplateToFile(enums, templateName, filename, generateEnums, CodegenConstants.ENUMS);
             }
             if (written != null) {

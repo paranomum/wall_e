@@ -1154,32 +1154,32 @@ public class CodegenProperty implements Cloneable, IJsonSchemaValidationProperti
 
     @Override
     public String toString() {
-        String sb = "CodegenProperty{" + "openApiType='" + openApiType + '\'' +
-                ", baseName='" + baseName + '\'' +
-                ", complexType='" + complexType + '\'' +
-                ", getter='" + getter + '\'' +
-                ", setter='" + setter + '\'' +
-                ", description='" + description + '\'' +
-                ", dataType='" + dataType + '\'' +
-                ", datatypeWithEnum='" + datatypeWithEnum + '\'' +
-                ", dataFormat='" + dataFormat + '\'' +
-                ", name='" + name + '\'' +
-                ", min='" + min + '\'' +
-                ", max='" + max + '\'' +
-                ", defaultValue='" + defaultValue + '\'' +
-                ", defaultValueWithParam='" + defaultValueWithParam + '\'' +
-                ", baseType='" + baseType + '\'' +
-                ", containerType='" + containerType + '\'' +
-                ", containerTypeMapped='" + containerTypeMapped + '\'' +
-                ", title='" + title + '\'' +
-                ", unescapedDescription='" + unescapedDescription + '\'' +
+        String sb = "CodegenProperty{" + "openApiType='" + openApiType + "'\n" +
+                ", baseName='" + baseName + "'\n" +
+                ", complexType='" + complexType + "'\n" +
+                ", getter='" + getter + "'\n" +
+                ", setter='" + setter + "'\n" +
+                ", description='" + description + "'\n" +
+                ", dataType='" + dataType + "'\n" +
+                ", datatypeWithEnum='" + datatypeWithEnum + "'\n" +
+                ", dataFormat='" + dataFormat + "'\n" +
+                ", name='" + name + "'\n" +
+                ", min='" + min + "'\n" +
+                ", max='" + max + "'\n" +
+                ", defaultValue='" + defaultValue + "'\n" +
+                ", defaultValueWithParam='" + defaultValueWithParam + "'\n" +
+                ", baseType='" + baseType + "'\n" +
+                ", containerType='" + containerType + "'\n" +
+                ", containerTypeMapped='" + containerTypeMapped + "'\n" +
+                ", title='" + title + "'\n" +
+                ", unescapedDescription='" + unescapedDescription + "'\n" +
                 ", maxLength=" + maxLength +
                 ", minLength=" + minLength +
-                ", pattern='" + pattern + '\'' +
-                ", example='" + example + '\'' +
-                ", jsonSchema='" + jsonSchema + '\'' +
-                ", minimum='" + minimum + '\'' +
-                ", maximum='" + maximum + '\'' +
+                ", pattern='" + pattern + "'\n" +
+                ", example='" + example + "'\n" +
+                ", jsonSchema='" + jsonSchema + "'\n" +
+                ", minimum='" + minimum + "'\n" +
+                ", maximum='" + maximum + "'\n" +
                 ", exclusiveMinimum=" + exclusiveMinimum +
                 ", exclusiveMaximum=" + exclusiveMaximum +
                 ", required=" + required +
@@ -1233,11 +1233,11 @@ public class CodegenProperty implements Cloneable, IJsonSchemaValidationProperti
                 ", vendorExtensions=" + vendorExtensions +
                 ", hasValidation=" + hasValidation +
                 ", isInherited=" + isInherited +
-                ", discriminatorValue='" + discriminatorValue + '\'' +
-                ", nameInCamelCase='" + nameInCamelCase + '\'' +
-                ", nameInPascalCase='" + nameInPascalCase + '\'' +
-                ", nameInSnakeCase='" + nameInSnakeCase + '\'' +
-                ", enumName='" + enumName + '\'' +
+                ", discriminatorValue='" + discriminatorValue + "'\n" +
+                ", nameInCamelCase='" + nameInCamelCase + "'\n" +
+                ", nameInPascalCase='" + nameInPascalCase + "'\n" +
+                ", nameInSnakeCase='" + nameInSnakeCase + "'\n" +
+                ", enumName='" + enumName + "'\n" +
                 ", maxItems=" + maxItems +
                 ", minItems=" + minItems +
                 ", maxProperties=" + maxProperties +
@@ -1246,9 +1246,9 @@ public class CodegenProperty implements Cloneable, IJsonSchemaValidationProperti
                 ", uniqueItemsBoolean=" + uniqueItemsBoolean +
                 ", multipleOf=" + multipleOf +
                 ", isXmlAttribute=" + isXmlAttribute +
-                ", xmlPrefix='" + xmlPrefix + '\'' +
-                ", xmlName='" + xmlName + '\'' +
-                ", xmlNamespace='" + xmlNamespace + '\'' +
+                ", xmlPrefix='" + xmlPrefix + "'\n" +
+                ", xmlName='" + xmlName + "'\n" +
+                ", xmlNamespace='" + xmlNamespace + "'\n" +
                 ", isXmlWrapped=" + isXmlWrapped +
                 ", isNull=" + isNull +
                 ", isVoid=" + isVoid +
