@@ -31,6 +31,8 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.parser.util.SchemaTypeUtil;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -143,6 +145,9 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
     protected boolean containerDefaultToNull = false;
     protected boolean generateConstructorWithAllArgs = false;
     private final Map<String, String> schemaKeyToModelNameCache = new HashMap<>();
+    @Getter
+    @Setter
+    protected boolean jackson = false;
 
     //TODO refactor cliOptions to add enums
     public AbstractJavaCodegen() {
@@ -774,9 +779,12 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
                 for (final CodegenProperty property : codegenModel.vars) {
                     propertyHash.put(property.name, property);
                     if(property.isEnum || property.datatypeWithEnum.endsWith("Enum")) {
+                        property.datatypeWithEnum = toEnumDataType(property.datatypeWithEnum);
                         String enumName = property.datatypeWithEnum;
-                        if (property.isEnum)
+                        if (property.isEnum) {
+                            property.enumName = toEnumFilename(property.enumName);
                             enumName = property.enumName;
+                        }
                         codegenModel.imports.add(enumName);
                         Map<String, String> importsEnum = new HashMap<>();
                         importsEnum.put("import", enumPackage + "." + enumName); // toEnumFilename(enumName)
@@ -1023,6 +1031,14 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
         }
 
         return name;
+    }
+
+    private String toEnumDataType(String dataType) {
+        String processedDataType = dataType.replace("Enum", "").replace("enum", "");
+        if (processedDataType.contains(">") && processedDataType.contains("<")) {
+            return processedDataType.replace(">", "Enum>");
+        }
+        return processedDataType + "Enum";
     }
 
     private boolean startsWithTwoUppercaseLetters(String name) {

@@ -71,6 +71,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -1702,7 +1703,8 @@ public class DefaultCodegen implements CodegenConfig {
      */
     @Override
     public String toEnumFilename(String name) {
-        return name.contains("enum") || name.contains("Enum") ? camelize(name) : camelize(name) + "Enum";
+        String processedName = name.replace("Enum", "").replace("enum", "");
+        return processedName.contains("enum") || processedName.contains("Enum") ? camelize(processedName) : camelize(processedName) + "Enum";
     }
 
     /**
@@ -2773,6 +2775,16 @@ public class DefaultCodegen implements CodegenConfig {
         String camelizedName = camelize(modelNamePrefix + "_" + name + "_" + modelNameSuffix);
         schemaKeyToModelNameCache.put(name, camelizedName);
         return camelizedName;
+    }
+
+    public boolean convertPropertyToBooleanAndWriteBack(String propertyKey, Consumer<Boolean> booleanSetter) {
+        if (additionalProperties.containsKey(propertyKey)) {
+            boolean result = convertPropertyToBoolean(propertyKey);
+            writePropertyBack(propertyKey, result);
+            booleanSetter.accept(result);
+            return result;
+        }
+        return false;
     }
 
     private static class NamedSchema {
@@ -6952,6 +6964,39 @@ public class DefaultCodegen implements CodegenConfig {
         boolean result = convertPropertyToBoolean(propertyKey);
         writePropertyBack(propertyKey, result);
         return result;
+    }
+
+    /**
+     * reads propertyKey from additionalProperties, converts it to a string and
+     * writes it back to additionalProperties to be usable as a string in
+     * mustache files.
+     *
+     * @param propertyKey property key
+     * @param stringSetter the setter function reference
+     * @return property value as String or null if not found
+     */
+    public String convertPropertyToStringAndWriteBack(String propertyKey, Consumer<String> stringSetter) {
+        return convertPropertyToTypeAndWriteBack(propertyKey, Function.identity(), stringSetter);
+    }
+
+    /**
+     * reads propertyKey from additionalProperties, converts it to T and
+     * writes it back to additionalProperties to be usable as T in
+     * mustache files.
+     *
+     * @param propertyKey property key
+     * @param genericTypeSetter the setter function reference
+     * @return property value as instance of type T or null if not found
+     */
+    public <T> T convertPropertyToTypeAndWriteBack(String propertyKey, Function<String, T> converter, Consumer<T> genericTypeSetter) {
+        if (additionalProperties.containsKey(propertyKey)) {
+            String value = additionalProperties.get(propertyKey).toString();
+            T result = converter.apply(value);
+            writePropertyBack(propertyKey, result);
+            genericTypeSetter.accept(result);
+            return result;
+        }
+        return null;
     }
 
     /**

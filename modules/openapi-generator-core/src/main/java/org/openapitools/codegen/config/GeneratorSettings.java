@@ -36,6 +36,7 @@ public final class GeneratorSettings implements Serializable {
     private String generatorName;
     private String apiPackage;
     private String modelPackage;
+    private String enumPackage;
     private String invokerPackage;
     private String packageName;
     private String apiNameSuffix;
@@ -95,6 +96,15 @@ public final class GeneratorSettings implements Serializable {
      */
     public String getModelPackage() {
         return modelPackage;
+    }
+
+    /**
+     * Gets the model package name for generated sources
+     *
+     * @return the model package
+     */
+    public String getEnumPackage() {
+        return enumPackage;
     }
 
     /**
@@ -437,6 +447,7 @@ public final class GeneratorSettings implements Serializable {
         generatorName = builder.generatorName;
         apiPackage = builder.apiPackage;
         modelPackage = builder.modelPackage;
+        enumPackage = builder.enumPackage;
         invokerPackage = builder.invokerPackage;
         packageName = builder.packageName;
         apiNameSuffix = builder.apiNameSuffix;
@@ -475,6 +486,9 @@ public final class GeneratorSettings implements Serializable {
         }
         if (isNotEmpty(modelPackage)) {
             additional.put("modelPackage", modelPackage);
+        }
+        if (isNotEmpty(enumPackage)) {
+            additional.put("enumPackage", enumPackage);
         }
         if (isNotEmpty(invokerPackage)) {
             additional.put("invokerPackage", invokerPackage);
@@ -569,6 +583,7 @@ public final class GeneratorSettings implements Serializable {
         builder.generatorName = copy.getGeneratorName();
         builder.apiPackage = copy.getApiPackage();
         builder.modelPackage = copy.getModelPackage();
+        builder.enumPackage = copy.getEnumPackage();
         builder.invokerPackage = copy.getInvokerPackage();
         builder.packageName = copy.getPackageName();
         builder.apiNameSuffix = copy.getApiNameSuffix();
@@ -646,6 +661,7 @@ public final class GeneratorSettings implements Serializable {
         private String generatorName;
         private String apiPackage;
         private String modelPackage;
+        private String enumPackage;
         private String invokerPackage;
         private String packageName;
         private String apiNameSuffix;
@@ -736,6 +752,17 @@ public final class GeneratorSettings implements Serializable {
          */
         public Builder withModelPackage(String modelPackage) {
             this.modelPackage = modelPackage;
+            return this;
+        }
+
+        /**
+         * Sets the {@code enumPackage} and returns a reference to this Builder so that the methods can be chained together.
+         *
+         * @param enumPackage the {@code enumPackage} to set
+         * @return a reference to this Builder
+         */
+        public Builder withEnumPackage(String enumPackage) {
+            this.enumPackage = enumPackage;
             return this;
         }
 
@@ -1337,6 +1364,7 @@ public final class GeneratorSettings implements Serializable {
                 "generatorName='" + generatorName + '\'' +
                 ", apiPackage='" + apiPackage + '\'' +
                 ", modelPackage='" + modelPackage + '\'' +
+                ", enumPackage='" + enumPackage + '\'' +
                 ", invokerPackage='" + invokerPackage + '\'' +
                 ", packageName='" + packageName + '\'' +
                 ", apiNameSuffix='" + apiNameSuffix + '\'' +
@@ -1369,6 +1397,7 @@ public final class GeneratorSettings implements Serializable {
         return Objects.equals(getGeneratorName(), that.getGeneratorName()) &&
                 Objects.equals(getApiPackage(), that.getApiPackage()) &&
                 Objects.equals(getModelPackage(), that.getModelPackage()) &&
+                Objects.equals(getEnumPackage(), that.getEnumPackage()) &&
                 Objects.equals(getInvokerPackage(), that.getInvokerPackage()) &&
                 Objects.equals(getPackageName(), that.getPackageName()) &&
                 Objects.equals(getApiNameSuffix(), that.getApiNameSuffix()) &&
@@ -1407,6 +1436,7 @@ public final class GeneratorSettings implements Serializable {
                 getGeneratorName(),
                 getApiPackage(),
                 getModelPackage(),
+                getEnumPackage(),
                 getInvokerPackage(),
                 getPackageName(),
                 getApiNameSuffix(),

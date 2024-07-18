@@ -29,12 +29,24 @@
 {{#vendorExtensions.x-class-extra-annotation}}
 {{{vendorExtensions.x-class-extra-annotation}}}
 {{/vendorExtensions.x-class-extra-annotation}}
+@Getter
+@Setter
 public class {{classname}} {{#parent}}extends {{{.}}} {{/parent}}{{#vendorExtensions.x-implements}}{{#-first}}implements {{{.}}}{{/-first}}{{^-first}}, {{{.}}}{{/-first}}{{#-last}} {{/-last}}{{/vendorExtensions.x-implements}}{
 {{#serializableModel}}
   private static final long serialVersionUID = 1L;
 
 {{/serializableModel}}
   {{#vars}}
+  {{#isEnum}}
+  {{^isContainer}}
+    {{>modelInnerEnum}}
+  {{/isContainer}}
+  {{#isContainer}}
+  {{#mostInnerItems}}
+    {{>modelInnerEnum}}
+  {{/mostInnerItems}}
+  {{/isContainer}}
+  {{/isEnum}}
   {{#gson}}
   public static final String SERIALIZED_NAME_{{nameInSnakeCase}} = "{{baseName}}";
   {{/gson}}

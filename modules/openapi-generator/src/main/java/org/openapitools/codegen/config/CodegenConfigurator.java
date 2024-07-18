@@ -564,6 +564,14 @@ public class CodegenConfigurator {
         return this;
     }
 
+    public CodegenConfigurator setEnumPackage(String enumPackage) {
+        if (StringUtils.isNotEmpty(enumPackage)) {
+            addAdditionalProperty(CodegenConstants.ENUM_PACKAGE, enumPackage);
+        }
+        generatorSettingsBuilder.withEnumPackage(enumPackage);
+        return this;
+    }
+
     public CodegenConfigurator setOutputDir(String outputDir) {
         workflowSettingsBuilder.withOutputDir(outputDir);
         return this;
