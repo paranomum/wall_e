@@ -1,4 +1,4 @@
-package org.openapitools.codegen.cmd;
+package org.openapitools.codegen.iqhr.cmd;
 
 import io.airlift.airline.Help;
 import io.airlift.airline.model.GlobalMetadata;

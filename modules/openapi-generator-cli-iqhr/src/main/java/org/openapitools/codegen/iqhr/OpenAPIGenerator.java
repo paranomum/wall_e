@@ -15,17 +15,18 @@
  * limitations under the License.
  */
 
-package org.openapitools.codegen;
+package org.openapitools.codegen.iqhr;
 
 import io.airlift.airline.Cli;
 import io.airlift.airline.ParseArgumentsUnexpectedException;
 import io.airlift.airline.ParseOptionMissingException;
 import io.airlift.airline.ParseOptionMissingValueException;
-import org.openapitools.codegen.cmd.*;
+import org.apache.commons.lang3.ArrayUtils;
+import org.openapitools.codegen.iqhr.cmd.*;
 
 import java.util.Locale;
 
-import static org.openapitools.codegen.Constants.CLI_NAME;
+import static org.openapitools.codegen.iqhr.Constants.CLI_NAME;
 
 /**
  * User: lanwen Date: 24.03.15 Time: 17:56
@@ -51,8 +52,6 @@ public class OpenAPIGenerator {
                                 Meta.class,
                                 HelpCommand.class,
                                 ConfigHelp.class,
-                                Validate.class,
-                                Version.class,
                                 CompletionCommand.class
                         );
 
@@ -76,6 +75,42 @@ public class OpenAPIGenerator {
             }
         } catch (ParseArgumentsUnexpectedException e) {
             System.err.printf(Locale.ROOT, "[error] %s%n%nSee '%s help' for usage.%n", e.getMessage(), CLI_NAME);
+            System.exit(1);
+        } catch (ParseOptionMissingException | ParseOptionMissingValueException e) {
+            System.err.printf(Locale.ROOT, "[error] %s%n", e.getMessage());
+            System.exit(1);
+        }
+    }
+
+    private void setupAndRunGeneration(String specFlag, final String spec, String langFlag,
+                                 final String lang, String outputDirFlag, final String outputDir,
+                                 boolean configuratorFromFile, final String configFile, String... additionalParameters) {
+        final String[] commonArgs =
+                {"generate", langFlag, lang, outputDirFlag, outputDir, specFlag, spec};
+
+        String[] argsToUse = ArrayUtils.addAll(commonArgs, additionalParameters);
+
+        Cli.CliBuilder<Runnable> builder =
+                Cli.<Runnable>builder("openapi-generator-cli")
+                        .withCommands(org.openapitools.codegen.cmd.Generate.class);
+
+        org.openapitools.codegen.cmd.Generate generate = (org.openapitools.codegen.cmd.Generate) builder.build().parse(argsToUse);
+
+        try {
+            generate.run();
+
+            // If CLI runs without a command, consider this an error. This exists after initial parse/run
+            // so we can present the configured "default command".
+            // We can check against empty args because unrecognized arguments/commands result in an exception.
+            // This is useful to exit with status 1, for example, so that misconfigured scripts fail fast.
+            // We don't want the default command to exit internally with status 1 because when the default command is something like "list",
+            // it would prevent scripting using the command directly. Example:
+            //     java -jar cli.jar list --short | tr ',' '\n' | xargs -I{} echo "Doing something with {}"
+            if (argsToUse.length == 0) {
+                System.exit(1);
+            }
+        } catch (ParseArgumentsUnexpectedException e) {
+            System.err.printf(Locale.ROOT, "[error] %s%n%nSee '%s help' for usage.%n", e.getMessage(), org.openapitools.codegen.Constants.CLI_NAME);
             System.exit(1);
         } catch (ParseOptionMissingException | ParseOptionMissingValueException e) {
             System.err.printf(Locale.ROOT, "[error] %s%n", e.getMessage());

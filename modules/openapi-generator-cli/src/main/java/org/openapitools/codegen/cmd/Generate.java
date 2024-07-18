@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.openapitools.codegen.*;
 import org.openapitools.codegen.config.CodegenConfigurator;
@@ -40,7 +41,9 @@ import org.slf4j.LoggerFactory;
 @Command(name = "generate", description = "Generate code with the specified generator.")
 public class Generate extends OpenApiGeneratorCommand {
 
+    @Setter
     CodegenConfigurator configurator;
+    @Setter
     Generator generator;
 
     @Option(name = {"-v", "--verbose"}, description = "verbose mode")
@@ -396,9 +399,6 @@ public class Generate extends OpenApiGeneratorCommand {
         // Generator name should not be validated here, as it's validated in toClientOptInput
         if (isNotEmpty(generatorName)) {
             configurator.setGeneratorName(generatorName);
-        }
-        else {
-            configurator.setGeneratorName(DEFAULT_GENERATOR_NAME);
         }
 
         if (isNotEmpty(output)) {
