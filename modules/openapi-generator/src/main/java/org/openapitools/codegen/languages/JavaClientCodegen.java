@@ -890,7 +890,6 @@ public class JavaClientCodegen extends AbstractJavaCodegen
             String enumValue = enumToValue.get("value").toString();
             enumProperty.name = enumName.toUpperCase(Locale.ROOT);
             enumProperty.value = enumValue.toUpperCase(Locale.ROOT);
-            LOGGER.info("enumProperty.name - {}, enumProperty.value - {}", enumProperty.name, enumProperty.value);
             enumProperty.enumUnknownDefaultCase = false;
             enumProperty.isString = true;
             enumProperty.withXml = false;

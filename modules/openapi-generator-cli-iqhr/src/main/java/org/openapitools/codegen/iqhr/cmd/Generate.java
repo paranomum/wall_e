@@ -17,28 +17,23 @@
 
 package org.openapitools.codegen.iqhr.cmd;
 
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.core.spi.FilterAttachable;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.airlift.airline.Cli;
 import io.airlift.airline.Command;
 import io.airlift.airline.Option;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.openapitools.codegen.*;
 import org.openapitools.codegen.config.CodegenConfigurator;
-import org.openapitools.codegen.config.MergedSpecBuilder;
-import org.openapitools.codegen.iqhr.ServicesEnum;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.openapitools.codegen.iqhr.model.ServicesConfig;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Locale;
-import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.openapitools.codegen.config.CodegenConfiguratorUtils.*;
 
 @SuppressWarnings({"java:S106"})
 @Command(name = "generate", description = "Generate code with the specified generator.")
@@ -47,8 +42,12 @@ public class Generate extends OpenApiGeneratorCommand {
     public CodegenConfigurator configurator;
     public Generator generator;
 
+    @Option(name = {"-c", "--config"}, title = "config with all services",
+            description = "config with all data for generation, must be absolute path")
+    private String configPath;
+
     @Option(name = {"-s", "--service"}, title = "service to generate",
-            description = "services of project fro generation")
+            description = "services of project for generation", required = true)
     private String service;
 
     @Option(name = {"-o", "--output"}, title = "output directory",
@@ -62,8 +61,32 @@ public class Generate extends OpenApiGeneratorCommand {
             System.exit(1);
         }
 
+        if(configPath == null) {
+            configPath = replaceJarFile();
+        }
+
+        File configFile = new File(configPath);
+
+        if(!configFile.canRead()) {
+            System.err.println("[error] Can't read file. Check permissions, if the path is absolute and existence \n" +
+                    "Config file path now is - " + configPath);
+            System.exit(1);
+        }
+
+        ServicesConfig servicesConfig = null;
+
+        try {
+            servicesConfig = new ObjectMapper().readValue(configFile, ServicesConfig.class);
+        }
+        catch (IOException e) {
+            System.err.println("[error] Can't readFile(). Check correction of file\n" +
+                    "file path - " + configFile.getPath() + "\n" +
+                    "error - " + e);
+            System.exit(1);
+        }
+
         String serviceProcessed = service.toLowerCase(Locale.ROOT);
-        String url = ServicesEnum.getServiceUrl(serviceProcessed);
+        String url =  servicesConfig.getServices().get(serviceProcessed);
         if (url == null) {
             System.err.println("[error] There is no such service");
             System.exit(1);
@@ -74,10 +97,10 @@ public class Generate extends OpenApiGeneratorCommand {
             outDir = new String[]{"-o", output};
         }
 
-        String modelPackage = "ru.rt.iqhr." + serviceProcessed + ".dto";
-        String apiPackage = "ru.rt.iqhr." + serviceProcessed + ".api";
-        String enumPackage = "ru.rt.iqhr." + serviceProcessed + ".model";
-        String invokerPackage = "ru.rt.iqhr.invoker";
+        String modelPackage = servicesConfig.getBasePath() + '.' + serviceProcessed + ".dto";
+        String apiPackage = servicesConfig.getBasePath() + '.' + serviceProcessed + ".api";
+        String enumPackage = servicesConfig.getBasePath() + '.' + serviceProcessed + ".model";
+        String invokerPackage = servicesConfig.getBasePath() + '.' +  ".invoker";
 
         String[] commonArgs =
                 {"generate",
@@ -97,5 +120,18 @@ public class Generate extends OpenApiGeneratorCommand {
 
         org.openapitools.codegen.cmd.Generate generate = (org.openapitools.codegen.cmd.Generate) builder.build().parse(allArgs);
         generate.run();
+    }
+
+    private String replaceJarFile() {
+        try {
+            File jarFile = new File(Generate.class.getProtectionDomain().getCodeSource().getLocation()
+                    .toURI().getPath());
+            configPath = jarFile.getParentFile().getPath();
+        }
+        catch (URISyntaxException ignored) {}
+        if (System.getProperty("os.name").contains("Windows"))
+            return configPath + "\\config-services.json";
+        else
+            return configPath + "/config-services.json";
     }
 }
