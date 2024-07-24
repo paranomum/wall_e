@@ -100,7 +100,7 @@ public class Generate extends OpenApiGeneratorCommand {
         String modelPackage = servicesConfig.getBasePath() + '.' + serviceProcessed + ".dto";
         String apiPackage = servicesConfig.getBasePath() + '.' + serviceProcessed + ".api";
         String enumPackage = servicesConfig.getBasePath() + '.' + serviceProcessed + ".model";
-        String invokerPackage = servicesConfig.getBasePath() + '.' +  ".invoker";
+        String invokerPackage = servicesConfig.getBasePath() + ".invoker";
 
         String[] commonArgs =
                 {"generate",
@@ -109,7 +109,7 @@ public class Generate extends OpenApiGeneratorCommand {
                         "-i", url,
                         "--api-package", apiPackage.replace('-', '_'),
                         "--model-package", modelPackage.replace('-', '_'),
-                        "--invoker-package", invokerPackage.replace('-', '_'),
+                        "--invoker-package", invokerPackage,
                         "--enum-package", enumPackage.replace('-', '_'), "--skip-validate-spec"};
 
         String[] allArgs = ArrayUtils.addAll(commonArgs, outDir);
