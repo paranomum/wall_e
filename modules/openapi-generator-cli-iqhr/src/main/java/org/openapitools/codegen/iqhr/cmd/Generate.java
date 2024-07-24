@@ -107,10 +107,10 @@ public class Generate extends OpenApiGeneratorCommand {
                         "-g", "java",
                         "--library", "webclient",
                         "-i", url,
-                        "--api-package", apiPackage,
-                        "--model-package", modelPackage,
-                        "--invoker-package", invokerPackage,
-                        "--enum-package", enumPackage};
+                        "--api-package", apiPackage.replace('-', '_'),
+                        "--model-package", modelPackage.replace('-', '_'),
+                        "--invoker-package", invokerPackage.replace('-', '_'),
+                        "--enum-package", enumPackage.replace('-', '_'), "--skip-validate-spec"};
 
         String[] allArgs = ArrayUtils.addAll(commonArgs, outDir);
 
