@@ -31,6 +31,8 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.parser.util.SchemaTypeUtil;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -143,6 +145,9 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
     protected boolean containerDefaultToNull = false;
     protected boolean generateConstructorWithAllArgs = false;
     private final Map<String, String> schemaKeyToModelNameCache = new HashMap<>();
+    @Getter
+    @Setter
+    protected boolean jackson = false;
 
     //TODO refactor cliOptions to add enums
     public AbstractJavaCodegen() {
@@ -743,18 +748,49 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
         for (ModelsMap modelsAttrs : objs.values()) {
             for (ModelMap mo : modelsAttrs.getModels()) {
                 CodegenModel codegenModel = mo.getModel();
+                if (codegenModel.children != null) {
+                    for (CodegenProperty parentVar : codegenModel.vars) {
+                        List<CodegenProperty> childVars = codegenModel.children.stream()
+                                .flatMap(item -> item.vars.stream()
+                                        .filter(var -> var.name.equals(parentVar.name) &&
+                                                ((!var.dataType.equals(var.datatypeWithEnum) && !var.datatypeWithEnum.equals(parentVar.datatypeWithEnum))
+                                                || !var.dataType.equals(parentVar.dataType))))
+                                .collect(Collectors.toList());
+                        if (codegenModel.children.size() == childVars.size()) {
+                            Set<String> dataTypeWithEnum = childVars.stream()
+                                    .map(CodegenProperty::getDatatypeWithEnum).collect(Collectors.toSet());
+                            Set<String> dataType = childVars.stream()
+                                    .map(CodegenProperty::getDataType).collect(Collectors.toSet());
+                            if (dataTypeWithEnum.size() == 1 && dataType.size() == 1) {
+                                parentVar.datatypeWithEnum = childVars.get(0).datatypeWithEnum;
+                                parentVar.dataType = childVars.get(0).dataType;
+                            }
+                            else {
+                                parentVar.dataType = "Object";
+                                parentVar.datatypeWithEnum = "Object";
+                                parentVar.isFreeFormObject = true;
+                                parentVar.isAnyType = true;
+                            }
+                        }
+                    }
+                }
                 Set<String> inheritedImports = new HashSet<>();
                 Map<String, CodegenProperty> propertyHash = new HashMap<>(codegenModel.vars.size());
                 for (final CodegenProperty property : codegenModel.vars) {
                     propertyHash.put(property.name, property);
-                    if(property.isEnum) {
-                        codegenModel.imports.add(property.enumName);
+                    if(property.isEnum || property.datatypeWithEnum.endsWith("Enum")) {
+                        property.datatypeWithEnum = toEnumDataType(property.datatypeWithEnum);
+                        String enumName = property.datatypeWithEnum;
+                        if (property.isEnum) {
+                            property.enumName = toEnumFilename(property.enumName);
+                            enumName = property.enumName;
+                        }
+                        codegenModel.imports.add(enumName);
                         Map<String, String> importsEnum = new HashMap<>();
-                        importsEnum.put("import", enumPackage + "." + property.enumName); // toEnumFilename(enumName)
+                        importsEnum.put("import", enumPackage + "." + enumName); // toEnumFilename(enumName)
                         List<Map<String, String>> imports = modelsAttrs.getImports();
                         imports.add(importsEnum);
                         modelsAttrs.setImports(imports);
-                        LOGGER.info(importsEnum.get("import"));
                     }
                 }
                 List<CodegenModel> parentModelList = getParentModelList(codegenModel);
@@ -788,7 +824,6 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
                         Map<String,String> toAdd = new HashMap<>();
                         toAdd.put("import", qimp);
                         modelsAttrs.getImports().add(toAdd);
-                        LOGGER.info(qimp);
                     }
                 }
             }
@@ -811,8 +846,6 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
                 }
             }
         }
-
-        //generate enums if library is webClient
 
         return objs;
     }
@@ -998,6 +1031,14 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
         }
 
         return name;
+    }
+
+    private String toEnumDataType(String dataType) {
+        String processedDataType = dataType.replace("Enum", "").replace("enum", "");
+        if (processedDataType.contains(">") && processedDataType.contains("<")) {
+            return processedDataType.replace(">", "Enum>");
+        }
+        return processedDataType + "Enum";
     }
 
     private boolean startsWithTwoUppercaseLetters(String name) {

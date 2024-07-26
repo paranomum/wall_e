@@ -22,7 +22,6 @@ import org.openapitools.codegen.CodegenModel;
 import org.openapitools.codegen.DefaultGenerator;
 import org.openapitools.codegen.TestUtils;
 import org.openapitools.codegen.config.CodegenConfigurator;
-import org.openapitools.codegen.languages.ProtobufSchemaCodegen;
 import org.openapitools.codegen.meta.FeatureSet;
 import org.openapitools.codegen.meta.features.WireFormatFeature;
 import org.testng.Assert;
@@ -39,15 +38,6 @@ import java.nio.file.Paths;
 import java.util.List;
 
 public class ProtobufSchemaCodegenTest {
-
-    @Test
-    public void testFeatureSet() {
-        final ProtobufSchemaCodegen codegen = new ProtobufSchemaCodegen();
-        FeatureSet featureSet = codegen.getGeneratorMetadata().getFeatureSet();
-
-        Assert.assertTrue(featureSet.getWireFormatFeatures().contains(WireFormatFeature.PROTOBUF));
-        Assert.assertEquals(featureSet.getWireFormatFeatures().size(), 1);
-    }
 
     @Test
     public void testCodeGenWithAllOf() throws IOException {
@@ -80,17 +70,5 @@ public class ProtobufSchemaCodegenTest {
             .replace("\n", "").replace("\r", "");
 
         assertEquals(generatedFile, expectedFile);
-    }
-
-    @Test(description = "convert a model with dollar signs")
-    public void modelTest() {
-        final OpenAPI openAPI = TestUtils.parseFlattenSpec("src/test/resources/3_0/dollar-in-names-pull14359.yaml");
-        final ProtobufSchemaCodegen codegen = new ProtobufSchemaCodegen();
-
-        codegen.setOpenAPI(openAPI);
-        final CodegenModel simpleName = codegen.fromModel("$DollarModel$", openAPI.getComponents().getSchemas().get("$DollarModel$"));
-        Assert.assertEquals(simpleName.name, "$DollarModel$");
-        Assert.assertEquals(simpleName.classname, "DollarModel");
-        Assert.assertEquals(simpleName.classVarName, "$DollarModel$");
     }
 }

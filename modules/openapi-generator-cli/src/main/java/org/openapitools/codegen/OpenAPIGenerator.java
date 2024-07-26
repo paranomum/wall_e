@@ -53,8 +53,7 @@ public class OpenAPIGenerator {
                                 ConfigHelp.class,
                                 Validate.class,
                                 Version.class,
-                                CompletionCommand.class,
-                                GenerateBatch.class
+                                CompletionCommand.class
                         );
 
         builder.withGroup("author")
