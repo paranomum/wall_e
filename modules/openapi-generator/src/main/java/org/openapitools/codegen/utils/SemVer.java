@@ -71,7 +71,9 @@ public class SemVer implements Comparable<SemVer> {
             return false;
         if (minor != other.minor)
             return false;
-        return revision == other.revision;
+        if (revision != other.revision)
+            return false;
+        return true;
     }
 
 }

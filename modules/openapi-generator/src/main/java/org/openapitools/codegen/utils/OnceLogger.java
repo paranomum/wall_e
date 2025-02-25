@@ -57,17 +57,17 @@ public class OnceLogger extends LoggerWrapper {
     /**
      * The allowed size of the cache.
      */
-    private static final int maxCacheSize = Integer.parseInt(GlobalSettings.getProperty(CACHE_SIZE_PROPERTY, "200"));
+    private static int maxCacheSize = Integer.parseInt(GlobalSettings.getProperty(CACHE_SIZE_PROPERTY, "200"));
 
     /**
      * The millis to expire a cached log message.
      */
-    private static final int expireMillis = Integer.parseInt(GlobalSettings.getProperty(EXPIRY_PROPERTY, "2000"));
+    private static int expireMillis = Integer.parseInt(GlobalSettings.getProperty(EXPIRY_PROPERTY, "2000"));
 
     /**
      * The number of allowed repetitions.
      */
-    private static final int maxRepetitions = 1;
+    private static int maxRepetitions = 1;
 
     OnceLogger(Logger logger) {
         this(logger, FQCN);

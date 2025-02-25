@@ -38,7 +38,7 @@ public class GlobalSettings {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalSettings.class);
 
-    private static final ThreadLocal<Properties> properties = new InheritableThreadLocal<Properties>() {
+    private static ThreadLocal<Properties> properties = new InheritableThreadLocal<Properties>() {
         @Override
         protected Properties initialValue() {
             // avoid using System.getProperties().clone() which is broken in Gradle - see https://github.com/gradle/gradle/issues/17344

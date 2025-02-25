@@ -18,6 +18,11 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 {{/asyncNative}}
 
+{{#useBeanValidation}}
+import {{javaxPackage}}.validation.constraints.*;
+import {{javaxPackage}}.validation.Valid;
+
+{{/useBeanValidation}}
 /**
  * API tests for {{classname}}
  */

@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import lombok.Getter;
 import org.openapitools.codegen.CodegenConfig;
 import org.openapitools.codegen.CodegenModel;
 import org.openapitools.codegen.CodegenProperty;
@@ -43,18 +45,14 @@ import org.slf4j.LoggerFactory;
  *   needs to be added to `One` and `Two` because of the above point)
  */
 public class OneOfImplementorAdditionalData {
-    private final String implementorName;
-    private final List<String> additionalInterfaces = new ArrayList<String>();
-    private final List<CodegenProperty> additionalProps = new ArrayList<CodegenProperty>();
-    private final List<Map<String, String>> additionalImports = new ArrayList<Map<String, String>>();
+    @Getter private String implementorName;
+    private List<String> additionalInterfaces = new ArrayList<String>();
+    private List<CodegenProperty> additionalProps = new ArrayList<CodegenProperty>();
+    private List<Map<String, String>> additionalImports = new ArrayList<Map<String, String>>();
     private final Logger LOGGER = LoggerFactory.getLogger(OneOfImplementorAdditionalData.class);
 
     public OneOfImplementorAdditionalData(String implementorName) {
         this.implementorName = implementorName;
-    }
-
-    public String getImplementorName() {
-        return implementorName;
     }
 
     /**
