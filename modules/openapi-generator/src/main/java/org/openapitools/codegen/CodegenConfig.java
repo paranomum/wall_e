@@ -27,7 +27,10 @@ import io.swagger.v3.oas.models.servers.ServerVariable;
 import org.openapitools.codegen.api.TemplatingEngineAdapter;
 import org.openapitools.codegen.meta.FeatureSet;
 import org.openapitools.codegen.meta.GeneratorMetadata;
-import org.openapitools.codegen.model.*;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.model.WebhooksMap;
 
 import java.io.File;
 import java.util.List;
@@ -75,23 +78,17 @@ public interface CodegenConfig {
 
     String modelFileFolder();
 
-    String enumFileFolder();
-
     String modelTestFileFolder();
 
     String modelDocFileFolder();
 
     String modelPackage();
 
-    String enumPackage();
-
     String toApiName(String name);
 
     String toApiVarName(String name);
 
     String toModelName(String name);
-
-//    String toEnumName(String name);
 
     String toParamName(String name);
 
@@ -169,8 +166,6 @@ public interface CodegenConfig {
 
     Map<String, String> modelTemplateFiles();
 
-    Map<String, String> enumTemplateFiles();
-
     Map<String, String> apiTestTemplateFiles();
 
     Map<String, String> modelTestTemplateFiles();
@@ -199,8 +194,6 @@ public interface CodegenConfig {
 
     String toModelFilename(String name);
 
-    String toEnumFilename(String name);
-
     String toApiTestFilename(String name);
 
     String toModelTestFilename(String name);
@@ -209,23 +202,15 @@ public interface CodegenConfig {
 
     String toModelDocFilename(String name);
 
-//    String toEnumDocFilename(String name);
-
     String toModelImport(String name);
 
-//    String toEnumImport(String name);
-
     Map<String, String> toModelImportMap(String name);
-
-//    Map<String, String> toEnumImportMap(String name);
 
     String toApiImport(String name);
 
     void addOperationToGroup(String tag, String resourcePath, Operation operation, CodegenOperation co, Map<String, List<CodegenOperation>> operations);
 
     Map<String, ModelsMap> updateAllModels(Map<String, ModelsMap> objs);
-
-    Map<String, ModelsMap> getEnumModels(Map<String, ModelsMap> objs);
 
     void postProcess();
 
@@ -249,10 +234,6 @@ public interface CodegenConfig {
 
     String modelFilename(String templateName, String modelName, String outputDir);
 
-    String enumFilename(String templateName, String modelName);
-
-    String enumFilename(String templateName, String modelName, String outputDir);
-
     String apiFilename(String templateName, String tag);
 
     String apiFilename(String templateName, String tag, String outputDir);
@@ -275,9 +256,13 @@ public interface CodegenConfig {
 
     void setSkipOperationExample(boolean skipOperationExample);
 
-    boolean isHideGenerationTimestamp();
+    boolean isSkipSortingOperations();
 
-    void setHideGenerationTimestamp(boolean hideGenerationTimestamp);
+    void setSkipSortingOperations(boolean skipSortingOperations);
+
+    public boolean isHideGenerationTimestamp();
+
+    public void setHideGenerationTimestamp(boolean hideGenerationTimestamp);
 
     Map<String, String> supportedLibraries();
 
@@ -343,9 +328,9 @@ public interface CodegenConfig {
 
     TemplatingEngineAdapter getTemplatingEngine();
 
-    boolean isEnableMinimalUpdate();
+    public boolean isEnableMinimalUpdate();
 
-    void setEnableMinimalUpdate(boolean isEnableMinimalUpdate);
+    public void setEnableMinimalUpdate(boolean isEnableMinimalUpdate);
 
     boolean isStrictSpecBehavior();
 
@@ -380,7 +365,5 @@ public interface CodegenConfig {
     boolean getUseOpenapiNormalizer();
 
     Set<String> getOpenapiGeneratorIgnoreList();
-
-    Map<String, CodegenEnum> combineEnums(Map<String, ModelsMap> objs);
 
 }

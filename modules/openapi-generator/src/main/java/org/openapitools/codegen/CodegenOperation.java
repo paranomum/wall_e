@@ -30,8 +30,9 @@ public class CodegenOperation {
             hasVersionHeaders = false, hasVersionQueryParams = false,
             isResponseBinary = false, isResponseFile = false, isResponseOptional = false, hasReference = false, defaultReturnType = false,
             isRestfulIndex, isRestfulShow, isRestfulCreate, isRestfulUpdate, isRestfulDestroy,
-            isRestful, isDeprecated, isCallbackRequest, uniqueItems, hasDefaultResponse = false, hasConstantParams = false,
-            hasErrorResponseObject; // if 4xx, 5xx responses have at least one error object defined
+            isRestful, isDeprecated, isCallbackRequest, uniqueItems, hasDefaultResponse = false, hasOnlyDefaultResponse = false, hasConstantParams = false,
+            hasErrorResponseObject, // if 4xx, 5xx responses have at least one error object defined
+            hasSingleParam = false; // if the operation has only one parameter;
     public CodegenProperty returnProperty;
     public String path, operationId, returnType, returnFormat, httpMethod, returnBaseType,
             returnContainer, summary, unescapedNotes, notes, baseName, defaultResponse;
@@ -214,6 +215,13 @@ public class CodegenOperation {
         return responses.stream().anyMatch(response -> response.isDefault);
     }
 
+    /**
+     * Check if the responses contain only 1 entry and it's default
+     *
+     * @return true if responses contain only 1 entry and it's a default response, false otherwise
+     */
+    public boolean getHasOnlyDefaultResponse() { return responses.size() == 1 && getHasDefaultResponse(); }
+
     public boolean getAllResponsesAreErrors() {
         return responses.stream().allMatch(response -> response.is4xx || response.is5xx);
     }
@@ -308,6 +316,24 @@ public class CodegenOperation {
     }
 
     /**
+     * Check if operation produces text/plain responses.
+     * NOTE: This does not mean it _only_ produces text/plain, just that it is one of the produces types.
+     *
+     * @return true if at least one produces is text/plain
+     */
+    public boolean producesTextPlain() {
+        if (produces != null) {
+            for (Map<String, String> produce : produces) {
+                if ("text/plain".equalsIgnoreCase(produce.get("mediaType").split(";")[0].trim())
+                        && "String".equals(returnType)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * Get the substring except baseName from path
      *
      * @return the substring
@@ -329,81 +355,84 @@ public class CodegenOperation {
 
     @Override
     public String toString() {
-        String sb = "CodegenOperation{" + "responseHeaders=" + responseHeaders +
-                ", hasAuthMethods=" + hasAuthMethods +
-                ", hasConsumes=" + hasConsumes +
-                ", hasProduces=" + hasProduces +
-                ", hasParams=" + hasParams +
-                ", hasOptionalParams=" + hasOptionalParams +
-                ", hasRequiredParams=" + hasRequiredParams +
-                ", returnTypeIsPrimitive=" + returnTypeIsPrimitive +
-                ", returnSimpleType=" + returnSimpleType +
-                ", subresourceOperation=" + subresourceOperation +
-                ", isMap=" + isMap +
-                ", returnProperty=" + returnProperty +
-                ", isArray=" + isArray +
-                ", isMultipart=" + isMultipart +
-                ", isVoid=" + isVoid +
-                ", isResponseBinary=" + isResponseBinary +
-                ", isResponseFile=" + isResponseFile +
-                ", isResponseOptional=" + isResponseOptional +
-                ", hasReference=" + hasReference +
-                ", hasDefaultResponse=" + hasDefaultResponse +
-                ", hasErrorResponseObject=" + hasErrorResponseObject +
-                ", isRestfulIndex=" + isRestfulIndex +
-                ", isRestfulShow=" + isRestfulShow +
-                ", isRestfulCreate=" + isRestfulCreate +
-                ", isRestfulUpdate=" + isRestfulUpdate +
-                ", isRestfulDestroy=" + isRestfulDestroy +
-                ", isRestful=" + isRestful +
-                ", isDeprecated=" + isDeprecated +
-                ", isCallbackRequest=" + isCallbackRequest +
-                ", uniqueItems='" + uniqueItems +
-                ", path='" + path + '\'' +
-                ", operationId='" + operationId + '\'' +
-                ", returnType='" + returnType + '\'' +
-                ", httpMethod='" + httpMethod + '\'' +
-                ", returnBaseType='" + returnBaseType + '\'' +
-                ", returnContainer='" + returnContainer + '\'' +
-                ", summary='" + summary + '\'' +
-                ", unescapedNotes='" + unescapedNotes + '\'' +
-                ", notes='" + notes + '\'' +
-                ", baseName='" + baseName + '\'' +
-                ", defaultResponse='" + defaultResponse + '\'' +
-                ", discriminator=" + discriminator +
-                ", consumes=" + consumes +
-                ", produces=" + produces +
-                ", prioritizedContentTypes=" + prioritizedContentTypes +
-                ", servers=" + servers +
-                ", bodyParam=" + bodyParam +
-                ", allParams=" + allParams +
-                ", bodyParams=" + bodyParams +
-                ", pathParams=" + pathParams +
-                ", queryParams=" + queryParams +
-                ", headerParams=" + headerParams +
-                ", formParams=" + formParams +
-                ", cookieParams=" + cookieParams +
-                ", requiredParams=" + requiredParams +
-                ", optionalParams=" + optionalParams +
-                ", requiredAndNotNullableParams=" + requiredAndNotNullableParams +
-                ", notNullableParams=" + notNullableParams +
-                ", authMethods=" + authMethods +
-                ", tags=" + tags +
-                ", responses=" + responses +
-                ", callbacks=" + callbacks +
-                ", imports=" + imports +
-                ", examples=" + examples +
-                ", requestBodyExamples=" + requestBodyExamples +
-                ", externalDocs=" + externalDocs +
-                ", vendorExtensions=" + vendorExtensions +
-                ", nickname='" + nickname + '\'' +
-                ", operationIdOriginal='" + operationIdOriginal + '\'' +
-                ", operationIdLowerCase='" + operationIdLowerCase + '\'' +
-                ", operationIdCamelCase='" + operationIdCamelCase + '\'' +
-                ", operationIdSnakeCase='" + operationIdSnakeCase + '\'' +
-                ", constantParams='" + constantParams + '\'' +
-                '}';
-        return sb;
+        final StringBuffer sb = new StringBuffer("CodegenOperation{");
+        sb.append("responseHeaders=").append(responseHeaders);
+        sb.append(", hasAuthMethods=").append(hasAuthMethods);
+        sb.append(", hasConsumes=").append(hasConsumes);
+        sb.append(", hasProduces=").append(hasProduces);
+        sb.append(", hasParams=").append(hasParams);
+        sb.append(", hasOptionalParams=").append(hasOptionalParams);
+        sb.append(", hasRequiredParams=").append(hasRequiredParams);
+        sb.append(", returnTypeIsPrimitive=").append(returnTypeIsPrimitive);
+        sb.append(", returnSimpleType=").append(returnSimpleType);
+        sb.append(", subresourceOperation=").append(subresourceOperation);
+        sb.append(", isMap=").append(isMap);
+        sb.append(", returnProperty=").append(returnProperty);
+        sb.append(", isArray=").append(isArray);
+        sb.append(", isMultipart=").append(isMultipart);
+        sb.append(", isVoid=").append(isVoid);
+        sb.append(", isResponseBinary=").append(isResponseBinary);
+        sb.append(", isResponseFile=").append(isResponseFile);
+        sb.append(", isResponseOptional=").append(isResponseOptional);
+        sb.append(", hasReference=").append(hasReference);
+        sb.append(", hasDefaultResponse=").append(hasDefaultResponse);
+        sb.append(", hasOnlyDefaultResponse=").append(hasOnlyDefaultResponse);
+        sb.append(", hasErrorResponseObject=").append(hasErrorResponseObject);
+        sb.append(", hasSingleParam=").append(hasSingleParam);
+        sb.append(", isRestfulIndex=").append(isRestfulIndex);
+        sb.append(", isRestfulShow=").append(isRestfulShow);
+        sb.append(", isRestfulCreate=").append(isRestfulCreate);
+        sb.append(", isRestfulUpdate=").append(isRestfulUpdate);
+        sb.append(", isRestfulDestroy=").append(isRestfulDestroy);
+        sb.append(", isRestful=").append(isRestful);
+        sb.append(", isDeprecated=").append(isDeprecated);
+        sb.append(", isCallbackRequest=").append(isCallbackRequest);
+        sb.append(", uniqueItems='").append(uniqueItems);
+        sb.append(", path='").append(path).append('\'');
+        sb.append(", operationId='").append(operationId).append('\'');
+        sb.append(", returnType='").append(returnType).append('\'');
+        sb.append(", httpMethod='").append(httpMethod).append('\'');
+        sb.append(", returnBaseType='").append(returnBaseType).append('\'');
+        sb.append(", returnContainer='").append(returnContainer).append('\'');
+        sb.append(", summary='").append(summary).append('\'');
+        sb.append(", unescapedNotes='").append(unescapedNotes).append('\'');
+        sb.append(", notes='").append(notes).append('\'');
+        sb.append(", baseName='").append(baseName).append('\'');
+        sb.append(", defaultResponse='").append(defaultResponse).append('\'');
+        sb.append(", discriminator=").append(discriminator);
+        sb.append(", consumes=").append(consumes);
+        sb.append(", produces=").append(produces);
+        sb.append(", prioritizedContentTypes=").append(prioritizedContentTypes);
+        sb.append(", servers=").append(servers);
+        sb.append(", bodyParam=").append(bodyParam);
+        sb.append(", allParams=").append(allParams);
+        sb.append(", bodyParams=").append(bodyParams);
+        sb.append(", pathParams=").append(pathParams);
+        sb.append(", queryParams=").append(queryParams);
+        sb.append(", headerParams=").append(headerParams);
+        sb.append(", formParams=").append(formParams);
+        sb.append(", cookieParams=").append(cookieParams);
+        sb.append(", requiredParams=").append(requiredParams);
+        sb.append(", optionalParams=").append(optionalParams);
+        sb.append(", requiredAndNotNullableParams=").append(requiredAndNotNullableParams);
+        sb.append(", notNullableParams=").append(notNullableParams);
+        sb.append(", authMethods=").append(authMethods);
+        sb.append(", tags=").append(tags);
+        sb.append(", responses=").append(responses);
+        sb.append(", callbacks=").append(callbacks);
+        sb.append(", imports=").append(imports);
+        sb.append(", examples=").append(examples);
+        sb.append(", requestBodyExamples=").append(requestBodyExamples);
+        sb.append(", externalDocs=").append(externalDocs);
+        sb.append(", vendorExtensions=").append(vendorExtensions);
+        sb.append(", nickname='").append(nickname).append('\'');
+        sb.append(", operationIdOriginal='").append(operationIdOriginal).append('\'');
+        sb.append(", operationIdLowerCase='").append(operationIdLowerCase).append('\'');
+        sb.append(", operationIdCamelCase='").append(operationIdCamelCase).append('\'');
+        sb.append(", operationIdSnakeCase='").append(operationIdSnakeCase).append('\'');
+        sb.append(", constantParams='").append(constantParams).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 
     @Override
@@ -429,7 +458,9 @@ public class CodegenOperation {
                 isResponseOptional == that.isResponseOptional &&
                 hasReference == that.hasReference &&
                 hasDefaultResponse == that.hasDefaultResponse &&
+                hasOnlyDefaultResponse == that.hasOnlyDefaultResponse &&
                 hasErrorResponseObject == that.hasErrorResponseObject &&
+                hasSingleParam == that.hasSingleParam &&
                 isRestfulIndex == that.isRestfulIndex &&
                 isRestfulShow == that.isRestfulShow &&
                 isRestfulCreate == that.isRestfulCreate &&
@@ -492,13 +523,13 @@ public class CodegenOperation {
         return Objects.hash(responseHeaders, hasAuthMethods, hasConsumes, hasProduces, hasParams, hasOptionalParams,
                 hasRequiredParams, returnTypeIsPrimitive, returnSimpleType, subresourceOperation, isMap,
                 isArray, isMultipart, isVoid, isResponseBinary, isResponseFile, isResponseOptional, hasReference,
-                hasDefaultResponse, isRestfulIndex, isRestfulShow, isRestfulCreate, isRestfulUpdate, isRestfulDestroy,
+                hasDefaultResponse, hasOnlyDefaultResponse, isRestfulIndex, isRestfulShow, isRestfulCreate, isRestfulUpdate, isRestfulDestroy,
                 isRestful, isDeprecated, isCallbackRequest, uniqueItems, path, operationId, returnType, httpMethod,
                 returnBaseType, returnContainer, summary, unescapedNotes, notes, baseName, defaultResponse,
                 discriminator, consumes, produces, prioritizedContentTypes, servers, bodyParam, allParams, bodyParams,
                 pathParams, queryParams, headerParams, formParams, cookieParams, requiredParams, returnProperty, optionalParams,
                 authMethods, tags, responses, callbacks, imports, examples, requestBodyExamples, externalDocs,
                 vendorExtensions, nickname, operationIdOriginal, operationIdLowerCase, operationIdCamelCase,
-                operationIdSnakeCase, hasErrorResponseObject, requiredAndNotNullableParams, notNullableParams, constantParams);
+                operationIdSnakeCase, hasErrorResponseObject, hasSingleParam, requiredAndNotNullableParams, notNullableParams, constantParams);
     }
 }

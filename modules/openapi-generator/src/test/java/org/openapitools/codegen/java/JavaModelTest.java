@@ -31,7 +31,6 @@ import io.swagger.v3.parser.util.SchemaTypeUtil;
 import org.openapitools.codegen.*;
 import org.openapitools.codegen.config.CodegenConfigurator;
 import org.openapitools.codegen.languages.JavaClientCodegen;
-import org.openapitools.codegen.languages.features.DocumentationProviderFeatures;
 import org.openapitools.codegen.languages.features.DocumentationProviderFeatures.AnnotationLibrary;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -275,10 +274,10 @@ public class JavaModelTest {
 
         final CodegenProperty property = cm.vars.get(0);
         Assert.assertEquals(property.baseName, "@Some:restricted%characters#to!handle+");
-        Assert.assertEquals(property.getter, "getAtSomeColonRestrictedPercentCharactersHashToExclamationHandlePlus");
-        Assert.assertEquals(property.setter, "setAtSomeColonRestrictedPercentCharactersHashToExclamationHandlePlus");
+        Assert.assertEquals(property.getter, "getAtSomeRestrictedPercentCharactersHashToExclamationHandlePlus");
+        Assert.assertEquals(property.setter, "setAtSomeRestrictedPercentCharactersHashToExclamationHandlePlus");
         Assert.assertEquals(property.dataType, "Boolean");
-        Assert.assertEquals(property.name, "atSomeColonRestrictedPercentCharactersHashToExclamationHandlePlus");
+        Assert.assertEquals(property.name, "atSomeRestrictedPercentCharactersHashToExclamationHandlePlus");
         Assert.assertNull(property.defaultValue);
         Assert.assertEquals(property.baseType, "Boolean");
         Assert.assertFalse(property.required);

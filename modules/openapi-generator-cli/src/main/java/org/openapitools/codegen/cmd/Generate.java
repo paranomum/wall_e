@@ -117,10 +117,6 @@ public class Generate extends OpenApiGeneratorCommand {
             description = CodegenConstants.MODEL_PACKAGE_DESC)
     private String modelPackage;
 
-    @Option(name = {"--enum-package"}, title = "model package",
-            description = CodegenConstants.ENUM_PACKAGE_DESC)
-    private String enumPackage;
-
     @Option(name = {"--api-name-suffix"}, title = "api name suffix",
             description = CodegenConstants.API_NAME_SUFFIX_DESC)
     private String apiNameSuffix;
@@ -424,10 +420,6 @@ public class Generate extends OpenApiGeneratorCommand {
 
         if (isNotEmpty(modelPackage)) {
             configurator.setModelPackage(modelPackage);
-        }
-
-        if (isNotEmpty(enumPackage)) {
-            configurator.setEnumPackage(enumPackage);
         }
 
         if (isNotEmpty(apiNameSuffix)) {

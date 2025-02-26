@@ -19,7 +19,7 @@ public interface TemplateProcessor {
      * @return The actual file
      * @throws IOException If file cannot be written.
      */
-    File write(Object data, String template, File target) throws IOException;
+    File write(Map<String, Object> data, String template, File target) throws IOException;
 
     /**
      * Write bytes to a file

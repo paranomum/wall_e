@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.Objects;
 
 import io.swagger.v3.oas.models.examples.Example;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Describes a single operation parameter in the OAS specification.
@@ -48,6 +50,8 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
     public boolean isString, isNumeric, isInteger, isLong, isNumber, isFloat, isDouble, isDecimal, isByteArray, isBinary,
             isBoolean, isDate, isDateTime, isUuid, isUri, isEmail, isPassword, isFreeFormObject, isAnyType, isShort, isUnboundedInteger;
     public boolean isArray, isMap;
+    /** datatype is the generic inner parameter of a std::optional for C++, or Optional (Java) */
+    public boolean isOptional;
     public boolean isFile;
     public boolean isEnum;
     public boolean isEnumRef; // true if the enum is a ref (model) but not defined inline
@@ -65,10 +69,10 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
     public String containerType;
     public String containerTypeMapped; // language-specified container type (e.g. `dict` in python for map)
 
+    @Getter @Setter
     private CodegenProperty schema;
     private boolean additionalPropertiesIsAnyType;
     private boolean hasVars;
-    private boolean hasEnums;
 
     /**
      * Determines whether this parameter is mandatory. If the parameter is in "path",
@@ -129,6 +133,7 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
     private boolean hasDiscriminatorWithNonEmptyMapping;
     private CodegenComposedSchemas composedSchemas;
     private boolean hasMultipleTypes = false;
+    @Getter @Setter
     private LinkedHashMap<String, CodegenMediaType> content;
     private Map<String, CodegenProperty> requiredVarsMap;
     private String ref;
@@ -262,6 +267,7 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
         output.isAnyType = this.isAnyType;
         output.isArray = this.isArray;
         output.isMap = this.isMap;
+        output.isOptional = this.isOptional;
         output.isExplode = this.isExplode;
         output.style = this.style;
         output.isDeepObject = this.isDeepObject;
@@ -281,7 +287,7 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
                 enumDefaultValue, enumName, style, isDeepObject, isMatrix, isAllowEmptyValue, example, examples,
                 jsonSchema, isString, isNumeric, isInteger, isLong, isNumber, isFloat, isDouble, isDecimal,
                 isByteArray, isBinary, isBoolean, isDate, isDateTime, isUuid, isUri, isEmail, isPassword,
-                isFreeFormObject, isAnyType, isArray, isMap, isFile, isEnum, isEnumRef, _enum, allowableValues,
+                isFreeFormObject, isAnyType, isArray, isMap, isOptional, isFile, isEnum, isEnumRef, _enum, allowableValues,
                 items, mostInnerItems, additionalProperties, vars, requiredVars, vendorExtensions, hasValidation,
                 getMaxProperties(), getMinProperties(), isNullable, isDeprecated, required, getMaximum(),
                 getExclusiveMaximum(), getMinimum(), getExclusiveMinimum(), getMaxLength(), getMinLength(),
@@ -331,6 +337,7 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
                 isAnyType == that.isAnyType &&
                 isArray == that.isArray &&
                 isMap == that.isMap &&
+                isOptional == that.isOptional &&
                 isFile == that.isFile &&
                 isEnum == that.isEnum &&
                 isEnumRef == that.isEnumRef &&
@@ -408,106 +415,108 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
 
     @Override
     public String toString() {
-        String sb = "CodegenParameter{" + "isFormParam=" + isFormParam +
-                ", isQueryParam=" + isQueryParam +
-                ", isPathParam=" + isPathParam +
-                ", isHeaderParam=" + isHeaderParam +
-                ", isCookieParam=" + isCookieParam +
-                ", isBodyParam=" + isBodyParam +
-                ", isContainer=" + isContainer +
-                ", isCollectionFormatMulti=" + isCollectionFormatMulti +
-                ", isPrimitiveType=" + isPrimitiveType +
-                ", isModel=" + isModel +
-                ", isExplode=" + isExplode +
-                ", baseName='" + baseName + '\'' +
-                ", paramName='" + paramName + '\'' +
-                ", dataType='" + dataType + '\'' +
-                ", datatypeWithEnum='" + datatypeWithEnum + '\'' +
-                ", dataFormat='" + dataFormat + '\'' +
-                ", collectionFormat='" + collectionFormat + '\'' +
-                ", description='" + description + '\'' +
-                ", unescapedDescription='" + unescapedDescription + '\'' +
-                ", baseType='" + baseType + '\'' +
-                ", containerType='" + containerType + '\'' +
-                ", containerTypeMapped='" + containerTypeMapped + '\'' +
-                ", defaultValue='" + defaultValue + '\'' +
-                ", enumDefaultValue='" + enumDefaultValue + '\'' +
-                ", enumName='" + enumName + '\'' +
-                ", style='" + style + '\'' +
-                ", deepObject='" + isDeepObject + '\'' +
-                ", isMatrix='" + isMatrix + '\'' +
-                ", allowEmptyValue='" + isAllowEmptyValue + '\'' +
-                ", example='" + example + '\'' +
-                ", examples='" + examples + '\'' +
-                ", jsonSchema='" + jsonSchema + '\'' +
-                ", isString=" + isString +
-                ", isNumeric=" + isNumeric +
-                ", isInteger=" + isInteger +
-                ", isShort=" + isShort +
-                ", isLong=" + isLong +
-                ", isUnboundedInteger=" + isUnboundedInteger +
-                ", isNumber=" + isNumber +
-                ", isFloat=" + isFloat +
-                ", isDouble=" + isDouble +
-                ", isDecimal=" + isDecimal +
-                ", isByteArray=" + isByteArray +
-                ", isBinary=" + isBinary +
-                ", isBoolean=" + isBoolean +
-                ", isDate=" + isDate +
-                ", isDateTime=" + isDateTime +
-                ", isUuid=" + isUuid +
-                ", isUri=" + isUri +
-                ", isEmail=" + isEmail +
-                ", isPassword=" + isPassword +
-                ", isFreeFormObject=" + isFreeFormObject +
-                ", isAnyType=" + isAnyType +
-                ", isArray=" + isArray +
-                ", isMap=" + isMap +
-                ", isFile=" + isFile +
-                ", isEnum=" + isEnum +
-                ", isEnumRef=" + isEnumRef +
-                ", _enum=" + _enum +
-                ", allowableValues=" + allowableValues +
-                ", items=" + items +
-                ", mostInnerItems=" + mostInnerItems +
-                ", additionalProperties=" + additionalProperties +
-                ", vars=" + vars +
-                ", requiredVars=" + requiredVars +
-                ", vendorExtensions=" + vendorExtensions +
-                ", hasValidation=" + hasValidation +
-                ", maxProperties=" + maxProperties +
-                ", minProperties=" + minProperties +
-                ", isNullable=" + isNullable +
-                ", isDeprecated=" + isDeprecated +
-                ", required=" + required +
-                ", maximum='" + maximum + '\'' +
-                ", exclusiveMaximum=" + exclusiveMaximum +
-                ", minimum='" + minimum + '\'' +
-                ", exclusiveMinimum=" + exclusiveMinimum +
-                ", maxLength=" + maxLength +
-                ", minLength=" + minLength +
-                ", pattern='" + pattern + '\'' +
-                ", maxItems=" + maxItems +
-                ", minItems=" + minItems +
-                ", uniqueItems=" + uniqueItems +
-                ", uniqueItemsBoolean=" + uniqueItemsBoolean +
-                ", contentType=" + contentType +
-                ", multipleOf=" + multipleOf +
-                ", isNull=" + isNull +
-                ", isVoid=" + isVoid +
-                ", getAdditionalPropertiesIsAnyType=" + additionalPropertiesIsAnyType +
-                ", getHasVars=" + hasVars +
-                ", getHasRequired=" + hasRequired +
-                ", getHasDiscriminatorWithNonEmptyMapping=" + hasDiscriminatorWithNonEmptyMapping +
-                ", composedSchemas=" + composedSchemas +
-                ", hasMultipleTypes=" + hasMultipleTypes +
-                ", schema=" + schema +
-                ", content=" + content +
-                ", requiredVarsMap=" + requiredVarsMap +
-                ", ref=" + ref +
-                ", schemaIsFromAdditionalProperties=" + schemaIsFromAdditionalProperties +
-                '}';
-        return sb;
+        final StringBuilder sb = new StringBuilder("CodegenParameter{");
+        sb.append("isFormParam=").append(isFormParam);
+        sb.append(", isQueryParam=").append(isQueryParam);
+        sb.append(", isPathParam=").append(isPathParam);
+        sb.append(", isHeaderParam=").append(isHeaderParam);
+        sb.append(", isCookieParam=").append(isCookieParam);
+        sb.append(", isBodyParam=").append(isBodyParam);
+        sb.append(", isContainer=").append(isContainer);
+        sb.append(", isCollectionFormatMulti=").append(isCollectionFormatMulti);
+        sb.append(", isPrimitiveType=").append(isPrimitiveType);
+        sb.append(", isModel=").append(isModel);
+        sb.append(", isExplode=").append(isExplode);
+        sb.append(", baseName='").append(baseName).append('\'');
+        sb.append(", paramName='").append(paramName).append('\'');
+        sb.append(", dataType='").append(dataType).append('\'');
+        sb.append(", datatypeWithEnum='").append(datatypeWithEnum).append('\'');
+        sb.append(", dataFormat='").append(dataFormat).append('\'');
+        sb.append(", collectionFormat='").append(collectionFormat).append('\'');
+        sb.append(", description='").append(description).append('\'');
+        sb.append(", unescapedDescription='").append(unescapedDescription).append('\'');
+        sb.append(", baseType='").append(baseType).append('\'');
+        sb.append(", containerType='").append(containerType).append('\'');
+        sb.append(", containerTypeMapped='").append(containerTypeMapped).append('\'');
+        sb.append(", defaultValue='").append(defaultValue).append('\'');
+        sb.append(", enumDefaultValue='").append(enumDefaultValue).append('\'');
+        sb.append(", enumName='").append(enumName).append('\'');
+        sb.append(", style='").append(style).append('\'');
+        sb.append(", deepObject='").append(isDeepObject).append('\'');
+        sb.append(", isMatrix='").append(isMatrix).append('\'');
+        sb.append(", allowEmptyValue='").append(isAllowEmptyValue).append('\'');
+        sb.append(", example='").append(example).append('\'');
+        sb.append(", examples='").append(examples).append('\'');
+        sb.append(", jsonSchema='").append(jsonSchema).append('\'');
+        sb.append(", isString=").append(isString);
+        sb.append(", isNumeric=").append(isNumeric);
+        sb.append(", isInteger=").append(isInteger);
+        sb.append(", isShort=").append(isShort);
+        sb.append(", isLong=").append(isLong);
+        sb.append(", isUnboundedInteger=").append(isUnboundedInteger);
+        sb.append(", isNumber=").append(isNumber);
+        sb.append(", isFloat=").append(isFloat);
+        sb.append(", isDouble=").append(isDouble);
+        sb.append(", isDecimal=").append(isDecimal);
+        sb.append(", isByteArray=").append(isByteArray);
+        sb.append(", isBinary=").append(isBinary);
+        sb.append(", isBoolean=").append(isBoolean);
+        sb.append(", isDate=").append(isDate);
+        sb.append(", isDateTime=").append(isDateTime);
+        sb.append(", isUuid=").append(isUuid);
+        sb.append(", isUri=").append(isUri);
+        sb.append(", isEmail=").append(isEmail);
+        sb.append(", isPassword=").append(isPassword);
+        sb.append(", isFreeFormObject=").append(isFreeFormObject);
+        sb.append(", isAnyType=").append(isAnyType);
+        sb.append(", isArray=").append(isArray);
+        sb.append(", isMap=").append(isMap);
+        sb.append(", isOptional=").append(isOptional);
+        sb.append(", isFile=").append(isFile);
+        sb.append(", isEnum=").append(isEnum);
+        sb.append(", isEnumRef=").append(isEnumRef);
+        sb.append(", _enum=").append(_enum);
+        sb.append(", allowableValues=").append(allowableValues);
+        sb.append(", items=").append(items);
+        sb.append(", mostInnerItems=").append(mostInnerItems);
+        sb.append(", additionalProperties=").append(additionalProperties);
+        sb.append(", vars=").append(vars);
+        sb.append(", requiredVars=").append(requiredVars);
+        sb.append(", vendorExtensions=").append(vendorExtensions);
+        sb.append(", hasValidation=").append(hasValidation);
+        sb.append(", maxProperties=").append(maxProperties);
+        sb.append(", minProperties=").append(minProperties);
+        sb.append(", isNullable=").append(isNullable);
+        sb.append(", isDeprecated=").append(isDeprecated);
+        sb.append(", required=").append(required);
+        sb.append(", maximum='").append(maximum).append('\'');
+        sb.append(", exclusiveMaximum=").append(exclusiveMaximum);
+        sb.append(", minimum='").append(minimum).append('\'');
+        sb.append(", exclusiveMinimum=").append(exclusiveMinimum);
+        sb.append(", maxLength=").append(maxLength);
+        sb.append(", minLength=").append(minLength);
+        sb.append(", pattern='").append(pattern).append('\'');
+        sb.append(", maxItems=").append(maxItems);
+        sb.append(", minItems=").append(minItems);
+        sb.append(", uniqueItems=").append(uniqueItems);
+        sb.append(", uniqueItemsBoolean=").append(uniqueItemsBoolean);
+        sb.append(", contentType=").append(contentType);
+        sb.append(", multipleOf=").append(multipleOf);
+        sb.append(", isNull=").append(isNull);
+        sb.append(", isVoid=").append(isVoid);
+        sb.append(", getAdditionalPropertiesIsAnyType=").append(additionalPropertiesIsAnyType);
+        sb.append(", getHasVars=").append(hasVars);
+        sb.append(", getHasRequired=").append(hasRequired);
+        sb.append(", getHasDiscriminatorWithNonEmptyMapping=").append(hasDiscriminatorWithNonEmptyMapping);
+        sb.append(", composedSchemas=").append(composedSchemas);
+        sb.append(", hasMultipleTypes=").append(hasMultipleTypes);
+        sb.append(", schema=").append(schema);
+        sb.append(", content=").append(content);
+        sb.append(", requiredVarsMap=").append(requiredVarsMap);
+        sb.append(", ref=").append(ref);
+        sb.append(", schemaIsFromAdditionalProperties=").append(schemaIsFromAdditionalProperties);
+        sb.append('}');
+        return sb.toString();
     }
 
     // use schema.getContains or content.mediaType.schema.getContains instead of this
@@ -756,6 +765,16 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
     }
 
     @Override
+    public boolean getIsOptional() {
+        return isOptional;
+    }
+
+    @Override
+    public void setIsOptional(boolean isOptional) {
+        this.isOptional = isOptional;
+    }
+
+    @Override
     public boolean getIsArray() {
         return isArray;
     }
@@ -973,22 +992,6 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
         this.hasMultipleTypes = hasMultipleTypes;
     }
 
-    public CodegenProperty getSchema() {
-        return schema;
-    }
-
-    public void setSchema(CodegenProperty schema) {
-        this.schema = schema;
-    }
-
-    public LinkedHashMap<String, CodegenMediaType> getContent() {
-        return content;
-    }
-
-    public void setContent(LinkedHashMap<String, CodegenMediaType> content) {
-        this.content = content;
-    }
-
     @Override
     public String getBaseType() {
         return baseType;
@@ -1122,16 +1125,6 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
     @Override
     public void setIsEnum(boolean isEnum) {
         this.isEnum = isEnum;
-    }
-
-    @Override
-    public boolean getHasEnums() {
-        return hasEnums;
-    }
-
-    @Override
-    public void setHasEnums(boolean hasEnums) {
-        this.hasEnums = hasEnums;
     }
 }
 

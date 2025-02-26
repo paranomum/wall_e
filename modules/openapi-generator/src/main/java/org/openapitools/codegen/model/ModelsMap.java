@@ -1,7 +1,5 @@
 package org.openapitools.codegen.model;
 
-import org.openapitools.codegen.CodegenProperty;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

@@ -20,7 +20,6 @@ package org.openapitools.codegen.utils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.core.util.AnnotationsUtils;
-import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -46,7 +45,6 @@ import org.openapitools.codegen.model.ModelsMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -64,6 +62,9 @@ public class ModelUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(ModelUtils.class);
 
     private static final String URI_FORMAT = "uri";
+
+    // These types are for 3.0.x only; 3.1 also has a `null` type as well
+    private static final Set<String> OPENAPI_TYPES = Set.of("array", "integer", "number", "boolean", "string", "object");
 
     private static final String generateAliasAsModelKey = "generateAliasAsModel";
 
@@ -482,7 +483,11 @@ public class ModelUtils {
         }
 
         // has allOf
-        return schema.getAllOf() != null;
+        if (schema.getAllOf() != null) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -559,7 +564,7 @@ public class ModelUtils {
         }
 
         if (schema instanceof JsonSchema) { // 3.1 spec
-            return ((schema.getAdditionalProperties() instanceof JsonSchema) ||
+            return ((schema.getAdditionalProperties() instanceof Schema) ||
                     (schema.getAdditionalProperties() instanceof Boolean && (Boolean) schema.getAdditionalProperties()));
         } else { // 3.0 or 2.x spec
             return (schema instanceof MapSchema) ||
@@ -595,7 +600,9 @@ public class ModelUtils {
         Schema<?> items = schema.getItems();
         if (items == null) {
             if (schema instanceof JsonSchema) { // 3.1 spec
-                // do nothing as the schema may contain prefixItems only
+                // set the items to a new schema (any type)
+                items = new Schema<>();
+                schema.setItems(items);
             } else { // 3.0 spec, default to string
                 LOGGER.error("Undefined array inner type for `{}`. Default to String.", schema.getName());
                 items = new StringSchema().description("TODO default missing array inner type to string");
@@ -607,6 +614,16 @@ public class ModelUtils {
 
     public static boolean isSet(Schema schema) {
         return ModelUtils.isArraySchema(schema) && Boolean.TRUE.equals(schema.getUniqueItems());
+    }
+
+    /**
+     * Return true if the schema is a string/integer/number/boolean type in OpenAPI.
+     *
+     * @param schema the OAS schema
+     * @return true if the schema is a string/integer/number/boolean type in OpenAPI.
+     */
+    public static boolean isPrimitiveType(Schema schema) {
+        return (isStringSchema(schema) || isIntegerSchema(schema) || isNumberSchema(schema) || isBooleanSchema(schema));
     }
 
     public static boolean isStringSchema(Schema schema) {
@@ -715,6 +732,16 @@ public class ModelUtils {
                 && URI_FORMAT.equals(schema.getFormat());
     }
 
+    public static boolean isEnumSchema(final Schema<?> schema) {
+        // MyEnum:
+        //   type: string
+        //   enum:
+        //   - ENUM_1
+        //   - ENUM_2
+        return schema.getEnum() != null
+                && !schema.getEnum().isEmpty();
+    }
+
     public static boolean isEmailSchema(Schema schema) {
         return (schema instanceof EmailSchema) ||
                 // format: email
@@ -749,7 +776,8 @@ public class ModelUtils {
         return ModelUtils.isByteArraySchema(schema) ||
                 ModelUtils.isBinarySchema(schema) ||
                 ModelUtils.isUUIDSchema(schema) ||
-                ModelUtils.isURISchema(schema);
+                ModelUtils.isURISchema(schema) ||
+                ModelUtils.isEnumSchema(schema);
 
     }
 
@@ -829,9 +857,10 @@ public class ModelUtils {
      *         The value can be any type except the 'null' value.
      *
      * @param schema  potentially containing a '$ref'
+     * @param openAPI  document containing the Schema.
      * @return true if it's a free-form object
      */
-    public static boolean isFreeFormObject(Schema schema) {
+    public static boolean isFreeFormObject(Schema schema, OpenAPI openAPI) {
         if (schema == null) {
             // TODO: Is this message necessary? A null schema is not a free-form object, so the result is correct.
             once(LOGGER).error("Schema cannot be null in isFreeFormObject check");
@@ -890,6 +919,8 @@ public class ModelUtils {
                 if (addlProps == null) {
                     return true;
                 } else {
+                    addlProps = getReferencedSchema(openAPI, addlProps);
+
                     if (addlProps instanceof ObjectSchema) {
                         ObjectSchema objSchema = (ObjectSchema) addlProps;
                         // additionalProperties defined as {}
@@ -936,7 +967,7 @@ public class ModelUtils {
      * @param schema  potentially containing a '$ref'
      * @return schema without '$ref'
      */
-    public static Schema getReferencedSchema(OpenAPI openAPI, Schema schema) {
+    public static Schema<?> getReferencedSchema(OpenAPI openAPI, Schema schema) {
         if (schema == null) {
             return null;
         }
@@ -1000,7 +1031,11 @@ public class ModelUtils {
 
         String[] parts = refString.split("/");
         // #/components/schemas/Pet/properties/category
-        return parts.length == 6 && "properties".equals(parts[4]);
+        if (parts.length == 6 && "properties".equals(parts[4])) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public static Schema getSchema(OpenAPI openAPI, String name) {
@@ -1340,7 +1375,7 @@ public class ModelUtils {
                     once(LOGGER).warn("{} is not defined", schema.get$ref());
                 }
                 return schema;
-            } else if (ref.getEnum() != null && !ref.getEnum().isEmpty()) {
+            } else if (isEnumSchema(ref)) {
                 // top-level enum class
                 return schema;
             } else if (isArraySchema(ref)) {
@@ -1469,8 +1504,8 @@ public class ModelUtils {
 
         Map<String, List<Entry<String, Schema>>> groupedByParent = allSchemas.entrySet().stream()
                 .filter(entry -> isComposedSchema(entry.getValue()))
-                .filter(entry -> getParentName(entry.getValue(), allSchemas) != null)
-                .collect(Collectors.groupingBy(entry -> getParentName(entry.getValue(), allSchemas)));
+                .filter(entry -> getParentName((Schema) entry.getValue(), allSchemas) != null)
+                .collect(Collectors.groupingBy(entry -> getParentName((Schema) entry.getValue(), allSchemas)));
 
         return groupedByParent.entrySet().stream()
                 .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue().stream().map(e -> e.getKey()).collect(Collectors.toList())));
@@ -1576,6 +1611,12 @@ public class ModelUtils {
      * @return the name of the parent model
      */
     public static List<String> getAllParentsName(Schema composedSchema, Map<String, Schema> allSchemas, boolean includeAncestors) {
+        return getAllParentsName(composedSchema, allSchemas, includeAncestors, new HashSet<>());
+    }
+
+    // Use a set of seen names to avoid infinite recursion
+    private static List<String> getAllParentsName(
+            Schema composedSchema, Map<String, Schema> allSchemas, boolean includeAncestors, Set<String> seenNames) {
         List<Schema> interfaces = getInterfaces(composedSchema);
         List<String> names = new ArrayList<String>();
 
@@ -1584,6 +1625,10 @@ public class ModelUtils {
                 // get the actual schema
                 if (StringUtils.isNotEmpty(schema.get$ref())) {
                     String parentName = getSimpleRef(schema.get$ref());
+                    if (seenNames.contains(parentName)) {
+                        continue;
+                    }
+                    seenNames.add(parentName);
                     Schema s = allSchemas.get(parentName);
                     if (s == null) {
                         LOGGER.error("Failed to obtain schema from {}", parentName);
@@ -1592,7 +1637,7 @@ public class ModelUtils {
                         // discriminator.propertyName is used or x-parent is used
                         names.add(parentName);
                         if (includeAncestors && isComposedSchema(s)) {
-                            names.addAll(getAllParentsName(s, allSchemas, true));
+                            names.addAll(getAllParentsName(s, allSchemas, true, seenNames));
                         }
                     } else {
                         // not a parent since discriminator.propertyName is not set
@@ -1900,7 +1945,7 @@ public class ModelUtils {
     private static void logWarnMessagesForIneffectiveValidations(Set<String> setValidations, Schema schema, Set<String> effectiveValidations) {
         setValidations.removeAll(effectiveValidations);
         setValidations.stream().forEach(validation -> {
-            LOGGER.warn("Validation '" + validation + "' has no effect on schema '" + getType(schema) +"'. Ignoring!");
+            LOGGER.warn("Validation '" + validation + "' has no effect on schema '" + getType(schema) + "'. Ignoring!");
         });
     }
 
@@ -1987,9 +2032,13 @@ public class ModelUtils {
      * @return true if the schema contains allOf but no properties/oneOf/anyOf defined.
      */
     public static boolean isAllOf(Schema schema) {
-        return hasAllOf(schema) && (schema.getProperties() == null || schema.getProperties().isEmpty()) &&
+        if (hasAllOf(schema) && (schema.getProperties() == null || schema.getProperties().isEmpty()) &&
                 (schema.getOneOf() == null || schema.getOneOf().isEmpty()) &&
-                (schema.getAnyOf() == null || schema.getAnyOf().isEmpty());
+                (schema.getAnyOf() == null || schema.getAnyOf().isEmpty())) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -2000,7 +2049,11 @@ public class ModelUtils {
      * @return true if allOf is not empty
      */
     public static boolean hasAllOf(Schema schema) {
-        return schema != null && schema.getAllOf() != null && !schema.getAllOf().isEmpty();
+        if (schema != null && schema.getAllOf() != null && !schema.getAllOf().isEmpty()) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -2028,9 +2081,13 @@ public class ModelUtils {
             return false;
         }
 
-        return hasOneOf(schema) && (schema.getProperties() == null || schema.getProperties().isEmpty()) &&
+        if (hasOneOf(schema) && (schema.getProperties() == null || schema.getProperties().isEmpty()) &&
                 (schema.getAllOf() == null || schema.getAllOf().isEmpty()) &&
-                (schema.getAnyOf() == null || schema.getAnyOf().isEmpty());
+                (schema.getAnyOf() == null || schema.getAnyOf().isEmpty())) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -2041,7 +2098,11 @@ public class ModelUtils {
      * @return true if allOf is not empty
      */
     public static boolean hasOneOf(Schema schema) {
-        return schema != null && schema.getOneOf() != null && !schema.getOneOf().isEmpty();
+        if (schema != null && schema.getOneOf() != null && !schema.getOneOf().isEmpty()) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -2056,9 +2117,13 @@ public class ModelUtils {
             return false;
         }
 
-        return hasAnyOf(schema) && (schema.getProperties() == null || schema.getProperties().isEmpty()) &&
+        if (hasAnyOf(schema) && (schema.getProperties() == null || schema.getProperties().isEmpty()) &&
                 (schema.getAllOf() == null || schema.getAllOf().isEmpty()) &&
-                (schema.getOneOf() == null || schema.getOneOf().isEmpty());
+                (schema.getOneOf() == null || schema.getOneOf().isEmpty())) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -2069,7 +2134,11 @@ public class ModelUtils {
      * @return true if anyOf is not empty
      */
     public static boolean hasAnyOf(Schema schema) {
-        return schema != null && schema.getAnyOf() != null && !schema.getAnyOf().isEmpty();
+        if (schema != null && schema.getAnyOf() != null && !schema.getAnyOf().isEmpty()) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -2085,7 +2154,7 @@ public class ModelUtils {
         }
 
         if (schema instanceof JsonSchema) {
-            if (schema.getTypes() != null) {
+            if (schema.getTypes() != null && !schema.getTypes().isEmpty()) {
                 return String.valueOf(schema.getTypes().iterator().next());
             } else {
                 return null;
@@ -2102,13 +2171,17 @@ public class ModelUtils {
      * @return true if allOf is not empty
      */
     public static boolean hasCommonAttributesDefined(Schema schema) {
-        return schema.getNullable() != null || schema.getDefault() != null ||
+        if (schema.getNullable() != null || schema.getDefault() != null ||
                 schema.getMinimum() != null || schema.getMaximum() != null ||
                 schema.getExclusiveMaximum() != null || schema.getExclusiveMinimum() != null ||
                 schema.getMinLength() != null || schema.getMaxLength() != null ||
                 schema.getMinItems() != null || schema.getMaxItems() != null ||
                 schema.getReadOnly() != null || schema.getWriteOnly() != null ||
-                schema.getPattern() != null;
+                schema.getPattern() != null) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -2123,27 +2196,122 @@ public class ModelUtils {
         }
 
         // if x-parent is set
-        return isExtensionParent(schema);
+        if (isExtensionParent(schema)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public static Schema cloneSchema(Schema schema, boolean openapi31) {
+        if (openapi31) {
+            return AnnotationsUtils.clone(schema, openapi31);
+        } else {
+            // AnnotationsUtils.clone doesn't support custom schema types for OpenAPI < 3.1
+            String schemaType = schema.getType();
+            if (schemaType != null && !OPENAPI_TYPES.contains(schemaType)) {
+                schema.setType(null);
+            }
+            Schema result = AnnotationsUtils.clone(schema, openapi31);
+            schema.setType(schemaType);
+            result.setType(schemaType);
+            return result;
+        }
     }
 
     /**
-     * Returns a clone of the schema.
+     * Check if the schema is of type 'null' or schema itself is pointing to null
+     * <p>
+     * Return true if the schema's type is 'null' or not specified
      *
-     * @param schema the schema.
-     * @param specVersionGreaterThanOrEqualTo310 true if spec version is 3.1.0 or later.
-     * @return a clone of the schema.
+     * @param schema Schema
+     * @param openAPI OpenAPI
+     *
+     * @return true if schema is null type
      */
-    public static Schema cloneSchema(Schema schema, boolean specVersionGreaterThanOrEqualTo310) {
-        Schema clone = AnnotationsUtils.clone(schema, specVersionGreaterThanOrEqualTo310);
-
-        // check to see if type is set and clone it if needed
-        // in openapi-generator, we also store type in `type` for 3.1 schema
-        // to make it backward compatible with the rest of the code base.
-        if (schema.getType() != null) {
-            clone.setType(schema.getType());
+    public static boolean isNullTypeSchema(OpenAPI openAPI, Schema schema) {
+        if (schema == null) {
+            return true;
         }
 
-        return clone;
+        // dereference the schema
+        schema = ModelUtils.getReferencedSchema(openAPI, schema);
+
+        // allOf/anyOf/oneOf
+        if (ModelUtils.hasAllOf(schema) || ModelUtils.hasOneOf(schema) || ModelUtils.hasAnyOf(schema)) {
+            return false;
+        }
+
+        // schema with properties
+        if (schema.getProperties() != null) {
+            return false;
+        }
+
+        // convert referenced enum of null only to `nullable:true`
+        if (schema.getEnum() != null && schema.getEnum().size() == 1) {
+            if ("null".equals(String.valueOf(schema.getEnum().get(0)))) {
+                return true;
+            }
+        }
+
+        if (schema.getTypes() != null && !schema.getTypes().isEmpty()) {
+            // 3.1 spec
+            if (schema.getTypes().size() == 1) { // 1 type only
+                String type = (String) schema.getTypes().iterator().next();
+                return type == null || "null".equals(type);
+            } else { // more than 1 type so must not be just null
+                return false;
+            }
+        }
+
+        if (schema instanceof JsonSchema) { // 3.1 spec
+            if (Boolean.TRUE.equals(schema.getNullable())) {
+                return true;
+            }
+
+            // for `type: null`
+            if (schema.getTypes() == null && schema.get$ref() == null
+                    && schema.getDescription() == null) { // ensure it's not schema with just a description)
+                return true;
+            }
+        } else { // 3.0.x or 2.x spec
+            if ((schema.getType() == null || schema.getType().equals("null"))
+                    && schema.get$ref() == null
+                    && schema.getDescription() == null) { // ensure it's not schema with just a description)
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if the schema is supported by OpenAPI Generator.
+     * <p>
+     * Return true if the schema can be handled by OpenAPI Generator
+     *
+     * @param schema Schema
+     * @param openAPI OpenAPIs
+     *
+     * @return true if schema is null type
+     */
+    public static boolean isUnsupportedSchema(OpenAPI openAPI, Schema schema) {
+        if (schema == null) {
+            return true;
+        }
+
+        // dereference the schema
+        schema = ModelUtils.getReferencedSchema(openAPI, schema);
+
+        if (schema.getTypes() == null && hasValidation(schema)) {
+            // just validation without type
+            return true;
+        } else if (schema.getIf() != null && schema.getThen() != null) {
+            // if, then in 3.1 spec
+            return true;
+        }
+
+        return false;
     }
 
     @FunctionalInterface

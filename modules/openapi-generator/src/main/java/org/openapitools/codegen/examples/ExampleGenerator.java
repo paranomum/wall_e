@@ -48,8 +48,8 @@ public class ExampleGenerator {
     private static final String STATUS_CODE = "statusCode";
 
     protected Map<String, Schema> examples;
-    private final OpenAPI openAPI;
-    private final Random random;
+    private OpenAPI openAPI;
+    private Random random;
 
     public ExampleGenerator(Map<String, Schema> examples, OpenAPI openAPI) {
         this.examples = examples;
@@ -307,7 +307,7 @@ public class ExampleGenerator {
                 return enumValues.get(0);
             }
             String format = property.getFormat();
-            if ((URI.equals(format) || URL.equals(format))) {
+            if (format != null && (URI.equals(format) || URL.equals(format))) {
                 LOGGER.debug("URI or URL format, without default or enum, generating random one.");
                 return "http://example.com/aeiou";
             }
@@ -377,7 +377,7 @@ public class ExampleGenerator {
                 return null;
             }
             return resolvePropertyToExample(name, mediaType, found.get(), processedModels);
-        } else if (ModelUtils.isArraySchema(schema)) {
+        } else if (ModelUtils.isArraySchema(schema) || ModelUtils.isEnumSchema(schema)) {
             return resolvePropertyToExample(schema.getName(), mediaType, schema, processedModels);
         } else {
             // TODO log an error message as the model does not have any properties

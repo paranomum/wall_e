@@ -30,11 +30,12 @@ public class CodegenServer {
 
     @Override
     public String toString() {
-        String sb = "CodegenServer{" + "url='" + url + '\'' +
-                ", description='" + description + '\'' +
-                ", variables=" + variables +
-                ", vendorExtensions=" + vendorExtensions +
-                '}';
-        return sb;
+        final StringBuffer sb = new StringBuffer("CodegenServer{");
+        sb.append("url='").append(url).append('\'');
+        sb.append(", description='").append(description).append('\'');
+        sb.append(", variables=").append(variables);
+        sb.append(", vendorExtensions=").append(vendorExtensions);
+        sb.append('}');
+        return sb.toString();
     }
 }

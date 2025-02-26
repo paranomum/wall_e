@@ -17,11 +17,13 @@
 
 package org.openapitools.codegen.ignore.rules;
 
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class IgnoreLineParser {
-    enum Token {
+    @Getter enum Token {
         MATCH_ALL("**"),
         MATCH_ANY("*"),
         ESCAPED_EXCLAMATION("\\!"),
@@ -33,15 +35,12 @@ public class IgnoreLineParser {
         ROOTED_MARKER("/"),
         COMMENT(null);
 
-        private final String pattern;
+        private String pattern;
 
         Token(String pattern) {
             this.pattern = pattern;
         }
 
-        public String getPattern() {
-            return pattern;
-        }
     }
 
     // NOTE: Comments that start with a : (e.g. //:) are pulled from git documentation for .gitignore
