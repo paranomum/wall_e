@@ -26,6 +26,7 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.parser.core.models.ParseOptions;
 
 import java.math.BigDecimal;
+import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -35,7 +36,9 @@ import java.util.stream.Collectors;
 import org.mockito.Answers;
 import org.mockito.Mockito;
 import org.openapitools.codegen.*;
+import org.openapitools.codegen.config.CodegenConfigurator;
 import org.openapitools.codegen.languages.AbstractJavaCodegen;
+import org.openapitools.codegen.languages.JavaClientCodegen;
 import org.openapitools.codegen.testutils.ConfigAssert;
 import org.openapitools.codegen.utils.ModelUtils;
 import org.testng.Assert;
@@ -47,6 +50,8 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.openapitools.codegen.TestUtils.newTempFolder;
+import static org.openapitools.codegen.TestUtils.validateJavaSourceFiles;
 
 public class AbstractJavaCodegenTest {
 
@@ -971,5 +976,74 @@ public class AbstractJavaCodegenTest {
         codegen.setOpenAPI(openAPI);
         DateSchema dateSchema = (DateSchema) openAPI.getPaths().get("/thingy/{date}").getPost().getParameters().get(0).getSchema();
         assertThat(codegen.escapeQuotationMark(codegen.toExampleValue(dateSchema))).isEqualTo("2021-01-01");
+    }
+
+    @Test(description = "test no --build-tool")
+    public void testGenerateBuildTool() {
+        final Path output = newTempFolder();
+        final CodegenConfigurator configurator = new CodegenConfigurator()
+                .setGeneratorName("java")
+                .setLibrary(JavaClientCodegen.OKHTTP_GSON)
+                .setAdditionalProperties(Map.of(CodegenConstants.API_PACKAGE, "xyz.abcdef.api"))
+                .setInputSpec("src/test/resources/3_0/ping.yaml")
+                .setOutputDir(output.toString().replace("\\", "/"));
+
+        List<File> files = new DefaultGenerator().opts(configurator.toClientOptInput()).generate();
+
+        validateJavaSourceFiles(files);
+        assertThat(files).map(File::toPath).contains(
+                output.resolve("build.gradle"),
+                output.resolve("gradle.properties"),
+                output.resolve("gradle/wrapper/gradle-wrapper.jar"),
+                output.resolve("gradle/wrapper/gradle-wrapper.properties"),
+                output.resolve("gradlew.bat"),
+                output.resolve("gradlew"),
+                output.resolve("pom.xml"),
+                output.resolve("settings.gradle")
+        );
+    }
+
+    @Test(description = "test --build-tool=maven")
+    public void testGenerateBuildToolMaven() {
+        final Path output = newTempFolder();
+        final CodegenConfigurator configurator = new CodegenConfigurator()
+                .setGeneratorName("java")
+                .setLibrary(JavaClientCodegen.OKHTTP_GSON)
+                .setAdditionalProperties(Map.of(CodegenConstants.API_PACKAGE, "xyz.abcdef.api",
+                        CodegenConstants.BUILD_TOOL, "maven"))
+                .setInputSpec("src/test/resources/3_0/ping.yaml")
+                .setOutputDir(output.toString().replace("\\", "/"));
+
+        List<File> files = new DefaultGenerator().opts(configurator.toClientOptInput()).generate();
+
+        validateJavaSourceFiles(files);
+        assertThat(files).map(File::toPath).doesNotContain(
+                output.resolve("build.gradle"),
+                output.resolve("gradle.properties"),
+                output.resolve("gradle/wrapper/gradle-wrapper.jar"),
+                output.resolve("gradle/wrapper/gradle-wrapper.properties"),
+                output.resolve("gradlew.bat"),
+                output.resolve("gradlew"),
+                output.resolve("settings.gradle")
+        );
+    }
+
+    @Test(description = "test --build-tool=gradle")
+    public void testGenerateBuildToolGradle() {
+        final Path output = newTempFolder();
+        final CodegenConfigurator configurator = new CodegenConfigurator()
+                .setGeneratorName("java")
+                .setLibrary(JavaClientCodegen.OKHTTP_GSON)
+                .setAdditionalProperties(Map.of(CodegenConstants.API_PACKAGE, "xyz.abcdef.api",
+                        CodegenConstants.BUILD_TOOL, "gradle"))
+                .setInputSpec("src/test/resources/3_0/ping.yaml")
+                .setOutputDir(output.toString().replace("\\", "/"));
+
+        List<File> files = new DefaultGenerator().opts(configurator.toClientOptInput()).generate();
+
+        validateJavaSourceFiles(files);
+        assertThat(files).map(File::toPath).doesNotContain(
+                output.resolve("pom.xml")
+        );
     }
 }
