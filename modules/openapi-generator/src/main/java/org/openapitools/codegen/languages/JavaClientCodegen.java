@@ -261,12 +261,22 @@ public class JavaClientCodegen extends AbstractJavaCodegen
         supportedLibraries.put(MICROPROFILE, "HTTP client: Microprofile client " + MICROPROFILE_REST_CLIENT_DEFAULT_VERSION + " (default, set desired version via `" + MICROPROFILE_REST_CLIENT_VERSION + "=x.x.x`). JSON processing: JSON-B 1.0.2 or Jackson 2.17.1");
         supportedLibraries.put(APACHE, "HTTP client: Apache httpclient 5.2.1. JSON processing: Jackson 2.17.1");
 
+        supportedBuildTools.add("maven");
+        supportedBuildTools.add("gradle");
+        supportedBuildTools.add("all");
+
         CliOption libraryOption = new CliOption(CodegenConstants.LIBRARY, "library template (sub-template) to use");
         libraryOption.setEnum(supportedLibraries);
         // set okhttp-gson as the default
         libraryOption.setDefault(OKHTTP_GSON);
         cliOptions.add(libraryOption);
         setLibrary(OKHTTP_GSON);
+
+        CliOption buildToolOption = new CliOption(CodegenConstants.BUILD_TOOL, "");
+        // set okhttp-gson as the default
+        buildToolOption.setDefault("all");
+        cliOptions.add(buildToolOption);
+        setBuildTool("all");
 
         CliOption serializationLibrary = new CliOption(CodegenConstants.SERIALIZATION_LIBRARY,
                 "Serialization library, default depends on value of the option library");
@@ -461,18 +471,22 @@ public class JavaClientCodegen extends AbstractJavaCodegen
         authFolder = (sourceFolder + '/' + invokerPackage + ".auth").replace(".", "/");
 
         //Common files
-        supportingFiles.add(new SupportingFile("pom.mustache", "", "pom.xml").doNotOverwrite());
+        if (!buildTool.equals("gradle"))
+            supportingFiles.add(new SupportingFile("pom.mustache", "", "pom.xml").doNotOverwrite());
         supportingFiles.add(new SupportingFile("README.mustache", "", "README.md").doNotOverwrite());
-        supportingFiles.add(new SupportingFile("build.gradle.mustache", "", "build.gradle").doNotOverwrite());
-        supportingFiles.add(new SupportingFile("build.sbt.mustache", "", "build.sbt").doNotOverwrite());
-        supportingFiles.add(new SupportingFile("settings.gradle.mustache", "", "settings.gradle").doNotOverwrite());
-        supportingFiles.add(new SupportingFile("gradle.properties.mustache", "", "gradle.properties").doNotOverwrite());
-        supportingFiles.add(new SupportingFile("manifest.mustache", projectFolder, "AndroidManifest.xml").doNotOverwrite());
+        if (!buildTool.equals("maven")) {
+            supportingFiles.add(new SupportingFile("build.gradle.mustache", "", "build.gradle").doNotOverwrite());
+            supportingFiles.add(new SupportingFile("build.sbt.mustache", "", "build.sbt").doNotOverwrite());
+            supportingFiles.add(new SupportingFile("settings.gradle.mustache", "", "settings.gradle").doNotOverwrite());
+            supportingFiles.add(new SupportingFile("gradle.properties.mustache", "", "gradle.properties").doNotOverwrite());
+        }
+//        supportingFiles.add(new SupportingFile("manifest.mustache", projectFolder, "AndroidManifest.xml").doNotOverwrite());
         supportingFiles.add(new SupportingFile("travis.mustache", "", ".travis.yml"));
         supportingFiles.add(new SupportingFile("ApiClient.mustache", invokerFolder, "ApiClient.java"));
         supportingFiles.add(new SupportingFile("ServerConfiguration.mustache", invokerFolder, "ServerConfiguration.java"));
         supportingFiles.add(new SupportingFile("ServerVariable.mustache", invokerFolder, "ServerVariable.java"));
-        supportingFiles.add(new SupportingFile("maven.yml.mustache", ".github/workflows", "maven.yml"));
+        if (!buildTool.equals("gradle"))
+            supportingFiles.add(new SupportingFile("maven.yml.mustache", ".github/workflows", "maven.yml"));
         if (dynamicOperations) {
             supportingFiles.add(new SupportingFile("openapi.mustache", projectFolder + "/resources/openapi", "openapi.yaml"));
             supportingFiles.add(new SupportingFile("apiOperation.mustache", invokerFolder, "ApiOperation.java"));
@@ -500,12 +514,14 @@ public class JavaClientCodegen extends AbstractJavaCodegen
             }
         }
 
+        if (!buildTool.equals("maven")) {
         supportingFiles.add(new SupportingFile("gradlew.mustache", "", "gradlew"));
         supportingFiles.add(new SupportingFile("gradlew.bat.mustache", "", "gradlew.bat"));
         supportingFiles.add(new SupportingFile("gradle-wrapper.properties.mustache",
                 gradleWrapperPackage.replace(".", File.separator), "gradle-wrapper.properties"));
         supportingFiles.add(new SupportingFile("gradle-wrapper.jar",
                 gradleWrapperPackage.replace(".", File.separator), "gradle-wrapper.jar"));
+        }
         supportingFiles.add(new SupportingFile("git_push.sh.mustache", "", "git_push.sh"));
         supportingFiles.add(new SupportingFile("gitignore.mustache", "", ".gitignore"));
 

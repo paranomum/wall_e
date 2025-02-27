@@ -50,6 +50,10 @@ public class Generate extends OpenApiGeneratorCommand {
             description = "generator to use (see list command for list)")
     private String generatorName;
 
+    @Option(name = {"--build-tool"}, title = "build tool (maven/gradle)",
+            description = "build tool for project (java only)")
+    private String buildTool;
+
     @Option(name = {"-o", "--output"}, title = "output directory",
             description = "where to write the generated files (current dir by default)")
     private String output = "";
@@ -404,6 +408,10 @@ public class Generate extends OpenApiGeneratorCommand {
         // Generator name should not be validated here, as it's validated in toClientOptInput
         if (isNotEmpty(generatorName)) {
             configurator.setGeneratorName(generatorName);
+        }
+
+        if (isNotEmpty(buildTool)) {
+            configurator.setBuildTool(buildTool);
         }
 
         if (isNotEmpty(output)) {

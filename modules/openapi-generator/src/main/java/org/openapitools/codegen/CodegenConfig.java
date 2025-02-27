@@ -272,6 +272,8 @@ public interface CodegenConfig {
 
     Map<String, String> supportedLibraries();
 
+    List<String> supportedBuildTools();
+
     void setLibrary(String library);
 
     /**
@@ -280,6 +282,10 @@ public interface CodegenConfig {
      * @return library template
      */
     String getLibrary();
+
+    void setBuildTool(String buildTool);
+
+    String getBuildTool();
 
     void setGitHost(String gitHost);
 

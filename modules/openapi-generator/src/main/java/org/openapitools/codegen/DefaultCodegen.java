@@ -256,7 +256,9 @@ public class DefaultCodegen implements CodegenConfig {
     protected boolean supportsAdditionalPropertiesWithComposedSchema;
     protected boolean supportsMixins;
     protected Map<String, String> supportedLibraries = new LinkedHashMap<>();
+    protected List<String> supportedBuildTools = new ArrayList<>();
     protected String library;
+    protected String buildTool;
     @Getter @Setter
     protected Boolean sortParamsByRequiredFlag = true;
     @Getter @Setter
@@ -6326,6 +6328,11 @@ public class DefaultCodegen implements CodegenConfig {
         return supportedLibraries;
     }
 
+    @Override
+    public List<String> supportedBuildTools() {
+        return supportedBuildTools;
+    }
+
     /**
      * Set library template (sub-template).
      *
@@ -6347,6 +6354,21 @@ public class DefaultCodegen implements CodegenConfig {
         this.library = library;
     }
 
+    @Override
+    public void setBuildTool(String buildTool) {
+        if (buildTool != null && !buildTool.isEmpty() && !supportedBuildTools.contains(buildTool)) {
+            StringBuilder sb = new StringBuilder("Unknown buildTool: " + buildTool + "\nAvailable buildTools:");
+            if (supportedBuildTools.size() == 0) {
+                sb.append("\n  ").append("NONE");
+            } else {
+                for (String tool : supportedBuildTools) {
+                    sb.append("\n  ").append(tool);
+                }
+            }
+            throw new RuntimeException(sb.toString());
+        }
+        this.buildTool = buildTool;
+    }
     /**
      * Library template (sub-template).
      *
@@ -6357,6 +6379,11 @@ public class DefaultCodegen implements CodegenConfig {
         return library;
     }
 
+    @Override
+    public String getBuildTool() {
+        return buildTool;
+    }
+
     /**
      * check if current active library equals to passed
      *
@@ -6365,6 +6392,10 @@ public class DefaultCodegen implements CodegenConfig {
      */
     public final boolean isLibrary(String library) {
         return library.equals(this.library);
+    }
+
+    public final boolean isBuildTool(String buildTol) {
+        return buildTol.equals(this.buildTool);
     }
 
     /**

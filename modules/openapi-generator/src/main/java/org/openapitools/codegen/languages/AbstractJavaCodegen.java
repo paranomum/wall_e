@@ -549,6 +549,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
         convertPropertyToStringAndWriteBack(CodegenConstants.SOURCE_FOLDER, this::setSourceFolder);
         convertPropertyToBooleanAndWriteBack(CodegenConstants.SERIALIZABLE_MODEL, this::setSerializableModel);
         convertPropertyToStringAndWriteBack(CodegenConstants.LIBRARY, this::setLibrary);
+        convertPropertyToStringAndWriteBack(CodegenConstants.BUILD_TOOL, this::setBuildTool);
         convertPropertyToBooleanAndWriteBack(CodegenConstants.SERIALIZE_BIG_DECIMAL_AS_STRING, this::setSerializeBigDecimalAsString );
         // need to put back serializableModel (boolean) into additionalProperties as value in additionalProperties is string
         // additionalProperties.put(CodegenConstants.SERIALIZABLE_MODEL, serializableModel);
