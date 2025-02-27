@@ -117,6 +117,10 @@ public class Generate extends OpenApiGeneratorCommand {
             description = CodegenConstants.MODEL_PACKAGE_DESC)
     private String modelPackage;
 
+    @Option(name = {"--enum-package"}, title = "enum package",
+            description = CodegenConstants.ENUM_PACKAGE_DESC)
+    private String enumPackage;
+
     @Option(name = {"--api-name-suffix"}, title = "api name suffix",
             description = CodegenConstants.API_NAME_SUFFIX_DESC)
     private String apiNameSuffix;
@@ -128,6 +132,14 @@ public class Generate extends OpenApiGeneratorCommand {
     @Option(name = {"--model-name-suffix"}, title = "model name suffix",
             description = CodegenConstants.MODEL_NAME_SUFFIX_DESC)
     private String modelNameSuffix;
+
+    @Option(name = {"--enum-name-prefix"}, title = "enum name prefix",
+            description = CodegenConstants.ENUM_NAME_PREFIX_DESC)
+    private String enumNamePrefix;
+
+    @Option(name = {"--enum-name-suffix"}, title = "enum name suffix",
+            description = CodegenConstants.ENUM_NAME_SUFFIX_DESC)
+    private String enumNameSuffix;
 
     @Option(
             name = {"--instantiation-types"},
@@ -258,7 +270,7 @@ public class Generate extends OpenApiGeneratorCommand {
             description = CodegenConstants.ARTIFACT_VERSION_DESC)
     private String artifactVersion;
 
-    @Option(name = {"--library"}, title = "library", description = CodegenConstants.LIBRARY_DESC)
+    @Option(name = {"-l", "--library"}, title = "library", description = CodegenConstants.LIBRARY_DESC)
     private String library;
 
     @Option(name = {"--git-host"}, title = "git host",
@@ -422,6 +434,10 @@ public class Generate extends OpenApiGeneratorCommand {
             configurator.setModelPackage(modelPackage);
         }
 
+        if (isNotEmpty(enumPackage)) {
+            configurator.setEnumPackage(enumPackage);
+        }
+
         if (isNotEmpty(apiNameSuffix)) {
             configurator.setApiNameSuffix(apiNameSuffix);
         }
@@ -430,8 +446,16 @@ public class Generate extends OpenApiGeneratorCommand {
             configurator.setModelNamePrefix(modelNamePrefix);
         }
 
+        if (isNotEmpty(enumNamePrefix)) {
+            configurator.setEnumNamePrefix(enumNamePrefix);
+        }
+
         if (isNotEmpty(modelNameSuffix)) {
             configurator.setModelNameSuffix(modelNameSuffix);
+        }
+
+        if (isNotEmpty(enumNameSuffix)) {
+            configurator.setEnumNameSuffix(enumNameSuffix);
         }
 
         if (isNotEmpty(invokerPackage)) {

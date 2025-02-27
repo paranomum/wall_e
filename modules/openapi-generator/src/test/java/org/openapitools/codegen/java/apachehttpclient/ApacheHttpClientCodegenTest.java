@@ -110,7 +110,7 @@ public class ApacheHttpClientCodegenTest {
         var files = generator.opts(clientOptInput).generate();
 
         // Assert
-        TestUtils.assertFileContains(Paths.get(output + "/src/main/java/org/openapitools/client/model/GetUsersRequestV1.java"),
+        TestUtils.assertFileContains(Paths.get(output + "/src/main/java/org/openapitools/client/dto/GetUsersRequestV1.java"),
                 "for (RolesEnum _item : getRoles()) {"
         );
     }

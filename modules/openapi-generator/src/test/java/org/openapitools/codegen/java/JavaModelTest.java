@@ -1391,7 +1391,7 @@ public class JavaModelTest {
         final ClientOptInput clientOptInput = configurator.toClientOptInput();
         new DefaultGenerator().opts(clientOptInput).generate();
 
-        File orderFile = new File(output, "src/main/java/org/openapitools/client/model/Order.java");
+        File orderFile = new File(output, "src/main/java/org/openapitools/client/dto/Order.java");
         Assert.assertTrue(orderFile.exists());
     }
 

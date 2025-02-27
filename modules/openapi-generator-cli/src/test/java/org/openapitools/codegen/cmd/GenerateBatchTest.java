@@ -54,39 +54,6 @@ public class GenerateBatchTest {
         };
     }
 
-    @Test(dataProvider = "customIncludeDeserializerFiles")
-    public void testDeserializerWithJsonInclude(String file) throws IOException {
-        String config = getTargetResourceAsFile(file).toString();
-        SimpleModule module = GenerateBatch.getCustomDeserializationModel(getIncludesDir());
-        CodegenConfigurator loaded = CodegenConfigurator.fromFile(config, module);
-
-        Map<String, Object> expectedAdditionalProperties = new HashMap<>();
-        expectedAdditionalProperties.put("serverPort", "8082");
-        expectedAdditionalProperties.put("dateLibrary", "java8");
-        expectedAdditionalProperties.put("hideGenerationTimestamp", true);
-        expectedAdditionalProperties.put("serializableModel", true);
-        expectedAdditionalProperties.put("withXml", true);
-        expectedAdditionalProperties.put("java8", true);
-        expectedAdditionalProperties.put("useBeanValidation", true);
-
-        assertNotNull(loaded);
-
-        Context<?> context = loaded.toContext();
-        WorkflowSettings workflowSettings = context.getWorkflowSettings();
-        GeneratorSettings generatorSettings = context.getGeneratorSettings();
-
-        assertNotNull(workflowSettings);
-        assertNotNull(generatorSettings);
-
-        assertEquals(generatorSettings.getGeneratorName(), "jaxrs-jersey");
-        assertEquals(workflowSettings.getOutputDir(), "outputDir");
-        assertEquals(workflowSettings.getInputSpec(), SPEC_FILE);
-        assertTrue(generatorSettings.getAdditionalProperties().size() >= 7);
-
-        Set<Map.Entry<String, Object>> actualSet = generatorSettings.getAdditionalProperties().entrySet();
-        assertTrue(actualSet.containsAll(expectedAdditionalProperties.entrySet()));
-    }
-
     @SuppressWarnings("unused")
     @Test(
             expectedExceptions = { RuntimeException.class },

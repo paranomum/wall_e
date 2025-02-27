@@ -36,11 +36,14 @@ public final class GeneratorSettings implements Serializable {
     private String generatorName;
     private String apiPackage;
     private String modelPackage;
+    private String enumPackage;
     private String invokerPackage;
     private String packageName;
     private String apiNameSuffix;
     private String modelNamePrefix;
     private String modelNameSuffix;
+    private String enumNamePrefix;
+    private String enumNameSuffix;
     private String groupId;
     private String artifactId;
     private String artifactVersion;
@@ -98,6 +101,15 @@ public final class GeneratorSettings implements Serializable {
     }
 
     /**
+     * Gets the model package name for generated sources
+     *
+     * @return the model package
+     */
+    public String getEnumPackage() {
+        return enumPackage;
+    }
+
+    /**
      * Gets the invoker package name for generated sources.
      *
      * @return the invoker package
@@ -144,6 +156,9 @@ public final class GeneratorSettings implements Serializable {
     public String getModelNamePrefix() {
         return modelNamePrefix;
     }
+    public String getEnumNamePrefix() {
+        return enumNamePrefix;
+    }
 
     /**
      * Gets a model name suffix for generated models. This name will be appended to a model name.
@@ -158,6 +173,9 @@ public final class GeneratorSettings implements Serializable {
      */
     public String getModelNameSuffix() {
         return modelNameSuffix;
+    }
+    public String getEnumNameSuffix() {
+        return enumNameSuffix;
     }
 
     /**
@@ -437,11 +455,14 @@ public final class GeneratorSettings implements Serializable {
         generatorName = builder.generatorName;
         apiPackage = builder.apiPackage;
         modelPackage = builder.modelPackage;
+        enumPackage = builder.enumPackage;
         invokerPackage = builder.invokerPackage;
         packageName = builder.packageName;
         apiNameSuffix = builder.apiNameSuffix;
         modelNamePrefix = builder.modelNamePrefix;
         modelNameSuffix = builder.modelNameSuffix;
+        enumNamePrefix = builder.enumNamePrefix;
+        enumNameSuffix = builder.enumNameSuffix;
         groupId = builder.groupId;
         artifactId = builder.artifactId;
         artifactVersion = builder.artifactVersion;
@@ -476,6 +497,9 @@ public final class GeneratorSettings implements Serializable {
         if (isNotEmpty(modelPackage)) {
             additional.put("modelPackage", modelPackage);
         }
+        if (isNotEmpty(enumPackage)) {
+            additional.put("enumPackage", enumPackage);
+        }
         if (isNotEmpty(invokerPackage)) {
             additional.put("invokerPackage", invokerPackage);
         }
@@ -499,6 +523,12 @@ public final class GeneratorSettings implements Serializable {
         }
         if (isNotEmpty(modelNameSuffix)) {
             additional.put("modelNameSuffix", modelNameSuffix);
+        }
+        if (isNotEmpty(enumNamePrefix)) {
+            additional.put("enumNamePrefix", enumNamePrefix);
+        }
+        if (isNotEmpty(enumNameSuffix)) {
+            additional.put("enumNameSuffix", enumNameSuffix);
         }
         if (isNotEmpty(gitHost)) {
             additional.put("gitHost", gitHost);
@@ -569,11 +599,14 @@ public final class GeneratorSettings implements Serializable {
         builder.generatorName = copy.getGeneratorName();
         builder.apiPackage = copy.getApiPackage();
         builder.modelPackage = copy.getModelPackage();
+        builder.enumPackage = copy.getEnumPackage();
         builder.invokerPackage = copy.getInvokerPackage();
         builder.packageName = copy.getPackageName();
         builder.apiNameSuffix = copy.getApiNameSuffix();
         builder.modelNamePrefix = copy.getModelNamePrefix();
         builder.modelNameSuffix = copy.getModelNameSuffix();
+        builder.enumNamePrefix = copy.getEnumNamePrefix();
+        builder.enumNameSuffix = copy.getEnumNameSuffix();
         builder.groupId = copy.getGroupId();
         builder.artifactId = copy.getArtifactId();
         builder.artifactVersion = copy.getArtifactVersion();
@@ -646,11 +679,14 @@ public final class GeneratorSettings implements Serializable {
         private String generatorName;
         private String apiPackage;
         private String modelPackage;
+        private String enumPackage;
         private String invokerPackage;
         private String packageName;
         private String apiNameSuffix;
         private String modelNamePrefix;
         private String modelNameSuffix;
+        private String enumNamePrefix;
+        private String enumNameSuffix;
         private String groupId;
         private String artifactId;
         private String artifactVersion;
@@ -740,6 +776,17 @@ public final class GeneratorSettings implements Serializable {
         }
 
         /**
+         * Sets the {@code enumPackage} and returns a reference to this Builder so that the methods can be chained together.
+         *
+         * @param enumPackage the {@code enumPackage} to set
+         * @return a reference to this Builder
+         */
+        public Builder withEnumPackage(String enumPackage) {
+            this.enumPackage = enumPackage;
+            return this;
+        }
+
+        /**
          * Sets the {@code invokerPackage} and returns a reference to this Builder so that the methods can be chained together.
          *
          * @param invokerPackage the {@code invokerPackage} to set
@@ -791,6 +838,28 @@ public final class GeneratorSettings implements Serializable {
          */
         public Builder withModelNameSuffix(String modelNameSuffix) {
             this.modelNameSuffix = modelNameSuffix;
+            return this;
+        }
+
+        /**
+         * Sets the {@code enumNamePrefix} and returns a reference to this Builder so that the methods can be chained together.
+         *
+         * @param enumNamePrefix the {@code enumNamePrefix} to set
+         * @return a reference to this Builder
+         */
+        public Builder withEnumNamePrefix(String enumNamePrefix) {
+            this.enumNamePrefix = enumNamePrefix;
+            return this;
+        }
+
+        /**
+         * Sets the {@code enumNameSuffix} and returns a reference to this Builder so that the methods can be chained together.
+         *
+         * @param enumNameSuffix the {@code enumNameSuffix} to set
+         * @return a reference to this Builder
+         */
+        public Builder withEnumNameSuffix(String enumNameSuffix) {
+            this.enumNameSuffix = enumNameSuffix;
             return this;
         }
 
@@ -1337,11 +1406,14 @@ public final class GeneratorSettings implements Serializable {
                 "generatorName='" + generatorName + '\'' +
                 ", apiPackage='" + apiPackage + '\'' +
                 ", modelPackage='" + modelPackage + '\'' +
+                ", enumPackage='" + enumPackage + '\'' +
                 ", invokerPackage='" + invokerPackage + '\'' +
                 ", packageName='" + packageName + '\'' +
                 ", apiNameSuffix='" + apiNameSuffix + '\'' +
                 ", modelNamePrefix='" + modelNamePrefix + '\'' +
                 ", modelNameSuffix='" + modelNameSuffix + '\'' +
+                ", enumNamePrefix='" + enumNamePrefix + '\'' +
+                ", enumNameSuffix='" + enumNameSuffix + '\'' +
                 ", groupId='" + groupId + '\'' +
                 ", artifactId='" + artifactId + '\'' +
                 ", artifactVersion='" + artifactVersion + '\'' +
@@ -1369,11 +1441,14 @@ public final class GeneratorSettings implements Serializable {
         return Objects.equals(getGeneratorName(), that.getGeneratorName()) &&
                 Objects.equals(getApiPackage(), that.getApiPackage()) &&
                 Objects.equals(getModelPackage(), that.getModelPackage()) &&
+                Objects.equals(getEnumPackage(), that.getEnumPackage()) &&
                 Objects.equals(getInvokerPackage(), that.getInvokerPackage()) &&
                 Objects.equals(getPackageName(), that.getPackageName()) &&
                 Objects.equals(getApiNameSuffix(), that.getApiNameSuffix()) &&
                 Objects.equals(getModelNamePrefix(), that.getModelNamePrefix()) &&
                 Objects.equals(getModelNameSuffix(), that.getModelNameSuffix()) &&
+                Objects.equals(getEnumNamePrefix(), that.getEnumNamePrefix()) &&
+                Objects.equals(getEnumNameSuffix(), that.getEnumNamePrefix()) &&
                 Objects.equals(getGroupId(), that.getGroupId()) &&
                 Objects.equals(getArtifactId(), that.getArtifactId()) &&
                 Objects.equals(getArtifactVersion(), that.getArtifactVersion()) &&
@@ -1407,11 +1482,14 @@ public final class GeneratorSettings implements Serializable {
                 getGeneratorName(),
                 getApiPackage(),
                 getModelPackage(),
+                getEnumPackage(),
                 getInvokerPackage(),
                 getPackageName(),
                 getApiNameSuffix(),
                 getModelNamePrefix(),
                 getModelNameSuffix(),
+                getEnumNamePrefix(),
+                getEnumNameSuffix(),
                 getGroupId(),
                 getArtifactId(),
                 getArtifactVersion(),

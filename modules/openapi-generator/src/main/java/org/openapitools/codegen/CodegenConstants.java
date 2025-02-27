@@ -49,6 +49,9 @@ public class CodegenConstants {
     public static final String MODEL_PACKAGE = "modelPackage";
     public static final String MODEL_PACKAGE_DESC = "package for generated models";
 
+    public static final String ENUM_PACKAGE = "modelPackage";
+    public static final String ENUM_PACKAGE_DESC = "package for generated models";
+
     public static final String TEMPLATE_DIR = "templateDir";
 
     public static final String ALLOW_UNICODE_IDENTIFIERS = "allowUnicodeIdentifiers";
@@ -255,6 +258,9 @@ public class CodegenConstants {
 
     public static final String MODEL_NAME_PREFIX = "modelNamePrefix";
     public static final String MODEL_NAME_PREFIX_DESC = "Prefix that will be prepended to all model names.";
+
+    public static final String ENUM_NAME_PREFIX = "enumNamePrefix";
+    public static final String ENUM_NAME_PREFIX_DESC = "Prefix that will be prepended to all enum names.";
 
     public static final String MODEL_NAME_SUFFIX = "modelNameSuffix";
     public static final String MODEL_NAME_SUFFIX_DESC = "Suffix that will be appended to all model names.";
