@@ -532,6 +532,11 @@ public class CodegenConfigurator {
         return this;
     }
 
+    public CodegenConfigurator setBuildTool(String buildTool) {
+        generatorSettingsBuilder.withBuildTool(buildTool);
+        return this;
+    }
+
     public CodegenConfigurator setLogToStderr(boolean logToStderr) {
         workflowSettingsBuilder.withLogToStderr(logToStderr);
         return this;
@@ -791,6 +796,10 @@ public class CodegenConfigurator {
             config.setLibrary(generatorSettings.getLibrary());
         }
 
+        if (isNotEmpty(generatorSettings.getBuildTool())) {
+            config.setBuildTool(generatorSettings.getBuildTool());
+        }
+
         // TODO: Work toward CodegenConfig having a "WorkflowSettings" property, or better a "Workflow" object which itself has a "WorkflowSettings" property.
         config.setInputSpec(workflowSettings.getInputSpec());
         config.setOutputDir(workflowSettings.getOutputDir());
@@ -839,6 +848,10 @@ public class CodegenConfigurator {
         // if library is found in additionalProperties, set the library option accordingly
         if (config.additionalProperties().containsKey("library")) {
             config.setLibrary(String.valueOf(config.additionalProperties().get("library")));
+        }
+
+        if (config.additionalProperties().containsKey("build tool")) {
+            config.setBuildTool(String.valueOf(config.additionalProperties().get("build tool")));
         }
 
         ClientOptInput input = new ClientOptInput()

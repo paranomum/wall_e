@@ -418,7 +418,7 @@ public class JavaClientCodegenTest {
         List<File> files = new DefaultGenerator().opts(configurator.toClientOptInput()).generate();
 
         validateJavaSourceFiles(files);
-        assertThat(files).hasSize(40).map(File::toPath).contains(
+        assertThat(files).hasSize(39).map(File::toPath).contains(
                 output.resolve(".gitignore"),
                 output.resolve(".openapi-generator-ignore"),
                 output.resolve(".openapi-generator/FILES"),
@@ -437,7 +437,6 @@ public class JavaClientCodegenTest {
                 output.resolve("README.md"),
                 output.resolve("settings.gradle"),
                 output.resolve("api/openapi.yaml"),
-                output.resolve("src/main/AndroidManifest.xml"),
                 output.resolve("src/main/java/xyz/abcdef/api/DefaultApi.java"),
                 output.resolve("src/main/java/xyz/abcdef/ApiCallback.java"),
                 output.resolve("src/main/java/xyz/abcdef/ApiClient.java"),
@@ -480,7 +479,7 @@ public class JavaClientCodegenTest {
         validateJavaSourceFiles(files);
         assertThat(output.resolve("src/main/java/zz/yyyy/model/xxxx/SomeObj.java")).content()
                 .contains("public class SomeObj", "Boolean isActive()");
-        assertThat(files).hasSize(43).map(File::toPath).contains(
+        assertThat(files).hasSize(42).map(File::toPath).contains(
                 output.resolve(".gitignore"),
                 output.resolve(".openapi-generator-ignore"),
                 output.resolve(".openapi-generator/FILES"),
@@ -500,7 +499,6 @@ public class JavaClientCodegenTest {
                 output.resolve("README.md"),
                 output.resolve("settings.gradle"),
                 output.resolve("api/openapi.yaml"),
-                output.resolve("src/main/AndroidManifest.xml"),
                 output.resolve("src/main/java/zz/yyyy/api/xxxx/PingApi.java"),
                 output.resolve("src/main/java/zz/yyyy/invoker/xxxx/ApiCallback.java"),
                 output.resolve("src/main/java/zz/yyyy/invoker/xxxx/ApiClient.java"),
@@ -537,7 +535,7 @@ public class JavaClientCodegenTest {
 
         List<File> files = new DefaultGenerator().opts(configurator.toClientOptInput()).generate();
 
-        assertThat(files).hasSize(32);
+        assertThat(files).hasSize(31);
         validateJavaSourceFiles(files);
         assertThat(output.resolve("src/main/java/xyz/abcdef/api/DefaultApi.java")).content().contains(
                 "public class DefaultApi",
@@ -607,7 +605,7 @@ public class JavaClientCodegenTest {
 
         List<File> files = new DefaultGenerator().opts(configurator.toClientOptInput()).generate();
 
-        assertThat(files).hasSize(35);
+        assertThat(files).hasSize(34);
 
         validateJavaSourceFiles(files);
         assertThat(output.resolve("src/main/java/xyz/abcdef/api/PingApi.java")).content().contains(
@@ -1183,7 +1181,7 @@ public class JavaClientCodegenTest {
                 .content().contains("class RealCommand {");
         assertThat(output.resolve("src/main/java/org/openapitools/client/dto/Command.java"))
                 .content().contains("class Command {");
-        assertThat(files).hasSize(49).contains(
+        assertThat(files).hasSize(48).contains(
                 output.resolve("src/main/java/org/openapitools/client/dto/RealCommand.java").toFile(),
                 output.resolve("src/main/java/org/openapitools/client/dto/Command.java").toFile()
         );
@@ -1428,7 +1426,7 @@ public class JavaClientCodegenTest {
         List<File> files = new DefaultGenerator().opts(configurator.toClientOptInput()).generate();
 
         validateJavaSourceFiles(files);
-        assertThat(files).hasSize(35);
+        assertThat(files).hasSize(34);
         TestUtils.assertFileContains(output.resolve("src/main/java/xyz/abcdef/ApiClient.java"),
                 "public static String urlEncode(String s) { return URLEncoder.encode(s,"
                         + " UTF_8).replaceAll(\"\\\\+\", \"%20\"); }"
@@ -1451,7 +1449,7 @@ public class JavaClientCodegenTest {
         List<File> files = new DefaultGenerator().opts(configurator.toClientOptInput()).generate();
 
         validateJavaSourceFiles(files);
-        assertThat(files).hasSize(38);
+        assertThat(files).hasSize(37);
         assertThat(output.resolve("src/main/java/xyz/abcdef/api/DefaultApi.java")).content()
                 .contains(
                         "localVarQueryParams.addAll(ApiClient.parameterToPairs(\"since\", queryObject.getSince()));",
