@@ -202,7 +202,8 @@ public class JavaClientCodegen extends AbstractJavaCodegen
         invokerPackage = "org.openapitools.client";
         artifactId = "openapi-java-client";
         apiPackage = "org.openapitools.client.api";
-        modelPackage = "org.openapitools.client.model";
+        modelPackage = "org.openapitools.client.dto";
+        enumPackage = "org.openapitools.client.model";
         rootJavaEEPackage = MICROPROFILE_REST_CLIENT_DEFAULT_ROOT_PACKAGE;
 
         // cliOptions default redefinition need to be updated
@@ -210,6 +211,7 @@ public class JavaClientCodegen extends AbstractJavaCodegen
         updateOption(CodegenConstants.ARTIFACT_ID, this.getArtifactId());
         updateOption(CodegenConstants.API_PACKAGE, apiPackage);
         updateOption(CodegenConstants.MODEL_PACKAGE, modelPackage);
+        updateOption(CodegenConstants.ENUM_PACKAGE, enumPackage);
 
         modelTestTemplateFiles.put("model_test.mustache", ".java");
 
@@ -455,6 +457,7 @@ public class JavaClientCodegen extends AbstractJavaCodegen
         final String invokerFolder = (sourceFolder + '/' + invokerPackage).replace(".", "/");
         final String apiFolder = (sourceFolder + '/' + apiPackage).replace(".", "/");
         final String modelsFolder = (sourceFolder + File.separator + modelPackage().replace('.', File.separatorChar)).replace('/', File.separatorChar);
+        final String enumsFolder = (sourceFolder + File.separator + enumPackage().replace('.', File.separatorChar)).replace('/', File.separatorChar);
         authFolder = (sourceFolder + '/' + invokerPackage + ".auth").replace(".", "/");
 
         //Common files

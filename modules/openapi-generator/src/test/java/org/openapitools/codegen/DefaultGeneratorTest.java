@@ -76,11 +76,11 @@ public class DefaultGeneratorTest {
             Assert.assertTrue(new File(output, "src/main/java/org/openapitools/client/api/PetApi.java").exists());
 
             // model sanity check
-            TestUtils.ensureContainsFile(files, output, "src/main/java/org/openapitools/client/model/Category.java");
-            Assert.assertTrue(new File(output, "src/main/java/org/openapitools/client/model/Category.java").exists());
+            TestUtils.ensureContainsFile(files, output, "src/main/java/org/openapitools/client/dto/Category.java");
+            Assert.assertTrue(new File(output, "src/main/java/org/openapitools/client/dto/Category.java").exists());
 
-            TestUtils.ensureContainsFile(files, output, "src/main/java/org/openapitools/client/model/ModelApiResponse.java");
-            Assert.assertTrue(new File(output, "src/main/java/org/openapitools/client/model/ModelApiResponse.java").exists());
+            TestUtils.ensureContainsFile(files, output, "src/main/java/org/openapitools/client/dto/ModelApiResponse.java");
+            Assert.assertTrue(new File(output, "src/main/java/org/openapitools/client/dto/ModelApiResponse.java").exists());
 
             // supporting files sanity check
             TestUtils.ensureContainsFile(files, output, "build.gradle");
@@ -105,8 +105,8 @@ public class DefaultGeneratorTest {
             TestUtils.ensureDoesNotContainFile(files, output, "pom.xml");
             Assert.assertFalse(new File(output, "pom.xml").exists());
 
-            TestUtils.ensureDoesNotContainFile(files, output, "src/test/java/org/openapitools/client/model/CategoryTest.java");
-            Assert.assertFalse(new File(output, "src/test/java/org/openapitools/client/model/CategoryTest.java").exists());
+            TestUtils.ensureDoesNotContainFile(files, output, "src/test/java/org/openapitools/client/dto/CategoryTest.java");
+            Assert.assertFalse(new File(output, "src/test/java/org/openapitools/client/dto/CategoryTest.java").exists());
 
             TestUtils.ensureDoesNotContainFile(files, output, "src/main/java/org/openapitools/client/api/UserApi.java");
             Assert.assertFalse(new File(output, "src/main/java/org/openapitools/client/api/UserApi.java").exists());
@@ -129,7 +129,7 @@ public class DefaultGeneratorTest {
 
             // Create "existing" files
             String apiTestRelativePath = "src/test/java/org/openapitools/client/api/PetApiTest.java";
-            String modelTestRelativePath = "src/test/java/org/openapitools/client/model/CategoryTest.java";
+            String modelTestRelativePath = "src/test/java/org/openapitools/client/dto/CategoryTest.java";
 
             File apiTestFile = new File(output, apiTestRelativePath);
             new File(apiTestFile.getParent()).mkdirs();
@@ -168,8 +168,8 @@ public class DefaultGeneratorTest {
             Assert.assertEquals(apiTestContents, "empty", "Expected test file to retain original contents.");
 
             // Check Model is written and Test is not
-            TestUtils.ensureContainsFile(files, output, "src/main/java/org/openapitools/client/model/Category.java");
-            Assert.assertTrue(new File(output, "src/test/java/org/openapitools/client/model/CategoryTest.java").exists());
+            TestUtils.ensureContainsFile(files, output, "src/main/java/org/openapitools/client/dto/Category.java");
+            Assert.assertTrue(new File(output, "src/test/java/org/openapitools/client/dto/CategoryTest.java").exists());
 
             TestUtils.ensureDoesNotContainFile(files, output, modelTestRelativePath);
             Assert.assertTrue(modelTestFile.exists());
@@ -236,7 +236,7 @@ public class DefaultGeneratorTest {
             List<File> files = generator.opts(clientOptInput).generate();
 
             Assert.assertEquals(files.size(), 1);
-            TestUtils.ensureContainsFile(files, output, "src/main/java/org/openapitools/client/model/SomeObj.java");
+            TestUtils.ensureContainsFile(files, output, "src/main/java/org/openapitools/client/dto/SomeObj.java");
         } finally {
             output.deleteOnExit();
         }

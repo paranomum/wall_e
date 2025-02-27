@@ -2641,9 +2641,9 @@ public class DefaultCodegenTest {
         DefaultGenerator generator = new DefaultGenerator();
         List<File> files = generator.opts(clientOptInput).generate();
 
-        TestUtils.ensureDoesNotContainFile(files, output, "src/main/java/org/openapitools/client/model/FreeFormWithValidation.java");
-        TestUtils.ensureDoesNotContainFile(files, output, "src/main/java/org/openapitools/client/model/FreeFormInterface.java");
-        TestUtils.ensureDoesNotContainFile(files, output, "src/main/java/org/openapitools/client/model/FreeForm.java");
+        TestUtils.ensureDoesNotContainFile(files, output, "src/main/java/org/openapitools/client/dto/FreeFormWithValidation.java");
+        TestUtils.ensureDoesNotContainFile(files, output, "src/main/java/org/openapitools/client/dto/FreeFormInterface.java");
+        TestUtils.ensureDoesNotContainFile(files, output, "src/main/java/org/openapitools/client/dto/FreeForm.java");
         output.deleteOnExit();
     }
 

@@ -226,7 +226,7 @@ public class JavaClientCodegenTest {
         codegen.processOpts();
         ConfigAssert configAssert = new ConfigAssert(codegen.additionalProperties());
         configAssert.assertValue(CodegenConstants.HIDE_GENERATION_TIMESTAMP, codegen::isHideGenerationTimestamp, Boolean.FALSE);
-        configAssert.assertValue(CodegenConstants.MODEL_PACKAGE, codegen::modelPackage, "org.openapitools.client.model");
+        configAssert.assertValue(CodegenConstants.MODEL_PACKAGE, codegen::modelPackage, "org.openapitools.client.dto");
         configAssert.assertValue(CodegenConstants.API_PACKAGE, codegen::apiPackage, "org.openapitools.client.api");
         configAssert.assertValue(CodegenConstants.INVOKER_PACKAGE, codegen::getInvokerPackage, "org.openapitools.client");
         assertEquals(codegen.getSerializationLibrary(), JavaClientCodegen.SERIALIZATION_LIBRARY_GSON);
@@ -832,7 +832,7 @@ public class JavaClientCodegenTest {
         validateJavaSourceFiles(files);
         Assertions.assertEquals(clientOptInput.getConfig().schemaMapping().get("TypeAlias"), "foo.bar.TypeAlias");
         assertThat(files).hasSize(1)
-                .contains(output.resolve("src/main/java/org/openapitools/client/model/ParentType.java").toFile());
+                .contains(output.resolve("src/main/java/org/openapitools/client/dto/ParentType.java").toFile());
 
         File file = files.stream().filter(f -> f.getName().endsWith("ParentType.java")).findFirst().get();
         String parentTypeContents = Files.readString(file.toPath());
@@ -1179,13 +1179,13 @@ public class JavaClientCodegenTest {
         List<File> files = new DefaultGenerator().opts(configurator.toClientOptInput()).generate();
 
         validateJavaSourceFiles(files);
-        assertThat(output.resolve("src/main/java/org/openapitools/client/model/RealCommand.java"))
+        assertThat(output.resolve("src/main/java/org/openapitools/client/dto/RealCommand.java"))
                 .content().contains("class RealCommand {");
-        assertThat(output.resolve("src/main/java/org/openapitools/client/model/Command.java"))
+        assertThat(output.resolve("src/main/java/org/openapitools/client/dto/Command.java"))
                 .content().contains("class Command {");
         assertThat(files).hasSize(49).contains(
-                output.resolve("src/main/java/org/openapitools/client/model/RealCommand.java").toFile(),
-                output.resolve("src/main/java/org/openapitools/client/model/Command.java").toFile()
+                output.resolve("src/main/java/org/openapitools/client/dto/RealCommand.java").toFile(),
+                output.resolve("src/main/java/org/openapitools/client/dto/Command.java").toFile()
         );
     }
 
@@ -1696,7 +1696,7 @@ public class JavaClientCodegenTest {
         generator.setGeneratorPropertyDefault(CodegenConstants.MODEL_DOCS, "false");
         generator.opts(configurator.toClientOptInput()).generate();
 
-        TestUtils.assertExtraAnnotationFiles(outputPath + "/src/main/java/org/openapitools/client/model");
+        TestUtils.assertExtraAnnotationFiles(outputPath + "/src/main/java/org/openapitools/client/dto");
     }
 
     /**
@@ -1813,9 +1813,9 @@ public class JavaClientCodegenTest {
         generator.setGeneratorPropertyDefault(CodegenConstants.SUPPORTING_FILES, "false");
         generator.opts(input).generate();
 
-        assertThat(output.resolve("src/main/java/org/openapitools/client/model/ChildWithMappingADTO.java"))
+        assertThat(output.resolve("src/main/java/org/openapitools/client/dto/ChildWithMappingADTO.java"))
                 .content().doesNotContain("@JsonTypeName");
-        assertThat(output.resolve("src/main/java/org/openapitools/client/model/ChildWithMappingBDTO.java"))
+        assertThat(output.resolve("src/main/java/org/openapitools/client/dto/ChildWithMappingBDTO.java"))
                 .content().doesNotContain("@JsonTypeName");
     }
 
@@ -1846,9 +1846,9 @@ public class JavaClientCodegenTest {
         generator.setGeneratorPropertyDefault(CodegenConstants.SUPPORTING_FILES, "false");
         generator.opts(input).generate();
 
-        assertThat(output.resolve("src/main/java/org/openapitools/client/model/ChildWithoutMappingADTO.java"))
+        assertThat(output.resolve("src/main/java/org/openapitools/client/dto/ChildWithoutMappingADTO.java"))
                 .content().contains("@JsonTypeName");
-        assertThat(output.resolve("src/main/java/org/openapitools/client/model/ChildWithoutMappingBDTO.java"))
+        assertThat(output.resolve("src/main/java/org/openapitools/client/dto/ChildWithoutMappingBDTO.java"))
                 .content().contains("@JsonTypeName");
     }
 
@@ -1864,7 +1864,7 @@ public class JavaClientCodegenTest {
 
         new DefaultGenerator().opts(new ClientOptInput().openAPI(openAPI).config(codegen)).generate();
 
-        assertThat(output.resolve("src/main/java/org/openapitools/client/model/Cat.java")).content()
+        assertThat(output.resolve("src/main/java/org/openapitools/client/dto/Cat.java")).content()
                 .contains("mappings.put(\"Cat\", Cat.class)")
                 .doesNotContain(
                         "@JsonSubTypes",
@@ -1872,7 +1872,7 @@ public class JavaClientCodegenTest {
                         "mappings.put(\"dog\", Dog.class);",
                         "mappings.put(\"lizard\", Lizard.class);"
                 );
-        assertThat(output.resolve("src/main/java/org/openapitools/client/model/Pet.java")).content()
+        assertThat(output.resolve("src/main/java/org/openapitools/client/dto/Pet.java")).content()
                 .contains(
                         "@JsonSubTypes.Type(value = Cat.class, name = \"cat\")",
                         "@JsonSubTypes.Type(value = Dog.class, name = \"dog\")",
@@ -1984,7 +1984,7 @@ public class JavaClientCodegenTest {
 
         new DefaultGenerator().opts(new ClientOptInput().openAPI(openAPI).config(codegen)).generate();
 
-        assertThat(output.resolve("src/main/java/org/openapitools/client/model/Cat.java")).content()
+        assertThat(output.resolve("src/main/java/org/openapitools/client/dto/Cat.java")).content()
                 .contains(
                         "@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property ="
                                 + " \"petType\", visible = true)"
@@ -1995,7 +1995,7 @@ public class JavaClientCodegenTest {
                         "@JsonSubTypes.Type(value = Lizard.class, name = \"lizard\")"
                 );
 
-        assertThat(output.resolve("src/main/java/org/openapitools/client/model/Pet.java")).content()
+        assertThat(output.resolve("src/main/java/org/openapitools/client/dto/Pet.java")).content()
                 .contains(
                         "@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property ="
                                 + " \"petType\", visible = true)",
@@ -2040,9 +2040,9 @@ public class JavaClientCodegenTest {
 
         new DefaultGenerator().opts(new ClientOptInput().openAPI(openAPI).config(codegen)).generate();
 
-        assertThat(output.resolve("src/main/java/org/openapitools/client/model/Cat.java")).content()
+        assertThat(output.resolve("src/main/java/org/openapitools/client/dto/Cat.java")).content()
                 .contains("  @Override\n" + "  public Cat petType(@javax.annotation.Nonnull String petType) {");
-        assertThat(output.resolve("src/main/java/org/openapitools/client/model/Pet.java")).content()
+        assertThat(output.resolve("src/main/java/org/openapitools/client/dto/Pet.java")).content()
                 .contains("  }\n" + "\n" + "  public Pet petType(@javax.annotation.Nonnull String petType) {\n");
     }
 
@@ -2058,9 +2058,9 @@ public class JavaClientCodegenTest {
 
         new DefaultGenerator().opts(new ClientOptInput().openAPI(openAPI).config(codegen)).generate();
 
-        assertThat(output.resolve("src/main/java/org/openapitools/client/model/Cat.java")).content()
+        assertThat(output.resolve("src/main/java/org/openapitools/client/dto/Cat.java")).content()
                 .contains("  @Override\n" + "  public Cat petType(@javax.annotation.Nonnull String petType) {");
-        assertThat(output.resolve("src/main/java/org/openapitools/client/model/Pet.java")).content()
+        assertThat(output.resolve("src/main/java/org/openapitools/client/dto/Pet.java")).content()
                 .contains("  }\n" + "\n" + "  public Pet petType(@javax.annotation.Nonnull String petType) {\n");
     }
 
@@ -2077,7 +2077,7 @@ public class JavaClientCodegenTest {
 
         validateJavaSourceFiles(files);
         TestUtils.assertFileContains(
-                output.resolve("src/main/java/org/openapitools/client/model/BigDog.java"),
+                output.resolve("src/main/java/org/openapitools/client/dto/BigDog.java"),
                 "@Deprecated\n public BigDog declawed(@javax.annotation.Nullable Boolean declawed) {", // deprecated builder method
                 "@Deprecated\n @javax.annotation.Nullable\n\n public Boolean getDeclawed() {", // deprecated getter
                 "@Deprecated\n" + " public void setDeclawed(@javax.annotation.Nullable Boolean declawed) {" // deprecated setter
@@ -2097,7 +2097,7 @@ public class JavaClientCodegenTest {
 
         validateJavaSourceFiles(files);
         TestUtils.assertFileContains(
-                output.resolve("src/main/java/org/openapitools/client/model/BigDog.java"),
+                output.resolve("src/main/java/org/openapitools/client/dto/BigDog.java"),
                 "@Deprecated\n public BigDog declawed(@jakarta.annotation.Nullable Boolean declawed) {", // deprecated builder method
                 "@Deprecated\n @jakarta.annotation.Nullable\n @JsonProperty(JSON_PROPERTY_DECLAWED)\n"
                         + " @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)\n\n"
@@ -2187,7 +2187,7 @@ public class JavaClientCodegenTest {
 
         validateJavaSourceFiles(files);
         TestUtils.assertFileContains(output.resolve("pom.xml"), "<artifactId>jakarta.validation-api</artifactId>");
-        TestUtils.assertFileContains(output.resolve("src/main/java/org/openapitools/client/model/Pet.java"), "@Valid");
+        TestUtils.assertFileContains(output.resolve("src/main/java/org/openapitools/client/dto/Pet.java"), "@Valid");
     }
 
     @Test
@@ -2205,7 +2205,7 @@ public class JavaClientCodegenTest {
 
         validateJavaSourceFiles(files);
         TestUtils.assertFileNotContains(output.resolve("pom.xml"), "<artifactId>jakarta.validation-api</artifactId>");
-        TestUtils.assertFileNotContains(output.resolve("src/main/java/org/openapitools/client/model/Pet.java"), "@Valid");
+        TestUtils.assertFileNotContains(output.resolve("src/main/java/org/openapitools/client/dto/Pet.java"), "@Valid");
     }
 
     @Test

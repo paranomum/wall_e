@@ -569,6 +569,30 @@ public class CodegenConfigurator {
         return this;
     }
 
+    public CodegenConfigurator setEnumNamePrefix(String prefix) {
+        if (StringUtils.isNotEmpty(prefix)) {
+            addAdditionalProperty(CodegenConstants.ENUM_NAME_PREFIX, prefix);
+        }
+        generatorSettingsBuilder.withEnumNamePrefix(prefix);
+        return this;
+    }
+
+    public CodegenConfigurator setEnumNameSuffix(String suffix) {
+        if (StringUtils.isNotEmpty(suffix)) {
+            addAdditionalProperty(CodegenConstants.ENUM_NAME_SUFFIX, suffix);
+        }
+        generatorSettingsBuilder.withEnumNameSuffix(suffix);
+        return this;
+    }
+
+    public CodegenConfigurator setEnumPackage(String enumPackage) {
+        if (StringUtils.isNotEmpty(enumPackage)) {
+            addAdditionalProperty(CodegenConstants.ENUM_PACKAGE, enumPackage);
+        }
+        generatorSettingsBuilder.withEnumPackage(enumPackage);
+        return this;
+    }
+
     public CodegenConfigurator setOutputDir(String outputDir) {
         workflowSettingsBuilder.withOutputDir(outputDir);
         return this;

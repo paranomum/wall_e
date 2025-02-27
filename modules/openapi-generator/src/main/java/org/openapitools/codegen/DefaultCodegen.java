@@ -185,7 +185,7 @@ public class DefaultCodegen implements CodegenConfig {
     protected Map<String, String> operationIdNameMapping = new HashMap<>();
     // a map to store the rules in OpenAPI Normalizer
     protected Map<String, String> openapiNormalizer = new HashMap<>();
-    @Setter protected String modelPackage = "", apiPackage = "";
+    @Setter protected String modelPackage = "", enumPackage = "", apiPackage = "";
     protected String fileSuffix;
     @Getter @Setter
     protected String modelNamePrefix = "", modelNameSuffix = "";
@@ -362,6 +362,7 @@ public class DefaultCodegen implements CodegenConfig {
         }
         convertPropertyToStringAndWriteBack(CodegenConstants.TEMPLATE_DIR, this::setTemplateDir);
         convertPropertyToStringAndWriteBack(CodegenConstants.MODEL_PACKAGE, this::setModelPackage);
+        convertPropertyToStringAndWriteBack(CodegenConstants.ENUM_PACKAGE, this::setEnumPackage);
         convertPropertyToStringAndWriteBack(CodegenConstants.API_PACKAGE, this::setApiPackage);
 
         convertPropertyToBooleanAndWriteBack(CodegenConstants.HIDE_GENERATION_TIMESTAMP, this::setHideGenerationTimestamp);
@@ -1297,6 +1298,11 @@ public class DefaultCodegen implements CodegenConfig {
     }
 
     @Override
+    public String enumPackage() {
+        return enumPackage;
+    }
+
+    @Override
     public String apiPackage() {
         return apiPackage;
     }
@@ -1363,6 +1369,11 @@ public class DefaultCodegen implements CodegenConfig {
     @Override
     public String modelFileFolder() {
         return outputFolder + File.separator + modelPackage().replace('.', File.separatorChar);
+    }
+
+    @Override
+    public String enumFileFolder() {
+        return outputFolder + File.separator + enumPackage().replace('.', File.separatorChar);
     }
 
     @Override

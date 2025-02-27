@@ -80,11 +80,15 @@ public interface CodegenConfig {
 
     String modelFileFolder();
 
+    String enumFileFolder();
+
     String modelTestFileFolder();
 
     String modelDocFileFolder();
 
     String modelPackage();
+
+    String enumPackage();
 
     String toApiName(String name);
 
