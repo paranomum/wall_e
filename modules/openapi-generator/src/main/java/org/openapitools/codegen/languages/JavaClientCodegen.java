@@ -300,6 +300,25 @@ public class JavaClientCodegen extends AbstractJavaCodegen
     }
 
     @Override
+    public List<String> getLibraries() {
+        return List.of(FEIGN,
+                GOOGLE_API_CLIENT,
+                JERSEY2,
+                JERSEY3,
+                NATIVE,
+                OKHTTP_GSON,
+                RESTEASY,
+                RESTTEMPLATE,
+                WEBCLIENT,
+                RESTCLIENT,
+                REST_ASSURED,
+                RETROFIT_2,
+                VERTX,
+                MICROPROFILE,
+                APACHE);
+    }
+
+    @Override
     public String getHelp() {
         return "Generates a Java client library (HTTP lib: Jersey (1.x, 2.x), Retrofit (2.x), OpenFeign (10.x) and more.";
     }

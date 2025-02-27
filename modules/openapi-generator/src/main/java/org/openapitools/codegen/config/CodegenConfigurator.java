@@ -103,7 +103,12 @@ public class CodegenConfigurator {
 
             // We copy "cached" properties into configurator so it is appropriately configured with all settings in external files.
             // FIXME: target is to eventually move away from CodegenConfigurator properties except gen/workflow settings.
-            configurator.generatorName = generatorSettings.getGeneratorName();
+            if (generatorSettings.getGeneratorName() == null || generatorSettings.getGeneratorName().isEmpty()) {
+                configurator.generatorName ="java";
+            }
+            else {
+                configurator.generatorName = generatorSettings.getGeneratorName();
+            }
             configurator.inputSpec = workflowSettings.getInputSpec();
             configurator.templatingEngineName = workflowSettings.getTemplatingEngineName();
             if (workflowSettings.getGlobalProperties() != null) {
@@ -640,11 +645,17 @@ public class CodegenConfigurator {
 
     @SuppressWarnings("WeakerAccess")
     public Context<?> toContext() {
+        if (generatorName == null || generatorName.isEmpty()) {
+            generatorName = "java";
+        }
         Validate.notEmpty(generatorName, "generator name must be specified");
         Validate.notEmpty(inputSpec, "input spec must be specified");
 
         GeneratorSettings generatorSettings = generatorSettingsBuilder.build();
-        CodegenConfig config = CodegenConfigLoader.forName(generatorSettings.getGeneratorName());
+        CodegenConfig config = CodegenConfigLoader.forName("java");
+        if (generatorSettings.getGeneratorName() != null && !generatorSettings.getGeneratorName().isEmpty()) {
+            config = CodegenConfigLoader.forName(generatorSettings.getGeneratorName());
+        }
         if (isEmpty(templatingEngineName)) {
             // if templatingEngineName is empty check the config for a default
             String defaultTemplatingEngine = config.defaultTemplatingEngine();
@@ -747,7 +758,10 @@ public class CodegenConfigurator {
 
         // We load the config via generatorSettings.getGeneratorName() because this is guaranteed to be set
         // regardless of entrypoint (CLI sets properties on this type, config deserialization sets on generatorSettings).
-        CodegenConfig config = CodegenConfigLoader.forName(generatorSettings.getGeneratorName());
+        CodegenConfig config = CodegenConfigLoader.forName("java");
+        if (generatorSettings.getGeneratorName() != null && !generatorSettings.getGeneratorName().isEmpty()) {
+            config = CodegenConfigLoader.forName(generatorSettings.getGeneratorName());
+        }
 
         if (isNotEmpty(generatorSettings.getLibrary())) {
             config.setLibrary(generatorSettings.getLibrary());

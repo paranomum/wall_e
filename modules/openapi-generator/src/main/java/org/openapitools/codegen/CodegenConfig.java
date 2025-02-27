@@ -48,6 +48,8 @@ public interface CodegenConfig {
 
     String getName();
 
+    List<String> getLibraries();
+
     String getHelp();
 
     Map<String, Object> additionalProperties();

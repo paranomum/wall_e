@@ -7176,6 +7176,11 @@ public class DefaultCodegen implements CodegenConfig {
     }
 
     @Override
+    public List<String> getLibraries() {
+        return null;
+    }
+
+    @Override
     public String getHelp() {
         return null;
     }
