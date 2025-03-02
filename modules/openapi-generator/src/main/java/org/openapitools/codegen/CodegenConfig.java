@@ -172,6 +172,8 @@ public interface CodegenConfig {
 
     Map<String, String> modelTemplateFiles();
 
+    Map<String, String> enumTemplateFiles();
+
     Map<String, String> apiTestTemplateFiles();
 
     Map<String, String> modelTestTemplateFiles();
@@ -199,6 +201,8 @@ public interface CodegenConfig {
     String toApiFilename(String name);
 
     String toModelFilename(String name);
+
+    String toEnumFilename(String name);
 
     String toApiTestFilename(String name);
 
@@ -239,6 +243,10 @@ public interface CodegenConfig {
     String modelFilename(String templateName, String modelName);
 
     String modelFilename(String templateName, String modelName, String outputDir);
+
+    String enumFilename(String templateName, String modelName);
+
+    String enumFilename(String templateName, String modelName, String outputDir);
 
     String apiFilename(String templateName, String tag);
 
@@ -378,4 +386,5 @@ public interface CodegenConfig {
 
     Set<String> getOpenapiGeneratorIgnoreList();
 
+    Map<String, CodegenEnum> combineEnums(Map<String, ModelsMap> objs);
 }

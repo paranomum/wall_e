@@ -25,6 +25,7 @@ public class CodegenConstants {
     // NOTE: We may want to move these to a separate class to avoid confusion or modification.
     public static final String APIS = "apis";
     public static final String MODELS = "models";
+    public static final String ENUMS = "enums";
     public static final String GENERATE_RECURSIVE_DEPENDENT_MODELS = "generateRecursiveDependentModels";
     public static final String SUPPORTING_FILES = "supportingFiles";
     public static final String MODEL_TESTS = "modelTests";
@@ -319,6 +320,8 @@ public class CodegenConstants {
     // Not user-configurable. System provided for use in templates.
     public static final String GENERATE_MODELS = "generateModels";
     public static final String GENERATE_MODEL_DOCS = "generateModelDocs";
+
+    public static final String GENERATE_ENUMS = "enerateEnums";
 
     public static final String VIRTUAL_SERVICE = "virtualService";
     public static final String VIRTUAL_SERVICE_DESC = "Generate Spring boot rest service as virtual service with Virtualan";

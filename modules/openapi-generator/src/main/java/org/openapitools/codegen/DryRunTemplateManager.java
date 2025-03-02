@@ -57,6 +57,11 @@ public class DryRunTemplateManager implements TemplateProcessor {
     }
 
     @Override
+    public File write(Object data, String template, File target) throws IOException {
+        return writeToFile(target.getAbsolutePath(), "dummy".getBytes(StandardCharsets.UTF_8));
+    }
+
+    @Override
     public File writeToFile(String filename, byte[] contents) throws IOException {
         final Path path = Paths.get(filename);
         final File outputFile = path.toFile();

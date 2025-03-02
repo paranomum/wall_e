@@ -84,6 +84,7 @@ public class DefaultGenerator implements Generator {
     protected CodegenIgnoreProcessor ignoreProcessor;
     private Boolean generateApis = null;
     private Boolean generateModels = null;
+    private Boolean generateEnums = null;
     private Boolean generateRecursiveDependentModels = null;
     private Boolean generateSupportingFiles = null;
     private Boolean generateWebhooks = null;
@@ -205,18 +206,22 @@ public class DefaultGenerator implements Generator {
         // NOTE: Boolean.TRUE is required below rather than `true` because of JVM boxing constraints and type inference.
         generateApis = GlobalSettings.getProperty(CodegenConstants.APIS) != null ? Boolean.TRUE : getGeneratorPropertyDefaultSwitch(CodegenConstants.APIS, null);
         generateModels = GlobalSettings.getProperty(CodegenConstants.MODELS) != null ? Boolean.TRUE : getGeneratorPropertyDefaultSwitch(CodegenConstants.MODELS, null);
+        generateEnums = GlobalSettings.getProperty(CodegenConstants.ENUMS) != null ? Boolean.TRUE : getGeneratorPropertyDefaultSwitch(CodegenConstants.ENUMS, null);
         generateSupportingFiles = GlobalSettings.getProperty(CodegenConstants.SUPPORTING_FILES) != null ? Boolean.TRUE : getGeneratorPropertyDefaultSwitch(CodegenConstants.SUPPORTING_FILES, null);
         generateWebhooks = GlobalSettings.getProperty(CodegenConstants.WEBHOOKS) != null ? Boolean.TRUE : getGeneratorPropertyDefaultSwitch(CodegenConstants.WEBHOOKS, null);
 
-        if (generateApis == null && generateModels == null && generateSupportingFiles == null && generateWebhooks == null) {
+        if (generateApis == null && generateModels == null && generateEnums == null && generateSupportingFiles == null && generateWebhooks == null) {
             // no specifics are set, generate everything
-            generateApis = generateModels = generateSupportingFiles = generateWebhooks = true;
+            generateApis = generateModels = generateEnums = generateSupportingFiles = generateWebhooks = true;
         } else {
             if (generateApis == null) {
                 generateApis = false;
             }
             if (generateModels == null) {
                 generateModels = false;
+            }
+            if (generateEnums == null) {
+                generateEnums = false;
             }
             if (generateSupportingFiles == null) {
                 generateSupportingFiles = false;
@@ -242,6 +247,7 @@ public class DefaultGenerator implements Generator {
 
         config.additionalProperties().put(CodegenConstants.GENERATE_APIS, generateApis);
         config.additionalProperties().put(CodegenConstants.GENERATE_MODELS, generateModels);
+        config.additionalProperties().put(CodegenConstants.GENERATE_ENUMS, generateEnums);
         config.additionalProperties().put(CodegenConstants.GENERATE_WEBHOOKS, generateWebhooks);
         config.additionalProperties().put(CodegenConstants.GENERATE_RECURSIVE_DEPENDENT_MODELS, generateRecursiveDependentModels);
 
@@ -449,6 +455,26 @@ public class DefaultGenerator implements Generator {
         }
     }
 
+    public void generateEnum(List<File> files, Object enums, String enumName) throws IOException {
+        for (String templateName : config.enumTemplateFiles().keySet()) {
+            File written;
+            if (config.templateOutputDirs().containsKey(templateName)) {
+                String outputDir = config.getOutputDir() + File.separator + config.templateOutputDirs().get(templateName);
+                String filename = config.enumFilename(templateName, enumName, outputDir);
+                written = processTemplateToFile(enums, templateName, filename, generateEnums, CodegenConstants.ENUMS, outputDir);
+            } else {
+                String filename = config.enumFilename(templateName, enumName);
+                written = processTemplateToFile(enums, templateName, filename, generateEnums, CodegenConstants.ENUMS);
+            }
+            if (written != null) {
+                files.add(written);
+                if (config.isEnablePostProcessFile() && !dryRun) {
+                    config.postProcessFile(written, "enum");
+                }
+            }
+        }
+    }
+
     void generateModels(List<File> files, List<ModelMap> allModels, List<String> unusedModels, List<ModelMap> aliasModels) {
         generateModels(files, allModels, unusedModels, aliasModels, new ArrayList<>(), DefaultGenerator.this::modelKeys);
     }
@@ -534,6 +560,18 @@ public class DefaultGenerator implements Generator {
 
         // post process all processed models
         allProcessedModels = config.postProcessAllModels(allProcessedModels);
+
+        if (config.generatorLanguage() == GeneratorLanguage.JAVA && config.getTag() == CodegenType.CLIENT) {
+            Map<String, CodegenEnum> allProcessedEnums = config.combineEnums(allProcessedModels);
+            for (String key : allProcessedEnums.keySet()) {
+                try {
+                    generateEnum(files, allProcessedEnums.get(key), key);
+                    //addImport (get all needed dto (Set String), where to import)
+                } catch (Exception e) {
+                    throw new RuntimeException("Could not generate enum '" + key + "'", e);
+                }
+            }
+        }
 
         if (generateRecursiveDependentModels) {
             for(ModelsMap modelsMap : allProcessedModels.values()) {
@@ -1441,9 +1479,39 @@ public class DefaultGenerator implements Generator {
         return processTemplateToFile(templateData, templateName, outputFilename, shouldGenerate, skippedByOption, this.config.getOutputDir());
     }
 
+    protected File processTemplateToFile(Object templateData, String templateName, String outputFilename, boolean shouldGenerate, String skippedByOption) throws IOException {
+        return processTemplateToFile(templateData, templateName, outputFilename, shouldGenerate, skippedByOption, this.config.getOutputDir());
+    }
+
     private final Set<String> seenFiles = new HashSet<>();
 
     private File processTemplateToFile(Map<String, Object> templateData, String templateName, String outputFilename, boolean shouldGenerate, String skippedByOption, String intendedOutputDir) throws IOException {
+        String adjustedOutputFilename = outputFilename.replaceAll("//", "/").replace('/', File.separatorChar);
+        File target = new File(adjustedOutputFilename);
+        if (ignoreProcessor.allowsFile(target)) {
+            if (shouldGenerate) {
+                Path outDir = java.nio.file.Paths.get(intendedOutputDir).toAbsolutePath();
+                Path absoluteTarget = target.toPath().toAbsolutePath();
+                if (!absoluteTarget.startsWith(outDir)) {
+                    throw new RuntimeException(String.format(Locale.ROOT, "Target files must be generated within the output directory; absoluteTarget=%s outDir=%s", absoluteTarget, outDir));
+                }
+
+                if (seenFiles.stream().filter(f -> f.toLowerCase(Locale.ROOT).equals(absoluteTarget.toString().toLowerCase(Locale.ROOT))).findAny().isPresent()) {
+                    LOGGER.warn("Duplicate file path detected. Not all operating systems can handle case sensitive file paths. path={}", absoluteTarget.toString());
+                }
+                seenFiles.add(absoluteTarget.toString());
+                return this.templateProcessor.write(templateData, templateName, target);
+            } else {
+                this.templateProcessor.skip(target.toPath(), String.format(Locale.ROOT, "Skipped by %s options supplied by user.", skippedByOption));
+                return null;
+            }
+        } else {
+            this.templateProcessor.ignore(target.toPath(), "Ignored by rule in ignore file.");
+            return null;
+        }
+    }
+
+    private File processTemplateToFile(Object templateData, String templateName, String outputFilename, boolean shouldGenerate, String skippedByOption, String intendedOutputDir) throws IOException {
         String adjustedOutputFilename = outputFilename.replaceAll("//", "/").replace('/', File.separatorChar);
         File target = new File(adjustedOutputFilename);
         if (ignoreProcessor.allowsFile(target)) {

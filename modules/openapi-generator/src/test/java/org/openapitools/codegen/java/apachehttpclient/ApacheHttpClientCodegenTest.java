@@ -16,6 +16,7 @@
 
 package org.openapitools.codegen.java.apachehttpclient;
 
+import org.junit.jupiter.api.Tag;
 import org.openapitools.codegen.ClientOptInput;
 import org.openapitools.codegen.CodegenConstants;
 import org.openapitools.codegen.DefaultGenerator;
@@ -92,6 +93,7 @@ public class ApacheHttpClientCodegenTest {
     }
 
     @Test
+    @Tag("check")
     void testApacheHttpClientQueryParamHandlingUniqueItemsStringEnum() throws IOException {
         // Arrange
         var output = Files.createTempDirectory("test").toFile();

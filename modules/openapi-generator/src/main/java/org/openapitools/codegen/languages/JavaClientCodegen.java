@@ -1154,6 +1154,88 @@ public class JavaClientCodegen extends AbstractJavaCodegen
     }
 
     @Override
+    public Map<String, CodegenEnum> combineEnums(Map<String, ModelsMap> objs) {
+        Map<String, CodegenEnum> enums = new HashMap<>();
+
+        for (String key : objs.keySet()) {
+            for (ModelMap modelMap : objs.get(key).getModels()) {
+                CodegenModel m = modelMap.getModel();
+                if (m.hasEnums) {
+                    for (CodegenProperty var : m.getVars()) {
+                        if (var.isEnum) {
+                            CodegenEnum ce = new CodegenEnum();
+                            ce.classname = toEnumFilename(var.enumName);
+                            ce.name = var.name;
+                            ce.filePackage = enumPackage;
+                            ce.hasEnums = true;
+                            ce.enumVars = parseAllowableValues(var.allowableValues.get("enumVars"));
+                            ce.description = var.description;
+//                            ce.dataType = var.dataType;
+                            ce.dataType = "String";
+                            LOGGER.info("dataType - {}", var.dataType);
+//                            ce.datatypeWithEnum = var.datatypeWithEnum;
+                            ce.additionalEnumTypeAnnotations = (List<String>) modelMap.get(ADDITIONAL_ENUM_TYPE_ANNOTATIONS);
+                            ce.useEnumCaseInsensitive = false;
+                            ce.isNullable = var.isNullable;
+                            ce.enumUnknownDefaultCase = parseEnumValues(var.allowableValues);
+                            if (additionalProperties.containsKey(SERIALIZATION_LIBRARY_JACKSON)) {
+                                ce.jackson = true;
+                            }
+                            if (additionalProperties.containsKey(SERIALIZATION_LIBRARY_GSON)) {
+                                ce.gson = true;
+                            }
+                            if (additionalProperties.containsKey(SERIALIZATION_LIBRARY_JSONB)) {
+                                ce.jsonb = true;
+                            }
+                            ce.isUri = false;
+                            if (enums.containsKey(ce.classname)){
+                                enums.replace(ce.classname, combineToEnum(enums.get(ce.classname), ce));
+                            }
+                            enums.putIfAbsent(ce.classname, ce);
+                        }
+                    }
+                }
+            }
+        }
+
+        return enums;
+    }
+
+    private CodegenEnum combineToEnum(CodegenEnum old, CodegenEnum last) {
+        old.enumVars.addAll(last.enumVars);
+        if (last.enumUnknownDefaultCase) {
+            old.enumUnknownDefaultCase = true;
+        }
+        return old;
+    }
+
+    private boolean parseEnumValues(Map<String, Object> allowableValues) {
+        return false;
+    }
+
+    private Set<EnumProperty> parseAllowableValues(Object objs) {
+        List<Map<String, Object>> allowableValues = (List<Map<String, Object>>) objs;
+        Set<EnumProperty> enumProperties = new HashSet<>();
+
+        for(Map<String, Object> enumToValue : allowableValues) {
+            EnumProperty enumProperty = new EnumProperty();
+            String enumName = enumToValue.get("name").toString();
+            String enumValue = enumToValue.get("value").toString();
+            enumProperty.name = enumName.toUpperCase(Locale.ROOT);
+            enumProperty.value = enumValue.toUpperCase(Locale.ROOT);
+            enumProperty.enumUnknownDefaultCase = false;
+            enumProperty.isString = true;
+            enumProperty.withXml = false;
+            enumProperty.isNullable = false;
+            if (enumProperty.name.equalsIgnoreCase("unknown_default_open_api"))
+                enumProperty.enumUnknownDefaultCase = true;
+            enumProperties.add(enumProperty);
+        }
+
+        return enumProperties;
+    }
+
+    @Override
     protected boolean isConstructorWithAllArgsAllowed(CodegenModel codegenModel) {
         // implementation detail: allVars is not reliable if openapiNormalizer.REFACTOR_ALLOF_WITH_PROPERTIES_ONLY is disabled
         if (codegenModel.readOnlyVars.size() != codegenModel.vars.size() + codegenModel.parentVars.size()) {
@@ -1251,5 +1333,11 @@ public class JavaClientCodegen extends AbstractJavaCodegen
         List<VendorExtension> extensions = super.getSupportedVendorExtensions();
         extensions.add(VendorExtension.X_WEBCLIENT_BLOCKING);
         return extensions;
+    }
+
+    @Override
+    public String toEnumFilename(String name) {
+        String processedName = name.replace("Enum", "").replace("enum", "");
+        return processedName.contains("enum") || processedName.contains("Enum") ? camelize(processedName) : camelize(processedName) + "Enum";
     }
 }

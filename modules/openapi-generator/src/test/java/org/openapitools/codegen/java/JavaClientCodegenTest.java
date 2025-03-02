@@ -29,6 +29,7 @@ import io.swagger.v3.parser.util.SchemaTypeUtil;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.openapitools.codegen.*;
 import org.openapitools.codegen.config.CodegenConfigurator;
 import org.openapitools.codegen.java.assertions.JavaFileAssert;
@@ -462,6 +463,7 @@ public class JavaClientCodegenTest {
     }
 
     @Test
+    @Tag("check")
     public void testGeneratePingSomeObj() {
         final Path output = newTempFolder();
         final CodegenConfigurator configurator = new CodegenConfigurator()
@@ -593,6 +595,7 @@ public class JavaClientCodegenTest {
     }
 
     @Test
+    @Tag("check")
     public void testJdkHttpAsyncClient() {
         final Path output = newTempFolder();
         final CodegenConfigurator configurator = new CodegenConfigurator()
@@ -605,7 +608,7 @@ public class JavaClientCodegenTest {
 
         List<File> files = new DefaultGenerator().opts(configurator.toClientOptInput()).generate();
 
-        assertThat(files).hasSize(34);
+        assertThat(files).hasSize(35);
 
         validateJavaSourceFiles(files);
         assertThat(output.resolve("src/main/java/xyz/abcdef/api/PingApi.java")).content().contains(
@@ -1460,6 +1463,7 @@ public class JavaClientCodegenTest {
     }
 
     @Test
+    @Tag("check")
     public void testDefaultMicroprofileRestClientVersion() {
         final Path output = newTempFolder();
         final CodegenConfigurator configurator = new CodegenConfigurator()
@@ -1483,6 +1487,7 @@ public class JavaClientCodegenTest {
     }
 
     @Test
+    @Tag("check")
     public void testMicroprofileRestClientVersion_1_4_1() {
         final Path output = newTempFolder();
         final CodegenConfigurator configurator = new CodegenConfigurator()
@@ -1527,6 +1532,7 @@ public class JavaClientCodegenTest {
     }
 
     @Test
+    @Tag("check")
     public void testMicroprofileRestClientVersion_3_0() {
         final Path output = newTempFolder();
         final CodegenConfigurator configurator = new CodegenConfigurator()
@@ -2026,6 +2032,7 @@ public class JavaClientCodegenTest {
     }
 
     @Test
+    @Tag("check")
     public void testForJavaApacheHttpClientOverrideSetter() {
         final Path output = newTempFolder();
         OpenAPI openAPI = new OpenAPIParser()
@@ -2135,6 +2142,7 @@ public class JavaClientCodegenTest {
     }
 
     @Test
+    @Tag("check")
     public void testRestTemplateWithGeneratedClientAsBeanDisabled() {
         final Path output = newTempFolder();
         final CodegenConfigurator configurator = new CodegenConfigurator()
@@ -2153,6 +2161,7 @@ public class JavaClientCodegenTest {
     }
 
     @Test
+    @Tag("check")
     public void testRestTemplateWithGeneratedClientAsBeanEnabled() {
         final Path output = newTempFolder();
         final CodegenConfigurator configurator = new CodegenConfigurator()
@@ -2171,6 +2180,7 @@ public class JavaClientCodegenTest {
     }
 
     @Test
+    @Tag("check")
     public void testRestTemplateWithUseBeanValidationEnabled() {
         final Path output = newTempFolder();
         final CodegenConfigurator configurator = new CodegenConfigurator()
@@ -2189,6 +2199,7 @@ public class JavaClientCodegenTest {
     }
 
     @Test
+    @Tag("check")
     public void testRestTemplateWithUseBeanValidationDisabled() {
         final Path output = newTempFolder();
         final CodegenConfigurator configurator = new CodegenConfigurator()
@@ -2207,6 +2218,7 @@ public class JavaClientCodegenTest {
     }
 
     @Test
+    @Tag("check")
     public void testRestTemplateWithPerformBeanValidationEnabled() {
         final Path output = newTempFolder();
         final CodegenConfigurator configurator = new CodegenConfigurator()
@@ -2225,6 +2237,7 @@ public class JavaClientCodegenTest {
     }
 
     @Test
+    @Tag("check")
     public void testRestTemplateWithPerformBeanValidationDisabled() {
         final Path output = newTempFolder();
         final CodegenConfigurator configurator = new CodegenConfigurator()
@@ -2441,6 +2454,7 @@ public class JavaClientCodegenTest {
     }
 
     @Test
+    @Tag("check")
     public void testRestTemplateHandleURIEnum() {
         String[] expectedInnerEnumLines = new String[]{
                 "V1_SCHEMA_JSON(URI.create(\"https://example.com/v1/schema.json\"))",
@@ -2592,6 +2606,7 @@ public class JavaClientCodegenTest {
     }
 
     @Test
+    @Tag("check")
     public void testRestClientFormMultipart() {
         final Path output = newTempFolder();
         final CodegenConfigurator configurator = new CodegenConfigurator()
@@ -2622,6 +2637,7 @@ public class JavaClientCodegenTest {
     }
 
     @Test
+    @Tag("check")
     public void testRestClientWithUseAbstractionForFiles() {
         final Path output = newTempFolder();
         final CodegenConfigurator configurator = new CodegenConfigurator()
@@ -2866,6 +2882,7 @@ public class JavaClientCodegenTest {
      * - <a href="https://github.com/OpenAPITools/openapi-generator/issues/18869">Microprofile generator missing Jackson annotations and namespaces</a>
      */
     @Test(dataProvider = "librariesSupportingJackson")
+    @Tag("check")
     void shouldGenerateCorrectXmlAnnotations(Library library) {
         // Arrange
         final CodegenConfigurator config = new CodegenConfigurator()
@@ -3007,6 +3024,7 @@ public class JavaClientCodegenTest {
      * General XML annotations test (only JAXB)
      */
     @Test(dataProvider = "librariesNotSupportingJackson")
+    @Tag("check")
     void shouldGenerateCorrectJaxbAnnotations(Library library) {
         // Arrange
         final CodegenConfigurator config = new CodegenConfigurator()
@@ -3156,6 +3174,7 @@ public class JavaClientCodegenTest {
     }
 
     @Test
+    @Tag("check")
     public void testRestClientWithXML_issue_19137() {
         final Path output = newTempFolder();
         final CodegenConfigurator configurator = new CodegenConfigurator()

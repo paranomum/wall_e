@@ -98,6 +98,40 @@ public class HandlebarsEngineAdapter extends AbstractTemplatingEngineAdapter {
         return tmpl.apply(context);
     }
 
+    @Override
+    public String compileTemplate(TemplatingExecutor executor,
+                                  Object bundle, String templateFile) throws IOException {
+        TemplateLoader loader = new AbstractTemplateLoader() {
+            @Override
+            public TemplateSource sourceAt(String location) {
+                return findTemplate(executor, location);
+            }
+        };
+
+        Context context = Context
+                .newBuilder(bundle)
+                .resolver(
+                        MapValueResolver.INSTANCE,
+                        JavaBeanValueResolver.INSTANCE,
+                        MethodValueResolver.INSTANCE,
+                        AccessAwareFieldValueResolver.INSTANCE)
+                .build();
+
+        Handlebars handlebars = new Handlebars(loader);
+        handlebars.registerHelperMissing((obj, options) -> {
+            LOGGER.warn(String.format(Locale.ROOT, "Unregistered helper name '%s', processing template:%n%s", options.helperName, options.fn.text()));
+            return "";
+        });
+        handlebars.registerHelper("json", Jackson2Helper.INSTANCE);
+        StringHelpers.register(handlebars);
+        handlebars.registerHelpers(ConditionalHelpers.class);
+        handlebars.registerHelpers(org.openapitools.codegen.templating.handlebars.StringHelpers.class);
+        handlebars.setInfiniteLoops(infiniteLoops);
+        handlebars.setPrettyPrint(prettyPrint);
+        Template tmpl = handlebars.compile(templateFile);
+        return tmpl.apply(context);
+    }
+
     @SuppressWarnings("java:S108")
     public TemplateSource findTemplate(TemplatingExecutor generator, String templateFile) {
         String[] possibilities = getModifiedFileLocation(templateFile);

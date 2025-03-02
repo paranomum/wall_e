@@ -67,6 +67,9 @@ public interface TemplatingEngineAdapter {
     String compileTemplate(TemplatingExecutor executor, Map<String, Object> bundle,
                            String templateFile) throws IOException;
 
+    String compileTemplate(TemplatingExecutor executor, Object bundle,
+                           String templateFile) throws IOException;
+
     /**
      * Determines whether the template file with supported extensions exists. This may be on the filesystem,
      * external filesystem, or classpath (implementation is up to TemplatingGenerator).

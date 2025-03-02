@@ -200,6 +200,7 @@ public class DefaultCodegen implements CodegenConfig {
     */
     protected Map<String, String> apiTemplateFiles = new HashMap<>();
     protected Map<String, String> modelTemplateFiles = new HashMap<>();
+    protected Map<String, String> enumTemplateFiles = new HashMap<>();
     protected Map<String, String> apiTestTemplateFiles = new HashMap<>();
     protected Map<String, String> modelTestTemplateFiles = new HashMap<>();
     protected Map<String, String> apiDocTemplateFiles = new HashMap<>();
@@ -1364,6 +1365,11 @@ public class DefaultCodegen implements CodegenConfig {
     }
 
     @Override
+    public Map<String, String> enumTemplateFiles() {
+        return enumTemplateFiles;
+    }
+
+    @Override
     public String apiFileFolder() {
         return outputFolder + File.separator + apiPackage().replace('.', File.separatorChar);
     }
@@ -1543,6 +1549,11 @@ public class DefaultCodegen implements CodegenConfig {
         return camelize(name);
     }
 
+    @Override
+    public String toEnumFilename(String name) {
+        String processedName = name.replace("Enum", "").replace("enum", "");
+        return processedName.contains("enum") || processedName.contains("Enum") ? camelize(processedName) : camelize(processedName) + "Enum";
+    }
     /**
      * Return the capitalized file name of the model test
      *
@@ -6229,6 +6240,18 @@ public class DefaultCodegen implements CodegenConfig {
         return outputDir + File.separator + toModelFilename(uniqueModelName) + suffix;
     }
 
+    @Override
+    public String enumFilename(String templateName, String enumName) {
+        String suffix = enumTemplateFiles().get(templateName);
+        return enumFileFolder() + File.separator + toEnumFilename(enumName) + suffix;
+    }
+
+    @Override
+    public String enumFilename(String templateName, String modelName, String outputDir) {
+        String suffix = enumTemplateFiles().get(templateName);
+        return outputDir + File.separator + toEnumFilename(modelName) + suffix;
+    }
+
     private final Map<String, String> seenApiDocFilenames = new HashMap<String, String>();
 
     /**
@@ -8624,6 +8647,11 @@ public class DefaultCodegen implements CodegenConfig {
     @Override
     public Set<String> getOpenapiGeneratorIgnoreList() {
         return openapiGeneratorIgnoreList;
+    }
+
+    @Override
+    public Map<String, CodegenEnum> combineEnums(Map<String, ModelsMap> objs) {
+        return null;
     }
 
     @Override
