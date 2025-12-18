@@ -1,6 +1,7 @@
 package org.openapitools.codegen.inputs;
 
 import com.fasterxml.jackson.databind.SerializationFeature;
+import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.*;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.*;
@@ -802,9 +803,110 @@ public class DocxParser {
 	}
 
 	/**
-	 * Строит список SchemaNode (bottom-up).
-	 * main = true ТОЛЬКО для root элементов (parent == null).
-	 * Вложенные Object/Map остаются ИНЛАЙН в root schema.
+	 * Строит схему Object.
+	 * Встраивает свойства inline (без создания отдельных компонентов для вложенных Object и Map).
+	 * КЛЮЧЕВОЕ: Map-поля встраиваются inline, а не создают $ref
+	 */
+	private Schema<?> buildObjectSchema(MappingEntry entry,
+										List<MappingEntry> allEntries,
+										Map<MappingEntry, Schema<?>> schemaCache,
+										Map<Integer, List<MappingEntry>> entriesByLevel) {
+
+		ObjectSchema objectSchema = new ObjectSchema();
+		objectSchema.setTitle(entry.getField());
+		objectSchema.setDescription(entry.getDescription());
+
+		List<MappingEntry> children = findChildren(entry, allEntries);
+		Map<String, Schema> properties = new LinkedHashMap<>();
+		List<String> required = new ArrayList<>();
+
+		for (MappingEntry child : children) {
+			Schema<?> childSchema = null;
+
+			if (isMapType(child.getType())) {
+				// Это Map-поле: строим его INLINE (встраиваем сразу, не делаем отдельный компонент)
+				List<MappingEntry> mapKeys = findChildren(child, allEntries);
+				childSchema = buildMapSchema(child, mapKeys, allEntries, schemaCache);
+				// ✅ ВСТРАИВАЕМ INLINE, а не делаем $ref
+
+			} else if ("Object".equalsIgnoreCase(child.getType())) {
+				// Это Object-поле внутри Object: встраиваем inline
+				childSchema = buildObjectSchema(child, allEntries, schemaCache, entriesByLevel);
+
+			} else {
+				// Простой тип
+				childSchema = schemaCache.get(child);
+				if (childSchema == null) {
+					childSchema = buildSimpleFieldSchema(child);
+				}
+			}
+
+			if (childSchema != null) {
+				properties.put(child.getField(), childSchema);
+				if (child.isRequired()) {
+					required.add(child.getField());
+				}
+			}
+		}
+
+		objectSchema.setProperties(properties);
+		if (!required.isEmpty()) {
+			objectSchema.setRequired(required);
+		}
+
+		return objectSchema;
+	}
+
+	/**
+	 * Исправленный метод построения схемы для Map.
+	 * Использует $ref на схему значения, которая определена в components.
+	 */
+	private Schema<?> buildMapSchema(MappingEntry mapEntry,
+									 List<MappingEntry> mapKeys,
+									 List<MappingEntry> allEntries,
+									 Map<MappingEntry, Schema<?>> schemaCache) {
+
+		MapSchema mapSchema = new MapSchema();
+		mapSchema.setTitle(mapEntry.getField());
+		mapSchema.setDescription(mapEntry.getDescription());
+
+		if (mapKeys.isEmpty()) {
+			mapSchema.setAdditionalProperties(new ObjectSchema());
+			return mapSchema;
+		}
+
+		// Берем первый ключ как образец структуры значения
+		MappingEntry keyEntry = mapKeys.get(0);
+		List<MappingEntry> valueFields = findChildren(keyEntry, allEntries);
+
+		if (valueFields.isEmpty()) {
+			// Если структура значения простая (нет вложенных полей)
+			mapSchema.setAdditionalProperties(mapTypeToSchema(keyEntry.getType()));
+		} else {
+			// Если структура сложная, мы ожидаем, что для keyEntry уже создана SchemaNode
+			// и она будет добавлена в components.
+			// Поэтому здесь мы создаем $ref на неё.
+
+			String refName = keyEntry.getField(); // Имя компонента = имя поля ключа (например, "alias")
+
+			// Создаем схему-ссылку
+			Schema<?> refSchema = new Schema<>().$ref("#/components/schemas/" + refName);
+
+			mapSchema.setAdditionalProperties(refSchema);
+			LOGGER.debug("✓ Map '{}' → additionalProperties: $ref to '{}'", mapEntry.getField(), refName);
+		}
+
+		return mapSchema;
+	}
+
+	/**
+	 * Исправленный метод buildSchemas.
+	 * Ключевое отличие: правильная логика создания компонентов:
+	 * - MapKey (alias) → ВСЕГДА компонент
+	 * - Map (если root или parent MapKey) → компонент
+	 * - Map (если child Object) → встраивается inline в Object
+	 * - Object (root) → компонент
+	 * - Object (внутри Object) → встраивается inline
 	 */
 	public List<SchemaNode> buildSchemas(List<MappingEntry> entries, String mainSchemaName) {
 		List<MappingEntry> sortedByDepth = entries.stream()
@@ -817,49 +919,71 @@ public class DocxParser {
 			entriesByLevel.computeIfAbsent(level, k -> new ArrayList<>()).add(entry);
 		}
 
-		System.out.println("\n=== Построение SchemaNodes (с отдельными schemas) ===");
-		System.out.println("Всего entries: " + entries.size());
-		System.out.println("Всего уровней: " + entriesByLevel.size());
-
-		for (Map.Entry<Integer, List<MappingEntry>> levelEntry : entriesByLevel.entrySet()) {
-			System.out.println("  Уровень " + levelEntry.getKey() + ": " + levelEntry.getValue().size() + " записей");
-		}
-
 		Map<MappingEntry, Schema<?>> schemaCache = new LinkedHashMap<>();
 		List<SchemaNode> allSchemaNodes = new ArrayList<>();
 
-		List<Integer> levelsSorted = sortedByLevel(entriesByLevel.keySet());
+		// Сортировка уровней от глубокого к поверхностному
+		List<Integer> levelsSorted = new ArrayList<>(entriesByLevel.keySet());
+		levelsSorted.sort(Collections.reverseOrder());
 
 		for (int level : levelsSorted) {
 			List<MappingEntry> levelEntries = entriesByLevel.get(level);
-			System.out.println("\n--- Обработка уровня: " + level + " ---");
-
 
 			for (MappingEntry entry : levelEntries) {
 				Schema<?> schema;
 
-				if ("Object".equalsIgnoreCase(entry.getType()) || isMapType(entry.getType())) {
-					schema = buildObjectOrMapSchema(entry, entries, schemaCache, entriesByLevel);
-					String marker = isMapType(entry.getType()) ? "[Map]" : "[Object]";
-					System.out.println("  ✓ " + marker + " " + entry.getField() +
-							(entry.getParent() != null ? " → parent: " + entry.getParent().getField() : " (ROOT)"));
+				if (isMapType(entry.getType())) {
+					// Map обрабатывается отдельно
+					List<MappingEntry> keys = findChildren(entry, entries);
+					schema = buildMapSchema(entry, keys, entries, schemaCache);
 
-					if (level > 0 && entry.getParent() != null) {
+					// Map становится компонентом ТОЛЬКО если:
+					// 1. Это root level (parent == null) - НЕ добавляем здесь
+					// 2. Его parent является MapKey (например, "alias")
+					// НО НЕ добавляем в компоненты, если это child обычного Object
+
+					MappingEntry parent = entry.getParent();
+					boolean parentIsMapKey = parent != null && parent.isMapKey();
+
+					if (parentIsMapKey && level > 0 && !entry.isMapKey()) {
 						allSchemaNodes.add(new SchemaNode(false, schema));
-						System.out.println("    → Добавлена как intermediate SchemaNode");
+					}
+
+				} else if ("Object".equalsIgnoreCase(entry.getType())) {
+					if (level == levelsSorted.get(0)) {
+						schema = buildSimpleFieldSchema(entry);
+					} else {
+						// Object: может встраиваться inline или быть компонентом
+						schema = buildObjectSchema(entry, entries, schemaCache, entriesByLevel);
+
+						// Object становится компонентом если:
+						// 1. Это MapKey (alias) - ВСЕГДА
+						// 2. Это Root element (parent == null) - добавляем после
+						// 3. Его parent является MapKey
+
+						if (entry.isMapKey()) {
+							// MapKey ВСЕГДА компонент
+							allSchemaNodes.add(new SchemaNode(false, schema));
+						} else if (entry.getParent() == null && level == 0) {
+							// Root element - не добавляем здесь (добавим позже)
+						} else if (entry.getParent() != null && entry.getParent().isMapKey()) {
+							// Child MapKey - добавляем как компонент
+							allSchemaNodes.add(new SchemaNode(false, schema));
+						}
+						// Если это Object внутри Object - встраивается inline (не добавляем)
 					}
 				} else {
+					// Простой тип
 					schema = buildSimpleFieldSchema(entry);
-					System.out.println("  ✓ [" + entry.getType() + "] " + entry.getField() +
-							(entry.getParent() != null ? " → parent: " + entry.getParent().getField() : " (ROOT)"));
 				}
 
 				schemaCache.put(entry, schema);
 			}
 		}
 
-		System.out.println("\n--- Сборка главной схемы (root элементы с $ref) ---");
-
+		// Сборка главной схемы (Root)
+		ObjectSchema mainSchema = new ObjectSchema();
+		mainSchema.setTitle(mainSchemaName);
 		Map<String, Schema> rootProperties = new LinkedHashMap<>();
 		List<String> rootRequired = new ArrayList<>();
 
@@ -868,49 +992,30 @@ public class DocxParser {
 				.sorted(Comparator.comparing(MappingEntry::getField))
 				.collect(Collectors.toList());
 
-		System.out.println("Найдено root элементов: " + rootEntries.size());
-
 		for (MappingEntry rootEntry : rootEntries) {
 			Schema<?> schema = schemaCache.get(rootEntry);
-			if (schema == null) {
-				schema = buildSimpleFieldSchema(rootEntry);
-			} else if ("Object".equalsIgnoreCase(rootEntry.getType()) || isMapType(rootEntry.getType())) {
-				String refName = rootEntry.getField();
-				schema = new Schema<>().$ref("#/components/schemas/" + refName);
-				System.out.println("    → Используется $ref на: " + refName);
+			if (schema == null) schema = buildSimpleFieldSchema(rootEntry);
+
+			// Для корневых элементов используем $ref если это сложные типы
+			if ("Object".equalsIgnoreCase(rootEntry.getType()) || isMapType(rootEntry.getType())) {
+				schema = new Schema<>().$ref("#/components/schemas/" + rootEntry.getField());
+				// Добавляем root Object/Map как компонент
+				Schema<?> rootSchema = schemaCache.get(rootEntry);
+				if (rootSchema != null) {
+					allSchemaNodes.add(new SchemaNode(false, rootSchema));
+				}
 			}
 
 			rootProperties.put(rootEntry.getField(), schema);
-			System.out.println("  ✓ " + rootEntry.getField() + " [" + rootEntry.getType() + "]" +
-					(rootEntry.isRequired() ? " *" : ""));
-
-			if (rootEntry.isRequired()) {
-				rootRequired.add(rootEntry.getField());
-			}
+			if (rootEntry.isRequired()) rootRequired.add(rootEntry.getField());
 		}
 
-		ObjectSchema mainSchema = new ObjectSchema();
-		mainSchema.setTitle(mainSchemaName);
 		mainSchema.setProperties(rootProperties);
-		if (!rootRequired.isEmpty()) {
-			mainSchema.setRequired(rootRequired);
-		}
+		if (!rootRequired.isEmpty()) mainSchema.setRequired(rootRequired);
 
 		List<SchemaNode> result = new ArrayList<>();
 		result.add(new SchemaNode(true, mainSchema));
-
-		for (Map.Entry<MappingEntry, Schema<?>> cacheEntry : schemaCache.entrySet()) {
-			Schema<?> schema = cacheEntry.getValue();
-			// Если это Object или Map (не simple field)
-			if ("Object".equalsIgnoreCase(cacheEntry.getKey().getType())
-					|| isMapType(cacheEntry.getKey().getType())) {
-				result.add(new SchemaNode(false, schema));
-				System.out.println("  [Intermediate] " + schema.getTitle());
-			}
-		}
-
-		System.out.println("\n✅ Результат: " + result.size() + " SchemaNode(s)");
-		System.out.println("  [MAIN] " + mainSchemaName);
+		result.addAll(allSchemaNodes);
 
 		return result;
 	}
@@ -922,13 +1027,13 @@ public class DocxParser {
 											 List<MappingEntry> allEntries,
 											 Map<MappingEntry, Schema<?>> schemaCache,
 											 Map<Integer, List<MappingEntry>> entriesByLevel) {
-
 		List<MappingEntry> children = findChildren(entry, allEntries);
 
 		if (isMapType(entry.getType())) {
 			return buildMapSchema(entry, children, allEntries, schemaCache);
 		}
 
+		// Строим ObjectSchema
 		ObjectSchema objectSchema = new ObjectSchema();
 		objectSchema.setTitle(entry.getField());
 		objectSchema.setDescription(entry.getDescription());
@@ -940,111 +1045,21 @@ public class DocxParser {
 			Schema<?> childSchema = schemaCache.get(child);
 
 			if (childSchema == null) {
-				if (("Object".equalsIgnoreCase(child.getType()) || isMapType(child.getType()))
-						&& !findChildren(child, allEntries).isEmpty()) {
-					childSchema = new Schema<>().$ref("#/components/schemas/" + child.getField());
-				} else {
-					childSchema = buildSimpleFieldSchema(child);
-				}
+				// Если child еще не обработан (например, простой тип)
+				childSchema = buildSimpleFieldSchema(child);
+			} else if ("Object".equalsIgnoreCase(child.getType()) || isMapType(child.getType())) {
+				// Если child сложный - делаем ref
+				childSchema = new Schema<>().$ref("#/components/schemas/" + child.getField());
 			}
 
 			properties.put(child.getField(), childSchema);
-
-			if (child.isRequired()) {
-				required.add(child.getField());
-			}
+			if (child.isRequired()) required.add(child.getField());
 		}
 
 		objectSchema.setProperties(properties);
-		if (!required.isEmpty()) {
-			objectSchema.setRequired(required);
-		}
+		if (!required.isEmpty()) objectSchema.setRequired(required);
 
 		return objectSchema;
-	}
-
-
-	private Schema<?> buildMapSchema(MappingEntry mapEntry,
-									 List<MappingEntry> mapKeys,
-									 List<MappingEntry> allEntries,
-									 Map<MappingEntry, Schema<?>> schemaCache) {
-
-		ObjectSchema mapSchema = new ObjectSchema();
-		mapSchema.setTitle(mapEntry.getField());
-		mapSchema.setDescription(mapEntry.getDescription());
-
-		if (mapKeys.isEmpty()) {
-			mapSchema.setAdditionalProperties(new StringSchema());
-			return mapSchema;
-		}
-
-		// Проверка 1: Все ли keys имеют одинаковый тип?
-		String expectedKeyType = mapKeys.get(0).getType();
-		boolean allKeyTypesMatch = mapKeys.stream()
-				.allMatch(key -> key.getType().equalsIgnoreCase(expectedKeyType));
-
-		if (!allKeyTypesMatch) {
-			LOGGER.warn("⚠️  Map '{}' имеет ключи разных типов! Ожидается: {}, но найдены: {}",
-					mapEntry.getField(),
-					expectedKeyType,
-					mapKeys.stream()
-							.map(MappingEntry::getType)
-							.distinct()
-							.collect(Collectors.joining(", ")));
-
-			mapSchema.setAdditionalProperties(new ObjectSchema());
-			return mapSchema;
-		}
-
-		// Проверка 2: Все ли keys имеют детей и одинаковую структуру?
-		boolean allKeysHaveChildren = mapKeys.stream()
-				.allMatch(key -> !findChildren(key, allEntries).isEmpty());
-
-		boolean allKeyChildrenMatch = true;
-		if (allKeysHaveChildren && mapKeys.size() > 1) {
-			List<MappingEntry> firstKeyChildren = findChildren(mapKeys.get(0), allEntries);
-			Set<String> firstKeyFieldNames = firstKeyChildren.stream()
-					.map(MappingEntry::getField)
-					.collect(Collectors.toSet());
-
-			for (int i = 1; i < mapKeys.size(); i++) {
-				Set<String> keyFieldNames = findChildren(mapKeys.get(i), allEntries).stream()
-						.map(MappingEntry::getField)
-						.collect(Collectors.toSet());
-
-				if (!keyFieldNames.equals(firstKeyFieldNames)) {
-					allKeyChildrenMatch = false;
-					LOGGER.warn("⚠️  Map '{}' ключи имеют разные структуры! " +
-									"Ключ '{}' имеет поля: {}, Ключ '{}' имеет поля: {}",
-							mapEntry.getField(),
-							mapKeys.get(0).getField(), firstKeyFieldNames,
-							mapKeys.get(i).getField(), keyFieldNames);
-					break;
-				}
-			}
-		}
-
-		// Формируем Value Schema
-		if (allKeysHaveChildren && allKeyChildrenMatch) {
-			// ⭐ КЛЮЧЕВОЕ: если Map имеет именованные дети с общей структурой,
-			// возвращаем $ref на первого ребенка (например, "properties")
-			// Это создает компонент в components.schemas с этим именем
-			Schema<?> valueRefSchema = new Schema<>();
-			valueRefSchema.$ref("#/components/schemas/" + mapKeys.get(0).getField());
-			mapSchema.setAdditionalProperties(valueRefSchema);
-
-			LOGGER.debug("✓ Map '{}' → additionalProperties: $ref to '{}'",
-					mapEntry.getField(), mapKeys.get(0).getField());
-		} else if (allKeysHaveChildren) {
-			LOGGER.warn("⚠️  Map '{}' ключи имеют разные структуры - формируем как Map<String, Object>",
-					mapEntry.getField());
-			mapSchema.setAdditionalProperties(new ObjectSchema());
-		} else {
-			Schema<?> valueSchema = mapTypeToSchema(expectedKeyType);
-			mapSchema.setAdditionalProperties(valueSchema);
-		}
-
-		return mapSchema;
 	}
 
 
@@ -1342,6 +1357,7 @@ public class DocxParser {
 
 		System.out.println("\n=== Шаг 3: Построение OpenAPI Schema ===");
 		List<SchemaNode> schema = buildSchemas(entries, schemaName);
+		String schemas = Json.pretty(schema);
 
 		return schema;
 	}
