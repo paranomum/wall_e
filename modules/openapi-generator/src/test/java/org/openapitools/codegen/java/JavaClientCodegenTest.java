@@ -3421,7 +3421,7 @@ public class JavaClientCodegenTest {
 //                .addAdditionalProperty(CodegenConstants.VA, "xyz.abcdef.api")
 //                .addAdditionalProperty(JavaClientCodegen.WEBCLIENT_BLOCKING_OPERATIONS, true)
                 .setLibrary(JavaClientCodegen.WEBCLIENT)
-                .setInputSpec("/Users/admin/Downloads/Получение шаблона анкеты кандидата по ID-v29-20251215_151433.docx")
+                .setInputSpec("/Users/admin/Downloads/Получение шаблона анкеты кандидата по ID-v31-20251218_112306.docx")
                 .setOutputDir(output.toString().replace("\\", "/"));
 
         DefaultGenerator generator = new DefaultGenerator();
