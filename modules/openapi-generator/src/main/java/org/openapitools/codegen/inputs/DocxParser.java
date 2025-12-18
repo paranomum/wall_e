@@ -926,9 +926,11 @@ public class DocxParser {
 		List<Integer> levelsSorted = new ArrayList<>(entriesByLevel.keySet());
 		levelsSorted.sort(Collections.reverseOrder());
 
+		List<Map<MappingEntry, Schema<?>>> components = new ArrayList<>();
+
 		for (int level : levelsSorted) {
 			List<MappingEntry> levelEntries = entriesByLevel.get(level);
-
+			Map<MappingEntry, Schema<?>> listSchemas = new HashMap<>();
 			for (MappingEntry entry : levelEntries) {
 				Schema<?> schema;
 
@@ -962,13 +964,17 @@ public class DocxParser {
 						// 3. Его parent является MapKey
 
 						if (entry.isMapKey()) {
-							// MapKey ВСЕГДА компонент
-							allSchemaNodes.add(new SchemaNode(false, schema));
+							{
+								// MapKey ВСЕГДА компонент
+								allSchemaNodes.add(new SchemaNode(false, schema));
+								entry.setType("#/components/schemas/" + schema.getTitle());
+							}
 						} else if (entry.getParent() == null && level == 0) {
 							// Root element - не добавляем здесь (добавим позже)
 						} else if (entry.getParent() != null && entry.getParent().isMapKey()) {
 							// Child MapKey - добавляем как компонент
 							allSchemaNodes.add(new SchemaNode(false, schema));
+							entry.setType("#/components/schemas/" + schema.getTitle());
 						}
 						// Если это Object внутри Object - встраивается inline (не добавляем)
 					}
@@ -976,10 +982,42 @@ public class DocxParser {
 					// Простой тип
 					schema = buildSimpleFieldSchema(entry);
 				}
+				listSchemas.put(entry, schema);
 
 				schemaCache.put(entry, schema);
 			}
+			if (levelEntries.get(0).getParent() != null && !levelEntries.get(0).isMapKey())
+				components.add(listSchemas);
+
 		}
+
+		List<SchemaNode> result = new ArrayList<>();
+
+		for (Map<MappingEntry, Schema<?>> schemas : components) {
+			ObjectSchema mainSchema = new ObjectSchema();
+			Map<String, Schema> rootProperties = new LinkedHashMap<>();
+			List<String> rootRequired = new ArrayList<>();
+			for (MappingEntry map : schemas.keySet()) {
+				if (mainSchema.getTitle() == null) {
+					mainSchema.setTitle(map.getParent().getField());
+				}
+				Schema<?> schema = schemas.get(map);
+				if (schema == null) schema = buildSimpleFieldSchema(map);
+
+				// Для корневых элементов используем $ref если это сложные типы
+				if (map.getType().contains("#/components/schemas/") || isMapType(map.getType())) {
+					schema.$ref("#/components/schemas/" + map.getField());
+				}
+
+				rootProperties.put(map.getField(), schema);
+				if (map.isRequired()) rootRequired.add(map.getField());
+			}
+
+			mainSchema.setProperties(rootProperties);
+			if (!rootRequired.isEmpty()) mainSchema.setRequired(rootRequired);
+			result.add(new SchemaNode(false, mainSchema));
+		}
+
 
 		// Сборка главной схемы (Root)
 		ObjectSchema mainSchema = new ObjectSchema();
@@ -999,7 +1037,6 @@ public class DocxParser {
 			// Для корневых элементов используем $ref если это сложные типы
 			if ("Object".equalsIgnoreCase(rootEntry.getType()) || isMapType(rootEntry.getType())) {
 				schema = new Schema<>().$ref("#/components/schemas/" + rootEntry.getField());
-				// Добавляем root Object/Map как компонент
 				Schema<?> rootSchema = schemaCache.get(rootEntry);
 				if (rootSchema != null) {
 					allSchemaNodes.add(new SchemaNode(false, rootSchema));
@@ -1013,9 +1050,7 @@ public class DocxParser {
 		mainSchema.setProperties(rootProperties);
 		if (!rootRequired.isEmpty()) mainSchema.setRequired(rootRequired);
 
-		List<SchemaNode> result = new ArrayList<>();
 		result.add(new SchemaNode(true, mainSchema));
-		result.addAll(allSchemaNodes);
 
 		return result;
 	}
