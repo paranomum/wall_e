@@ -3412,4 +3412,34 @@ public class JavaClientCodegenTest {
                 "responseBody.isBlank()? null: memberVarObjectMapper.readValue(responseBody, new TypeReference<LocationData>() {})"
         );
     }
+
+    @Test
+    public void checkt() {
+        final Path output = newTempFolder();
+        final CodegenConfigurator configurator = new CodegenConfigurator()
+                .setGeneratorName("java")
+//                .addAdditionalProperty(CodegenConstants.VA, "xyz.abcdef.api")
+//                .addAdditionalProperty(JavaClientCodegen.WEBCLIENT_BLOCKING_OPERATIONS, true)
+                .setLibrary(JavaClientCodegen.WEBCLIENT)
+                .setInputSpec("/Users/admin/Downloads/Получение шаблона анкеты кандидата по ID-v29-20251215_151433.docx")
+                .setOutputDir(output.toString().replace("\\", "/"));
+
+        DefaultGenerator generator = new DefaultGenerator();
+        Map<String, File> files = generator.opts(configurator.toClientOptInput()).generate().stream()
+                .collect(Collectors.toMap(File::getName, Function.identity()));
+
+//        JavaFileAssert.assertThat(files.get("StoreApi.java"))
+//                .assertMethod("getInventory")
+//                .hasReturnType(
+//                        "Mono<Map<String, Integer>>") // explicit 'x-webclient-blocking: false' which overrides
+//                // global config
+//                .toFileAssert()
+//                .assertMethod("placeOrder")
+//                .hasReturnType("Order"); // use global config
+//
+//        JavaFileAssert.assertThat(files.get("PetApi.java"))
+//                .assertMethod("findPetsByStatus")
+//                .hasReturnType(
+//                        "List<Pet>"); // explicit 'x-webclient-blocking: true' which overrides global config
+    }
 }

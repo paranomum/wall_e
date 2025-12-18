@@ -145,6 +145,14 @@
                 <artifactId>maven-release-plugin</artifactId>
                 <version>${maven-release-plugin.version}</version>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>14</source>
+                    <target>14</target>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <profiles>
@@ -464,6 +472,12 @@
              <artifactId>snakeyaml</artifactId>
             <version>${snakeyaml.version}</version>
          </dependency>
+        <!-- POI для парсинга Word -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.2.3</version>
+        </dependency>
     </dependencies>
     <repositories>
         <repository>

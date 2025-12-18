@@ -34,6 +34,7 @@ import org.openapitools.codegen.*;
 import org.openapitools.codegen.api.TemplateDefinition;
 import org.openapitools.codegen.api.TemplatingEngineAdapter;
 import org.openapitools.codegen.auth.AuthParser;
+import org.openapitools.codegen.inputs.DocxInputConverter;
 import org.openapitools.codegen.utils.ModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -723,11 +724,19 @@ public class CodegenConfigurator {
         final List<AuthorizationValue> authorizationValues = AuthParser.parse(this.auth);
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        SwaggerParseResult result = new OpenAPIParser().readLocation(inputSpec, authorizationValues, options);
+
+        OpenAPI specification = null;
+        Set<String> validationMessages = new HashSet<>();
+
+        if (!inputSpec.endsWith(".docx")) {
+            SwaggerParseResult result = new OpenAPIParser().readLocation(inputSpec, authorizationValues, options);
+            validationMessages = new HashSet<>(null != result.getMessages() ? result.getMessages() : new ArrayList<>());
+            specification = result.getOpenAPI();
+        }
+        else
+            specification = new DocxInputConverter().convertDocxToOpenApiJson(inputSpec);
 
         // TODO: Move custom validations to a separate type as part of a "Workflow"
-        Set<String> validationMessages = new HashSet<>(null != result.getMessages() ? result.getMessages() : new ArrayList<>());
-        OpenAPI specification = result.getOpenAPI();
         // TODO: The line below could be removed when at least one of the issue below has been resolved.
         // https://github.com/swagger-api/swagger-parser/issues/1369
         // https://github.com/swagger-api/swagger-parser/pull/1374
