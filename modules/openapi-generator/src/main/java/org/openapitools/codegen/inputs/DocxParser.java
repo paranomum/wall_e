@@ -1,7 +1,5 @@
 package org.openapitools.codegen.inputs;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.swagger.v3.oas.models.*;
 import io.swagger.v3.oas.models.info.Info;
@@ -404,35 +402,6 @@ public class DocxParser {
 		return json.toString().trim();
 	}
 
-	/**
-	 * Ищет начало следующего заголовка после "Пример ответа сервиса"
-	 * Примитивно: ищем фразы "Мапинг", "Алгоритм работы", "Параметры запроса" и т.п.
-	 */
-	private int indexOfNextHeader(String text) {
-		int min = -1;
-
-		String[] markers = new String[] {
-				"Мапинг",
-				"Алгоритм работы",
-				"Параметры запроса",
-				"Общее описание",
-				"# ",
-				"## "
-		};
-
-		for (String marker : markers) {
-			int idx = text.indexOf(marker);
-			if (idx != -1 && idx > 0) {
-				if (min == -1 || idx < min) {
-					min = idx;
-				}
-			}
-		}
-
-		return min;
-	}
-
-
 
 	/**
 	 * Вспомогательный метод для извлечения всего текста из документа
@@ -516,19 +485,12 @@ public class DocxParser {
 
 		if (resultSchema != null) {
 			try {
-				LOGGER.debug("Создана главная Schema: ResultDto");
-				MediaType mediaType = new MediaType()
-						.schema(resultSchema);
-
-				Content content = new Content()
-						.addMediaType("application/json", mediaType);
-
+				Schema<?> refSchema = new Schema<>().$ref("#/components/schemas/" + resultSchema.getTitle());
+				MediaType mediaType = new MediaType().schema(refSchema);
+				Content content = new Content().addMediaType("application/json", mediaType);
 				successResponse.setContent(content);
-
 			} catch (Exception e) {
-				LOGGER.error("✗ Ошибка при преобразовании примера ответа: {}",
-						e.getMessage(), e);
-				// При ошибке возвращаем базовый ответ без схемы
+				LOGGER.error("✗ Ошибка при установке схемы ответа: {}", e.getMessage(), e);
 			}
 		}
 
@@ -543,41 +505,6 @@ public class DocxParser {
 		}
 
 		return responses;
-	}
-
-	private Schema<?> generateSchemaFromJson(String json) throws Exception {
-		Map<String, Object> parsed = objectMapper.readValue(json, Map.class);
-		return mapJsonToSchema(parsed);
-	}
-
-	private Schema<?> mapJsonToSchema(Object obj) {
-		Schema<?> schema = new Schema<>();
-
-		if (obj instanceof Map) {
-			schema.setType("object");
-			Map<String, Object> map = (Map<String, Object>) obj;
-			map.forEach((key, value) -> {
-				schema.addProperties(key, mapJsonToSchema(value));
-			});
-		} else if (obj instanceof List) {
-			schema.setType("array");
-			List<?> list = (List<?>) obj;
-			if (!list.isEmpty()) {
-				schema.setItems(mapJsonToSchema(list.get(0)));
-			}
-		} else if (obj instanceof String) {
-			schema.setType("string");
-		} else if (obj instanceof Integer) {
-			schema.setType("integer");
-		} else if (obj instanceof Double) {
-			schema.setType("number");
-		} else if (obj instanceof Boolean) {
-			schema.setType("boolean");
-		} else {
-			schema.setType("object");
-		}
-
-		return schema;
 	}
 
 	private String mapType(String docxType) {
@@ -640,493 +567,6 @@ public class DocxParser {
 		cleaned = cleaned.trim();
 
 		return cleaned;
-	}
-
-	/**
-	 * Пытается "залечить" неполный JSON, добавляя недостающие закрывающие скобки.
-	 * Это нужно для JSON, который был обрезан при вытаскивании из документа.
-	 */
-	private static String fixIncompleteJson(String json) {
-		if (json == null || json.isEmpty()) {
-			return json;
-		}
-
-		int openBraces = 0;
-		int openBrackets = 0;
-		int openParens = 0;
-		boolean inString = false;
-		boolean escaped = false;
-
-		// Считаем открытые и закрытые скобки
-		for (int i = 0; i < json.length(); i++) {
-			char c = json.charAt(i);
-
-			if (escaped) {
-				escaped = false;
-				continue;
-			}
-
-			if (c == '\\') {
-				escaped = true;
-				continue;
-			}
-
-			if (c == '"' && !escaped) {
-				inString = !inString;
-				continue;
-			}
-
-			if (inString) {
-				continue;
-			}
-
-			if (c == '{') openBraces++;
-			else if (c == '}') openBraces--;
-			else if (c == '[') openBrackets++;
-			else if (c == ']') openBrackets--;
-			else if (c == '(') openParens++;
-			else if (c == ')') openParens--;
-		}
-
-		// Добавляем недостающие закрывающие скобки
-		StringBuilder fixed = new StringBuilder(json);
-
-		for (int i = 0; i < openBraces; i++) {
-			fixed.append("}");
-		}
-		for (int i = 0; i < openBrackets; i++) {
-			fixed.append("]");
-		}
-		for (int i = 0; i < openParens; i++) {
-			fixed.append(")");
-		}
-
-		return fixed.toString();
-	}
-
-	/**
-	 * Преобразует JSON строку (результат extractResponse) в Map компонентов OpenAPI Schema.
-	 *
-	 * @param jsonResponse JSON строка из документа
-	 * @return Map<String, Schema> где ключ - имя компонента, значение - Schema
-	 */
-	public Map<String, Schema> convertJsonToOpenApiComponents(String jsonResponse) {
-		Map<String, Schema> components = new LinkedHashMap<>();
-
-		try {
-			// Очищаем JSON от скрытых символов и неправильного форматирования
-			String cleanedJson = fixIncompleteJson(cleanJsonString(jsonResponse));
-
-			JsonNode rootNode = objectMapper.readTree(cleanedJson);
-			JsonNode resultNode = rootNode.get("result");
-
-			if (resultNode == null) {
-				return components;
-			}
-
-			JsonNode templateNode = resultNode.get("template");
-
-			if (templateNode == null) {
-				return components;
-			}
-
-			// Создаём главную Schema для template
-			Schema templateSchema = createSchemaFromNode(templateNode, "TemplateDto");
-			components.put("TemplateDto", templateSchema);
-
-			// Обрабатываем properties верхнего уровня (секции)
-			JsonNode propertiesNode = templateNode.get("properties");
-			if (propertiesNode != null && propertiesNode.isObject()) {
-				Iterator<String> fieldNames = propertiesNode.fieldNames();
-				while (fieldNames.hasNext()) {
-					String sectionName = fieldNames.next();
-					JsonNode sectionNode = propertiesNode.get(sectionName);
-
-					// Создаём Schema для каждой секции
-					String sectionDtoName = toPascalCase(sectionName) + "Dto";
-					Schema sectionSchema = createSchemaFromNode(sectionNode, sectionDtoName);
-					components.put(sectionDtoName, sectionSchema);
-
-					// Обрабатываем вложенные свойства секции (поля)
-					JsonNode sectionPropertiesNode = sectionNode.get("properties");
-					if (sectionPropertiesNode != null && sectionPropertiesNode.isObject()) {
-						Iterator<String> fieldNamesInSection = sectionPropertiesNode.fieldNames();
-						while (fieldNamesInSection.hasNext()) {
-							String fieldName = fieldNamesInSection.next();
-							JsonNode fieldNode = sectionPropertiesNode.get(fieldName);
-
-							// Обрабатываем вложенные структуры в полях
-							extractNestedStructures(fieldNode, components, sectionDtoName);
-						}
-					}
-				}
-			}
-
-		} catch (Exception e) {
-			throw new RuntimeException("Ошибка при парсинге JSON: " + e.getMessage(), e);
-		}
-
-		return components;
-	}
-
-	/**
-	 * Рекурсивно извлекает вложенные структуры (errorMessage, items, prefilledValue и т.д.)
-	 */
-	private static void extractNestedStructures(JsonNode fieldNode, Map<String, Schema> components,
-												String parentDtoName) {
-		if (fieldNode == null || !fieldNode.isObject()) {
-			return;
-		}
-
-		// Проверяем errorMessage
-		JsonNode errorMessageNode = fieldNode.get("errorMessage");
-		if (errorMessageNode != null && errorMessageNode.isObject()) {
-			String errorMessageDtoName = "ErrorMessageDto";
-			if (!components.containsKey(errorMessageDtoName)) {
-				Schema errorMessageSchema = createSchemaFromNode(errorMessageNode, errorMessageDtoName);
-				components.put(errorMessageDtoName, errorMessageSchema);
-			}
-		}
-
-		// Проверяем items (для array типов)
-		JsonNode itemsNode = fieldNode.get("items");
-		if (itemsNode != null && itemsNode.isObject()) {
-			String itemsDtoName = "ItemsDto";
-			if (!components.containsKey(itemsDtoName)) {
-				Schema itemsSchema = createSchemaFromNode(itemsNode, itemsDtoName);
-				components.put(itemsDtoName, itemsSchema);
-
-				// Проверяем errorMessage внутри items
-				JsonNode itemsErrorMessageNode = itemsNode.get("errorMessage");
-				if (itemsErrorMessageNode != null && itemsErrorMessageNode.isObject()) {
-					String itemsErrorMessageDtoName = "ItemsErrorMessageDto";
-					if (!components.containsKey(itemsErrorMessageDtoName)) {
-						Schema itemsErrorMessageSchema = createSchemaFromNode(itemsErrorMessageNode,
-								itemsErrorMessageDtoName);
-						components.put(itemsErrorMessageDtoName, itemsErrorMessageSchema);
-					}
-				}
-			}
-		}
-
-		// Проверяем prefilledValue (если это object)
-		JsonNode prefilledValueNode = fieldNode.get("prefilledValue");
-		if (prefilledValueNode != null && prefilledValueNode.isObject()) {
-			String prefilledValueDtoName = "PrefilledValueDto";
-			if (!components.containsKey(prefilledValueDtoName)) {
-				Schema prefilledValueSchema = createSchemaFromNode(prefilledValueNode, prefilledValueDtoName);
-				components.put(prefilledValueDtoName, prefilledValueSchema);
-			}
-		}
-	}
-
-	/**
-	 * Создаёт Schema из JsonNode.
-	 */
-	private static Schema createSchemaFromNode(JsonNode node, String dtoName) {
-		Schema schema = new Schema<>();
-
-		// Устанавливаем title (имя DTO)
-		schema.setTitle(dtoName);
-
-		// Обрабатываем основные свойства
-		if (node.has("type")) {
-			schema.setType(node.get("type").asText());
-		}
-
-		if (node.has("title")) {
-			String title = node.get("title").asText();
-			// Если title не совпадает с dtoName, устанавливаем его как description
-			if (!title.equals(dtoName)) {
-				schema.setDescription(title);
-			}
-		}
-
-		if (node.has("description")) {
-			schema.setDescription(node.get("description").asText());
-		}
-
-		// Обрабатываем required
-		if (node.has("required") && node.get("required").isArray()) {
-			List<String> required = new ArrayList<>();
-			node.get("required").forEach(item -> required.add(item.asText()));
-			schema.setRequired(required);
-		}
-
-		// Обрабатываем properties
-		if (node.has("properties") && node.get("properties").isObject()) {
-			Map<String, Schema> properties = new LinkedHashMap<>();
-			JsonNode propertiesNode = node.get("properties");
-
-			Iterator<String> fieldNames = propertiesNode.fieldNames();
-			while (fieldNames.hasNext()) {
-				String fieldName = fieldNames.next();
-				JsonNode fieldNode = propertiesNode.get(fieldName);
-
-				Schema propertySchema = new Schema<>();
-				buildPropertySchema(fieldNode, propertySchema);
-				properties.put(fieldName, propertySchema);
-			}
-
-			schema.setProperties(properties);
-		}
-
-		// Обрабатываем items (для array типов)
-		if (node.has("items") && node.get("items").isObject()) {
-			Schema itemsSchema = new Schema<>();
-			JsonNode itemsNode = node.get("items");
-			buildPropertySchema(itemsNode, itemsSchema);
-			schema.setItems(itemsSchema);
-		}
-
-		// Обрабатываем числовые ограничения
-		if (node.has("minLength")) {
-			schema.setMinLength(node.get("minLength").asInt());
-		}
-		if (node.has("maxLength")) {
-			schema.setMaxLength(node.get("maxLength").asInt());
-		}
-		if (node.has("minItems")) {
-			schema.setMinItems(node.get("minItems").asInt());
-		}
-		if (node.has("maxItems")) {
-			schema.setMaxItems(node.get("maxItems").asInt());
-		}
-
-		// Обрабатываем паттерны и форматы
-		if (node.has("pattern")) {
-			schema.setPattern(node.get("pattern").asText());
-		}
-		if (node.has("format")) {
-			schema.setFormat(node.get("format").asText());
-		}
-
-		// Обрабатываем пользовательские свойства
-		addCustomProperties(node, schema);
-
-		return schema;
-	}
-
-	/**
-	 * Строит Schema для свойства, обрабатывая все стандартные JSON Schema поля.
-	 */
-	private static void buildPropertySchema(JsonNode fieldNode, Schema schema) {
-		if (fieldNode == null || !fieldNode.isObject()) {
-			return;
-		}
-
-		// Базовые типы
-		if (fieldNode.has("type")) {
-			schema.setType(fieldNode.get("type").asText());
-		}
-
-		// Метаданные
-		if (fieldNode.has("title")) {
-			schema.setTitle(fieldNode.get("title").asText());
-		}
-		if (fieldNode.has("description")) {
-			schema.setDescription(fieldNode.get("description").asText());
-		}
-
-		// Ограничения строк
-		if (fieldNode.has("minLength")) {
-			schema.setMinLength(fieldNode.get("minLength").asInt());
-		}
-		if (fieldNode.has("maxLength")) {
-			schema.setMaxLength(fieldNode.get("maxLength").asInt());
-		}
-		if (fieldNode.has("pattern")) {
-			schema.setPattern(fieldNode.get("pattern").asText());
-		}
-
-		// Ограничения массивов
-		if (fieldNode.has("minItems")) {
-			schema.setMinItems(fieldNode.get("minItems").asInt());
-		}
-		if (fieldNode.has("maxItems")) {
-			schema.setMaxItems(fieldNode.get("maxItems").asInt());
-		}
-
-		// Форматы
-		if (fieldNode.has("format")) {
-			schema.setFormat(fieldNode.get("format").asText());
-		}
-
-		// Вложенные items для array типов
-		if (fieldNode.has("items") && fieldNode.get("items").isObject()) {
-			Schema itemsSchema = new Schema<>();
-			buildPropertySchema(fieldNode.get("items"), itemsSchema);
-			schema.setItems(itemsSchema);
-		}
-
-		// Вложенные properties для object типов
-		if (fieldNode.has("properties") && fieldNode.get("properties").isObject()) {
-			Map<String, Schema> properties = new LinkedHashMap<>();
-			JsonNode propertiesNode = fieldNode.get("properties");
-
-			Iterator<String> fieldNames = propertiesNode.fieldNames();
-			while (fieldNames.hasNext()) {
-				String fieldName = fieldNames.next();
-				JsonNode propNode = propertiesNode.get(fieldName);
-
-				Schema propSchema = new Schema<>();
-				buildPropertySchema(propNode, propSchema);
-				properties.put(fieldName, propSchema);
-			}
-
-			schema.setProperties(properties);
-		}
-
-		// Обработка required для objects
-		if (fieldNode.has("required") && fieldNode.get("required").isArray()) {
-			List<String> required = new ArrayList<>();
-			fieldNode.get("required").forEach(item -> required.add(item.asText()));
-			schema.setRequired(required);
-		}
-
-		// Пользовательские свойства (uiType, dictionaryType и т.д.)
-		addCustomProperties(fieldNode, schema);
-	}
-
-	/**
-	 * Добавляет пользовательские свойства в Schema (расширения для UI).
-	 */
-	private static void addCustomProperties(JsonNode node, Schema schema) {
-		Map<String, Object> extensions = new HashMap<>();
-
-		// uiType - тип UI элемента
-		if (node.has("uiType")) {
-			extensions.put("x-ui-type", node.get("uiType").asText());
-		}
-
-		// Свойства Dictionary
-		if (node.has("dictionaryType")) {
-			extensions.put("x-dictionary-type", node.get("dictionaryType").asText());
-		}
-		if (node.has("dictionaryAlias")) {
-			extensions.put("x-dictionary-alias", node.get("dictionaryAlias").asText());
-		}
-
-		// Файловые свойства
-		if (node.has("multi")) {
-			extensions.put("x-multi", node.get("multi").asBoolean());
-		}
-		if (node.has("maxFileSize")) {
-			extensions.put("x-max-file-size", node.get("maxFileSize").asLong());
-		}
-		if (node.has("contentMediaType")) {
-			extensions.put("x-content-media-type", node.get("contentMediaType").asText());
-		}
-
-		// UI форматы
-		if (node.has("uiFormat")) {
-			extensions.put("x-ui-format", node.get("uiFormat").asText());
-		}
-
-		// Предзаполненные значения
-		if (node.has("prefilledValue")) {
-			JsonNode prefilledNode = node.get("prefilledValue");
-			if (prefilledNode.isTextual()) {
-				extensions.put("x-prefilled-value", prefilledNode.asText());
-			} else if (prefilledNode.isObject()) {
-				extensions.put("x-prefilled-value", prefilledNode.toString());
-			}
-		}
-
-		// Сообщения об ошибках
-		if (node.has("errorMessage") && node.get("errorMessage").isObject()) {
-			extensions.put("x-error-message", node.get("errorMessage").toString());
-		}
-
-		// Добавляем расширения в Schema
-		if (!extensions.isEmpty()) {
-			extensions.forEach((key, value) -> schema.addExtension(key, value));
-		}
-	}
-
-	private Schema generateResultSchema(String jsonResponse) {
-		Schema resultSchema = new Schema<>();
-
-		try {
-			String cleanedJson = fixIncompleteJson(cleanJsonString(jsonResponse));
-
-			JsonNode rootNode = objectMapper.readTree(cleanedJson);
-			JsonNode resultNode = rootNode.get("result");
-
-			if (resultNode == null) {
-				return resultSchema;
-			}
-
-			resultSchema.setType("object");
-			resultSchema.setTitle("ResultDto");
-			resultSchema.setDescription("Результат запроса шаблона анкеты кандидата");
-
-			Map<String, Schema> resultProperties = new LinkedHashMap<>();
-
-			// Свойство id
-			if (resultNode.has("id")) {
-				Schema idSchema = new Schema<>();
-				idSchema.setType("string");
-				idSchema.setTitle("id");
-				idSchema.setDescription("Уникальный идентификатор результата");
-				resultProperties.put("id", idSchema);
-			}
-
-			// Свойство template - это ссылка на компонент TemplateDto
-			if (resultNode.has("template")) {
-				Schema templateRefSchema = new Schema<>();
-				templateRefSchema.set$ref("#/components/schemas/TemplateDto");
-				resultProperties.put("template", templateRefSchema);
-			}
-
-			resultSchema.setProperties(resultProperties);
-			resultSchema.setRequired(Arrays.asList("id", "template"));
-
-		} catch (Exception e) {
-			throw new RuntimeException("Ошибка при генерации Result Schema: " + e.getMessage(), e);
-		}
-
-		return resultSchema;
-	}
-
-	/**
-	 * Конвертирует camelCase или snake_case в PascalCase.
-	 * Пример: "candidate_basics" -> "CandidateBasics", "candidateBasics" -> "CandidateBasics"
-	 */
-	private static String toPascalCase(String input) {
-		if (input == null || input.isEmpty()) {
-			return input;
-		}
-
-		String[] words;
-
-		// Если есть подчеркивания - разбиваем по ним
-		if (input.contains("_")) {
-			words = input.split("_");
-		} else {
-			// Иначе разбиваем по заглавным буквам в camelCase
-			words = input.split("(?=[A-Z])");
-		}
-
-		StringBuilder result = new StringBuilder();
-		for (String word : words) {
-			if (word.isEmpty()) continue;
-			result.append(word.substring(0, 1).toUpperCase(Locale.ROOT))
-					.append(word.substring(1).toLowerCase(Locale.ROOT));
-		}
-
-		return result.toString();
-	}
-
-	/**
-	 * Парсит DOCX файл и извлекает все таблицы маппинга
-	 */
-	public List<MappingEntry> parseDocument(String filePath) throws IOException {
-		try (FileInputStream fis = new FileInputStream(filePath);
-			 XWPFDocument document = new XWPFDocument(fis)) {
-
-			return extractMappingRules(document);
-		}
 	}
 
 	/**
@@ -1204,6 +644,20 @@ public class DocxParser {
 			// Определяем родителя на основе уровня вложенности
 			MappingEntry parent = determineParent(nestLevel, previousEntries);
 			entry.setParent(parent);
+			entry.setMapKey(false);
+
+			if (entry.getParent() != null) {
+				if (entry.getParent().getType().contains("Map")) {
+					String getKey = entry.getParent().getType().split(",")[0];
+					getKey = getKey.substring(4);
+					System.out.println(getKey);
+					if (getKey.toLowerCase(Locale.ROOT).trim().equals(entry.getType().toLowerCase(Locale.ROOT).trim()))
+						entry.setMapKey(true);
+					else {
+						LOGGER.warn("MAP DETECTED BUT WITH AN ERROR");
+					}
+				}
+			}
 
 			return entry;
 
@@ -1348,129 +802,22 @@ public class DocxParser {
 	}
 
 	/**
-	 * Сериализация в красивый JSON строку
-	 */
-	private String serializeToJson(Object object) {
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			// Включаем pretty-print (отступы)
-			mapper.enable(SerializationFeature.INDENT_OUTPUT);
-			return mapper.writeValueAsString(object);
-		} catch (Exception e) {
-			throw new RuntimeException("Ошибка при создании JSON", e);
-		}
-	}
-
-	public List<MappingEntry> parseTable(String filePath, int tableIndex) throws IOException {
-		List<MappingEntry> entries = new ArrayList<>();
-
-		try (FileInputStream fis = new FileInputStream(filePath);
-			 XWPFDocument document = new XWPFDocument(fis)) {
-
-			if (document.getTables().size() <= tableIndex) {
-				throw new IllegalArgumentException("Таблица с индексом " + tableIndex + " не найдена");
-			}
-
-			XWPFTable table = document.getTables().get(tableIndex);
-
-			// Пропускаем заголовок (первая строка)
-			for (int i = 1; i < table.getRows().size(); i++) {
-				XWPFTableRow row = table.getRows().get(i);
-
-				if (row.getTableCells().size() < 5) {
-					continue;
-				}
-
-				MappingEntry entry = parseRow(row, entries);
-				if (entry != null) {
-					entries.add(entry);
-				}
-			}
-		}
-
-		return entries;
-	}
-
-	private MappingEntry parseRow(XWPFTableRow row, List<MappingEntry> previousEntries) {
-		try {
-			String field = getCellText(row, 0).trim();
-			String type = getCellText(row, 1).trim();
-			String description = getCellText(row, 2).trim();
-			String obligatory = getCellText(row, 3).trim();
-			String mappingRule = getCellText(row, 4).trim();
-
-			if (field.isEmpty()) {
-				return null;
-			}
-
-			boolean required = "да".equalsIgnoreCase(obligatory) || "true".equalsIgnoreCase(obligatory);
-
-			// Определяем родителя для вложенных полей
-			MappingEntry parent = detectParent(field, previousEntries);
-
-			// Очищаем название поля (удаляем точки если это вложенное поле)
-			String cleanField = extractFieldName(field);
-
-			return new MappingEntry(
-					cleanField,
-					type,
-					description,
-					required,
-					mappingRule,
-					parent
-			);
-		} catch (Exception e) {
-			System.err.println("Ошибка при парсинге строки: " + e.getMessage());
-			return null;
-		}
-	}
-
-	private String getCellText(XWPFTableRow row, int cellIndex) {
-		if (row.getTableCells().size() <= cellIndex) {
-			return "";
-		}
-		return row.getTableCells().get(cellIndex).getText();
-	}
-
-	/**
-	 * Определяет родительский элемент по отступу или иерархии
-	 */
-	private MappingEntry detectParent(String field, List<MappingEntry> previousEntries) {
-		// Если поле начинается с точки или имеет отступ - это вложенное поле
-		if (field.startsWith(".")) {
-			if (!previousEntries.isEmpty()) {
-				return previousEntries.get(previousEntries.size() - 1);
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Извлекает имя поля, удаляя служебные символы
-	 */
-	private String extractFieldName(String field) {
-		return field.replaceAll("^\\s*\\.+\\s*", "").trim();
-	}
-
-	/**
 	 * Строит список SchemaNode (bottom-up).
 	 * main = true ТОЛЬКО для root элементов (parent == null).
 	 * Вложенные Object/Map остаются ИНЛАЙН в root schema.
 	 */
 	public List<SchemaNode> buildSchemas(List<MappingEntry> entries, String mainSchemaName) {
-		// 1. Сортируем записи по глубине (от самых глубоких к корневым)
 		List<MappingEntry> sortedByDepth = entries.stream()
 				.sorted((a, b) -> Integer.compare(b.getDepthLevel(), a.getDepthLevel()))
 				.collect(Collectors.toList());
 
-		// 2. Группируем по уровню вложенности
 		Map<Integer, List<MappingEntry>> entriesByLevel = new LinkedHashMap<>();
 		for (MappingEntry entry : sortedByDepth) {
 			int level = entry.getDepthLevel();
 			entriesByLevel.computeIfAbsent(level, k -> new ArrayList<>()).add(entry);
 		}
 
-		System.out.println("\n=== Построение SchemaNodes (bottom-up) ===");
+		System.out.println("\n=== Построение SchemaNodes (с отдельными schemas) ===");
 		System.out.println("Всего entries: " + entries.size());
 		System.out.println("Всего уровней: " + entriesByLevel.size());
 
@@ -1478,49 +825,63 @@ public class DocxParser {
 			System.out.println("  Уровень " + levelEntry.getKey() + ": " + levelEntry.getValue().size() + " записей");
 		}
 
-		// 3. Кэш для уже построенных Schema
 		Map<MappingEntry, Schema<?>> schemaCache = new LinkedHashMap<>();
+		List<SchemaNode> allSchemaNodes = new ArrayList<>();
 
-		// 4. Проходим по уровням от самых глубоких к корневым
 		List<Integer> levelsSorted = sortedByLevel(entriesByLevel.keySet());
 
 		for (int level : levelsSorted) {
 			List<MappingEntry> levelEntries = entriesByLevel.get(level);
+			System.out.println("\n--- Обработка уровня: " + level + " ---");
 
-			System.out.println("\n--- Обработка уровня вложенности: " + level + " ---");
 
 			for (MappingEntry entry : levelEntries) {
-				Schema<?> schema = buildEntrySchema(entry, entries, schemaCache);
+				Schema<?> schema;
+
+				if ("Object".equalsIgnoreCase(entry.getType()) || isMapType(entry.getType())) {
+					schema = buildObjectOrMapSchema(entry, entries, schemaCache, entriesByLevel);
+					String marker = isMapType(entry.getType()) ? "[Map]" : "[Object]";
+					System.out.println("  ✓ " + marker + " " + entry.getField() +
+							(entry.getParent() != null ? " → parent: " + entry.getParent().getField() : " (ROOT)"));
+
+					if (level > 0 && entry.getParent() != null) {
+						allSchemaNodes.add(new SchemaNode(false, schema));
+						System.out.println("    → Добавлена как intermediate SchemaNode");
+					}
+				} else {
+					schema = buildSimpleFieldSchema(entry);
+					System.out.println("  ✓ [" + entry.getType() + "] " + entry.getField() +
+							(entry.getParent() != null ? " → parent: " + entry.getParent().getField() : " (ROOT)"));
+				}
+
 				schemaCache.put(entry, schema);
-
-				String parentInfo = entry.getParent() != null ?
-						" → parent: " + entry.getParent().getField() : "";
-				String requiredMark = entry.isRequired() ? " *" : "";
-
-				System.out.println("  ✓ " + entry.getField() +
-						" [" + entry.getType() + "]" + requiredMark + parentInfo);
 			}
 		}
 
-		// 5. Собираем root schema из root элементов (ТОЛЬКО они становятся SchemaNode)
-		System.out.println("\n--- Построение root schema '" + mainSchemaName + "' ---");
+		System.out.println("\n--- Сборка главной схемы (root элементы с $ref) ---");
 
 		Map<String, Schema> rootProperties = new LinkedHashMap<>();
 		List<String> rootRequired = new ArrayList<>();
 
 		List<MappingEntry> rootEntries = entries.stream()
-				.filter(e -> e.getParent() == null)
+				.filter(e -> e.getParent() == null && e.getDepthLevel() == 0)
 				.sorted(Comparator.comparing(MappingEntry::getField))
 				.collect(Collectors.toList());
 
+		System.out.println("Найдено root элементов: " + rootEntries.size());
+
 		for (MappingEntry rootEntry : rootEntries) {
-			Schema<?> schema = schemaCache.getOrDefault(rootEntry,
-					buildEntrySchema(rootEntry, entries, schemaCache));
+			Schema<?> schema = schemaCache.get(rootEntry);
+			if (schema == null) {
+				schema = buildSimpleFieldSchema(rootEntry);
+			} else if ("Object".equalsIgnoreCase(rootEntry.getType()) || isMapType(rootEntry.getType())) {
+				String refName = rootEntry.getField();
+				schema = new Schema<>().$ref("#/components/schemas/" + refName);
+				System.out.println("    → Используется $ref на: " + refName);
+			}
 
-			// Для root элементов просто добавляем их schema инлайн
 			rootProperties.put(rootEntry.getField(), schema);
-
-			System.out.println("  ✓ " + rootEntry.getField() +
+			System.out.println("  ✓ " + rootEntry.getField() + " [" + rootEntry.getType() + "]" +
 					(rootEntry.isRequired() ? " *" : ""));
 
 			if (rootEntry.isRequired()) {
@@ -1528,17 +889,25 @@ public class DocxParser {
 			}
 		}
 
-		ObjectSchema rootSchema = new ObjectSchema();
-		rootSchema.setTitle(mainSchemaName);
-		rootSchema.setProperties(rootProperties);
+		ObjectSchema mainSchema = new ObjectSchema();
+		mainSchema.setTitle(mainSchemaName);
+		mainSchema.setProperties(rootProperties);
 		if (!rootRequired.isEmpty()) {
-			rootSchema.setRequired(rootRequired);
+			mainSchema.setRequired(rootRequired);
 		}
 
-		// 6. Результат: только ONE root SchemaNode с main=true
 		List<SchemaNode> result = new ArrayList<>();
-		SchemaNode mainNode = new SchemaNode(true, rootSchema);
-		result.add(mainNode);
+		result.add(new SchemaNode(true, mainSchema));
+
+		for (Map.Entry<MappingEntry, Schema<?>> cacheEntry : schemaCache.entrySet()) {
+			Schema<?> schema = cacheEntry.getValue();
+			// Если это Object или Map (не simple field)
+			if ("Object".equalsIgnoreCase(cacheEntry.getKey().getType())
+					|| isMapType(cacheEntry.getKey().getType())) {
+				result.add(new SchemaNode(false, schema));
+				System.out.println("  [Intermediate] " + schema.getTitle());
+			}
+		}
 
 		System.out.println("\n✅ Результат: " + result.size() + " SchemaNode(s)");
 		System.out.println("  [MAIN] " + mainSchemaName);
@@ -1546,88 +915,150 @@ public class DocxParser {
 		return result;
 	}
 
-	/** Старый метод buildSchema переименовываем во внутренний */
-	private Schema<?> buildRootSchema(List<MappingEntry> entries, String schemaName) {
-		ObjectSchema rootSchema = new ObjectSchema();
-		rootSchema.setTitle(schemaName);
+	/**
+	 * Строит Schema для Object или Map, группируя его children.
+	 */
+	private Schema<?> buildObjectOrMapSchema(MappingEntry entry,
+											 List<MappingEntry> allEntries,
+											 Map<MappingEntry, Schema<?>> schemaCache,
+											 Map<Integer, List<MappingEntry>> entriesByLevel) {
 
-		// ===== ниженаписанный код – это твой текущий bottom-up buildSchema
-		// просто перенесён внутрь buildRootSchema БЕЗ изменений =====
+		List<MappingEntry> children = findChildren(entry, allEntries);
 
-		// Шаг 1: Сортируем записи по глубине (от самых глубоких к корневым)
-		List<MappingEntry> sortedByDepth = entries.stream()
-				.sorted((a, b) -> Integer.compare(b.getDepthLevel(), a.getDepthLevel()))
-				.collect(Collectors.toList());
-
-		// Шаг 2: Группируем по уровню вложенности
-		Map<Integer, List<MappingEntry>> entriesByLevel = new LinkedHashMap<>();
-		for (MappingEntry entry : sortedByDepth) {
-			int level = entry.getDepthLevel();
-			entriesByLevel.computeIfAbsent(level, k -> new ArrayList<>()).add(entry);
+		if (isMapType(entry.getType())) {
+			return buildMapSchema(entry, children, allEntries, schemaCache);
 		}
 
-		System.out.println("\n=== Построение Schema (bottom-up) ===");
-		System.out.println("Всего entries: " + entries.size());
-		System.out.println("Всего уровней: " + entriesByLevel.size());
+		ObjectSchema objectSchema = new ObjectSchema();
+		objectSchema.setTitle(entry.getField());
+		objectSchema.setDescription(entry.getDescription());
 
-		for (Map.Entry<Integer, List<MappingEntry>> levelEntry : entriesByLevel.entrySet()) {
-			System.out.println("  Уровень " + levelEntry.getKey() + ": " + levelEntry.getValue().size() + " записей");
-		}
+		Map<String, Schema> properties = new LinkedHashMap<>();
+		List<String> required = new ArrayList<>();
 
-		// Шаг 3: Кэш для уже построенных Schema
-		Map<MappingEntry, Schema<?>> schemaCache = new LinkedHashMap<>();
+		for (MappingEntry child : children) {
+			Schema<?> childSchema = schemaCache.get(child);
 
-		// Шаг 4: Проходим по уровням от самых глубоких к корневым
-		List<Integer> levelsSorted = sortedByLevel(entriesByLevel.keySet());
+			if (childSchema == null) {
+				if (("Object".equalsIgnoreCase(child.getType()) || isMapType(child.getType()))
+						&& !findChildren(child, allEntries).isEmpty()) {
+					childSchema = new Schema<>().$ref("#/components/schemas/" + child.getField());
+				} else {
+					childSchema = buildSimpleFieldSchema(child);
+				}
+			}
 
-		for (int level : levelsSorted) {
-			List<MappingEntry> levelEntries = entriesByLevel.get(level);
+			properties.put(child.getField(), childSchema);
 
-			System.out.println("\n--- Обработка уровня вложенности: " + level + " ---");
-
-			for (MappingEntry entry : levelEntries) {
-				Schema<?> schema = buildEntrySchema(entry, entries, schemaCache);
-				schemaCache.put(entry, schema);
-
-				String parentInfo = entry.getParent() != null ?
-						" → parent: " + entry.getParent().getField() : "";
-				String requiredMark = entry.isRequired() ? " *" : "";
-
-				System.out.println("  ✓ " + entry.getField() +
-						" [" + entry.getType() + "]" + requiredMark + parentInfo);
+			if (child.isRequired()) {
+				required.add(child.getField());
 			}
 		}
 
-		// Шаг 5: Собираем корневую схему из root элементов
-		Map<String, Schema> rootProperties = new LinkedHashMap<>();
-		List<String> rootRequired = new ArrayList<>();
+		objectSchema.setProperties(properties);
+		if (!required.isEmpty()) {
+			objectSchema.setRequired(required);
+		}
 
-		List<MappingEntry> rootEntries = entries.stream()
-				.filter(e -> e.getParent() == null)
-				.sorted(Comparator.comparing(MappingEntry::getField))
-				.collect(Collectors.toList());
+		return objectSchema;
+	}
 
-		System.out.println("\n--- Сборка root schema (" + rootEntries.size() + " полей) ---");
 
-		for (MappingEntry rootEntry : rootEntries) {
-			Schema<?> schema = schemaCache.getOrDefault(rootEntry,
-					buildEntrySchema(rootEntry, entries, schemaCache));
-			rootProperties.put(rootEntry.getField(), schema);
+	private Schema<?> buildMapSchema(MappingEntry mapEntry,
+									 List<MappingEntry> mapKeys,
+									 List<MappingEntry> allEntries,
+									 Map<MappingEntry, Schema<?>> schemaCache) {
 
-			System.out.println("  ✓ " + rootEntry.getField() +
-					(rootEntry.isRequired() ? " *" : ""));
+		ObjectSchema mapSchema = new ObjectSchema();
+		mapSchema.setTitle(mapEntry.getField());
+		mapSchema.setDescription(mapEntry.getDescription());
 
-			if (rootEntry.isRequired()) {
-				rootRequired.add(rootEntry.getField());
+		if (mapKeys.isEmpty()) {
+			mapSchema.setAdditionalProperties(new StringSchema());
+			return mapSchema;
+		}
+
+		// Проверка 1: Все ли keys имеют одинаковый тип?
+		String expectedKeyType = mapKeys.get(0).getType();
+		boolean allKeyTypesMatch = mapKeys.stream()
+				.allMatch(key -> key.getType().equalsIgnoreCase(expectedKeyType));
+
+		if (!allKeyTypesMatch) {
+			LOGGER.warn("⚠️  Map '{}' имеет ключи разных типов! Ожидается: {}, но найдены: {}",
+					mapEntry.getField(),
+					expectedKeyType,
+					mapKeys.stream()
+							.map(MappingEntry::getType)
+							.distinct()
+							.collect(Collectors.joining(", ")));
+
+			mapSchema.setAdditionalProperties(new ObjectSchema());
+			return mapSchema;
+		}
+
+		// Проверка 2: Все ли keys имеют детей и одинаковую структуру?
+		boolean allKeysHaveChildren = mapKeys.stream()
+				.allMatch(key -> !findChildren(key, allEntries).isEmpty());
+
+		boolean allKeyChildrenMatch = true;
+		if (allKeysHaveChildren && mapKeys.size() > 1) {
+			List<MappingEntry> firstKeyChildren = findChildren(mapKeys.get(0), allEntries);
+			Set<String> firstKeyFieldNames = firstKeyChildren.stream()
+					.map(MappingEntry::getField)
+					.collect(Collectors.toSet());
+
+			for (int i = 1; i < mapKeys.size(); i++) {
+				Set<String> keyFieldNames = findChildren(mapKeys.get(i), allEntries).stream()
+						.map(MappingEntry::getField)
+						.collect(Collectors.toSet());
+
+				if (!keyFieldNames.equals(firstKeyFieldNames)) {
+					allKeyChildrenMatch = false;
+					LOGGER.warn("⚠️  Map '{}' ключи имеют разные структуры! " +
+									"Ключ '{}' имеет поля: {}, Ключ '{}' имеет поля: {}",
+							mapEntry.getField(),
+							mapKeys.get(0).getField(), firstKeyFieldNames,
+							mapKeys.get(i).getField(), keyFieldNames);
+					break;
+				}
 			}
 		}
 
-		rootSchema.setProperties(rootProperties);
-		if (!rootRequired.isEmpty()) {
-			rootSchema.setRequired(rootRequired);
+		// Формируем Value Schema
+		if (allKeysHaveChildren && allKeyChildrenMatch) {
+			// ⭐ КЛЮЧЕВОЕ: если Map имеет именованные дети с общей структурой,
+			// возвращаем $ref на первого ребенка (например, "properties")
+			// Это создает компонент в components.schemas с этим именем
+			Schema<?> valueRefSchema = new Schema<>();
+			valueRefSchema.$ref("#/components/schemas/" + mapKeys.get(0).getField());
+			mapSchema.setAdditionalProperties(valueRefSchema);
+
+			LOGGER.debug("✓ Map '{}' → additionalProperties: $ref to '{}'",
+					mapEntry.getField(), mapKeys.get(0).getField());
+		} else if (allKeysHaveChildren) {
+			LOGGER.warn("⚠️  Map '{}' ключи имеют разные структуры - формируем как Map<String, Object>",
+					mapEntry.getField());
+			mapSchema.setAdditionalProperties(new ObjectSchema());
+		} else {
+			Schema<?> valueSchema = mapTypeToSchema(expectedKeyType);
+			mapSchema.setAdditionalProperties(valueSchema);
 		}
 
-		return rootSchema;
+		return mapSchema;
+	}
+
+
+	/**
+	 * Строит Schema для простого поля (String, Long, Integer и т.д.).
+	 */
+	private Schema<?> buildSimpleFieldSchema(MappingEntry entry) {
+		Schema<?> schema = mapTypeToSchema(entry.getType());
+
+		if (entry.getDescription() != null && !entry.getDescription().isEmpty()) {
+			schema.setDescription(entry.getDescription());
+		}
+
+		return schema;
 	}
 
 	/**
@@ -1841,22 +1272,6 @@ public class DocxParser {
 		return objectSchema;
 	}
 
-	/**
-	 * Строит Schema для простого поля (без детей)
-	 */
-	private Schema<?> buildSimpleFieldSchema(MappingEntry entry) {
-		Schema<?> schema = mapTypeToSchema(entry.getType());
-
-		if (entry.getDescription() != null && !entry.getDescription().isEmpty()) {
-			schema.setDescription(entry.getDescription());
-		}
-
-		return schema;
-	}
-
-	/**
-	 * Проверяет, является ли тип Map
-	 */
 	private boolean isMapType(String typeString) {
 		if (typeString == null || typeString.isEmpty()) {
 			return false;
@@ -2000,6 +1415,7 @@ class MappingEntry {
 	private boolean required;
 	private String mappingRule;
 	private MappingEntry parent;
+	private boolean isMapKey;
 
 	public boolean isNested() {
 		return parent != null;
