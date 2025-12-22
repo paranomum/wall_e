@@ -1,13 +1,12 @@
 package org.openapitools.codegen.inputs;
 
-import com.fasterxml.jackson.databind.SerializationFeature;
-import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.*;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.PathParameter;
 import io.swagger.v3.oas.models.parameters.QueryParameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import lombok.*;
@@ -58,13 +57,14 @@ public class DocxParser {
 			String endpoint = extractEndpoint(document);
 			String method = extractMethod(endpoint);
 			String path = extractPath(endpoint);
-			List<RequestParameter> requestParams = extractRequestParameters(document);
-			List<SchemaNode> schemaNodes = convert(document, "TemplateDto");
+			List<RequestParameter> requestPathParams = extractRequestPathParameters(document);
+			List<SchemaNode> requestBodySchemas = convert(document, "RequestDto", "Формат тела запроса");
+			Schema requestBody = getMainSchema(requestBodySchemas);
+			List<SchemaNode> schemaNodes = convert(document, "ResponseDto", "Мапинг");
 
 			String responseExampleJson = extractResponse(document);
 			List<ErrorCase> errorCases = extractErrorCases(document);
-			LOGGER.info("{\ntitle - {},\nendpoint - {}\nmethod - {}\npath - {}\n,requestParams - {}\nresponseExample - {}\n}"
-			,title,endpoint,  method, path, requestParams, responseExampleJson);
+
 			// Обновляем информацию
 			openAPI.getInfo().setTitle(title.isEmpty() ? "Generated API" : title);
 
@@ -76,12 +76,25 @@ public class DocxParser {
 
 			// Добавляем параметры
 			List<Parameter> parameters = new ArrayList<>();
-			for (RequestParameter param : requestParams) {
+			for (RequestParameter param : requestPathParams) {
 				if (path.contains("{" + param.getName() + "}")) {
 					parameters.add(createPathParameter(param));
 				} else {
 					parameters.add(createQueryParameter(param));
 				}
+			}
+			if (requestBody != null) {
+				RequestBody requestBodyParam = new RequestBody()
+						.description("Описание тела запроса")
+						.required(true)
+						.content(new Content()
+								.addMediaType("application/json", new MediaType()
+										.schema(new Schema<>()
+												.$ref("#/components/schemas/" + requestBody.getTitle())
+										)
+								)
+						);
+				operation.setRequestBody(requestBodyParam);
 			}
 			operation.setParameters(parameters);
 
@@ -90,7 +103,13 @@ public class DocxParser {
 			// 3. Добавляем все схемы в components.schemas
 			for (SchemaNode node : schemaNodes) {
 				Schema<?> schema = node.getSchema();
-				String name = schema.getTitle(); // или другое правило нейминга
+				String name = schema.getTitle();
+				components.addSchemas(name, schema);
+			}
+
+			for (SchemaNode node : requestBodySchemas) {
+				Schema<?> schema = node.getSchema();
+				String name = schema.getTitle();
 				components.addSchemas(name, schema);
 			}
 
@@ -203,7 +222,7 @@ public class DocxParser {
 	/**
 	 * Извлекает параметры запроса из таблицы
 	 */
-	private List<RequestParameter> extractRequestParameters(XWPFDocument document) {
+	private List<RequestParameter> extractRequestPathParameters(XWPFDocument document) {
 		List<RequestParameter> params = new ArrayList<>();
 
 		for (XWPFTable table : document.getTables()) {
@@ -274,7 +293,7 @@ public class DocxParser {
 			if (!inResponseSection && element.getElementType() == BodyElementType.PARAGRAPH) {
 				XWPFParagraph p = (XWPFParagraph) element;
 				String text = p.getText();
-				if (text != null && text.contains("Пример ответа сервиса")) {
+				if (text != null && text.contains("Мапинг")) {
 					j++;
 					if (j == 2)
 						inResponseSection = true;
@@ -575,13 +594,12 @@ public class DocxParser {
 	 * Ищет таблицу, где первый заголовок похож на "Поле".
 	 * Поддерживает вложенные поля (с отступом в первом столбце).
 	 *
-	 * @param document DOCX документ
+	 * @param table DOCX документ
 	 * @return список MappingEntry с иерархией
 	 */
-	public List<MappingEntry> extractMappingRules(XWPFDocument document) {
+	public List<MappingEntry> extractMappingRules(XWPFTable table) {
 		List<MappingEntry> mappings = new ArrayList<>();
 
-		for (XWPFTable table : document.getTables()) {
 			List<XWPFTableRow> rows = table.getRows();
 
 			// Проверка, что таблица не пустая и это нужная таблица (по заголовку)
@@ -595,6 +613,15 @@ public class DocxParser {
 					// Ожидаем минимум 5 колонок: Поле, Тип, Наименование, Обязательность, Маппинг
 					if (cells.size() >= 5) {
 						MappingEntry entry = parseTableRow(cells, mappings);
+						if (entry.isMapKey()) {
+							String rawField = cells.get(0).getText();
+							int nestLevel = calculateNestLevel(rawField);
+							int indexToChange = mappings.indexOf(determineParent(nestLevel, mappings));
+							MappingEntry mapToChange = mappings.get(indexToChange);
+							mapToChange.setMapKeyAlias(entry.getField());
+							mappings.remove(indexToChange);
+							mappings.add(indexToChange, mapToChange);
+						}
 						if (entry != null) {
 							mappings.add(entry);
 						}
@@ -602,8 +629,6 @@ public class DocxParser {
 				}
 
 				// Если нашли нужную таблицу и распарсили, выходим из цикла по таблицам
-				break;
-			}
 		}
 
 		return mappings;
@@ -646,7 +671,12 @@ public class DocxParser {
 			MappingEntry parent = determineParent(nestLevel, previousEntries);
 			entry.setParent(parent);
 			entry.setMapKey(false);
+			entry.setMap(false);
+			entry.setMapKeyAlias(null);
 
+			if (entry.getType().contains("Map")){
+				entry.setMap(true);
+			}
 			if (entry.getParent() != null) {
 				if (entry.getParent().getType().contains("Map")) {
 					String getKey = entry.getParent().getType().split(",")[0];
@@ -947,6 +977,11 @@ public class DocxParser {
 					MappingEntry parent = entry.getParent();
 					boolean parentIsMapKey = parent != null && parent.isMapKey();
 
+					if(entry.isMap()) {
+						if (entry.getType().contains("Object>")) {
+							schema = buildMapStringObject(entry);
+						}
+					}
 					if (parentIsMapKey && level > 0 && !entry.isMapKey()) {
 						allSchemaNodes.add(new SchemaNode(false, schema));
 					}
@@ -966,14 +1001,12 @@ public class DocxParser {
 						if (entry.isMapKey()) {
 							{
 								// MapKey ВСЕГДА компонент
-								allSchemaNodes.add(new SchemaNode(false, schema));
+//								allSchemaNodes.add(new SchemaNode(false, schema));
 								entry.setType("#/components/schemas/" + schema.getTitle());
 							}
-						} else if (entry.getParent() == null && level == 0) {
-							// Root element - не добавляем здесь (добавим позже)
 						} else if (entry.getParent() != null && entry.getParent().isMapKey()) {
 							// Child MapKey - добавляем как компонент
-							allSchemaNodes.add(new SchemaNode(false, schema));
+//							allSchemaNodes.add(new SchemaNode(false, schema));
 							entry.setType("#/components/schemas/" + schema.getTitle());
 						}
 						// Если это Object внутри Object - встраивается inline (не добавляем)
@@ -1002,10 +1035,11 @@ public class DocxParser {
 					mainSchema.setTitle(map.getParent().getField());
 				}
 				Schema<?> schema = schemas.get(map);
-				if (schema == null) schema = buildSimpleFieldSchema(map);
+				if (schema == null)
+					schema = buildSimpleFieldSchema(map);
 
 				// Для корневых элементов используем $ref если это сложные типы
-				if (map.getType().contains("#/components/schemas/") || isMapType(map.getType())) {
+				if (map.getType().contains("#/components/schemas/")) {
 					schema.$ref("#/components/schemas/" + map.getField());
 				}
 
@@ -1149,15 +1183,22 @@ public class DocxParser {
 	/**
 	 * Строит Schema для value объекта Map (когда entry это ключ Map)
 	 */
-	private Schema<?> buildMapValueObjectSchema(MappingEntry mapKey, List<MappingEntry> valueFields,
+	private Schema<?> buildMapValueObjectSchema(MappingEntry map, List<MappingEntry> valueFields,
 												List<MappingEntry> allEntries,
 												Map<MappingEntry, Schema<?>> schemaCache) {
 
-		System.out.println("      [MapKey→Value] " + mapKey.getField() +
-				" (type: " + mapKey.getType() + ")");
-
+		Schema schema = new Schema();
 		Map<String, Schema> valueProperties = new LinkedHashMap<>();
 		List<String> valueRequired = new ArrayList<>();
+
+		if (isMapType(map.getType())) {
+			schema.type("object");
+			schema.additionalProperties(new Schema().$ref("#/components/schemas/" + map.getMapKeyAlias()));
+		}
+
+		System.out.println("      [MapKey→Value] " + map.getField() +
+				" (type: " + map.getType() + ")");
+
 
 		for (MappingEntry valueField : valueFields) {
 			Schema<?> fieldSchema = schemaCache.getOrDefault(valueField,
@@ -1170,13 +1211,26 @@ public class DocxParser {
 		}
 
 		ObjectSchema valueObject = new ObjectSchema();
-		valueObject.setDescription("Value объект для Map ключа: " + mapKey.getField());
+		valueObject.setDescription("Value объект для Map ключа: " + map.getField());
 		valueObject.setProperties(valueProperties);
 		if (!valueRequired.isEmpty()) {
 			valueObject.setRequired(valueRequired);
 		}
 
 		return valueObject;
+	}
+
+	private Schema buildMapStringObject(MappingEntry map) {
+		Schema schema = new Schema();
+		Map<String, Schema> valueProperties = new LinkedHashMap<>();
+		List<String> valueRequired = new ArrayList<>();
+
+		if (isMapType(map.getType())) {
+			schema.type("object");
+			schema.additionalProperties(new Schema().$ref("#/components/schemas/" + map.getMapKeyAlias()));
+		}
+
+		return schema;
 	}
 
 	/**
@@ -1326,7 +1380,7 @@ public class DocxParser {
 		if (typeString == null || typeString.isEmpty()) {
 			return false;
 		}
-		String type = typeString.toLowerCase().trim();
+		String type = typeString.toLowerCase(Locale.ROOT).trim();
 		return type.contains("map");
 	}
 
@@ -1347,7 +1401,7 @@ public class DocxParser {
 			return new StringSchema();
 		}
 
-		String type = typeString.toLowerCase().trim();
+		String type = typeString.toLowerCase(Locale.ROOT).trim();
 
 		if (type.contains("long")) {
 			io.swagger.v3.oas.models.media.IntegerSchema intSchema =
@@ -1378,23 +1432,53 @@ public class DocxParser {
 	}
 
 
-	public List<SchemaNode> convert(XWPFDocument docxFilePath, String schemaName) throws IOException {
-		System.out.println("=== Шаг 1: Парсирование DOCX файла ===");
-		List<MappingEntry> entries = extractMappingRules(docxFilePath);
+	public List<SchemaNode> convert(XWPFDocument docxFilePath, String schemaName, String paragraphName) throws IOException {
+		List<IBodyElement> bodyElements = docxFilePath.getBodyElements();
+		XWPFTable table = null;
+		boolean inRequestSection = false;
+		int j = 0;
+		for (int i = 0; i < bodyElements.size(); i++) {
+			IBodyElement element = bodyElements.get(i);
 
-		if (entries.isEmpty()) {
-			System.err.println("❌ Ошибка: Не найдено записей в таблице!");
-			return null;
+			if (!inRequestSection && element.getElementType() == BodyElementType.PARAGRAPH) {
+				XWPFParagraph p = (XWPFParagraph) element;
+				String text = p.getText();
+				if (text != null && text.contains(paragraphName)) {
+					j++;
+					if (j == 2)
+						inRequestSection = true;
+				}
+				continue;
+			}
+
+			if (inRequestSection && element.getElementType() == BodyElementType.TABLE) {
+				table = (XWPFTable) element;  // ← Просто кастим в XWPFTable
+				break;  // ← Выходим, так как нашли нужную таблицу
+			}
 		}
 
-		System.out.println("\n=== Шаг 2: Распарсено " + entries.size() + " записей ===");
-		printEntriesTree(entries);
+		if (table != null) {
 
-		System.out.println("\n=== Шаг 3: Построение OpenAPI Schema ===");
-		List<SchemaNode> schema = buildSchemas(entries, schemaName);
-		String schemas = Json.pretty(schema);
+			List<MappingEntry> entries = extractMappingRules(table);
 
-		return schema;
+			if (entries.isEmpty()) {
+				System.err.println("❌ Ошибка: Не найдено записей в таблице!");
+				return new ArrayList();
+			}
+
+//			if (entries.stream().allMatch(e -> e.getParent() == null)) {
+//				return new ArrayList()<>;
+//			}
+
+//		System.out.println("\n=== Шаг 2: Распарсено " + entries.size() + " записей ===");
+//		printEntriesTree(entries);
+
+//		System.out.println("\n=== Шаг 3: Построение OpenAPI Schema ===");
+			List<SchemaNode> schema = buildSchemas(entries, schemaName);
+			return schema;
+		}
+
+		return new ArrayList();
 	}
 
 	private String schemaToCleanJson(Schema<?> schema) {
@@ -1408,27 +1492,33 @@ public class DocxParser {
 		}
 	}
 
-	private void printEntriesTree(List<MappingEntry> entries) {
-		for (MappingEntry entry : entries) {
-			String indent = "  ".repeat(entry.getDepthLevel());
-			String marker = entry.getParent() != null ? "├─ " : "• ";
-			String required = entry.isRequired() ? " *" : "";
-			String parent = entry.getParent() != null ? " (parent: " + entry.getParent().getField() + ")" : "";
-
-			System.out.println(String.format(
-					"%s%s%-25s [%-15s]%s%s",
-					indent,
-					marker,
-					entry.getField(),
-					entry.getType(),
-					required,
-					parent
-			));
-		}
-	}
+//	private void printEntriesTree(List<MappingEntry> entries) {
+//		for (MappingEntry entry : entries) {
+//			String indent = "  ".repeat(entry.getDepthLevel());
+//			String marker = entry.getParent() != null ? "├─ " : "• ";
+//			String required = entry.isRequired() ? " *" : "";
+//			String parent = entry.getParent() != null ? " (parent: " + entry.getParent().getField() + ")" : "";
+//
+//			System.out.printf(
+//					"%s%s%-25s [%-15s]%s%s%n",
+//					indent,
+//					marker,
+//					entry.getField(),
+//					entry.getType(),
+//					required,
+//					parent
+//			);
+//		}
+//	}
 
 	private Schema getMainSchema(List<SchemaNode> schemas) {
-		return schemas.stream().filter(e -> e.main).collect(Collectors.toList()).get(0).getSchema();
+			SchemaNode schemeNode = schemas.stream().filter(SchemaNode::isMain)
+				.findFirst()
+				.orElse(null);
+			if (schemeNode != null) {
+				return schemeNode.getSchema();
+			}
+			return null;
 	}
 }
 
@@ -1467,6 +1557,8 @@ class MappingEntry {
 	private String mappingRule;
 	private MappingEntry parent;
 	private boolean isMapKey;
+	private boolean isMap;
+	private String mapKeyAlias;
 
 	public boolean isNested() {
 		return parent != null;
