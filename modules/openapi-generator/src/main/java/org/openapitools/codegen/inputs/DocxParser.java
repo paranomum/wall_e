@@ -62,7 +62,6 @@ public class DocxParser {
 			Schema requestBody = getMainSchema(requestBodySchemas);
 			List<SchemaNode> schemaNodes = convert(document, "ResponseDto", "Мапинг");
 
-			String responseExampleJson = extractResponse(document);
 			List<ErrorCase> errorCases = extractErrorCases(document);
 
 			// Обновляем информацию
@@ -178,7 +177,7 @@ public class DocxParser {
 			return method + " " + dots + path;
 		}
 
-		return "GET .../candidate-form-templates/{id}";
+		return "GET .../NOTHING";
 	}
 
 	/**
@@ -1465,15 +1464,6 @@ public class DocxParser {
 				System.err.println("❌ Ошибка: Не найдено записей в таблице!");
 				return new ArrayList();
 			}
-
-//			if (entries.stream().allMatch(e -> e.getParent() == null)) {
-//				return new ArrayList()<>;
-//			}
-
-//		System.out.println("\n=== Шаг 2: Распарсено " + entries.size() + " записей ===");
-//		printEntriesTree(entries);
-
-//		System.out.println("\n=== Шаг 3: Построение OpenAPI Schema ===");
 			List<SchemaNode> schema = buildSchemas(entries, schemaName);
 			return schema;
 		}
@@ -1491,25 +1481,6 @@ public class DocxParser {
 			return schema.toString();
 		}
 	}
-
-//	private void printEntriesTree(List<MappingEntry> entries) {
-//		for (MappingEntry entry : entries) {
-//			String indent = "  ".repeat(entry.getDepthLevel());
-//			String marker = entry.getParent() != null ? "├─ " : "• ";
-//			String required = entry.isRequired() ? " *" : "";
-//			String parent = entry.getParent() != null ? " (parent: " + entry.getParent().getField() + ")" : "";
-//
-//			System.out.printf(
-//					"%s%s%-25s [%-15s]%s%s%n",
-//					indent,
-//					marker,
-//					entry.getField(),
-//					entry.getType(),
-//					required,
-//					parent
-//			);
-//		}
-//	}
 
 	private Schema getMainSchema(List<SchemaNode> schemas) {
 			SchemaNode schemeNode = schemas.stream().filter(SchemaNode::isMain)
