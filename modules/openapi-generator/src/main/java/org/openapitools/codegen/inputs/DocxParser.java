@@ -23,6 +23,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.openapitools.codegen.utils.StringUtils.camelize;
+
 /**
  * Конвертирует Word документ в OpenAPI 3.0 спецификацию
  */
@@ -89,7 +91,7 @@ public class DocxParser {
 						.content(new Content()
 								.addMediaType("application/json", new MediaType()
 										.schema(new Schema<>()
-												.$ref("#/components/schemas/" + requestBody.getTitle())
+												.$ref("#/components/schemas/" + camelize(requestBody.getTitle()) + "Dto")
 										)
 								)
 						);
@@ -166,7 +168,7 @@ public class DocxParser {
 	private String extractEndpoint(XWPFDocument document) {
 		String fullText = extractFullText(document);
 
-		// Поиск паттерна "GET .../path"
+		// Поиск паттерна "HTTP_METHOD .../path"
 		Pattern pattern = Pattern.compile("(GET|POST|PUT|DELETE|PATCH)\\s+(\\.\\.\\.)?(/[\\w\\-/{}/]+)");
 		Matcher matcher = pattern.matcher(fullText);
 
@@ -215,7 +217,7 @@ public class DocxParser {
 			return matcher.group(1);
 		}
 
-		return "/candidate-form-templates/{id}";
+		return "/NOTHING";
 	}
 
 	/**
@@ -274,153 +276,6 @@ public class DocxParser {
 		return (firstCell.contains("параметр") || firstCell.contains("name")) &&
 				(secondCell.contains("тип") || secondCell.contains("type"));
 	}
-
-	/**
-	 * Универсальное извлечение JSON-примера ответа из секции
-	 * "Пример ответа сервиса", без привязки к названию корневого поля.
-	 */
-	private String extractResponse(XWPFDocument document) {
-		List<IBodyElement> bodyElements = document.getBodyElements();
-
-		boolean inResponseSection = false;
-
-		int j = 0;
-		for (int i = 0; i < bodyElements.size(); i++) {
-			IBodyElement element = bodyElements.get(i);
-
-			// 1. Находим заголовок "Пример ответа сервиса"
-			if (!inResponseSection && element.getElementType() == BodyElementType.PARAGRAPH) {
-				XWPFParagraph p = (XWPFParagraph) element;
-				String text = p.getText();
-				if (text != null && text.contains("Мапинг")) {
-					j++;
-					if (j == 2)
-						inResponseSection = true;
-				}
-				continue;
-			}
-
-			if (!inResponseSection) {
-				continue;
-			}
-
-			// 2. После заголовка ищем первый "кодовый" блок
-
-			// 2.1. Таблица – типичный контейнер для примера
-			if (element.getElementType() == BodyElementType.TABLE) {
-				String json = collectJsonFromTable((XWPFTable) element);
-				if (!json.isEmpty()) {
-					return json;
-				}
-				// если из таблицы не получилось – продолжаем дальше
-			}
-
-			// 2.2. Параграфы подряд с фигурными скобками
-			if (element.getElementType() == BodyElementType.PARAGRAPH) {
-				XWPFParagraph p = (XWPFParagraph) element;
-				String text = p.getText();
-				if (text != null && text.contains("{")) {
-					// считаем, что это начало JSON, собираем дальше
-					return collectJsonFromParagraphs(bodyElements, i);
-				}
-			}
-
-			// Если встретили другой крупный заголовок – выходим, JSON не нашли
-			if (element.getElementType() == BodyElementType.PARAGRAPH) {
-				XWPFParagraph p = (XWPFParagraph) element;
-				String text = p.getText();
-				if (text != null && (text.startsWith("# ") || text.startsWith("## "))) {
-					break;
-				}
-			}
-		}
-
-		return "";
-	}
-
-	/**
-	 * Собирает JSON из последовательности параграфов, начиная с индекса startIndex.
-	 */
-	private String collectJsonFromParagraphs(List<IBodyElement> bodyElements, int startIndex) {
-		StringBuilder json = new StringBuilder();
-		int braceCount = 0;
-		boolean started = false;
-
-		for (int i = startIndex; i < bodyElements.size(); i++) {
-			IBodyElement element = bodyElements.get(i);
-			if (element.getElementType() != BodyElementType.PARAGRAPH) {
-				break;
-			}
-
-			XWPFParagraph p = (XWPFParagraph) element;
-			String text = p.getText();
-			if (text == null || text.isEmpty()) {
-				continue;
-			}
-
-			// пока не начали – ищем первую "{"
-			if (!started && !text.contains("{")) {
-				continue;
-			}
-
-			json.append(text).append("\n");
-
-			for (char c : text.toCharArray()) {
-				if (c == '{') {
-					braceCount++;
-					started = true;
-				} else if (c == '}') {
-					braceCount--;
-				}
-			}
-
-			if (started && braceCount == 0) {
-				break;
-			}
-		}
-
-		return json.toString().trim();
-	}
-
-	/**
-	 * Собирает JSON из таблицы – каждую ячейку считаем строкой текста.
-	 */
-	private String collectJsonFromTable(XWPFTable table) {
-		StringBuilder json = new StringBuilder();
-		int braceCount = 0;
-		boolean started = false;
-
-		for (XWPFTableRow row : table.getRows()) {
-			for (XWPFTableCell cell : row.getTableCells()) {
-				String text = cell.getText();
-				if (text == null || text.isEmpty()) {
-					continue;
-				}
-
-				if (!started && !text.contains("{")) {
-					continue;
-				}
-
-				json.append(text).append("\n");
-
-				for (char c : text.toCharArray()) {
-					if (c == '{') {
-						braceCount++;
-						started = true;
-					} else if (c == '}') {
-						braceCount--;
-					}
-				}
-
-				if (started && braceCount == 0) {
-					return json.toString().trim();
-				}
-			}
-		}
-
-		return json.toString().trim();
-	}
-
 
 	/**
 	 * Вспомогательный метод для извлечения всего текста из документа
@@ -504,7 +359,7 @@ public class DocxParser {
 
 		if (resultSchema != null) {
 			try {
-				Schema<?> refSchema = new Schema<>().$ref("#/components/schemas/" + resultSchema.getTitle());
+				Schema<?> refSchema = new Schema<>().$ref("#/components/schemas/" + camelize(resultSchema.getTitle()) + "Dto");
 				MediaType mediaType = new MediaType().schema(refSchema);
 				Content content = new Content().addMediaType("application/json", mediaType);
 				successResponse.setContent(content);
@@ -536,11 +391,16 @@ public class DocxParser {
 			case "varchar":
 				return "string";
 			case "boolean":
+			case "bool":
 				return "boolean";
 			case "double":
 			case "float":
 				return "number";
 			case "date":
+			case "uuid":
+			case "date-time":
+			case "byte":
+			case "binary":
 				return "string";
 			default:
 				return "string";
@@ -551,6 +411,32 @@ public class DocxParser {
 		switch (docxType.toLowerCase(Locale.ROOT)) {
 			case "long":
 				return "int64";
+			case "int":
+			case "integer":
+				return "int32";
+			case "float":
+				return "float";
+			case "double":
+				return "double";
+			case "date":
+				return "date";
+			case "datetime":
+			case "timestamp":
+				return "date-time";
+			case "byte":
+				return "byte";
+			case "binary":
+				return "binary";
+			case "uuid":
+				return "uuid";
+			case "email":
+				return "email";
+			case "url":
+			case "uri":
+				return "uri";
+			case "decimal":
+			case "bigdecimal":
+				return "decimal";
 			default:
 				return null;
 		}
@@ -617,7 +503,7 @@ public class DocxParser {
 							int nestLevel = calculateNestLevel(rawField);
 							int indexToChange = mappings.indexOf(determineParent(nestLevel, mappings));
 							MappingEntry mapToChange = mappings.get(indexToChange);
-							mapToChange.setMapKeyAlias(entry.getField());
+							mapToChange.setMapKeyAlias(entry.getName());
 							mappings.remove(indexToChange);
 							mappings.add(indexToChange, mapToChange);
 						}
@@ -626,8 +512,6 @@ public class DocxParser {
 						}
 					}
 				}
-
-				// Если нашли нужную таблицу и распарсили, выходим из цикла по таблицам
 		}
 
 		return mappings;
@@ -656,7 +540,7 @@ public class DocxParser {
 			}
 
 			MappingEntry entry = new MappingEntry();
-			entry.setField(cleanFieldName);
+			entry.setName(cleanFieldName);
 			entry.setType(cleanText(cells.get(1).getText()));
 			entry.setDescription(cleanText(cells.get(2).getText()));
 
@@ -727,7 +611,7 @@ public class DocxParser {
 		String cleaned = fieldText.replaceAll("^[\\s\\t]+", "").trim();
 
 		// Удаляем специальные символы, оставляя только буквы, цифры и подчеркивание
-		String cleanedSecond = cleaned.replaceAll("[^a-zA-Z0-9_.]", "");
+		String cleanedSecond = cleaned.replaceAll("[^a-zA-Z0-9_.]", "").replaceAll("\\[N]", "");
 
 		String[] names = cleanedSecond.split("\\.");
 
@@ -842,7 +726,7 @@ public class DocxParser {
 										Map<Integer, List<MappingEntry>> entriesByLevel) {
 
 		ObjectSchema objectSchema = new ObjectSchema();
-		objectSchema.setTitle(entry.getField());
+		objectSchema.setTitle(camelize(entry.getName()) + "Dto");
 		objectSchema.setDescription(entry.getDescription());
 
 		List<MappingEntry> children = findChildren(entry, allEntries);
@@ -855,7 +739,7 @@ public class DocxParser {
 			if (isMapType(child.getType())) {
 				// Это Map-поле: строим его INLINE (встраиваем сразу, не делаем отдельный компонент)
 				List<MappingEntry> mapKeys = findChildren(child, allEntries);
-				childSchema = buildMapSchema(child, mapKeys, allEntries, schemaCache);
+				childSchema = buildMapSchema(child, mapKeys, allEntries);
 				// ✅ ВСТРАИВАЕМ INLINE, а не делаем $ref
 
 			} else if ("Object".equalsIgnoreCase(child.getType())) {
@@ -871,9 +755,9 @@ public class DocxParser {
 			}
 
 			if (childSchema != null) {
-				properties.put(child.getField(), childSchema);
+				properties.put(child.getName(), childSchema);
 				if (child.isRequired()) {
-					required.add(child.getField());
+					required.add(child.getName());
 				}
 			}
 		}
@@ -892,11 +776,10 @@ public class DocxParser {
 	 */
 	private Schema<?> buildMapSchema(MappingEntry mapEntry,
 									 List<MappingEntry> mapKeys,
-									 List<MappingEntry> allEntries,
-									 Map<MappingEntry, Schema<?>> schemaCache) {
+									 List<MappingEntry> allEntries) {
 
 		MapSchema mapSchema = new MapSchema();
-		mapSchema.setTitle(mapEntry.getField());
+		mapSchema.setTitle(camelize(mapEntry.getName()) + "Dto");
 		mapSchema.setDescription(mapEntry.getDescription());
 
 		if (mapKeys.isEmpty()) {
@@ -916,13 +799,13 @@ public class DocxParser {
 			// и она будет добавлена в components.
 			// Поэтому здесь мы создаем $ref на неё.
 
-			String refName = keyEntry.getField(); // Имя компонента = имя поля ключа (например, "alias")
+			String refName = keyEntry.getName(); // Имя компонента = имя поля ключа (например, "alias")
 
 			// Создаем схему-ссылку
-			Schema<?> refSchema = new Schema<>().$ref("#/components/schemas/" + refName);
+			Schema<?> refSchema = new Schema<>().$ref("#/components/schemas/" + camelize(refName) + "Dto");
 
 			mapSchema.setAdditionalProperties(refSchema);
-			LOGGER.debug("✓ Map '{}' → additionalProperties: $ref to '{}'", mapEntry.getField(), refName);
+			LOGGER.debug("✓ Map '{}' → additionalProperties: $ref to '{}'", mapEntry.getName(), refName);
 		}
 
 		return mapSchema;
@@ -963,10 +846,10 @@ public class DocxParser {
 			for (MappingEntry entry : levelEntries) {
 				Schema<?> schema;
 
-				if (isMapType(entry.getType())) {
+				if (isCollection(entry.getType())) {
 					// Map обрабатывается отдельно
 					List<MappingEntry> keys = findChildren(entry, entries);
-					schema = buildMapSchema(entry, keys, entries, schemaCache);
+					schema = buildMapSchema(entry, keys, entries);
 
 					// Map становится компонентом ТОЛЬКО если:
 					// 1. Это root level (parent == null) - НЕ добавляем здесь
@@ -977,14 +860,18 @@ public class DocxParser {
 					boolean parentIsMapKey = parent != null && parent.isMapKey();
 
 					if(entry.isMap()) {
-						if (entry.getType().contains("Object>")) {
+						if (entry.getType().contains("Object")) {
 							schema = buildMapStringObject(entry);
+						}
+					}
+					else if(entry.getType().toLowerCase(Locale.ROOT).trim().contains("list")) {
+						if (entry.getType().contains("Object")) {
+							schema = buildListObject(entry);
 						}
 					}
 					if (parentIsMapKey && level > 0 && !entry.isMapKey()) {
 						allSchemaNodes.add(new SchemaNode(false, schema));
 					}
-
 				} else if ("Object".equalsIgnoreCase(entry.getType())) {
 					if (level == levelsSorted.get(0)) {
 						schema = buildSimpleFieldSchema(entry);
@@ -1001,14 +888,13 @@ public class DocxParser {
 							{
 								// MapKey ВСЕГДА компонент
 //								allSchemaNodes.add(new SchemaNode(false, schema));
-								entry.setType("#/components/schemas/" + schema.getTitle());
+								entry.setType("#/components/schemas/" + camelize(schema.getTitle()) + "Dto");
 							}
 						} else if (entry.getParent() != null && entry.getParent().isMapKey()) {
 							// Child MapKey - добавляем как компонент
 //							allSchemaNodes.add(new SchemaNode(false, schema));
-							entry.setType("#/components/schemas/" + schema.getTitle());
+							entry.setType("#/components/schemas/" + camelize(schema.getTitle()) + "Dto");
 						}
-						// Если это Object внутри Object - встраивается inline (не добавляем)
 					}
 				} else {
 					// Простой тип
@@ -1031,7 +917,7 @@ public class DocxParser {
 			List<String> rootRequired = new ArrayList<>();
 			for (MappingEntry map : schemas.keySet()) {
 				if (mainSchema.getTitle() == null) {
-					mainSchema.setTitle(map.getParent().getField());
+					mainSchema.setTitle(camelize(map.getParent().getName()) + "Dto");
 				}
 				Schema<?> schema = schemas.get(map);
 				if (schema == null)
@@ -1039,11 +925,24 @@ public class DocxParser {
 
 				// Для корневых элементов используем $ref если это сложные типы
 				if (map.getType().contains("#/components/schemas/")) {
-					schema.$ref("#/components/schemas/" + map.getField());
+					schema.$ref("#/components/schemas/" + camelize(map.getName()) + "Dto");
+				} else if (map.getType().toLowerCase(Locale.ROOT).contains("object")) {
+					if (map.getType().toLowerCase(Locale.ROOT).trim().contains("list")) {
+						Schema items = new Schema<>().$ref("#/components/schemas/" + camelize(map.getName()) + "Dto");
+						schema.setItems(items);
+					} else if (map.getType().toLowerCase(Locale.ROOT).trim().contains("map")) {
+						schema = buildMapStringObject(map);
+					} else {
+						schema = new Schema<>().$ref("#/components/schemas/" + camelize(map.getName()) + "Dto");
+						Schema<?> rootSchema = schemaCache.get(map);
+						if (rootSchema != null) {
+							allSchemaNodes.add(new SchemaNode(false, rootSchema));
+						}
+					}
 				}
 
-				rootProperties.put(map.getField(), schema);
-				if (map.isRequired()) rootRequired.add(map.getField());
+				rootProperties.put(map.getName(), schema);
+				if (map.isRequired()) rootRequired.add(map.getName());
 			}
 
 			mainSchema.setProperties(rootProperties);
@@ -1060,24 +959,35 @@ public class DocxParser {
 
 		List<MappingEntry> rootEntries = entries.stream()
 				.filter(e -> e.getParent() == null && e.getDepthLevel() == 0)
-				.sorted(Comparator.comparing(MappingEntry::getField))
+				.sorted(Comparator.comparing(MappingEntry::getName))
 				.collect(Collectors.toList());
 
 		for (MappingEntry rootEntry : rootEntries) {
 			Schema<?> schema = schemaCache.get(rootEntry);
 			if (schema == null) schema = buildSimpleFieldSchema(rootEntry);
-
-			// Для корневых элементов используем $ref если это сложные типы
-			if ("Object".equalsIgnoreCase(rootEntry.getType()) || isMapType(rootEntry.getType())) {
-				schema = new Schema<>().$ref("#/components/schemas/" + rootEntry.getField());
-				Schema<?> rootSchema = schemaCache.get(rootEntry);
-				if (rootSchema != null) {
-					allSchemaNodes.add(new SchemaNode(false, rootSchema));
+			if (rootEntry.getType().toLowerCase(Locale.ROOT).contains("object")) {
+				if (rootEntry.getType().toLowerCase(Locale.ROOT).trim().contains("list")) {
+					Schema items = new Schema<>().$ref("#/components/schemas/" + camelize(rootEntry.getName()) + "Dto");
+					schema.setItems(items);
+				} else if (rootEntry.getType().toLowerCase(Locale.ROOT).trim().contains("map")) {
+					schema = buildMapStringObject(rootEntry);
+				} else {
+					schema = new Schema<>().$ref("#/components/schemas/" + camelize(rootEntry.getName()) + "Dto");
+					Schema<?> rootSchema = schemaCache.get(rootEntry);
+					if (rootSchema != null) {
+						allSchemaNodes.add(new SchemaNode(false, rootSchema));
+					}
 				}
 			}
 
-			rootProperties.put(rootEntry.getField(), schema);
-			if (rootEntry.isRequired()) rootRequired.add(rootEntry.getField());
+			rootProperties.put(rootEntry.getName(), schema);
+			if (rootEntry.isRequired()) rootRequired.add(rootEntry.getName());
+		}
+
+		if (mainSchemaName.toLowerCase(Locale.ROOT).contains("response")) {
+			rootProperties.put("errorCode", buildSimpleFieldSchema("integer")); //integer
+			rootProperties.put("errorMsg", buildSimpleFieldSchema("string")); //string
+			rootProperties.put("msg", buildSimpleFieldSchema("string")); //sting
 		}
 
 		mainSchema.setProperties(rootProperties);
@@ -1086,48 +996,6 @@ public class DocxParser {
 		result.add(new SchemaNode(true, mainSchema));
 
 		return result;
-	}
-
-	/**
-	 * Строит Schema для Object или Map, группируя его children.
-	 */
-	private Schema<?> buildObjectOrMapSchema(MappingEntry entry,
-											 List<MappingEntry> allEntries,
-											 Map<MappingEntry, Schema<?>> schemaCache,
-											 Map<Integer, List<MappingEntry>> entriesByLevel) {
-		List<MappingEntry> children = findChildren(entry, allEntries);
-
-		if (isMapType(entry.getType())) {
-			return buildMapSchema(entry, children, allEntries, schemaCache);
-		}
-
-		// Строим ObjectSchema
-		ObjectSchema objectSchema = new ObjectSchema();
-		objectSchema.setTitle(entry.getField());
-		objectSchema.setDescription(entry.getDescription());
-
-		Map<String, Schema> properties = new LinkedHashMap<>();
-		List<String> required = new ArrayList<>();
-
-		for (MappingEntry child : children) {
-			Schema<?> childSchema = schemaCache.get(child);
-
-			if (childSchema == null) {
-				// Если child еще не обработан (например, простой тип)
-				childSchema = buildSimpleFieldSchema(child);
-			} else if ("Object".equalsIgnoreCase(child.getType()) || isMapType(child.getType())) {
-				// Если child сложный - делаем ref
-				childSchema = new Schema<>().$ref("#/components/schemas/" + child.getField());
-			}
-
-			properties.put(child.getField(), childSchema);
-			if (child.isRequired()) required.add(child.getField());
-		}
-
-		objectSchema.setProperties(properties);
-		if (!required.isEmpty()) objectSchema.setRequired(required);
-
-		return objectSchema;
 	}
 
 
@@ -1144,13 +1012,9 @@ public class DocxParser {
 		return schema;
 	}
 
-	/**
-	 * Сортирует ключи по убыванию для обхода от самых глубоких
-	 */
-	private List<Integer> sortedByLevel(Set<Integer> levels) {
-		return levels.stream()
-				.sorted(Collections.reverseOrder())
-				.collect(Collectors.toList());
+	private Schema<?> buildSimpleFieldSchema(String type) {
+		Schema<?> schema = mapTypeToSchema(type);
+		return schema;
 	}
 
 	/**
@@ -1192,25 +1056,25 @@ public class DocxParser {
 
 		if (isMapType(map.getType())) {
 			schema.type("object");
-			schema.additionalProperties(new Schema().$ref("#/components/schemas/" + map.getMapKeyAlias()));
+			schema.additionalProperties(new Schema().$ref("#/components/schemas/" + camelize(map.getMapKeyAlias()) + "Dto"));
 		}
 
-		System.out.println("      [MapKey→Value] " + map.getField() +
+		System.out.println("      [MapKey→Value] " + map.getName() +
 				" (type: " + map.getType() + ")");
 
 
 		for (MappingEntry valueField : valueFields) {
 			Schema<?> fieldSchema = schemaCache.getOrDefault(valueField,
 					buildEntrySchema(valueField, allEntries, schemaCache));
-			valueProperties.put(valueField.getField(), fieldSchema);
+			valueProperties.put(valueField.getName(), fieldSchema);
 
 			if (valueField.isRequired()) {
-				valueRequired.add(valueField.getField());
+				valueRequired.add(valueField.getName());
 			}
 		}
 
 		ObjectSchema valueObject = new ObjectSchema();
-		valueObject.setDescription("Value объект для Map ключа: " + map.getField());
+		valueObject.setDescription("Value объект для Map ключа: " + map.getName());
 		valueObject.setProperties(valueProperties);
 		if (!valueRequired.isEmpty()) {
 			valueObject.setRequired(valueRequired);
@@ -1221,12 +1085,21 @@ public class DocxParser {
 
 	private Schema buildMapStringObject(MappingEntry map) {
 		Schema schema = new Schema();
-		Map<String, Schema> valueProperties = new LinkedHashMap<>();
-		List<String> valueRequired = new ArrayList<>();
 
 		if (isMapType(map.getType())) {
 			schema.type("object");
-			schema.additionalProperties(new Schema().$ref("#/components/schemas/" + map.getMapKeyAlias()));
+			schema.additionalProperties(new Schema().$ref("#/components/schemas/" + camelize(map.getMapKeyAlias()) + "Dto"));
+		}
+
+		return schema;
+	}
+
+	private Schema buildListObject(MappingEntry map) {
+		Schema schema = new Schema();
+
+		if (isMapType(map.getType())) {
+			schema.type("array");
+			schema.items(new Schema().$ref("#/components/schemas/" + camelize(map.getName()) + "Dto"));
 		}
 
 		return schema;
@@ -1239,12 +1112,12 @@ public class DocxParser {
 											 List<MappingEntry> allEntries,
 											 Map<MappingEntry, Schema<?>> schemaCache) {
 
-		System.out.println("    [Map] " + mapEntry.getField() +
+		System.out.println("    [Map] " + mapEntry.getName() +
 				" (ключей: " + mapKeys.size() + ", type: " + mapEntry.getType() + ")");
 
 		ObjectSchema mapSchema = new ObjectSchema();
 		mapSchema.setDescription(mapEntry.getDescription());
-		mapSchema.setTitle(mapEntry.getField());
+		mapSchema.setTitle(camelize(mapEntry.getName()) + "Dto");
 
 		if (mapKeys.isEmpty()) {
 			mapSchema.setAdditionalProperties(new StringSchema());
@@ -1257,7 +1130,7 @@ public class DocxParser {
 				.allMatch(key -> key.getType().equalsIgnoreCase(expectedKeyType));
 
 		if (!allKeyTypesMatch) {
-			System.err.println("  ⚠️  WARNING: Map '" + mapEntry.getField() +
+			System.err.println("  ⚠️  WARNING: Map '" + mapEntry.getName() +
 					"' имеет ключи разных типов!");
 			System.err.println("     Ожидается: " + expectedKeyType +
 					", но найдены: " + mapKeys.stream()
@@ -1278,21 +1151,21 @@ public class DocxParser {
 		if (allKeysHaveChildren && mapKeys.size() > 1) {
 			List<MappingEntry> firstKeyChildren = findChildren(mapKeys.get(0), allEntries);
 			Set<String> firstKeyFieldNames = firstKeyChildren.stream()
-					.map(MappingEntry::getField)
+					.map(MappingEntry::getName)
 					.collect(Collectors.toSet());
 
 			for (int i = 1; i < mapKeys.size(); i++) {
 				Set<String> keyFieldNames = findChildren(mapKeys.get(i), allEntries).stream()
-						.map(MappingEntry::getField)
+						.map(MappingEntry::getName)
 						.collect(Collectors.toSet());
 
 				if (!keyFieldNames.equals(firstKeyFieldNames)) {
 					allKeyChildrenMatch = false;
-					System.err.println("  ⚠️  WARNING: Map '" + mapEntry.getField() +
+					System.err.println("  ⚠️  WARNING: Map '" + mapEntry.getName() +
 							"' ключи имеют разные структуры!");
-					System.err.println("     Ключ '" + mapKeys.get(0).getField() +
+					System.err.println("     Ключ '" + mapKeys.get(0).getName() +
 							"' имеет поля: " + firstKeyFieldNames);
-					System.err.println("     Ключ '" + mapKeys.get(i).getField() +
+					System.err.println("     Ключ '" + mapKeys.get(i).getName() +
 							"' имеет поля: " + keyFieldNames);
 					break;
 				}
@@ -1310,9 +1183,9 @@ public class DocxParser {
 				Schema<?> childSchema = schemaCache.getOrDefault(childField,
 						buildEntrySchema(childField, allEntries, schemaCache));
 
-				mergedProperties.put(childField.getField(), childSchema);
+				mergedProperties.put(childField.getName(), childSchema);
 				if (childField.isRequired()) {
-					mergedRequired.add(childField.getField());
+					mergedRequired.add(childField.getName());
 				}
 			}
 
@@ -1344,11 +1217,11 @@ public class DocxParser {
 												Map<MappingEntry, Schema<?>> schemaCache) {
 
 		if (entry.getParent() != null && isMapType(entry.getParent().getType())) {
-			System.err.println("  ⚠️  WARNING: Object '" + entry.getField() +
+			System.err.println("  ⚠️  WARNING: Object '" + entry.getName() +
 					"' это ключ Map, но обрабатывается как Object!");
 		}
 
-		System.out.println("    [Object] " + entry.getField() +
+		System.out.println("    [Object] " + entry.getName() +
 				" (свойств: " + children.size() + ")");
 
 		ObjectSchema objectSchema = new ObjectSchema();
@@ -1360,10 +1233,10 @@ public class DocxParser {
 		for (MappingEntry child : children) {
 			Schema<?> childSchema = schemaCache.getOrDefault(child,
 					buildEntrySchema(child, allEntries, schemaCache));
-			properties.put(child.getField(), childSchema);
+			properties.put(child.getName(), childSchema);
 
 			if (child.isRequired()) {
-				required.add(child.getField());
+				required.add(child.getName());
 			}
 		}
 
@@ -1381,6 +1254,14 @@ public class DocxParser {
 		}
 		String type = typeString.toLowerCase(Locale.ROOT).trim();
 		return type.contains("map");
+	}
+
+	private boolean isCollection(String typeString) {
+		if (typeString == null || typeString.isEmpty()) {
+			return false;
+		}
+		String type = typeString.toLowerCase(Locale.ROOT).trim();
+		return type.contains("map") || type.contains("list") || type.contains("set");
 	}
 
 	/**
@@ -1521,7 +1402,7 @@ class ErrorCase {
 @Setter
 @AllArgsConstructor
 class MappingEntry {
-	private String field;
+	private String name;
 	private String type;
 	private String description;
 	private boolean required;
@@ -1537,9 +1418,9 @@ class MappingEntry {
 
 	public String getFullPath() {
 		if (parent == null) {
-			return field;
+			return name;
 		}
-		return parent.getFullPath() + "." + field;
+		return parent.getFullPath() + "." + name;
 	}
 
 	public int getDepthLevel() {
