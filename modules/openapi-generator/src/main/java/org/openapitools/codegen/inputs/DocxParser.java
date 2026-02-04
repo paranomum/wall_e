@@ -33,6 +33,9 @@ public class DocxParser {
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	private final Logger LOGGER = LoggerFactory.getLogger(DocxParser.class);
+
+	protected String method;
+	protected String path;
 	/**
 	 * Парсит Word документ и возвращает OpenAPI спецификацию
 	 */
@@ -56,9 +59,7 @@ public class DocxParser {
 
 			// Извлекаем информацию из документа
 			String title = extractTitle(document);
-			String endpoint = extractEndpoint(document);
-			String method = extractMethod(endpoint);
-			String path = extractPath(endpoint);
+			extractEndpoint(document);
 			List<RequestParameter> requestPathParams = extractRequestPathParameters(document);
 			List<SchemaNode> requestBodySchemas = convert(document, "RequestDto", "Формат тела запроса");
 			Schema requestBody = getMainSchema(requestBodySchemas);
@@ -165,59 +166,48 @@ public class DocxParser {
 	/**
 	 * Извлекает полный endpoint в формате "GET .../candidate-form-templates/{id}"
 	 */
-	private String extractEndpoint(XWPFDocument document) {
-		String fullText = extractFullText(document);
+	private void extractEndpoint(XWPFDocument document) {
+		this.method = "get";
+		this.path = "/nothing";
+		List<IBodyElement> bodyElements = document.getBodyElements();
+		XWPFTable table = null;
+		int indexOfLast = 0;
+		String fullText = "";
+		for (int i = 0; i < bodyElements.size(); i++) {
+			IBodyElement element = bodyElements.get(i);
 
-		// Поиск паттерна "HTTP_METHOD .../path"
-		Pattern pattern = Pattern.compile("(GET|POST|PUT|DELETE|PATCH)\\s+(\\.\\.\\.)?(/[\\w\\-/{}/]+)");
-		Matcher matcher = pattern.matcher(fullText);
+			if (element.getElementType() == BodyElementType.PARAGRAPH) {
+				XWPFParagraph p = (XWPFParagraph) element;
+				String text = p.getText();
+				if (text != null && text.contains("Общее описание")) {
+					indexOfLast = i;
+					continue;
+				}
+			}
+		}
+		if (indexOfLast > 0) {
+			for (int j = indexOfLast + 1; j < bodyElements.size(); j++) {
+				IBodyElement element = bodyElements.get(j);
+				if (element.getElementType() == BodyElementType.TABLE) {
+					table = (XWPFTable) element;  // ← Просто кастим в XWPFTable
+					break;  // ← Выходим, так как нашли нужную таблицу
+				}
+			}
 
-		if (matcher.find()) {
-			String method = matcher.group(1);
-			String dots = matcher.group(2) != null ? matcher.group(2) : "";
-			String path = matcher.group(3);
-			return method + " " + dots + path;
+			if (table != null) {
+				fullText = extractTextFromTable(table);
+			}
 		}
 
-		return "GET .../NOTHING";
-	}
-
-	/**
-	 * Извлекает HTTP метод из endpoint
-	 * Пример: "GET .../candidate-form-templates/{id}" -> "GET"
-	 */
-	private String extractMethod(String endpoint) {
-		if (endpoint == null || endpoint.isEmpty()) {
-			return "GET";
+		if (!fullText.isBlank()) {
+			Pattern pattern = Pattern.compile("(GET|POST|PUT|DELETE|PATCH)\\s+\\.{1,4}(/[\\w\\-/{}/]+)");
+			Matcher matcher = pattern.matcher(fullText);
+			if (matcher.find()) {
+				this.method = matcher.group(1);
+				this.path = matcher.group(2);
+			}
 		}
 
-		Pattern pattern = Pattern.compile("^(GET|POST|PUT|DELETE|PATCH)");
-		Matcher matcher = pattern.matcher(endpoint.trim());
-
-		if (matcher.find()) {
-			return matcher.group(1);
-		}
-
-		return "GET";
-	}
-
-	/**
-	 * Извлекает путь из endpoint
-	 * Пример: "GET .../candidate-form-templates/{id}" -> "/candidate-form-templates/{id}"
-	 */
-	private String extractPath(String endpoint) {
-		if (endpoint == null || endpoint.isEmpty()) {
-			return "/candidate-form-templates/{id}";
-		}
-
-		Pattern pattern = Pattern.compile("(/[\\w\\-/{}/]+)");
-		Matcher matcher = pattern.matcher(endpoint);
-
-		if (matcher.find()) {
-			return matcher.group(1);
-		}
-
-		return "/NOTHING";
 	}
 
 	/**
@@ -294,6 +284,20 @@ public class DocxParser {
 				}
 				fullText.append("\n");
 			}
+		}
+
+		return fullText.toString();
+	}
+
+	private String extractTextFromTable(XWPFTable document) {
+		StringBuilder fullText = new StringBuilder();
+
+		for (XWPFTableRow row : document.getRows()) {
+			for (XWPFTableCell cell : row.getTableCells()) {
+				fullText.append(cell.getText()).append(" ");
+			}
+			fullText.append("\n");
+
 		}
 
 		return fullText.toString();
@@ -506,6 +510,17 @@ public class DocxParser {
 							mapToChange.setMapKeyAlias(entry.getName());
 							mappings.remove(indexToChange);
 							mappings.add(indexToChange, mapToChange);
+						} else if (entry.getParent() != null) {
+							if (entry.getParent().getType().equals("Object")) {
+								String rawField = cells.get(0).getText();
+								int nestLevel = calculateNestLevel(rawField);
+								int indexToChange = mappings.indexOf(determineParent(nestLevel, mappings));
+								MappingEntry mapToChange = mappings.get(indexToChange);
+								int childs = mapToChange.getChildCount();
+								mapToChange.setChildCount(childs + 1);
+								mappings.remove(indexToChange);
+								mappings.add(indexToChange, mapToChange);
+							}
 						}
 						if (entry != null) {
 							mappings.add(entry);
@@ -556,6 +571,7 @@ public class DocxParser {
 			entry.setMapKey(false);
 			entry.setMap(false);
 			entry.setMapKeyAlias(null);
+			entry.setChildCount(0);
 
 			if (entry.getType().contains("Map")){
 				entry.setMap(true);
@@ -844,36 +860,28 @@ public class DocxParser {
 			List<MappingEntry> levelEntries = entriesByLevel.get(level);
 			Map<MappingEntry, Schema<?>> listSchemas = new HashMap<>();
 			for (MappingEntry entry : levelEntries) {
-				Schema<?> schema;
+				Schema<?> schema = new Schema<>();
 
 				if (isCollection(entry.getType())) {
-					// Map обрабатывается отдельно
-					List<MappingEntry> keys = findChildren(entry, entries);
-					schema = buildMapSchema(entry, keys, entries);
-
-					// Map становится компонентом ТОЛЬКО если:
-					// 1. Это root level (parent == null) - НЕ добавляем здесь
-					// 2. Его parent является MapKey (например, "alias")
-					// НО НЕ добавляем в компоненты, если это child обычного Object
-
-					MappingEntry parent = entry.getParent();
-					boolean parentIsMapKey = parent != null && parent.isMapKey();
-
 					if(entry.isMap()) {
+						List<MappingEntry> keys = findChildren(entry, entries);
+						schema = buildMapSchema(entry, keys, entries);
+						MappingEntry parent = entry.getParent();
+						boolean parentIsMapKey = parent != null && parent.isMapKey();
 						if (entry.getType().contains("Object")) {
 							schema = buildMapStringObject(entry);
+						} else {
+							schema = buildMapStringString(entry);
+						}
+						if (parentIsMapKey && level > 0 && !entry.isMapKey()) {
+							allSchemaNodes.add(new SchemaNode(false, schema));
 						}
 					}
 					else if(entry.getType().toLowerCase(Locale.ROOT).trim().contains("list")) {
-						if (entry.getType().contains("Object")) {
-							schema = buildListObject(entry);
-						}
-					}
-					if (parentIsMapKey && level > 0 && !entry.isMapKey()) {
-						allSchemaNodes.add(new SchemaNode(false, schema));
+						schema = buildList(entry);
 					}
 				} else if ("Object".equalsIgnoreCase(entry.getType())) {
-					if (level == levelsSorted.get(0)) {
+					if (entry.getChildCount() == 0) {
 						schema = buildSimpleFieldSchema(entry);
 					} else {
 						// Object: может встраиваться inline или быть компонентом
@@ -915,34 +923,39 @@ public class DocxParser {
 			ObjectSchema mainSchema = new ObjectSchema();
 			Map<String, Schema> rootProperties = new LinkedHashMap<>();
 			List<String> rootRequired = new ArrayList<>();
-			for (MappingEntry map : schemas.keySet()) {
+			for (MappingEntry rootEntry : schemas.keySet()) {
 				if (mainSchema.getTitle() == null) {
-					mainSchema.setTitle(camelize(map.getParent().getName()) + "Dto");
+					mainSchema.setTitle(camelize(rootEntry.getParent().getName()) + "Dto");
 				}
-				Schema<?> schema = schemas.get(map);
+				Schema<?> schema = schemas.get(rootEntry);
 				if (schema == null)
-					schema = buildSimpleFieldSchema(map);
+					schema = buildSimpleFieldSchema(rootEntry);
 
 				// Для корневых элементов используем $ref если это сложные типы
-				if (map.getType().contains("#/components/schemas/")) {
-					schema.$ref("#/components/schemas/" + camelize(map.getName()) + "Dto");
-				} else if (map.getType().toLowerCase(Locale.ROOT).contains("object")) {
-					if (map.getType().toLowerCase(Locale.ROOT).trim().contains("list")) {
-						Schema items = new Schema<>().$ref("#/components/schemas/" + camelize(map.getName()) + "Dto");
-						schema.setItems(items);
-					} else if (map.getType().toLowerCase(Locale.ROOT).trim().contains("map")) {
-						schema = buildMapStringObject(map);
+				if (rootEntry.getType().contains("#/components/schemas/")) {
+					schema.$ref("#/components/schemas/" + camelize(rootEntry.getName()) + "Dto");
+				} else if (rootEntry.getType().toLowerCase(Locale.ROOT).contains("object")) {
+					if (rootEntry.getType().toLowerCase(Locale.ROOT).trim().contains("map")) {
+						schema = buildMapStringObject(rootEntry);
 					} else {
-						schema = new Schema<>().$ref("#/components/schemas/" + camelize(map.getName()) + "Dto");
-						Schema<?> rootSchema = schemaCache.get(map);
-						if (rootSchema != null) {
-							allSchemaNodes.add(new SchemaNode(false, rootSchema));
+						if (rootEntry.getChildCount() > 0) {
+							schema = new Schema<>().$ref("#/components/schemas/" + camelize(rootEntry.getName()) + "Dto");
+							Schema<?> rootSchema = schemaCache.get(rootEntry);
+							if (rootSchema != null) {
+								allSchemaNodes.add(new SchemaNode(false, rootSchema));
+							}
+						} else {
+							schema = buildSimpleFieldSchema(rootEntry);
 						}
 					}
+				} else if (rootEntry.getType().toLowerCase(Locale.ROOT).trim().contains("list")) {
+					schema = buildList(rootEntry);
+				} else if(rootEntry.isMap() && rootEntry.getType().contains("String>")) {
+						schema = buildMapStringString(rootEntry);
 				}
 
-				rootProperties.put(map.getName(), schema);
-				if (map.isRequired()) rootRequired.add(map.getName());
+				rootProperties.put(rootEntry.getName(), schema);
+				if (rootEntry.isRequired()) rootRequired.add(rootEntry.getName());
 			}
 
 			mainSchema.setProperties(rootProperties);
@@ -964,20 +977,30 @@ public class DocxParser {
 
 		for (MappingEntry rootEntry : rootEntries) {
 			Schema<?> schema = schemaCache.get(rootEntry);
-			if (schema == null) schema = buildSimpleFieldSchema(rootEntry);
-			if (rootEntry.getType().toLowerCase(Locale.ROOT).contains("object")) {
-				if (rootEntry.getType().toLowerCase(Locale.ROOT).trim().contains("list")) {
-					Schema items = new Schema<>().$ref("#/components/schemas/" + camelize(rootEntry.getName()) + "Dto");
-					schema.setItems(items);
-				} else if (rootEntry.getType().toLowerCase(Locale.ROOT).trim().contains("map")) {
+			if (schema == null)
+				schema = buildSimpleFieldSchema(rootEntry);
+
+			// Для корневых элементов используем $ref если это сложные типы
+			if (rootEntry.getType().contains("#/components/schemas/")) {
+				schema.$ref("#/components/schemas/" + camelize(rootEntry.getName()) + "Dto");
+			} else if (rootEntry.getType().toLowerCase(Locale.ROOT).contains("object")) {
+				if (rootEntry.getType().toLowerCase(Locale.ROOT).trim().contains("map")) {
 					schema = buildMapStringObject(rootEntry);
 				} else {
-					schema = new Schema<>().$ref("#/components/schemas/" + camelize(rootEntry.getName()) + "Dto");
-					Schema<?> rootSchema = schemaCache.get(rootEntry);
-					if (rootSchema != null) {
-						allSchemaNodes.add(new SchemaNode(false, rootSchema));
+					if (rootEntry.getChildCount() > 0) {
+						schema = new Schema<>().$ref("#/components/schemas/" + camelize(rootEntry.getName()) + "Dto");
+						Schema<?> rootSchema = schemaCache.get(rootEntry);
+						if (rootSchema != null) {
+							allSchemaNodes.add(new SchemaNode(false, rootSchema));
+						}
+					} else {
+						schema = buildSimpleFieldSchema(rootEntry);
 					}
 				}
+			} else if (rootEntry.getType().toLowerCase(Locale.ROOT).trim().contains("list")) {
+				schema = buildList(rootEntry);
+			} else if(rootEntry.isMap() && rootEntry.getType().contains("String>")) {
+				schema = buildMapStringString(rootEntry);
 			}
 
 			rootProperties.put(rootEntry.getName(), schema);
@@ -1094,17 +1117,35 @@ public class DocxParser {
 		return schema;
 	}
 
-	private Schema buildListObject(MappingEntry map) {
+	private Schema buildMapStringString(MappingEntry map) {
 		Schema schema = new Schema();
 
 		if (isMapType(map.getType())) {
-			schema.type("array");
-			schema.items(new Schema().$ref("#/components/schemas/" + camelize(map.getName()) + "Dto"));
+			schema.type("object");
+			schema.additionalProperties(new Schema().type("string"));
 		}
 
 		return schema;
 	}
 
+	private Schema buildList(MappingEntry map) {
+		Schema schema = new Schema();
+		schema.type("array");
+		Schema itemsSchema = new Schema();
+		String listType = map.getType().substring(5).replaceAll(">", "");
+		if (listType.trim().toLowerCase(Locale.ROOT).contains("object"))
+			itemsSchema = new Schema().$ref("#/components/schemas/" + camelize(map.getName()) + "Dto");
+		else {
+			itemsSchema.type(mapType(listType));
+			String format = mapFormat(listType);
+			if (format != null) {
+				itemsSchema.format(format);
+			}
+		}
+		schema.items(itemsSchema);
+
+		return schema;
+	}
 	/**
 	 * Строит Schema для Map (bottom-up)
 	 */
@@ -1315,38 +1356,39 @@ public class DocxParser {
 	public List<SchemaNode> convert(XWPFDocument docxFilePath, String schemaName, String paragraphName) throws IOException {
 		List<IBodyElement> bodyElements = docxFilePath.getBodyElements();
 		XWPFTable table = null;
-		boolean inRequestSection = false;
-		int j = 0;
+		int indexOfLast = 0;
 		for (int i = 0; i < bodyElements.size(); i++) {
 			IBodyElement element = bodyElements.get(i);
 
-			if (!inRequestSection && element.getElementType() == BodyElementType.PARAGRAPH) {
+			if (element.getElementType() == BodyElementType.PARAGRAPH) {
 				XWPFParagraph p = (XWPFParagraph) element;
 				String text = p.getText();
 				if (text != null && text.contains(paragraphName)) {
-					j++;
-					if (j == 2)
-						inRequestSection = true;
+					indexOfLast = i;
+					continue;
 				}
-				continue;
-			}
-
-			if (inRequestSection && element.getElementType() == BodyElementType.TABLE) {
-				table = (XWPFTable) element;  // ← Просто кастим в XWPFTable
-				break;  // ← Выходим, так как нашли нужную таблицу
 			}
 		}
-
-		if (table != null) {
-
-			List<MappingEntry> entries = extractMappingRules(table);
-
-			if (entries.isEmpty()) {
-				System.err.println("❌ Ошибка: Не найдено записей в таблице!");
-				return new ArrayList();
+		if (indexOfLast > 0) {
+			for (int j = indexOfLast + 1; j < bodyElements.size(); j++) {
+				IBodyElement element = bodyElements.get(j);
+				if (element.getElementType() == BodyElementType.TABLE) {
+					table = (XWPFTable) element;  // ← Просто кастим в XWPFTable
+					break;  // ← Выходим, так как нашли нужную таблицу
+				}
 			}
-			List<SchemaNode> schema = buildSchemas(entries, schemaName);
-			return schema;
+
+			if (table != null) {
+
+				List<MappingEntry> entries = extractMappingRules(table);
+
+				if (entries.isEmpty()) {
+					System.err.println("❌ Ошибка: Не найдено записей в таблице!");
+					return new ArrayList();
+				}
+				List<SchemaNode> schema = buildSchemas(entries, schemaName);
+				return schema;
+			}
 		}
 
 		return new ArrayList();
@@ -1411,6 +1453,7 @@ class MappingEntry {
 	private boolean isMapKey;
 	private boolean isMap;
 	private String mapKeyAlias;
+	private int childCount;
 
 	public boolean isNested() {
 		return parent != null;

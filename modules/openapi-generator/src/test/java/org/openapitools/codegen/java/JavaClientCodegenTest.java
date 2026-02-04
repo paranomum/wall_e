@@ -3422,7 +3422,7 @@ public class JavaClientCodegenTest {
 //                .addAdditionalProperty(JavaClientCodegen.WEBCLIENT_BLOCKING_OPERATIONS, true)
                 .setLibrary(JavaClientCodegen.WEBCLIENT)
                 .setInputSpec("/Users/admin/Documents/rest/" +
-                        "Валидация анкеты кандидата по шаблону-v11-20251222_125452.docx")
+                        "Получение статусов анкет кандидатов-v15-20251222_125129.docx")
                 .setOutputDir(output.toString().replace("\\", "/"));
 
         DefaultGenerator generator = new DefaultGenerator();
