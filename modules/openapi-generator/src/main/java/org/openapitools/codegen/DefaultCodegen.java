@@ -498,6 +498,7 @@ public class DefaultCodegen implements CodegenConfig {
                 ModelsMap objsValue = new ModelsMap();
                 objsValue.setModels(Collections.singletonList(modelMapValue));
                 objsValue.put("package", modelPackage());
+                objsValue.put("enumPackage", enumPackage());
                 objsValue.setImports(importsValue);
                 objsValue.put("classname", cm.classname);
                 objsValue.putAll(additionalProperties);
@@ -1381,7 +1382,9 @@ public class DefaultCodegen implements CodegenConfig {
 
     @Override
     public String enumFileFolder() {
-        return outputFolder + File.separator + enumPackage().replace('.', File.separatorChar);
+        String modelFolder = modelFileFolder();
+        return modelFolder.substring(0,  modelFolder.length() - 3) + "model";
+//        return outputFolder + File.separator + enumPackage().replace('.', File.separatorChar);
     }
 
     @Override

@@ -36,18 +36,6 @@ public class {{classname}} {{#parent}}extends {{{.}}} {{/parent}}{{#vendorExtens
 
 {{/serializableModel}}
   {{#vars}}
-    {{#isEnum}}
-    {{^isContainer}}
-    {{^vendorExtensions.x-enum-as-string}}
-{{>modelInnerEnum}}
-    {{/vendorExtensions.x-enum-as-string}}
-    {{/isContainer}}
-    {{#isContainer}}
-    {{#mostInnerItems}}
-{{>modelInnerEnum}}
-    {{/mostInnerItems}}
-    {{/isContainer}}
-    {{/isEnum}}
   {{#gson}}
   public static final String SERIALIZED_NAME_{{nameInSnakeCase}} = "{{baseName}}";
   {{/gson}}

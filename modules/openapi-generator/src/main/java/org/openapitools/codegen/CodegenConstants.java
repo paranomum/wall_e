@@ -50,7 +50,7 @@ public class CodegenConstants {
     public static final String MODEL_PACKAGE = "modelPackage";
     public static final String MODEL_PACKAGE_DESC = "package for generated models";
 
-    public static final String ENUM_PACKAGE = "modelPackage";
+    public static final String ENUM_PACKAGE = "enumPackage";
     public static final String ENUM_PACKAGE_DESC = "package for generated models";
 
     public static final String TEMPLATE_DIR = "templateDir";
@@ -321,7 +321,7 @@ public class CodegenConstants {
     public static final String GENERATE_MODELS = "generateModels";
     public static final String GENERATE_MODEL_DOCS = "generateModelDocs";
 
-    public static final String GENERATE_ENUMS = "enerateEnums";
+    public static final String GENERATE_ENUMS = "generateEnums";
 
     public static final String VIRTUAL_SERVICE = "virtualService";
     public static final String VIRTUAL_SERVICE_DESC = "Generate Spring boot rest service as virtual service with Virtualan";

@@ -46,16 +46,7 @@ public class {{classname}} {{#parent}}extends {{{.}}} {{/parent}}{{#vendorExtens
 
 {{/serializableModel}}
   {{#vars}}
-    {{#isEnum}}
-    {{^isContainer}}
-{{>modelInnerEnum}}
-    {{/isContainer}}
-    {{#isContainer}}
-    {{#mostInnerItems}}
-{{>modelInnerEnum}}
-    {{/mostInnerItems}}
-    {{/isContainer}}
-    {{/isEnum}}
+
   public static final String SERIALIZED_NAME_{{nameInSnakeCase}} = "{{baseName}}";
   {{#withXml}}
   @Xml{{#isXmlAttribute}}Attribute{{/isXmlAttribute}}{{^isXmlAttribute}}Element{{/isXmlAttribute}}(name = "{{items.xmlName}}{{^items.xmlName}}{{xmlName}}{{^xmlName}}{{baseName}}{{/xmlName}}{{/items.xmlName}}"{{#xmlNamespace}}, namespace = "{{.}}"{{/xmlNamespace}})

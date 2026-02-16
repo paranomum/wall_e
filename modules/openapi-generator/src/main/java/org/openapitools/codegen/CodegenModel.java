@@ -156,9 +156,12 @@ public class CodegenModel implements IJsonSchemaValidationProperties {
 
     @Getter @Setter
     public Set<String> imports = new TreeSet<>();
+
     @Getter @Setter
     public boolean emptyVars;
     public boolean hasVars, hasMoreModels, hasEnums, isEnum, hasValidation;
+    @Getter @Setter
+    public Set<String> enums = new TreeSet<>();
     /**
      * Indicates the OAS schema specifies "nullable: true".
      */
@@ -885,6 +888,7 @@ public class CodegenModel implements IJsonSchemaValidationProperties {
                 emptyVars == that.emptyVars &&
                 hasMoreModels == that.hasMoreModels &&
                 hasEnums == that.hasEnums &&
+                enums == that.enums &&
                 isEnum == that.isEnum &&
                 isNullable == that.isNullable &&
                 hasRequired == that.hasRequired &&
@@ -986,7 +990,7 @@ public class CodegenModel implements IJsonSchemaValidationProperties {
                 isDate, isDateTime, isNull, hasValidation, isShort, isUnboundedInteger, isBoolean,
                 getVars(), getAllVars(), getNonNullableVars(), getRequiredVars(), getOptionalVars(), getReadOnlyVars(), getReadWriteVars(),
                 getParentVars(), getAllowableValues(), getMandatory(), getAllMandatory(), getImports(), hasVars,
-                isEmptyVars(), hasMoreModels, hasEnums, isEnum, isNullable, hasRequired, hasOptional, isArray,
+                isEmptyVars(), hasMoreModels, hasEnums, enums, isEnum, isNullable, hasRequired, hasOptional, isArray,
                 hasChildren, isMap, isOptional, isDeprecated, hasReadOnly, hasOnlyReadOnly, getExternalDocumentation(), getVendorExtensions(),
                 getAdditionalPropertiesType(), getMaxProperties(), getMinProperties(), getUniqueItems(), getMaxItems(),
                 getMinItems(), getMaxLength(), getMinLength(), getExclusiveMinimum(), getExclusiveMaximum(), getMinimum(),
@@ -1056,6 +1060,7 @@ public class CodegenModel implements IJsonSchemaValidationProperties {
         sb.append(", emptyVars=").append(emptyVars);
         sb.append(", hasMoreModels=").append(hasMoreModels);
         sb.append(", hasEnums=").append(hasEnums);
+        sb.append(", enums=").append(enums);
         sb.append(", isEnum=").append(isEnum);
         sb.append(", isNullable=").append(isNullable);
         sb.append(", hasRequired=").append(hasRequired);

@@ -8,6 +8,18 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 {{/useReflectionEqualsHashCode}}
 {{#models}}
 {{#model}}
+{{^isEnum}}
+    {{#generateEnums}}
+{{#hasEnums}}
+    {{#enums}}
+import {{.}};
+    {{/enums}}
+{{/hasEnums}}
+{{/generateEnums}}
+import lombok.Getter;
+import lombok.Setter;
+import lombok.Builder;
+{{/isEnum}}
 {{#additionalPropertiesType}}
 import java.util.Map;
 import java.util.HashMap;

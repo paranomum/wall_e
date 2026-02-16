@@ -3421,8 +3421,7 @@ public class JavaClientCodegenTest {
 //                .addAdditionalProperty(CodegenConstants.VA, "xyz.abcdef.api")
 //                .addAdditionalProperty(JavaClientCodegen.WEBCLIENT_BLOCKING_OPERATIONS, true)
                 .setLibrary(JavaClientCodegen.WEBCLIENT)
-                .setInputSpec("/Users/admin/Documents/rest/" +
-                        "Получение статусов анкет кандидатов-v15-20251222_125129.docx")
+                .setInputSpec("https://iqhr-questionnaire-service-iqhr.apps.okd.stage.digital.rt.ru/questionary/v3/api-docs/questionery")
                 .setOutputDir(output.toString().replace("\\", "/"));
 
         DefaultGenerator generator = new DefaultGenerator();

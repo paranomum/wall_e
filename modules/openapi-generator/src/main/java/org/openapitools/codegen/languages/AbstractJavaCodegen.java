@@ -295,6 +295,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
         supportedBuildTools.add("all");
 
         cliOptions.add(new CliOption(CodegenConstants.MODEL_PACKAGE, CodegenConstants.MODEL_PACKAGE_DESC));
+        cliOptions.add(new CliOption(CodegenConstants.ENUM_PACKAGE, CodegenConstants.ENUM_PACKAGE_DESC));
         cliOptions.add(new CliOption(CodegenConstants.API_PACKAGE, CodegenConstants.API_PACKAGE_DESC));
         cliOptions.add(new CliOption(CodegenConstants.INVOKER_PACKAGE, CodegenConstants.INVOKER_PACKAGE_DESC).defaultValue(this.getInvokerPackage()));
         cliOptions.add(new CliOption(CodegenConstants.GROUP_ID, CodegenConstants.GROUP_ID_DESC).defaultValue(this.getGroupId()));
@@ -455,6 +456,10 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
             this.setInvokerPackage(derivedInvokerPackage);
             LOGGER.info("Invoker Package Name, originally not set, is now derived from model package name: {}",
                     derivedInvokerPackage);
+        } else if (additionalProperties.containsKey(CodegenConstants.ENUM_PACKAGE)) {
+            String derivedInvokerPackage = deriveInvokerPackageName((String) additionalProperties.get(CodegenConstants.ENUM_PACKAGE));
+            this.setInvokerPackage(derivedInvokerPackage);
+            LOGGER.info("Invoker Package Name, originally not set, is now derived from enum package name: {}",  derivedInvokerPackage);
         } else {
             //not set, use default to be passed to template
             additionalProperties.put(CodegenConstants.INVOKER_PACKAGE, invokerPackage);
@@ -462,6 +467,10 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
 
         if (!additionalProperties.containsKey(CodegenConstants.MODEL_PACKAGE)) {
             additionalProperties.put(CodegenConstants.MODEL_PACKAGE, modelPackage);
+        }
+
+        if (!additionalProperties.containsKey(CodegenConstants.ENUM_PACKAGE)) {
+            additionalProperties.put(CodegenConstants.ENUM_PACKAGE, enumPackage);
         }
 
         if (!additionalProperties.containsKey(CodegenConstants.API_PACKAGE)) {
@@ -537,6 +546,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
         }
 
         convertPropertyToStringAndWriteBack(CodegenConstants.MODEL_PACKAGE, this::setModelPackage);
+        convertPropertyToStringAndWriteBack(CodegenConstants.ENUM_PACKAGE, this::setEnumPackage);
         convertPropertyToStringAndWriteBack(CodegenConstants.API_PACKAGE, this::setApiPackage);
         convertPropertyToStringAndWriteBack(CodegenConstants.GROUP_ID, this::setGroupId);
         convertPropertyToStringAndWriteBack(CodegenConstants.ARTIFACT_ID, this::setArtifactId);
@@ -807,6 +817,8 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
         additionalProperties.remove(CodegenConstants.API_PACKAGE);
         this.setModelPackage(sanitizePackageName(modelPackage));
         additionalProperties.remove(CodegenConstants.MODEL_PACKAGE);
+        this.setEnumPackage(sanitizePackageName(enumPackage));
+        additionalProperties.remove(CodegenConstants.ENUM_PACKAGE);
         this.setInvokerPackage(sanitizePackageName(invokerPackage));
         additionalProperties.remove(CodegenConstants.INVOKER_PACKAGE);
     }

@@ -1192,6 +1192,7 @@ public class JavaClientCodegen extends AbstractJavaCodegen
                                 enums.replace(ce.classname, combineToEnum(enums.get(ce.classname), ce));
                             }
                             enums.putIfAbsent(ce.classname, ce);
+                            m.enums.add(enumPackage+"."+ce.classname);
                         }
                     }
                 }
