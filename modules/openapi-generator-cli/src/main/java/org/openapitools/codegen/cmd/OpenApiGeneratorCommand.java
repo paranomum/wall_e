@@ -7,7 +7,6 @@ import javax.inject.Inject;
 
 @SuppressWarnings({"java:S106"})
 public abstract class OpenApiGeneratorCommand implements Runnable {
-
     @Inject
     public GlobalOptions globalOptions = new GlobalOptions();
 

@@ -157,7 +157,26 @@ public class TemplateManager implements TemplatingExecutor, TemplateProcessor {
      * @return The actual file
      */
     @Override
-    //writes data to files
+    public File write(Map<String, Object> data, String template, File target) throws IOException {
+        if (this.engineAdapter.handlesFile(template)) {
+            // Only pass files with valid endings through template engine
+            String templateContent = this.engineAdapter.compileTemplate(this, data, template);
+            return writeToFile(target.getPath(), templateContent);
+        } else {
+            // Do a straight copy of the file if not listed as supported by the template engine.
+            InputStream is;
+            try {
+                // look up the file using the same template resolution logic the adapters would use.
+                String fullTemplatePath = getFullTemplateFile(template);
+                is = getInputStream(fullTemplatePath);
+            } catch (TemplateNotFoundException ex) {
+                is = new FileInputStream(Paths.get(template).toFile());
+            }
+            return writeToFile(target.getAbsolutePath(), IOUtils.toByteArray(is));
+        }
+    }
+
+    @Override
     public File write(Object data, String template, File target) throws IOException {
         if (this.engineAdapter.handlesFile(template)) {
             // Only pass files with valid endings through template engine
@@ -241,7 +260,6 @@ public class TemplateManager implements TemplatingExecutor, TemplateProcessor {
         return outputFile;
     }
 
-    //writing generated data
     private File writeToFileRaw(String filename, byte[] contents) throws IOException {
         // Use Paths.get here to normalize path (for Windows file separator, space escaping on Linux/Mac, etc)
         File output = Paths.get(filename).toFile();

@@ -1,6 +1,5 @@
 package org.openapitools.codegen.validations.oas;
 
-import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 import org.openapitools.codegen.utils.ModelUtils;
@@ -121,6 +120,7 @@ class OpenApiSchemaValidations extends GenericValidator<SchemaWrapper> {
      * <p>
      * The 'nullable' attribute is supported in OpenAPI Specification 3.0.x, but it is deprecated in OpenAPI 3.1 and above.
      *
+     * @param schema An input schema, regardless of the type of schema
      * @return {@link ValidationRule.Pass} if the check succeeds, otherwise {@link ValidationRule.Fail}
      */
     private static ValidationRule.Result checkNullableAttribute(SchemaWrapper schemaWrapper) {
@@ -146,7 +146,7 @@ class OpenApiSchemaValidations extends GenericValidator<SchemaWrapper> {
     }
 
     // The set of valid OAS values for the 'type' attribute.
-    private static final Set<String> validTypes = new HashSet<String>(
+    private static Set<String> validTypes = new HashSet<String>(
         Arrays.asList("null", "boolean", "object", "array", "number", "string", "integer"));
 
     /**
@@ -154,6 +154,7 @@ class OpenApiSchemaValidations extends GenericValidator<SchemaWrapper> {
      * <p>
      * The type must be one of the following values: null, boolean, object, array, number, string, integer.
      *
+     * @param schema An input schema, regardless of the type of schema
      * @return {@link ValidationRule.Pass} if the check succeeds, otherwise {@link ValidationRule.Fail}
      */
     private static ValidationRule.Result checkInvalidType(SchemaWrapper schemaWrapper) {

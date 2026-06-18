@@ -17,10 +17,14 @@
 
 package org.openapitools.codegen;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.*;
 
 public class CodegenResponse implements IJsonSchemaValidationProperties {
     public final List<CodegenProperty> headers = new ArrayList<CodegenProperty>();
+    @Getter @Setter
     private List<CodegenParameter> responseHeaders = new ArrayList<CodegenParameter>();
     public String code;
     public boolean is1xx;
@@ -59,6 +63,8 @@ public class CodegenResponse implements IJsonSchemaValidationProperties {
     public boolean simpleType;
     public boolean primitiveType;
     public boolean isMap;
+    /** datatype is the generic inner parameter of a std::optional for C++, or Optional (Java) */
+    public boolean isOptional;
     public boolean isArray;
     public boolean isBinary = false;
     public boolean isFile = false;
@@ -88,11 +94,11 @@ public class CodegenResponse implements IJsonSchemaValidationProperties {
     private boolean hasValidation;
     private boolean additionalPropertiesIsAnyType;
     private boolean hasVars;
-    private boolean hasEnums;
     private boolean hasRequired;
     private boolean hasDiscriminatorWithNonEmptyMapping;
     private CodegenComposedSchemas composedSchemas;
     private boolean hasMultipleTypes = false;
+    @Getter @Setter
     private LinkedHashMap<String, CodegenMediaType> content;
     private Map<String, CodegenProperty> requiredVarsMap;
     private String ref;
@@ -104,7 +110,7 @@ public class CodegenResponse implements IJsonSchemaValidationProperties {
         return Objects.hash(headers, code, message, examples, dataType, baseType, containerType, containerTypeMapped, hasHeaders,
                 isString, isNumeric, isInteger, isLong, isNumber, isFloat, isDouble, isDecimal, isByteArray, isBoolean, isDate,
                 isDateTime, isUuid, isEmail, isPassword, isModel, isFreeFormObject, isAnyType, isDefault, simpleType, primitiveType,
-                isMap, isArray, isBinary, isFile, schema, jsonSchema, vendorExtensions, items, additionalProperties,
+                isMap, isOptional, isArray, isBinary, isFile, schema, jsonSchema, vendorExtensions, items, additionalProperties,
                 vars, requiredVars, isNull, isVoid, hasValidation, isShort, isUnboundedInteger,
                 getMaxProperties(), getMinProperties(), uniqueItems, getMaxItems(), getMinItems(), getMaxLength(),
                 getMinLength(), exclusiveMinimum, exclusiveMaximum, getMinimum(), getMaximum(), getPattern(),
@@ -143,6 +149,7 @@ public class CodegenResponse implements IJsonSchemaValidationProperties {
                 simpleType == that.simpleType &&
                 primitiveType == that.primitiveType &&
                 isMap == that.isMap &&
+                isOptional == that.isOptional &&
                 isArray == that.isArray &&
                 isBinary == that.isBinary &&
                 isFile == that.isFile &&
@@ -246,22 +253,6 @@ public class CodegenResponse implements IJsonSchemaValidationProperties {
     // use content.mediaType.schema.setFormat instead of this
     @Override
     public void setFormat(String format) {}
-
-    public LinkedHashMap<String, CodegenMediaType> getContent() {
-        return content;
-    }
-
-    public void setContent(LinkedHashMap<String, CodegenMediaType> content) {
-        this.content = content;
-    }
-
-    public List<CodegenParameter> getResponseHeaders() {
-        return responseHeaders;
-    }
-
-    public void setResponseHeaders(List<CodegenParameter> responseHeaders) {
-        this.responseHeaders = responseHeaders;
-    }
 
     @Override
     public String getPattern() {
@@ -505,6 +496,16 @@ public class CodegenResponse implements IJsonSchemaValidationProperties {
     }
 
     @Override
+    public boolean getIsOptional() {
+        return isOptional;
+    }
+
+    @Override
+    public void setIsOptional(boolean isOptional) {
+        this.isOptional = isOptional;
+    }
+
+    @Override
     public CodegenProperty getAdditionalProperties() {
         return additionalProperties;
     }
@@ -556,84 +557,86 @@ public class CodegenResponse implements IJsonSchemaValidationProperties {
 
     @Override
     public String toString() {
-        String sb = "CodegenResponse{" + "headers=" + headers +
-                ", code='" + code + '\'' +
-                ", is1xx='" + is1xx + '\'' +
-                ", is2xx='" + is2xx + '\'' +
-                ", is3xx='" + is3xx + '\'' +
-                ", is4xx='" + is4xx + '\'' +
-                ", is5xx='" + is5xx + '\'' +
-                ", message='" + message + '\'' +
-                ", examples=" + examples +
-                ", dataType='" + dataType + '\'' +
-                ", baseType='" + baseType + '\'' +
-                ", containerType='" + containerType + '\'' +
-                ", containerTypeMapped='" + containerTypeMapped + '\'' +
-                ", hasHeaders=" + hasHeaders +
-                ", isString=" + isString +
-                ", isNumeric=" + isNumeric +
-                ", isInteger=" + isInteger +
-                ", isShort=" + isShort +
-                ", isLong=" + isLong +
-                ", isUnboundedInteger=" + isUnboundedInteger +
-                ", isNumber=" + isNumber +
-                ", isFloat=" + isFloat +
-                ", isDouble=" + isDouble +
-                ", isDecimal=" + isDecimal +
-                ", isByteArray=" + isByteArray +
-                ", isBoolean=" + isBoolean +
-                ", isDate=" + isDate +
-                ", isDateTime=" + isDateTime +
-                ", isUuid=" + isUuid +
-                ", isEmail=" + isEmail +
-                ", isPassword=" + isPassword +
-                ", isModel=" + isModel +
-                ", isFreeFormObject=" + isFreeFormObject +
-                ", isAnyType=" + isAnyType +
-                ", isDefault=" + isDefault +
-                ", simpleType=" + simpleType +
-                ", primitiveType=" + primitiveType +
-                ", isMap=" + isMap +
-                ", isArray=" + isArray +
-                ", isBinary=" + isBinary +
-                ", isFile=" + isFile +
-                ", schema=" + schema +
-                ", jsonSchema='" + jsonSchema + '\'' +
-                ", vendorExtensions=" + vendorExtensions +
-                ", maxProperties=" + maxProperties +
-                ", minProperties=" + minProperties +
-                ", uniqueItems=" + uniqueItems +
-                ", uniqueItemsBoolean=" + uniqueItemsBoolean +
-                ", maxItems=" + maxItems +
-                ", minItems=" + minItems +
-                ", maxLength=" + maxLength +
-                ", minLength=" + minLength +
-                ", exclusiveMinimum=" + exclusiveMinimum +
-                ", exclusiveMaximum=" + exclusiveMaximum +
-                ", minimum='" + minimum + '\'' +
-                ", maximum='" + maximum + '\'' +
-                ", pattern='" + pattern + '\'' +
-                ", multipleOf='" + multipleOf + '\'' +
-                ", items='" + items + '\'' +
-                ", additionalProperties='" + additionalProperties + '\'' +
-                ", vars='" + vars + '\'' +
-                ", requiredVars='" + requiredVars + '\'' +
-                ", isNull='" + isNull +
-                ", isVoid='" + isVoid +
-                ", hasValidation='" + hasValidation +
-                ", getAdditionalPropertiesIsAnyType=" + additionalPropertiesIsAnyType +
-                ", getHasVars=" + hasVars +
-                ", getHasRequired=" + hasRequired +
-                ", getHasDiscriminatorWithNonEmptyMapping=" + hasDiscriminatorWithNonEmptyMapping +
-                ", composedSchemas=" + composedSchemas +
-                ", hasMultipleTypes=" + hasMultipleTypes +
-                ", responseHeaders=" + responseHeaders +
-                ", content=" + content +
-                ", requiredVarsMap=" + requiredVarsMap +
-                ", ref=" + ref +
-                ", schemaIsFromAdditionalProperties=" + schemaIsFromAdditionalProperties +
-                '}';
-        return sb;
+        final StringBuilder sb = new StringBuilder("CodegenResponse{");
+        sb.append("headers=").append(headers);
+        sb.append(", code='").append(code).append('\'');
+        sb.append(", is1xx='").append(is1xx).append('\'');
+        sb.append(", is2xx='").append(is2xx).append('\'');
+        sb.append(", is3xx='").append(is3xx).append('\'');
+        sb.append(", is4xx='").append(is4xx).append('\'');
+        sb.append(", is5xx='").append(is5xx).append('\'');
+        sb.append(", message='").append(message).append('\'');
+        sb.append(", examples=").append(examples);
+        sb.append(", dataType='").append(dataType).append('\'');
+        sb.append(", baseType='").append(baseType).append('\'');
+        sb.append(", containerType='").append(containerType).append('\'');
+        sb.append(", containerTypeMapped='").append(containerTypeMapped).append('\'');
+        sb.append(", hasHeaders=").append(hasHeaders);
+        sb.append(", isString=").append(isString);
+        sb.append(", isNumeric=").append(isNumeric);
+        sb.append(", isInteger=").append(isInteger);
+        sb.append(", isShort=").append(isShort);
+        sb.append(", isLong=").append(isLong);
+        sb.append(", isUnboundedInteger=").append(isUnboundedInteger);
+        sb.append(", isNumber=").append(isNumber);
+        sb.append(", isFloat=").append(isFloat);
+        sb.append(", isDouble=").append(isDouble);
+        sb.append(", isDecimal=").append(isDecimal);
+        sb.append(", isByteArray=").append(isByteArray);
+        sb.append(", isBoolean=").append(isBoolean);
+        sb.append(", isDate=").append(isDate);
+        sb.append(", isDateTime=").append(isDateTime);
+        sb.append(", isUuid=").append(isUuid);
+        sb.append(", isEmail=").append(isEmail);
+        sb.append(", isPassword=").append(isPassword);
+        sb.append(", isModel=").append(isModel);
+        sb.append(", isFreeFormObject=").append(isFreeFormObject);
+        sb.append(", isAnyType=").append(isAnyType);
+        sb.append(", isDefault=").append(isDefault);
+        sb.append(", simpleType=").append(simpleType);
+        sb.append(", primitiveType=").append(primitiveType);
+        sb.append(", isMap=").append(isMap);
+        sb.append(", isOptional=").append(isOptional);
+        sb.append(", isArray=").append(isArray);
+        sb.append(", isBinary=").append(isBinary);
+        sb.append(", isFile=").append(isFile);
+        sb.append(", schema=").append(schema);
+        sb.append(", jsonSchema='").append(jsonSchema).append('\'');
+        sb.append(", vendorExtensions=").append(vendorExtensions);
+        sb.append(", maxProperties=").append(maxProperties);
+        sb.append(", minProperties=").append(minProperties);
+        sb.append(", uniqueItems=").append(uniqueItems);
+        sb.append(", uniqueItemsBoolean=").append(uniqueItemsBoolean);
+        sb.append(", maxItems=").append(maxItems);
+        sb.append(", minItems=").append(minItems);
+        sb.append(", maxLength=").append(maxLength);
+        sb.append(", minLength=").append(minLength);
+        sb.append(", exclusiveMinimum=").append(exclusiveMinimum);
+        sb.append(", exclusiveMaximum=").append(exclusiveMaximum);
+        sb.append(", minimum='").append(minimum).append('\'');
+        sb.append(", maximum='").append(maximum).append('\'');
+        sb.append(", pattern='").append(pattern).append('\'');
+        sb.append(", multipleOf='").append(multipleOf).append('\'');
+        sb.append(", items='").append(items).append('\'');
+        sb.append(", additionalProperties='").append(additionalProperties).append('\'');
+        sb.append(", vars='").append(vars).append('\'');
+        sb.append(", requiredVars='").append(requiredVars).append('\'');
+        sb.append(", isNull='").append(isNull);
+        sb.append(", isVoid='").append(isVoid);
+        sb.append(", hasValidation='").append(hasValidation);
+        sb.append(", getAdditionalPropertiesIsAnyType=").append(additionalPropertiesIsAnyType);
+        sb.append(", getHasVars=").append(hasVars);
+        sb.append(", getHasRequired=").append(hasRequired);
+        sb.append(", getHasDiscriminatorWithNonEmptyMapping=").append(hasDiscriminatorWithNonEmptyMapping);
+        sb.append(", composedSchemas=").append(composedSchemas);
+        sb.append(", hasMultipleTypes=").append(hasMultipleTypes);
+        sb.append(", responseHeaders=").append(responseHeaders);
+        sb.append(", content=").append(content);
+        sb.append(", requiredVarsMap=").append(requiredVarsMap);
+        sb.append(", ref=").append(ref);
+        sb.append(", schemaIsFromAdditionalProperties=").append(schemaIsFromAdditionalProperties);
+        sb.append('}');
+        return sb.toString();
     }
 
     // this is used in templates. Do not remove it.
@@ -648,7 +651,9 @@ public class CodegenResponse implements IJsonSchemaValidationProperties {
      * @return True if the status code is a range (e.g. 2XX)
      */
     public boolean isRange() {
-        return code != null && code.length() == 3 && "XX".equalsIgnoreCase(code.substring(1));
+        if (code != null && code.length() == 3 && "XX".equalsIgnoreCase(code.substring(1)))
+            return true;
+        return false;
     }
 
     @Override
@@ -885,12 +890,4 @@ public class CodegenResponse implements IJsonSchemaValidationProperties {
 
     @Override
     public void setIsEnum(boolean isEnum) {}
-
-    @Override
-    public boolean getHasEnums() {
-        return hasEnums;
-    }
-
-    @Override
-    public void setHasEnums(boolean hasEnums) {}
 }

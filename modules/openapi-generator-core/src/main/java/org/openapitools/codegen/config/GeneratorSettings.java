@@ -42,10 +42,13 @@ public final class GeneratorSettings implements Serializable {
     private String apiNameSuffix;
     private String modelNamePrefix;
     private String modelNameSuffix;
+    private String enumNamePrefix;
+    private String enumNameSuffix;
     private String groupId;
     private String artifactId;
     private String artifactVersion;
     private String library;
+    private String buildTool;
 
     private final Map<String, String> instantiationTypes;
     private final Map<String, String> typeMappings;
@@ -154,6 +157,9 @@ public final class GeneratorSettings implements Serializable {
     public String getModelNamePrefix() {
         return modelNamePrefix;
     }
+    public String getEnumNamePrefix() {
+        return enumNamePrefix;
+    }
 
     /**
      * Gets a model name suffix for generated models. This name will be appended to a model name.
@@ -168,6 +174,9 @@ public final class GeneratorSettings implements Serializable {
      */
     public String getModelNameSuffix() {
         return modelNameSuffix;
+    }
+    public String getEnumNameSuffix() {
+        return enumNameSuffix;
     }
 
     /**
@@ -204,6 +213,15 @@ public final class GeneratorSettings implements Serializable {
      */
     public String getLibrary() {
         return library;
+    }
+
+    /**
+     * Gets buildTool (sub-template) for the target generated.
+     *
+     * @return the buildTool
+     */
+    public String getBuildTool() {
+        return buildTool;
     }
 
 
@@ -453,10 +471,13 @@ public final class GeneratorSettings implements Serializable {
         apiNameSuffix = builder.apiNameSuffix;
         modelNamePrefix = builder.modelNamePrefix;
         modelNameSuffix = builder.modelNameSuffix;
+        enumNamePrefix = builder.enumNamePrefix;
+        enumNameSuffix = builder.enumNameSuffix;
         groupId = builder.groupId;
         artifactId = builder.artifactId;
         artifactVersion = builder.artifactVersion;
         library = builder.library;
+        buildTool = builder.buildTool;
         instantiationTypes = Collections.unmodifiableMap(builder.instantiationTypes);
         typeMappings = Collections.unmodifiableMap(builder.typeMappings);
         importMappings = Collections.unmodifiableMap(builder.importMappings);
@@ -513,6 +534,12 @@ public final class GeneratorSettings implements Serializable {
         }
         if (isNotEmpty(modelNameSuffix)) {
             additional.put("modelNameSuffix", modelNameSuffix);
+        }
+        if (isNotEmpty(enumNamePrefix)) {
+            additional.put("enumNamePrefix", enumNamePrefix);
+        }
+        if (isNotEmpty(enumNameSuffix)) {
+            additional.put("enumNameSuffix", enumNameSuffix);
         }
         if (isNotEmpty(gitHost)) {
             additional.put("gitHost", gitHost);
@@ -589,10 +616,13 @@ public final class GeneratorSettings implements Serializable {
         builder.apiNameSuffix = copy.getApiNameSuffix();
         builder.modelNamePrefix = copy.getModelNamePrefix();
         builder.modelNameSuffix = copy.getModelNameSuffix();
+        builder.enumNamePrefix = copy.getEnumNamePrefix();
+        builder.enumNameSuffix = copy.getEnumNameSuffix();
         builder.groupId = copy.getGroupId();
         builder.artifactId = copy.getArtifactId();
         builder.artifactVersion = copy.getArtifactVersion();
         builder.library = copy.getLibrary();
+        builder.buildTool = copy.getBuildTool();
         if (copy.getInstantiationTypes() != null) {
             builder.instantiationTypes.putAll(copy.getInstantiationTypes());
         }
@@ -667,10 +697,13 @@ public final class GeneratorSettings implements Serializable {
         private String apiNameSuffix;
         private String modelNamePrefix;
         private String modelNameSuffix;
+        private String enumNamePrefix;
+        private String enumNameSuffix;
         private String groupId;
         private String artifactId;
         private String artifactVersion;
         private String library;
+        private String buildTool;
         private Map<String, String> instantiationTypes;
         private Map<String, String> typeMappings;
         private Map<String, Object> additionalProperties;
@@ -822,6 +855,28 @@ public final class GeneratorSettings implements Serializable {
         }
 
         /**
+         * Sets the {@code enumNamePrefix} and returns a reference to this Builder so that the methods can be chained together.
+         *
+         * @param enumNamePrefix the {@code enumNamePrefix} to set
+         * @return a reference to this Builder
+         */
+        public Builder withEnumNamePrefix(String enumNamePrefix) {
+            this.enumNamePrefix = enumNamePrefix;
+            return this;
+        }
+
+        /**
+         * Sets the {@code enumNameSuffix} and returns a reference to this Builder so that the methods can be chained together.
+         *
+         * @param enumNameSuffix the {@code enumNameSuffix} to set
+         * @return a reference to this Builder
+         */
+        public Builder withEnumNameSuffix(String enumNameSuffix) {
+            this.enumNameSuffix = enumNameSuffix;
+            return this;
+        }
+
+        /**
          * Sets the {@code groupId} and returns a reference to this Builder so that the methods can be chained together.
          *
          * @param groupId the {@code groupId} to set
@@ -862,6 +917,17 @@ public final class GeneratorSettings implements Serializable {
          */
         public Builder withLibrary(String library) {
             this.library = library;
+            return this;
+        }
+
+        /**
+         * Sets the {@code buildTool} and returns a reference to this Builder so that the methods can be chained together.
+         *
+         * @param buildTool the {@code buildTool} to set
+         * @return a reference to this Builder
+         */
+        public Builder withBuildTool(String buildTool) {
+            this.buildTool = buildTool;
             return this;
         }
 
@@ -1370,10 +1436,13 @@ public final class GeneratorSettings implements Serializable {
                 ", apiNameSuffix='" + apiNameSuffix + '\'' +
                 ", modelNamePrefix='" + modelNamePrefix + '\'' +
                 ", modelNameSuffix='" + modelNameSuffix + '\'' +
+                ", enumNamePrefix='" + enumNamePrefix + '\'' +
+                ", enumNameSuffix='" + enumNameSuffix + '\'' +
                 ", groupId='" + groupId + '\'' +
                 ", artifactId='" + artifactId + '\'' +
                 ", artifactVersion='" + artifactVersion + '\'' +
                 ", library='" + library + '\'' +
+                ", buildTool='" + buildTool + '\'' +
                 ", instantiationTypes=" + instantiationTypes +
                 ", typeMappings=" + typeMappings +
                 ", additionalProperties=" + additionalProperties +
@@ -1403,10 +1472,13 @@ public final class GeneratorSettings implements Serializable {
                 Objects.equals(getApiNameSuffix(), that.getApiNameSuffix()) &&
                 Objects.equals(getModelNamePrefix(), that.getModelNamePrefix()) &&
                 Objects.equals(getModelNameSuffix(), that.getModelNameSuffix()) &&
+                Objects.equals(getEnumNamePrefix(), that.getEnumNamePrefix()) &&
+                Objects.equals(getEnumNameSuffix(), that.getEnumNamePrefix()) &&
                 Objects.equals(getGroupId(), that.getGroupId()) &&
                 Objects.equals(getArtifactId(), that.getArtifactId()) &&
                 Objects.equals(getArtifactVersion(), that.getArtifactVersion()) &&
                 Objects.equals(getLibrary(), that.getLibrary()) &&
+                Objects.equals(getBuildTool(), that.getBuildTool()) &&
                 Objects.equals(getInstantiationTypes(), that.getInstantiationTypes()) &&
                 Objects.equals(getTypeMappings(), that.getTypeMappings()) &&
                 Objects.equals(getAdditionalProperties(), that.getAdditionalProperties()) &&
@@ -1442,10 +1514,13 @@ public final class GeneratorSettings implements Serializable {
                 getApiNameSuffix(),
                 getModelNamePrefix(),
                 getModelNameSuffix(),
+                getEnumNamePrefix(),
+                getEnumNameSuffix(),
                 getGroupId(),
                 getArtifactId(),
                 getArtifactVersion(),
                 getLibrary(),
+                getBuildTool(),
                 getInstantiationTypes(),
                 getTypeMappings(),
                 getAdditionalProperties(),

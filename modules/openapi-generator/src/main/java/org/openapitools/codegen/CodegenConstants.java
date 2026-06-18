@@ -26,6 +26,7 @@ public class CodegenConstants {
     public static final String APIS = "apis";
     public static final String MODELS = "models";
     public static final String ENUMS = "enums";
+    public static final String GENERATE_RECURSIVE_DEPENDENT_MODELS = "generateRecursiveDependentModels";
     public static final String SUPPORTING_FILES = "supportingFiles";
     public static final String MODEL_TESTS = "modelTests";
     public static final String MODEL_DOCS = "modelDocs";
@@ -33,7 +34,6 @@ public class CodegenConstants {
     public static final String API_TESTS = "apiTests";
     public static final String API_DOCS = "apiDocs";
 
-    public static final String WITH_XML = "withXml";
     public static final String SKIP_FORM_MODEL = "skipFormModel";
     /* /end System Properties */
 
@@ -49,8 +49,9 @@ public class CodegenConstants {
 
     public static final String MODEL_PACKAGE = "modelPackage";
     public static final String MODEL_PACKAGE_DESC = "package for generated models";
+
     public static final String ENUM_PACKAGE = "enumPackage";
-    public static final String ENUM_PACKAGE_DESC = "package for generated enums";
+    public static final String ENUM_PACKAGE_DESC = "package for generated models";
 
     public static final String TEMPLATE_DIR = "templateDir";
 
@@ -60,8 +61,32 @@ public class CodegenConstants {
     public static final String INVOKER_PACKAGE = "invokerPackage";
     public static final String INVOKER_PACKAGE_DESC = "root package for generated code";
 
+    public static final String PHP_INVOKER_PACKAGE = "phpInvokerPackage";
+    public static final String PHP_INVOKER_PACKAGE_DESC = "root package for generated php code";
+
+    public static final String PERL_MODULE_NAME = "perlModuleName";
+    public static final String PERL_MODULE_NAME_DESC = "root module name for generated perl code";
+
+    public static final String MODULE_NAME = "moduleName";
+    public static final String MODULE_NAME_DESC = "top module name (convention: CamelCase, usually corresponding to gem name).";
+
+    public static final String GEM_NAME = "gemName";
+    public static final String GEM_NAME_DESC = "gem name (convention: underscore_case).";
+
+    public static final String PYTHON_PACKAGE_NAME = "pythonPackageName";
+    public static final String PYTHON_PACKAGE_NAME_DESC = "package name for generated python code";
+
+    public static final String PYTHON_ATTR_NONE_IF_UNSET = "pythonAttrNoneIfUnset";
+    public static final String PYTHON_ATTR_NONE_IF_UNSET_DESC = "when accessing unset attribute, return `None` instead of raising `ApiAttributeError`";
+
+    public static final String WITH_GO_CODEGEN_COMMENT = "withGoCodegenComment";
+    public static final String WITH_GO_CODEGEN_COMMENT_DESC = "whether to include Go codegen comment to disable Go Lint and collapse by default in GitHub PRs and diffs";
+
     public static final String WITH_AWSV4_SIGNATURE_COMMENT = "withAWSV4Signature";
     public static final String WITH_AWSV4_SIGNATURE_COMMENT_DESC = "whether to include AWS v4 signature support";
+
+    public static final String IS_GO_SUBMODULE = "isGoSubmodule";
+    public static final String IS_GO_SUBMODULE_DESC = "whether the generated Go module is a submodule";
 
     public static final String GROUP_ID = "groupId";
     public static final String GROUP_ID_DESC = "groupId in generated pom.xml";
@@ -102,11 +127,17 @@ public class CodegenConstants {
     public static final String LICENSE_NAME = "licenseName";
     public static final String LICENSE_NAME_DESC = "The name of the license";
 
+    public static final String LICENSE_ID = "licenseId";
+    public static final String LICENSE_ID_DESC = "The identifier of the license";
+
     public static final String LICENSE_URL = "licenseUrl";
     public static final String LICENSE_URL_DESC = "The URL of the license";
 
     public static final String SOURCE_FOLDER = "sourceFolder";
     public static final String SOURCE_FOLDER_DESC = "source folder for generated code";
+
+    public static final String IMPL_FOLDER = "implFolder";
+    public static final String IMPL_FOLDER_DESC = "folder for generated implementation code";
 
     public static final String SERIALIZABLE_MODEL = "serializableModel";
     public static final String SERIALIZABLE_MODEL_DESC = "boolean - toggle \"implements Serializable\" for generated models";
@@ -117,6 +148,9 @@ public class CodegenConstants {
     public static final String LIBRARY = "library";
     public static final String LIBRARY_DESC = "library template (sub-template)";
 
+    public static final String BUILD_TOOL = "build tool";
+    public static final String BUILD_TOOL_DESC = "";
+
     public static final String SORT_PARAMS_BY_REQUIRED_FLAG = "sortParamsByRequiredFlag";
     public static final String SORT_PARAMS_BY_REQUIRED_FLAG_DESC = "Sort method arguments to place required parameters before optional parameters.";
 
@@ -126,15 +160,92 @@ public class CodegenConstants {
     public static final String PREPEND_FORM_OR_BODY_PARAMETERS = "prependFormOrBodyParameters";
     public static final String PREPEND_FORM_OR_BODY_PARAMETERS_DESC = "Add form or body parameters to the beginning of the parameter list.";
 
+    public static final String USE_DATETIME_OFFSET = "useDateTimeOffset";
+    public static final String USE_DATETIME_OFFSET_DESC = "Use DateTimeOffset to model date-time properties";
+
+    public static final String USE_DATETIME_FOR_DATE = "useDateTimeForDate";
+    public static final String USE_DATETIME_FOR_DATE_DESC = "Use DateTime to model date properties even if DateOnly supported. (.net 6.0+ only)";
+
     public static final String ENSURE_UNIQUE_PARAMS = "ensureUniqueParams";
     public static final String ENSURE_UNIQUE_PARAMS_DESC = "Whether to ensure parameter names are unique in an operation (rename parameters that are not).";
 
+    public static final String PROJECT_NAME = "projectName";
     public static final String PACKAGE_NAME = "packageName";
     public static final String PACKAGE_NAME_DESC = "package for generated classes (where supported)";
 
     public static final String PACKAGE_VERSION = "packageVersion";
 
+    public static final String PACKAGE_TITLE = "packageTitle";
+    public static final String PACKAGE_TITLE_DESC = "Specifies an AssemblyTitle for the .NET Framework global assembly attributes stored in the AssemblyInfo file.";
+    public static final String PACKAGE_PRODUCTNAME = "packageProductName";
+    public static final String PACKAGE_PRODUCTNAME_DESC = "Specifies an AssemblyProduct for the .NET Framework global assembly attributes stored in the AssemblyInfo file.";
+    public static final String PACKAGE_DESCRIPTION = "packageDescription";
+    public static final String PACKAGE_DESCRIPTION_DESC = "Specifies a AssemblyDescription for the .NET Framework global assembly attributes stored in the AssemblyInfo file.";
+    public static final String PACKAGE_COMPANY = "packageCompany";
+    public static final String PACKAGE_COMPANY_DESC = "Specifies an AssemblyCompany for the .NET Framework global assembly attributes stored in the AssemblyInfo file.";
+    public static final String PACKAGE_AUTHORS = "packageAuthors";
+    public static final String PACKAGE_AUTHORS_DESC = "Specifies Authors property in the .NET Core project file.";
+    public static final String PACKAGE_AUTHORS_URL = "packageAuthorsUrl";
+    public static final String PACKAGE_AUTHORS_URL_DESC = "Specifies Authors URL property in the PHP composer.json file.";
+    public static final String PACKAGE_COPYRIGHT = "packageCopyright";
+    public static final String PACKAGE_COPYRIGHT_DESC = "Specifies an AssemblyCopyright for the .NET Framework global assembly attributes stored in the AssemblyInfo file.";
+    public static final String COMPOSER_PACKAGE_NAME = "composerPackageName";
+    public static final String COMPOSER_PACKAGE_NAME_DESC = "The name to use in the composer package name field. e.g. `vendor/project` (must be lowercase and consist of words separated by `-`, `.` or `_`).";
+
     public static final String POD_VERSION = "podVersion";
+
+    public static final String OPTIONAL_METHOD_ARGUMENT = "optionalMethodArgument";
+    public static final String OPTIONAL_METHOD_ARGUMENT_DESC = "Optional method argument, e.g. void square(int x=10) (.net 4.0+ only).";
+
+    public static final String OPTIONAL_ASSEMBLY_INFO = "optionalAssemblyInfo";
+    public static final String OPTIONAL_ASSEMBLY_INFO_DESC = "Generate AssemblyInfo.cs.";
+
+    public static final String OPTIONAL_EMIT_DEFAULT_VALUES = "optionalEmitDefaultValues";
+    public static final String OPTIONAL_EMIT_DEFAULT_VALUES_DESC = "Set DataMember's EmitDefaultValue.";
+
+    public static final String OPTIONAL_CONDITIONAL_SERIALIZATION = "conditionalSerialization";
+    public static final String OPTIONAL_CONDITIONAL_SERIALIZATION_DESC = "Serialize only those properties which are initialized by user, accepted values are true or false, default value is false.";
+
+    public static final String NETCORE_PROJECT_FILE = "netCoreProjectFile";
+    public static final String NETCORE_PROJECT_FILE_DESC = "Use the new format (.NET Core) for .NET project files (.csproj).";
+
+    public static final String USE_COLLECTION = "useCollection";
+    public static final String USE_COLLECTION_DESC = "Deserialize array types to Collection<T> instead of List<T>.";
+
+    public static final String INTERFACE_PREFIX = "interfacePrefix";
+    public static final String INTERFACE_PREFIX_DESC = "Prefix interfaces with a community standard or widely accepted prefix.";
+
+    public static final String RETURN_ICOLLECTION = "returnICollection";
+    public static final String RETURN_ICOLLECTION_DESC = "Return ICollection<T> instead of the concrete type.";
+
+    public static final String OPTIONAL_PROJECT_FILE = "optionalProjectFile";
+    public static final String OPTIONAL_PROJECT_FILE_DESC = "Generate {PackageName}.csproj.";
+
+    public static final String OPTIONAL_PROJECT_GUID = "packageGuid";
+    public static final String OPTIONAL_PROJECT_GUID_DESC = "The GUID that will be associated with the C# project";
+
+    public static final String MODEL_PROPERTY_NAMING = "modelPropertyNaming";
+    public static final String MODEL_PROPERTY_NAMING_DESC = "Naming convention for the property: 'camelCase', 'PascalCase', 'snake_case' and 'original', which keeps the original name";
+
+    public static final String PARAM_NAMING = "paramNaming";
+    public static final String PARAM_NAMING_DESC = "Naming convention for parameters: 'camelCase', 'PascalCase', 'snake_case' and 'original', which keeps the original name";
+
+    public static final String DOTNET_FRAMEWORK = "targetFramework";
+    public static final String DOTNET_FRAMEWORK_DESC = "The target .NET framework version. To target multiple frameworks, use `;` as the separator, e.g. `netstandard2.1;netcoreapp3.1`";
+
+    public static final String NULLABLE_REFERENCE_TYPES = "nullableReferenceTypes";
+    public static final String NULLABLE_REFERENCE_TYPES_DESC = "Use nullable annotations in the project. Only supported on C# 8 / ASP.NET Core 3.1 or newer.";
+
+    public static final String TEMPLATING_ENGINE = "templatingEngine";
+    public static final String TEMPLATING_ENGINE_DESC = "The templating engine plugin to use: \"mustache\" (default) or \"handlebars\" (beta)";
+
+    public static final String MUSTACHE_PARENT_CONTEXT = "MUSTACHE_PARENT_CONTEXT";
+
+    public static enum PARAM_NAMING_TYPE {camelCase, PascalCase, snake_case, original}
+
+    public static enum MODEL_PROPERTY_NAMING_TYPE {camelCase, PascalCase, snake_case, original}
+
+    public static enum ENUM_PROPERTY_NAMING_TYPE {camelCase, PascalCase, snake_case, original, UPPERCASE}
 
     public static final String ENUM_PROPERTY_NAMING = "enumPropertyNaming";
     public static final String ENUM_PROPERTY_NAMING_DESC = "Naming convention for enum properties: 'camelCase', 'PascalCase', 'snake_case', 'UPPERCASE', and 'original'";
@@ -152,11 +263,11 @@ public class CodegenConstants {
     public static final String MODEL_NAME_PREFIX = "modelNamePrefix";
     public static final String MODEL_NAME_PREFIX_DESC = "Prefix that will be prepended to all model names.";
 
+    public static final String ENUM_NAME_PREFIX = "enumNamePrefix";
+    public static final String ENUM_NAME_PREFIX_DESC = "Prefix that will be prepended to all enum names.";
+
     public static final String MODEL_NAME_SUFFIX = "modelNameSuffix";
     public static final String MODEL_NAME_SUFFIX_DESC = "Suffix that will be appended to all model names.";
-
-    public static final String ENUM_NAME_PREFIX = "enumNamePrefix";
-    public static final String ENUM_NAME_PREFIX_DESC = "Prefix that will be appended to all enum names.";
 
     public static final String ENUM_NAME_SUFFIX = "enumNameSuffix";
     public static final String ENUM_NAME_SUFFIX_DESC = "Suffix that will be appended to all enum names.";
@@ -310,9 +421,7 @@ public class CodegenConstants {
         "If true (default), keep the old (incorrect) behaviour that 'additionalProperties' is set to false by default.";
 
     public static final String UNSUPPORTED_V310_SPEC_MSG =
-                    "Generation using 3.1.0 specs is in development and is not officially supported yet. " +
-                    "If you would like to expedite development, please consider woking on the open issues in the 3.1.0 project: https://github.com/orgs/OpenAPITools/projects/4/views/1 " +
-                    "and reach out to our team on Slack at https://join.slack.com/t/openapi-generator/shared_invite/zt-12jxxd7p2-XUeQM~4pzsU9x~eGLQqX2g";
+                    "OpenAPI 3.1 support is still in beta. To report an issue related to 3.1 spec, please kindly open an issue in the Github repo: https://github.com/openAPITools/openapi-generator.";
 
     public static final String ENUM_UNKNOWN_DEFAULT_CASE = "enumUnknownDefaultCase";
     public static final String ENUM_UNKNOWN_DEFAULT_CASE_DESC =
@@ -340,6 +449,8 @@ public class CodegenConstants {
 
     public static final String FASTAPI_IMPLEMENTATION_PACKAGE = "fastapiImplementationPackage";
 
+    public static final String WITH_XML = "withXml";
+    
     public static final String WITH_GO_MOD = "withGoMod";
 
     public static final String GENERATE_MARSHAL_JSON = "generateMarshalJSON";
@@ -350,4 +461,6 @@ public class CodegenConstants {
     public static final String MAX_ATTEMPTS_FOR_RETRY = "maxAttemptsForRetry";
 
     public static final String WAIT_TIME_OF_THREAD = "waitTimeMillis";
+
+    public static final String USE_DEFAULT_VALUES_FOR_REQUIRED_VARS = "useDefaultValuesForRequiredVars";
 }

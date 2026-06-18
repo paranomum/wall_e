@@ -13,6 +13,7 @@ import org.openapitools.codegen.meta.FeatureSet;
 import org.openapitools.codegen.meta.features.SchemaSupportFeature;
 import org.openapitools.codegen.utils.ModelUtils;
 
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 
 public interface IJsonSchemaValidationProperties {
@@ -105,9 +106,21 @@ public interface IJsonSchemaValidationProperties {
 
     void setIsMap(boolean isMap);
 
+    /**
+     * Tells if the datatype is a generic inner parameter of a <code>std::optional</code> for C++, or <code>Optional</code> (Java)<br>
+     *  to resolve cases (detected in issue #6726) where :<br>
+     *     - <code>categoryOneOf</code> is a parameter of class <code>GetAccountVideos_categoryOneOf_parameter</code>, a model parameter that correctly prefixed by its namespace: <code>org::openapitools::server::model::GetAccountVideos_categoryOneOf_parameter</code><br>
+     *     - but that <code>GetAccountVideos_categoryOneOf_parameter</code> class is inside an <code>std::optional</code><br>
+     *     <br>
+     *   Then a correct generation of that parameter can be (for C++) <code>const std::optional&lt;org::openapitools::server::model::GetAccountVideos_categoryOneOf_parameter&gt; &amp;categoryOneOf</code><br>
+         *   but using #isModel alone without #isOptional in mustache might produce <code>const org::openapitools::server::model::std::optional&lt;org::openapitools::server::model::GetAccountVideos_categoryOneOf_parameter&gt; &amp;categoryOneOf</code> instead, that do not compile.
+     */
+    boolean getIsOptional();
+    void setIsOptional(boolean isOptional);
+
     boolean getIsArray();
 
-    void setIsArray(boolean isShort);
+    void setIsArray(boolean isArray);
 
     boolean getIsShort();
 
@@ -180,7 +193,7 @@ public interface IJsonSchemaValidationProperties {
 
     boolean getIsString();
 
-    void setIsString(boolean isNumber);
+    void setIsString(boolean isString);
 
     boolean getIsNumber();
 
@@ -236,7 +249,7 @@ public interface IJsonSchemaValidationProperties {
 
     boolean getIsDouble();
 
-    void setIsInteger(boolean isDouble);
+    void setIsInteger(boolean isInteger);
 
     boolean getIsInteger();
 
@@ -264,10 +277,6 @@ public interface IJsonSchemaValidationProperties {
 
     boolean getIsEnum();
 
-    void setHasEnums(boolean hasEnums);
-
-    boolean getHasEnums();
-
     /**
      * Syncs all the schema's type properties into the IJsonSchemaValidationProperties instance
      * for now this only supports types without format information
@@ -275,7 +284,7 @@ public interface IJsonSchemaValidationProperties {
      *
      * @param p the schema which contains the type info
      */
-    default void setTypeProperties(Schema p) {
+    default void setTypeProperties(Schema p, OpenAPI openAPI) {
         if (ModelUtils.isModelWithPropertiesOnly(p)) {
             setIsModel(true);
         } else if (ModelUtils.isArraySchema(p)) {
@@ -285,28 +294,40 @@ public interface IJsonSchemaValidationProperties {
         } else if (ModelUtils.isStringSchema(p)) {
             setIsString(true);
             if (ModelUtils.isByteArraySchema(p)) {
+                ;
             } else if (ModelUtils.isBinarySchema(p)) {
                 // openapi v3 way of representing binary + file data
                 // for backward compatibility with 2.x file type
                 setIsString(false);
             } else if (ModelUtils.isUUIDSchema(p)) {
                 // keep isString to true to make it backward compatible
+                ;
             } else if (ModelUtils.isURISchema(p)) {
+                ;
             } else if (ModelUtils.isEmailSchema(p)) {
+                ;
             } else if (ModelUtils.isPasswordSchema(p)) {
+                ;
             } else if (ModelUtils.isDateSchema(p)) {
+                ;
             } else if (ModelUtils.isDateTimeSchema(p)) {
+                ;
             } else if (ModelUtils.isDecimalSchema(p)) { // type: string, format: number
+                ;
             }
         } else if (ModelUtils.isNumberSchema(p)) {
             if (ModelUtils.isFloatSchema(p)) { // float
+                ;
             } else if (ModelUtils.isDoubleSchema(p)) { // double
+                ;
             } else { // type is number and without format
                 setIsNumber(true);
             }
         } else if (ModelUtils.isIntegerSchema(p)) { // integer type
             if (ModelUtils.isLongSchema(p)) { // int64/long format
+                ;
             } else if (ModelUtils.isShortSchema(p)) { // int32/short format
+                ;
             } else { // unbounded integer
                 setIsUnboundedInteger(true);
             }
@@ -316,7 +337,7 @@ public interface IJsonSchemaValidationProperties {
             setIsNull(true);
         } else if (ModelUtils.isAnyType(p)) {
             setIsAnyType(true);
-        } else if (ModelUtils.isFreeFormObject(p)) {
+        } else if (ModelUtils.isFreeFormObject(p, openAPI)) {
             setIsFreeFormObject(true);
             // TODO: remove below later after updating generators to properly use isFreeFormObject
             setIsMap(true);
@@ -367,7 +388,7 @@ public interface IJsonSchemaValidationProperties {
                 anyOfs = composed.getAnyOf();
             }
             if (composed.getNot() != null && featureSet.getSchemaSupportFeatures().contains(SchemaSupportFeature.not)) {
-                nots = Collections.singletonList(composed.getNot());
+                nots = Arrays.asList(composed.getNot());
             }
             Stream<CodegenProperty> innerTypes = Stream.of(
                             allOfs.stream(), anyOfs.stream(), oneOfs.stream(), nots.stream())

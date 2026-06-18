@@ -17,7 +17,6 @@
 
 package org.openapitools.codegen.examples;
 
-import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.XML;
 import org.apache.commons.lang3.StringUtils;
@@ -33,7 +32,7 @@ public class XmlExampleGenerator {
     public static String TAG_START = "<";
     public static String CLOSE_TAG = ">";
     public static String TAG_END = "</";
-    private static final String EMPTY = "";
+    private static String EMPTY = "";
     protected Map<String, Schema> examples;
 
     public XmlExampleGenerator(Map<String, Schema> examples) {
@@ -129,7 +128,10 @@ public class XmlExampleGenerator {
 
         if (ModelUtils.isArraySchema(schema)) {
             Schema inner = ModelUtils.getSchemaItems(schema);
-            boolean wrapped = schema.getXml() != null && schema.getXml().getWrapped() != null && schema.getXml().getWrapped();
+            boolean wrapped = false;
+            if (schema.getXml() != null && schema.getXml().getWrapped() != null && schema.getXml().getWrapped()) {
+                wrapped = true;
+            }
             if (wrapped) {
                 String prefix = EMPTY;
                 if (name != null) {

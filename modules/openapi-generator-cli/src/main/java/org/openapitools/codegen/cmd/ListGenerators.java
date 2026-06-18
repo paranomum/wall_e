@@ -113,18 +113,20 @@ public class ListGenerators extends OpenApiGeneratorCommand {
                     // trailing space is important for markdown list formatting
                     sb.append("  ");
                 } else {
-                    sb.append("    - ");
-                    sb.append(generator.getName());
+                    sb.append("    - ").append(generator.getName());
 
                     if (meta != null && meta.getStability() != null && meta.getStability() != Stability.STABLE) {
                         sb.append(" (").append(meta.getStability().value()).append(")");
                     }
                 }
                 sb.append(System.lineSeparator());
+                sb.append("          ").append("libraries:");
+                sb.append(System.lineSeparator());
+                for (String lib : generator.getLibraries()) {
+                    sb.append("              - ").append(lib);
+                    sb.append(System.lineSeparator());
+                }
             });
-
-            sb.append(System.lineSeparator());
-            sb.append(System.lineSeparator());
         }
     }
 }

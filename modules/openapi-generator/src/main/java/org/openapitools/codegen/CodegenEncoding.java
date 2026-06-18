@@ -1,17 +1,19 @@
 package org.openapitools.codegen;
 
+import lombok.Getter;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 public class CodegenEncoding {
-    private final String contentType;
-    private final List<CodegenParameter> headers;
-    private final String style;
-    private final boolean explode;
-    private final boolean allowReserved;
-    public Map<String, Object> vendorExtensions = new HashMap<>();
+    @Getter private String contentType;
+    @Getter private List<CodegenParameter> headers;
+    @Getter private String style;
+    private boolean explode;
+    private boolean allowReserved;
+    @Getter public Map<String, Object> vendorExtensions = new HashMap<>();
 
     public CodegenEncoding(String contentType, List<CodegenParameter> headers, String style, boolean explode, boolean allowReserved) {
         this.contentType = contentType;
@@ -19,18 +21,6 @@ public class CodegenEncoding {
         this.style = style;
         this.explode = explode;
         this.allowReserved = allowReserved;
-    }
-
-    public String getContentType() {
-        return contentType;
-    }
-
-    public List<CodegenParameter> getHeaders() {
-        return headers;
-    }
-
-    public String getStyle() {
-        return style;
     }
 
     public boolean getExplode() {
@@ -41,19 +31,16 @@ public class CodegenEncoding {
         return allowReserved;
     }
 
-    public Map<String, Object> getVendorExtensions() {
-        return vendorExtensions;
-    }
-
     public String toString() {
-        String sb = "CodegenEncoding{" + "contentType=" + contentType +
-                ", headers=" + headers +
-                ", style=" + style +
-                ", explode=" + explode +
-                ", allowReserved=" + allowReserved +
-                ", vendorExtensions=" + vendorExtensions +
-                '}';
-        return sb;
+        final StringBuilder sb = new StringBuilder("CodegenEncoding{");
+        sb.append("contentType=").append(contentType);
+        sb.append(", headers=").append(headers);
+        sb.append(", style=").append(style);
+        sb.append(", explode=").append(explode);
+        sb.append(", allowReserved=").append(allowReserved);
+        sb.append(", vendorExtensions=").append(vendorExtensions);
+        sb.append('}');
+        return sb.toString();
     }
 
     public boolean equals(Object o) {

@@ -27,7 +27,10 @@ import io.swagger.v3.oas.models.servers.ServerVariable;
 import org.openapitools.codegen.api.TemplatingEngineAdapter;
 import org.openapitools.codegen.meta.FeatureSet;
 import org.openapitools.codegen.meta.GeneratorMetadata;
-import org.openapitools.codegen.model.*;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.model.WebhooksMap;
 
 import java.io.File;
 import java.util.List;
@@ -44,6 +47,8 @@ public interface CodegenConfig {
     CodegenType getTag();
 
     String getName();
+
+    List<String> getLibraries();
 
     String getHelp();
 
@@ -90,8 +95,6 @@ public interface CodegenConfig {
     String toApiVarName(String name);
 
     String toModelName(String name);
-
-//    String toEnumName(String name);
 
     String toParamName(String name);
 
@@ -209,23 +212,15 @@ public interface CodegenConfig {
 
     String toModelDocFilename(String name);
 
-//    String toEnumDocFilename(String name);
-
     String toModelImport(String name);
 
-//    String toEnumImport(String name);
-
     Map<String, String> toModelImportMap(String name);
-
-//    Map<String, String> toEnumImportMap(String name);
 
     String toApiImport(String name);
 
     void addOperationToGroup(String tag, String resourcePath, Operation operation, CodegenOperation co, Map<String, List<CodegenOperation>> operations);
 
     Map<String, ModelsMap> updateAllModels(Map<String, ModelsMap> objs);
-
-    Map<String, ModelsMap> getEnumModels(Map<String, ModelsMap> objs);
 
     void postProcess();
 
@@ -275,11 +270,17 @@ public interface CodegenConfig {
 
     void setSkipOperationExample(boolean skipOperationExample);
 
-    boolean isHideGenerationTimestamp();
+    boolean isSkipSortingOperations();
 
-    void setHideGenerationTimestamp(boolean hideGenerationTimestamp);
+    void setSkipSortingOperations(boolean skipSortingOperations);
+
+    public boolean isHideGenerationTimestamp();
+
+    public void setHideGenerationTimestamp(boolean hideGenerationTimestamp);
 
     Map<String, String> supportedLibraries();
+
+    List<String> supportedBuildTools();
 
     void setLibrary(String library);
 
@@ -289,6 +290,10 @@ public interface CodegenConfig {
      * @return library template
      */
     String getLibrary();
+
+    void setBuildTool(String buildTool);
+
+    String getBuildTool();
 
     void setGitHost(String gitHost);
 
@@ -343,9 +348,9 @@ public interface CodegenConfig {
 
     TemplatingEngineAdapter getTemplatingEngine();
 
-    boolean isEnableMinimalUpdate();
+    public boolean isEnableMinimalUpdate();
 
-    void setEnableMinimalUpdate(boolean isEnableMinimalUpdate);
+    public void setEnableMinimalUpdate(boolean isEnableMinimalUpdate);
 
     boolean isStrictSpecBehavior();
 
@@ -382,5 +387,4 @@ public interface CodegenConfig {
     Set<String> getOpenapiGeneratorIgnoreList();
 
     Map<String, CodegenEnum> combineEnums(Map<String, ModelsMap> objs);
-
 }

@@ -50,6 +50,10 @@ public class Generate extends OpenApiGeneratorCommand {
             description = "generator to use (see list command for list)")
     private String generatorName;
 
+    @Option(name = {"--build-tool"}, title = "build tool (maven/gradle)",
+            description = "build tool for project (java only)")
+    private String buildTool;
+
     @Option(name = {"-o", "--output"}, title = "output directory",
             description = "where to write the generated files (current dir by default)")
     private String output = "";
@@ -117,7 +121,7 @@ public class Generate extends OpenApiGeneratorCommand {
             description = CodegenConstants.MODEL_PACKAGE_DESC)
     private String modelPackage;
 
-    @Option(name = {"--enum-package"}, title = "model package",
+    @Option(name = {"--enum-package"}, title = "enum package",
             description = CodegenConstants.ENUM_PACKAGE_DESC)
     private String enumPackage;
 
@@ -132,6 +136,14 @@ public class Generate extends OpenApiGeneratorCommand {
     @Option(name = {"--model-name-suffix"}, title = "model name suffix",
             description = CodegenConstants.MODEL_NAME_SUFFIX_DESC)
     private String modelNameSuffix;
+
+    @Option(name = {"--enum-name-prefix"}, title = "enum name prefix",
+            description = CodegenConstants.ENUM_NAME_PREFIX_DESC)
+    private String enumNamePrefix;
+
+    @Option(name = {"--enum-name-suffix"}, title = "enum name suffix",
+            description = CodegenConstants.ENUM_NAME_SUFFIX_DESC)
+    private String enumNameSuffix;
 
     @Option(
             name = {"--instantiation-types"},
@@ -262,7 +274,7 @@ public class Generate extends OpenApiGeneratorCommand {
             description = CodegenConstants.ARTIFACT_VERSION_DESC)
     private String artifactVersion;
 
-    @Option(name = {"--library"}, title = "library", description = CodegenConstants.LIBRARY_DESC)
+    @Option(name = {"-l", "--library"}, title = "library", description = CodegenConstants.LIBRARY_DESC)
     private String library;
 
     @Option(name = {"--git-host"}, title = "git host",
@@ -398,6 +410,10 @@ public class Generate extends OpenApiGeneratorCommand {
             configurator.setGeneratorName(generatorName);
         }
 
+        if (isNotEmpty(buildTool)) {
+            configurator.setBuildTool(buildTool);
+        }
+
         if (isNotEmpty(output)) {
             configurator.setOutputDir(output);
         }
@@ -438,8 +454,16 @@ public class Generate extends OpenApiGeneratorCommand {
             configurator.setModelNamePrefix(modelNamePrefix);
         }
 
+        if (isNotEmpty(enumNamePrefix)) {
+            configurator.setEnumNamePrefix(enumNamePrefix);
+        }
+
         if (isNotEmpty(modelNameSuffix)) {
             configurator.setModelNameSuffix(modelNameSuffix);
+        }
+
+        if (isNotEmpty(enumNameSuffix)) {
+            configurator.setEnumNameSuffix(enumNameSuffix);
         }
 
         if (isNotEmpty(invokerPackage)) {

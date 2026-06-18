@@ -18,10 +18,9 @@
 package org.openapitools.codegen;
 
 import io.swagger.v3.oas.models.ExternalDocumentation;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
-
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * CodegenEnum represents a schema object in a OpenAPI document.

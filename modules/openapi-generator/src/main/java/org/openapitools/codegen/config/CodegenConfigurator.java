@@ -34,6 +34,7 @@ import org.openapitools.codegen.*;
 import org.openapitools.codegen.api.TemplateDefinition;
 import org.openapitools.codegen.api.TemplatingEngineAdapter;
 import org.openapitools.codegen.auth.AuthParser;
+import org.openapitools.codegen.inputs.DocxInputConverter;
 import org.openapitools.codegen.utils.ModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +84,7 @@ public class CodegenConfigurator {
     private Map<String, String> serverVariables = new HashMap<>();
     private String auth;
 
-    private final List<TemplateDefinition> userDefinedTemplates = new ArrayList<>();
+    private List<TemplateDefinition> userDefinedTemplates = new ArrayList<>();
 
     public CodegenConfigurator() {
 
@@ -103,7 +104,12 @@ public class CodegenConfigurator {
 
             // We copy "cached" properties into configurator so it is appropriately configured with all settings in external files.
             // FIXME: target is to eventually move away from CodegenConfigurator properties except gen/workflow settings.
-            configurator.generatorName = generatorSettings.getGeneratorName();
+            if (generatorSettings.getGeneratorName() == null || generatorSettings.getGeneratorName().isEmpty()) {
+                configurator.generatorName ="java";
+            }
+            else {
+                configurator.generatorName = generatorSettings.getGeneratorName();
+            }
             configurator.inputSpec = workflowSettings.getInputSpec();
             configurator.templatingEngineName = workflowSettings.getTemplatingEngineName();
             if (workflowSettings.getGlobalProperties() != null) {
@@ -176,7 +182,7 @@ public class CodegenConfigurator {
     private static DynamicSettings readDynamicSettings(String configFile, Module... modules) {
         ObjectMapper mapper;
 
-        if (FilenameUtils.isExtension(configFile.toLowerCase(Locale.ROOT), "yml", "yaml")) {
+        if (FilenameUtils.isExtension(configFile.toLowerCase(Locale.ROOT), new String[]{"yml", "yaml"})) {
             mapper = Yaml.mapper().copy();
         } else {
             mapper = Json.mapper().copy();
@@ -527,6 +533,11 @@ public class CodegenConfigurator {
         return this;
     }
 
+    public CodegenConfigurator setBuildTool(String buildTool) {
+        generatorSettingsBuilder.withBuildTool(buildTool);
+        return this;
+    }
+
     public CodegenConfigurator setLogToStderr(boolean logToStderr) {
         workflowSettingsBuilder.withLogToStderr(logToStderr);
         return this;
@@ -561,6 +572,22 @@ public class CodegenConfigurator {
             addAdditionalProperty(CodegenConstants.MODEL_PACKAGE, modelPackage);
         }
         generatorSettingsBuilder.withModelPackage(modelPackage);
+        return this;
+    }
+
+    public CodegenConfigurator setEnumNamePrefix(String prefix) {
+        if (StringUtils.isNotEmpty(prefix)) {
+            addAdditionalProperty(CodegenConstants.ENUM_NAME_PREFIX, prefix);
+        }
+        generatorSettingsBuilder.withEnumNamePrefix(prefix);
+        return this;
+    }
+
+    public CodegenConfigurator setEnumNameSuffix(String suffix) {
+        if (StringUtils.isNotEmpty(suffix)) {
+            addAdditionalProperty(CodegenConstants.ENUM_NAME_SUFFIX, suffix);
+        }
+        generatorSettingsBuilder.withEnumNameSuffix(suffix);
         return this;
     }
 
@@ -648,11 +675,17 @@ public class CodegenConfigurator {
 
     @SuppressWarnings("WeakerAccess")
     public Context<?> toContext() {
+        if (generatorName == null || generatorName.isEmpty()) {
+            generatorName = "java";
+        }
         Validate.notEmpty(generatorName, "generator name must be specified");
         Validate.notEmpty(inputSpec, "input spec must be specified");
 
         GeneratorSettings generatorSettings = generatorSettingsBuilder.build();
-        CodegenConfig config = CodegenConfigLoader.forName(generatorSettings.getGeneratorName());
+        CodegenConfig config = CodegenConfigLoader.forName("java");
+        if (generatorSettings.getGeneratorName() != null && !generatorSettings.getGeneratorName().isEmpty()) {
+            config = CodegenConfigLoader.forName(generatorSettings.getGeneratorName());
+        }
         if (isEmpty(templatingEngineName)) {
             // if templatingEngineName is empty check the config for a default
             String defaultTemplatingEngine = config.defaultTemplatingEngine();
@@ -691,11 +724,19 @@ public class CodegenConfigurator {
         final List<AuthorizationValue> authorizationValues = AuthParser.parse(this.auth);
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        SwaggerParseResult result = new OpenAPIParser().readLocation(inputSpec, authorizationValues, options);
+
+        OpenAPI specification = null;
+        Set<String> validationMessages = new HashSet<>();
+
+        if (!inputSpec.endsWith(".docx")) {
+            SwaggerParseResult result = new OpenAPIParser().readLocation(inputSpec, authorizationValues, options);
+            validationMessages = new HashSet<>(null != result.getMessages() ? result.getMessages() : new ArrayList<>());
+            specification = result.getOpenAPI();
+        }
+        else
+            specification = new DocxInputConverter().convertDocxToOpenApiJson(inputSpec);
 
         // TODO: Move custom validations to a separate type as part of a "Workflow"
-        Set<String> validationMessages = new HashSet<>(null != result.getMessages() ? result.getMessages() : new ArrayList<>());
-        OpenAPI specification = result.getOpenAPI();
         // TODO: The line below could be removed when at least one of the issue below has been resolved.
         // https://github.com/swagger-api/swagger-parser/issues/1369
         // https://github.com/swagger-api/swagger-parser/pull/1374
@@ -755,10 +796,17 @@ public class CodegenConfigurator {
 
         // We load the config via generatorSettings.getGeneratorName() because this is guaranteed to be set
         // regardless of entrypoint (CLI sets properties on this type, config deserialization sets on generatorSettings).
-        CodegenConfig config = CodegenConfigLoader.forName(generatorSettings.getGeneratorName());
+        CodegenConfig config = CodegenConfigLoader.forName("java");
+        if (generatorSettings.getGeneratorName() != null && !generatorSettings.getGeneratorName().isEmpty()) {
+            config = CodegenConfigLoader.forName(generatorSettings.getGeneratorName());
+        }
 
         if (isNotEmpty(generatorSettings.getLibrary())) {
             config.setLibrary(generatorSettings.getLibrary());
+        }
+
+        if (isNotEmpty(generatorSettings.getBuildTool())) {
+            config.setBuildTool(generatorSettings.getBuildTool());
         }
 
         // TODO: Work toward CodegenConfig having a "WorkflowSettings" property, or better a "Workflow" object which itself has a "WorkflowSettings" property.
@@ -809,6 +857,10 @@ public class CodegenConfigurator {
         // if library is found in additionalProperties, set the library option accordingly
         if (config.additionalProperties().containsKey("library")) {
             config.setLibrary(String.valueOf(config.additionalProperties().get("library")));
+        }
+
+        if (config.additionalProperties().containsKey("build tool")) {
+            config.setBuildTool(String.valueOf(config.additionalProperties().get("build tool")));
         }
 
         ClientOptInput input = new ClientOptInput()
