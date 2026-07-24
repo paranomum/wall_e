@@ -1554,8 +1554,11 @@ public class DefaultCodegen implements CodegenConfig {
 
     @Override
     public String toEnumFilename(String name) {
-        String processedName = name.replace("Enum", "").replace("enum", "");
-        return processedName.contains("enum") || processedName.contains("Enum") ? camelize(processedName) : camelize(processedName) + "Enum";
+        String processedName = camelize(name == null ? "" : name.trim());
+        if (processedName.endsWith("Enum")) {
+            return processedName;
+        }
+        return processedName + "Enum";
     }
     /**
      * Return the capitalized file name of the model test
@@ -1668,7 +1671,11 @@ public class DefaultCodegen implements CodegenConfig {
      */
     @SuppressWarnings("static-method")
     public String toEnumName(CodegenProperty property) {
-        return StringUtils.capitalize(property.name) + "Enum";
+        String raw = sanitizeName(camelize(property.name));
+        if (raw.endsWith("Enum")) {
+            return raw;
+        }
+        return raw + "Enum";
     }
 
     /**
@@ -6036,6 +6043,9 @@ public class DefaultCodegen implements CodegenConfig {
                 if (cm != null && cm.allVars == vars && cp.isOverridden == null) { // processing allVars and it's a parent property
                     cp.isOverridden = true;
                 }
+                if (cm != null && cm.allVars == vars && cp.isOverridden != null && cp.isOverridden) {
+                    cp.vendorExtensions.put("x-parent-var", true);
+                }
 
                 vars.add(cp);
                 m.setHasVars(true);
@@ -6105,6 +6115,14 @@ public class DefaultCodegen implements CodegenConfig {
         }
 
         addImports(model, property);
+
+        if (property.enumName != null && !property.enumName.isBlank()) {
+            addImport(model.imports, property.enumName);
+        }
+
+        if (property.items != null && property.items.enumName != null && !property.items.enumName.isBlank()) {
+            addImport(model.imports, property.items.enumName);
+        }
     }
 
     /**

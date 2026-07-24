@@ -76,6 +76,7 @@ public class JavaClientCodegen extends AbstractJavaCodegen
     public static final String SUPPORT_URL_QUERY = "supportUrlQuery";
     public static final String GRADLE_PROPERTIES = "gradleProperties";
     public static final String ERROR_OBJECT_TYPE = "errorObjectType";
+    public static final String ONLY_LONG = "onlyLong";
 
     public static final String FEIGN = "feign";
     public static final String GOOGLE_API_CLIENT = "google-api-client";
@@ -134,6 +135,7 @@ public class JavaClientCodegen extends AbstractJavaCodegen
     @Setter protected boolean withAWSV4Signature = false;
     @Setter protected String gradleProperties;
     @Setter protected String errorObjectType;
+    @Setter protected boolean onlyLong = false;
     @Getter @Setter protected boolean failOnUnknownProperties = false;
     protected String authFolder;
     /**
@@ -234,6 +236,7 @@ public class JavaClientCodegen extends AbstractJavaCodegen
         cliOptions.add(CliOption.newBoolean(CodegenConstants.WITH_AWSV4_SIGNATURE_COMMENT, CodegenConstants.WITH_AWSV4_SIGNATURE_COMMENT_DESC + " (only available for okhttp-gson library)", this.withAWSV4Signature));
         cliOptions.add(CliOption.newString(GRADLE_PROPERTIES, "Append additional Gradle properties to the gradle.properties file"));
         cliOptions.add(CliOption.newString(ERROR_OBJECT_TYPE, "Error Object type. (This option is for okhttp-gson only)"));
+        cliOptions.add(CliOption.newBoolean(ONLY_LONG, "Replace BigDecimal with Long everywhere", this.onlyLong));
         cliOptions.add(CliOption.newString(CONFIG_KEY, "Config key in @RegisterRestClient. Default to none. Only `microprofile` supports this option."));
         cliOptions.add(CliOption.newString(CONFIG_KEY_FROM_CLASS_NAME, "If true, set tag as key in @RegisterRestClient. Default to false. Only `microprofile` supports this option."));
         cliOptions.add(CliOption.newBoolean(CodegenConstants.USE_ONEOF_DISCRIMINATOR_LOOKUP, CodegenConstants.USE_ONEOF_DISCRIMINATOR_LOOKUP_DESC + " Only jersey2, jersey3, native, okhttp-gson support this option."));
@@ -438,6 +441,12 @@ public class JavaClientCodegen extends AbstractJavaCodegen
         convertPropertyToBooleanAndWriteBack(CASE_INSENSITIVE_RESPONSE_HEADERS, this::setUseReflectionEqualsHashCode);
         convertPropertyToBooleanAndWriteBack(USE_ABSTRACTION_FOR_FILES, this::setUseAbstractionForFiles);
         convertPropertyToBooleanAndWriteBack(DYNAMIC_OPERATIONS, this::setDynamicOperations);
+        convertPropertyToBooleanAndWriteBack(ONLY_LONG, this::setOnlyLong);
+        if (onlyLong) {
+            typeMapping.put("number", "Long");
+            typeMapping.put("decimal", "Long");
+            importMapping.remove("BigDecimal");
+        }
         convertPropertyToBooleanAndWriteBack(SUPPORT_STREAMING, this::setSupportStreaming);
         convertPropertyToBooleanAndWriteBack(CodegenConstants.WITH_AWSV4_SIGNATURE_COMMENT, this::setWithAWSV4Signature);
         convertPropertyToStringAndWriteBack(GRADLE_PROPERTIES, this::setGradleProperties);
@@ -1127,6 +1136,44 @@ public class JavaClientCodegen extends AbstractJavaCodegen
             }
         }
 
+        // ---------- СТРАХОВКА: принудительный импорт enum'ов независимо от родителя/библиотеки сериализации ----------
+        // Гарантирует, что enum-поле импортируется в модель даже если оно унаследовано от parent
+        // или было переименовано после combineEnums(...). Не зависит от SERIALIZATION_LIBRARY_JACKSON.
+        List<Map<String, String>> enumImports = objs.getImports();
+        for (ModelMap mo : models) {
+            CodegenModel cm = mo.getModel();
+
+            List<CodegenProperty> allPropsToCheck = new ArrayList<>();
+            if (cm.vars != null) {
+                allPropsToCheck.addAll(cm.vars);
+            }
+            if (cm.allVars != null) {
+                allPropsToCheck.addAll(cm.allVars);
+            }
+
+            for (CodegenProperty var : allPropsToCheck) {
+                if (var == null || !Boolean.TRUE.equals(var.isEnum) || var.enumName == null || var.enumName.isBlank()) {
+                    continue;
+                }
+
+                String enumClassname = toEnumFilename(var.enumName);
+                cm.imports.add(enumClassname);
+
+                Map<String, String> enumImportEntry = new HashMap<>();
+                enumImportEntry.put("import", enumPackage + "." + enumClassname);
+                enumImports.add(enumImportEntry);
+
+                if (var.items != null && Boolean.TRUE.equals(var.items.isEnum) && var.items.enumName != null && !var.items.enumName.isBlank()) {
+                    String innerEnumClassname = toEnumFilename(var.items.enumName);
+                    cm.imports.add(innerEnumClassname);
+
+                    Map<String, String> innerEnumImportEntry = new HashMap<>();
+                    innerEnumImportEntry.put("import", enumPackage + "." + innerEnumClassname);
+                    enumImports.add(innerEnumImportEntry);
+                }
+            }
+        }
+
         // add implements for serializable/parcelable to all models
         for (ModelMap mo : models) {
             CodegenModel cm = mo.getModel();
@@ -1155,51 +1202,199 @@ public class JavaClientCodegen extends AbstractJavaCodegen
 
     @Override
     public Map<String, CodegenEnum> combineEnums(Map<String, ModelsMap> objs) {
-        Map<String, CodegenEnum> enums = new HashMap<>();
+        // ---------- ПРОХОД 1: группировка по полному совпадению имени enum'а ----------
+        // Даже если у двух свойств enum называется одинаково, наполнение (values) может отличаться
+        // из-за особенностей описания в swagger. На этом шаге просто объединяем всё, что имеет
+        // одинаковое итоговое имя класса (toEnumFilename(var.enumName)), без анализа значений.
+        Map<String, CodegenEnum> byName = new LinkedHashMap<>();
+        // Для каждого var запоминаем, к какому "имя-ключу" он был отнесён на первом проходе,
+        // чтобы на втором проходе смочь актуализировать enumName/datatypeWithEnum.
+        List<VarNameBinding> bindings = new ArrayList<>();
 
         for (String key : objs.keySet()) {
             for (ModelMap modelMap : objs.get(key).getModels()) {
                 CodegenModel m = modelMap.getModel();
-                if (m.hasEnums) {
-                    for (CodegenProperty var : m.getVars()) {
-                        if (var.isEnum) {
-                            CodegenEnum ce = new CodegenEnum();
-                            ce.classname = toEnumFilename(var.enumName);
-                            ce.name = var.name;
-                            ce.filePackage = enumPackage;
-                            ce.hasEnums = true;
-                            ce.enumVars = parseAllowableValues(var.allowableValues.get("enumVars"));
-                            ce.description = var.description;
-//                            ce.dataType = var.dataType;
-                            ce.dataType = "String";
-                            LOGGER.info("dataType - {}", var.dataType);
-//                            ce.datatypeWithEnum = var.datatypeWithEnum;
-                            ce.additionalEnumTypeAnnotations = (List<String>) modelMap.get(ADDITIONAL_ENUM_TYPE_ANNOTATIONS);
-                            ce.useEnumCaseInsensitive = false;
-                            ce.isNullable = var.isNullable;
-                            ce.enumUnknownDefaultCase = parseEnumValues(var.allowableValues);
-                            if (additionalProperties.containsKey(SERIALIZATION_LIBRARY_JACKSON)) {
-                                ce.jackson = true;
-                            }
-                            if (additionalProperties.containsKey(SERIALIZATION_LIBRARY_GSON)) {
-                                ce.gson = true;
-                            }
-                            if (additionalProperties.containsKey(SERIALIZATION_LIBRARY_JSONB)) {
-                                ce.jsonb = true;
-                            }
-                            ce.isUri = false;
-                            if (enums.containsKey(ce.classname)){
-                                enums.replace(ce.classname, combineToEnum(enums.get(ce.classname), ce));
-                            }
-                            enums.putIfAbsent(ce.classname, ce);
-                            m.enums.add(enumPackage+"."+ce.classname);
-                        }
+                if (m == null || !m.hasEnums) {
+                    continue;
+                }
+
+                for (CodegenProperty var : m.getVars()) {
+                    if (!Boolean.TRUE.equals(var.isEnum) || var.allowableValues == null || var.allowableValues.get("enumVars") == null) {
+                        continue;
                     }
+
+                    String nameKey = toEnumFilename(var.enumName);
+                    Set<EnumProperty> parsedEnumVars = parseAllowableValues(var.allowableValues.get("enumVars"));
+
+                    CodegenEnum ce = byName.get(nameKey);
+                    if (ce == null) {
+                        ce = buildCodegenEnum(modelMap, var, parsedEnumVars, nameKey);
+                        byName.put(nameKey, ce);
+                    } else {
+                        // тот же nameKey - объединяем значения (union), даже если наполнение отличалось
+                        byName.put(nameKey, combineToEnum(ce, buildCodegenEnum(modelMap, var, parsedEnumVars, nameKey)));
+                    }
+
+                    bindings.add(new VarNameBinding(m, var, nameKey));
                 }
             }
         }
 
-        return enums;
+        // ---------- ПРОХОД 2: группировка результатов прохода 1 по совпадению значений ----------
+        // Теперь у нас есть набор enum'ов, уже объединённых по имени. Среди них ищем те,
+        // у которых итоговое наполнение (values) идентично, и склеиваем их в один общий enum.
+        // Имя нового enum'а ищем через общий суффикс исходных nameKey; если суффикса нет -
+        // берём имя первого найденного enum'а в группе.
+        Map<String, String> signatureToFinalName = new LinkedHashMap<>();
+        Map<String, List<String>> signatureToNameKeys = new LinkedHashMap<>();
+        Map<String, CodegenEnum> finalEnums = new LinkedHashMap<>();
+
+        for (Map.Entry<String, CodegenEnum> entry : byName.entrySet()) {
+            String nameKey = entry.getKey();
+            CodegenEnum ce = entry.getValue();
+            String signature = buildEnumSignature(ce.enumVars);
+
+            signatureToNameKeys.computeIfAbsent(signature, s -> new ArrayList<>()).add(nameKey);
+
+            String finalName = signatureToFinalName.get(signature);
+            if (finalName == null) {
+                // имя пока не определено окончательно - для одиночной группы используем nameKey как есть,
+                // а как только в группу попадёт второй nameKey, имя будет пересчитано ниже через общий суффикс
+                finalName = nameKey;
+                signatureToFinalName.put(signature, finalName);
+                finalEnums.put(finalName, ce);
+            } else if (!finalName.equals(nameKey)) {
+                // в группу добавился второй (и последующие) nameKey - пересчитываем общее имя
+                List<String> ownerNameKeys = signatureToNameKeys.get(signature);
+                String recalculatedName = resolveSharedEnumName(null, ownerNameKeys, ownerNameKeys.get(0));
+
+                CodegenEnum existing = finalEnums.remove(finalName);
+                CodegenEnum merged = combineToEnum(existing, ce);
+                merged.classname = recalculatedName;
+
+                finalEnums.put(recalculatedName, merged);
+                signatureToFinalName.put(signature, recalculatedName);
+                finalName = recalculatedName;
+            } else {
+                finalEnums.put(finalName, combineToEnum(finalEnums.get(finalName), ce));
+            }
+        }
+
+        // синхронизируем итоговое имя во всех уже накопленных финальных enum'ах, чтобы classname
+        // соответствовал последнему пересчитанному значению для его сигнатуры
+        for (Map.Entry<String, String> sigEntry : signatureToFinalName.entrySet()) {
+            String finalName = sigEntry.getValue();
+            CodegenEnum ce = finalEnums.get(finalName);
+            if (ce != null) {
+                ce.classname = finalName;
+            }
+        }
+
+        // ---------- Обновляем свойства моделей на итоговое имя enum'а ----------
+        for (VarNameBinding binding : bindings) {
+            CodegenEnum intermediate = byName.get(binding.nameKey);
+            String signature = buildEnumSignature(intermediate.enumVars);
+            String finalName = signatureToFinalName.get(signature);
+
+            binding.var.enumName = finalName;
+            binding.var.datatypeWithEnum = finalName;
+            if (binding.var.items != null && Boolean.TRUE.equals(binding.var.isInnerEnum)) {
+                binding.var.items.enumName = finalName;
+                binding.var.items.datatypeWithEnum = finalName;
+            }
+            binding.model.enums.add(enumPackage + "." + finalName);
+        }
+
+        return finalEnums;
+    }
+
+    private CodegenEnum buildCodegenEnum(ModelMap modelMap, CodegenProperty var, Set<EnumProperty> parsedEnumVars, String resolvedClassname) {
+        CodegenEnum ce = new CodegenEnum();
+        ce.classname = resolvedClassname;
+        ce.name = var.name;
+        ce.filePackage = enumPackage;
+        ce.hasEnums = true;
+        ce.enumVars = new LinkedHashSet<>(parsedEnumVars);
+        ce.description = var.description;
+        ce.dataType = "String";
+        ce.additionalEnumTypeAnnotations = (List<String>) modelMap.get(ADDITIONAL_ENUM_TYPE_ANNOTATIONS);
+        ce.useEnumCaseInsensitive = false;
+        ce.isNullable = var.isNullable;
+        ce.enumUnknownDefaultCase = parseEnumValues(var.allowableValues);
+        if (additionalProperties.containsKey(SERIALIZATION_LIBRARY_JACKSON)) {
+            ce.jackson = true;
+        }
+        if (additionalProperties.containsKey(SERIALIZATION_LIBRARY_GSON)) {
+            ce.gson = true;
+        }
+        if (additionalProperties.containsKey(SERIALIZATION_LIBRARY_JSONB)) {
+            ce.jsonb = true;
+        }
+        ce.isUri = false;
+        return ce;
+    }
+
+    private String buildEnumSignature(Set<EnumProperty> enumVars) {
+        return enumVars.stream()
+                .map(EnumProperty::getValue)
+                .filter(Objects::nonNull)
+                .map(v -> v.replace("\"", "").trim().toUpperCase(Locale.ROOT))
+                .sorted()
+                .reduce((a, b) -> a + "|" + b)
+                .orElse("");
+    }
+
+    private String resolveSharedEnumName(String currentName, List<String> ownerNames, String fallbackEnumName) {
+        if (ownerNames == null || ownerNames.isEmpty()) {
+            return toEnumFilename(fallbackEnumName);
+        }
+
+        String commonSuffix = ownerNames.get(0);
+        for (int i = 1; i < ownerNames.size(); i++) {
+            commonSuffix = longestCommonSuffix(commonSuffix, ownerNames.get(i));
+            if (commonSuffix == null || commonSuffix.isBlank()) {
+                break;
+            }
+        }
+
+        if (commonSuffix != null && !commonSuffix.isBlank()) {
+            return toEnumFilename(commonSuffix);
+        }
+
+        return toEnumFilename(fallbackEnumName);
+    }
+
+    private String longestCommonSuffix(String left, String right) {
+        if (left == null || right == null) {
+            return "";
+        }
+
+        int li = left.length() - 1;
+        int ri = right.length() - 1;
+        StringBuilder sb = new StringBuilder();
+
+        while (li >= 0 && ri >= 0) {
+            if (Character.toLowerCase(left.charAt(li)) != Character.toLowerCase(right.charAt(ri))) {
+                break;
+            }
+            sb.append(left.charAt(li));
+            li--;
+            ri--;
+        }
+
+        return sb.reverse().toString().trim();
+    }
+
+    private static final class VarNameBinding {
+        final CodegenModel model;
+        final CodegenProperty var;
+        final String nameKey;
+
+        VarNameBinding(CodegenModel model, CodegenProperty var, String nameKey) {
+            this.model = model;
+            this.var = var;
+            this.nameKey = nameKey;
+        }
     }
 
     private CodegenEnum combineToEnum(CodegenEnum old, CodegenEnum last) {
@@ -1338,7 +1533,10 @@ public class JavaClientCodegen extends AbstractJavaCodegen
 
     @Override
     public String toEnumFilename(String name) {
-        String processedName = name.replace("Enum", "").replace("enum", "");
-        return processedName.contains("enum") || processedName.contains("Enum") ? camelize(processedName) : camelize(processedName) + "Enum";
+        String processedName = camelize(name == null ? "" : name.trim());
+        if (processedName.endsWith("Enum")) {
+            return processedName;
+        }
+        return processedName + "Enum";
     }
 }

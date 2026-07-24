@@ -1284,6 +1284,9 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
                                     if ("BigInteger".equals(cp.items.dataType)) {
                                         return "new BigInteger(\"" + v + "\")";
                                     } else if ("BigDecimal".equals(cp.items.dataType)) {
+                                        if (typeMapping.containsKey("number") && "Long".equals(typeMapping.get("number"))) {
+                                            return v + "L";
+                                        }
                                         return "new BigDecimal(\"" + v + "\")";
                                     } else if (cp.items.isFloat) {
                                         return v + "f";
@@ -1360,6 +1363,9 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
                 } else if (SchemaTypeUtil.DOUBLE_FORMAT.equals(schema.getFormat())) {
                     return schema.getDefault().toString() + "d";
                 } else {
+                    if (typeMapping.containsKey("number") && "Long".equals(typeMapping.get("number"))) {
+                        return schema.getDefault().toString() + "L";
+                    }
                     return "new BigDecimal(\"" + schema.getDefault().toString() + "\")";
                 }
             }
@@ -1616,10 +1622,18 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
                 example = "OffsetDateTime.parse(\"" + example + "\")";
             }
         } else if ("BigDecimal".equals(type)) {
-            if (example == null) {
-                example = "new BigDecimal(78)";
+            if (typeMapping.containsKey("number") && "Long".equals(typeMapping.get("number"))) {
+                if (example == null) {
+                    example = "78L";
+                } else {
+                    example = example + "L";
+                }
             } else {
-                example = "new BigDecimal(\"" + example + "\")";
+                if (example == null) {
+                    example = "new BigDecimal(78)";
+                } else {
+                    example = "new BigDecimal(\"" + example + "\")";
+                }
             }
         } else if ("UUID".equals(type)) {
             if (example == null) {
@@ -2026,7 +2040,11 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
 
     @Override
     public String toEnumName(CodegenProperty property) {
-        return sanitizeName(camelize(property.name)) + "Enum";
+        String raw = sanitizeName(camelize(property.name));
+        if (raw.endsWith("Enum")) {
+            return raw;
+        }
+        return raw + "Enum";
     }
 
     @Override
