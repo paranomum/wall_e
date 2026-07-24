@@ -394,6 +394,7 @@ public boolean equals(Object o) {
         StringJoiner joiner = new StringJoiner("&");
 
     {{#allVars}}
+        {{^vendorExtensions.x-parent-var}}
             // add `{{baseName}}` to the URL query string
         {{#isArray}}
             {{#items.isPrimitiveType}}
@@ -549,6 +550,7 @@ public boolean equals(Object o) {
             {{/isMap}}
         {{/isArray}}
 
+        {{/vendorExtensions.x-parent-var}}
     {{/allVars}}
         return joiner.toString();
         }

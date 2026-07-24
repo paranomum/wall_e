@@ -1746,7 +1746,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
             final CodegenModel parentCodegenModel = super.fromModel(codegenModel.parent, parentModel);
             codegenModel = AbstractJavaCodegen.reconcileInlineEnums(codegenModel, parentCodegenModel);
         }
-        if ("BigDecimal".equals(codegenModel.dataType)) {
+        if ("BigDecimal".equals(codegenModel.dataType) && !"Long".equals(typeMapping.get("number"))) {
             codegenModel.imports.add("BigDecimal");
         }
 
@@ -2105,6 +2105,9 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
             // add f to number, e.g. 3.14 => 3.14f
             return value + "f";
         } else if ("BigDecimal".equals(datatype)) {
+            if (typeMapping.containsKey("number") && "Long".equals(typeMapping.get("number"))) {
+                return value + "L";
+            }
             // use BigDecimal String constructor
             return "new BigDecimal(\"" + value + "\")";
         } else if ("URI".equals(datatype)) {
